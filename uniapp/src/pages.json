@@ -1,0 +1,412 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false,
+				"navigationStyle": "custom",
+				"disableScroll": true
+			},
+			"meta": {
+				"share": true
+			}
+		},
+		{
+			"path": "pages/staff/staff",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false,
+				"navigationStyle": "custom",
+				"disableScroll": true
+			}
+		},
+		{
+			"path": "pages/assistant/assistant",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false,
+				"navigationStyle": "custom",
+				"disableScroll": true
+			}
+		},
+		{
+			"path": "pages/user/user",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false,
+				"navigationStyle": "custom",
+				"disableScroll": true
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			},
+			"meta": {
+				"white": true
+			}
+		}
+	],
+	"subPackages": [
+		{
+			"root": "packages",
+			"pages": [
+				{
+					"path": "pages/register/register",
+					"style": {
+						"navigationBarTitleText": "注册"
+					},
+					"meta": {
+						"white": true
+					}
+				},
+				{
+					"path": "pages/forget_pwd/forget_pwd",
+					"style": {
+						"navigationBarTitleText": "忘记密码"
+					}
+				},
+				{
+					"path": "pages/robot_cate/robot_cate",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/robot_chat/robot_chat",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					},
+					"meta": {
+						"auth": true
+					}
+				},
+				{
+					"path": "pages/recharge/recharge",
+					"style": {
+						"navigationBarTitleText": "充值",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/creation_record/creation_record",
+					"style": {
+						"navigationBarTitleText": "创建记录",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/user_balance/user_balance",
+					"style": {
+						"navigationBarTitleText": "变化记录",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/recharge_record/recharge_record",
+					"style": {
+						"navigationBarTitleText": "订阅记录",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/tokens_rule/tokens_rule",
+					"style": {
+						"navigationBarTitleText": "消耗规则",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/agreement/agreement",
+					"style": {}
+				},
+				{
+					"path": "pages/app_detail/app_detail",
+					"style": {
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/service/service",
+					"style": {
+						"navigationBarTitleText": "客服"
+					}
+				}
+			]
+		},
+		{
+			"root": "ai_modules/digital_human",
+			"pages": [
+				{
+					"path": "pages/index/index",
+					"style": {
+						"navigationBarTitleText": "数字人",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom"
+					},
+					"meta": {
+						"auth": true
+					}
+				},
+				{
+					"path": "pages/video_works/video_works",
+					"style": {
+						"navigationBarTitleText": "我的作品",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/video_upload/video_upload",
+					"style": {
+						"navigationBarTitleText": "视频上传",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/video_create/video_create",
+					"style": {
+						"navigationBarTitleText": "数字人",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/anchor_clone/anchor_clone",
+					"style": {
+						"navigationBarTitleText": "",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/tone_clone/tone_clone",
+					"style": {
+						"navigationBarTitleText": "音色克隆",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/tone_manage/tone_manage",
+					"style": {
+						"navigationBarTitleText": "我的音色",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/audio_manage/audio_manage",
+					"style": {
+						"navigationBarTitleText": "音频管理"
+					}
+				},
+				{
+					"path": "pages/model_manage/model_manage",
+					"style": {
+						"navigationBarTitleText": "我的模特",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/ai_chat/ai_chat",
+					"style": {
+						"navigationBarTitleText": "AI文案",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				}
+			]
+		},
+		{
+			"root": "ai_modules/meeting_minutes",
+			"pages": [
+				{
+					"path": "pages/index/index",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					},
+					"meta": {
+						"auth": true
+					}
+				},
+				{
+					"path": "pages/record/record",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/detail/detail",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/audio_upload/audio_upload",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/recorder/recorder",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				}
+			]
+		},
+		{
+			"root": "ai_modules/ladder_player",
+			"pages": [
+				{
+					"path": "pages/index/index",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					},
+					"meta": {
+						"auth": true
+					}
+				},
+				{
+					"path": "pages/report/report",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/report_detail/report_detail",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/scene_create/scene_create",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/scene_intro/scene_intro",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/chat/chat",
+					"style": {
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				}
+			]
+		},
+		{
+			"root": "ai_modules/interview",
+			"pages": [
+				{
+					"path": "pages/index/index",
+					"style": {
+						"navigationBarTitleText": "AI面试",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					},
+					"meta": {
+						"auth": true
+					}
+				},
+				{
+					"path": "pages/interview_detail/interview_detail",
+					"style": {
+						"navigationBarTitleText": "岗位选择",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/resume_form/resume_form",
+					"style": {
+						"navigationBarTitleText": "岗位详情"
+					}
+				},
+				{
+					"path": "pages/chat/chat",
+					"style": {
+						"navigationBarTitleText": "AI面试",
+						"navigationStyle": "custom",
+						"disableScroll": true,
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "",
+		"navigationBarBackgroundColor": "#ffffff",
+		"backgroundColor": "#F8F8F8",
+		"h5": {
+			"navigationStyle": "custom"
+		}
+	},
+	"easycom": {
+		"custom": {
+			"router-navigate": "uniapp-router-next/components/router-navigate/router-navigate.vue",
+			"^(?!z-paging-refresh|z-paging-load-more)z-paging(.*)": "z-paging/components/z-paging$1/z-paging$1.vue"
+		}
+	}
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>电,闪电,电力,电量@2x</title>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#FFC8A3" offset="0%"></stop>
+            <stop stop-color="#FEA96E" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="公共组件" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="菜单栏-顶部栏-已登录" transform="translate(-1638, -21)" fill-rule="nonzero">
+            <g id="编组-5" transform="translate(1638, 19)">
+                <g id="电,闪电,电力,电量" transform="translate(0, 2)">
+                    <rect id="矩形" fill="#000000" opacity="0" x="0" y="0" width="16" height="16"></rect>
+                    <path d="M12.0515625,7.278125 L4,16 L6.3453125,8.9640625 C6.371875,8.8828125 6.3125,8.8 6.2265625,8.8 L3.953125,8.8 C3.2265625,8.8 2.7421875,8.0484375 3.0421875,7.3859375 L6.1328125,0.5859375 C6.2953125,0.2296875 6.6515625,0 7.04375,0 L13.6,0 L10.5078125,5.4125 C10.4609375,5.4953125 10.5203125,5.6 10.615625,5.6 L11.315625,5.6 C12.1875,5.6 12.6421875,6.6375 12.0515625,7.278125 Z" id="路径" fill="url(#linearGradient-1)"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

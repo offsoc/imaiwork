@@ -1,0 +1,19 @@
+<template>
+	<div class="mx-2 flex items-center gap-x-2 flex-col md:flex-row">
+		<NuxtLink to="/" class="flex-shrink-0">
+			<img :src="getWebsiteConfig.pc_logo" alt="logo" class="h-7" />
+		</NuxtLink>
+		<div class="text-[#7F7F7F] text-sm hidden md:block">
+			{{ getWebsiteConfig.pc_home_title }}
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { useAppStore } from "~/stores/app";
+import { getBaseUrl } from "~/utils/env";
+
+const { getWebsiteConfig } = useAppStore();
+</script>
+
+<style scoped></style>

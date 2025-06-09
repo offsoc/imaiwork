@@ -1,0 +1,51 @@
+<template>
+	<div class="flex flex-col h-full bg-white p-4">
+		<div class="pb-0">
+			<div class="text-2xl font-bold mb-2">创作中心</div>
+			<div class="flex gap-4">
+				<div
+					v-for="(tab, index) in sceneTabs"
+					:key="index"
+					class="bg-[#F7F9FF] rounded-[25px] h-[40px] flex items-center justify-center gap-2 px-3 cursor-pointer border-[2px] border-[transparent] hover:border-[#000000]"
+					:class="tab.value === sceneType ? '!border-[#000000]' : ''"
+					@click="sceneType = tab.value">
+					<Icon :name="`local-icon-${tab.icon}`" :size="22" />
+					<div class="text-base font-bold">{{ tab.label }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="grow min-h-0 mt-5">
+			<CreationContent v-if="sceneType == 1" />
+			<CreationImage v-if="sceneType == 2" />
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+import CreationContent from "./_components/content.vue";
+import CreationImage from "./_components/image.vue";
+import { useAppStore } from "~/stores/app";
+
+const router = useRouter();
+const route = useRoute();
+
+const appStore = useAppStore();
+
+const sceneTabs = ref([
+	{ label: "AI创作", value: 1, icon: "edit2" },
+	{ label: "AI作图", value: 2, icon: "pic" },
+]);
+const sceneType = ref<number>();
+
+onMounted(() => {
+	sceneType.value = Number(route.query.type) || 1;
+});
+</script>
+
+<style scoped lang="scss">
+:deep() {
+	.el-loading-mask {
+		background: transparent;
+	}
+}
+</style>

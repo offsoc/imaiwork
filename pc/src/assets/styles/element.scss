@@ -1,0 +1,59 @@
+:root {
+    .el-input__inner {
+        --el-input-inner-height: 38px;
+    }
+    .el-input--small {
+        .el-input__inner {
+            --el-input-inner-height: 24px;
+        }
+    }
+    .el-select__wrapper {
+        min-height: var(--el-input-wrapper-height);
+    }
+    .el-button--primary {
+        --el-button-disabled-bg-color: var(--el-color-primary-light-3);
+        --el-button-disabled-border-color: var(--el-color-primary-light-3);
+    }
+
+    .el-message--error {
+        --el-message-text-color: var(--color-white);
+    }
+    .el-message-box__errormsg {
+        color: var(--el-color-error-light-9);
+    }
+
+    .el-table {
+        --el-table-header-text-color: var(--el-text-color-primary);
+        --el-table-header-bg-color: var(--table-header-bg-color);
+        .el-table__cell {
+            text-align: center;
+        }
+        thead {
+            th {
+                font-weight: 400;
+                &.el-table__cell {
+                    background-color: transparent;
+                }
+            }
+        }
+    }
+
+    .el-checkbox {
+        --el-checkbox-font-size: var(--el-font-size-base);
+    }
+
+    .el-tabs__item {
+        font-weight: 400;
+    }
+
+    .el-message {
+        border-style: none;
+    }
+
+    .el-dialog {
+        --el-dialog-border-radius: var(--el-border-radius-lg);
+    }
+    .el-button:focus-visible {
+        outline: none;
+    }
+}

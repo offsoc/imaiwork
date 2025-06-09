@@ -1,0 +1,11 @@
+/app/adminapi/http/middleware/AuthMiddleware.php merge=keep-ours
+/app/adminapi/http/middleware/CheckMiddleware.php merge=keep-ours
+/app/adminapi/http/middleware/EncryptDataMiddleware.php merge=keep-ours
+/app/adminapi/http/middleware/InitMiddleware.php merge=keep-ours
+/app/adminapi/http/middleware/LoginMiddleware.php merge=keep-ours
+/app/common/service/ToolsService.php merge=keep-ours
+/public/install/install.php merge=keep-ours
+/public/install/model.php merge=keep-ours
+/public/install/YxEnv.php merge=keep-ours
+/public/install/template/main.php merge=keep-ours
+.gitignore merge=keep-ours
