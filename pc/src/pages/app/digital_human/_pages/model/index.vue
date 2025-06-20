@@ -17,7 +17,7 @@
                     @change="search">
                     <ElOption label="全部" value=""></ElOption>
                     <ElOption
-                        v-for="item in getDigitalHumanModels"
+                        v-for="item in modelChannel"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id"></ElOption>
@@ -68,7 +68,8 @@ import VideoItem from "@/pages/app/_components/video-item.vue";
 import { useAppStore } from "@/stores/app";
 import { Refresh } from "@element-plus/icons-vue";
 const appStore = useAppStore();
-const { getDigitalHumanModels } = appStore;
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+
 const lists = ref<any[]>([]);
 
 const queryParams = reactive({
@@ -132,6 +133,6 @@ getLists();
     }
 }
 :deep(.el-select__wrapper) {
-    min-height: 34px;
+    min-height: 31px;
 }
 </style>

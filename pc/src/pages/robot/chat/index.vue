@@ -17,7 +17,7 @@
                 </div>
             </ElAside>
             <div class="grow h-full relative rounded-xl py-4">
-                <div class="pt-20 h-full bg-white rounded-xl mr-4 px-4">
+                <div class="pt-20 h-full mr-4 px-4">
                     <Chatting
                         v-if="!loading"
                         ref="chattingRef"
@@ -400,8 +400,5 @@ definePageMeta({
     .message-contain--his {
         background-color: #f5f6f7;
     }
-}
-:deep(.send-box) {
-    background-color: #f6f7f8;
 }
 </style>

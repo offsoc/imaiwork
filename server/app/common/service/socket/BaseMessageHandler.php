@@ -6,7 +6,7 @@ use Workerman\Connection\TcpConnection;
 use app\common\model\sv\SvDevice;
 abstract class BaseMessageHandler
 {
-    protected WorkerService $service;
+    protected XhsSocketService $service;
     protected $worker;
     protected int $msgType;
     protected string $uid;
@@ -20,7 +20,7 @@ abstract class BaseMessageHandler
         3 => '小红书'
     );
 
-    public function __construct(WorkerService $service)
+    public function __construct(XhsSocketService $service)
     {
         $this->service = $service;
     }

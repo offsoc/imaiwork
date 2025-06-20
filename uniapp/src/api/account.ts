@@ -35,8 +35,13 @@ export function mnpLogin(data: Record<string, any>) {
     return request.post({ url: "/login/mnpLogin", data });
 }
 
-export function uninAppLogin(data: Record<string, any>) {
+export function uniAppLogin(data: Record<string, any>) {
     return request.post({ url: "/login/appLogin", data });
+}
+
+// pc扫码登录
+export function pcLogin(data: Record<string, any>) {
+    return request.post({ url: "/login/mnpAuthPcLogin", data });
 }
 
 //更新微信小程序头像昵称

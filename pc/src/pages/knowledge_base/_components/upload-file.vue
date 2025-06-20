@@ -114,7 +114,6 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "on-progress"]);
 const userStore = useUserStore();
-const appStore = useAppStore();
 
 const uploadRefs = shallowRef<InstanceType<typeof ElUpload>>();
 const action = computed(() => `${getApiUrl()}${getApiPrefix()}/knowledge/fileUpload`);

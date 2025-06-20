@@ -8,7 +8,7 @@
         width="1100px"
         :append-to-body="false"
         @close="close">
-        <div class="rounded-xl overflow-hidden h-[736px] flex flex-col">
+        <div class="rounded-xl overflow-hidden flex flex-col">
             <div
                 class="h-[62px] flex items-center justify-between px-4"
                 style="background: linear-gradient(156.65deg, #c1fedd 0%, #aeecff 53.87%, #c7c2ff 100%)">
@@ -16,9 +16,7 @@
                     上传视频 ——
                     {{ modelType == ModeType.VIDEO ? "同步创建形象并生成内容" : "马上为您克隆分身" }}
                 </div>
-                <div
-                    class="cursor-pointer p-1 hover:bg-primary-light-7 rounded-full leading-[0]"
-                    @click="uploadPopRef.close">
+                <div class="cursor-pointer p-1 hover:bg-primary-light-7 rounded-full leading-[0]" @click="close()">
                     <Icon name="el-icon-Close" :size="22"></Icon>
                 </div>
             </div>
@@ -38,7 +36,7 @@
                                 "></div>
                         </div>
                     </div>
-                    <div class="rounded-xl bg-primary-light-8 p-6 w-[520px] h-[499px] mt-4">
+                    <div class="rounded-xl bg-primary-light-9 p-6 w-[520px] h-[499px] mt-4">
                         <div class="flex gap-4">
                             <div class="relative w-[221px] h-[236px] flex-shrink-0">
                                 <img src="../../../_assets/images/upload_temp1.png" />
@@ -75,7 +73,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="grow">
+                <div class="grow flex flex-col">
                     <div class="flex justify-between items-center">
                         <div class="flex text-xl">
                             <div>请上传一段视频，作为驱动数字人的</div>
@@ -99,7 +97,30 @@
                             <span class="text-[#82AEFF] text-xs">查看教程示例</span>
                         </div>
                     </div>
-                    <div class="rounded-xl bg-primary-light-8 h-[270px] mt-4">
+                    <div class="mt-4 flex flex-col gap-y-4">
+                        <div class="text-[#4A505E] text-sm">注意：切换模型选择后，视频会清空，需要重新上传</div>
+                        <div
+                            class="border border-[#EDEDED] rounded-lg h-[48px] flex items-center justify-between px-4 model-select">
+                            <div class="flex items-center gap-2 text-primary">
+                                <Icon name="local-icon-clone_dh" :size="16"></Icon>
+                                <span class="font-bold">模型选择</span>
+                            </div>
+                            <div class="">
+                                <ElSelect
+                                    v-model="formData.model_version"
+                                    class="!w-[200px]"
+                                    placeholder="请选择模型"
+                                    @change="changeModel">
+                                    <ElOption
+                                        v-for="item in modelChannel"
+                                        :key="item.id"
+                                        :value="item.id"
+                                        :label="item.name"></ElOption>
+                                </ElSelect>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-xl bg-primary-light-9 grow min-h-0 mt-4">
                         <upload
                             class="w-full h-full"
                             type="video"
@@ -107,11 +128,11 @@
                             show-progress
                             :limit="1"
                             :show-file-list="false"
-                            :max-size="uploadLimit[formData.model_version].size"
-                            :min-duration="uploadLimit[formData.model_version].videoMinDuration"
-                            :max-duration="uploadLimit[formData.model_version].videoMaxDuration"
-                            :video-min-width="uploadLimit[formData.model_version].minResolution"
-                            :video-max-width="uploadLimit[formData.model_version].maxResolution"
+                            :max-size="UploadLimit[formData.model_version].size"
+                            :min-duration="UploadLimit[formData.model_version].videoMinDuration"
+                            :max-duration="UploadLimit[formData.model_version].videoMaxDuration"
+                            :video-min-width="getUploadVideoMinWidth"
+                            :video-max-width="getUploadVideoMaxWidth"
                             :accept="uploadVideoFormat"
                             @success="getVideo">
                             <div class="w-full rounded-lg h-full flex flex-col items-center justify-center">
@@ -163,62 +184,13 @@
                             </div>
                         </upload>
                     </div>
-                    <div class="mt-4 flex flex-col gap-y-4">
-                        <div class="text-[#4A505E] text-sm">注意：切换模型选择后，视频会清空，需要重新上传</div>
-                        <div
-                            class="border border-[#EDEDED] rounded-lg h-[48px] flex items-center justify-between px-4 model-select">
-                            <div class="flex items-center gap-2 text-primary">
-                                <Icon name="local-icon-clone_dh" :size="16"></Icon>
-                                <span class="font-bold">模型选择</span>
-                            </div>
-                            <div class="">
-                                <ElSelect
-                                    v-model="formData.model_version"
-                                    class="!w-[200px]"
-                                    placeholder="请选择模型"
-                                    @change="changeModel">
-                                    <ElOption
-                                        v-for="item in getDigitalHumanModels"
-                                        :key="item.id"
-                                        :value="item.id"
-                                        :label="item.name"></ElOption>
-                                </ElSelect>
-                            </div>
-                        </div>
-                        <div
-                            class="border border-[#EDEDED] rounded-lg h-[48px] flex items-center justify-between px-4 name-input">
-                            <div class="flex items-center gap-2 text-primary">
-                                <Icon name="local-icon-tag" :size="20"></Icon>
-                                <span class="font-bold">形象名称</span>
-                            </div>
-                            <div class="">
-                                <ElInput
-                                    v-model="formData.anchor_name"
-                                    class="!w-[200px]"
-                                    input-style="text-align:right"
-                                    maxlength="10"
-                                    placeholder="点击此处为您的数字人形象命名" />
-                            </div>
-                        </div>
-                        <div class="border border-[#EDEDED] rounded-lg h-[48px] flex items-center justify-between px-4">
-                            <div class="flex items-center gap-2 text-primary">
-                                <Icon name="local-icon-sex" :size="20"></Icon>
-                                <span class="font-bold">性别选择</span>
-                            </div>
-                            <div class="">
-                                <ElRadioGroup v-model="formData.gender">
-                                    <ElRadio label="male" value="male">男</ElRadio>
-                                    <ElRadio label="female" value="female">女</ElRadio>
-                                </ElRadioGroup>
-                            </div>
-                        </div>
-                    </div>
+
                     <div class="mt-4 flex justify-center">
                         <ElTooltip placement="top" v-if="modelType == ModeType.FIGURE">
                             <ElButton
                                 type="primary"
                                 class="w-[358px] !h-[48px]"
-                                :loading="isLock"
+                                :loading="isLock || parseLoading"
                                 :disabled="!isAvailable"
                                 @click="lockSubmit">
                                 立即克隆
@@ -234,7 +206,7 @@
                             v-if="modelType == ModeType.VIDEO"
                             type="primary"
                             class="w-[358px] !h-[48px]"
-                            :loading="isLock"
+                            :loading="isLock || parseLoading"
                             :disabled="!isAvailable"
                             @click="lockSubmit">
                             立即创建
@@ -255,12 +227,7 @@ import { TokensSceneEnum } from "@/enums/appEnums";
 import { useUserStore } from "@/stores/user";
 import { Delete } from "@element-plus/icons-vue";
 import Popup from "@/components/popup/index.vue";
-import {
-    DigitalHumanModelVersionEnum,
-    DigitalHumanModelVersionEnumMap,
-    commonUploadLimit,
-    uploadLimit,
-} from "../../../_enums";
+import { DigitalHumanModelVersionEnum, CommonUploadLimit, UploadLimit } from "../../../_enums";
 import ExampleVideo from "../../../_assets/video/example.mp4";
 
 enum ModeType {
@@ -269,20 +236,18 @@ enum ModeType {
 }
 
 const emit = defineEmits<{
-    (e: "playVideo", value: string): void;
     (e: "create", value?: any): void;
-    (e: "openExampleVideo", value: string): void;
+    (e: "close"): void;
+    (e: "playVideo", value: string): void;
 }>();
 
 const appStore = useAppStore();
 const userStore = useUserStore();
-const { getDigitalHumanModels } = appStore;
-const { userTokens } = toRefs(userStore);
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const formData = reactive<any>({
     model_version: DigitalHumanModelVersionEnum.STANDARD,
-    anchor_name: "",
-    gender: "male" as "male" | "female",
+    anchor_name: dayjs().format("YYYYMMDDHHMM").substring(2),
     pic: "",
     url: "",
 });
@@ -299,7 +264,7 @@ const tokensValue = computed(() => {
 
 // 获取当前模型名称
 const getModelName = computed(() => {
-    return getDigitalHumanModels.find((item) => item.id == formData.model_version)?.name;
+    return modelChannel.value.find((item) => item.id == formData.model_version)?.name;
 });
 
 // 上传视频格式限制
@@ -310,13 +275,13 @@ const commonUploadRequirements = [
         desc: "视频全程只能有一个人物，嘴型不得遮挡，不得多人出镜",
     },
     {
-        desc: `文件≤${commonUploadLimit.size}MB，${commonUploadLimit.videoMinDuration}秒＜时长＜${commonUploadLimit.videoMaxDuration}秒`,
+        desc: `文件≤${CommonUploadLimit.size}MB，${CommonUploadLimit.videoMinDuration}秒＜时长＜${CommonUploadLimit.videoMaxDuration}秒`,
     },
     {
         desc: "15fps≤帧率≤60fps",
     },
     {
-        desc: `清晰度必须为${commonUploadLimit.minResolution}P-${commonUploadLimit.maxResolution}P以内`,
+        desc: `清晰度必须为${CommonUploadLimit.minResolution}P-${CommonUploadLimit.maxResolution}P以内`,
     },
     {
         desc: "视频内音频需要清晰、响亮且无嘈杂背景音等干扰",
@@ -332,13 +297,13 @@ const modelUploadRequirements = {
             desc: "视频全程只能有一个人物，嘴型不得遮挡，不得多人出镜",
         },
         {
-            desc: `文件≤${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].size}MB，${
-                uploadLimit[DigitalHumanModelVersionEnum.STANDARD].videoMinDuration
-            }秒＜时长＜${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].videoMaxDuration}秒`,
+            desc: `文件≤${UploadLimit[DigitalHumanModelVersionEnum.STANDARD].size}MB，${
+                UploadLimit[DigitalHumanModelVersionEnum.STANDARD].videoMinDuration
+            }秒＜时长＜${UploadLimit[DigitalHumanModelVersionEnum.STANDARD].videoMaxDuration}秒`,
         },
         {
-            desc: `像素${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].minResolution}P-${
-                uploadLimit[DigitalHumanModelVersionEnum.STANDARD].maxResolution
+            desc: `像素${UploadLimit[DigitalHumanModelVersionEnum.STANDARD].minResolution}P-${
+                UploadLimit[DigitalHumanModelVersionEnum.STANDARD].maxResolution
             }P以内`,
         },
         {
@@ -353,16 +318,16 @@ const modelUploadRequirements = {
             desc: "视频全程只能有一个人物，嘴型不得遮挡，不得多人出镜",
         },
         {
-            desc: `文件≤${uploadLimit[DigitalHumanModelVersionEnum.SUPER].size}MB，${
-                uploadLimit[DigitalHumanModelVersionEnum.SUPER].videoMinDuration
-            }秒＜时长＜${uploadLimit[DigitalHumanModelVersionEnum.SUPER].videoMaxDuration}秒`,
+            desc: `文件≤${UploadLimit[DigitalHumanModelVersionEnum.SUPER].size}MB，${
+                UploadLimit[DigitalHumanModelVersionEnum.SUPER].videoMinDuration
+            }秒＜时长＜${UploadLimit[DigitalHumanModelVersionEnum.SUPER].videoMaxDuration}秒`,
         },
         {
             desc: "15fps≤帧率≤60fps",
         },
         {
-            desc: `清晰度必须为${uploadLimit[DigitalHumanModelVersionEnum.SUPER].minResolution}P-${
-                uploadLimit[DigitalHumanModelVersionEnum.SUPER].maxResolution
+            desc: `清晰度必须为${UploadLimit[DigitalHumanModelVersionEnum.SUPER].minResolution}P-${
+                UploadLimit[DigitalHumanModelVersionEnum.SUPER].maxResolution
             }P以内`,
         },
         {
@@ -375,6 +340,22 @@ const modelUploadRequirements = {
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadRequirements,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadRequirements,
 };
+
+const getUploadVideoMinWidth = computed(() => {
+    return [DigitalHumanModelVersionEnum.ADVANCED, DigitalHumanModelVersionEnum.ELITE].includes(
+        parseInt(formData.model_version)
+    )
+        ? 0
+        : UploadLimit[formData.model_version].minResolution;
+});
+
+const getUploadVideoMaxWidth = computed(() => {
+    return [DigitalHumanModelVersionEnum.ADVANCED, DigitalHumanModelVersionEnum.ELITE].includes(
+        parseInt(formData.model_version)
+    )
+        ? 0
+        : UploadLimit[formData.model_version].maxResolution;
+});
 
 // 是否可用
 const isAvailable = computed(() => {
@@ -389,7 +370,7 @@ const getVideo = (result: any) => {
     parseVideo(uri);
 };
 
-const parseLoading = ref<boolean>(true);
+const parseLoading = ref<boolean>(false);
 const parseVideo = (url: string) => {
     const video = document.createElement("video");
     const canvas = document.createElement("canvas");
@@ -398,6 +379,7 @@ const parseVideo = (url: string) => {
     video.muted = true;
     video.playsInline = true;
     video.preload = "auto";
+    parseLoading.value = true;
     // 允许跨域
     video.crossOrigin = "anonymous";
     video.addEventListener("loadedmetadata", () => {
@@ -441,12 +423,6 @@ const handleCreate = async () => {
     if (!url) {
         feedback.msgError("请上传视频");
         return;
-    } else if (!anchor_name) {
-        feedback.msgError("请输入形象名称");
-        return;
-    } else if (!anchor_name.match(/^[a-zA-Z0-9\u4e00-\u9fa5]*$/)) {
-        feedback.msgError("形象名称只能有数字与字母、中文组成, 且10个字符以内");
-        return;
     }
     if (modelType.value == ModeType.VIDEO) {
         emit("create", {
@@ -484,15 +460,15 @@ const open = async (type: ModeType) => {
 };
 
 const close = () => {
-    uploadPopRef.value?.close();
+    emit("close");
 };
 
 const openExampleVideo = async () => {
-    emit("openExampleVideo", ExampleVideo);
+    emit("playVideo", ExampleVideo);
 };
 
 watch(
-    () => getDigitalHumanModels,
+    () => modelChannel.value,
     (newVal) => {
         if (newVal && newVal.length) {
             formData.model_version = newVal[0].id;
@@ -506,7 +482,6 @@ watch(
 
 defineExpose({
     open,
-    close,
 });
 </script>
 

@@ -38,7 +38,7 @@ export const ClientMap = {
     [ClientEnum.PC]: "电脑PC",
     // [ClientEnum.IOS]: '苹果APP',
     // [ClientEnum.ANDROID]: '安卓APP',
-    // [ClientEnum.ADMIN]: "后台创建",
+    [ClientEnum.ADMIN]: "后台创建",
 };
 
 export enum DatabaseEnum {

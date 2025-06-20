@@ -24,8 +24,10 @@ export const useAppStore = defineStore("appStore", {
         getCopyright: (state) => state.config.copyright || "",
         getVersion: (state) => state.config.version || "",
         getIndexConfig: (state) => state.config.index_config || [],
-        getDigitalHumanModels: (state) => state.config.model_list || [],
+        getDigitalHumanConfig: (state) => state.config.digital_human || {},
         getMeetingConfig: (state) => state.config.meeting_config || {},
+        getCardCodeConfig: (state) => state.config.card_code || {},
+        getCopyRightConfig: (state) => state.config.copyright || [],
     },
     actions: {
         async getConfig() {
@@ -46,7 +48,7 @@ export const useAppStore = defineStore("appStore", {
             this.showSurvey = remind == 1;
         },
         toggleSidebar(toggle?: boolean) {
-            this.hideSidebar = toggle;
+            this.hideSidebar = toggle ?? !this.hideSidebar;
         },
     },
 });

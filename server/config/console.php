@@ -32,5 +32,9 @@ return [
         'query_sv_audio_cron' => 'app\common\command\QuerySvAudioTaskCron',
         //文案查询
         'query_sv_copywriting_cron' => 'app\common\command\QuerySvCopywritingTaskCron',
+        'workerman:server' => 'app\common\command\WorkermanServie',
+
+        //oss迁移
+        'oss_migration_cron' => 'app\common\command\OssMigrationCron',
     ],
 ];

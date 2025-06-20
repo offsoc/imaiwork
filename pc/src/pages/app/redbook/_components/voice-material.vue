@@ -55,7 +55,10 @@
                     </ElTableColumn>
                     <template #empty>
                         <ElEmpty description="暂无数据" :image-size="100"></ElEmpty>
-                        <NuxtLink to="/app/digital_human?type=3" class="hover:underline" target="_blank">
+                        <NuxtLink
+                            :to="`${getBaseUrl()}/app/digital_human?type=3`"
+                            class="hover:underline"
+                            target="_blank">
                             还么有音色？点击这里
                         </NuxtLink>
                     </template>
@@ -82,6 +85,8 @@ import { DigitalHumanModelVersionEnum, DigitalHumanModelVersionEnumMap } from "~
 import Popup from "@/components/popup/index.vue";
 import { ElTable } from "element-plus";
 import { cloneDeep } from "lodash-es";
+import { getBaseUrl } from "@/utils/env";
+
 const props = defineProps<{
     voiceList: any[];
 }>();

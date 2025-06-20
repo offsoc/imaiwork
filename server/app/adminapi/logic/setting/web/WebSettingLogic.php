@@ -25,6 +25,9 @@ class WebSettingLogic extends BaseLogic
      */
     public static function getWebsiteInfo(): array
     {
+        $image = ConfigService::get('website', 'share_image', '');
+        $image = empty($image) ? $image : FileService::getFileUrl($image);
+
         return [
             'name' => ConfigService::get('website', 'name'),
             'web_favicon' => FileService::getFileUrl(ConfigService::get('website', 'web_favicon')),
@@ -38,9 +41,13 @@ class WebSettingLogic extends BaseLogic
             'pc_ico' => FileService::getFileUrl(ConfigService::get('website', 'pc_ico')),
             'pc_desc' => ConfigService::get('website', 'pc_desc', ''),
             'pc_keywords' => ConfigService::get('website', 'pc_keywords', ''),
-            'pc_home_title' => ConfigService::get('website', 'pc_home_title', 'AI时代，企业化AI工具的新星'),
+            'shop_title' => ConfigService::get('website', 'shop_title', 'AI时代，企业化AI工具的新星'),
 
             'h5_favicon' => FileService::getFileUrl(ConfigService::get('website', 'h5_favicon')),
+
+            'share_title'   => ConfigService::get('website', 'share_title', ''),
+            'share_desc'    => ConfigService::get('website', 'share_desc', ''),
+            'share_image'   => $image,
         ];
     }
 
@@ -60,6 +67,7 @@ class WebSettingLogic extends BaseLogic
         $shopLogo = FileService::setFileUrl($params['shop_logo']);
         $pcLogo = FileService::setFileUrl($params['pc_logo']);
         $pcIco = FileService::setFileUrl($params['pc_ico'] ?? '');
+        $image = FileService::setFileUrl($params['share_image'] ?? '');
 
         ConfigService::set('website', 'name', $params['name']);
         ConfigService::set('website', 'web_favicon', $favicon);
@@ -75,7 +83,11 @@ class WebSettingLogic extends BaseLogic
         ConfigService::set('website', 'pc_keywords', $params['pc_keywords'] ?? '');
 
         ConfigService::set('website', 'h5_favicon', $h5favicon);
-        ConfigService::set('website', 'pc_home_title', $params['pc_home_title']);
+        ConfigService::set('website', 'shop_title', $params['shop_title']);
+
+        ConfigService::set('website', 'share_image', $image);
+        ConfigService::set('website', 'share_title', $params['share_title'] ?? '');
+        ConfigService::set('website', 'share_desc', $params['share_desc'] ?? '');
     }
 
 
@@ -149,5 +161,45 @@ class WebSettingLogic extends BaseLogic
         $config['privacy_content'] = get_file_domain($config['privacy_content']);
 
         return $config;
+    }
+
+    public static function setClient($params)
+    {
+        try {
+            if (isset($params['windows'])) {
+                ConfigService::set('client_download', 'windows', $params['windows']);
+            }
+            if (isset($params['mac_apple'])) {
+                ConfigService::set('client_download', 'mac_apple', $params['mac_apple']);
+            }
+            if (isset($params['mac_intel'])) {
+                ConfigService::set('client_download', 'mac_intel', $params['mac_intel']);
+            }
+            if (isset($params['android'])) {
+                ConfigService::set('client_download', 'android', $params['android']);
+            }
+            if (isset($params['mini_programs'])) {
+                ConfigService::set('client_download', 'mini_programs', $params['mini_programs']);
+            }
+            if (isset($params['h5'])) {
+                ConfigService::set('client_download', 'h5', $params['h5']);
+            }
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function getClient()
+    {
+        return [
+            'windows' =>  ConfigService::get('client_download','windows',''),
+            'mac_intel' =>  ConfigService::get('client_download','mac_intel',''),
+            'mac_apple' =>  ConfigService::get('client_download','mac_apple',''),
+            'android' =>  ConfigService::get('client_download','android',''),
+            'mini_programs' =>  ConfigService::get('client_download','mini_programs',''),
+            'h5' =>  ConfigService::get('client_download','h5',''),
+        ];
     }
 }

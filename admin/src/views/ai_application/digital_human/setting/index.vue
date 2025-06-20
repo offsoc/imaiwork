@@ -2,23 +2,45 @@
     <div>
         <el-card class="!border-none" shadow="never">
             <div class="text-xl font-medium mb-[20px]">驱动模型管理</div>
-            <div class="flex flex-col gap-2">
-                <div v-for="item in model_list" class="flex gap-2">
-                    <div class="mt-2 font-bold">V{{ item.id }}：</div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <el-input v-model="item.name" class="w-[300px]" :key="item.id"></el-input>
-                            <el-switch v-model="item.status" active-value="1" inactive-value="0" />
-                        </div>
-                        <div class="mt-2 flex items-center gap-2">
-                            <Icon name="el-icon-Warning" color="#999999"></Icon>
-                            <span class="text-sm text-[#999999]"> 关闭后用户将无法选择该模型 </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4">
-                <el-button type="primary" :loading="isSaveModelList" @click="lockSaveModelList">保存</el-button>
+            <el-alert title="提示：关闭后用户将无法选择对应模型" type="warning" />
+            <el-table :data="modelChannel" style="width: 100%" :row-style="{ height: '50px' }" class="mt-4">
+                <el-table-column label="名称" prop="name" />
+                <el-table-column label="描述" prop="described" />
+                <el-table-column label="图标" prop="icon">
+                    <template #default="{ row }">
+                        <el-image :src="row.icon" style="width: 50px; height: 50px" />
+                    </template>
+                </el-table-column>
+                <el-table-column label="状态" prop="status">
+                    <template #default="{ $index }">
+                        <el-switch
+                            v-model="modelChannel[$index].status"
+                            active-value="1"
+                            inactive-value="0"
+                            @change="lockSaveModelList()" />
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" prop="action">
+                    <template #default="{ $index }">
+                        <el-button type="primary" size="small" @click="editModelChannel($index)">编辑</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="text-xl font-medium mb-[20px] mt-4">系统音色管理</div>
+            <div class="mt-4 w-[400px]">
+                <el-alert title="提示：关闭后用户将无法选择对应音色" type="warning" />
+                <el-table :data="voiceLists" style="width: 100%" :row-style="{ height: '50px' }" class="mt-4">
+                    <el-table-column label="名称" prop="name" />
+                    <el-table-column label="状态" prop="status">
+                        <template #default="{ $index }">
+                            <el-switch
+                                v-model="voiceLists[$index].status"
+                                active-value="1"
+                                inactive-value="0"
+                                @change="lockSaveModelList()" />
+                        </template>
+                    </el-table-column>
+                </el-table>
             </div>
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
@@ -88,6 +110,7 @@
             </div>
         </el-card>
     </div>
+    <model-edit ref="modelEditRef" v-if="showModelEdit" @close="showModelEdit = false" @success="saveModelChannel" />
 </template>
 
 <script setup lang="ts">
@@ -96,14 +119,35 @@ import { getGptPrompt, saveGptPrompt } from "@/api/chat";
 import feedback from "@/utils/feedback";
 import { useLockFn } from "@/hooks/useLockFn";
 import useAppStore from "@/stores/modules/app";
-
+import ModelEdit from "./model-edit.vue";
 const appStore = useAppStore();
 const { config } = toRefs(appStore);
-const model_list = computed(() => config.value.model_list);
+const modelChannel = computed(() => config.value.digital_human?.channel);
+const voiceLists = computed(() => config.value?.digital_human.voice);
+
+const modelEditRef = ref<InstanceType<typeof ModelEdit>>();
+const showModelEdit = ref(false);
+const currentEditIndex = ref<number>(0);
+
+const editModelChannel = async (index: number) => {
+    currentEditIndex.value = index;
+    showModelEdit.value = true;
+    await nextTick();
+    modelEditRef.value?.open();
+    modelEditRef.value?.setFormData(modelChannel.value[index]);
+};
+
+const saveModelChannel = async (data: any) => {
+    modelChannel.value[currentEditIndex.value] = data;
+    lockSaveModelList();
+};
 
 const { lockFn: lockSaveModelList, isLock: isSaveModelList } = useLockFn(async () => {
     await saveConfig({
-        data: model_list.value,
+        data: {
+            channel: modelChannel.value,
+            voice: voiceLists.value,
+        },
         type: "model",
         name: "list",
     });

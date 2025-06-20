@@ -211,7 +211,7 @@ watch(
 
 <style lang="scss">
 $uni-base-color: #6a6a6a !default;
-$uni-main-color: #2353f4 !default;
+$uni-main-color: #0065fb !default;
 $uni-secondary-color: #909399 !default;
 $uni-border-3: #e5e5e5;
 

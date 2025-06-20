@@ -191,7 +191,7 @@ const handleCopyLink = async (id: number) => {
     feedback.loading("复制中...");
     try {
         const { url } = await generateJobLink({ job_id: id });
-        copy(url);
+        copy(url, { errMsg: "小程序未配置，请联系站长" });
     } catch (error) {
         feedback.msgError(error);
     } finally {

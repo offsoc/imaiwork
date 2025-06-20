@@ -86,7 +86,7 @@ const showTabbar = computed(() => {
 });
 
 const tabbarStyle = computed(() => ({
-    activeColor: "#2353f4",
+    activeColor: "#0065FB",
 }));
 const handleChange = (index: number) => {
     const selectTab = tabbarList.value[index];
@@ -114,8 +114,4 @@ watch(
     }
 );
 </script>
-<style lang="scss">
-:deep(.u-tabbar__content) {
-    z-index: 9 !important;
-}
-</style>
+<style lang="scss"></style>

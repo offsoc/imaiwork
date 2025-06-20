@@ -19,6 +19,9 @@
 				"enablePullDownRefresh": false,
 				"navigationStyle": "custom",
 				"disableScroll": true
+			},
+			"meta": {
+				"share": true
 			}
 		},
 		{
@@ -28,6 +31,9 @@
 				"enablePullDownRefresh": false,
 				"navigationStyle": "custom",
 				"disableScroll": true
+			},
+			"meta": {
+				"share": true
 			}
 		},
 		{
@@ -37,15 +43,41 @@
 				"enablePullDownRefresh": false,
 				"navigationStyle": "custom",
 				"disableScroll": true
+			},
+			"meta": {
+				"share": true
 			}
 		},
 		{
 			"path": "pages/login/login",
 			"style": {
-				"navigationBarTitleText": "登录"
+				"navigationBarTitleText": "登录",
+				"enablePullDownRefresh": false,
+				"navigationStyle": "custom",
+				"disableScroll": true
 			},
 			"meta": {
-				"white": true
+				"white": true,
+				"share": true
+			}
+		},
+		{
+			"path": "pages/login/mobile",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": false,
+				"disableScroll": true
+			},
+			"meta": {
+				"share": true
+			}
+		},
+		{
+			"path": "uni_modules/vk-uview-ui/components/u-avatar-cropper/u-avatar-cropper",
+			"style": {
+				"navigationBarTitleText": "头像裁剪",
+				"navigationBarBackgroundColor": "#000000"
 			}
 		}
 	],
@@ -54,27 +86,15 @@
 			"root": "packages",
 			"pages": [
 				{
-					"path": "pages/register/register",
-					"style": {
-						"navigationBarTitleText": "注册"
-					},
-					"meta": {
-						"white": true
-					}
-				},
-				{
-					"path": "pages/forget_pwd/forget_pwd",
-					"style": {
-						"navigationBarTitleText": "忘记密码"
-					}
-				},
-				{
 					"path": "pages/robot_cate/robot_cate",
 					"style": {
 						"navigationBarTitleText": "",
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -86,7 +106,8 @@
 						"disableScroll": true
 					},
 					"meta": {
-						"auth": true
+						"auth": true,
+						"share": true
 					}
 				},
 				{
@@ -96,6 +117,10 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true,
+						"auth": true
 					}
 				},
 				{
@@ -105,6 +130,10 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true,
+						"auth": true
 					}
 				},
 				{
@@ -114,6 +143,10 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true,
+						"auth": true
 					}
 				},
 				{
@@ -123,6 +156,10 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true,
+						"auth": true
 					}
 				},
 				{
@@ -132,11 +169,17 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
 					"path": "pages/agreement/agreement",
-					"style": {}
+					"style": {},
+					"meta": {
+						"share": true
+					}
 				},
 				{
 					"path": "pages/app_detail/app_detail",
@@ -144,12 +187,50 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
 					"path": "pages/service/service",
 					"style": {
 						"navigationBarTitleText": "客服"
+					},
+					"meta": {
+						"share": true
+					}
+				},
+				{
+					"path": "pages/redeem/redeem",
+					"style": {
+						"navigationBarTitleText": "充值",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					},
+					"meta": {
+						"share": true,
+						"auth": true
+					}
+				},
+				{
+					"path": "pages/setting/setting",
+					"style": {
+						"navigationBarTitleText": "相关设置"
+					},
+					"meta": {
+						"share": true
+					}
+				},
+				{
+					"path": "pages/404/404",
+					"style": {
+						"navigationBarTitleText": "404"
+					},
+					"name": "404",
+					"meta": {
+						"white": true
 					}
 				}
 			]
@@ -165,7 +246,8 @@
 						"navigationStyle": "custom"
 					},
 					"meta": {
-						"auth": true
+						"auth": true,
+						"share": true
 					}
 				},
 				{
@@ -175,33 +257,29 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
 					"path": "pages/video_upload/video_upload",
 					"style": {
 						"navigationBarTitleText": "视频上传",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom",
-						"disableScroll": true
+						"navigationBarBackgroundColor": "#F9FAFB"
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
 					"path": "pages/video_create/video_create",
 					"style": {
-						"navigationBarTitleText": "数字人",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom",
-						"disableScroll": true
-					}
-				},
-				{
-					"path": "pages/anchor_clone/anchor_clone",
-					"style": {
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom",
-						"disableScroll": true
+						"navigationBarTitleText": "智能数字人",
+						"navigationBarBackgroundColor": "#F9FAFB"
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -211,6 +289,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -220,12 +301,18 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
 					"path": "pages/audio_manage/audio_manage",
 					"style": {
 						"navigationBarTitleText": "音频管理"
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -235,15 +322,19 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
-					"path": "pages/ai_chat/ai_chat",
+					"path": "pages/ai_copywriter/ai_copywriter",
 					"style": {
-						"navigationBarTitleText": "AI文案",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom",
-						"disableScroll": true
+						"navigationBarTitleText": "输入文案",
+						"navigationBarBackgroundColor": "#F9FAFB"
+					},
+					"meta": {
+						"share": true
 					}
 				}
 			]
@@ -259,7 +350,8 @@
 						"disableScroll": true
 					},
 					"meta": {
-						"auth": true
+						"auth": true,
+						"share": true
 					}
 				},
 				{
@@ -268,6 +360,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -276,6 +371,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -284,6 +382,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -292,6 +393,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				}
 			]
@@ -307,7 +411,8 @@
 						"disableScroll": true
 					},
 					"meta": {
-						"auth": true
+						"auth": true,
+						"share": true
 					}
 				},
 				{
@@ -316,6 +421,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -324,6 +432,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -332,6 +443,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -340,6 +454,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -348,6 +465,9 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				}
 			]
@@ -364,7 +484,8 @@
 						"disableScroll": true
 					},
 					"meta": {
-						"auth": true
+						"auth": true,
+						"share": true
 					}
 				},
 				{
@@ -374,12 +495,18 @@
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
 					"path": "pages/resume_form/resume_form",
 					"style": {
 						"navigationBarTitleText": "岗位详情"
+					},
+					"meta": {
+						"share": true
 					}
 				},
 				{
@@ -389,6 +516,9 @@
 						"navigationStyle": "custom",
 						"disableScroll": true,
 						"enablePullDownRefresh": false
+					},
+					"meta": {
+						"share": true
 					}
 				}
 			]

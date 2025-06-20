@@ -95,12 +95,13 @@ class WeChatMnpService
      * @return string
      * @throws \Exception
      */
-    public function getMnpCodeUrl(string $page, int $width = 430, $savePath = '/tmp/mnp-wxacode-123.png')
+    public function getMnpCodeUrl(string $page, int $width = 430, $savePath = '/tmp/mnp-wxacode-123.png', $params = [])
     {
         try {
+
             $response = $this->app->getClient()->postJson('/wxa/getwxacodeunlimit', [
                 'page' => $page,
-                'scene' => '1011',
+                'scene' => isset($params['auth_key']) ? '1011&auth_key=' . $params['auth_key'] : '1011',
                 'width' => $width,
                 'check_path' => true
             ]);

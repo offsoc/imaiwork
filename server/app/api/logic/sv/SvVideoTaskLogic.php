@@ -232,9 +232,9 @@ class SvVideoTaskLogic extends SvBaseLogic
             $tasks = SvVideoTask::where($where)
                 ->order('tries DESC, id ASC')
                 ->limit(2)
-                ->select();
+                ->select()->toArray();
 
-            if ($tasks->isEmpty()) {
+            if (!$tasks) {
                 //Log::channel('sv')->info('没有需要查询音频任务');
                 return;
             }
@@ -243,36 +243,49 @@ class SvVideoTaskLogic extends SvBaseLogic
                 6 => 'detailYmt',
             ];
 
+            $typeMap = [
+                4 => AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YM,
+                6 => AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT,
+            ];
+
             foreach ($tasks as $task) {
                 try {
                    // Log::channel('sv')->info('开始查询音频任务' . $task->task_id);
-
-                    $method = $methodMap[$task->model_version] ?? 'detailYmt';
-
+                    unset($task['create_time']);
+                    $task['update_time'] = time();
+                    $method = $methodMap[$task['model_version']] ?? 'detailYmt';
                     $response = \app\common\service\ToolsService::Human()->$method([
                         'type' => 3,
-                        'id' =>  $task->audio_id
+                        'id' =>  $task['audio_id']
                     ]);
+
                     if (isset($response['data']['status']) && $response['data']['status'] == 3) {
                         $upload_url = FileService::downloadFileBySource($response['data']['speech_url'], 'audio');
-                        $task->tries = 0;
-                        $task->status = 3;
-                        $task->audio_result_url = $response['data']['speech_url'];
-                        $task->audio_url =  $upload_url;
+                        $task['tries'] = 0;
+                        $task['status'] = 3;
+                        $task['audio_result_url'] = $response['data']['speech_url'];
+                        $task['audio_url'] =  $upload_url;
 
                     }elseif(isset($response['data']['status']) && $response['data']['status'] == 4) {
-                        SvVideoTaskLogic::updateAudio($task, $task->model_version);
-                        $task->status = 2;
+                        $typeID = $typeMap[$task['model_version']] ?? AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT;
+                        //查询是否已返还
+                        if (UserTokensLog::where('user_id',  $task['user_id'])->where('change_type', $typeID)->where('action', 1)->where('task_id',  $task['task_id'])->count() == 0) {
+
+                            $points = UserTokensLog::where('user_id',  $task['user_id'])->where('change_type', $typeID)->where('task_id',  $task['task_id'])->value('change_amount') ?? 0;
+
+                            AccountLogLogic::recordUserTokensLog(false,  $task['user_id'], $typeID, $points,  $task['task_id']);
+                        }
+                        $task['status'] = 2;
 
                     }
-                    $task->tries =  $task->tries + 1;
-                    $task->save();
+                    $task['tries'] =  $task['tries'] + 1;
+                    SvVideoTask::update($task, ['id' => $task['id']]);
 
                 } catch (\Exception $e) {
-                    $task->tries = $task->tries + 1;
-                   // Log::channel('sv')->info('视频任务处理失败'. $task->task_id .$e->getMessage());
-                    $task->remark = $e->getMessage();
-                    $task->save();
+                    $task['tries'] = $task['tries'] + 1;
+                   // Log::channel('sv')->info('视频任务处理失败'. $task['task_id'] .$e->getMessage());
+                    $task['remark'] = $e->getMessage();
+                    SvVideoTask::update($task, ['id' => $task['id']]);
                 }
             }
 
@@ -390,10 +403,10 @@ class SvVideoTaskLogic extends SvBaseLogic
 
                     $item->status = ($data['url'] != "") ? 1 : 2;
                     $item->url = FileService::downloadFileBySource($data['url'], 'audio');
-
+                    $scene = $item->model_version == 4 ? "human_audio_ym" : "human_audio_ymt";
                     // TODO 失败退费
                     if ($item->status == 2) {
-                        self::refundTokens($item->user_id, $item->anchor_id, $item->task_id, 'human_anchor');
+                        self::refundTokens($item->user_id, $item->anchor_id, $item->task_id, $scene);
                     }
 
                     // 更新视频

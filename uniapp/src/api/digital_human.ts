@@ -79,3 +79,8 @@ export const createTask = (data: Record<string, any>) => {
 export const createDouyinContent = (data: Record<string, any>) => {
     return request.post({ url: "/human/dyToText", data });
 };
+
+// 文案生成
+export const generatePrompt = (data: Record<string, any>) => {
+    return request.post({ url: "/human/copywriting", data });
+};

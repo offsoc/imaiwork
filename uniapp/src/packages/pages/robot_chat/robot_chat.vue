@@ -78,6 +78,7 @@
         </view>
     </view>
     <Sidebar ref="sidebarRef" :form-list="getFormLists" :title="detail.name" @success="getSliderParams" />
+    <recharge-popup ref="rechargePopupRef"></recharge-popup>
 </template>
 
 <script lang="ts" setup>
@@ -92,6 +93,8 @@ const sidebarRef = shallowRef<InstanceType<typeof Sidebar>>();
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
 const getSceneTokens = userStore.getTokenByScene(TokensSceneEnum.SCENE_CHAT)?.score;
+
+const rechargePopupRef = ref();
 
 const detail = reactive<Record<string, any>>({
     id: "",
@@ -172,6 +175,7 @@ let streamReader: any = null;
 const contentPost = async (userInput?: any, isNewChat: boolean = false) => {
     if (userTokens.value <= 0) {
         uni.$u.toast("算力不足，请充值！");
+        rechargePopupRef.value?.open();
         return;
     }
     if (isReceiving.value) return;

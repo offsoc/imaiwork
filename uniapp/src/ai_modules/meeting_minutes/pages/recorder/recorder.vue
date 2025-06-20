@@ -411,7 +411,7 @@ const back = () => {
         pauseRecord();
         uni.showModal({
             title: "提示",
-            content: "确定返回首页吗？, ",
+            content: "确定返回首页吗？",
             success: async (res) => {
                 if (res.confirm) {
                     await stopRecord();
@@ -447,3 +447,27 @@ onHide(() => {
 </script>
 
 <style scoped lang="scss"></style>
+<!-- #ifdef APP -->
+<script module="yourModuleName" lang="renderjs">
+import 'recorder-core'
+import RecordApp from 'recorder-core/src/app-support/app'
+import '../../static/Recorder-UniCore/app-uni-support.js'
+
+//按需引入你需要的录音格式支持文件，和插件
+import 'recorder-core/src/engine/mp3'
+import 'recorder-core/src/engine/mp3-engine'
+
+import 'recorder-core/src/extensions/waveview'
+
+export default {
+    mounted(){
+        //App的renderjs必须调用的函数，传入当前模块this
+        RecordApp.UniRenderjsRegister(this);
+    },
+    methods: {
+        //这里定义的方法，在逻辑层中可通过 RecordApp.UniWebViewVueCall(this,'this.xxxFunc()') 直接调用
+        //调用逻辑层的方法，请直接用 this.$ownerInstance.callMethod("xxxFunc",{args}) 调用，二进制数据需转成base64来传递
+    }
+}
+</script>
+<!-- #endif -->

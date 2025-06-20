@@ -51,11 +51,12 @@
                                     v-if="activeName === TypeLists.IMAGE ? !fileData.image.uri : !fileData.video.uri">
                                     <img src="../_assets/images/add.png" class="w-8" />
                                     <div class="text-[#8A8A8A] mt-4">
-                                        点击上传{{ activeName === TypeLists.IMAGE ? "图片" : "视频" }}，或点击此<span
+                                        点击上传{{ activeName === TypeLists.IMAGE ? "图片" : "视频" }}
+                                        <!-- ，或点击此<span
                                             class="text-primary cursor-pointer hover:underline"
                                             @click.stop="openMaterialLibrary"
                                             >从素材库选择</span
-                                        >
+                                        > -->
                                     </div>
                                 </template>
                                 <div v-else class="h-full w-full flex justify-center relative" v-loading="parseLoading">

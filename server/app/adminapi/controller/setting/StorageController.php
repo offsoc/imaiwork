@@ -72,4 +72,21 @@ class StorageController extends BaseAdminController
         StorageLogic::change($params);
         return $this->success('切换成功', [], 1, 1);
     }
+
+
+    /**
+     * @notes  迁移
+     * @return Json
+     * @author 段誉
+     * @date 2022/4/20 16:19
+     */
+    public function migration()
+    {
+        $params = (new StorageValidate())->post()->goCheck('migration');
+        $result = StorageLogic::migration($params);
+        if (true === $result) {
+            return $this->success('配置成功', [], 1, 1);
+        }
+        return $this->fail($result);
+    }
 }

@@ -51,7 +51,7 @@
                     >{{ state.type == CreateType.SINGLE ? "开始录音" : "上传音视频文件" }}
                 </u-button>
                 <view class="flex items-center gap-1 justify-center mt-2" @click="handleSupportFormat">
-                    <u-icon name="question-circle" size="32" color="#2353F4"></u-icon>
+                    <u-icon name="question-circle" size="32" color="#0065FB"></u-icon>
                     <view class="text-sm text-primary">
                         {{ state.type == CreateType.BATCH ? "查看支持格式" : "查看注意事项" }}
                     </view>
@@ -79,19 +79,15 @@
             </view>
         </view>
     </u-popup>
+    <recharge-popup ref="rechargePopupRef"></recharge-popup>
 </template>
 
 <script setup lang="ts">
-import {
-    ChooseResult,
-    FileData,
-    chooseFile,
-    getFilesByExtname,
-    normalizeFileData,
-} from "@/components/file-upload/choose-file";
+import { ChooseResult, chooseFile } from "@/components/file-upload/choose-file";
 import Recorder from "recorder-core";
 import RecordApp from "recorder-core/src/app-support/app";
-import { meetingMinutesCreate, meetingMinutesBatchCreate } from "@/api/meeting_minutes";
+import "../../static/Recorder-UniCore/app-uni-support.js";
+import { meetingMinutesBatchCreate } from "@/api/meeting_minutes";
 import { uploadFile } from "@/api/app";
 import { useUserStore } from "@/stores/user";
 import useHandleApi from "../../hooks/useHandleApi";
@@ -102,6 +98,8 @@ Recorder.install = true;
 
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
+
+const rechargePopupRef = ref();
 
 const state = reactive({
     type: CreateType.SINGLE,
@@ -126,6 +124,7 @@ const extension = ["mp3", "wav", "wma", "aac", "ogg", "amr", "flac", "aiff"];
 const openFile = async () => {
     if (tokensValue.value <= 0) {
         uni.$u.toast("算力不足，请充值！");
+        rechargePopupRef.value?.open();
         return;
     }
     const filesResult = await chooseFile({
@@ -235,6 +234,7 @@ const submitFileUpload = async (item: any, index: number) => {
 const handleCreate = async () => {
     if (userTokens.value <= 0) {
         uni.$u.toast("算力不足，请充值！");
+        rechargePopupRef.value.open();
         return;
     }
     if (state.type === CreateType.SINGLE) {
@@ -245,6 +245,7 @@ const handleCreate = async () => {
     }
 };
 
+const { proxy }: any = getCurrentInstance();
 const startRecord = async () => {
     const toRecorder = () => {
         uni.$u.route({
@@ -255,6 +256,9 @@ const startRecord = async () => {
             },
         });
     };
+    // #ifdef APP-PLUS
+    RecordApp.UniWebViewActivate(proxy);
+    // #endif
     RecordApp.RequestPermission(
         () => {
             toRecorder();
@@ -282,9 +286,38 @@ const handleSupportFormat = () => {
     showSupportFormat.value = true;
 };
 
+onMounted(() => {
+    RecordApp.UniPageOnShow(proxy);
+});
+
 onLoad((options: any) => {
     state.type = options.type || CreateType.BATCH;
 });
 </script>
 
 <style scoped></style>
+
+<!-- #ifdef APP -->
+<script module="yourModuleName" lang="renderjs">
+import 'recorder-core'
+import RecordApp from 'recorder-core/src/app-support/app'
+import '../../static/Recorder-UniCore/app-uni-support.js'
+
+//按需引入你需要的录音格式支持文件，和插件
+import 'recorder-core/src/engine/mp3'
+import 'recorder-core/src/engine/mp3-engine'
+
+import 'recorder-core/src/extensions/waveview'
+
+export default {
+    mounted(){
+        //App的renderjs必须调用的函数，传入当前模块this
+        RecordApp.UniRenderjsRegister(this);
+    },
+    methods: {
+        //这里定义的方法，在逻辑层中可通过 RecordApp.UniWebViewVueCall(this,'this.xxxFunc()') 直接调用
+        //调用逻辑层的方法，请直接用 this.$ownerInstance.callMethod("xxxFunc",{args}) 调用，二进制数据需转成base64来传递
+    }
+}
+</script>
+<!-- #endif -->

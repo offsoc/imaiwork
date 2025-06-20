@@ -35,8 +35,8 @@
                                     <view
                                         class="flex-1 flex items-center justify-between gap-2 border border-solid rounded-lg p-2 h-[80rpx]"
                                         :style="{
-                                            borderColor: formData.gender === item.value ? '#2353f4' : '#e5e5e5',
-                                            color: formData.gender === item.value ? '#2353f4' : '#6a6a6a',
+                                            borderColor: formData.gender === item.value ? '#0065FB' : '#e5e5e5',
+                                            color: formData.gender === item.value ? '#0065FB' : '#6a6a6a',
                                         }"
                                         v-for="(item, index) in toneOptions"
                                         :key="index"
@@ -75,21 +75,21 @@
                                     </view>
                                     <view class="mt-2 grid grid-cols-3 gap-2">
                                         <view
-                                            v-for="(item, index) in templateList"
+                                            v-for="(item, index) in cratedVoiceCopywriter"
                                             class="border border-solid p-2 rounded"
                                             :key="index"
                                             :style="{
-                                                borderColor: templateIndex === index ? '#2353f4' : '#EBEBEB',
-                                                color: templateIndex === index ? '#2353f4' : '#D9D9D9',
+                                                borderColor: currCopywriterIndex === index ? '#0065FB' : '#EBEBEB',
+                                                color: currCopywriterIndex === index ? '#0065FB' : '#D9D9D9',
                                             }"
-                                            @click="templateIndex = index">
+                                            @click="currCopywriterIndex = index">
                                             {{ item }}
                                         </view>
                                     </view>
                                 </template>
                                 <template v-if="step == 2">
                                     <view class="p-2 rounded border border-dashed border-primary text-base">
-                                        {{ templateList[templateIndex] }}
+                                        {{ cratedVoiceCopywriter[currCopywriterIndex] }}
                                     </view>
                                     <view class="mt-6 flex flex-col items-center justify-center">
                                         <view class="font-bold text-[48rpx] text-primary">
@@ -185,7 +185,7 @@
                                         class="mt-4 rounded-lg flex flex-col items-center justify-center border border-dashed border-[#858585] p-4"
                                         @click="openFile('record')">
                                         <image
-                                            src="@/ai_modules/digital_human/static/icons/upload2.svg"
+                                            src="@/ai_modules/digital_human/static/icons/upload.svg"
                                             class="w-[96rpx] h-[96rpx]"></image>
                                         <view class="text-xl text-[#07C160] font-bold">从微信聊天记录里上传</view>
                                         <view class="text-xs text-[#B4B4B4]">
@@ -226,42 +226,37 @@
             </u-button>
         </view>
     </view>
+    <recharge-popup ref="rechargePopupRef"></recharge-popup>
 </template>
 
 <script setup lang="ts">
-import {
-    ChooseResult,
-    FileData,
-    chooseFile,
-    getFilesByExtname,
-    normalizeFileData,
-} from "@/components/file-upload/choose-file";
+import { ChooseResult, chooseFile } from "@/components/file-upload/choose-file";
 import { uploadFile } from "@/api/app";
 import { voiceClone } from "@/api/digital_human";
-import { useLockFn } from "@/hooks/useLockFn";
 import { useAudio } from "@/hooks/useAudio";
 import { useRecorder } from "@/hooks/useRecorder";
 import { formatAudioTime } from "@/utils/util";
-import Cache from "@/utils/cache";
 import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { DigitalHumanModelVersionEnum } from "../../enums";
-import videoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
-
-const videoPreviewRef = shallowRef<InstanceType<typeof videoPreview>>();
+import { cratedVoiceCopywriter } from "../../config/copywriter";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
-const { getDigitalHumanModels } = toRefs(appStore);
 const { userTokens } = toRefs(userStore);
 
+const rechargePopupRef = ref();
+
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel || []);
+
 const getModelList = computed(() => {
-    return getDigitalHumanModels.value.map((item: any) => ({
+    return modelChannel.value.map((item: any) => ({
         text: item.name,
         value: item.id,
     }));
 });
+
 const tokensValue = computed(() => {
     const tokenMap: any = {
         [DigitalHumanModelVersionEnum.STANDARD]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_VOICE)?.score,
@@ -346,12 +341,7 @@ const uploadAudio = async (file: string) => {
     }
 };
 
-const templateList = [
-    "亲爱的顾客朋友们，注意啦！本周末我们将迎来年度最大的促销活动。全场商品低至五折起，更有神秘大奖等你来拿！记得带上你的亲朋好友，一起享受这场购物盛宴。错过今天，再等一年！快来加入我们，让这个周末充满惊喜和欢乐",
-    "各位听众，今天我要向大家介绍一款革命性的产品——智能恒温杯。它不仅能保持饮品的最佳温度，还能通过手机APP远程控制。无论是热咖啡还是冰果汁，都能随时享受最佳口感。智能恒温杯，让生活更便捷，让品味更出众。",
-    "尊敬的市民们，让我们共同关注环境，保护我们美丽的地球。本周我们将举办‘绿色出行周’活动，鼓励大家使用公共交通工具，减少私家车出行。让我们一起行动起来，为减少碳排放，改善空气质量做出自己的贡献。绿色出行，从我做起，从现在做起。",
-];
-const templateIndex = ref(0);
+const currCopywriterIndex = ref(0);
 
 const recordDurationTimer = ref<any>(null);
 const recordDuration = ref<number>(0);
@@ -396,7 +386,7 @@ const nextStep = async (index: number) => {
 
     step.value += index;
     if (step.value == 0) {
-        templateIndex.value = 0;
+        currCopywriterIndex.value = 0;
         is_transcribe.value = false;
     } else if (step.value == 2) {
     }
@@ -471,6 +461,7 @@ const startClone = async () => {
     }
     if (userTokens.value < tokensValue.value) {
         uni.$u.toast("算力不足，请充值！");
+        rechargePopupRef.value?.open();
         return;
     }
     try {
@@ -499,7 +490,7 @@ const goHome = () => {
 };
 
 watch(
-    () => appStore.getDigitalHumanModels,
+    () => appStore.getDigitalHumanConfig,
     (newVal) => {
         if (newVal && newVal.length > 0) {
             formData.model_version = newVal[0].id;

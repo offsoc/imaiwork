@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-full w-full p-4 flex flex-col">
+    <div class="min-h-full w-full p-4 flex flex-col" v-if="!showCreatePanel">
         <div class="header-wrap flex items-center justify-between">
             <div class="h-full flex items-center relative w-full z-20">
                 <img src="@/assets/images/kn_header_img.png" class="w-[61px] mt-4" />
@@ -9,7 +9,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <ElButton type="primary" @click="handleAdd()">创建知识库</ElButton>
+                <ElButton type="primary" @click="handleCreate()">创建知识库</ElButton>
             </div>
         </div>
         <div class="mt-4">
@@ -108,20 +108,21 @@
                 <ElEmpty description="暂无数据"></ElEmpty>
             </div>
         </div>
+        <edit-popup v-if="showEditPopup" ref="editPopupRef" @success="resetPage" @close="showEditPopup = false" />
+        <file-add v-if="showFileAdd" ref="fileAddRef" @success="resetPage" @close="showFileAdd = false" />
     </div>
-    <edit-popup v-if="showEditPopup" ref="editPopupRef" @success="resetPage" @close="showEditPopup = false" />
-    <file-add v-if="showFileAdd" ref="fileAddRef" @success="resetPage" @close="showFileAdd = false" />
+    <create-panel v-else ref="createPanelRef" @success="reset" @close="reset" />
 </template>
 
 <script setup lang="ts">
 import { knowledgeBaseLists, knowledgeBaseDelete } from "@/api/knowledge_base";
 import KnMyIcon from "@/assets/images/kn_my.png";
-import KnAidIcon from "@/assets/images/kn_aid.png";
 import dayjs from "dayjs";
 import EditPopup from "./_components/edit-popup.vue";
 import FileAdd from "./_components/file-add.vue";
+import CreatePanel from "./_components/create-panel.vue";
 const router = useRouter();
-
+const route = useRoute();
 enum Tab {
     MyKn = "my_kn",
     AidKn = "aid_kn",
@@ -140,6 +141,8 @@ const tabs: { label: string; value: Tab; icon: string }[] = [
     //     icon: KnAidIcon,
     // },
 ];
+
+const showCreatePanel = ref(false);
 
 const queryParams = reactive({
     page_no: 1,
@@ -163,16 +166,15 @@ const visibleChange = (flag: boolean, id: number) => {
 const showEditPopup = ref(false);
 const editPopupRef = ref<InstanceType<typeof EditPopup>>();
 
-const handleAdd = async () => {
-    showEditPopup.value = true;
-    await nextTick();
-    editPopupRef.value?.open();
+const handleCreate = async () => {
+    showCreatePanel.value = true;
+    replaceState({ type: "add" });
 };
 
 const handleEdit = async (id: number) => {
     showEditPopup.value = true;
     await nextTick();
-    editPopupRef.value?.open("edit");
+    editPopupRef.value?.open();
     editPopupRef.value?.getDetail(id);
 };
 
@@ -210,6 +212,31 @@ const load = () => {
     queryParams.page_no++;
     getLists();
 };
+
+const reset = () => {
+    showCreatePanel.value = false;
+    showEditPopup.value = false;
+    showFileAdd.value = false;
+    router.replace({
+        query: {
+            type: undefined,
+            id: undefined,
+        },
+    });
+    resetPage();
+};
+
+watch(
+    () => route.query.type,
+    (val) => {
+        if (val == "add") {
+            showCreatePanel.value = true;
+        }
+    },
+    {
+        immediate: true,
+    }
+);
 
 getLists();
 </script>

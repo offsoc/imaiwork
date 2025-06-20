@@ -66,7 +66,7 @@ const showPreviewVideo = ref(false);
 const currentPanel = ref<EnumFriendPanel>(EnumFriendPanel.Dialogue);
 
 // 使用微信 WebSocket
-const { on, send, addDeviceLoading, actionType } = useWeChatWs();
+const { on, send, addDeviceLoading, actionType, isConnected } = useWeChatWs();
 
 // 使用微信消息处理
 const {
@@ -74,15 +74,12 @@ const {
     wechatLists,
     conversationList,
     newMsg,
-    wechatAiInfo,
     currentWechat,
     currentFriend,
     friendList,
     friendInfo,
     chattingRef,
     historyMsgList,
-    userInfoForm,
-    userInfoIsLocked,
     getWeChatAiInfo,
     getFriendInfo,
     addFriend,
@@ -92,11 +89,10 @@ const {
 } = useHandle();
 
 // 使用SOP任务
-const { getSopGreetInfo, createStopTask, deleteStopTask, deleteAllStopTask } = useSopTask();
+const { getSopGreetInfo, deleteStopTask, deleteAllStopTask } = useSopTask();
 
 // 使用回复策略任务
-const { talkReplyTaskData, createTalkReplyTask, deleteAllTalkReplyTask, onTalkEvent, triggerTalkEvent } =
-    useTalkReplyTask();
+const { talkReplyTaskData, onTalkEvent, triggerTalkEvent } = useTalkReplyTask();
 
 // 添加设备Code
 const addDeviceCode = ref<string>("");
@@ -134,10 +130,13 @@ const historyPageParams = reactive<Record<string, any>>({
     Count: 10,
 });
 
+on("open", () => {
+    getWechatListsFn();
+});
+
 // 监听错误事件
 on("error", (error?: any) => {
     const { Code, MsgType, Content } = error;
-
     if (Code == EnumMsgErrorCode.InternalError && MsgType == EnumMsgType.TalkToFriendTaskResultNotice) {
         historyMsgList.value = historyMsgList.value.filter((item) => !item.loading);
     } else if (Code == EnumMsgErrorCode.DeviceOffline) {
@@ -471,7 +470,7 @@ function handleFriendTalk(result: any) {
     } else {
         if (MsgSvrId != "0" && !isCompany) {
             // 创建回复策略任务, 目前回复策略只支持好友
-            createTalkReplyTask(result);
+            // createTalkReplyTask(result);
         }
     }
     currWechat?.Convers.forEach((conv: any) => {
@@ -515,6 +514,10 @@ function handlePostMessageRead(Content: any) {
 
 // 处理添加微信
 function handleAddWeChat(DeviceId: string) {
+    if (!isConnected.value) {
+        feedback.notifyError("网络连接失败，请检查网络");
+        return;
+    }
     actionType.value = EnumMsgType.AddDevice;
     addDeviceCode.value = DeviceId;
     addDeviceLoading.value = true;
@@ -669,12 +672,12 @@ async function handleFriendAddNotice(Content: any) {
     const result = handleFriendReportNotice(WeChatId, FriendInfo);
     await addFriend(result);
     // 打招呼
-    createStopTask({
-        WeChatId,
-        FriendId,
-        Memo,
-        NickName: FriendNick,
-    });
+    // createStopTask({
+    //     WeChatId,
+    //     FriendId,
+    //     Memo,
+    //     NickName: FriendNick,
+    // });
 }
 
 // 处理好友删除
@@ -1155,7 +1158,6 @@ const getWechatListsFn = async () => {
     }
 };
 
-getWechatListsFn();
 getSopGreetInfo();
 getReplyStrategyInfo();
 

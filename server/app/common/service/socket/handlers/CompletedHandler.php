@@ -7,6 +7,7 @@ use app\common\service\socket\WorkerEnum;
 use Workerman\Lib\Timer;
 use app\common\model\sv\SvDevice;
 use app\common\model\sv\SvPublishSettingDetail;
+use app\common\model\sv\SvReplyStrategy;
 
 class CompletedHandler extends BaseMessageHandler
 {
@@ -35,7 +36,7 @@ class CompletedHandler extends BaseMessageHandler
                 if($worker->uidConnections[$uid]->isMsgRunning == 0){
                     try {
                         $handler = new CrontabHandler($this->service);
-                        $this->setLog('设备绑定定时器, 设备号:'. $payload['deviceId']. ', uid:'. $uid. ', name:'. $worker->uidConnections[$uid]->name, 'device');
+                        //$this->setLog('设备绑定定时器, 设备号:'. $payload['deviceId']. ', uid:'. $uid. ', name:'. $worker->uidConnections[$uid]->name, 'device');
                         return $handler->runing($worker->uidConnections[$uid]);
                     }catch (\Exception $e) {
                         $this->setLog($e, 'error');
@@ -54,7 +55,7 @@ class CompletedHandler extends BaseMessageHandler
                 if(!$find->isEmpty()){
                     if(!isset($worker->uidConnections[$uid])){
                         $msg = '设备不在线';
-                        $this->setLog('设备绑定定时器, 设备号:'. $payload['deviceId']. ', uid:'. $uid . '  msg:' . $msg, 'device');
+                       // $this->setLog('设备绑定定时器, 设备号:'. $payload['deviceId']. ', uid:'. $uid . '  msg:' . $msg, 'device');
                         return;
                     }
                     
@@ -79,6 +80,23 @@ class CompletedHandler extends BaseMessageHandler
 
             $this->service->getRedis()->set("xhs:init:{$payload['deviceId']}", 1);
             $payload['reply'] = '初始化完成';
+            //获取设备对应用户的回复策略
+            $device = SvDevice::where('device_code', $payload['deviceId'])->limit(1)->findOrEmpty();
+            $defaultReplyStrategy =  [
+                "multiple_type" => 0,
+                "voice_enable" => 0,
+                "image_enable" => 0,
+                "image_reply" => "",
+                "stop_enable" => 0,
+                "stop_keywords" => '',
+                "number_chat_rounds" => 0,
+            ];
+            if(!$device->isEmpty()){
+                $replyFind = SvReplyStrategy::where('user_id', $device['user_id'])->limit(1)->findOrEmpty();
+                $defaultReplyStrategy = $replyFind->isEmpty() ? $defaultReplyStrategy : $replyFind->toArray();
+            }
+
+            $payload['reply'] = $defaultReplyStrategy;
             $this->sendResponse($uid, $payload, $payload['reply']);
             
             $this->sendWeb([

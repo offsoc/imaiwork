@@ -40,11 +40,13 @@ interface WeChatWsAction {
 const eventHandlers = new Map<WeChatWsEvent, WeChatWsEventCallback>();
 
 export default function useWeChatWs(options: WebSocketOptions = {}) {
+    const wssUrl = `wss://${window.location.host}/wechat`;
     const {
         on: wssOn,
         send,
         reconnect,
-    } = useWebSocket("wss://wechat.imai.work/ws", {
+        isConnected,
+    } = useWebSocket(wssUrl, {
         manualHeartbeat: true,
         ...options,
     });
@@ -196,6 +198,7 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
 
     // 暴露的方法
     return {
+        isConnected,
         addDeviceLoading,
         actionType,
         on: <D = unknown>(event: WeChatWsEvent, callback: WeChatWsEventCallback<D>) => {

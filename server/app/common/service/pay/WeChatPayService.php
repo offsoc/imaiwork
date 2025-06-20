@@ -359,38 +359,43 @@ class WeChatPayService extends BasePayService
      */
     public function notify()
     {
-        $server = $this->app->getServer();
-        // 支付通知
-        $server->handlePaid(function (Message $message) {
-            Log::write("解密数据-" . $message, "wxPay");
-            if ($message['trade_state'] === 'SUCCESS') {
-                $extra['transaction_id'] = $message['transaction_id'];
-                $attach                  = $message['attach'];
-                $message['out_trade_no'] = mb_substr($message['out_trade_no'], 0, 18);
-                switch ($attach) {
-                    case 'recharge':
-                        $order = RechargeOrder::where(['sn' => $message['out_trade_no']])->findOrEmpty();
-                        if ($order->isEmpty() || $order->pay_status == PayEnum::ISPAID) {
-                            return true;
-                        }
-                        PayNotifyLogic::handle('recharge', $message['out_trade_no'], $extra);
-                        break;
-                    case 'tokens':
-                        $order = GiftPackageOrder::where(['sn' => $message['out_trade_no']])->findOrEmpty();
-                        if ($order->isEmpty() || $order->pay_status == PayEnum::ISPAID) {
-                            return true;
-                        }
-                        PayNotifyLogic::handle('tokens', $message['out_trade_no'], $extra);
-                        break;
+        try {
+            $server = $this->app->getServer();
+            // 支付通知
+            $server->handlePaid(function (Message $message) {
+                Log::write("解密数据-" . $message, "wxPay");
+                if ($message['trade_state'] === 'SUCCESS') {
+                    $extra['transaction_id'] = $message['transaction_id'];
+                    $attach = $message['attach'];
+                    $message['out_trade_no'] = mb_substr($message['out_trade_no'], 0, 18);
+                    switch ($attach) {
+                        case 'recharge':
+                            $order = RechargeOrder::where(['sn' => $message['out_trade_no']])->findOrEmpty();
+                            if ($order->isEmpty() || $order->pay_status == PayEnum::ISPAID) {
+                                return true;
+                            }
+                            PayNotifyLogic::handle('recharge', $message['out_trade_no'], $extra);
+                            break;
+                        case 'tokens':
+                            $order = GiftPackageOrder::where(['sn' => $message['out_trade_no']])->findOrEmpty();
+                            if ($order->isEmpty() || $order->pay_status == PayEnum::ISPAID) {
+                                return true;
+                            }
+                            PayNotifyLogic::handle('tokens', $message['out_trade_no'], $extra);
+                            break;
+                    }
                 }
-            }
-            return true;
-        });
+                return true;
+            });
 
-        // 退款通知
-        $server->handleRefunded(function (Message $message) {
-            return true;
-        });
-        return $server->serve();
+            // 退款通知
+            $server->handleRefunded(function (Message $message) {
+                return true;
+            });
+            return $server->serve();
+        }catch (\Exception $e) {
+            Log::write("回调报错-" . $e->getMessage(), "wxPayerror");
+            return false;
+        }
     }
 }

@@ -24,6 +24,7 @@ class ConfigLogic
     public static function getConfig(): array
     {
 
+        $modelList = ConfigService::get('model', 'list', []);
         //配置按模块分类，配置放到对应的模块里面，不要单独写，或者写到别的模块里面
         $config = [
             // 文件域名
@@ -43,8 +44,6 @@ class ConfigLogic
 
             //首页配置信息
             'index_config' => ConfigService::get('index', 'config', []),
-
-            'model_list' => ConfigService::get('model', 'list', []),
 
             //模型秘钥配置
             'model_key' => ConfigService::get('model', 'key', []),
@@ -67,8 +66,11 @@ class ConfigLogic
             //练练
             'lianlian' => self::getLianlianConfig(),
             'digital_human' => [
-                'privacy' => ConfigService::get('digital_human', 'privacy', [])
+                'privacy' => ConfigService::get('digital_human', 'privacy', []),
+                'channel' => $modelList['channel'] ?? [],
+                'voice' => $modelList['voice'] ?? [],
             ],
+            'ai_live' =>  ConfigService::get('ai_live', 'config', [])
         ];
         return $config;
     }

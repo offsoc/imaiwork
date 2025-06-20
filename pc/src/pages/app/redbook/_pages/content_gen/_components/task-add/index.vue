@@ -246,6 +246,7 @@ const buildSubmitParams = (type: "save" | "draft") => ({
 // 提交函数，校验通过后提交
 const handleSubmit = async (type: "save" | "draft") => {
     const { valid, ref, msg } = validateTask(type);
+    console.log(valid);
     if (!valid) {
         await nextTick();
         scrollRef.value?.scrollTo(0, ref.value?.offsetTop || 0);

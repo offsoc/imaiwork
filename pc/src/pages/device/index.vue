@@ -109,7 +109,7 @@
 
 <script setup lang="ts">
 import { getDeviceList, deleteDevice } from "@/api/device";
-import { AppTypeEnum, DeviceCmdCodeEnum } from "@/enums/appEnums";
+import { AppTypeEnum, DeviceCmdCodeEnum, DeviceCmdEnum } from "@/enums/appEnums";
 import RpaSetting from "./_components/rpa-setting.vue";
 import DeviceAdd from "./_components/device-add.vue";
 import DeviceProgress from "./_components/device-progress.vue";
@@ -142,22 +142,22 @@ const {
         const { msg, type, data } = res;
         if (msg) feedback.msgSuccess(msg);
         switch (type) {
+            case DeviceCmdEnum.GET_USER_INFO:
+                showProgress.value = false;
+                getLists();
+                break;
             default:
                 addDeviceId.value = "";
-                showProgress.value = false;
                 progressError.value = false;
-                refreshDataLoading.value = false;
                 currDevice.value = null;
-                getLists();
                 break;
         }
     },
     onError: (err) => {
-        refreshDataLoading.value = false;
         progressError.value = true;
         progressValue.value = 0;
-        const { code, error } = err;
-        if (code != DeviceCmdCodeEnum.CONNECT_ERROR) {
+        const { code, error, type } = err;
+        if (code != DeviceCmdCodeEnum.CONNECT_ERROR && type != DeviceCmdEnum.BIND_WS) {
             feedback.notifyError(error);
         }
     },
@@ -183,12 +183,9 @@ const confirmAddDevice = (deviceId: string) => {
     handleAddDeviceConfirm(deviceId);
 };
 
-const refreshDataLoading = ref(false);
 const currDevice = ref(null);
 const handleRefreshData = (row: any) => {
-    if (refreshDataLoading.value) return;
     const { account, device_code } = row;
-    refreshDataLoading.value = true;
     currDevice.value = row;
     if (account.length) {
         showProgress.value = true;
@@ -217,7 +214,7 @@ const handleAccountDetail = (row: any) => {
             },
         });
     } else {
-        feedback.notifyError("暂无账号数据，请点击更新数据");
+        handleRefreshData(row);
     }
 };
 

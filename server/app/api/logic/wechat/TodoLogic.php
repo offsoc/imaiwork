@@ -4,7 +4,7 @@ namespace app\api\logic\wechat;
 
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatTodo;
-
+use app\common\traits\WechatTrait;
 /**
  * TodoLogic
  * @desc 微信待办
@@ -12,7 +12,7 @@ use app\common\model\wechat\AiWechatTodo;
  */
 class TodoLogic extends WechatBaseLogic
 {
-
+    use WechatTrait;
     /**
      * @desc 添加待办
      * @param array $params
@@ -123,11 +123,19 @@ class TodoLogic extends WechatBaseLogic
 
                     try {
                         // 推送消息
-                        $response = \app\common\service\ToolsService::Wechat()->push([
+                        // $response = \app\common\service\ToolsService::Wechat()->push([
+                        //     'wechat_id' => $item->wechat_id,
+                        //     'friend_id' => $item->friend_id,
+                        //     'message' => $item->todo_content,
+                        //     'device_code' => $deviceCode,
+                        // ]);
+
+                        $response = self::wxPush([
                             'wechat_id' => $item->wechat_id,
                             'friend_id' => $item->friend_id,
                             'message' => $item->todo_content,
                             'device_code' => $deviceCode,
+                            'opt_type' => 'todo'
                         ]);
 
                         if ($response['code'] == 10000) {

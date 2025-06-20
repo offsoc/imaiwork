@@ -18,6 +18,7 @@ class StorageValidate extends BaseValidate
     protected $rule = [
         'engine' => 'require',
         'status' => 'require',
+        'migration' => 'require',
     ];
 
 
@@ -55,5 +56,17 @@ class StorageValidate extends BaseValidate
     public function sceneChange()
     {
         return $this->only(['engine']);
+    }
+
+
+    /**
+     * @notes  迁移
+     * @return StorageValidate
+     * @author 段誉
+     * @date 2022/4/20 16:18
+     */
+    public function sceneMigration()
+    {
+        return $this->only(['engine', 'status','migration']);
     }
 }

@@ -49,6 +49,10 @@ class PublishDetailLists extends BaseApiDataLists implements ListsSearchInterfac
             ->each(function ($item) {
                 // 请求在线状态
                 $item['exec_time'] = date('Y-m-d H:i:s', $item['exec_time']);
+
+                if( $item['status'] == 0){
+                    $item['exec_time'] = '';
+                }
                 $setting = SvPublishSetting::where('id', $item['publish_id'])->limit(1)->find();
                 $time_config = json_decode($setting['time_config'], true);
                 if(empty($time_config)){

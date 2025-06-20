@@ -3,6 +3,7 @@
 
 namespace app\api\logic;
 
+use think\response\Json;
 use app\api\logic\service\{WechatUserService};
 use app\api\logic\service\UserTokenService;
 use app\common\cache\WebScanLoginCache;
@@ -16,7 +17,8 @@ use app\common\service\{
     wechat\WeChatConfigService,
     wechat\WeChatMnpService,
     wechat\WeChatOaService,
-    wechat\WeChatRequestService
+    wechat\WeChatRequestService,
+    wechat\WeChatUrllinkService
 };
 use think\facade\{Config, Db};
 
@@ -44,7 +46,7 @@ class LoginLogic extends BaseLogic
             $avatar = ConfigService::get('default_image', 'user_avatar');
 
             $tokens = ConfigService::get('default_tokens', 'tokens', 0);
-            
+
             $add = User::create([
                 'sn' => $userSn,
                 'avatar' => $avatar,
@@ -101,7 +103,7 @@ class LoginLogic extends BaseLogic
                 $passwordSalt = Config::get('project.unique_identification');
                 $password = create_password($params['password'], $passwordSalt);
                 $avatar = ConfigService::get('default_image', 'user_avatar');
-                
+
                 $tokens = ConfigService::get('default_tokens', 'tokens', 0);
 
                 $add = User::create([
@@ -414,7 +416,7 @@ class LoginLogic extends BaseLogic
     public static function getScanCode($redirectUri)
     {
         try {
-            $config = WeChatConfigService::getOpConfig();
+            $config = WeChatConfigService::getMnpConfig();
             $appId = $config['app_id'];
             $redirectUri = UrlEncode($redirectUri);
 
@@ -486,4 +488,86 @@ class LoginLogic extends BaseLogic
             'is_new_user' => YesNoEnum::NO
         ]);
     }
+
+    /**
+     * @notes 小程序授权PC登录
+     * @param array $params
+     * @return array|false
+     * @author Rick
+     * @date 2025/6/4 19:26
+     */
+    public static function mnpAuthPcLogin(array $params): bool|array
+    {
+        try {
+            // 账号/手机号 密码登录
+            $where = ['account|mobile' => $params['account']];
+            $user = User::where($where)->findOrEmpty();
+            if ($user->isEmpty()) {
+                throw new \Exception('用户不存在,请先注册');
+            }
+
+            //更新登录信息
+            $user->login_time = time();
+            $user->login_ip = request()->ip();
+            $user->save();
+
+            //设置token
+            $userInfo = UserTokenService::setToken($user->id, $params['terminal'], $params['auth_key']);
+
+            //返回登录信息
+            $avatar = $user->avatar ?: Config::get('project.default_image.user_avatar');
+            $avatar = FileService::getFileUrl($avatar);
+
+            return [
+                'nickname' => $userInfo['nickname'],
+                'sn' => $userInfo['sn'],
+                'mobile' => $userInfo['mobile']
+            ];
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @notes 小程序授权状态
+     * @param array $params
+     * @return array|false
+     * @author Rick
+     * @date 2025/6/4 19:26
+     */
+    public static function mnpAuthStatus(array $params): array|bool
+    {
+        try {
+            $authKey = $params['auth_key']??'';
+            if (!$authKey) {
+                throw new \Exception('参数错误');
+            }
+            $user = User::alias('u')
+                        ->leftJoin('user_session us', 'us.user_id = u.id')
+                        ->where('us.auth_key', $authKey)
+                        ->where('us.terminal',UserTerminalEnum::PC)
+                        ->field('u.id,u.account,u.mobile,u.nickname,u.sn,u.avatar,us.token,us.update_time')
+                        ->findOrEmpty();
+            if ($user->isEmpty()){
+                throw new \Exception('未授权');
+            }
+            $time = time() - strtotime($user->update_time);
+            if ($time < 60) {
+                return [
+                           'msg'=>'授权成功',
+                           'nickname' => $user->nickname,
+                           'sn' => $user->sn,
+                           'mobile' => $user->mobile,
+                           'avatar' => $user->avatar,
+                           'token' => $user->token
+                       ];
+            }
+            throw new \Exception('未授权');
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
 }

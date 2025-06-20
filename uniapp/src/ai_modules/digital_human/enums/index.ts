@@ -34,12 +34,24 @@ export const DigitalHumanModelVersionEnumMap = {
 
 // 模型类型
 export enum ModeType {
-    VIDEO = 1,
-    FIGURE = 2,
+    VIDEO = 1, // 视频
+    ANCHOR = 2, // 形象
 }
 
 // 创建类型
 export enum CreateType {
     TEXT = 1, // 文本
     AUDIO = 2, // 音频
+}
+
+// 监听类型
+export enum ListenerType {
+    // AI文案
+    AI_COPYWRITER = "ai-copywriter",
+    // 音色
+    TONE = "tone",
+    // 上传形象
+    UPLOAD_ANCHOR = "upload-anchor",
+    // 上传视频
+    UPLOAD_VIDEO = "upload-video",
 }

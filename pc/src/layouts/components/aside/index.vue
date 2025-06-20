@@ -1,10 +1,10 @@
 <template>
-	<div class="h-full bg-white border-r border-[#efefef]">
-		<Sidebar />
-		<div class="panel" v-if="$slots.panel">
-			<slot name="panel" />
-		</div>
-	</div>
+    <div class="h-full">
+        <Sidebar />
+        <div class="panel" v-if="$slots.panel">
+            <slot name="panel" />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">

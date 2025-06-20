@@ -5,7 +5,7 @@
                 <scroll-view scroll-y ref="contentRef" :scroll-top="scrollTop">
                     <view v-if="contentList.length" class="content-box">
                         <view v-for="(item, index) in contentList" :key="`${item.id} + ${index} + ''`">
-                            <view class="chat-record pb-[20rpx]">
+                            <view class="chat-record pb-[60rpx]">
                                 <chat-record-item
                                     :type="item.type"
                                     :avatar="item.form_avatar"
@@ -26,10 +26,9 @@
             </view>
             <view class="w-full flex justify-center mb-2 absolute bottom-0">
                 <view
-                    class="flex items-center gap-1 bg-white rounded-full px-[16rpx] h-[48rpx] shadow-md"
+                    class="flex items-center justify-center rounded-full px-[16rpx] h-[76rpx] w-[228rpx] border border-solid border-[#EDEDEE]"
                     @click="chatAdd()">
-                    <u-icon name="/static/images/icons/msg2.svg" :size="32"></u-icon>
-                    <text class="text-[20rpx] text-[#989898]">开启全新对话</text>
+                    <text class="text-xs text-[#989898]">开启全新对话</text>
                 </view>
             </view>
         </view>
@@ -45,87 +44,82 @@
                 <slot name="content"></slot>
             </view>
             <view class="relative z-[79] chatBottomBox">
-                <view class="flex flex-col gap-1">
-                    <view class="flex items-end gap-2">
-                        <slot name="send-left"></slot>
-                        <view class="flex flex-1 bg-white rounded-[50rpx] overflow-hidden relative p-2 shadow-sm">
-                            <textarea
-                                class="!w-full max-h-[300rpx] overflow-auto p-2"
-                                :class="{
-                                    '!h-[190rpx]': contentList.length == 0 && !isStaff,
-                                }"
-                                ref="textareaRef"
-                                v-model="userInput"
-                                placeholder-style="color: #BFC2CA;"
-                                :placeholder="placeholder"
-                                :adjust-position="false"
-                                :show-confirm-bar="false"
-                                :auto-height="contentList.length || isStaff"
-                                :disable-default-padding="true"
-                                confirm-type="done"
-                                maxlength="-1"
-                                hold-keyboard></textarea>
-                            <view class="flex-shrink-0 flex items-end gap-2.5 mb-[8rpx]">
-                                <view class="bg-primary send-btn" v-if="isStop" @click="chatClose">
-                                    <u-icon name="/static/images/icons/stop.svg" :size="42" color="#ffffff"></u-icon>
-                                </view>
-                                <view
-                                    class="send-btn"
-                                    :style="{
-                                        backgroundColor: userInput ? '#2353f4' : '#a6c4fe',
-                                    }"
-                                    @click.prevent="contentPost"
-                                    v-else>
-                                    <u-icon name="/static/images/icons/post.svg" :size="34"></u-icon>
-                                </view>
+                <view class="flex flex-col">
+                    <view
+                        class="flex flex-1 bg-white rounded-tl-[48rpx] rounded-tr-[48rpx] border border-solid border-b-0 border-[#F1F1F2] overflow-hidden relative py-[6rpx]">
+                        <textarea
+                            class="!w-full max-h-[300rpx] overflow-y-auto text-[26rpx] px-[36rpx] py-[24rpx] transition-all duration-300"
+                            :style="{
+                                minHeight: isInputFocus ? '120rpx' : '0',
+                            }"
+                            ref="textareaRef"
+                            v-model="userInput"
+                            confirm-type="done"
+                            maxlength="-1"
+                            hold-keyboard
+                            placeholder-style="color: rgba(0, 0, 0, 0.2); font-size: 26rpx;"
+                            auto-height
+                            :placeholder="placeholder"
+                            :show-confirm-bar="false"
+                            :disable-default-padding="true"
+                            @focus="handleInputFocus"
+                            @blur="isInputFocus = false"></textarea>
+                        <view class="flex-shrink-0 flex items-end gap-2.5 mr-3 mb-1">
+                            <view class="send-btn bg-primary-light-9" v-if="isStop" @click="chatClose">
+                                <u-icon name="/static/images/icons/chat_stop.svg" :size="36"></u-icon>
+                            </view>
+                            <view
+                                class="send-btn"
+                                :class="[userInput.trim() ? 'bg-primary-light-9' : 'bg-[#F2F2F2]']"
+                                @click.prevent="contentPost"
+                                v-else>
+                                <u-icon
+                                    v-if="userInput.trim()"
+                                    name="/static/images/icons/arrow_up_primary.svg"
+                                    :size="36"></u-icon>
+                                <u-icon v-else name="/static/images/icons/arrow_up.svg" :size="36"></u-icon>
+                            </view>
+                        </view>
+                    </view>
+                    <view
+                        class="flex items-center gap-x-[12rpx] h-[100rpx] bg-[#F9FAFB] px-[12rpx] rounded-bl-[48rpx] rounded-br-[48rpx] border border-solid border-[#F1F1F2] border-t-0">
+                        <view
+                            v-if="isDeep"
+                            class="flex items-center justify-center gap-x-1 w-[208rpx] h-[76rpx] rounded-full text-[#323232]"
+                            :class="{
+                                '!bg-primary-light-9 !text-primary': selectedDeep,
+                            }"
+                            @click="handleDeep">
+                            <u-icon v-if="!selectedDeep" name="/static/images/icons/deep.svg" :size="28"></u-icon>
+                            <u-icon v-else name="/static/images/icons/deep_s.svg" :size="28"></u-icon>
+                            <text class="text-xs">深度思考</text>
+                        </view>
+                        <view class="h-[28rpx]">
+                            <u-line direction="vertical" color="#F1F1F2"></u-line>
+                        </view>
+                        <view
+                            class="flex items-center justify-center gap-x-1 w-[208rpx] h-[76rpx] rounded-full text-[#323232]"
+                            :class="{
+                                '!bg-primary-light-9 !text-primary': selectedKnowledgeBase || activeKnb.id,
+                            }"
+                            @click="handleKnb">
+                            <u-icon
+                                v-if="!selectedKnowledgeBase && !activeKnb.id"
+                                name="/static/images/icons/note_book.svg"
+                                :size="28"></u-icon>
+                            <u-icon v-else name="/static/images/icons/note_book_s.svg" :size="28"></u-icon>
+                            <text class="text-xs">关联知识库</text>
+                        </view>
+                    </view>
+                    <view class="flex justify-center mt-[40rpx]">
+                        <view class="flex items-center rounded-full bg-[rgba(0,0,0,0.03)] gap-x-1.5 p-[6rpx]">
+                            <u-icon name="/static/images/icons/tips.svg" :size="32"></u-icon>
+                            <view class="text-[rgba(0,0,0,0.3)] text-xs">
+                                免责声明：内容由AI大模型生成，请仔细甄别。
                             </view>
                         </view>
                     </view>
                 </view>
-                <view class="flex items-center gap-x-1 mt-2">
-                    <view
-                        class="flex items-center gap-x-1 border border-[#0000001f] rounded-[14px] h-[28px] px-[14rpx] bg-white"
-                        :class="{
-                            '!bg-primary-light-7 text-primary border-primary-light-6': selectedDeep,
-                        }"
-                        v-if="isDeep"
-                        @click="handleDeep">
-                        <u-icon v-if="!selectedDeep" name="/static/images/icons/deep.svg" :size="28"></u-icon>
-                        <u-icon v-else name="/static/images/icons/deep_s.svg" :size="28"></u-icon>
-                        <text class="text-xs">深度思考</text>
-                    </view>
-                    <view
-                        class="flex items-center gap-x-1 border border-[#0000001f] rounded-[14px] h-[28px] px-[14rpx] bg-white"
-                        :class="{
-                            '!bg-primary-light-7 text-primary border-primary-light-6': selectedNetwork,
-                        }"
-                        v-if="isNetwork"
-                        @click="handleNetwork">
-                        <u-icon v-if="!selectedNetwork" name="/static/images/icons/network.svg" :size="28"></u-icon>
-                        <u-icon v-else name="/static/images/icons/network_s.svg" :size="28"></u-icon>
-                        <text class="text-xs">网络搜索</text>
-                    </view>
-                    <view
-                        class="flex items-center gap-x-1 border border-[#0000001f] rounded-[14px] h-[28px] px-[14rpx] bg-white"
-                        :class="{
-                            '!bg-primary-light-7 text-primary border-primary-light-6':
-                                selectedKnowledgeBase || activeKnb.id,
-                        }"
-                        @click="handleKnb">
-                        <u-icon
-                            v-if="!selectedKnowledgeBase && !activeKnb.id"
-                            name="/static/images/icons/note_book.svg"
-                            :size="28"></u-icon>
-                        <u-icon v-else name="/static/images/icons/note_book_s.svg" :size="28"></u-icon>
-                        <text class="text-xs">关联知识库</text>
-                    </view>
-                </view>
-            </view>
-        </view>
-        <view class="safe-area">
-            <view class="text-xs text-[#B3B3B3] flex justify-center mb-1 gap-2 items-center">
-                <u-icon name="/static/images/icons/info_filled.svg" :size="24"></u-icon>
-                免责声明：内容由AI大模型生成，请仔细甄别。
             </view>
         </view>
         <view
@@ -138,12 +132,8 @@
 </template>
 <script lang="ts" setup>
 import { getRect } from "@/utils/util";
-import config from "@/config";
-import { chatSendTextStream } from "@/api/chat";
-import { useLockFn } from "@/hooks/useLockFn";
 import { isImageUrl } from "@/utils/util";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
-import FileItem from "./components/file-item.vue";
 import KnbSelect from "../knb-select/knb-select.vue";
 const props = withDefaults(
     defineProps<{
@@ -158,7 +148,7 @@ const props = withDefaults(
     }>(),
     {
         contentList: () => [],
-        placeholder: "发送消息或输入你的问题",
+        placeholder: "在这里输入任何问题 ...",
         sendDisabled: false,
         tokens: 0,
         isStop: false,
@@ -212,6 +202,11 @@ const userInput = ref("");
 const scrollTop = ref<number>(0);
 
 const { dynamicHeight } = useKeyboardHeight();
+
+const isInputFocus = ref(false);
+const handleInputFocus = () => {
+    isInputFocus.value = true;
+};
 
 const contentPost = () => {
     if (userInput.value.replace(/(^\s*)|(\s*$)/g, "") == "") {
@@ -296,10 +291,10 @@ defineExpose({
 <style lang="scss" scoped>
 .chat-scroll-view {
     .send-btn {
-        @apply w-[54rpx] h-[54rpx] rounded-full flex items-center justify-center;
+        @apply w-[60rpx] h-[60rpx] rounded-full flex items-center justify-center;
     }
 }
-:deep(.uni-textarea) {
-    height: initial;
+textarea {
+    height: inherit;
 }
 </style>

@@ -20,7 +20,7 @@
                                 <ElInput
                                     v-model="formData.name"
                                     placeholder="请输入任务名称"
-                                    maxlength="20"
+                                    maxlength="50"
                                     show-word-limit />
                             </ElFormItem>
                             <!-- 发布账号 -->
@@ -266,16 +266,7 @@ const { lockFn, isLock } = useLockFn(confirm);
 
 const getDetail = async () => {
     const data = await getPublishTaskDetail({ id: route.query.id });
-    setFormData(data);
-};
-
-const setFormData = async (data: Record<any, any>) => {
-    for (const key in formData) {
-        if (data[key] != null && data[key] != undefined) {
-            //@ts-ignore
-            formData[key] = data[key];
-        }
-    }
+    setFormData(data, formData);
 };
 
 onMounted(() => {

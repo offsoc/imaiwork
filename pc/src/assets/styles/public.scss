@@ -1,6 +1,5 @@
 body {
     @apply text-base bg-page;
-    color: var(--color-minor);
 }
 
 :host,
@@ -136,6 +135,7 @@ body {
     &::-webkit-scrollbar-thumb {
         background-color: #ccc;
         border-radius: 4px;
+        cursor: pointer;
     }
 }
 
@@ -173,4 +173,22 @@ body {
 
 .resize-handle:hover {
     background: linear-gradient(135deg, transparent 50%, #999 50%);
+}
+
+.app-item-card {
+    @apply gap-x-4 h-20 border border-[transparent] rounded-[10px] p-[1px] cursor-pointer relative;
+    &:hover {
+        border-color: var(--border-primary);
+        &::after {
+            display: none;
+        }
+    }
+    &:after {
+        @apply content-[''] absolute w-[calc(200%-16px)] h-[1px] left-[10px] bottom-0;
+        transform: scale(0.5) translate(-50%, 0);
+        background: var(--border-primary);
+    }
+}
+.app-more-btn {
+    @apply cursor-pointer  text-xs flex items-center gap-x-1 hover:underline;
 }

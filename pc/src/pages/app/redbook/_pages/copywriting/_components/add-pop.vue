@@ -207,6 +207,7 @@ const confirm = async () => {
         });
         genResult.value = data;
         isGenSuccess.value = true;
+        userStore.getUser();
     } catch (error) {
         feedback.notifyError(error || "添加失败");
         simulateProgressTimers.value.forEach((timer) => {

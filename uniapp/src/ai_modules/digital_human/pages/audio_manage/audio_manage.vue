@@ -96,7 +96,7 @@
                         v-model="showModel"
                         mode="selector"
                         range-key="name"
-                        :range="getDigitalHumanModels"
+                        :range="getDigitalHumanConfig"
                         @confirm="handleModel">
                     </u-picker>
                 </u-form-item>
@@ -131,7 +131,7 @@
                     type="primary"
                     size="mini"
                     :custom-style="{
-                        background: '#2353f4',
+                        background: '#0065FB',
                         border: 'none',
                     }"
                     :disabled="isLock"
@@ -155,7 +155,7 @@ import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
 
 const appStore = useAppStore();
-const { getDigitalHumanModels } = toRefs(appStore);
+const { getDigitalHumanConfig } = toRefs(appStore);
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
 
@@ -172,7 +172,7 @@ const tokensValue = computed(() => {
 });
 
 const modelVersionMap = computed(() => {
-    return getDigitalHumanModels.value.reduce((acc: Record<string, any>, item: any) => {
+    return getDigitalHumanConfig.value.reduce((acc: Record<string, any>, item: any) => {
         acc[item.id] = item.name;
         return acc;
     }, {});
@@ -299,7 +299,7 @@ const modelData = reactive<Record<string, any>>({
     name: "",
 });
 const handleModel = (index: number[]) => {
-    const data = getDigitalHumanModels.value[index[0]];
+    const data = getDigitalHumanConfig.value[index[0]];
     formData.model_version = data.id;
     modelData.name = data.name;
 };

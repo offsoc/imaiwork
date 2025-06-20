@@ -5,15 +5,9 @@
                 type="warning"
                 title="温馨提示：填写微信小程序开发配置，请前往微信公众平台申请小程序并完成认证"
                 :closable="false"
-                show-icon
-            />
+                show-icon />
         </el-card>
-        <el-form
-            ref="formRef"
-            :model="formData"
-            :rules="formRules"
-            :label-width="appStore.isMobile ? '80px' : '160px'"
-        >
+        <el-form ref="formRef" :model="formData" :rules="formRules" :label-width="appStore.isMobile ? '80px' : '160px'">
             <el-card class="!border-none mt-4" shadow="never">
                 <div class="font-medium mb-7">微信小程序</div>
                 <el-form-item label="小程序名称" prop="name">
@@ -50,6 +44,20 @@
                 <el-form-item>
                     <div class="form-tips">
                         小程序账号登录微信公众平台，点击开发>开发设置->开发者ID，设置AppID和AppSecret
+                    </div>
+                </el-form-item>
+            </el-card>
+            <el-card class="!border-none mt-4" shadow="never">
+                <div class="font-medium mb-7">小程序代码上传</div>
+                <el-form-item label="代码上传密钥" prop="private_key">
+                    <div>
+                        <el-input
+                            type="textarea"
+                            rows="3"
+                            v-model="formData.private_key"
+                            placeholder="请输入小程序代码上传密钥" />
+
+                        <div class="form-tips">微信公众平台-开发-开发管理-开发设置-小程序代码上传</div>
                     </div>
                 </el-form-item>
             </el-card>
@@ -144,55 +152,56 @@
     </div>
 </template>
 <script lang="ts" setup name="weappConfig">
-import { getWeappConfig, setWeappConfig } from '@/api/channel/weapp'
-import useAppStore from '@/stores/modules/app'
-import type { FormInstance } from 'element-plus'
+import { getWeappConfig, setWeappConfig } from "@/api/channel/weapp";
+import useAppStore from "@/stores/modules/app";
+import type { FormInstance } from "element-plus";
 
-const appStore = useAppStore()
+const appStore = useAppStore();
 const formData = reactive({
-    name: '',
-    original_id: '',
-    qr_code: '',
-    app_id: '',
-    app_secret: '',
-    business_domain: '',
-    download_file_domain: '',
-    request_domain: '',
-    socket_domain: '',
-    tcpDomain: '',
-    udp_domain: '',
-    upload_file_domain: ''
-})
-const formRef = shallowRef<FormInstance>()
+    name: "",
+    original_id: "",
+    qr_code: "",
+    app_id: "",
+    app_secret: "",
+    business_domain: "",
+    download_file_domain: "",
+    request_domain: "",
+    socket_domain: "",
+    tcpDomain: "",
+    udp_domain: "",
+    upload_file_domain: "",
+    private_key: "",
+});
+const formRef = shallowRef<FormInstance>();
 const formRules = {
     app_id: [
         {
             required: true,
-            message: '请输入AppID',
-            trigger: ['blur', 'change']
-        }
+            message: "请输入AppID",
+            trigger: ["blur", "change"],
+        },
     ],
     app_secret: [
         {
             required: true,
-            message: '请输入AppSecret',
-            trigger: ['blur', 'change']
-        }
-    ]
-}
+            message: "请输入AppSecret",
+            trigger: ["blur", "change"],
+        },
+    ],
+};
 const getDetail = async () => {
-    const data = await getWeappConfig()
+    const data = await getWeappConfig();
     for (const key in formData) {
         //@ts-ignore
-        formData[key] = data[key]
+        formData[key] = data[key];
     }
-}
+};
 
 const handelSave = async () => {
-    await formRef.value?.validate()
-    await setWeappConfig(formData)
-    getDetail()
-}
+    await formRef.value?.validate();
+    await setWeappConfig(formData);
+    getDetail();
+};
 
-getDetail()
+getDetail();
 </script>

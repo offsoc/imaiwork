@@ -32,7 +32,13 @@ class DownloadController extends BaseAdminController
 
         //下载前删除缓存
         $exportCache->delete($fileKey);
+        $file = $fileInfo['src'] . $fileInfo['name'];
+        header('Content-Disposition: attachment; filename=' .$fileInfo['name']);
+        header('Content-type: application/octet-stream');
+        header('Content-Length: ' . filesize($file));
+        readfile($file);
+        exit;
 
-        return download($fileInfo['src'] . $fileInfo['name'], $fileInfo['name']);
+        //return download($fileInfo['src'] . $fileInfo['name'], $fileInfo['name']);
     }
 }

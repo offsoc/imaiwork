@@ -24,7 +24,18 @@ class VideoSettingController extends BaseApiController
     {
         try {
             $params = (new SvVideoSettingValidate())->post()->goCheck('add');
-            $result = SvVideoSettingLogic::addSvVideoSetting($params);
+            // 检查状态值
+            $status = isset($params['status']) ? (int)$params['status'] : null;
+            if ($status === null || ($status !== 0 && $status !== 1)) {
+                self::setError('非法操作：status参数只能为0或1');
+                return false;
+            }
+            $setting_type = isset($params['setting_type']) ? (int)$params['setting_type'] : null;
+            if ($setting_type == 2) {
+                $result = SvVideoSettingLogic::addExistSvVideoSetting($params);
+            }else{
+                $result = SvVideoSettingLogic::addSvVideoSetting($params);
+            }
             if ($result) {
                 return $this->data(SvVideoSettingLogic::getReturnData());
             }

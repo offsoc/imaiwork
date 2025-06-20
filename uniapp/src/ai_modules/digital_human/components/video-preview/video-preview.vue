@@ -1,61 +1,79 @@
 <template>
-    <view>
-        <u-mask :show="show" mode="center">
-            <view class="h-full flex items-center justify-center relative bg-black">
-                <view class="flex items-center justify-center h-[80vh] w-full flex-shrink-0 z-50">
-                    <video
-                        :src="videoSrc"
-                        class="w-full h-full"
-                        :show-fullscreen-btn="false"
-                        autoplay
-                        v-if="show"></video>
-                </view>
-                <view class="absolute left-4 top-[5vh] z-[8888] p-2 rounded-full bg-[#626169]" @click="close">
-                    <u-icon name="close" size="36" color="#fff"></u-icon>
-                </view>
-                <view class="absolute bottom-[60rpx] right-4" @click="saveVideoToPhotosAlbum(videoSrc)">
-                    <image
-                        src="@/ai_modules/digital_human/static/images/common/file_download.png"
-                        class="w-[64rpx] h-[64rpx]" />
-                </view>
+    <u-popup v-model="showPopup" mode="center" width="90%" border-radius="48">
+        <view class="container relative p-[24rpx]">
+            <view class="absolute right-4 top-5" @click="showPopup = false">
+                <image src="/static/images/icons/close.svg" class="w-[48rpx] h-[48rpx]"></image>
             </view>
-        </u-mask>
-    </view>
+            <view class="font-bold text-center mt-[24rpx] text-[30rpx]"> {{ title }} </view>
+            <view
+                class="border-[4rpx] border-solid border-[#0065fb4d] rounded-[48rpx] h-[846rpx] mt-[40rpx] p-0.5 shadow-lg">
+                <video-player
+                    v-if="show"
+                    :poster="`${config.baseUrl}static/images/dh_example_bg1.png`"
+                    :video-url="videoUrl"></video-player>
+            </view>
+            <view class="mt-[40rpx]">
+                <u-button
+                    type="primary"
+                    shape="circle"
+                    :custom-style="{
+                        height: '90rpx',
+                        boxShadow: ' 0px 3px 12px 0px rgba(0, 0, 0, 0.12)',
+                        fontSize: '26rpx',
+                    }"
+                    @click="emit('confirm')"
+                    >{{ confirmBtnText }}</u-button
+                >
+            </view>
+        </view>
+    </u-popup>
 </template>
 
-<script lang="ts" setup>
-import { saveVideoToPhotosAlbum } from "@/utils/file";
-
+<script setup lang="ts">
+import config from "@/config";
+import VideoPlayer from "../video-player/video-player.vue";
 const props = withDefaults(
     defineProps<{
-        videoSrc?: string;
+        title: string;
+        show: boolean;
+        videoUrl: string;
+        confirmBtnText?: string;
     }>(),
     {
-        videoSrc: "",
+        title: "",
+        show: false,
+        confirmBtnText: "确定",
     }
 );
 
-const emits = defineEmits<{
-    (event: "open"): void;
-    (event: "close"): void;
-}>();
+const emit = defineEmits(["update:show", "confirm"]);
 
-const show = ref(false);
-
-const open = () => {
-    emits("open");
-    show.value = true;
-};
-
-const close = () => {
-    emits("close");
-    show.value = false;
-};
-
-defineExpose({
-    open,
-    close,
+const showPopup = computed({
+    get() {
+        return props.show;
+    },
+    set(val) {
+        emit("update:show", val);
+    },
 });
+
+const isShowVideo = ref(true);
+watch(
+    () => props.show,
+    (val) => {
+        if (!val) {
+            setTimeout(() => {
+                isShowVideo.value = false;
+            }, 300);
+            return;
+        }
+        isShowVideo.value = true;
+    }
+);
 </script>
 
-<style></style>
+<style scoped lang="scss">
+.container {
+    background: linear-gradient(215.46deg, #0065fb -28.04%, #ffffff 35.52%);
+}
+</style>

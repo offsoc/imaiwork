@@ -52,7 +52,7 @@
             <div class="h-full flex flex-col gap-4">
                 <div class="p-[20px] bg-white rounded-xl">
                     <div class="text-base font-bold">当前场景</div>
-                    <div class="flex gap-3.5 bg-primary-light-8 p-3 rounded-lg mt-2">
+                    <div class="flex gap-3.5 bg-primary-light-9 p-3 rounded-lg mt-2">
                         <div class="flex-none w-[48px] h-[48px] p-2 bg-white rounded-lg">
                             <img :src="detail.logo" class="w-full h-full object-contain" />
                         </div>
@@ -60,7 +60,7 @@
                             <div class="text-[14px] font-bold">
                                 {{ detail.name }}
                             </div>
-                            <div class="text-[#81859E] text-xs">
+                            <div class="text-[#81859E] text-xs mt-2">
                                 {{ detail.description }}
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                                                     :file-limit="fileLimit">
                                                     <div class="h-40 w-full rounded-lg bg-[#F6F7F8]">
                                                         <div
-                                                            class="flex flex-col justify-center items-center h-full w-full border border-dashed border-token-border-primary-3 rounded-lg hover:border-primary text-token-text-secondary hover:text-primary">
+                                                            class="flex flex-col justify-center items-center h-full w-full border border-dashed border-token-primary-3 rounded-lg hover:border-primary text-token-text-secondary hover:text-primary">
                                                             <Icon name="local-icon-image_upload" :size="32"></Icon>
                                                             <span class="font-bold text-[#B7B7B7]"
                                                                 >点击此处上传图片</span

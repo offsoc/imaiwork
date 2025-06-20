@@ -22,12 +22,14 @@ export const useAppStore = defineStore({
         getVersion: (state) => state.config.version || "",
         getTabbarConfig: (state) => state.config.tabbar || {},
         getH5Config: (state) => state.config.webPage || {},
-        getDigitalHumanModels: (state) => state.config.model_list || [],
+        getDigitalHumanConfig: (state) => state.config.digital_human || {},
         getWssConfig: (state) => state.wssConfig || {},
-        getShareConfig: (state) => state.config.share || {},
+        getShareConfig: (state) => state.config.mnp_share_config || {},
         getMeetingConfig: (state) => state.config.meeting_config || {},
         getLadderConfig: (state) => state.config.lianlian || {},
-        getDigitalHumanPrivacy: (state) => state.config.digital_human?.privacy || "",
+        getCardCodeConfig: (state) => state.config.card_code || {},
+        getRechargeConfig: (state) => state.config.recharge || {},
+        getCopyRightConfig: (state) => state.config.copyright || [],
     },
     actions: {
         getImageUrl(url: string) {

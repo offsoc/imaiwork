@@ -28,13 +28,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                 self::setError('非法操作：status参数只能为0或1');
                 return false;
             }
-            $setting_type = isset($params['setting_type']) ? (int)$params['setting_type'] : null;
-            if ($setting_type == 2) {
-                self::addExistSvVideoSetting($params);
-                return true;
-            }
 
-            
             // 预处理JSON字段
             $jsonFields = ['anchor', 'voice', 'title', 'subtitle', 'copywriting', 'topic'];
             $decodedData = [];

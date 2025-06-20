@@ -38,7 +38,8 @@ class VideoLists extends BaseAdminDataLists implements ListsSearchInterface
     public function lists(): array
     {
         //模型版本
-        $modelVersion = ConfigService::get('model', 'list', []);
+        $modelList = ConfigService::get('model', 'list', []);
+        $modelVersion = $modelList['channel'];
 
         return HumanVideoTask::alias('hv')
             ->join('user u', 'u.id = hv.user_id')

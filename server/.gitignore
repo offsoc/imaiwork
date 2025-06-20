@@ -15,10 +15,10 @@ composer.lock
 /public/uploads/*
 !/public/uploads/.gitkeep
 /vendor
-/vendor1
 /public/pc
 /public/admin
 swoole.php
 .history
-/*.zip
-/log
+/extend/miniprogram-ci/
+/public/.well-known
+/public/.user.ini

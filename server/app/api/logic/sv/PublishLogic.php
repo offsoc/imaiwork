@@ -191,11 +191,11 @@ class PublishLogic extends SvBaseLogic
             }
 
             //查询任务明细是否存在
-            $publishDetial = SvPublishSettingDetail::where('publish_id', $params['id'])->where('user_id', self::$uid)->findOrEmpty();
-            if (!$publishDetial->isEmpty()) {
-                self::setError('任务正在执行中，不能删除');
-                return false;
-            }
+            // $publishDetial = SvPublishSettingDetail::where('publish_id', $params['id'])->where('user_id', self::$uid)->findOrEmpty();
+            // if (!$publishDetial->isEmpty()) {
+            //     self::setError('任务正在执行中，不能删除');
+            //     return false;
+            // }
             $publish->delete();
             //SvPublishSettingAccount::where('publish_id', $publish->id)->delete();
 
@@ -362,7 +362,7 @@ class PublishLogic extends SvBaseLogic
                 ->select()->toArray();
                 
             print_r(Db::getLastSql());
-            print_r($accounts);
+            print_r("count: " . count($accounts));
             $insertData = [];
             $videoIds = [];
             foreach ($accounts as $key => $account) {
@@ -378,17 +378,7 @@ class PublishLogic extends SvBaseLogic
                     ->select()
                     ->toArray();
                     //print_r($videos);die;
-                print_r(SvVideoTask::alias('vs')
-                ->field('vs.*')
-                ->where('vs.video_setting_id', $account['video_setting_id'])
-                ->where('vs.user_id', $account['user_id'])
-                ->where('vs.status', 6)
-                ->fetchSql(true)
-                ->select());
                 $videoCount = count($videos);
-
-                
-
                 foreach ($videos as $key => $video) {
                     $detail = SvPublishSettingDetail::where('publish_id', $account['publish_id'])
                         ->where('publish_account_id', $account['id'])
@@ -447,10 +437,8 @@ class PublishLogic extends SvBaseLogic
      */
     private static function _getPublishTime($account,  int $videoCount, int $num, int $type = 1){
         $account['time_config'] = json_decode($account['time_config'], true);
-        //print_r($account);die;
         try {
             if(empty($account['time_config'])){
-                //return date('Y-m-d H:i:s', strtotime($account['publish_start'] . '00:00:00') + ($num * self::$interval));
                 $account['time_config'] = [
                     [
                         'start_time' => date('H:i', time() + 600), // 开始时间
@@ -461,7 +449,6 @@ class PublishLogic extends SvBaseLogic
 
             
             $timeConfig = $account['time_config'];
-            //print_r($timeConfig);die;
             // 时间配置解析
             $periods = array_map(function($item) use($account) {
                 return [
@@ -469,7 +456,6 @@ class PublishLogic extends SvBaseLogic
                     'end' => strtotime("{$account['publish_end']} {$item['end_time']}:00")
                 ];
             }, $timeConfig);
-           // print_r($periods);die;
             if($type == 1){
                 $periodCount = count($periods);
                 $currentPeriod = $num % $periodCount; // 当前视频所属时段索引

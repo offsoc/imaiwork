@@ -17,8 +17,7 @@ class UserTerminalEnum
     const PC         = 4; //电脑PC
     const IOS        = 5; //苹果app
     const ANDROID    = 6; //安卓app
-
-
+    const ADMIN    = 7; //后台创建
     const ALL_TERMINAL = [
         self::WECHAT_MMP,
         self::WECHAT_OA,
@@ -26,6 +25,7 @@ class UserTerminalEnum
         self::PC,
         self::IOS,
         self::ANDROID,
+        self::ADMIN,
     ];
 
     /**
@@ -44,6 +44,7 @@ class UserTerminalEnum
             self::PC            => '电脑PC',
             self::IOS           => '苹果APP',
             self::ANDROID       => '安卓APP',
+            self::ADMIN         => '后台创建',
         ];
         if (true === $from) {
             return $desc;

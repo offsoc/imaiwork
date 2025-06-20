@@ -19,21 +19,22 @@
 
 :root body {
 	--el-font-family: theme(fontFamily.sans);
-	--color-primary: #2353f4;
+	--color-primary: #0065FB;
 	--el-color-primary: var(--color-primary);
 	--color-minor: var(--gray-950);
 	--color-btn-text: white;
-	--el-bg-color-page: white;
+	--el-bg-color-page: #F6F6F6;
 	--el-color-primary-dark-2: #4448e0;
-	--el-color-primary: #2353f4;
-	--el-color-primary-light-1: #3d66f7;
-	--el-color-primary-light-2: #5879f9;
-	--el-color-primary-light-3: #729cfc;
-	--el-color-primary-light-4: #8cb0fd;
-	--el-color-primary-light-5: #a6c4fe;
-	--el-color-primary-light-6: #c1d8ff;
-	--el-color-primary-light-7: #dbeeff;
-	--el-color-primary-light-8: #f1f6ff;
+	--el-color-primary: var(--color-primary);
+	--el-color-primary-light-1: #1A74FB;
+	--el-color-primary-light-2: #3383FC;
+	--el-color-primary-light-3: #4D93FC;
+	--el-color-primary-light-4: #66A2FD;
+	--el-color-primary-light-5: #80B1FD;
+	--el-color-primary-light-6: #99C0FE;
+	--el-color-primary-light-7: #B3D0FE;
+	--el-color-primary-light-8: #CCDFFF;
+	--el-color-primary-light-9: #E6EFFF;
 	--el-color-error-light-9: #ef4444;
 	--el-font-weight-primary: 400;
 	--el-menu-item-height: 40px;
@@ -50,11 +51,13 @@
 	--el-menu-level-padding: 26px;
 	--el-font-size-large: 16px;
 	--el-font-size-medium: 15px;
-	--el-font-size-base: 14px;
+	--el-font-size-base: 13px;
 	--el-font-size-small: 13px;
 	--el-font-size-extra-small: 12px;
 	--el-border-radius-base: 8px;
 	--el-border-radius-lg: 16px;
+	--el-border-radius-xl: 24px;
+	--el-border-radius-2xl: 32px;
 	--el-input-wrapper-height: 38px;
 	--el-component-size: 38px;
 	--el-menu-item-font-size: var(--el-font-size-small);
@@ -95,6 +98,8 @@
 	--el-color-error: var(--el-color-error-light-9);
 	--el-color-success-light-9: #c9fbd5;
 	--el-color-warning-light-9: #fde0d0;
+	--el-popover-border-radius: 6px;
+
 	--sidebar-surface-secondary: var(--gray-100);
 	--sidebar-surface-secondary-primary: #e5f0ff;
 	--sidebar-surface-secondary-primary-7: var(--el-color-primary-light-7);
@@ -107,9 +112,11 @@
 	--file-surface-secondary: #f0f0f0;
 	--text-color-primary: #b4b4b4;
 	--border-heavy: rgba(0, 0, 0, 0.2);
-	--border-primary: #e0e0e0;
+	--border-primary: #ededed;
 	--border-primary-2: #bfbfbf;
 	--border-primary-3: #ebebeb;
 	/* 小红书主题 */
 	--color-redbook: #f45d5d;
+	--aside-width: 228px;
+	--nav-height: 76px;
 }

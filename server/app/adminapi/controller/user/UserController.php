@@ -8,6 +8,7 @@ use app\adminapi\logic\user\UserLogic;
 use app\adminapi\validate\user\AdjustUserMoney;
 use app\adminapi\validate\user\AdjustUserToken;
 use app\adminapi\validate\user\UserValidate;
+use think\response\Json;
 
 /**
  * 用户控制器
@@ -101,5 +102,15 @@ class UserController extends BaseAdminController
         $params = (new UserValidate())->post()->goCheck('detail');
         UserLogic::setUserPas($params);
         return $this->success('操作成功', [], 1, 1);
+    }
+
+    public function add()
+    {
+        $params = (new UserValidate())->post()->goCheck('create');
+        $result = UserLogic::createUser($params);
+        if ($result === false) {
+            return $this->fail(UserLogic::getError());
+        }
+        return $this->success('创建成功', [], 1, 1);
     }
 }

@@ -35,11 +35,19 @@ class CrontabHandler extends BaseMessageHandler
             $this->setLog('正在发布设备:'. $this->connection->deviceid .' 的内容' , 'cron');
             $st = date('Y-m-d H:i:s', (time() - 300));
             $et = date('Y-m-d H:i:s', (time() + 1800));
+            $account = $this->service->getRedis()->get("xhs:{$this->connection->deviceid}:accountNo");
+            if(empty($account)){
+                $this->setLog('设备:'. $this->connection->deviceid .' 没有绑定账号' , 'cron');
+                return;
+            }
+            
+
             $publishes = SvPublishSettingDetail::alias('ps')
                 ->field('ps.*')
                 // ->join('sv_video_task v', 'v.id = ps.video_task_id')
                 // ->join('sv_video_setting s', 's.id = v.video_setting_id')
                 ->where('ps.device_code', '=', $this->connection->deviceid)
+                ->where('ps.account', $account)
                 ->where('ps.status', 0)
                 ->where('ps.data_type', $dataType)
                 ->where('ps.publish_time', 'between', [$st, $et])

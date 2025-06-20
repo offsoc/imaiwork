@@ -8,6 +8,7 @@ use app\common\service\wechat\WeChatOaService;
 use EasyWeChat\Kernel\Exceptions\Exception;
 use app\common\service\wechat\WeChatMnpService;
 use app\common\service\FileService;
+use think\helper\Str;
 
 /**
  * 微信
@@ -69,6 +70,14 @@ class WechatLogic extends BaseLogic
             $wechatMnpService = new WeChatMnpService();
 
             $path = public_path() . 'uploads/images/' . md5($postData['path']) . '.png';
+            $params = [];
+            $authKey = '';
+
+            if (isset($postData['mnp_auth'])){
+                $authKey = Str::random(16);
+                $params = ['auth_key' => $authKey];
+                $path = public_path() . 'uploads/images/mnpqrcode/' . md5(time().$authKey) . '.png';
+            }
 
             if (!is_dir(dirname($path))) {
                 umask(0);
@@ -76,10 +85,10 @@ class WechatLogic extends BaseLogic
             }
 
             if (!file_exists($path)) {
-                $wechatMnpService->getMnpCodeUrl($postData['path'], 430, $path);
+                $wechatMnpService->getMnpCodeUrl($postData['path'], 430, $path, $params);
             }
 
-            self::$returnData = ['url' => FileService::getFileUrl(str_replace(public_path(), '', $path))];
+            self::$returnData = ['url' => FileService::getFileUrl(str_replace(public_path(), '', $path)),'auth_key' => $authKey];
             return true;
         } catch (\Exception $exception) {
             self::setError($exception->getMessage());

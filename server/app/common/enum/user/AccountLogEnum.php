@@ -51,7 +51,6 @@ class AccountLogEnum
     const UM_INC_ADMIN = 200;
     const UM_INC_RECHARGE = 201;
 
-
     /**
      * 用户余额（减少类型汇总）
      */
@@ -130,6 +129,7 @@ class AccountLogEnum
      const TOKENS_DEC_HUMAN_VOICE_YMT = 5015;
      const TOKENS_DEC_HUMAN_AUDIO_YMT = 5016;
      const TOKENS_DEC_HUMAN_VIDEO_YMT = 5017;
+    const TOKENS_DEC_HUMAN_COPYWRITING = 5018;
 
     //AI陪练
     const TOKENS_DEC_AI_LIANLIAN = 6001;
@@ -158,6 +158,8 @@ class AccountLogEnum
     const TOKENS_INC_ADMIN = 9102;
     const TOKENS_INC_RECHARGE = 9103;
 
+    const TOKENS_INC_CARDCODE_GIVE  = 9105;  //卡密兑换赠送算力值
+
     const TOKENS_DEC_AI_XHS = 9104;
 
     /**
@@ -185,6 +187,7 @@ class AccountLogEnum
         self::TOKENS_DEC_HUMAN_VOICE_PRO,
         self::TOKENS_DEC_HUMAN_AVATAR_PRO,
         self::TOKENS_DEC_HUMAN_PROMPT,
+        self::TOKENS_DEC_HUMAN_COPYWRITING,
         self::TOKENS_DEC_AI_LIANLIAN,
         self::TOKENS_DEC_AI_WECHAT,
         self::TOKENS_DEC_AI_XHS,
@@ -215,6 +218,7 @@ class AccountLogEnum
     const TOKENS_INC = [
         self::TOKENS_INC_ADMIN,
         self::TOKENS_INC_RECHARGE,
+        self::TOKENS_INC_CARDCODE_GIVE,
     ];
 
 
@@ -288,6 +292,7 @@ class AccountLogEnum
             self::TOKENS_DEC_HUMAN_VOICE_YM        => '数字人音色 - 高级版减少算力',
             self::TOKENS_DEC_HUMAN_VIDEO_YM        => '数字人视频 - 高级版减少算力',
             self::TOKENS_DEC_HUMAN_PROMPT           => '数字人口播文案提示词减少算力',
+            self::TOKENS_DEC_HUMAN_COPYWRITING      => '数字人口播文案减少算力',
 
 
             self::TOKENS_DEC_AI_LIANLIAN            => 'AI陪练减少算力',
@@ -309,6 +314,8 @@ class AccountLogEnum
             self::KEYWORD_TO_TITLE                  => '关键词转标题减少算力',
             self::KEYWORD_TO_SUBTITLE               => '关键词转副标题减少算力',
             self::KEYWORD_TO_COPYWRITING            => '关键词转文案减少算力',
+
+            self::TOKENS_INC_CARDCODE_GIVE        => '卡密兑换增加算力',
 
         ];
         if ($flag) {

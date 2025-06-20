@@ -187,7 +187,7 @@ import { getUserDetail, userEdit, blackList, adjustTokens } from "@/api/consumer
 import { isEmpty } from "@/utils/util";
 import AccountAdjust from "../components/account-adjust.vue";
 import feedback from "@/utils/feedback";
-import resetPasswordPop from "../components/resetPasswordPop.vue";
+import resetPasswordPop from "../components/reset-password-pop.vue";
 import VipAdjust from "../components/vip-adjust.vue";
 import UserType from "../components/user-type.vue";
 import { usePaging } from "@/hooks/usePaging";

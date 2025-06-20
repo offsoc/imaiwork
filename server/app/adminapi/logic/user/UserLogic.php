@@ -7,12 +7,16 @@ use app\common\enum\user\UserTerminalEnum;
 use app\common\logic\AccountLogLogic;
 use app\common\logic\BaseLogic;
 use app\common\model\user\User;
+use app\common\service\ConfigService;
+use app\common\service\FileService;
+use app\common\service\UserService;
 use think\facade\Db;
 use think\facade\Config;
 use app\common\model\recharge\GiftPackageOrder;
 use app\common\model\recharge\GiftPackage;
 use app\common\model\survey\Surveys;
 use app\common\model\user\UserTokensLog;
+use Exception;
 
 /**
  * 用户逻辑层
@@ -208,5 +212,47 @@ class UserLogic extends BaseLogic
             'id' => $params['id'],
             'password' => $params['password']
         ]);
+    }
+
+
+    public static function createUser(array $params): bool
+    {
+        try {
+            $userSn = User::createUserSn();
+            $passwordSalt = Config::get('project.unique_identification');
+            $password     = create_password($params['password'], $passwordSalt);
+
+            if ($params['password'] != $params['password_confirm']) {
+                throw new Exception('两次密码不一致');
+            }
+
+            $modelUser = new User();
+            $isMobile = $modelUser->where(['mobile' => $params['mobile']])->findOrEmpty();
+            if (!$isMobile->isEmpty()) {
+                throw new Exception('手机已被占用,换一个吧！');
+            }
+
+            if (empty($params['nickname'])) {
+                $params['nickname'] = '用户' . $userSn;
+            }
+            if (empty($params['avatar'])) {
+                $params['avatar'] = ConfigService::get('default_image', 'user_avatar');
+            }
+
+            $user = User::create([
+                'sn'        => $userSn,
+                'avatar'    => FileService::setFileUrl($params['avatar']),
+                'real_name' => $params['real_name'] ?? '',
+                'nickname'  => $params['nickname']  ?? '',
+                'mobile'    => $params['mobile'] ?? '',
+                'account'   => $params['mobile'] ?? '',
+                'password'  => $password,
+                'channel'   => UserTerminalEnum::ADMIN,
+            ]);
+            return true;
+        } catch (Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
     }
 }

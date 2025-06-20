@@ -1,11 +1,15 @@
 <template>
     <div class="h-full flex flex-col p-4">
-        <ElBreadcrumb class="mt-2">
-            <ElBreadcrumbItem>
-                <span class="cursor-pointer text-[#8A8C99] hover:text-primary" @click="$router.back()"> 智能体 </span>
-            </ElBreadcrumbItem>
-            <ElBreadcrumbItem>账号设置</ElBreadcrumbItem>
-        </ElBreadcrumb>
+        <ElCard class="!border-none !rounded-xl" shadow="never">
+            <ElBreadcrumb>
+                <ElBreadcrumbItem>
+                    <span class="cursor-pointer text-[#8A8C99] hover:text-primary" @click="$router.back()">
+                        智能体
+                    </span>
+                </ElBreadcrumbItem>
+                <ElBreadcrumbItem>账号设置</ElBreadcrumbItem>
+            </ElBreadcrumb>
+        </ElCard>
         <div class="grow min-h-0 bg-white rounded-lg mt-4 flex flex-col overflow-hidden" ref="containerRef">
             <div class="h-[71px] px-5 flex items-center justify-between border-b border-b-[#E8E8E8]">
                 <div>
@@ -25,9 +29,9 @@
                                 <div class="flex flex-col gap-y-1 p-2 max-h-[300px] overflow-y-auto">
                                     <div
                                         v-for="(item, index) in deviceLists"
-                                        class="break-all hover:bg-primary-light-8 rounded-lg p-2 cursor-pointer"
+                                        class="break-all hover:bg-primary-light-9 rounded-lg p-2 cursor-pointer"
                                         :class="{
-                                            'bg-primary-light-8 text-primary':
+                                            'bg-primary-light-9 text-primary':
                                                 queryParams.device_code === item.device_code,
                                         }"
                                         :key="index"
@@ -50,22 +54,30 @@
                     </div>
                 </div>
             </div>
-            <div class="grow min-h-0 flex">
+            <div class="grow min-h-0 flex w-full">
                 <div class="w-[178px] bg-white border-r border-r-[#E8E8E8] flex-shrink-0">
                     <div class="flex flex-col gap-y-4 p-4">
                         <div
                             v-for="(item, index) in socialPlatformList"
                             :key="index"
-                            class="flex items-center gap-x-3 px-4 hover:bg-primary-light-8 py-1.5 rounded-lg cursor-pointer"
-                            :class="{ 'bg-primary-light-8': currentSocialPlatform === item.type }"
+                            class="flex items-center gap-x-3 px-4 hover:bg-primary-light-9 py-1.5 rounded-lg cursor-pointer"
+                            :class="{
+                                'bg-primary-light-9': currentSocialPlatform === item.type,
+                            }"
                             @click="handleChangeSocialPlatform(item.type)">
                             <img :src="item.icon" class="w-6 h-6" />
                             <div>{{ item.name }}</div>
                         </div>
                     </div>
                 </div>
-                <div class="flex-1 flex flex-col mt-4">
-                    <div class="flex justify-end px-4">
+                <div class="flex-1 overflow-auto flex flex-col mt-4">
+                    <div class="flex justify-between items-center px-4">
+                        <div>
+                            <ElButton link @click="refreshData" :loading="isRefreshData">
+                                <Icon name="el-icon-Refresh"></Icon>
+                                <span>刷新数据</span>
+                            </ElButton>
+                        </div>
                         <ElInput
                             v-model="queryParams.account"
                             placeholder="搜索账号信息"
@@ -75,7 +87,7 @@
                             @clear="resetParams()"
                             @keyup.enter="getLists()" />
                     </div>
-                    <div class="grow min-h-0 mt-4">
+                    <div class="grow min-h-0 mt-4 w-full">
                         <ElTable
                             ref="tableRef"
                             v-loading="pager.loading"
@@ -83,46 +95,52 @@
                             height="100%"
                             stripe
                             :row-style="{ height: '60px' }">
-                            <ElTableColumn label="账号" prop="account" />
-                            <ElTableColumn label="名片数量" prop="business_card" />
-                            <ElTableColumn label="粉丝数量" prop="fans" />
-                            <ElTableColumn label="点赞数量" prop="thumbup_collect" />
-                            <ElTableColumn label="关注数量" prop="followers" />
+                            <ElTableColumn label="头像" width="80">
+                                <template #default="{ row }">
+                                    <ElAvatar :src="row.avatar"></ElAvatar>
+                                </template>
+                            </ElTableColumn>
+                            <ElTableColumn label="账号/昵称" prop="account" min-width="140">
+                                <template #default="{ row }">
+                                    <div class="flex items-center justify-center gap-x-2">
+                                        <div>
+                                            <div>{{ row.account }}</div>
+                                            <div>({{ row.nickname }})</div>
+                                        </div>
+                                        <ElTag v-if="row.status == 1" type="success">当前账号</ElTag>
+                                    </div>
+                                </template>
+                            </ElTableColumn>
+                            <ElTableColumn label="名片数量" prop="business_card" min-width="100" />
+                            <ElTableColumn label="粉丝数量" prop="fans" min-width="100" />
+                            <ElTableColumn label="点赞数量" prop="thumbup_collect" min-width="100" />
+                            <ElTableColumn label="关注数量" prop="followers" min-width="100" />
                             <ElTableColumn label="更新时间" prop="create_time" width="180" />
                             <ElTableColumn label="操作" width="120px" fixed="right">
                                 <template #default="{ row }">
-                                    <ElPopover
-                                        :show-arrow="false"
-                                        popper-class="!w-[130px] !min-w-[130px] !p-[6px] !rounded-xl">
-                                        <template #reference>
-                                            <ElButton link>
-                                                <Icon name="el-icon-MoreFilled"></Icon>
-                                            </ElButton>
-                                        </template>
-                                        <div class="flex flex-col gap-2">
-                                            <div
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
-                                                @click="handleRefreshData(row)">
-                                                <span class="flex items-center justify-center">
-                                                    <Icon name="el-icon-Refresh"></Icon>
-                                                </span>
-                                                <span>刷新数据</span>
-                                            </div>
-                                            <div
-                                                v-if="row.account_type == 1"
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
-                                                @click="handleGetBusinessCard(row)">
-                                                <Icon name="el-icon-Postcard"></Icon>
-                                                <span>名片获取</span>
-                                            </div>
-                                            <div
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
-                                                @click="handleDelete(row)">
-                                                <Icon name="el-icon-Delete"></Icon>
-                                                <span>账号移除</span>
-                                            </div>
+                                    <div class="flex flex-col gap-2">
+                                        <div
+                                            class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
+                                            @click="handleRefreshData(row)">
+                                            <span class="flex items-center justify-center">
+                                                <Icon name="el-icon-Refresh"></Icon>
+                                            </span>
+                                            <span>刷新数据</span>
                                         </div>
-                                    </ElPopover>
+                                        <div
+                                            v-if="row.account_type == 1"
+                                            class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                            @click="handleGetBusinessCard(row)">
+                                            <Icon name="el-icon-Postcard"></Icon>
+                                            <span>名片获取</span>
+                                        </div>
+                                        <div
+                                            class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                            @click="handleDelete(row)">
+                                            <Icon name="el-icon-Delete"></Icon>
+                                            <span>账号移除</span>
+                                        </div>
+                                    </div>
                                 </template>
                             </ElTableColumn>
                             <template #empty>
@@ -160,16 +178,13 @@
 
 <script setup lang="ts">
 import { getAccountList, addMaterial, deleteAccount } from "@/api/service";
-import { getDeviceList as getDeviceListApi, addDevice } from "@/api/device";
-import { AppTypeEnum, DeviceCmdEnum, DeviceCmdCodeEnum } from "@/enums/appEnums";
+import { getDeviceList as getDeviceListApi } from "@/api/device";
+import { AppTypeEnum, DeviceCmdEnum } from "@/enums/appEnums";
 import DeviceAdd from "./_components/device-add.vue";
 import DeviceProgress from "./_components/device-progress.vue";
+import { ElTableColumn } from "element-plus";
 
 const route = useRoute();
-const detailId = route.params.id;
-const account = route.query.account;
-const device_code = route.query.device_code;
-const device_model = route.query.device_model;
 const { socialPlatformList, currentSocialPlatform } = useSocialPlatform();
 
 const deviceLists = ref<any[]>([]);
@@ -182,7 +197,7 @@ const getCurrentDevice = computed(() => {
     return deviceLists.value.find((item) => item.device_code === queryParams.device_code);
 });
 
-const { isConnected, onEvent, send } = useDeviceWs();
+const { onEvent, send } = useDeviceWs();
 
 const {
     showAddDevice,
@@ -198,14 +213,16 @@ const {
         const { msg, type, data } = res;
         if (msg) feedback.msgSuccess(msg);
         switch (type) {
+            case DeviceCmdEnum.GET_USER_INFO:
+                showProgress.value = false;
+                getLists();
+                break;
             case DeviceCmdEnum.GET_BUSINESS_CARD:
                 handleAddBusinessCard(data.content);
                 break;
             default:
-                showProgress.value = false;
                 progressError.value = false;
                 feedback.closeLoading();
-                getLists();
                 break;
         }
     },
@@ -215,6 +232,24 @@ const {
         feedback.notifyError(err.error);
     },
 });
+
+const isRefreshData = ref(false);
+const refreshData = async () => {
+    if (isRefreshData.value) return;
+    try {
+        isRefreshData.value = true;
+        const { lists } = await getAccountList({ status: 1, device_code: queryParams.device_code });
+        if (lists.length == 0) {
+            feedback.notifyError("暂无在线账号");
+            return;
+        }
+        handleRefreshData(lists[0]);
+    } catch (error) {
+        feedback.notifyError(error);
+    } finally {
+        isRefreshData.value = false;
+    }
+};
 
 // 添加名卡
 const handleAddBusinessCard = async (content: string) => {
@@ -329,7 +364,11 @@ const handleDelete = async (row: any) => {
     }
 };
 
-getLists();
+onMounted(async () => {
+    queryParams.device_code = route.query.device_code as string;
+    getLists();
+});
+
 getDeviceList();
 </script>
 

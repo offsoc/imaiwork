@@ -95,7 +95,7 @@
                                 src="@/ai_modules/ladder_player/static/images/common/katong.png"
                                 class="h-[172rpx] w-[168rpx]"></image>
                         </view>
-                        <view class="absolute top-0 right-0 z-[888]">
+                        <view class="absolute top-0 right-0 z-[888]" v-if="item.status == 2">
                             <view class="p-2" @click.stop="handleMore(item.id)">
                                 <image
                                     src="@/ai_modules/ladder_player/static/icons/more_white.svg"

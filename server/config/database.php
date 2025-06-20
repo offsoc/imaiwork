@@ -55,6 +55,9 @@ return [
             'trigger_sql'     => env('app_debug', true),
             // 开启字段缓存
             'fields_cache'    => false,
+            'options'         => [
+                PDO::ATTR_PERSISTENT => true,
+            ],
         ],
 
         // 更多的数据库配置信息

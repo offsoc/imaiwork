@@ -5,6 +5,7 @@ use app\common\service\socket\BaseMessageHandler;
 use app\common\model\sv\SvDevice;
 use app\common\service\socket\WorkerEnum;
 use Workerman\Connection\TcpConnection;
+use GuzzleHttp\Client as HttpClient;
 
 class DeviceHandler extends BaseMessageHandler
 {
@@ -43,11 +44,13 @@ class DeviceHandler extends BaseMessageHandler
     }
     private function _checkDevice(){
         try {
-            $response = json_decode($this->postRequest('https://file.imai.work/device/svcheck', [
+            $payload = array(
                 'device_code' => $this->payload['deviceId'],
                 'platform' => 3,
                 'code' => $this->content['code']?? '',
-            ]), true);
+            );
+            
+            $response = \app\common\service\ToolsService::Auth()->checkSvDevice($payload);
             $this->setLog($response, 'device');
             if((int)$response['code'] === 10000){
                 $this->deviceInfo = $response['data']?? [];
@@ -134,7 +137,7 @@ class DeviceHandler extends BaseMessageHandler
                         'deviceId' => $device['DeviceId'],
                     ]
                 );
-                $this->sendResponse($uid, $message, $message['reply']);
+                //$this->sendResponse($uid, $message, $message['reply']);
                 if($this->payload['code'] !== WorkerEnum::SUCCESS_CODE){
                     $this->sendError($this->connection,  $this->payload);
                 }else{
@@ -214,8 +217,9 @@ class DeviceHandler extends BaseMessageHandler
                 $worker->uidConnections[$uid]->appversion = $payload['appVersion'] ?? '';
                 $worker->uidConnections[$uid]->clientType = 'device';
                 $worker->uidConnections[$uid]->name =  'device:' . $payload['deviceId'];
-            
-    
+                $worker->uidConnections[$uid]->initial = 0;
+                $worker->uidConnections[$uid]->isMsgRunning = 0;
+                
                 $worker->devices[$payload['deviceId']] = $uid;
                 $worker->appType = $payload['appType'] ?? 'ai_xhs';
                 $this->service->getRedis()->set("xhs:device:" . $payload['deviceId'], $uid);

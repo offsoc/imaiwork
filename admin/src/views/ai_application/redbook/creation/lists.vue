@@ -134,6 +134,11 @@ const getStatusText = (status: number) => {
 const multipleSelection = ref<any[]>([]);
 
 const handleSelectionChange = (val: any[]) => {
+    const row = val[0];
+    if (![GenStatus.SUCCESS, GenStatus.PARTIAL_SUCCESS, GenStatus.DRAFT].includes(row.status)) {
+        feedback.msgError("当前视频正在处理中，不可选中");
+        return;
+    }
     multipleSelection.value = val;
 };
 

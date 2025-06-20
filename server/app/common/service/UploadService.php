@@ -313,13 +313,13 @@ class UploadService
                 'default' => ConfigService::get('storage', 'default', 'local'),
                 'engine'  => ConfigService::get('storage') ?? ['local' => []],
             ];
-        
+
             // 2、执行文件上传
             $StorageDriver = new StorageDriver($config);
             $StorageDriver->setUploadFile('file');
             $fileName = $StorageDriver->getFileName();
             $fileInfo = $StorageDriver->getFileInfo();
-      
+
             // 校验上传文件后缀
             if (!in_array(strtolower($fileInfo['ext']), config('project.file_file'))) {
                 throw new Exception("上传文件不允许上传" . $fileInfo['ext'] . "文件");
@@ -348,7 +348,7 @@ class UploadService
                 'source_id'   => $sourceId,
                 'create_time' => time(),
             ]);
-           $url =  FileService::getFileUrl($file['uri']);
+            $url =  FileService::getFileUrl($file['uri']);
             // 5、返回结果
             return [
                 'id'   => $file['id'],
@@ -522,6 +522,75 @@ class UploadService
         }
     }
 
+    /**
+     * @notes 上传文件
+     * @param $cid
+     * @param int $sourceId
+     * @param int $source
+     * @param string $saveDir
+     * @return array
+     * @throws Exception
+     * @author dw
+     * @date 2023/06/26
+     */
+    public static function zipfile($cid, int $sourceId = 0, int $source = FileEnum::SOURCE_ADMIN, string $saveDir = '../extend/miniprogram-ci')
+    {
+        try {
+            $config = [
+                'default' => "local",
+                'engine'  => [],
+            ];
+
+            // 2、执行文件上传
+            $StorageDriver = new StorageDriver($config);
+            $StorageDriver->setUploadFile('file');
+            $fileName = $StorageDriver->getFileName();
+            $fileInfo = $StorageDriver->getFileInfo();
+
+            // 校验上传文件后缀
+            if (!in_array(strtolower($fileInfo['ext']), config('project.zip_file'))) {
+                throw new Exception("上传压缩文件不允许上传" . $fileInfo['ext'] . "文件");
+            }
+
+            // 上传文件
+            if (!$StorageDriver->upload($saveDir)) {
+                throw new Exception($StorageDriver->getError());
+            }
+
+            // 3、处理文件名称
+            if (strlen($fileInfo['name']) > 128) {
+                $name             = substr($fileInfo['name'], 0, 123);
+                $nameEnd          = substr($fileInfo['name'], strlen($fileInfo['name']) - 5, strlen($fileInfo['name']));
+                $fileInfo['name'] = $name . $nameEnd;
+            }
+
+            // 4、写入数据库中
+            $file = File::create([
+                'cid'         => $cid,
+                'type'        => FileEnum::IMAGE_TYPE,
+                'name'        => $fileInfo['name'],
+                'uri'         => $saveDir . '/' . str_replace("\\", "/", $fileName),
+                'source'      => $source,
+                'source_id'   => $sourceId,
+                'create_time' => time(),
+            ]);
+
+            // 5、返回结果
+            return [
+                'id'   => $file['id'],
+                'cid'  => $file['cid'],
+                'type' => $file['type'],
+                'name' => $file['name'],
+                //                'uri'  => FileService::getFileUrl($file['uri']),
+                'url'  => $file['uri']
+            ];
+        } catch (\think\exception\HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new Exception($exception->getMessage());
+        }
+    }
+
 
     /**
      * @notes 上传文件到
@@ -531,20 +600,20 @@ class UploadService
      * @author dw
      * @date 2023/06/26
      */
-    public static function fileLocal($cid, int $sourceId = 0, int $source = FileEnum::SOURCE_ADMIN,string $saveDir = 'uploads/file')
+    public static function fileLocal($cid, int $sourceId = 0, int $source = FileEnum::SOURCE_ADMIN, string $saveDir = 'uploads/file')
     {
         try {
             $config = [
                 'default' => "local",
                 'engine'  => ['local' => [""]],
             ];
-         
+
             // 2、执行文件上传
             $StorageDriver = new StorageDriver($config);
             $StorageDriver->setUploadFile('file');
             $fileName = $StorageDriver->getFileName();
             $fileInfo = $StorageDriver->getFileInfo();
-          
+
             // 校验上传文件后缀
             if (!in_array(strtolower($fileInfo['ext']), config('project.file_file'))) {
                 throw new Exception("上传文件不允许上传" . $fileInfo['ext'] . "文件");
@@ -564,7 +633,7 @@ class UploadService
             }
             $host = config('app.app_host');
 
-               // 4、写入数据库中
+            // 4、写入数据库中
             $file = File::create([
                 'cid'         => $cid,
                 'type'        => FileEnum::FILE_TYPE,
@@ -574,20 +643,113 @@ class UploadService
                 'source_id'   => $sourceId,
                 'create_time' => time(),
             ]);
-           
+
             // 5、返回结果
             return [
                 'id'   => $file['id'],
                 'cid'  => $file['cid'],
                 'type' => $file['type'],
                 'name' => $file['name'],
-                'uri'  => $host .'/'. $saveDir . '/' . str_replace("\\", "/", $fileName),
+                'uri'  => $host . '/' . $saveDir . '/' . str_replace("\\", "/", $fileName),
                 'url'  => $file['uri']
             ];
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
+
+    public static function wechatUpload($cid, int $sourceId = 0, int $source = FileEnum::SOURCE_ADMIN, string $saveDir = 'uploads/file')
+    {
+        try {
+            $config = [
+                'default' => ConfigService::get('storage', 'default', 'local'),
+                'engine'  => ConfigService::get('storage') ?? ['local' => []],
+            ];
+            
+            // 2、执行文件上传
+            $StorageDriver = new StorageDriver($config);
+            $StorageDriver->setUploadFile('myfile');
+            $fileName = $StorageDriver->getFileName();
+            $fileInfo = $StorageDriver->getFileInfo();
+            //print_r($fileInfo);die;
+            // 校验上传文件后缀
+            if (!in_array(strtolower($fileInfo['ext']), config('project.file_file'))) {
+                throw new Exception("上传文件不允许上传" . $fileInfo['ext'] . "文件");
+            }
+
+            $extension = $fileInfo['ext'];
+            $path = $fileInfo['realPath'];
+            $fileSize = $fileInfo['size'];
+            
+            // 检查是否为AMR文件并转换为MP3
+            if (strtolower($extension) === 'amr') {
+                    
+                $fileName = str_replace('.amr', '.mp3', $fileName);
+                // 获取临时文件的后缀
+                $tempExtension = pathinfo($path, PATHINFO_EXTENSION);
+                
+                $command = root_path() . 'extend/lib/silk/converter.sh' . " " . $path . " mp3";
+
+                exec($command, $output, $returnCode);
+
+                if ($returnCode !== 0) {
+                    throw new \Exception('无法转换文件' . $command);
+                }
+                //@unlink($path);
+                $path = str_replace($tempExtension, 'mp3', $path);
+                //print_r($path);die;
+                $StorageDriver->setRealPath($path);
+                $StorageDriver->setFilename($fileName);
+            }
+
+            // 上传文件
+            $saveDir = self::getUploadUrl($saveDir);
+            if (!$StorageDriver->upload($saveDir)) {
+                throw new Exception($StorageDriver->getError());
+            }
+
+            // 3、处理文件名称
+            if (strlen($fileInfo['name']) > 128) {
+                $name             = substr($fileInfo['name'], 0, 123);
+                $nameEnd          = substr($fileInfo['name'], strlen($fileInfo['name']) - 5, strlen($fileInfo['name']));
+                $fileInfo['name'] = $name . $nameEnd;
+            }
+
+            // 4、写入数据库中
+            $file = File::create([
+                'cid'         => $cid,
+                'type'        => FileEnum::FILE_TYPE,
+                'name'        => $fileInfo['name'],
+                'uri'         => $saveDir . '/' . str_replace("\\", "/", $fileName),
+                'source'      => $source,
+                'source_id'   => $sourceId,
+                'create_time' => time(),
+            ]);
+            $url =  FileService::getFileUrl($file['uri']);
+            // 5、返回结果
+            return [
+                'bizCode' => 0,
+                'data' => [
+                    'fileSize' => $fileSize,
+                    'url' => $url
+                ],
+                'msg' => '上传成功'
+            ];
+
+        } catch (Exception $e) {
+            //throw new Exception($e->getMessage());
+            print_r($e);die;
+            return [
+                'bizCode' => 6001,
+                'data' => [],
+                'msg' => '系统错误',
+                'info' => $e->__toString()
+            ];
+        }
+    }
+    
+    
+
 
     /**
      * @notes 上传地址

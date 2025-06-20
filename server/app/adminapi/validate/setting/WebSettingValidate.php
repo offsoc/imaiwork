@@ -20,6 +20,9 @@ class WebSettingValidate extends BaseValidate
         'shop_name' => 'require',
         'shop_logo' => 'require',
         'pc_logo' => 'require',
+        'share_image' => 'require',
+        'share_title' => 'require',
+        'share_desc' => 'require',
     ];
 
     protected $message = [
@@ -31,9 +34,12 @@ class WebSettingValidate extends BaseValidate
         'shop_name.require' => '请填写前台名称',
         'shop_logo.require' => '请上传前台logo',
         'pc_logo.require' => '请上传PC端logo',
+        'share_image.require' => '请上传分享图片',
+        'share_title.require' => '请填写分享标题',
+        'share_desc.require' => '请填写分享描述',
     ];
 
     protected $scene = [
-        'website' => ['name', 'web_favicon', 'web_logo', 'login_image', 'shop_name', 'shop_logo', 'pc_logo'],
+        'website' => ['name', 'web_favicon', 'web_logo', 'login_image', 'shop_name', 'shop_logo', 'pc_logo', 'share_image', 'share_title', 'share_desc'],
     ];
 }

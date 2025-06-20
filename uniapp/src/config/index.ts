@@ -14,7 +14,7 @@ baseUrl = isDevMode() || envBaseUrl ? baseUrl : envBaseUrl;
 //#endif
 
 const config = {
-    version: "2.0.1", //版本号
+    version: "2.0.3", //版本号
     baseUrl, //请求接口域名
     urlPrefix: "api", //请求默认前缀
     timeout: 10 * 30 * 1000, //请求超时时长

@@ -1,6 +1,6 @@
 <template>
     <div
-        class="flex flex-col h-full bg-white overflow-y-auto"
+        class="flex flex-col h-full overflow-y-auto"
         :infinite-scroll-immediate="false"
         :infinite-scroll-disabled="!isLoad"
         :infinite-scroll-distance="10"

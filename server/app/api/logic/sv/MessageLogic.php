@@ -2,12 +2,13 @@
 
 namespace app\api\logic\sv;
 
-use app\common\model\sv\SvGreetStrategyot;
+use app\common\model\sv\SvGreetStrategy;
 use app\common\model\sv\SvReplyStrategy;
 use app\common\model\sv\SvRobot;
 use app\common\service\FileService;
 use app\common\model\sv\SvAccountContact;
 use app\common\model\sv\SvAccount;
+use think\facade\Cache;
 
 /**
  * MessageLogic
@@ -44,7 +45,7 @@ class MessageLogic extends SvBaseLogic
             }
 
             // 获取用户设置
-            $greet = SvGreetStrategyot::where('user_id', self::$uid)->findOrEmpty();
+            $greet = SvGreetStrategy::where('user_id', self::$uid)->findOrEmpty();
 
             if ($greet->isEmpty()) {
                 self::setError('请先设置打招呼的配置');
@@ -208,20 +209,11 @@ class MessageLogic extends SvBaseLogic
                 self::setError('设备不存在');
                 return false;
             }
+            $account = Cache::store('redis')->get("xhs:{$device_code}:accountNo");
 
-            $response = \app\common\service\ToolsService::Sv()->online([
-                'account' => $account,
-                'device_code' => $device_code,
-                'type' => $type,
-            ]);
-
-            if (isset($response['code']) && $response['code'] != 10000) {
-                self::setError('获取在线状态失败');
-                return false;
-            }
-
-            self::$returnData = $response['data']['online_status'] ?? 0;
+            self::$returnData = $account === $accountinfo['account'] ? 1 : 0;
             return true;
+            
         } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;

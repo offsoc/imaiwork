@@ -86,8 +86,6 @@ const load = async () => {
     getLists();
 };
 
-const handleSearch = () => {};
-
 const handleSelect = (item: any) => {
     if (activeKnb.value.id == item.id) {
         activeKnb.value = {};
@@ -105,14 +103,13 @@ const handleConfirm = () => {
 const open = () => {
     visible.value = true;
     activeKnb.value = props.activeKnb;
+    resetPage();
 };
 
 const close = () => {
     visible.value = false;
     emit("close");
 };
-
-resetPage();
 
 defineExpose({
     open,

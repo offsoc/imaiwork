@@ -1,25 +1,41 @@
 <template>
-    <view class="agreement" v-if="isOpenAgreement" :class="{ shake: isShake }">
-        <view>
-            <u-checkbox v-model="isActive" shape="circle">
+    <view class="agreement" :class="{ shake: isShake }">
+        <view class="">
+            <u-checkbox v-model="isActive" shape="circle" size="26">
                 <view class="text-xs flex">
                     已阅读并同意
                     <view @click.stop class="text-primary">
                         <router-navigate to="/packages/pages/agreement/agreement?type=service">
-                            《服务协议》
+                            服务协议
                         </router-navigate>
                     </view>
-
                     和
                     <view @click.stop class="text-primary">
                         <router-navigate to="/packages/pages/agreement/agreement?type=privacy">
-                            《隐私协议》
+                            隐私协议
                         </router-navigate>
                     </view>
                 </view>
             </u-checkbox>
         </view>
     </view>
+    <u-popup v-model="showConfirm" mode="center" border-radius="24" width="90%">
+        <view class="p-[28rpx]">
+            <view class="font-bold text-[30rpx] text-center mt-4">温馨提示</view>
+            <view class="text-[#00000080] w-[62%] text-center text-[26rpx] mx-auto mt-5 leading-6">
+                请勾选已阅读并同意《服务协议》和《隐私协议》
+            </view>
+            <view class="mt-[48rpx]">
+                <u-button
+                    type="primary"
+                    shape="circle"
+                    :custom-style="{ height: '90rpx', 'box-shadow': '0px 6px 12px 0px rgba(0,101,251,0.2)' }"
+                    @click="confirmActive"
+                    >确定</u-button
+                >
+            </view>
+        </view>
+    </u-popup>
 </template>
 <script lang="ts" setup>
 import { useAppStore } from "@/stores/app";
@@ -28,21 +44,23 @@ const appStore = useAppStore();
 const isActive = ref(false);
 const isShake = ref(false);
 const isOpenAgreement = computed(() => appStore.getLoginConfig.login_agreement == 1);
+
+const showConfirm = ref<boolean>(false);
+
 const checkAgreement = () => {
     if (!isActive.value && isOpenAgreement.value) {
-        uni.showModal({
-            title: "提示",
-            content: "请勾选已阅读并同意《服务协议》和《隐私协议》",
-            showCancel: false,
-            success: (res) => {
-                isActive.value = res.confirm;
-            },
-        });
+        showConfirm.value = true;
     } else if (!isOpenAgreement.value) {
         return true;
     }
     return isActive.value;
 };
+
+const confirmActive = () => {
+    isActive.value = true;
+    showConfirm.value = false;
+};
+
 defineExpose({
     isActive,
     checkAgreement,

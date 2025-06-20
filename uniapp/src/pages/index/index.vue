@@ -1,28 +1,25 @@
 <template>
-    <view class="h-screen flex flex-col relative bg-[#F5F6F6]">
-        <view class="index-bg"></view>
-        <view class="relative z-30">
-            <u-navbar
-                :border-bottom="false"
-                :is-fixed="false"
-                :is-back="chatContentList.length > 0"
-                :background="{
-                    background: 'transparent',
-                }"
-                is-custom-back-icon
-                :custom-back="backChat">
-                <template #custom-back-icon>
-                    <u-icon name="arrow-left" :size="32"></u-icon>
-                </template>
-                <view
-                    class="font-bold text-xl"
-                    :class="{
-                        'mx-4': chatContentList.length == 0,
-                    }">
-                    智能聊天
-                </view>
-            </u-navbar>
-        </view>
+    <view class="h-screen flex flex-col page-bg">
+        <u-navbar
+            :border-bottom="false"
+            :is-fixed="false"
+            :is-back="chatContentList.length > 0"
+            :background="{
+                background: 'transparent',
+            }"
+            is-custom-back-icon
+            :custom-back="backChat">
+            <template #custom-back-icon>
+                <u-icon name="arrow-left" :size="32"></u-icon>
+            </template>
+            <view
+                class="font-bold text-xl"
+                :class="{
+                    'mx-4': chatContentList.length == 0,
+                }">
+                智能聊天
+            </view>
+        </u-navbar>
         <view class="grow min-h-0 relative z-10">
             <chat-scroll-view
                 ref="chattingRef"
@@ -38,66 +35,60 @@
                 @content-post="contentPost"
                 @confirm-knb="confirmKnb">
                 <template #content>
-                    <view v-if="chatContentList.length == 0" class="text-[48rpx] font-bold text-center mb-[64rpx]">
-                        今天有什么可以帮你
+                    <view
+                        v-if="chatContentList.length == 0"
+                        class="mb-[64rpx] flex flex-col items-center justify-center">
+                        <view>
+                            <image :src="websiteConfig.shop_logo" class="w-[128rpx] h-[128rpx] rounded-full"></image>
+                        </view>
+                        <view class="text-[40rpx] font-bold text-center mt-[48rpx]"> 有什么可以帮忙的？ </view>
                     </view>
                 </template>
             </chat-scroll-view>
-        </view>
-        <view
-            class="fixed right-2 z-[66] leading-[0]"
-            :style="{
-                top: safeAreaTop + 48 + 'px',
-            }"
-            v-if="chatContentList.length === 0"
-            @click="openHistory">
-            <u-icon name="/static/images/icons/history.svg" :size="48"></u-icon>
-        </view>
-        <u-popup v-model="isHistory" mode="bottom" :mask="false" :height="getPopupHeight" @close="isHistory = false">
-            <view class="w-full h-full flex flex-col bg-white p-2">
-                <view class="relative">
-                    <view class="absolute left-0 top-0 p-2" @click="isHistory = false">
-                        <u-icon name="arrow-left" :size="32"></u-icon>
-                    </view>
-                    <view class="font-bold text-center py-[12rpx]">历史记录</view>
-                </view>
-                <view class="grow min-h-0 mt-5">
-                    <z-paging
-                        ref="pagingRef"
-                        v-model="recordLists"
-                        :fixed="false"
-                        :safe-area-inset-bottom="true"
-                        @query="queryRecordList">
-                        <view class="flex flex-col gap-4 px-[32rpx]">
-                            <view
-                                class="bg-white"
-                                v-for="(item, index) in recordLists"
-                                :key="index"
-                                @click="handleRecord(item.task_id)">
-                                <view>
-                                    <view class="flex items-center justify-between">
-                                        <view class="text-[#858597] text-xs">
-                                            {{ item.create_time }}
-                                        </view>
-                                    </view>
-                                    <view class="line-clamp-3 mt-4">
-                                        {{ item.message }}
-                                    </view>
-                                </view>
-                                <view class="my-3">
-                                    <u-line></u-line>
-                                </view>
-                            </view>
-                        </view>
-                        <template #empty>
-                            <empty />
-                        </template>
-                    </z-paging>
+            <view class="w-full flex justify-center mb-2 absolute bottom-0" v-if="chatContentList.length == 0">
+                <view
+                    class="flex items-center justify-center rounded-full px-[16rpx] h-[76rpx] w-[228rpx] border border-solid border-[#EDEDEE]"
+                    @click="showHistory = true">
+                    <text class="text-xs text-[#989898]">历史记录</text>
                 </view>
             </view>
-        </u-popup>
+        </view>
+
         <tabbar v-if="chatContentList.length === 0" />
     </view>
+    <popup-bottom v-model:show="showHistory" title="历史记录" :is-disabled-touch="true" custom-class="bg-[#F9FAFB]">
+        <template #content>
+            <view class="h-full py-[30rpx]">
+                <z-paging
+                    ref="pagingRef"
+                    v-model="recordLists"
+                    :fixed="false"
+                    :safe-area-inset-bottom="true"
+                    @query="queryRecordList">
+                    <view class="flex flex-col gap-4 px-[32rpx]">
+                        <view
+                            class="bg-white rounded-[24rpx] p-[24rpx]"
+                            v-for="(item, index) in recordLists"
+                            :key="index"
+                            @click="handleRecord(item.task_id)">
+                            <view class="flex items-center justify-between">
+                                <view class="text-[#AEAFB0] text-xs bg-[#F9FAFB] rounded-[12rpx] py-[4rpx] px-[8rpx]">
+                                    {{ item.create_time }}
+                                </view>
+                            </view>
+                            <view class="line-clamp-3 mt-4 text-[26rpx]">
+                                {{ item.message }}
+                            </view>
+                        </view>
+                    </view>
+                    <template #empty>
+                        <empty />
+                    </template>
+                </z-paging>
+            </view>
+        </template>
+    </popup-bottom>
+    <recharge-popup ref="rechargePopupRef"></recharge-popup>
 </template>
 
 <script lang="ts" setup>
@@ -110,12 +101,13 @@ import { isImageUrl } from "@/utils/util";
 const safeAreaTop = ref<number>(50);
 
 const appStore = useAppStore();
-const { chatConfig } = toRefs(appStore);
-
 const userStore = useUserStore();
+const { chatConfig } = toRefs(appStore);
+const websiteConfig = computed(() => appStore.getWebsiteConfig);
 const { userTokens, isLogin } = toRefs(userStore);
-
 const tokensValue = userStore.getTokenByScene(TokensSceneEnum.CHAT)?.score;
+
+const rechargePopupRef = ref();
 
 // 获取弹窗高度
 const getPopupHeight = computed(() => {
@@ -134,7 +126,7 @@ const getPopupHeight = computed(() => {
 
 const isDeep = ref(false);
 const isNetwork = ref(false);
-const isHistory = ref(false);
+const showHistory = ref(false);
 const updateDeep = (value: boolean) => {
     isDeep.value = value;
 };
@@ -145,12 +137,12 @@ const updateNetwork = (value: boolean) => {
 const recordLists = ref<any[]>([]);
 const pagingRef = shallowRef();
 const openHistory = () => {
-    isHistory.value = true;
+    showHistory.value = true;
 };
 const handleRecord = async (task_id: any) => {
     taskId.value = task_id;
     await getChatList();
-    isHistory.value = false;
+    showHistory.value = false;
 };
 
 const confirmKnb = (val: any) => {
@@ -166,6 +158,7 @@ const queryRecordList = async (page_no: number, page_size: number) => {
             scene_id: 0,
             type: 1,
         });
+
         pagingRef.value?.complete(lists);
     } catch (error) {
         console.log(error);
@@ -246,6 +239,7 @@ const contentPost = async (userInput?: any, isNewChat: boolean = false) => {
     }
     if (userTokens.value <= 0) {
         uni.$u.toast("算力不足，请充值！");
+        rechargePopupRef.value?.open();
         return;
     }
     if (isReceiving.value) return;

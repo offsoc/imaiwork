@@ -1,17 +1,14 @@
 <template>
-    <view class="h-screen flex flex-col">
-        <view class="index-bg"></view>
-        <view class="relative z-30">
-            <u-navbar
-                :border-bottom="false"
-                :is-fixed="false"
-                :background="{
-                    background: 'transparent',
-                }"
-                title="我的音色"
-                title-bold>
-            </u-navbar>
-        </view>
+    <view class="h-screen flex flex-col page-bg">
+        <u-navbar
+            :border-bottom="false"
+            :is-fixed="false"
+            :background="{
+                background: 'transparent',
+            }"
+            title="我的音色"
+            title-bold>
+        </u-navbar>
         <view class="px-4 mt-4 relative z-30">
             <view class="flex items-center justify-between">
                 <view class="relative">
@@ -41,23 +38,6 @@
                 :safe-area-inset-bottom="true"
                 @query="queryList">
                 <view class="flex flex-col gap-3 mx-2 py-4">
-                    <view v-if="type === 'choose'" @click="clickItem(-1)">
-                        <view class="h-[96rpx] flex items-center bg-white rounded-full px-4 justify-between">
-                            <view class="flex items-center gap-4">
-                                <view class="w-[12rpx] h-[12rpx] bg-primary rounded-full"> </view>
-                                <view>原视频声音</view>
-                                <u-tag text="系统内置" type="error" />
-                            </view>
-                            <view class="flex items-center gap-2">
-                                <view>
-                                    <radio
-                                        color="#2353f4"
-                                        style="transform: scale(0.8)"
-                                        :checked="active.includes(-1)"></radio>
-                                </view>
-                            </view>
-                        </view>
-                    </view>
                     <view :index="index" v-for="(item, index) in dataLists" :key="index" @click="clickItem(item.id)">
                         <view class="h-[96rpx] flex items-center bg-white rounded-full px-4 justify-between">
                             <view class="flex items-center gap-4">
@@ -90,7 +70,7 @@
                                 </view>
                                 <view v-if="type !== 'all' || isDelete">
                                     <radio
-                                        color="#2353f4"
+                                        color="#0065FB"
                                         style="transform: scale(0.8)"
                                         :checked="active.includes(item.id)"></radio>
                                 </view>
@@ -126,11 +106,12 @@
 </template>
 
 <script setup lang="ts">
-import { getVoiceList, deleteVoice, retryVoice } from "@/api/digital_human";
+import { getVoiceList, deleteVoice } from "@/api/digital_human";
 import { useAppStore } from "@/stores/app";
 
 const appStore = useAppStore();
-const { getDigitalHumanModels } = toRefs(appStore);
+
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel || []);
 
 const searchValue = ref("");
 
@@ -161,22 +142,17 @@ const queryList = async (page_no: number, page_size: number) => {
 };
 
 const modelVersionMap = computed(() => {
-    return getDigitalHumanModels.value.reduce((acc: Record<string, any>, item: any) => {
+    return modelChannel.value.reduce((acc: Record<string, any>, item: any) => {
         acc[item.id] = item.name;
         return acc;
     }, {});
 });
 
 const clickItem = (id: number) => {
-    if (type.value === "choose") {
-        active.value = [id];
-    }
-    if (type.value === "all") {
-        if (active.value.includes(id)) {
-            active.value = active.value.filter((item) => item !== id);
-        } else {
-            active.value.push(id);
-        }
+    if (active.value.includes(id)) {
+        active.value = active.value.filter((item) => item !== id);
+    } else {
+        active.value.push(id);
     }
 };
 
@@ -235,28 +211,18 @@ const confirm = () => {
         return;
     }
     uni.$emit("confirm", {
-        data:
-            active.value[0] === -1
-                ? {
-                      name: "原视频声音",
-                      id: "",
-                  }
-                : dataLists.value.find((item) => item.id === active.value[0]),
+        data: dataLists.value.find((item) => item.id === active.value[0]),
         type: "tone",
     });
     uni.navigateBack();
 };
 
 onLoad(async (query?: any) => {
-    type.value = query.type || "all";
     if (query.id) {
         active.value = [parseInt(query.id)];
     }
     if (query.model_version) {
         queryParams.model_version = query.model_version;
-    }
-    if (type.value === "choose") {
-        queryParams.status = "1";
     }
     await nextTick();
     pagingRef.value?.reload();

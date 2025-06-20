@@ -13,7 +13,7 @@
             <image src="@/ai_modules/digital_human/static/images/home/bg.png" class="w-full h-full"></image>
             <navigator
                 hover-class="none"
-                :url="`/ai_modules/digital_human/pages/video_upload/video_upload?type=${ModeType.VIDEO}`"
+                url="/ai_modules/digital_human/pages/video_create/video_create"
                 class="absolute bottom-[-70rpx] w-full flex justify-center">
                 <u-button
                     type="primary"
@@ -33,7 +33,7 @@
         </view>
         <view class="mt-[140rpx] px-4">
             <view class="grid grid-cols-2 gap-[30rpx]">
-                <view class="w-full" v-for="(item, index) in menuLists" :key="index" @click="handleMenu(item.url)">
+                <view class="w-full" v-for="(item, index) in menuLists" :key="index" @click="handleMenu(item)">
                     <image :src="item.icon" class="h-[152rpx] w-full"></image>
                 </view>
             </view>
@@ -65,14 +65,26 @@
                                 remark: item.remark,
                                 model_version: item.model_version,
                             }"
-                            @play="handlePlay"></video-item>
+                            @play="handlePlayVideo"></video-item>
                     </view>
                 </view>
                 <empty v-else />
             </view>
         </view>
     </view>
-    <video-preview ref="videoPreviewRef" :video-src="videoUrl" />
+    <video-preview
+        v-model:show="showVideoPreview"
+        title="视频预览"
+        :video-url="videoUrl"
+        @confirm="showVideoPreview = false" />
+    <video-preview
+        v-model:show="showExamplePopup"
+        title="新手教程"
+        confirm-btn-text="立即定制"
+        :video-url="`${config.baseUrl}static/videos/dh_example1.mp4`"
+        @close="showExamplePopup = false"
+        @confirm="handleExampleConfirm" />
+    <choose-model v-model:show="showChooseModel" @confirm="handleChooseModel" />
 </template>
 
 <script setup lang="ts">
@@ -81,31 +93,37 @@ import ImageMenu1 from "@/ai_modules/digital_human/static/images/home/menu1.png"
 import ImageMenu2 from "@/ai_modules/digital_human/static/images/home/menu2.png";
 import ImageMenu3 from "@/ai_modules/digital_human/static/images/home/menu3.png";
 import ImageMenu4 from "@/ai_modules/digital_human/static/images/home/menu4.png";
-import VideoItem from "@/ai_modules/digital_human/components/video-item/video-item.vue";
-import { ModeType } from "@/ai_modules/digital_human/enums";
-import videoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 import { usePaging } from "@/hooks/usePaging";
+import { ModeType } from "@/ai_modules/digital_human/enums";
+import VideoItem from "@/ai_modules/digital_human/components/video-item/video-item.vue";
+import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
+import ChooseModel from "@/ai_modules/digital_human/components/choose-model/choose-model.vue";
+import Cache from "@/utils/cache";
+import config from "@/config";
 
-const swiperList = ref<any[]>();
 const menuLists = ref<any[]>([
     {
         icon: ImageMenu1,
         title: "形象克隆",
-        url: `/ai_modules/digital_human/pages/video_upload/video_upload?type=${ModeType.FIGURE}`,
+        key: "anchor_clone",
+        url: `/ai_modules/digital_human/pages/video_upload/video_upload?type=${ModeType.ANCHOR}`,
     },
     {
         icon: ImageMenu2,
         title: "声音克隆",
+        key: "tone_clone",
         url: "/ai_modules/digital_human/pages/tone_clone/tone_clone",
     },
     {
         icon: ImageMenu3,
         title: "我的模特",
+        key: "model_manage",
         url: "/ai_modules/digital_human/pages/model_manage/model_manage",
     },
     {
         icon: ImageMenu4,
         title: "音色管理",
+        key: "tone_manage",
         url: "/ai_modules/digital_human/pages/tone_manage/tone_manage",
     },
 ]);
@@ -117,21 +135,39 @@ const { pager, getLists } = usePaging({
     },
 });
 
-const videoUrl = ref<string>("");
-const videoPreviewRef = shallowRef<InstanceType<typeof videoPreview>>();
-
-const handlePlay = ({ video_url }: any) => {
-    videoUrl.value = video_url;
-    videoPreviewRef.value?.open();
+const showExamplePopup = ref(false);
+// 缓存示例key
+const DH_EXAMPLE = "dh_example";
+const handleExampleConfirm = () => {
+    showExamplePopup.value = false;
+    uni.$u.route({
+        url: `/ai_modules/digital_human/pages/video_create/video_create`,
+    });
 };
 
-const handleMenu = (url: string) => {
-    if (!url) {
-        uni.$u.toast("功能开发中");
+const videoUrl = ref<string>("");
+const showVideoPreview = ref(false);
+const handlePlayVideo = ({ video_url }: any) => {
+    videoUrl.value = video_url;
+    showVideoPreview.value = true;
+};
+
+const showChooseModel = ref(false);
+const handleMenu = (item: any) => {
+    const { url, key } = item;
+    if (key === "anchor_clone") {
+        showChooseModel.value = true;
         return;
     }
     uni.navigateTo({
-        url,
+        url: item.url,
+    });
+};
+
+const handleChooseModel = (id: string) => {
+    showChooseModel.value = false;
+    uni.$u.route({
+        url: `/ai_modules/digital_human/pages/video_upload/video_upload?type=${ModeType.ANCHOR}&model_version=${id}`,
     });
 };
 
@@ -153,9 +189,18 @@ const loopLists = async () => {
         }
     }, 2000);
 };
+
 onShow(async () => {
     await getLists();
     loopLists();
+    if (!Cache.get(DH_EXAMPLE)) {
+        Cache.set(DH_EXAMPLE, true);
+        showExamplePopup.value = true;
+    }
+});
+
+onHide(() => {
+    clearTimeout(loopTimer.value);
 });
 
 onUnload(() => {

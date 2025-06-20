@@ -7,8 +7,7 @@
                 background: 'transparent',
             }"
             title="AI陪练"
-            title-bold
-            @custom-back="showEndPracticePop = true"></u-navbar>
+            title-bold></u-navbar>
         <view class="mx-4">
             <view class="flex items-center justify-between py-4">
                 <view>
@@ -109,6 +108,7 @@ import {
     lpSceneChatContinue,
     lpSceneChatEnd,
     lpSceneChatStart,
+    lpRecordLists,
     lpSceneChatTips,
     lpScenePerformance,
 } from "@/api/ladder_player";
@@ -142,6 +142,43 @@ const recorderRef = shallowRef<InstanceType<typeof Recorder>>();
 const showTipsPop = ref(false);
 const tips = ref<any>(null);
 const tipsLoading = ref(false);
+
+const getRecordList = async () => {
+    const { lists } = await lpRecordLists({
+        analysis_id: state.analysis_id,
+        page_size: 9999,
+    });
+    const transformedLists = lists
+        .map((item: any) => {
+            if (item.preliminary_ask) {
+                return {
+                    type: 2,
+                    reply: item.preliminary_ask,
+                    duration: item.preliminary_ask_audio_duration,
+                    logo: getCurrVoice.value.logo,
+                    link: item.preliminary_ask_audio,
+                };
+            } else {
+                return [
+                    {
+                        type: 1,
+                        duration: item.ask_audio_duration,
+                        message: item.ask,
+                        link: item.ask_audio,
+                    },
+                    {
+                        type: 2,
+                        reply: item.reply,
+                        duration: item.reply_audio_duration,
+                        logo: getCurrVoice.value.logo,
+                        link: item.reply_audio,
+                    },
+                ];
+            }
+        })
+        .flat();
+    contentList.value = transformedLists;
+};
 
 const createResult = (logo: string) =>
     reactive({
@@ -293,10 +330,17 @@ const endPractice = async () => {
     try {
         showEndPracticePop.value = false;
         await endChat();
-        uni.$u.route({
-            url: "/ai_modules/ladder_player/pages/index/index",
-            type: "redirect",
+        uni.showToast({
+            icon: "none",
+            title: "提交成功，3秒跳转到报告页面~",
+            duration: 3000,
         });
+        setTimeout(() => {
+            uni.$u.route({
+                url: "/ai_modules/ladder_player/pages/report/report",
+                type: "redirect",
+            });
+        }, 3000);
     } catch (error: any) {
         uni.showToast({
             title: error || "结束对话失败",
@@ -343,7 +387,11 @@ const getDetail = async () => {
             id: state.scene_id,
         });
         detail.value = data || {};
-        startChat();
+        if (!state.analysis_id) {
+            startChat();
+        } else {
+            getRecordList();
+        }
     } catch (error: any) {
         uni.showToast({
             title: error || "获取场景详情失败",
@@ -357,6 +405,9 @@ const getDetail = async () => {
 
 onLoad((options: any) => {
     state.scene_id = options.id;
+    if (options.analysis_id) {
+        state.analysis_id = options.analysis_id;
+    }
     getDetail();
 });
 </script>

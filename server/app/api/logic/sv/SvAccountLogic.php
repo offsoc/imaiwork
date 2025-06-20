@@ -111,7 +111,6 @@ class SvAccountLogic extends SvBaseLogic
                         self::setError('账号不存在');
                         return false;
                     }
-                    $account->delete();
                     SvPublishSettingAccount::where('account', $account['account'])
                         ->where('user_id', self::$uid)
                         ->where('status',1)

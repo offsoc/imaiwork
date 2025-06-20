@@ -1,18 +1,15 @@
 <template>
-    <view class="h-screen flex flex-col relative">
-        <view class="index-bg"></view>
-        <view class="relative z-30">
-            <u-navbar
-                :border-bottom="false"
-                :is-fixed="false"
-                :background="{
-                    background: 'transparent',
-                }"
-                title="我的模特"
-                title-bold>
-            </u-navbar>
-        </view>
-        <view class="px-4 mt-4 relative z-30">
+    <view class="h-screen flex flex-col page-bg">
+        <u-navbar
+            :border-bottom="false"
+            :is-fixed="false"
+            :background="{
+                background: 'transparent',
+            }"
+            title="我的模特"
+            title-bold>
+        </u-navbar>
+        <view class="px-4 mt-4">
             <view class="flex items-center justify-between">
                 <view class="relative">
                     <text class="text-xl font-bold">我的模特（{{ dataLists.length }}）</text>
@@ -104,13 +101,18 @@
             </u-button>
         </view>
     </view>
-    <video-preview ref="videoPreviewRef" :video-src="videoUrl" />
+    <video-preview
+        v-model:show="showVideoPreview"
+        title="视频预览"
+        :video-url="videoUrl"
+        @confirm="showVideoPreview = false" />
 </template>
 
 <script setup lang="ts">
 import { getAnchorList, deleteAnchor } from "@/api/digital_human";
 import VideoItem from "@/ai_modules/digital_human/components/video-item/video-item.vue";
 import videoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
+import { ListenerType } from "../../enums";
 
 const dataLists = ref<any[]>([]);
 const active = ref<number[]>([]);
@@ -126,11 +128,10 @@ const queryList = async (page_no: number, page_size: number) => {
 };
 
 const videoUrl = ref<string>("");
-const videoPreviewRef = shallowRef<InstanceType<typeof videoPreview>>();
-
+const showVideoPreview = ref(false);
 const handlePlay = ({ video_url }: any) => {
     videoUrl.value = video_url;
-    videoPreviewRef.value?.open();
+    showVideoPreview.value = true;
 };
 
 const clickItem = (id: number) => {
@@ -183,16 +184,12 @@ const handleDelete = (id?: number) => {
 };
 
 const handleCreate = (item: any) => {
-    const { pic, anchor_id, gender, model_version, name, url } = item;
+    const { pic, anchor_id, model_version, name, url } = item;
     uni.$u.route({
         url: "/ai_modules/digital_human/pages/video_create/video_create",
         params: {
-            pic,
-            anchor_id,
-            gender,
-            model_version,
-            name,
-            url,
+            type: ListenerType.UPLOAD_VIDEO,
+            data: JSON.stringify({ pic, anchor_id, model_version, name, url }),
         },
     });
 };

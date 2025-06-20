@@ -95,7 +95,7 @@ abstract class Server
      * @return mixed
      */
     abstract protected function upload($save_dir);
-
+    
     /**
      * 文件删除
      * @param $fileName
@@ -118,9 +118,20 @@ abstract class Server
         return $this->fileInfo;
     }
 
-    protected function getRealPath()
+    public function getRealPath()
     {
         return $this->fileInfo['realPath'];
+    }
+    
+    public function setRealPath($path){
+        $this->fileInfo['realPath'] = $path;
+    }
+    public function getFileSize() {
+        return $this->fileInfo['size'];
+    }
+    
+    public function setFilename($fileName){
+        $this->fileName = $fileName;
     }
 
     /**
@@ -139,11 +150,37 @@ abstract class Server
     {
         // 要上传图片的本地路径
         $realPath = $this->getRealPath();
+        
         // 扩展名
         $ext = pathinfo($this->getFileInfo()['name'], PATHINFO_EXTENSION);
         // 自动生成文件名
         return date('YmdHis') . substr(md5($realPath), 0, 5)
             . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT) . ".{$ext}";
+    }
+
+
+     /**
+     * 设置上传的文件信息
+     * @param string $filePath
+     */
+    public function setUploadFileByFileName($filePath,$filename)
+    {
+        // 设置为系统内部上传
+        $this->isInternal = true;
+        $this->file = new \SplFileObject($filePath);
+
+        // 文件信息
+        $this->fileInfo = [
+            'name' => basename($filePath),
+            'size' => filesize($filePath),
+            'tmp_name' => $filePath,
+            'error' => 0,
+            'realPath' => $this->file->getRealPath(),
+        ];
+
+
+        // 生成保存文件名
+        $this->fileName = $filename;
     }
 
 }

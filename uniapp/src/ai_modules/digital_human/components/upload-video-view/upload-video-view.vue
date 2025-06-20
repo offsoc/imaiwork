@@ -67,10 +67,10 @@ const emit = defineEmits<{
 }>();
 
 const appStore = useAppStore();
-const { getDigitalHumanModels } = toRefs(appStore);
+const { getDigitalHumanConfig } = toRefs(appStore);
 
 const modelVersionMap = computed(() => {
-    return getDigitalHumanModels.value.reduce((acc: Record<string, any>, item: any) => {
+    return getDigitalHumanConfig.value.reduce((acc: Record<string, any>, item: any) => {
         acc[item.id] = item.name;
         return acc;
     }, {});

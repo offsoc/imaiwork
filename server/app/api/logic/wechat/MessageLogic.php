@@ -68,6 +68,7 @@ class MessageLogic extends WechatBaseLogic
                     'wechat_id' => $wechat->wechat_id,
                     'friend_id' => $params['friend_id'],
                     'device_code' => $wechat->device_code,
+                    'opt_type' => 'greet'
                 ];
 
                 switch ($content['type']) {
@@ -88,7 +89,8 @@ class MessageLogic extends WechatBaseLogic
                     default:
                 }
 
-                \app\common\service\ToolsService::Wechat()->push($message);
+                //\app\common\service\ToolsService::Wechat()->push($message);
+                self::wxPush($message);
             }
 
             // 用户设置打招呼，设置接管模式
@@ -209,7 +211,13 @@ class MessageLogic extends WechatBaseLogic
                 return false;
             }
 
-            $response = \app\common\service\ToolsService::Wechat()->online([
+            // $response = \app\common\service\ToolsService::Wechat()->online([
+            //     'wechat_id' => $wechat_id,
+            //     'device_code' => $device_code,
+            //     'type' => $type,
+            // ]);
+
+            $response = self::wxOnline([
                 'wechat_id' => $wechat_id,
                 'device_code' => $device_code,
                 'type' => $type,

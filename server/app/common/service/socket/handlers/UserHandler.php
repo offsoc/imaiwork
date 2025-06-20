@@ -137,7 +137,8 @@ class UserHandler extends BaseMessageHandler
             
             $this->payload['reply'] = '设备用户新增成功, ';
             $this->payload['code'] = WorkerEnum::SUCCESS_CODE;
-                
+            $this->service->getRedis()->set("xhs:{$this->payload['deviceId']}:accountNo", $content['xhsId']);
+            $this->service->getRedis()->set("xhs:{$this->payload['deviceId']}:accountInfo:{$content['xhsId']}", json_encode($postData, JSON_UNESCAPED_UNICODE));
             //判断是不是有web的ws,用则推送一条数据
             $this->_sendWeb($postData);
             

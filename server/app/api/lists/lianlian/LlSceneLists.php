@@ -2,6 +2,7 @@
 
 namespace app\api\lists\lianlian;
 
+use app\common\model\lianlian\LlAnalysis;
 use app\common\model\lianlian\LlScene;
 use app\common\lists\ListsSearchInterface;
 use app\common\service\FileService;
@@ -37,6 +38,14 @@ class LlSceneLists extends BaseApiDataLists implements ListsSearchInterface
             ->select()
             ->each(function ($item) {
                 $item['logo']           = $item['logo'] ? FileService::getFileUrl($item['logo']) : '';
+                $analysis = LlAnalysis::where([
+                                                  'scene_id'=>$item['id'],
+                                                  'user_id'=>$this->userId,
+                                                  'status'=>0,
+                                                  'is_draft'=>1
+                                              ])->findOrEmpty();
+                $item['is_draft']       = $analysis->isEmpty() ? 0 : 1;
+                $item['analysis_id']    = $analysis->id ?? 0;
             })
             ->toArray();
     }

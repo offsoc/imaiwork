@@ -22,7 +22,7 @@ class UserTokenService
      * @author 段誉
      * @date 2022/9/16 10:10
      */
-    public static function setToken($userId, $terminal)
+    public static function setToken($userId, $terminal, $authKey='')
     {
         $time = time();
         $userSession = UserSession::where([['user_id', '=', $userId], ['terminal', '=', $terminal]])->find();
@@ -39,6 +39,7 @@ class UserTokenService
             $userSession->token = create_token($userId);
             $userSession->expire_time = $expireTime;
             $userSession->update_time = $time;
+            $userSession->auth_key = $authKey;
             $userSession->save();
         } else {
             //找不到在该终端的token记录，创建token记录
@@ -46,6 +47,7 @@ class UserTokenService
                 'user_id' => $userId,
                 'terminal' => $terminal,
                 'token' => create_token($userId),
+                'auth_key' => $authKey,
                 'expire_time' => $expireTime
             ]);
         }

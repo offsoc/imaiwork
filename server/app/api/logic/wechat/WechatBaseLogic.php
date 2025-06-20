@@ -14,7 +14,7 @@ use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
 use app\common\model\ChatPrompt;
 use think\facade\Queue;
-
+use app\common\traits\WechatTrait;
 /**
  * WechatBaseLogic
  * @desc 微信基础逻辑
@@ -23,7 +23,7 @@ use think\facade\Queue;
 class WechatBaseLogic extends ApiLogic
 {
 
-
+    use WechatTrait;
     /**
      * @desc 获取微信账号信息
      * @param string $wechatId
@@ -250,6 +250,8 @@ class WechatBaseLogic extends ApiLogic
     protected static function send(array $request)
     {
         sleep(5);
-        \app\common\service\ToolsService::Wechat()->push($request);
+        //\app\common\service\ToolsService::Wechat()->push($request);
+        $request['opt_type'] = 'send';
+        self::wxPush($request);
     }
 }

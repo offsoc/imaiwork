@@ -3,7 +3,11 @@
 
 namespace app\api\controller;
 
-use app\api\validate\{LoginAccountValidate, RegisterValidate, WebScanLoginValidate, WechatLoginValidate};
+use app\api\validate\{LoginAccountValidate,
+    MnpAuthPcValidate,
+    RegisterValidate,
+    WebScanLoginValidate,
+    WechatLoginValidate};
 use app\api\logic\LoginLogic;
 
 /**
@@ -14,7 +18,7 @@ use app\api\logic\LoginLogic;
 class LoginController extends BaseApiController
 {
 
-    public array $notNeedLogin = ['register', 'account', 'logout', 'codeUrl', 'oaLogin',  'mnpLogin', 'getScanCode', 'scanLogin', 'getMobileNumber'];
+    public array $notNeedLogin = ['register', 'account', 'logout', 'codeUrl', 'oaLogin',  'mnpLogin', 'getScanCode', 'scanLogin', 'getMobileNumber', 'getMnpQrCode', 'mnpAuthPcLogin','mnpAuthStatus'];
 
 
     /**
@@ -124,8 +128,8 @@ class LoginController extends BaseApiController
     public function getMobileNumber()
     {
         $params = (new \app\api\validate\UserValidate())->post()->goCheck('getMobileNumber');
-        
-        
+
+
         $result = LoginLogic::getMobileNumber($params);
         if ($result === false) {
             return $this->fail(LoginLogic::getError());
@@ -180,7 +184,7 @@ class LoginController extends BaseApiController
      */
     public function getScanCode()
     {
-        $redirectUri = $this->request->get('url/s');
+        $redirectUri = $this->request->domain().'/pc';
         $result = LoginLogic::getScanCode($redirectUri);
         if (false === $result) {
             return $this->fail(LoginLogic::getError() ?? '未知错误');
@@ -217,5 +221,35 @@ class LoginController extends BaseApiController
         $params = (new WechatLoginValidate())->post()->goCheck("updateUser");
         LoginLogic::updateUser($params, $this->userId);
         return $this->success('操作成功', [], 1, 1);
+    }
+
+    /**
+     * @notes 小程序授权PC登录
+     * @return \think\response\Json
+     * @author Rick
+     * @date 2025/6/3 19:15
+     */
+    public function mnpAuthPcLogin(){
+        $params = (new MnpAuthPcValidate())->post()->goCheck();
+        $result = LoginLogic::mnpAuthPcLogin($params);
+        if (false === $result) {
+            return $this->fail(LoginLogic::getError());
+        }
+        return $this->success('授权成功',$result);
+    }
+
+    /**
+     * @notes 小程序授权登录状态查询
+     * @return \think\response\Json
+     * @author Rick
+     * @date 2025/6/3 19:15
+     */
+    public function mnpAuthStatus(){
+        $params = $this->request->post();
+        $result = LoginLogic::mnpAuthStatus($params);
+        if (false === $result) {
+            return $this->fail(LoginLogic::getError());
+        }
+        return $this->success('已授权',$result);
     }
 }

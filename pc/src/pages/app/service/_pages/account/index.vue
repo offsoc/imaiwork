@@ -14,13 +14,12 @@
                     </div>
                 </div>
             </div>
-            <div class="flex-1 bg-white flex flex-col py-4">
+            <div class="flex-1 bg-white flex flex-col py-4 overflow-hidden">
                 <div class="px-4 flex items-center justify-between">
                     <ElButton text @click="getAccountList()">
                         <Icon name="el-icon-Refresh"></Icon>
                         <span>刷新</span>
                     </ElButton>
-
                     <div>
                         <ElInput
                             v-model="queryParams.name"
@@ -33,7 +32,19 @@
                 </div>
                 <div class="grow min-h-0 mt-4">
                     <ElTable :data="accountPager.lists" v-loading="accountPager.loading" height="100%" stripe>
-                        <ElTableColumn prop="nickname" label="账号信息" />
+                        <ElTableColumn label="头像">
+                            <template #default="{ row }">
+                                <ElAvatar :src="row.avatar"></ElAvatar>
+                            </template>
+                        </ElTableColumn>
+                        <ElTableColumn label="账号/昵称" prop="account" min-width="120">
+                            <template #default="{ row }">
+                                <div>
+                                    <div>{{ row.account }}</div>
+                                    <div>({{ row.nickname }})</div>
+                                </div>
+                            </template>
+                        </ElTableColumn>
                         <ElTableColumn prop="device_code" label="所属设备" />
                         <ElTableColumn prop="robot_name" label="接管机器人" />
                         <ElTableColumn label="接管类型" width="80">

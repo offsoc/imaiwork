@@ -13,15 +13,25 @@
             <div class="w-[319px] flex-shrink-0">
                 <img src="@/assets/images/recharge_pic.png" class="w-full" />
             </div>
-            <div class="px-5 grow overflow-hidden relative" v-loading="loading">
-                <div class="">
+            <div class="px-5 grow overflow-hidden relative">
+                <div class="flex mt-4 gap-x-4">
                     <div
-                        class="mt-[42px] flex items-center justify-center bg-[#FFC8A3] h-[35px] w-[250px] mx-auto rounded-full">
+                        v-for="(tab, index) in getTabs"
+                        class="cursor-pointer"
+                        :key="index"
+                        :class="[tab.key == tabValue ? 'font-bold text-lg' : '']"
+                        @click="handleTab(tab.key)">
+                        {{ tab.name }}
+                    </div>
+                </div>
+                <div v-if="tabValue == TabKey.RECHARGE" class="h-full recharge-box" v-loading="loading">
+                    <div
+                        class="mt-5 flex items-center justify-center bg-[#FFC8A3] h-[35px] w-[250px] mx-auto rounded-full">
                         <div class="font-bold text-[#472716]">充值算力</div>
                     </div>
                     <div class="flex justify-center mt-2">
                         <ElScrollbar class="w-full">
-                            <div class="flex gap-4 mt-4 whitespace-nowrap">
+                            <div class="flex gap-4 mt-4 whitespace-nowrap mb-3">
                                 <div
                                     v-for="(item, index) in rechargeLists"
                                     :key="index"
@@ -46,7 +56,7 @@
                         </ElScrollbar>
                     </div>
                     <div
-                        class="mt-4 grid gap-2"
+                        class="mt-2 grid gap-2"
                         :style="{
                             gridTemplateColumns: `repeat(${payWayList.length}, minmax(0, 1fr))`,
                         }">
@@ -100,6 +110,56 @@
                         >
                     </div>
                 </div>
+                <div v-if="tabValue == TabKey.REDEEM" class="redeem-box">
+                    <div class="h-full mx-4">
+                        <div class="mt-10">
+                            <ElInput v-model="redeemForm.sn" class="!h-[48px]" placeholder="请输入卡密编号"></ElInput>
+                        </div>
+                        <div>
+                            <ElButton
+                                type="primary"
+                                class="w-full !h-[50px] mt-5"
+                                :loading="isLockQueryRedeem"
+                                @click="lockFnQueryRedeem">
+                                查询
+                            </ElButton>
+                        </div>
+                        <div class="text-[#B0B0B0] text-xs mt-8 leading-6">
+                            <p>温馨提示：</p>
+                            <p>1、充值获得的积分只能在本平台使用。</p>
+                            <p>2、若充值未到账，请联系客服。</p>
+                            <P>3、充值获得的为虚拟积分，一般不可退换。</P>
+                        </div>
+                    </div>
+                    <div class="redeem-code-check-pop" v-if="checkVisible">
+                        <ElDialog v-model="checkVisible" width="400">
+                            <template #header>
+                                <div class="text-lg text-center font-medium">查询结果</div>
+                            </template>
+                            <div class="h-full">
+                                <el-form-item label="卡密面额：">
+                                    {{ checkResult.content }}
+                                </el-form-item>
+                                <el-form-item label="兑换时间：">
+                                    {{ checkResult.failure_time }}
+                                </el-form-item>
+                                <el-form-item label="有效期至：" v-if="checkResult.valid_time">
+                                    {{ checkResult.valid_time }}
+                                </el-form-item>
+                            </div>
+                            <div class="flex-1 flex justify-center items-center bg-white pt-[20px]">
+                                <el-button
+                                    class="w-full"
+                                    type="primary"
+                                    size="large"
+                                    :loading="isUse"
+                                    @click="onUseRedeemCode">
+                                    立即兑换
+                                </el-button>
+                            </div>
+                        </ElDialog>
+                    </div>
+                </div>
             </div>
         </div>
         <ElDialog
@@ -129,11 +189,52 @@
 
 <script setup lang="ts">
 import Popup from "@/components/popup/index.vue";
-import { getRechargeList, getPaymentList, createRechargeOrder, prePay, getPayResult } from "@/api/recharge";
+import {
+    getRechargeList,
+    getPaymentList,
+    createRechargeOrder,
+    prePay,
+    getPayResult,
+    checkRedeemCode,
+    useRedeemCode,
+} from "@/api/recharge";
 import { PolicyAgreementEnum } from "@/enums/appEnums";
 import QrCode from "qrcode.vue";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
+
+const appStore = useAppStore();
+const userStore = useUserStore();
 
 const emit = defineEmits(["close"]);
+
+enum TabKey {
+    RECHARGE = "recharge",
+    REDEEM = "redeem",
+}
+
+const tabs: Record<string, any>[] = [
+    { key: TabKey.RECHARGE, name: "算力充值" },
+    { key: TabKey.REDEEM, name: "卡密兑换" },
+];
+const getTabs = computed(() => {
+    const cardCodeConfig = appStore.getCardCodeConfig;
+    if (cardCodeConfig.is_open == 1) {
+        return tabs;
+    }
+    return tabs.filter((item) => item.key != TabKey.REDEEM);
+});
+const tabValue = ref<TabKey>(TabKey.RECHARGE);
+
+const handleTab = (key: TabKey) => {
+    if (key == tabValue.value) return;
+    if (key == TabKey.REDEEM) {
+        end();
+    } else {
+        start();
+    }
+    tabValue.value = key;
+};
 
 const showPop = ref(false);
 const showPayResult = ref(false);
@@ -242,8 +343,41 @@ const { lockFn: lockPay, isLock: isPayLock } = useLockFn(handlePay);
 
 //轮询参数
 const { start, end, result } = usePolling(check, {
-    totalTime: 300 * 1000,
+    totalTime: 5 * 60 * 1000,
     callback: endCallback,
+});
+
+const redeemForm = reactive({
+    sn: "",
+});
+// 显示查询结果
+const checkVisible = ref<boolean>(false);
+const checkResult = ref<any>({});
+const { lockFn: lockFnQueryRedeem, isLock: isLockQueryRedeem } = useLockFn(async () => {
+    if (!redeemForm.sn) {
+        feedback.msgError("卡密编号不能为空");
+        return;
+    }
+    try {
+        const data = await checkRedeemCode({ sn: redeemForm.sn });
+        checkVisible.value = true;
+        checkResult.value = data;
+    } catch (error) {
+        feedback.msgError(error || "查询失败");
+    }
+});
+
+const { lockFn: onUseRedeemCode, isLock: isUse } = useLockFn(async () => {
+    try {
+        await useRedeemCode({ sn: redeemForm.sn });
+        feedback.msgSuccess("兑换成功");
+        checkVisible.value = false;
+        redeemForm.sn = "";
+        showPop.value = false;
+        await userStore.getUser();
+    } catch (error) {
+        feedback.msgError(error || "兑换失败");
+    }
 });
 
 const loading = ref(false);
@@ -280,6 +414,11 @@ defineExpose({
     background-image: url("@/assets/images/recharge_result_bg.png");
     background-size: contain;
     background-repeat: no-repeat;
+}
+.redeem-box {
+    :deep(.el-input__wrapper) {
+        background-color: #f0f0ef;
+    }
 }
 </style>
 <style lang="scss">

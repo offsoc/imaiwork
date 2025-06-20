@@ -26,7 +26,7 @@ class HumanLogic extends ApiLogic
     const VOICE_TRAINING = 'voiceTraining'; //音色训练
     const AUDIO_TRAINING = 'audioTraining'; //文字转音频
     const VIDEO_TRAINING = 'videoTraining'; //视频训练
-
+    const COPYWRITING_CREATE = 'copywritingCreate'; //文案创作
     const AVATAR_TRAINING_PRO = 'avatarTrainingPro'; //形象训练
     const VOICE_TRAINING_PRO = 'voiceTrainingPro'; //音色训练
     const AUDIO_TRAINING_PRO = 'audioTrainingPro'; //文字转音频
@@ -321,7 +321,7 @@ class HumanLogic extends ApiLogic
             $anchor_id = $request['anchor_id'] ?? '';
             $anchor_name = $request['anchor_name'] ?? '';
             $name = $request['name'] ?? '';
-            $gender = $request['gender'] ?? '';
+            $gender = $request['gender'] ?? 'male';
             $pic = $request['pic'] ?? '';
             $video_url = $request['video_url'] ?? '';
             $msg = $request['msg'] ?? '';
@@ -329,11 +329,15 @@ class HumanLogic extends ApiLogic
             $model_version = $request['model_version'] ?? '';
             $voice_id = $request['voice_id'] ?? '';
             $voice_name = $request['voice_name'] ?? '';
+            $voice_type = $request['voice_type'] ?? 1;
 
             if (empty($anchor_name) || empty($name) || !in_array($model_version, [1, 2, 4, 6]) || !in_array($gender, ['male', 'female'])) {
 
                 throw new \Exception('参数错误');
             }
+
+
+
             //生成一个唯一任务ID
             $taskId = generate_unique_task_id();
 
@@ -414,14 +418,29 @@ class HumanLogic extends ApiLogic
                 }
                 $video_url =  $anchor['url'];
             }
+            if ( $pic == ''){
+                $pic = self::getVideoThumbnailFromUrl($video_url);
+                if ( $pic == false){
+                    Log::write('获取图片任务失败' . $pic);
+                    throw new \Exception('封面获取失败');
+                }
+            }
 
             // 音色ID 已有音色
-            if ($voice_id) {
+            if ($voice_id && $voice_type == 1) {
                 $voice = HumanVoice::where('voice_id', $voice_id)->findOrEmpty();
                 if ($voice->isEmpty()) {
                     throw new \Exception('音色不存在');
                 }
                 $voice_name =  $voice['name'];
+            }elseif ($voice_id && $voice_type == 0){
+                $voice_id = HumanVoice::getBuiltInVoice($voice_id,$model_version);
+                if ($voice_name == '') {
+                    throw new \Exception('音色名称不能为空');
+                }
+                if ($voice_id === '00000') {
+                    throw new \Exception('音色错误');
+                }
             }
 
             $videoTaskData = [
@@ -444,7 +463,6 @@ class HumanLogic extends ApiLogic
             if ($audio_type == 2) {
                 $videoTaskData['audio_url'] = $audio_url;
             }
-
             $videoTask = HumanVideoTask::create($videoTaskData);
 
             self::$returnData = $videoTask->toArray();
@@ -478,7 +496,7 @@ class HumanLogic extends ApiLogic
         }
 
         $name = $data['name'] ?? '';
-        $gender = $data['gender'] ?? '';
+        $gender = $data['gender'] ?? 'male';
         $anchor_url = $data['url'] ?? '';
         $model_version = $data['model_version'] ?? '';
         if (empty($name) || !in_array($model_version, [1, 2, 4, 6]) || !in_array($gender, ['male', 'female']) || empty($anchor_url)) {
@@ -492,7 +510,14 @@ class HumanLogic extends ApiLogic
 
             message('标题只能有数字与字母、中文组成, 且10个字符以内');
         }
-
+        $pic =  $data['pic'] ?? '';
+        if ($pic == ''){
+            $pic = self::getVideoThumbnailFromUrl($anchor_url);
+            if ( $pic == false){
+                self::setError('封面获取失败');
+                return false;
+            }
+        }
         $taskId = generate_unique_task_id();
 
         if (in_array($data['model_version'] ,[2, 4, 6])) {
@@ -506,12 +531,14 @@ class HumanLogic extends ApiLogic
                 'url' => $anchor_url,
                 'task_id' => $taskId,
                 'model_version' => $model_version,
-                'pic' => $data['pic'] ?? '',
+                'pic' => $pic,
             ];
             $anchor = HumanAnchor::create($addData);
 
             self::$returnData = [
                 'id' => $anchor->anchor_id,
+                'pic' => $pic,
+                'picurl' => FileService::getFileUrl($pic),
             ];
             return true;
         }
@@ -543,6 +570,9 @@ class HumanLogic extends ApiLogic
         $result = self::requestUrl($request, $scene, self::$uid, $taskId);
 
         if (!empty($result) && isset($result['id'])) {
+
+            $result['pic'] = $pic;
+            $result['picurl'] = FileService::getFileUrl($pic);
             self::$returnData = $result;
             $addData = [
                 'user_id' => self::$uid,
@@ -553,7 +583,7 @@ class HumanLogic extends ApiLogic
                 'url' => $anchor_url,
                 'task_id' => $taskId,
                 'model_version' => $model_version,
-                'pic' => $data['pic'] ?? '',
+                'pic' => $pic
             ];
             HumanAnchor::create($addData);
         } else {
@@ -911,29 +941,56 @@ class HumanLogic extends ApiLogic
         $name = $data['name'] ?? '';
         $modelVersion = $data['model_version'] ?? '';
         $status = $data['status'] ?? '';
-        $result = HumanVoice::where(['user_id' => self::$uid])
-            ->order('create_time', 'desc')
-            ->limit($pageNo, $pageSize)
-            ->when($name, function ($query) use ($name) {
-                $query->where('name', 'like', '%' . $name . '%');
-            })
-            ->when($modelVersion, function ($query) use ($modelVersion) {
-                $query->where('model_version', $modelVersion);
-            })
-            ->when($status != "", function ($query) use ($status) {
-                $query->where('status', $status);
-            })
-            ->order('create_time', 'desc')
-            ->select()
-            ->toArray();
 
-        $data = [
-            'lists' => $result,
-            'count' => HumanVoice::where(['user_id' => self::$uid])
+        $type = $data['type'] ?? 3;
+        $result = [];
+        $count = 0;
+        if (in_array($type,[1,3])) {
+            $result = HumanVoice::where(['user_id' => self::$uid])
+                ->order('create_time', 'desc')
+                ->limit($pageNo, $pageSize)
+                ->when($name, function ($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%');
+                })
                 ->when($modelVersion, function ($query) use ($modelVersion) {
                     $query->where('model_version', $modelVersion);
                 })
-                ->count(),
+                ->when($status != "", function ($query) use ($status) {
+                    $query->where('status', $status);
+                })
+                ->order('create_time', 'desc')
+                ->select()->each(function ($item) {
+                    $item->type = 1;
+                })
+                ->toArray();
+
+            $count = HumanVoice::where(['user_id' => self::$uid])
+                ->when($name, function ($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%');
+                })
+                ->when($modelVersion, function ($query) use ($modelVersion) {
+                    $query->where('model_version', $modelVersion);
+                })
+                ->when($status != "", function ($query) use ($status) {
+                    $query->where('status', $status);
+                })
+                ->count();
+        }
+
+        if (in_array($type,[0,3])) {
+            $voice = HumanVoice::getModelList();
+            if ($voice) {
+                foreach ($voice['voice'] as &$v) {
+                    $v['type'] = 0;
+                };
+                $result = array_merge($voice['voice'], $result);
+            }
+            $count = count( $result);
+        }
+
+        $data = [
+            'lists' => $result,
+            'count' =>  $count,
             'page_no' => $data['page_no'],
             'page_size' => $data['page_size'],
         ];
@@ -1463,6 +1520,10 @@ class HumanLogic extends ApiLogic
 
                 $taskModel = $taskModel->where('task_id', $taskId);
             }
+
+            $modellist = HumanVoice::getModelList();
+
+
             //第二步遍历任务
             $taskModel->select()->each(function ($item) {
                 // var_dump('运行');
@@ -1544,25 +1605,34 @@ class HumanLogic extends ApiLogic
 
                     // 文案驱动
                     if ($item->audio_type == 1) {
-
                         //step2 音色
                         $voice = HumanVoice::where('user_id', $item['user_id'])->where('voice_id', $item->voice_id)->findOrEmpty();
 
+                        $voiceres = false;
                         // 如果音色不存在，则创建音色
                         if ($voice->isEmpty()) {
+                            $BuiltInVoice = HumanVoice::getBuiltInVoiceList($item->model_version);
+                            if (!in_array($item->voice_id, $BuiltInVoice)) {
+                                $voice = HumanVoice::create([
+                                    'task_id' => $item->task_id,
+                                    'model_version' => $item->model_version,
+                                    'name' => $item->voice_name ? $item->voice_name : $item->name,
+                                    'gender' => $item->gender,
+                                    'voice_urls' => $item->upload_video_url,
+                                    'user_id' => $item['user_id']
+                                ]);
+                                $voiceres = false;
 
-                            $voice = HumanVoice::create([
-                                'task_id' => $item->task_id,
-                                'model_version' => $item->model_version,
-                                'name' => $item->voice_name ? $item->voice_name : $item->name,
-                                'gender' => $item->gender,
-                                'voice_urls' => $item->upload_video_url,
-                                'user_id' => $item['user_id']
-                            ]);
+                            }else{
+                                $voice->voice_id = $item->voice_id;
+                                $voiceres = true;
+                            }
+
+
                         }
                         // var_dump('ys开始');
                         // 如果没有训练，请求训练
-                        if ($voice->voice_id == "") {
+                        if ($voice->voice_id == "" && !$voiceres) {
                         //    var_dump('创建音色');
                             switch ($item->model_version) {
                                 case 1:
@@ -1635,7 +1705,7 @@ class HumanLogic extends ApiLogic
                         }
 
                         // 音色还没有训练完成
-                        if ($voice->status != 1) {
+                        if ($voice->status != 1 && !$voiceres) {
 
                             return true;
                         }
@@ -2060,6 +2130,7 @@ class HumanLogic extends ApiLogic
             self::AVATAR_TRAINING => ['human_avatar', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR],
             self::VOICE_TRAINING => ['human_voice', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE],
             self::VIDEO_TRAINING => ['human_video', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO],
+            self::COPYWRITING_CREATE => ['copywriting_create', AccountLogEnum::TOKENS_DEC_HUMAN_COPYWRITING],
             self::AUDIO_TRAINING_PRO => ['human_audio_pro', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_PRO],
             self::AVATAR_TRAINING_PRO => ['human_avatar_pro', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_PRO],
             self::VOICE_TRAINING_PRO => ['human_voice_pro', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_PRO],
@@ -2102,7 +2173,10 @@ class HumanLogic extends ApiLogic
 
                 $response = $requestService->videoTraining($request);
                 break;
+            case self::COPYWRITING_CREATE:
 
+                $response = $requestService->copywritingCreate($request);
+                break;
             case self::AVATAR_TRAINING_PRO:
 
                 $response = $requestService->avatarTrainingPro($request);
@@ -2336,6 +2410,60 @@ class HumanLogic extends ApiLogic
         } else {
 
             return "";
+        }
+    }
+
+    public static function copywriting($data){
+
+        $keywords = $data['keywords'] ?? '';
+        $number = $data['number'] ?? '';
+        if (empty($keywords)  || empty($number)) {
+            message('参数错误');
+        }
+
+        $taskId = generate_unique_task_id();
+        $request = [
+            'keywords' => $keywords,
+            'number' => $number,
+        ];
+        $scene = self::COPYWRITING_CREATE;
+
+        $result = self::requestUrl($request, $scene, self::$uid, $taskId);
+        if (!empty($result) && isset($result['content'])) {
+            self::$returnData = $result;
+        } else {
+            self::setError('生成失败');
+            return false;
+        }
+        return true;
+    }
+
+
+    public static function getVideoThumbnailFromUrl($videoUrl, $time = '00:00:01')
+    {
+        try {
+            // 生成缩略图保存路径
+            $dirPath = public_path() . 'uploads/images/' . date('Ymd') . '/';
+            $thumbnailname = date('YmdHis') . substr(md5($videoUrl), 0, 5)
+                . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT) . '.jpg';
+            $thumbnailPath = $dirPath . $thumbnailname;
+            // 检查文件夹是否存在，不存在则创建
+            if (!file_exists($dirPath)) {
+                mkdir($dirPath, 0777, true); // 0777 是权限模式，true 表示递归创建
+            }
+// 构建 FFmpeg 命令，直接使用视频的 URL
+            $command = "ffmpeg -i " . escapeshellarg($videoUrl) . " -ss " . escapeshellarg($time) . " -vframes 1 " . escapeshellarg($thumbnailPath) . " 2>&1";
+// 执行命令
+            $output = shell_exec($command);
+// 检查是否成功生成缩略图
+            if (file_exists($thumbnailPath)) {
+                return 'uploads/images/' . date('Ymd') . '/' . $thumbnailname;
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::write('获取图片任务失败11' . $e->getMessage());
+              return false;
         }
     }
 }

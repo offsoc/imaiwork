@@ -226,5 +226,16 @@ class LianlianController extends BaseApiController
         $data = $this->request->post();
         return LianLianLogic::performanceChat($data) ? $this->success(data: LianLianLogic::getReturnData()) : $this->fail(LianLianLogic::getError());
     }
+
+    /**
+     * @notes 存为草稿
+     * @author Rick
+     * @date 2024-06-09 11:34:16
+     */
+    public function addDraft()
+    {
+        $data = $this->request->post();
+        return LianLianLogic::analysisAddDraft($data) ? $this->success(data: LianLianLogic::getReturnData()) : $this->fail(LianLianLogic::getError());
+    }
 }
             

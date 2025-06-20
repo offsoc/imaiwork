@@ -1,143 +1,234 @@
 <template>
-    <view class="h-screen flex flex-col relative">
-        <view class="index-bg"></view>
-        <view class="relative z-30">
-            <u-navbar
-                :border-bottom="false"
-                :is-fixed="false"
-                :background="{
-                    background: 'transparent',
-                }"
-                title="充值中心"
-                title-bold>
-            </u-navbar>
+    <view class="h-screen flex flex-col relative bg-[#060815]">
+        <u-navbar
+            :border-bottom="false"
+            :is-fixed="false"
+            :background="{
+                background: 'transparent',
+            }"
+            back-icon-color="#ffffff"
+            title-color="#ffffff"
+            title="充值中心"
+            title-bold>
+        </u-navbar>
+        <view
+            class="flex flex-col items-center justify-center bg-no-repeat bg-center bg-cover relative py-[60rpx]"
+            :style="{ backgroundImage: `url(${config.baseUrl}static/images/recharge_img1.png)` }">
+            <view class="text-[30rpx] font-bold text-white">当前算力</view>
+            <text class="font-digital-number font-bold text-white text-[48rpx] mt-[60rpx]"> {{ userTokens }}</text>
         </view>
-        <view class="grow min-h-0 mt-[40rpx]">
+        <view class="relative grow min-h-0">
             <scroll-view scroll-y class="h-full">
-                <view class="px-[32rpx] relative z-20">
-                    <view class="text-[#858597] text-xs">当前算力</view>
-                    <view class="flex items-center gap-2 mt-3">
-                        <image src="/static/images/common/shandian.png" class="w-[40rpx] h-[58rpx]"></image>
-                        <text class="tokens">{{ userInfo.tokens }}</text>
-                    </view>
-                </view>
-                <view class="recharge-box">
+                <view class="px-[32rpx]">
                     <view v-if="isIOS()">
-                        <view class="flex flex-col items-center">
-                            <image src="@/packages/static/images/common/emoji_cry.png" class="w-[96rpx] h-[96rpx]" />
-                            <text class="text-xl font-bold mt-4">小程序暂不提供IOS端充值功能</text>
+                        <view class="flex items-center gap-x-2 justify-center">
+                            <image src="@/packages/static/icons/title_line.svg" class="w-[50rpx] h-[10rpx]"></image>
+                            <view class="text-center text-[#384166] text-[26rpx]"> 小程序暂不提供IOS端充值功能 </view>
+                            <image
+                                src="@/packages/static/icons/title_line.svg"
+                                class="w-[50rpx] h-[10rpx]"
+                                style="transform: rotate(180deg)"></image>
+                        </view>
+                        <view class="relative h-[450rpx] mt-2">
                             <view
-                                class="rounded-[28rpx] flex flex-col items-center justify-center mt-6 w-full bg-white h-[578rpx] shadow-[-8px_-6px_25px_4px_rgba(112,144,176,0.05),14px_27px_45px_4px_rgba(112,144,176,0.05)]">
-                                <image
-                                    :src="getServerConfig.qrcode"
-                                    class="w-[378rpx] h-[378rpx]"
-                                    show-menu-by-longpress />
-                                <text class="text-[#B0B0B0] text-xs mt-4">请长按二维码扫描添加客服</text>
+                                class="h-[284rpx] bg-center bg-no-repeat bg-cover"
+                                :style="{
+                                    backgroundImage: `url(${config.baseUrl}static/images/recharge_qrcode_bg.png)`,
+                                }">
                             </view>
+                            <image :src="getServerConfig.qrcode" class="service-qrcode"></image>
+                        </view>
+                        <view class="text-[26rpx] text-white mt-[12rpx] text-center"> 请长按二维码扫描添加客服 </view>
+                        <view class="text-[#384166] text-[26rpx] flex flex-col items-center justify-center mt-[24rpx]">
+                            <view class="mb-[52rpx]">温馨提示</view>
+                            <view class="flex flex-col gap-y-4">
+                                <view class="flex items-center gap-x-2 text-[26rpx]">
+                                    <text
+                                        class="flex items-center justify-center border border-solid border-[#9eb4fd0d] bg-[#9eb4fd1a] w-[36rpx] h-[36rpx] text-white rounded-full"
+                                        >1</text
+                                    >
+                                    <text>充值获得的算力只能在本平台使用</text>
+                                </view>
+                                <view class="flex items-center gap-x-2 text-[26rpx]">
+                                    <text
+                                        class="flex items-center justify-center border border-solid border-[#9eb4fd0d] bg-[#9eb4fd1a] w-[36rpx] h-[36rpx] text-white rounded-full"
+                                        >2</text
+                                    >
+                                    <text>若充值未到账，请联系客服</text>
+                                </view>
+                                <view class="flex items-center gap-x-2 text-[26rpx]">
+                                    <text
+                                        class="flex items-center justify-center border border-solid border-[#9eb4fd0d] bg-[#9eb4fd1a] w-[36rpx] h-[36rpx] text-white rounded-full"
+                                        >3</text
+                                    >
+                                    <text>充值获得的为虚拟算力，一般不可退换</text>
+                                </view>
+                            </view>
+                        </view>
+                        <view class="mt-5 pb-5">
+                            <u-button
+                                type="primary"
+                                shape="circle"
+                                :custom-style="{ height: '90rpx', fontSize: '26rpx' }"
+                                @click="showRecord = true"
+                                >订阅记录</u-button
+                            >
                         </view>
                     </view>
-                    <view v-else>
-                        <view>
-                            <view class="flex items-center justify-between">
-                                <view class="flex items-center justify-between gap-1 relative">
-                                    <image
-                                        src="@/packages/static/images/common/jf.png"
-                                        class="w-[48rpx] h-[48rpx]"></image>
-                                    <text class="text-[32rpx] font-bold">立即充值</text>
-                                    <image
-                                        src="@/packages/static/images/common/title_path.png"
-                                        class="h-[16rpx] w-[122rpx] absolute right-[-62rpx] bottom-0 z-[-1]"></image>
-                                </view>
-                                <view class="text-xs flex items-center text-[#B0B0B0]">
-                                    充值代表接受<navigator
-                                        class="text-[#7397FC]"
-                                        hover-class="none"
-                                        url="/packages/pages/agreement/agreement?type=service"
-                                        >《充值规则协议》</navigator
-                                    >
-                                </view>
-                            </view>
+                    <template v-else>
+                        <view class="absolute left-0 -top-[42rpx] flex justify-center w-full">
+                            <image
+                                src="@/packages/static/images/common/dazzle_light.png"
+                                class="w-[308rpx] h-[200rpx]"></image>
                         </view>
-                        <view class="mt-[50rpx]" v-if="!rechargeLoading">
-                            <view class="flex flex-wrap justify-center gap-x-[24rpx] gap-y-[48rpx]">
-                                <view
-                                    class="recharge-item"
-                                    v-for="(item, index) in optionsData.rechargeLists"
-                                    :key="index"
-                                    :class="chooseIndex === index ? 'active' : ''"
-                                    @click="handleChoose(index)">
+                        <view
+                            class="h-[560rpx] w-full bg-no-repeat mt-[60rpx]"
+                            :style="{
+                                backgroundImage: `url(${config.baseUrl}static/images/recharge_box_bg.png)`,
+                                backgroundSize: '100% 100%',
+                            }">
+                            <scroll-view class="h-full" scroll-y>
+                                <view class="h-full flex flex-col p-[40rpx]">
                                     <view
-                                        class="h-full flex flex-col items-center justify-center relative overflow-hidden">
-                                        <view class="absolute left-1 top-1">
+                                        v-for="(item, index) in rechargeLists"
+                                        :key="index"
+                                        class="flex items-center h-[122rpx] px-[26rpx] bg-no-repeat"
+                                        :style="{
+                                            backgroundImage:
+                                                currRechargeId == item.id
+                                                    ? `url(${config.baseUrl}static/images/recharge_tokens_item_active_bg.png)`
+                                                    : `url(${config.baseUrl}static/images/recharge_tokens_item_bg.png)`,
+                                            backgroundSize: '100% 100%',
+                                        }"
+                                        @click="handleRecharge(item.id)">
+                                        <view
+                                            class="min-w-[200rpx] font-digital-number"
+                                            :class="[currRechargeId == item.id ? 'text-[#FF9500]' : 'text-white']">
+                                            ￥{{ item.price }}
+                                        </view>
+                                        <view class="flex justify-between flex-1">
                                             <view
-                                                class="text-[20rpx] bg-primary-light-8 text-black p-1 rounded-tl-lg rounded-br-lg font-bold">
-                                                ￥{{ getPackageAvgPrice(item) }}/算力
+                                                class="text-[26rpx]"
+                                                :class="[
+                                                    currRechargeId == item.id ? 'text-[#FF9500]' : 'text-[#808080]',
+                                                ]">
+                                                Tokens/算力
+                                            </view>
+                                            <view
+                                                class="flex items-center h-[40rpx] rounded-full relative pr-3 pl-5 border border-solid"
+                                                :class="[
+                                                    currRechargeId == item.id
+                                                        ? 'border-[#624E35] bg-[#ff95001a]'
+                                                        : 'bg-[#16f49f1a] border-[#16f49f33]',
+                                                ]">
+                                                <image
+                                                    v-if="currRechargeId == item.id"
+                                                    src="@/packages/static/icons/tokens2.svg"
+                                                    class="w-[32rpx] h-[32rpx] absolute left-[2rpx]"></image>
+                                                <image
+                                                    v-else
+                                                    src="@/packages/static/icons/tokens.svg"
+                                                    class="w-[32rpx] h-[32rpx] absolute left-[2rpx]"></image>
+                                                <view
+                                                    class="text-[26rpx] flex-1 text-center"
+                                                    :class="[
+                                                        currRechargeId == item.id ? 'text-[#FF9500]' : 'text-[#16F49F]',
+                                                    ]"
+                                                    >{{ item.package_info.tokens }}</view
+                                                >
                                             </view>
                                         </view>
-                                        <view class="mt-[24rpx]">
-                                            <text class="text-[16rpx]">￥</text>
-                                            <text class="font-bold text-[40rpx]">{{ item.price }}</text>
-                                        </view>
-                                        <view class="mt-1">
-                                            <text class="text-xs"> {{ item.package_info?.tokens }}算力 </text>
-                                        </view>
-                                    </view>
-                                    <view
-                                        v-if="chooseIndex === index"
-                                        class="absolute left-[50%] bottom-[-32rpx]"
-                                        style="transform: translateX(-50%)">
-                                        <image
-                                            src="@/packages/static/images/common/recharge_success.png"
-                                            class="w-[48rpx] h-[48rpx]"></image>
                                     </view>
                                 </view>
+                            </scroll-view>
+                        </view>
+                        <view class="flex items-center mt-[24rpx]">
+                            <u-checkbox v-model="isAgreement" shape="circle" size="28"> </u-checkbox>
+                            <view class="text-white text-xs flex -ml-2">
+                                点击<text class="text-primary">兑换</text>或<text class="text-primary">充值</text
+                                >即表示您已了解并接受<navigator
+                                    class="text-primary"
+                                    hover-class="none"
+                                    url="/packages/pages/agreement/agreement?type=service"
+                                    >《充值规则协议》</navigator
+                                >
                             </view>
-                            <view class="mt-[48rpx]">
-                                <view
-                                    class="flex items-center justify-center text-white text-[32rpx] font-bold"
-                                    :style="{
-                                        background:
-                                            'linear-gradient(220.06deg, rgba(196, 232, 255, 1) 0%, rgba(61, 105, 252, 1) 100%)',
-                                        height: '102rpx',
-                                        borderRadius: '48rpx',
-                                        fontWeight: 'bold',
-                                    }"
+                        </view>
+                        <view class="flex items-center justify-center mt-[48rpx] gap-x-2">
+                            <navigator
+                                v-if="cardCodeConfig.is_open == 1"
+                                url="/packages/pages/redeem/redeem"
+                                hover-class="none"
+                                class="bg-[#121420] flex-1 h-[100rpx] rounded-full flex items-center justify-center text-[#888990] text-[26rpx] font-bold">
+                                卡密兑换
+                            </navigator>
+                            <!-- #ifdef MP-WEIXIN -->
+                            <view class="flex-1">
+                                <u-button
+                                    type="primary"
+                                    shape="circle"
+                                    :loading="isLock"
+                                    :custom-style="{ height: '100rpx', fontSize: '26rpx' }"
                                     @click="handlePay">
-                                    <text>￥{{ getRechargeData.price }}</text>
-                                    <text class="ml-2">立即充值</text>
-                                </view>
+                                    立即充值
+                                </u-button>
                             </view>
+                            <!-- #endif -->
                         </view>
-                        <view v-else class="flex flex-col justify-center items-center py-[100rpx]">
-                            <u-loading size="50"></u-loading>
-                            <text class="text-[#858597] text-xs mt-2">加载中...</text>
+                        <view class="text-white text-[26rpx] text-center mt-[48rpx] font-bold">
+                            点击查看<text class="text-primary ml-1" @click="showRecord = true">账单明细</text>
                         </view>
-                    </view>
-                    <view class="mt-4">
-                        <navigator
-                            url="/packages/pages/recharge_record/recharge_record"
-                            hover-class="none"
-                            class="text-xs text-[#2353F4] text-center flex items-center justify-center gap-1">
-                            <u-icon name="error-circle"></u-icon>
-                            <text>查看订阅记录</text>
-                        </navigator>
-                    </view>
-                    <view class="mt-[48rpx]">
-                        <view class="text-[#B0B0B0] text-xs leading-5">
-                            <view> 温馨提示: </view>
-                            <view> 1、充值获得的算力只能在本平台使用。 </view>
-                            <view> 2、若充值未到账，请联系客服。 </view>
-                            <view> 3、充值获得的为虚拟算力，一般不可退换。 </view>
-                        </view>
-                    </view>
+                    </template>
                 </view>
             </scroll-view>
         </view>
     </view>
+    <popup-bottom v-model:show="showRecord" title="订阅记录" :is-disabled-touch="true" custom-class="bg-[#F9FAFB]">
+        <template #content>
+            <view class="h-full flex flex-col">
+                <view class="grow min-h-0 rounded-[24rpx] mt-4">
+                    <z-paging
+                        ref="pagingRef"
+                        v-model="recordLists"
+                        :fixed="false"
+                        :default-page-size="20"
+                        :safe-area-inset-bottom="true"
+                        auto-show-back-to-top
+                        @query="queryList">
+                        <view class="px-[32rpx] flex flex-col gap-2">
+                            <view
+                                v-for="(item, index) in recordLists"
+                                :key="index"
+                                class="p-4 rounded-[16rpx] bg-white">
+                                <view class="flex items-center justify-between">
+                                    <view>
+                                        <view class="text-[26rpx]">{{ item.remark }}</view>
+                                        <view class="opacity-30 text-[22rpx] mt-1">订单编号：{{ item.sn }}</view>
+                                    </view>
+                                    <view class="text-right">
+                                        <view class="text-[26rpx] opacity-80">
+                                            {{ item.change_amount_desc }}
+                                        </view>
+                                        <view class="opacity-30 text-[22rpx] mt-1">
+                                            {{ item.create_time }}
+                                        </view>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                        <template #empty>
+                            <empty />
+                        </template>
+                    </z-paging>
+                </view>
+            </view>
+        </template>
+    </popup-bottom>
 </template>
 
 <script lang="ts" setup>
 import { getRechargeList, getPaymentList, createRechargeOrder, prePay, getPayResult } from "@/api/recharge";
+import { accountLog } from "@/api/user";
 import { pay, PayWayEnum } from "@/utils/pay";
 import { useLockFn } from "@/hooks/useLockFn";
 import { PayStatusEnum } from "@/enums/appEnums";
@@ -146,44 +237,44 @@ import { useDictOptions } from "@/hooks/useDictOptions";
 import { series } from "@/utils/util";
 import { isIOS } from "@/utils/client";
 import { useAppStore } from "@/stores/app";
+import config from "@/config";
 
 const appStore = useAppStore();
 
 const userStore = useUserStore();
 const { userInfo } = toRefs(userStore);
-const rechargeLoading = ref<boolean>(true);
 
+const userTokens = computed(() => userStore.userTokens);
+const cardCodeConfig = computed(() => appStore.getCardCodeConfig);
 const getServerConfig = computed(() => {
     const { customer_service } = appStore.getWebsiteConfig;
     return {
-        qrcode: customer_service.wx_image,
+        qrcode: customer_service?.wx_image,
     };
 });
 
 const getRechargeData = computed(() => {
-    return optionsData.rechargeLists[chooseIndex.value];
+    return rechargeLists.value.find((item: any) => item.id == currRechargeId.value);
 });
 
-const { optionsData } = useDictOptions<{
-    rechargeLists: any[];
-}>({
-    rechargeLists: {
-        api: getRechargeList,
-        params: {
-            type: 1,
-        },
-        transformData: (res) => {
-            rechargeLoading.value = false;
-            getPayWayListData();
-            return res.lists;
-        },
-    },
-});
+const isAgreement = ref<boolean>(true);
+const rechargeLoading = ref<boolean>(true);
 
-const chooseIndex = ref<number>(0);
+const rechargeLists = ref<any[]>([]);
+const getRechargeLists = async () => {
+    const { lists } = await getRechargeList({ type: 1 });
+    getPayWayListData();
+    rechargeLists.value = lists;
+    rechargeLoading.value = false;
+    if (lists && lists.length) {
+        currRechargeId.value = lists[0].id;
+    }
+};
 
-const handleChoose = (index: number) => {
-    chooseIndex.value = index;
+const currRechargeId = ref<number>(-1);
+
+const handleRecharge = (id: number) => {
+    currRechargeId.value = id;
 };
 
 const payFrom = "tokens";
@@ -194,11 +285,13 @@ const getPayWay = computed(() => {
 });
 
 const getPayWayListData = async () => {
-    const res = await getPaymentList({
+    const { lists } = await getPaymentList({
         from: payFrom,
     });
-    payWayList.value = res.lists;
-    payWay.value = payWayList.value.length ? payWayList.value[0].id : -1;
+    if (lists && lists.length) {
+        payWayList.value = lists;
+        payWay.value = payWayList.value[0].id;
+    }
 };
 
 const getPackageAvgPrice = (item: any) => {
@@ -217,8 +310,12 @@ const payment = (() => {
                 package_id: getRechargeData.value.id,
             });
             return result;
-        } catch (error) {
-            uni.$u.toast(error || "创建订单失败");
+        } catch (error: any) {
+            uni.showToast({
+                icon: "none",
+                title: error || "创建订单失败",
+                duration: 3000,
+            });
             return Promise.reject(error);
         } finally {
             uni.hideLoading();
@@ -241,7 +338,7 @@ const payment = (() => {
             uni.showToast({
                 title: error || "支付失败",
                 icon: "none",
-                duration: 2000,
+                duration: 3000,
             });
             return Promise.reject(error);
         } finally {
@@ -258,7 +355,7 @@ const payment = (() => {
             uni.showToast({
                 title: error || "支付失败",
                 icon: "none",
-                duration: 2000,
+                duration: 3000,
             });
             return Promise.reject(error);
         }
@@ -291,34 +388,39 @@ const handlePayResult = (status: PayStatusEnum) => {
             break;
     }
 };
+
+const showRecord = ref<boolean>(false);
+const recordLists = ref<any[]>([]);
+const pagingRef = shallowRef();
+const queryList = async (page_no: number, page_size: number) => {
+    try {
+        const { lists } = await accountLog({
+            page_no,
+            page_size,
+            type: "tokens",
+            is_order: 1,
+            action: 1,
+        });
+        pagingRef.value?.complete(lists);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+getRechargeLists();
 </script>
 
 <style lang="scss" scoped>
-.tokens {
-    background-image: linear-gradient(254.82deg, rgba(196, 232, 255, 1) 0%, rgba(61, 105, 252, 1) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-size: 64rpx;
-    font-weight: bold;
-}
-.recharge-box {
-    @apply grow min-h-0 relative z-10 p-[32rpx] py-[24rpx]  mt-[40rpx] rounded-tl-[40rpx] rounded-tr-[40rpx];
-    background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
-    box-shadow: inset 0rpx 0rpx 4rpx #ffffff, inset 0rpx 1rpx 0rpx #ffffff, inset 0rpx 0rpx 30rpx #ffffff,
-        inset 0rpx 40rpx 60rpx #ffffff;
-    .recharge-item {
-        @apply rounded-[32rpx] h-[216rpx]  text-[#8A5938] relative;
-        flex-basis: calc(100% / 3 - 24rpx);
-        background: linear-gradient(180deg, rgba(246, 246, 246, 1) 0%, rgba(250, 250, 250, 0.5) 99.85%);
-        box-shadow: 2rpx 2rpx 8rpx 2rpx rgba(181, 181, 181, 0.1);
-        border: 8rpx solid transparent;
-        &.active {
-            border-color: #4277ed;
-            background: #ffffff;
-            box-shadow: 0rpx 6rpx 20rpx 10rpx rgba(255, 195, 155, 0.2);
-            color: #4277ed;
-        }
+.service-qrcode {
+    @apply w-[400rpx] h-[400rpx] absolute top-2 left-[50%] border-0 border-b-[4rpx] border-dashed border-white;
+    transform: translateX(-50%);
+    &::after {
+        position: absolute;
+        content: "";
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, #000 0%, #232323 5.25%, rgba(35, 35, 35, 0) 26.25%);
     }
 }
 </style>

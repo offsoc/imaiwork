@@ -21,7 +21,7 @@
                         show-progress
                         @change="getUploadFile">
                         <div class="rounded-lg hover:bg-token-sidebar-surface-secondary p-2 cursor-pointer leading-[0]">
-                            <Icon name="local-icon-file2" :size="24" />
+                            <Icon name="local-icon-file" :size="24" />
                         </div>
                     </upload>
                     <ElPopover

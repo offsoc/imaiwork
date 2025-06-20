@@ -10,6 +10,7 @@ use app\common\model\hd\HdLog;
 use app\common\model\user\User;
 use app\common\service\FileService;
 use app\common\model\hd\HdImageCases;
+use think\facade\Log;
 
 
 class HdLogic extends ApiLogic
@@ -395,6 +396,7 @@ class HdLogic extends ApiLogic
                 self::taskStatus($task, 4, json_encode($result));
                 return true;
             }
+
             $sub_task_results = $result['sub_task_results'];
 
             $scene = match ((int)$type) {
@@ -440,8 +442,14 @@ class HdLogic extends ApiLogic
 
                 //假设某张失败 则恢复对应的算力
                 if (in_array($task_status, [3, 4])) {
+                    $extra = ['图片生成失败' => 1, '算力单价' => $unit,'恢复算力'=> $unit];
 
-                    AccountLogLogic::recordUserTokensLog(false, $task->user_id, $scene['type'], $unit, $item['task_id']);
+                    if (isset($item['task_id'])){
+                        AccountLogLogic::recordUserTokensLog(false, $task->user_id, $scene['type'], $unit, $item['task_id'],$extra);
+                    }
+                    if (isset($item['sub_task_id'])){
+                        AccountLogLogic::recordUserTokensLog(false, $task->user_id, $scene['type'], $unit, $item['sub_task_id'],$extra);
+                    }
                 }
             }
             $status_array = array_column($sub_task_results, 'task_status');
@@ -544,7 +552,6 @@ class HdLogic extends ApiLogic
                 break;
             default:
         }
-
         if ($tokenScene && isset($response['code']) && $response['code'] == 10000) {
 
             $taskId = $response['data']['task_id'];

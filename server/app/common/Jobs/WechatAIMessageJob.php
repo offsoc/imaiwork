@@ -11,9 +11,11 @@ use app\common\model\user\User;
 use app\common\logic\AccountLogLogic;
 use app\common\model\chat\ChatLog;
 use think\facade\Log;
+use app\common\traits\WechatTrait;
 
 class WechatAIMessageJob
 {
+    use WechatTrait;
     /**
      * 微信ID
      * @var string
@@ -180,7 +182,7 @@ class WechatAIMessageJob
         ChatLogic::saveChatResponseLog($this->request, $response);
 
         //计算消耗tokens
-        $points = ceil($tokens / $unit);
+        $points = $unit > 0 ? ceil($tokens / $unit) : 0;
 
         //token扣除
         User::userTokensChange($this->uid, $points);
@@ -201,13 +203,22 @@ class WechatAIMessageJob
     private function sendMessage(string $reply)
     {   
         
-        \app\common\service\ToolsService::Wechat()->push([
+        // \app\common\service\ToolsService::Wechat()->push([
+        //     'wechat_id' => $this->wechatId,
+        //     'friend_id' => $this->friendId,
+        //     'device_code' => $this->deviceCode,
+        //     'message' => $reply,
+        //     'message_type' => $this->request['message_id'] ? 22 : 1, //22: 引用
+        //     'remark' => $this->request['message_id'],
+        // ]);
+        self::wxPush([
             'wechat_id' => $this->wechatId,
             'friend_id' => $this->friendId,
             'device_code' => $this->deviceCode,
             'message' => $reply,
             'message_type' => $this->request['message_id'] ? 22 : 1, //22: 引用
             'remark' => $this->request['message_id'],
+            'opt_type' => 'job'
         ]);
     }
 

@@ -47,14 +47,14 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleRemove(row)">
                                         <ElButton link icon="el-icon-Close" class="w-full !justify-start"
                                             >移除设备</ElButton
                                         >
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleClearCache(row)">
                                         <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                             >清除缓存</ElButton

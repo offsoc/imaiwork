@@ -37,7 +37,6 @@
                         {{ formatAudioTime(audioDuration) }}
                     </view>
                 </view>
-
                 <view class="flex justify-between mt-4">
                     <view>
                         <view class="flex items-center gap-2">
@@ -104,7 +103,15 @@
                 <u-line />
             </view>
             <view>
-                <u-button type="primary" @click="handleConfirm()">
+                <u-button
+                    type="primary"
+                    shape="circle"
+                    :custom-style="{
+                        height: '90rpx',
+                        boxShadow: ' 0px 3px 12px 0px rgba(0, 0, 0, 0.12)',
+                        fontSize: '26rpx',
+                    }"
+                    @click="handleConfirm()">
                     <view class="flex items-center gap-2">
                         <image src="@/ai_modules/digital_human/static/icons/video.svg" class="w-6 h-6"></image>
                         <text class="text-white text-xl font-bold"> 开始生成视频 </text>
@@ -117,7 +124,6 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import { formatAudioTime } from "@/utils/util";
 import { TokensSceneEnum } from "@/enums/appEnums";
@@ -133,7 +139,7 @@ const props = withDefaults(
     { formData: () => ({}) }
 );
 
-const emit = defineEmits(["success", "close"]);
+const emit = defineEmits(["success", "close", "recharge"]);
 
 // Refs and computed
 const show = ref(false);
@@ -149,7 +155,7 @@ const getConstTotal = computed(() => {
 
 // Methods
 const getCostRules = async () => {
-    const { anchor_id, model_version, audio_type, voice_id } = props.formData;
+    const { anchor_id, model_version, audio_type, voice_id, voice_type } = props.formData;
     const _costTokens = reactive({
         video_cost: 0,
         figure_cost: 0,
@@ -164,7 +170,7 @@ const getCostRules = async () => {
     const setCosts = (videoKey: string, voiceKey: string, audioKey: string, figureKey?: string) => {
         _costTokens.video_cost = getTokenByScene(videoKey).score;
         _costTokens.video_unit = getTokenByScene(videoKey).unit;
-        _costTokens.voice_cost = CreateType.AUDIO == audio_type || !voice_id ? getTokenByScene(voiceKey).score : 0;
+        _costTokens.voice_cost = voice_type == 1 && voice_id == -1 ? getTokenByScene(voiceKey).score : 0;
         _costTokens.voice_unit = getTokenByScene(voiceKey).unit;
         _costTokens.audio_cost = getTokenByScene(audioKey).score;
         _costTokens.audio_unit = getTokenByScene(audioKey).unit;
@@ -222,8 +228,11 @@ const getAudioDuration = (msg: string, duration: number) => {
 };
 
 const handleConfirm = () => {
+    initData();
     if (userTokens.value < getConstTotal.value) {
         uni.$u.toast("算力不足，请充值！");
+        emit("recharge");
+        show.value = false;
         return;
     }
     emit("success");
@@ -243,7 +252,7 @@ const initData = () => {
 };
 
 const open = () => {
-    show.value = true;
+    // show.value = true;
     initData();
 };
 
@@ -252,7 +261,7 @@ const close = () => {
     emit("close");
 };
 
-defineExpose({ open, close });
+defineExpose({ open, close, confirm: handleConfirm });
 </script>
 
 <style scoped></style>

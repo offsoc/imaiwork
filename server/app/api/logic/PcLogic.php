@@ -10,6 +10,7 @@ use app\common\model\article\Article;
 use app\common\model\article\ArticleCate;
 use app\common\model\article\ArticleCollect;
 use app\common\model\decorate\DecoratePage;
+use app\common\model\human\HumanVoice;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
 
@@ -152,11 +153,19 @@ class PcLogic extends BaseLogic
             // 客服信息
             'customer_service' => self::getCustomerService(),
 
-            'pc_home_title' => ConfigService::get('website', 'pc_home_title', 'AI时代，企业化AI工具的新星'),
+            'shop_title' => ConfigService::get('website', 'shop_title', 'AI时代，企业化AI工具的新星'),
+            'client_download'                 => [
+                'windows' =>  ConfigService::get('client_download','windows',''),
+                'mac_intel' =>  ConfigService::get('client_download','mac_intel',''),
+                'mac_apple' =>  ConfigService::get('client_download','mac_apple',''),
+                'android' =>  ConfigService::get('client_download','android',''),
+                'mini_programs' =>  ConfigService::get('client_download','mini_programs',''),
+                'h5' =>  ConfigService::get('client_download','h5',''),
+            ],
         ];
 
         //模型
-        $modelList =  self::getModelList();
+        $modelList =  HumanVoice::getModelList();
 
         //模型
         $indexConfig =  ConfigService::get('index', 'config', []);
@@ -192,12 +201,21 @@ class PcLogic extends BaseLogic
                 'mnp' => $mnpQrCode,
             ],
             'index_config' => $indexConfig,
-            'model_list' => $modelList,
             'meeting_config' => $meetingConfig,
             'lianlian' => $lianlian,
             'digital_human' => [
-                'privacy' => ConfigService::get('digital_human', 'privacy', [])
+                'privacy' => ConfigService::get('digital_human', 'privacy', []),
+                'channel' => $modelList['channel'] ?? [],
+                'voice' => $modelList['voice'] ?? [],
             ],
+            'card_code'                 => [
+                'is_open'   => ConfigService::get('card_code','is_open',0),
+            ],
+            'recharge'                 => [
+                'is_ios_open'   => ConfigService::get('recharge','is_ios_open',0),
+            ],
+            'ai_live' =>  ConfigService::get('ai_live', 'config', [])
+
         ];
     }
 
@@ -294,27 +312,6 @@ class PcLogic extends BaseLogic
         return $info;
     }
 
-
-    /**
-     * @desc 获取模型列表
-     * @return array
-     * @date 2024/12/30 10:18
-     * @author dagouzi
-     */
-    public static function getModelList()
-    {
-        $info =  ConfigService::get('model', 'list', []);
-
-        foreach ($info as $key => $value) {
-
-            if ($value['status'] != 1) {
-
-                unset($info[$key]);
-            }
-        }
-
-        return array_values($info);
-    }
 
 
     /**

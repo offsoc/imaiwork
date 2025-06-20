@@ -1109,7 +1109,7 @@ class KnowledgeLogic extends ApiLogic
                 $usage = $response['data']['usage'];
                 $tokens = $usage['total_tokens'] + $request['knowledge_tokens'];
                  //计算消耗tokens
-                $points = ceil($tokens / $unit);
+                $points = $unit > 0 ? ceil($tokens / $unit) : 0;
                 $knowlwdge_tokens = $request['knowledge_tokens'];
             }
             
@@ -1366,71 +1366,70 @@ class KnowledgeLogic extends ApiLogic
             return true;
 
         } catch (\Throwable $e) {
-            
-            message($e->getMessage());
+            clogger($e);
+            if($params['scene'] !== 'socket'){
+                message($e->getMessage());
+            }else{
+                self::$returnData = []; 
+                return false;
+            }
+        
         }
 
     }
     
-    
-    public static function sceneChat($params){
+    public static function socketChat($params){
         set_time_limit(0);
-        if (empty($params['message']) && empty($params['message_ext'])) {
-            message('提示词 不能为空');
-        }
-        
-        $assistant = \app\common\model\chat\Assistants::where('id', $params['assistant_id'])->findOrEmpty();
-        if ($assistant->isEmpty()) {
-            message('助手不存在');
-        }
-        
-        $uid = $params['user_id'] ?? self::$uid;
-        $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
-        if(empty($knowlwdge)){
-            message('知识库不存在'); 
-        }
-
-        $message = $params['message'];
-        // 表单变量替换
-        $message_ext = $params['message_ext'] ?? '';
-        if ($message_ext) {
-            $message_ext_text = self::parseMsg($message_ext, $assistant['form_info']);
-            $message = $message_ext_text . $message;
-        }
-        $request = [
-            'indexid' => $params['indexid'],
-            'prompt' => $message,
-            'rerank_min_score' => $params['rerank_min_score'] ?? ($knowlwdge['rerank_min_score'] ?? self::RERANK_MIN_SCORE), // 默认为0
-            'stream' =>  (bool)$params['stream'] ?? true,
-            'task_id' => $params['task_id'] ?? generate_unique_task_id(),
-            'scene' => $params['scene'] ?? '未知聊天',
-            'assistant_id' => $params['assistant_id'] ?? 0
-        ];
-
-        if(mb_strlen(mb_trim($message), 'utf-8') == 0){
-            message('提示词 不能为空'); 
-        }
-
-        if($params['scene'] == '陪练聊天'){
-            $request['voice'] = $params['voice']?? '';
-            $request['emotion'] =  $params['emotion']?? '';
-            $request['intensity'] =  $params['intensity']?? '';
-        }
-        
-        self::__getRequestData($request, $params);
-
         try {
+            if(!isset($params['message']) || empty($params['message'])){
+                return [false, '提示词 不能为空'];
+            }
+        
+            $uid = $params['user_id'] ?? self::$uid;
+            $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
+            if(empty($knowlwdge)){
+                return [false, '知识库不存在'];
+            }
+
+            $message = $params['message'];
+            // 表单变量替换
+            $message_ext = $params['message_ext'] ?? '';
+
+            if ($message_ext) {
+                $message_ext_text = self::parseMsg($message_ext, '');
+                $message = $message_ext_text . $message;
+            }
+
+
+            $request = [
+                'indexid' => $params['indexid'],
+                'prompt' => $message,
+                'rerank_min_score' => $params['rerank_min_score'] ?? ($knowledge['rerank_min_score'] ?? self::RERANK_MIN_SCORE), // 默认为0
+                'stream' =>  (bool)$params['stream'] ?? true,
+                'task_id' => $params['task_id'] ?? generate_unique_task_id(),
+                'scene' => $params['scene'] ?? '未知聊天',
+                'assistant_id' => $params['assistant_id'] ?? 0
+            ];
+
+            if($params['scene'] == '陪练聊天'){
+                $request['voice'] = $params['voice']?? '';
+                $request['emotion'] =  $params['emotion']?? '';
+                $request['intensity'] =  $params['intensity']?? '';
+            }
+        
+            self::__getRequestData($request, $params);
+        
             $record = array(
                 'user_id' => $uid,
                 'index_id' => $params['indexid'],
                 'prompt' => $message,
-                'rerank_min_score' => $request['rerank_min_score'], // 默认为0
+                'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE, // 默认为0
                 'scene' => $params['scene'] ?? '未知聊天',
             );
             
             // 根据用户提示词检索
             $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
-
+            
             // 拼接切片内容
             if((int)$response['code'] === 10000){
                 if(isset($response['data']['Nodes'])){
@@ -1456,6 +1455,104 @@ class KnowledgeLogic extends ApiLogic
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;
 
+                $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
+                return [true, $result];
+            }else{
+                return [false, $response['message'] ?? '知识库检索失败'];
+            }
+
+        } catch (\Throwable $e) {
+            return [false, $e->getMessage()];
+        }
+
+    }
+    
+    public static function sceneChat($params){
+        set_time_limit(0);
+        if (empty($params['message']) && empty($params['message_ext'])) {
+            message('提示词 不能为空');
+        }
+        
+        $assistant = \app\common\model\chat\Assistants::where('id', $params['assistant_id'])->findOrEmpty();
+        if ($assistant->isEmpty()) {
+            message('助手不存在');
+        }
+        
+        $uid = $params['user_id'] ?? self::$uid;
+        $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
+        if(empty($knowlwdge)){
+            message('知识库不存在'); 
+        }
+
+        $message = $params['message'];
+        
+        $request = [
+            'indexid' => $params['indexid'],
+            'prompt' => $message,
+            'rerank_min_score' => $params['rerank_min_score'] ?? ($knowlwdge['rerank_min_score'] ?? self::RERANK_MIN_SCORE), // 默认为0
+            'stream' =>  (bool)$params['stream'] ?? true,
+            'task_id' => $params['task_id'] ?? generate_unique_task_id(),
+            'scene' => $params['scene'] ?? '未知聊天',
+            'assistant_id' => $params['assistant_id'] ?? 0
+        ];
+        //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        if(mb_strlen(mb_trim($message), 'utf-8') == 0){
+            message('提示词 不能为空'); 
+        }
+
+        if($params['scene'] == '陪练聊天'){
+            $request['voice'] = $params['voice']?? '';
+            $request['emotion'] =  $params['emotion']?? '';
+            $request['intensity'] =  $params['intensity']?? '';
+        }
+        
+        self::__getRequestData($request, $params);
+
+        try {
+            $record = array(
+                'user_id' => $uid,
+                'index_id' => $params['indexid'],
+                'prompt' => $message,
+                'rerank_min_score' => $request['rerank_min_score'], // 默认为0
+                'scene' => $params['scene'] ?? '未知聊天',
+            );
+            
+            // 根据用户提示词检索
+            $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
+            
+            // 拼接切片内容
+            if((int)$response['code'] === 10000){
+                if(isset($response['data']['Nodes'])){
+                    $texts = implode("\n", array_column($response['data']['Nodes'], 'Text'));
+                }else{
+                    $texts = '';
+                }
+                //clogger($texts);
+                // 表单变量替换
+                $message_ext = $params['message_ext'] ?? '';
+                if ($message_ext) {
+                    $message_ext_text = self::parseMsg($message_ext, $assistant['form_info']);// $assistant['form_info']
+                    $texts = $message_ext_text . $texts;
+                }
+                $textLength = mb_strlen($texts, 'utf-8');
+                
+                $record['retrieve_content'] = $texts;
+                $record['retrieve_length'] = $textLength;
+                $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
+
+                $prompt = "请根据以下知识库内容回答问题：
+                        {$texts}
+                        问题：{$message}";
+
+                $request['user_id'] = $uid; // 替换为实际的用户ID
+                $request['prompt'] = $prompt;
+                $request['knowledge_tokens'] = ceil($textLength / 4);
+                $request['chat_type'] = 9006;
+                $request['now'] = time();
+                $request['knowledge_record'] = $record;
+                
+                //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+                
                 $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
                 self::$returnData = $result;
                 return $result;
@@ -1528,7 +1625,7 @@ class KnowledgeLogic extends ApiLogic
                 
                 $record['retrieve_content'] = $texts;
                 $record['retrieve_length'] = $textLength;
-                $record['retrieve_tokens'] = ceil($textLength / 2); //2个字一个token
+                $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
 
                 $prompt = "请根据以下知识库内容回答问题：
                         {$texts}
@@ -1536,7 +1633,7 @@ class KnowledgeLogic extends ApiLogic
 
                 $request['user_id'] = $uid; // 替换为实际的用户ID
                 $request['prompt'] = $prompt;
-                $request['knowledge_tokens'] = ceil($textLength / 2);
+                $request['knowledge_tokens'] = ceil($textLength / 4);
                 $request['chat_type'] = 9006;
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;

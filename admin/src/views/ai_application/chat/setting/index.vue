@@ -3,12 +3,12 @@
         <el-card class="!border-none" shadow="never">
             <div class="text-xl font-medium mb-[20px]">配置信息</div>
             <el-form ref="formRef" :model="formData" :rules="rules" label-width="160px">
-                <el-form-item label="通用对话版图设置" prop="banner">
+                <!-- <el-form-item label="通用对话版图设置" prop="banner">
                     <div class="flex flex-col gap-2 banner-upload">
                         <material-picker v-model="formData.banner" :limit="1" />
                         <div class="form-tips">图片尺寸推荐500*345px</div>
                     </div>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="通用对话聊天头像" prop="logo">
                     <material-picker v-model="formData.logo" :limit="1" />
                 </el-form-item>
@@ -28,7 +28,7 @@
                         maxlength="1000"
                         :rows="4" />
                 </el-form-item>
-                <el-form-item label="对话开场白">
+                <!-- <el-form-item label="对话开场白">
                     <div class="w-[500px]">
                         <div class="flex mb-4">
                             <el-button type="primary" @click="addDol"> 新增开场白 </el-button>
@@ -50,7 +50,7 @@
                             </el-table-column>
                         </el-table>
                     </div>
-                </el-form-item>
+                </el-form-item> -->
             </el-form>
         </el-card>
     </div>

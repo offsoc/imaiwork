@@ -37,8 +37,8 @@ class VoiceLists extends BaseAdminDataLists implements ListsSearchInterface
     {
 
         //模型版本
-        $modelVersion = ConfigService::get('model', 'list', []);
-
+        $modelList = ConfigService::get('model', 'list', []);
+        $modelVersion = $modelList['channel'];
         return HumanVoice::alias('hv')
             ->join('user u', 'u.id = hv.user_id')
             ->field('hv.id,hv.name,hv.gender,hv.user_id,hv.model_version,hv.task_id,hv.create_time,hv.voice_urls,hv.status,u.nickname,u.avatar')

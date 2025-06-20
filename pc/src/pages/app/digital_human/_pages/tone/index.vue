@@ -6,7 +6,7 @@
                 <ElRadioGroup v-model="queryParams.model_version" @change="getLists">
                     <ElRadioButton label="全部" value=""></ElRadioButton>
                     <ElRadioButton
-                        v-for="item in getDigitalHumanModels"
+                        v-for="item in modelChannel"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id"></ElRadioButton>
@@ -85,7 +85,7 @@ import { useAppStore } from "@/stores/app";
 import { Refresh } from "@element-plus/icons-vue";
 const appStore = useAppStore();
 
-const { getDigitalHumanModels } = appStore;
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const showAddPopup = ref<boolean>(false);
 const showTonePopup = ref<boolean>(false);
@@ -94,6 +94,7 @@ const tonePopRef = shallowRef<InstanceType<typeof TonePop>>();
 
 const queryParams = reactive({
     name: "",
+    type: 1,
     model_version: "",
 });
 
@@ -103,7 +104,7 @@ const { pager, getLists, resetParams } = usePaging({
 });
 
 const getModelType = (type: number) => {
-    const data = getDigitalHumanModels.find((item) => item.id == type);
+    const data = modelChannel.value.find((item) => item.id == type);
     return data?.name || "";
 };
 
@@ -133,7 +134,7 @@ onMounted(() => {
 <style scoped lang="scss">
 :deep(.el-radio-group) {
     .el-radio-button__inner {
-        padding: 8px 30px;
+        padding: 8.5px 30px;
     }
 }
 :deep(.el-input-group__append) {

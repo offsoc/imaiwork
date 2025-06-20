@@ -38,8 +38,8 @@ class AudioLists extends BaseAdminDataLists implements ListsSearchInterface
     public function lists(): array
     {
         //模型版本
-        $modelVersion = ConfigService::get('model', 'list', []);
-
+        $modelList = ConfigService::get('model', 'list', []);
+        $modelVersion = $modelList['channel'];
         return HumanAudio::alias('ha')
             ->join('user u', 'u.id = ha.user_id')
             ->field('ha.id,ha.name,ha.user_id,ha.model_version,ha.task_id,ha.create_time,ha.url,ha.status,u.nickname,u.avatar')

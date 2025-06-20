@@ -1,6 +1,6 @@
 <template>
     <div class="h-full flex flex-col p-4">
-        <ElBreadcrumb>
+        <ElBreadcrumb class="mb-4">
             <ElBreadcrumbItem>
                 <NuxtLink to="/knowledge_base">知识库</NuxtLink>
             </ElBreadcrumbItem>
@@ -17,7 +17,7 @@
             </ElBreadcrumbItem>
         </ElBreadcrumb>
         <template v-if="!showChunk">
-            <div class="rounded-lg bg-white p-4 mt-4 flex items-center justify-between gap-4">
+            <div class="rounded-lg bg-white p-4 flex items-center justify-between gap-4">
                 <ElButton type="primary" @click="handleAddFile">添加文件</ElButton>
                 <div class="flex items-center gap-2">
                     <ElSelect
@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="grow min-h-0 flex flex-col gap-x-4 mt-4 bg-white rounded-lg">
-                <div class="grow min-h-0 pt-4">
+                <div class="grow min-h-0 pt-4 overflow-hidden">
                     <ElTable
                         ref="tableRef"
                         :data="pager.lists"
@@ -95,7 +95,7 @@
                             </template>
                         </ElTableColumn>
                         <ElTableColumn prop="create_time" label="导入时间" width="180px" />
-                        <ElTableColumn prop="update_time" label="操作" width="140px">
+                        <ElTableColumn prop="update_time" label="操作" width="140px" fixed="right">
                             <template #default="{ row }">
                                 <ElButton
                                     v-if="row.status == 'PARSE_SUCCESS'"
@@ -117,19 +117,15 @@
                 </div>
             </div>
         </template>
-        <chunk-detail class="mt-4" v-else ref="chunkDetailRef" />
+        <div v-else class="grow min-h-0">
+            <chunk-detail ref="chunkDetailRef" />
+        </div>
     </div>
     <file-add v-if="showFileAdd" ref="fileAddRef" @success="resetPage" @close="showFileAdd = false" />
 </template>
 
 <script setup lang="ts">
-import Popup from "@/components/popup/index.vue";
-import {
-    knowledgeBaseDetail,
-    knowledgeBaseFileLists,
-    knowledgeBaseFileDelete,
-    knowledgeBaseFileChunkLists,
-} from "@/api/knowledge_base";
+import { knowledgeBaseDetail, knowledgeBaseFileLists, knowledgeBaseFileDelete } from "@/api/knowledge_base";
 import FileAdd from "../_components/file-add.vue";
 import { formatFileSize } from "@/utils/util";
 import { ElTable } from "element-plus";

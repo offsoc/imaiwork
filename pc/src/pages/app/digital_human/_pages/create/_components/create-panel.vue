@@ -1,135 +1,16 @@
 <template>
-    <div>
-        <ElPopover
-            :visible="showNext"
-            :show-arrow="false"
-            width="336"
-            trigger="click"
-            popper-class="!p-0 !rounded-xl shadow-[0_0_10px_rgba(0,0,0,0.1)]">
-            <template #reference>
-                <ElButton class="w-full" type="primary" size="large" :disabled="showNext" @click="handleNext">
-                    <span class="font-bold text-lg">下一步</span>
-                </ElButton>
-            </template>
-            <div class="px-4 py-6 flex flex-col gap-4 relative">
-                <div class="absolute top-[-10px] right-[-10px]">
-                    <ElButton size="small" :icon="Close" circle @click="showNext = false"></ElButton>
-                </div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <img src="../../../_assets/images/shandian.png" class="w-6 h-6" />
-                        <span class="text-[#545454]"> 算力余额：</span>
-                    </div>
-                    <div class="text-lg text-[#575757] leading-[0]">
-                        {{ userTokens }}
-                    </div>
-                </div>
-                <ElDivider class="!my-0" />
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <img src="../../../_assets/images/shichang.png" class="w-6 h-6" />
-                        <span class="text-[#545454]"> 预估时长：</span>
-                    </div>
-                    <div class="text-lg text-[#575757] leading-[0]">
-                        {{ formatAudioTime(audioDuration) }}
-                    </div>
-                </div>
-                <div class="flex justify-between">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <img src="../../../_assets/images/shuidi.png" class="w-6 h-6" />
-                            <span class="text-[#545454] leading-[0]"> 算力消耗：</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-2 text-right">
-                        <div class="text-lg text-[#575757] flex items-center" v-if="costTokens.video_cost">
-                            <span>(视频合成)</span>
-                            <ElTooltip>
-                                <div class="leading-[0] ml-1">
-                                    <Icon name="el-icon-InfoFilled"></Icon>
-                                </div>
-                                <template #content>
-                                    {{ costTokens.video_cost }}
-                                    {{ costTokens.video_unit }}
-                                </template>
-                            </ElTooltip>
-                            <span class="mr-2">：</span>
-                            <span>
-                                {{ costTokens.video_cost * audioDuration }}
-                            </span>
-                        </div>
-                        <div class="text-lg text-[#575757] flex items-center" v-if="costTokens.figure_cost">
-                            <span>(形象克隆)</span>
-                            <ElTooltip>
-                                <div class="leading-[0] ml-1">
-                                    <Icon name="el-icon-InfoFilled"></Icon>
-                                </div>
-                                <template #content>
-                                    {{ costTokens.figure_cost }}
-                                    {{ costTokens.figure_unit }}
-                                </template>
-                            </ElTooltip>
-                            <span class="mr-2">：</span>
-                            <span>
-                                {{ costTokens.figure_cost }}
-                            </span>
-                        </div>
-                        <div class="text-lg text-[#575757] flex items-center" v-if="costTokens.voice_cost">
-                            <span>(音色克隆)</span>
-                            <ElTooltip>
-                                <div class="leading-[0] ml-1">
-                                    <Icon name="el-icon-InfoFilled"></Icon>
-                                </div>
-                                <template #content>
-                                    {{ costTokens.voice_cost }}
-                                    {{ costTokens.voice_unit }}
-                                </template>
-                            </ElTooltip>
-                            <span class="mr-2">：</span>
-                            <span>
-                                {{ costTokens.voice_cost }}
-                            </span>
-                        </div>
-                        <div class="text-lg text-[#575757] flex items-center" v-if="costTokens.audio_cost">
-                            <span>(音频合成)</span>
-                            <ElTooltip>
-                                <div class="leading-[0] ml-1">
-                                    <Icon name="el-icon-InfoFilled"></Icon>
-                                </div>
-                                <template #content>
-                                    {{ costTokens.audio_cost }}
-                                    {{ costTokens.audio_unit }}
-                                </template>
-                            </ElTooltip>
-                            <span class="mr-2">：</span>
-                            <span>{{ costTokens.audio_cost * audioDuration }}</span>
-                        </div>
-                        <div class="text-lg text-[#575757]">预计：{{ getConstTotal }}</div>
-                    </div>
-                </div>
-                <ElDivider class="!my-0" />
-                <div class="mt-4">
-                    <ElButton type="primary" size="large" class="w-full" :loading="createIsLock" @click="createLockFn">
-                        <div class="flex items-center gap-2">
-                            <Icon name="local-icon-video" color="#ffffff" :size="20"></Icon>
-                            <span class="text-white font-bold text-lg">开始生成视频</span>
-                        </div>
-                    </ElButton>
-                </div>
-            </div>
-        </ElPopover>
-        <div class="fixed top-0 left-0 w-full h-full z-[888] bg-black/5" v-if="showNext"></div>
-    </div>
+    <ElButton class="w-full" type="primary" size="large" :loading="createIsLock" @click="createLockFn">
+        <span class="font-bold text-lg">确定</span>
+    </ElButton>
 </template>
 
 <script setup lang="ts">
 import { createTask } from "@/api/digital_human";
 import { useUserStore } from "@/stores/user";
 import { useAppStore } from "@/stores/app";
-import { formatAudioTime } from "@/utils/util";
 import { TokensSceneEnum } from "@/enums/appEnums";
-import { Close } from "@element-plus/icons-vue";
 import { CreateType, DigitalHumanModelVersionEnum, CreateTaskParams } from "../../../_enums";
+import dayjs from "dayjs";
 
 interface CostTokens {
     video_cost: number;
@@ -172,7 +53,7 @@ const getConstTotal = computed(() => {
 });
 
 const getCostRules = async () => {
-    const { anchor_id, msg, model_version, voice_url, voice_id, audio_type, audio_duration } = props.formData;
+    const { anchor_id, msg, model_version, voice_id, voice_type, audio_type, audio_duration } = props.formData;
     const _costTokens: CostTokens = {
         video_cost: 0,
         figure_cost: 0,
@@ -188,7 +69,9 @@ const getCostRules = async () => {
     const setCosts = (videoKey: string, voiceKey: string, audioKey: string, figureKey?: string) => {
         _costTokens.video_cost = getTokenByScene(videoKey).score;
         _costTokens.video_unit = getTokenByScene(videoKey).unit;
-        _costTokens.voice_cost = CreateType.AUDIO == audio_type || voice_id == -1 ? getTokenByScene(voiceKey).score : 0;
+        _costTokens.voice_cost =
+            CreateType.AUDIO == audio_type || (voice_type == 1 && voice_id == -1) ? getTokenByScene(voiceKey).score : 0;
+
         _costTokens.voice_unit = getTokenByScene(voiceKey).unit;
         _costTokens.audio_cost = getTokenByScene(audioKey).score;
         _costTokens.audio_unit = getTokenByScene(audioKey).unit;
@@ -247,17 +130,8 @@ const getAudioDuration = (msg: string, duration: number) => {
 };
 
 const validateFormData = (formData: any) => {
-    const { name, url, audio_type, msg, voice_id, audio_url } = formData;
+    const { url, audio_type, msg, voice_id, audio_url } = formData;
 
-    if (!name) {
-        feedback.msgError("请输入数字人名称");
-        emit("error", { type: "name" });
-        return false;
-    } else if (!name.match(/^[a-zA-Z0-9\u4e00-\u9fa5]*$/)) {
-        feedback.msgError("视频只能有数字与字母、中文组成, 且10个字符以内");
-        emit("error", { type: "name" });
-        return false;
-    }
     if (!url) {
         feedback.msgError("请选择一位数字人");
         return false;
@@ -286,14 +160,12 @@ const validateFormData = (formData: any) => {
 const handleNext = () => {
     const {
         url,
-        name,
         msg,
-        pic,
         anchor_id,
         anchor_name,
         model_version,
         audio_type,
-        voice_url,
+        voice_type,
         gender,
         voice_id,
         voice_name,
@@ -305,13 +177,13 @@ const handleNext = () => {
 
     createTaskParams.value = {
         ...createTaskParams.value,
+        name: dayjs().format("YYYYMMDD"),
         video_url: url,
+        voice_type,
         anchor_id,
-        name,
         anchor_name,
         model_version,
         audio_type,
-        pic,
         gender,
         audio_url,
     };
@@ -320,7 +192,6 @@ const handleNext = () => {
         createTaskParams.value.msg = message;
         if (voice_id != -1) {
             createTaskParams.value.voice_id = voice_id;
-            createTaskParams.value.voice_url = voice_url;
             createTaskParams.value.voice_name = voice_name;
         }
         getAudioDuration(msg, duration);
@@ -340,6 +211,7 @@ const handleNext = () => {
 
 const handleCreate = async () => {
     try {
+        handleNext();
         if (!validateFormData(props.formData)) return;
 
         if (getConstTotal.value > userTokens.value) {

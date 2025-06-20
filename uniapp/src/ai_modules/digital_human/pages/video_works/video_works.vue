@@ -1,18 +1,15 @@
 <template>
-    <view class="h-screen flex flex-col relative">
-        <view class="index-bg"></view>
-        <view class="relative z-30">
-            <u-navbar
-                :border-bottom="false"
-                :is-fixed="false"
-                :background="{
-                    background: 'transparent',
-                }"
-                title="我的作品"
-                title-bold>
-            </u-navbar>
-        </view>
-        <view class="px-4 mt-4 relative z-30">
+    <view class="h-screen flex flex-col page-bg">
+        <u-navbar
+            :border-bottom="false"
+            :is-fixed="false"
+            :background="{
+                background: 'transparent',
+            }"
+            title="我的作品"
+            title-bold>
+        </u-navbar>
+        <view class="px-4">
             <view class="flex items-center justify-between">
                 <view class="relative">
                     <text class="text-xl font-bold">我的作品（{{ dataLists.length }}）</text>
@@ -91,7 +88,11 @@
             </u-button>
         </view>
     </view>
-    <video-preview ref="videoPreviewRef" :video-src="videoUrl" />
+    <video-preview
+        v-model:show="showVideoPreview"
+        title="视频预览"
+        :video-url="videoUrl"
+        @confirm="showVideoPreview = false" />
 </template>
 
 <script setup lang="ts">
@@ -130,11 +131,10 @@ const chooseDelete = (item: any) => {
 };
 
 const videoUrl = ref<string>("");
-const videoPreviewRef = shallowRef<InstanceType<typeof videoPreview>>();
-
+const showVideoPreview = ref(false);
 const handlePlay = ({ video_url }: any) => {
     videoUrl.value = video_url;
-    videoPreviewRef.value?.open();
+    showVideoPreview.value = true;
 };
 
 const handleDelete = (id?: number) => {

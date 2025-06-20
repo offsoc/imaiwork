@@ -3,12 +3,8 @@
         <div class="flex items-center gap-2 overflow-y-auto">
             <div
                 v-for="(item, index) in categoryLists"
-                class="px-2 py-1 rounded-md cursor-pointer whitespace-nowrap"
-                :class="[
-                    sceneIndex == index
-                        ? 'text-[#000000] font-bold bg-[rgba(120,96,254,.08)]'
-                        : 'bg-[rgba(139,95,95,0.04)]',
-                ]"
+                class="px-2 py-1 rounded-md cursor-pointer whitespace-nowrap bg-white"
+                :class="[sceneIndex == index ? 'text-[#000000] font-bold ' : '']"
                 @click="handleSceneType(index)">
                 <span class="text-base">
                     {{ item.name }}
@@ -25,12 +21,12 @@
                 <template v-if="pager.lists.length">
                     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                         <ElCard
-                            class="cursor-pointer !rounded-xl !bg-[#f7f9ff] relative hover:scale-[1.02] !p-0"
+                            class="cursor-pointer !rounded-xl relative hover:scale-[1.02] !p-0"
                             shadow="never"
                             v-for="(item, index) in pager.lists"
                             :key="index"
                             @click="handleRecord(item)">
-                            <div class="flex flex-col rounded-lg w-full flex-grow gap-4 group relative h-[135px]">
+                            <div class="flex flex-col rounded-lg w-full flex-grow gap-4 group relative h-[130px]">
                                 <div class="font-bold">
                                     {{ item.scene_name }}
                                 </div>

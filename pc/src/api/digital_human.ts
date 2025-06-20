@@ -83,7 +83,7 @@ export const createTask = (params: Record<string, any>) => {
     return $request.post({ url: "/human/videoTask", params });
 };
 
-// 抖音生成文案
-export const createDouyinContent = (params: Record<string, any>) => {
-    return $request.post({ url: "/human/dyToText", params });
+// 文案生成
+export const generatePrompt = (params: Record<string, any>) => {
+    return $request.post({ url: "/human/copywriting", params });
 };

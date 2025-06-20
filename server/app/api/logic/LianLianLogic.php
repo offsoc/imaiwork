@@ -13,6 +13,7 @@ use app\api\logic\service\TokenLogService;
 use app\common\model\user\User;
 use app\common\logic\AccountLogLogic;
 use app\common\enum\user\AccountLogEnum;
+use think\facade\Log;
 
 /**
  * logic
@@ -106,6 +107,26 @@ class LianLianLogic extends ApiLogic
             return false;
         }
     }
+
+    /**
+     * 存入草稿
+     * @param array $data
+     * @return bool
+     * @author Rick
+     * @data 2024-06-09 11:05:46
+     */
+    public static function analysisAddDraft(array $data): bool
+    {
+        try {
+            LlAnalysis::update(['is_draft' => 1],['id' => $data['analysis_id']]);
+            self::$returnData = ['message'=>'操作成功'];
+            return true;
+        } catch (\Exception $exception) {
+            self::setError($exception->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * 分析工作台
@@ -265,6 +286,15 @@ class LianLianLogic extends ApiLogic
             if ($info->isEmpty()) {
                 throw new \Exception("查无此信息");
             }
+            $analysis = LlAnalysis::where([
+                                              'scene_id'=>$id,
+                                              'user_id'=>self::$uid,
+                                              'status'=>0,
+                                              'is_draft'=>1
+                                          ])->findOrEmpty();
+            $info['is_draft']       = $analysis->isEmpty() ? 0 : 1;
+            $info['analysis_id']    = $analysis->id ?? 0;
+
             $info['index_id'] = \app\common\model\knowledge\KnowledgeBind::where('data_id', $info->id)->where('type', 2)->value('index_id');
             $info['knowledge'] = \app\common\model\knowledge\KnowledgeBind::alias('b')
                                 ->field('k.index_id, k.name, k.category_id, k.description, k.rerank_min_score, b.data_id, b.type')
@@ -465,8 +495,8 @@ class LianLianLogic extends ApiLogic
     public static function startChat(array $data): bool
     {
         Db::startTrans();
-        //计费
-        $unit = TokenLogService::checkToken(self::$uid, 'lianlian');
+        //计费，改为结算的时候扣费
+//        $unit = TokenLogService::checkToken(self::$uid, 'lianlian');
         try {
             // 场景ID
             if (!isset($data['scene_id'])) {
@@ -481,6 +511,21 @@ class LianLianLogic extends ApiLogic
 
             if ($info->user_id != 0 && $info->user_id != self::$uid) {
                 throw new \Exception("查无此信息");
+            }
+
+            //场景重练或发起新对话时，删除无效的旧对话数据
+            $drafts = LlAnalysis::where([
+                                            'scene_id' => $data['scene_id'],
+                                            'user_id'  => self::$uid,
+                                            'is_draft' => 1,
+                                            'status'   => 0
+                                        ])->select()->toArray();
+            if ($drafts){
+                foreach ($drafts as $draft){
+                    LlChat::destroy(['analysis_id'=>$draft['id']]);
+                    LlAnalysis::destroy($draft['id']);
+                    Log::write('场景ID：'.$data['scene_id'].'对话ID：'.$draft['id'].'删除成功');
+                }
             }
 
             $task_id = generate_unique_task_id();
@@ -541,11 +586,11 @@ class LianLianLogic extends ApiLogic
                 'preliminary_ask_audio_duration'    => $response['data']['audio_duration'] ?? 0,
             ]);
 
-            //token扣除
-            User::userTokensChange($analysisInfo->user_id, $unit);
+            //token扣除，改为结算时扣费
+//            User::userTokensChange($analysisInfo->user_id, $unit);
 
-            //记录日志
-            AccountLogLogic::recordUserTokensLog(true, $analysisInfo->user_id, AccountLogEnum::TOKENS_DEC_AI_LIANLIAN, $unit, $analysisInfo->task_id);
+            //记录日志，改为结算时扣费
+//            AccountLogLogic::recordUserTokensLog(true, $analysisInfo->user_id, AccountLogEnum::TOKENS_DEC_AI_LIANLIAN, $unit, $analysisInfo->task_id);
 
             self::$returnData = $chatInfo->toArray();
             Db::commit();
@@ -607,9 +652,11 @@ class LianLianLogic extends ApiLogic
     {
         Db::startTrans();
         try {
-            $info = LlAnalysis::where('id', $data['analysis_id'])
+            $info = LlAnalysis::where('is_draft', 1)
+                ->where('id', $data['analysis_id'])
                 ->where('user_id', self::$uid)
                 ->where('scene_id', $data['scene_id'])
+                ->order('id','DESC')
                 ->findOrEmpty();
 
             if ($info->isEmpty()) {
@@ -795,6 +842,8 @@ class LianLianLogic extends ApiLogic
     public static function endChat(array $data): bool
     {
         try {
+            //计费，改为结算的时候扣费
+            $unit = TokenLogService::checkToken(self::$uid, 'lianlian');
             $info = LlAnalysis::where('id', $data['analysis_id'])
                 ->where('user_id', self::$uid)
                 ->where('scene_id', $data['scene_id'])
@@ -809,11 +858,27 @@ class LianLianLogic extends ApiLogic
                 throw new \Exception("状态错误");
             }
 
+            //陪练结束，中台扣费
+            $response = \app\common\service\ToolsService::Ll()->chat([
+                                                                         'action'    => 'end',
+                                                                     ]);
+            if (!isset($response['data'])) {
+
+                throw new \Exception("陪练结束失败");
+            }
+
             $info->status   = 1;
+            $info->is_draft = 0;
             $info->end_time = time();
             $info->save();
 
             self::$returnData = $info->toArray();
+            //token扣除
+            User::userTokensChange($info->user_id, $unit);
+
+            //记录日志
+            AccountLogLogic::recordUserTokensLog(true, $info->user_id, AccountLogEnum::TOKENS_DEC_AI_LIANLIAN, $unit, $info->task_id);
+
             return true;
         } catch (\Exception $exception) {
             self::setError($exception->getMessage());

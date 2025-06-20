@@ -1,435 +1,483 @@
 <template>
-    <div class="min-h-full w-full p-4">
+    <div class="w-full h-full">
         <ElScrollbar>
-            <div class="flex gap-4 pb-4">
-                <div class="bg-white rounded-xl p-6 min-w-[734px] basis-7/12">
-                    <div class="flex items-center gap-3">
-                        <div class="text-[20px] font-bold">AI内务</div>
-                        <img src="./app/_assets/images/internal_affairs.png" class="h-[26px]" />
+            <div class="w-[720px] mx-auto py-[60px]">
+                <div>
+                    <div class="flex">
+                        <div
+                            class="border border-token-primary rounded-full px-3 flex items-center justify-center gap-x-[6px] h-[28px]">
+                            <Icon name="local-icon-beautify"></Icon>
+                            <span>热门工具</span>
+                        </div>
                     </div>
-                    <div class="mt-9">
-                        <div class="grid grid-cols-4 gap-4">
-                            <div v-for="item in aiList" class="" :key="item.key">
-                                <div>
-                                    <img :src="appImageData[item.key].src" class="w-16 h-16" />
-                                    <div class="text-lg font-bold mt-4">
-                                        {{ item.title }}
-                                    </div>
+                    <div class="font-bold text-[32px] mt-[10px]">打造智能化新体验</div>
+                    <div class="mt-[10px] text-xs text-[rgba(0,0,0,0.5)]">
+                        智能（AI）工具结合先进算法与智能学习，覆盖内容生成、客户服务、图像设计、语音处理等多元场景，帮助企业降本增效、提升生产力。让复杂问题，变得简单可控。
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <div class="search-bar" :class="{ 'is-active': isSearchActive }">
+                        <div class="bg-black text-[rgba(255,255,255,0.8)] px-[25px] py-[8px] rounded-md">全部</div>
+                        <div class="mx-4 text-[rgba(0,0,0,0.5)]">精选推荐</div>
+                        <ElDivider direction="vertical" class="!mx-0" />
+                        <div class="flex-1" v-click-outside="onClickOutside">
+                            <ElInput
+                                ref="searchInputRef"
+                                class="w-full search-input"
+                                v-model="searchValue"
+                                placeholder="您需要什么帮助"
+                                @input="handleSearch"
+                                @focus="isSearchActive = true"
+                                @blur="isSearchActive = false" />
+                        </div>
+                        <ElPopover
+                            ref="searchPopRef"
+                            trigger="click"
+                            virtual-triggering
+                            popper-class="!w-[720px] !border-none !rounded-xl !p-0"
+                            :trigger-keys="[]"
+                            :show-arrow="false"
+                            :popper-options="{
+                                modifiers: [
+                                    {
+                                        name: 'offset',
+                                        options: {
+                                            offset: [-89, 20],
+                                        },
+                                    },
+                                ],
+                            }"
+                            :virtual-ref="searchInputRef">
+                            <div class="p-2">
+                                <div
+                                    class="max-h-[500px] overflow-y-auto overflow-x-hidden dynamic-scroller"
+                                    v-if="getSearchApp.length">
+                                    <app-more
+                                        :list="getSearchApp"
+                                        :count="searchCount"
+                                        :page-size="4"
+                                        :page="searchPage"
+                                        @handle="toDetail"
+                                        @load-more="loadSearchMore" />
                                 </div>
-                                <div class="mt-9">
-                                    <div class="font-bold text-xs">
-                                        {{ item.sub_title }}
-                                    </div>
-                                    <div class="text-xs">
-                                        {{ item.desc1 }}
-                                    </div>
-                                    <div class="text-xs">
-                                        {{ item.desc2 }}
-                                    </div>
-                                </div>
-                                <div class="mt-9">
-                                    <ElButton
-                                        color="#F2F2F7"
-                                        class="w-[60px] rounded-full !h-[21px]"
-                                        @click="handleStart(item)">
-                                        <span class="text-primary font-bold text-xs">使用</span>
-                                    </ElButton>
-                                    <ElButton link @click="toDetail(item.key, item.id)">
-                                        <span class="text-xs text-[#9F9F9F] hover:underline"> 前往了解> </span>
-                                    </ElButton>
-                                </div>
+                                <ElEmpty v-else description="暂无搜索结果" :image-size="100" />
                             </div>
+                        </ElPopover>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2">
+                        <div
+                            class="tag-style"
+                            v-for="item in tagList"
+                            :key="item.key"
+                            @click="handleTagClick(item.key)">
+                            {{ item.name }}·{{ item.name_en }}
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-xl p-6 basis-5/12 min-w-[448px]">
-                    <div class="flex items-center gap-3">
-                        <div class="text-[20px] font-bold">AI智能拓客</div>
-                        <img src="./app/_assets/images/smart_prospecting.png" class="h-[26px]" />
-                    </div>
-                    <div class="mt-9">
-                        <div class="grid grid-cols-4 gap-4">
-                            <div class="" v-for="item in aiCustomerList" :key="item.key">
-                                <div>
-                                    <img :src="appImageData[item.key].src" class="w-16 h-16" />
-                                    <div class="mt-4">
-                                        <ElButton
-                                            color="#F2F2F7"
-                                            class="w-[60px] rounded-full !h-[21px]"
-                                            @click="handleStart(item)">
-                                            <span class="text-primary font-bold text-xs">使用</span>
-                                        </ElButton>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-9">
-                        <div class="text-lg font-bold">全域流量爆增新纪元！</div>
-                        <div class="text-lg font-bold">AI智能矩阵×超级IP生态闭环，打造全平台精准引流系统</div>
-                    </div>
-                    <div class="mt-[50px] flex justify-end">
-                        <ElButton link @click="toDetail('management')">
-                            <span class="text-xs text-[#9F9F9F] hover:underline"> 前往，进一步了解> </span>
-                        </ElButton>
-                    </div>
-                </div>
-            </div>
-        </ElScrollbar>
-        <ElScrollbar>
-            <div class="flex gap-4 pb-4">
-                <div class="bg-white rounded-xl p-6 min-w-[385px] basis-4/12">
-                    <div class="flex items-center gap-3">
-                        <div class="text-[20px] font-bold">AI内容营销</div>
-                        <img src="./app/_assets/images/content_engine.png" class="h-[26px]" />
-                    </div>
-                    <div class="mt-9">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div v-for="item in aiContentList" class="" :key="item.key">
-                                <div>
-                                    <img :src="appImageData[item.key].src" class="w-16 h-16" />
-                                    <div class="text-lg font-bold mt-4">
-                                        {{ item.title }}
-                                    </div>
-                                </div>
-                                <div class="mt-9">
-                                    <div class="font-bold text-xs">
-                                        {{ item.sub_title }}
-                                    </div>
-                                    <div class="text-xs">
-                                        {{ item.desc1 }}
-                                    </div>
-                                    <div class="text-xs">
-                                        {{ item.desc2 }}
-                                    </div>
-                                </div>
-                                <div class="mt-9">
-                                    <ElButton
-                                        color="#F2F2F7"
-                                        class="w-[60px] rounded-full !h-[21px]"
-                                        @click="handleStart(item)">
-                                        <span class="text-primary font-bold text-xs">使用</span>
-                                    </ElButton>
-                                    <ElButton link @click="toDetail(item.key, item.id)">
-                                        <span class="text-xs text-[#9F9F9F] hover:underline"> 前往了解> </span>
-                                    </ElButton>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl p-6 min-w-[817px] basis-8/12 flex">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-3">
-                            <div class="text-[20px] font-bold">AI客户管理</div>
-                            <img src="./app/_assets/images/engagement_hub.png" class="h-[26px]" />
-                        </div>
-                        <div class="mt-9">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div v-for="item in aiCustomerManagementList" class="" :key="item.key">
-                                    <div>
-                                        <img :src="appImageData[item.key].src" class="w-16 h-16" />
-                                        <div class="text-lg font-bold mt-4">
-                                            {{ item.title }}
+                <div class="mt-8 flex flex-col">
+                    <div>
+                        <div class="text-xl font-bold">精选推荐</div>
+                        <div class="text-xs text-[rgba(0,0,0,0.5)] mt-[10px]">让智能为你赋能，驱动无限可能！</div>
+                        <div class="mt-6 grid gap-3">
+                            <template v-for="item in recommendApp" :key="item.key">
+                                <div
+                                    v-if="item.key == AppKeyEnum.DIGITAL_HUMAN"
+                                    class="bg-black rounded-2xl p-6 col-span-3 bg-cover bg-center flex cursor-pointer"
+                                    :style="{
+                                        backgroundImage: `url(${appImageData[`${item.key}_bg`].src})`,
+                                    }"
+                                    @click="toDetail(item)">
+                                    <div class="flex-1">
+                                        <img :src="item.src" class="w-12 h-12 mt-4" />
+                                        <div class="flex items-center gap-x-2 mt-4">
+                                            <span class="text-[rgba(255,255,255,0.8)] text-[20px] font-bold">{{
+                                                item.name
+                                            }}</span>
+                                            <span
+                                                v-if="item.is_hot"
+                                                class="text-xs text-white px-2 py-1 rounded-md bg-primary"
+                                                >热门工具</span
+                                            >
+                                            <span
+                                                v-else-if="item.is_new"
+                                                class="text-xs text-white px-2 py-1 rounded-md bg-[#FF4906]"
+                                                >最新上线</span
+                                            >
+                                        </div>
+                                        <div class="flex items-center gap-x-2 mt-3">
+                                            <Icon name="local-icon-hot2"></Icon>
+                                            <span class="text-[rgba(255,255,255,0.8)]">热门首推的智能工具</span>
+                                        </div>
+                                        <div class="mt-3 text-xs text-[rgba(255,255,255,0.5)] w-[306px]">
+                                            {{ item.desc }}
                                         </div>
                                     </div>
-                                    <div class="mt-9">
-                                        <div class="font-bold text-xs">
-                                            {{ item.sub_title }}
-                                        </div>
-                                        <div class="text-xs">
-                                            {{ item.desc1 }}
-                                        </div>
-                                        <div class="text-xs">
-                                            {{ item.desc2 }}
+                                    <div class="flex items-end">
+                                        <div class="app-more-btn text-[rgba(255,255,255,0.8)]" @click="toDetail(item)">
+                                            了解更多<Icon name="local-icon-arrow_right" :size="12"></Icon>
                                         </div>
                                     </div>
-                                    <div class="mt-9">
-                                        <ElButton
-                                            color="#F2F2F7"
-                                            class="w-[60px] rounded-full !h-[21px]"
-                                            @click="handleStart(item)">
-                                            <span class="text-primary font-bold text-xs">使用</span>
-                                        </ElButton>
-                                        <ElButton link @click="toDetail(item.key, item.id)">
-                                            <span class="text-xs text-[#9F9F9F] hover:underline"> 前往了解> </span>
-                                        </ElButton>
+                                </div>
+                                <div
+                                    v-else
+                                    class="bg-black rounded-2xl p-6 bg-cover bg-center cursor-pointer"
+                                    :style="{
+                                        backgroundImage: `url(${appImageData[`${item.key}_bg`].src})`,
+                                    }"
+                                    @click="toDetail(item)">
+                                    <div class="flex items-center gap-x-2 mt-[73px]">
+                                        <span class="text-[rgba(255,255,255,0.8)] text-[20px] font-bold">{{
+                                            item.name
+                                        }}</span>
+                                        <span
+                                            v-if="item.is_hot"
+                                            class="text-xs text-white px-2 py-1 rounded-md bg-primary"
+                                            >热门工具</span
+                                        >
+                                        <span
+                                            v-else-if="item.is_new"
+                                            class="text-xs text-white px-2 py-1 rounded-md bg-[#FF4906]"
+                                            >最新上线</span
+                                        >
+                                    </div>
+                                    <div class="mt-3 text-xs text-[rgba(255,255,255,0.5)]">
+                                        {{ item.desc }}
+                                    </div>
+                                    <div class="app-more-btn text-[rgba(255,255,255,0.8)] mt-5" @click="toDetail(item)">
+                                        了解更多<Icon name="local-icon-arrow_right" :size="12"></Icon>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
                         </div>
                     </div>
-                    <div class="bg-[#F7F7FA] rounded-xl p-6 w-[421px] flex-shrink-0 flex flex-col">
-                        <div class="grow flex items-center justify-between gap-4">
-                            <div>
-                                <div class="font-bold text-lg">AI个微助手</div>
-                                <div class="text-gl text-[#A1A1A1] mt-2">智能回复，精准触达，私域运营全自动化</div>
-                                <div class="text-lg leading-[22px] mt-[22px]">
-                                    AI私域个人微信助手，自动接管微信消息回复，全自动发送SOP，助力私域流量精细化运营，轻松实现自动化管理。
-                                </div>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <img src="./app/_assets/app/person_wechat.png" class="w-[140px] h-[140px]" />
-                            </div>
+                    <div class="mt-8">
+                        <div class="text-xl font-bold">热门内容</div>
+                        <div class="text-xs text-[rgba(0,0,0,0.5)] mt-[10px]">
+                            挖掘深层价值，精准洞察需求，快速实现业务增长
                         </div>
-                        <div class="flex justify-end items-center">
-                            <ElButton
-                                type="primary"
-                                class="w-[60px] rounded-full !h-[21px]"
-                                @click="handleStart({ key: 'person_wechat' })">
-                                <span class="font-bold text-xs">使用</span>
-                            </ElButton>
-                            <ElButton link @click="toDetail('person_wechat')">
-                                <span class="text-xs text-[#9F9F9F] hover:underline"> 前往，进一步了解> </span>
-                            </ElButton>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </ElScrollbar>
-        <ElScrollbar>
-            <div class="flex gap-4 pb-4">
-                <div class="bg-white rounded-xl p-6 min-w-[949px] basis-10/12">
-                    <div class="flex items-center gap-3">
-                        <div class="text-[20px] font-bold">持续开发中</div>
-                        <img src="./app/_assets/images/in_active_development.png" class="h-[26px]" />
-                    </div>
-                    <div class="mt-9">
-                        <div class="flex justify-between gap-4">
-                            <div v-for="item in aiIngList" :key="item.key">
-                                <div class="flex flex-col items-center">
-                                    <img
-                                        :src="appImageData[item.key].src"
-                                        class="w-16 h-16"
-                                        :class="{
-                                            'rounded-[15px]  shadow-lighter': item.key == 'company_wechat',
-                                        }" />
-                                    <div class="text-lg font-bold mt-4">
-                                        {{ item.title }}
+                        <div class="mt-6 bg-white rounded-xl p-3">
+                            <template v-for="(item, index) in hotApp">
+                                <div
+                                    v-if="item.key == AppKeyEnum.PERSON_WECHAT"
+                                    class="bg-black rounded-2xl p-6 mb-[14px] bg-cover bg-center cursor-pointer"
+                                    :style="{
+                                        backgroundImage: `url(${appImageData[`${item.key}_bg`].src})`,
+                                    }"
+                                    @click="toDetail(item)">
+                                    <img :src="item.src" class="w-12 h-12 mt-4" />
+                                    <div class="mt-4 text-[rgba(255,255,255,0.8)] text-[20px] font-bold">
+                                        {{ item.name }}
+                                    </div>
+                                    <div class="mt-3 text-xs text-[rgba(255,255,255,0.5)] w-[306px]">
+                                        {{ item.desc }}
+                                    </div>
+                                    <div class="app-more-btn text-[rgba(255,255,255,0.8)] mt-9" @click="toDetail(item)">
+                                        了解更多<Icon name="local-icon-arrow_right" :size="12"></Icon>
                                     </div>
                                 </div>
-                            </div>
+                                <app-card v-else :item="item" @click="toDetail(item)" />
+                            </template>
                         </div>
                     </div>
-                </div>
-                <div class="bg-white rounded-xl p-6 min-w-[233px] basis-2/12">
-                    <div class="flex items-center gap-3">
-                        <div class="text-[20px] font-bold">技术底座</div>
-                        <img src="./app/_assets/images/base.png" class="h-[26px]" />
-                    </div>
-                    <div class="mt-9">
-                        <div class="flex justify-between gap-4">
-                            <div v-for="item in aiBaseList" :key="item.key">
-                                <div class="text-center">
-                                    <img :src="appImageData[item.key].src" class="w-16 h-16" />
-                                    <div class="text-lg font-bold mt-4">
-                                        {{ item.title }}
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="mt-8">
+                        <div class="text-xl font-bold">更多工具</div>
+                        <div class="text-xs text-[rgba(0,0,0,0.5)] mt-[10px]">
+                            通过持续开发与迭代更新，我们让功能更强大、体验更流畅、场景适应性更全面，助力企业在竞争中始终保持技术领先
+                        </div>
+                        <div class="mt-6 bg-white rounded-xl p-3">
+                            <app-more
+                                :list="getMoreApp"
+                                :count="moreApp.length"
+                                :page-size="morePageSize"
+                                :page="morePage"
+                                @handle="toDetail"
+                                @load-more="loadMore" />
                         </div>
                     </div>
                 </div>
             </div>
         </ElScrollbar>
     </div>
-    <AppTips v-if="showTips" ref="appTipsRef" :name="appName" @close="showTips = false" />
+    <app-intro v-if="showAppIntro" ref="appIntroRef" :name="appName" @close="showAppIntro = false" />
+    <popup ref="followPopRef" width="412" confirm-button-text="" cancel-button-text="" :show-close="false">
+        <div class="-mb-10">
+            <div
+                class="absolute right-4 top-4 w-6 h-6 rounded-full bg-[#F2F2F2] flex items-center justify-center cursor-pointer"
+                @click="closeFollowPop">
+                <Icon name="el-icon-Close"></Icon>
+            </div>
+            <div class="text-[24px] font-bold">
+                {{ currTag.name }}
+            </div>
+            <div class="text-xs mt-[15px] text-[rgba(0,0,0,0.5)]">
+                {{ currTag.desc }}
+            </div>
+            <div class="mt-[26px] flex flex-col gap-y-1">
+                <div
+                    v-for="(item, index) in getFollowList(currTag.key)"
+                    :key="index"
+                    class="app-item-card"
+                    @click="toDetail(item)">
+                    <div class="h-full hover:bg-[rgba(0,0,0,0.03)] flex items-center px-[10px] rounded-[10px] gap-x-3">
+                        <img :src="item.src" class="w-12 h-12" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-2">
+                                <div class="font-bold">{{ item.name }}</div>
+                                <div
+                                    v-if="!item.is_online"
+                                    class="text-[11px] bg-[rgba(0,0,0,0.05)] rounded px-2 py-[2px] text-[rgba(0,0,0,0.5)]">
+                                    开发进行中
+                                </div>
+                            </div>
+                            <div class="mt-1 flex items-center">
+                                <span class="text-[#00000080] text-xs">
+                                    {{ item.desc }}
+                                </span>
+                                <span class="app-more-btn ml-2" @click="toDetail(item)"> 了解更多 </span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <ElButton
+                                type="primary"
+                                round
+                                class="!w-[100px] !h-[36px] !text-xs"
+                                @click="toggleFollow(item.key)"
+                                >{{ isFollow(item.key) ? "取消关注" : "关注" }}
+                            </ElButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-5">
+                <div class="text-xs flex justify-center mb-8 gap-2 items-center p-1 bg-[#00000008] rounded-full">
+                    <Icon name="local-icon-tips2" :size="16"></Icon>
+                    <span class="text-[#0000004d] text-xs"
+                        >我们正不断拓展智能（AI）工具的边界及解决方案，敬请期待。</span
+                    >
+                </div>
+            </div>
+        </div>
+    </popup>
+    <live-popup v-if="showLivePop" ref="livePopRef" @close="showLivePop = false" />
 </template>
 
 <script setup lang="ts">
-import { getStaffLists } from "@/api/app";
-import AppTips from "./app/_components/app-tips.vue";
 import { getBaseUrl } from "@/utils/env";
+import { useFollowStore } from "@/stores/follow";
+import { ClickOutside as vClickOutside } from "element-plus";
+import { applications } from "@/config/common";
+import { AppKeyEnum, appKeyNameMap, FollowTypeEnum } from "@/enums/appEnums";
+import AppIntro from "./app/_components/app-intro.vue";
+import AppMore from "./app/_components/app-more.vue";
+import AppCard from "./app/_components/app-card.vue";
+import LivePopup from "./app/_components/live-popup.vue";
 
-const appImageModules = import.meta.glob("./app/_assets/app/*.png", {
-    eager: true,
-});
+const followStore = useFollowStore();
 
-const appImageData = Object.keys(appImageModules).reduce((acc, key) => {
+const { toggleFollow, isFollow } = followStore;
+
+const appImages = {
+    ...import.meta.glob("./app/_assets/images/*.png", { eager: true }),
+};
+
+const appImageData = Object.keys(appImages).reduce((acc, key) => {
     const name = key.split("/").pop()?.split(".")[0];
     if (name) {
         acc[name] = {
             name,
-            src: (appImageModules[key] as any).default,
+            src: (appImages[key] as any).default,
         };
     }
     return acc;
 }, {} as Record<string, { name: string; src: string }>);
 
-const appTipsRef = ref<InstanceType<typeof AppTips> | null>(null);
-
-const router = useRouter();
-const showTips = ref(false);
-
-// AI内务
-const aiList = [
+const tagList = [
     {
-        id: 6,
-        key: "ladder_player",
-        title: "AI员工陪练",
-        sub_title: "自动培训员工",
-        desc1: "5类算法全面分析",
-        desc2: "陪练式学习反馈",
+        key: FollowTypeEnum.INTERNAL,
+        name: "内务工具",
+        name_en: "Internal Affairs",
+        desc: "智能提醒、任务分配、自动归档，一站式提升团队效率与组织力，让时间与精力专注于真正重要的事。",
     },
     {
-        id: 2,
-        key: "interview",
-        title: "AI自动面试",
-        sub_title: "全自动化招聘流程",
-        desc1: "AI自动筛选牛人",
-        desc2: "自动面试并出具报告",
+        key: FollowTypeEnum.SMART_MARKETING,
+        name: "智能拓客",
+        name_en: "Smart Prospecting",
+        desc: "快速锁定潜在客户，数据驱动、智能推荐，让拓客更高效，成交更简单，助力企业业绩稳步增长！",
     },
     {
-        id: 4,
-        key: "meeting_minutes",
-        title: "会议助手",
-        sub_title: "多人发言自动识别",
-        desc1: "AI分析待办事项",
-        desc2: "纪要代办一手总结",
+        key: FollowTypeEnum.CUSTOMER_MANAGEMENT,
+        name: "客户管理",
+        name_en: "Engagement Hub",
+        desc: "精准洞察客户需求，自动跟进潜在商机，提升转化效率。帮你打造更贴心、更高效的客户体验。",
     },
     {
-        id: 5,
-        key: "mind_map",
-        title: "头脑风暴",
-        sub_title: "一句话生成思维导图",
-        desc1: "系统化梳理逻辑",
-        desc2: "可视化思维导图展示",
+        key: FollowTypeEnum.CONTENT_MARKETING,
+        name: "内容营销",
+        name_en: "Content Marketing",
+        desc: "快速锁定潜在客户，数据驱动、智能推荐，让拓客更高效，成交更简单，助力企业业绩稳步增长！",
     },
 ];
+const currTag = ref<any>(null);
 
-// AI智能拓客
-const aiCustomerList = [
-    {
-        key: "redbook",
-    },
-    {
-        key: "douyin",
-    },
-    {
-        key: "kuaishou",
-    },
-    {
-        key: "sph",
-    },
-];
-// AI内容营销
-const aiContentList = [
-    {
-        id: 1,
-        key: "digital_human",
-        title: "AI数字人",
-        sub_title: "智能同步音色",
-        desc1: "输入文本AI替您发言",
-        desc2: "自定台词精准匹配口型",
-    },
-    {
-        id: 3,
-        key: "drawing",
-        title: "AI图片设计",
-        sub_title: "AI智能生成设计",
-        desc1: "风格自选秒变专业视觉",
-        desc2: "输入需求定制专属创意",
-    },
-];
+// 应用配置
+const APP_CONFIG = {
+    // 精选推荐
+    RECOMMEND: [AppKeyEnum.DIGITAL_HUMAN, AppKeyEnum.REDBOOK, AppKeyEnum.MEETING_MINUTES, AppKeyEnum.INTERVIEW],
+    // 热门内容
+    HOT: [AppKeyEnum.PERSON_WECHAT, AppKeyEnum.LIVE, AppKeyEnum.SERVICE, AppKeyEnum.TELEMARKETING],
 
-// AI客户管理
-const aiCustomerManagementList = [
-    {
-        id: 10,
-        key: "telemarketing",
-        title: "AI电销获客",
-        sub_title: "AI自动打电话获客",
-        desc1: "批量自动引流获客",
-        desc2: "智能识别意图精准转化",
-    },
-    {
-        key: "service",
-        title: "自动客服",
-        sub_title: "支持多渠道客户服务整合",
-        desc1: "提供智能客服解答功能",
-        desc2: "兼容H5、小程序、个/企微",
-    },
-];
+    // 更多工具
+    MORE: [
+        AppKeyEnum.DIGITAL_HUMAN,
+        AppKeyEnum.PERSON_WECHAT,
+        AppKeyEnum.REDBOOK,
+        AppKeyEnum.LADDER_PLAYER,
+        AppKeyEnum.INTERVIEW,
+        AppKeyEnum.MEETING_MINUTES,
+        AppKeyEnum.DRAWING,
+        AppKeyEnum.SERVICE,
+        AppKeyEnum.MIND_MAP,
+        AppKeyEnum.DOUBYIN,
+        AppKeyEnum.KUAISHOU,
+        AppKeyEnum.SPH,
+        AppKeyEnum.TELEMARKETING,
+        AppKeyEnum.TAX,
+        AppKeyEnum.LAW,
+        AppKeyEnum.WORD,
+        AppKeyEnum.PPT,
+        AppKeyEnum.COMPANY_WECHAT,
+        AppKeyEnum.STATEMENT,
+        AppKeyEnum.POSTER,
+        AppKeyEnum.CONTRACT,
+        AppKeyEnum.LIVE,
+    ],
+} as const;
 
-// 持续开发中
-const aiIngList = [
-    {
-        key: "tax",
-        title: "AI税务",
-    },
-    {
-        key: "law",
-        title: "AI法务",
-    },
-    {
-        key: "word",
-        title: "AI-WORD",
-    },
-    {
-        key: "ppt",
-        title: "AI-PPT",
-    },
-    {
-        key: "company_wechat",
-        title: "AI-企微",
-    },
-    {
-        key: "statement",
-        title: "AI报表",
-    },
-    {
-        key: "poster",
-        title: "AI海报",
-    },
-    {
-        key: "contract",
-        title: "AI合同审查",
-    },
-];
+const followPopRef = shallowRef();
+const handleTagClick = (key: FollowTypeEnum) => {
+    currTag.value = tagList.find((item) => item.key === key);
+    followPopRef.value.open();
+};
 
-// 技术底座
-const aiBaseList = [
-    {
-        key: "deepseek",
-        title: "DeepSeek",
-    },
-    {
-        key: "tongyi",
-        title: "通义千问",
-    },
-];
+const closeFollowPop = () => {
+    followPopRef.value.close();
+};
 
-const toDetail = (key: string, id?: number) => {
-    if (key === "management" || key === "telemarketing" || !id) {
-        feedback.notifyWarning("功能正在开发中，敬请期待!");
+const getTagAppList = (key: FollowTypeEnum) => {
+    const list: any = Object.keys(applications).map((key) => ({
+        ...applications[key],
+        key,
+    }));
+    return list.filter((item: any) => item.followType === key);
+};
+
+const getFollowList = computed(() => {
+    return (key: FollowTypeEnum) => getTagAppList(key);
+});
+
+// 精选推荐
+const recommendApp = computed(() => {
+    return APP_CONFIG.RECOMMEND.map((key) => ({
+        key,
+        ...applications[key],
+        desc: applications[key].desc2,
+        name: appKeyNameMap[key],
+        is_new: key == AppKeyEnum.REDBOOK,
+        is_hot: [AppKeyEnum.DIGITAL_HUMAN, AppKeyEnum.MEETING_MINUTES, AppKeyEnum.INTERVIEW].includes(key),
+    }));
+});
+
+// 热门内容
+const hotApp = computed(() => {
+    return APP_CONFIG.HOT.map((key) => ({
+        key,
+        ...applications[key],
+        desc: applications[key].desc2,
+        name: appKeyNameMap[key],
+    }));
+});
+
+// 更多工具
+const morePageSize = ref(6);
+const morePage = ref(1);
+const moreApp = computed(() => {
+    return APP_CONFIG.MORE.map((key) => ({
+        key,
+        ...applications[key],
+        desc: applications[key].desc2,
+        name: appKeyNameMap[key],
+    }));
+});
+
+const getMoreApp = computed(() => {
+    return moreApp.value.slice(0, morePage.value * morePageSize.value);
+});
+
+const loadMore = () => {
+    morePage.value++;
+};
+
+const searchInputRef = shallowRef();
+const searchPopRef = shallowRef();
+const onClickOutside = () => {
+    unref(searchPopRef).popperRef?.delayHide?.();
+};
+
+const searchValue = ref("");
+const searchApp = ref<any[]>(moreApp.value);
+const searchPage = ref(1);
+const searchCount = ref(searchApp.value.length);
+const isSearchActive = ref(false);
+const getSearchApp = computed(() => {
+    const lists = searchApp.value.slice(0, searchPage.value * 4);
+    return lists.filter((item) => item.name.includes(searchValue.value.trim()));
+});
+
+const loadSearchMore = () => {
+    searchPage.value++;
+};
+
+const handleSearch = (value: string) => {
+    if (!value.trim()) {
+        searchCount.value = moreApp.value.length;
         return;
     }
-    router.push(`/app/detail?id=${id}`);
+    searchCount.value = getSearchApp.value.length;
 };
+
+const appIntroRef = ref<InstanceType<typeof AppIntro> | null>(null);
+const showAppIntro = ref(false);
+
+const livePopRef = shallowRef();
+const showLivePop = ref(false);
 
 const appName = ref("");
 
-const handleStart = async (item: any) => {
+const toDetail = async (item: any) => {
     const { key, name } = item;
     switch (key) {
-        case "digital_human":
-        case "drawing":
-        case "meeting_minutes":
-        case "mind_map":
-        case "interview":
-        case "redbook":
-        case "service":
-            router.push(`/app/${key}`);
+        case AppKeyEnum.DIGITAL_HUMAN:
+        case AppKeyEnum.DRAWING:
+        case AppKeyEnum.MEETING_MINUTES:
+        case AppKeyEnum.MIND_MAP:
+        case AppKeyEnum.INTERVIEW:
+        case AppKeyEnum.REDBOOK:
+        case AppKeyEnum.SERVICE:
+            window.open(`${getBaseUrl()}/app/${key}`, "_blank");
             break;
-
-        case "ladder_player":
+        case AppKeyEnum.LADDER_PLAYER:
             appName.value = name;
-            showTips.value = true;
+            showAppIntro.value = true;
             await nextTick();
-            appTipsRef.value?.open("ladder_player");
+            appIntroRef.value?.open("ladder_player");
             break;
-        case "person_wechat":
+        case AppKeyEnum.PERSON_WECHAT:
             window.open(`${getBaseUrl()}/app/person_wechat/chat`, "_blank");
+            break;
+        case AppKeyEnum.LIVE:
+            showLivePop.value = true;
+            await nextTick();
+            livePopRef.value?.open();
             break;
         default:
             feedback.notifyWarning("功能正在开发中，敬请期待!");
@@ -438,4 +486,28 @@ const handleStart = async (item: any) => {
 };
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.search-bar {
+    @apply rounded-xl border border-token-primary bg-white p-2 flex items-center;
+    &.is-active {
+        box-shadow: 0px 0px 0px 2px rgba(0, 101, 251, 0.2);
+        border-color: var(--color-primary);
+        background: rgba(0, 101, 251, 0.03);
+    }
+}
+:deep(.search-input) {
+    .el-input__wrapper {
+        box-shadow: none;
+        background-color: transparent;
+        .el-input__inner {
+            &::placeholder {
+                @apply text-[rgba(0,0,0,0.5)] text-base;
+            }
+        }
+    }
+}
+
+.tag-style {
+    @apply cursor-pointer rounded-full px-3 py-1 text-[11px] text-[rgba(0,0,0,0.5)] bg-[rgba(0,0,0,0.03)] hover:bg-[rgba(0,0,0,0.05)];
+}
+</style>

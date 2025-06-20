@@ -89,7 +89,7 @@ export const formatFileSize = (sizeInBytes: any, precision = 2): string => {
  * @returns 格式化后的时间字符串（格式为 HH:MM:SS）
  */
 export function formatAudioTime(seconds: number, isShowHours = false): string {
-    if (!seconds) return "00:00:00";
+    if (!seconds) return isShowHours ? "00:00:00" : "00:00";
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);

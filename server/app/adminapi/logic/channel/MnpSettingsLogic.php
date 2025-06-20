@@ -6,6 +6,7 @@ namespace app\adminapi\logic\channel;
 use app\common\logic\BaseLogic;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
+use Exception;
 
 /**
  * 小程序设置逻辑
@@ -26,17 +27,19 @@ class MnpSettingsLogic extends BaseLogic
         $qrCode = ConfigService::get('mnp_setting', 'qr_code', '');
         $qrCode = empty($qrCode) ? $qrCode : FileService::getFileUrl($qrCode);
         $config = [
-            'name'                  => ConfigService::get('mnp_setting', 'name', ''),
-            'original_id'           => ConfigService::get('mnp_setting', 'original_id', ''),
-            'qr_code'               => $qrCode,
-            'app_id'                => ConfigService::get('mnp_setting', 'app_id', ''),
-            'app_secret'            => ConfigService::get('mnp_setting', 'app_secret', ''),
-            'request_domain'        => 'https://' . $domainName,
-            'socket_domain'         => 'wss://' . $domainName,
-            'upload_file_domain'     => 'https://' . $domainName,
-            'download_file_domain'   => 'https://' . $domainName,
-            'udp_domain'            => 'udp://' . $domainName,
-            'business_domain'       => $domainName,
+            'name'                 => ConfigService::get('mnp_setting', 'name', ''),
+            'original_id'          => ConfigService::get('mnp_setting', 'original_id', ''),
+            'qr_code'              => $qrCode,
+            'app_id'               => ConfigService::get('mnp_setting', 'app_id', ''),
+            'app_secret'           => ConfigService::get('mnp_setting', 'app_secret', ''),
+            'private_key'          => ConfigService::get('mnp_setting', 'private_key', ''),
+            'app_version'          => ConfigService::get('mnp_setting', 'app_version', '1.0.0'),
+            'request_domain'       => 'https://' . $domainName,
+            'socket_domain'        => 'wss://' . $domainName,
+            'upload_file_domain'   => 'https://' . $domainName,
+            'download_file_domain' => 'https://' . $domainName,
+            'udp_domain'           => 'udp://' . $domainName,
+            'business_domain'      => $domainName,
         ];
 
         return $config;
@@ -57,5 +60,126 @@ class MnpSettingsLogic extends BaseLogic
         ConfigService::set('mnp_setting', 'qr_code', $qrCode);
         ConfigService::set('mnp_setting', 'app_id', $params['app_id']);
         ConfigService::set('mnp_setting', 'app_secret', $params['app_secret']);
+        ConfigService::set('mnp_setting', 'app_version', $params['app_secret']);
+
+        if (!empty($params['private_key'])) {
+            $saveDir = '../extend/miniprogram-ci/';
+            if (!file_exists($saveDir)) {
+                mkdir($saveDir, 0775, true);
+            }
+            //保存文件
+            $savePath = $saveDir . 'private.' . $params['app_id'] . '.key';
+            $f = fopen($savePath, 'w');
+            fwrite($f, $params['private_key']);
+            fclose($f);
+
+            ConfigService::set('mnp_setting', 'private_key', $params['private_key']);
+        }else{
+            ConfigService::set('mnp_setting', 'private_key', "");
+        }
+    }
+
+    /**
+     * @notes 上传小程序
+     * @param $params
+     * @return bool|array
+     * @author mjf
+     * @date 2025/1/8 17:33
+     */
+    public function uploadMnp($params): bool|array
+    {
+        try {
+            //校验是否已安装miniprogram-ci工具
+            if (!file_exists('../extend/miniprogram-ci/node_modules/miniprogram-ci')) {
+                throw new Exception('请先安装miniprogram-ci工具');
+            }
+
+            if (!file_exists('../extend/miniprogram-ci/mp-weixin')) {
+                throw new Exception('请先上传小程序代码文件');
+            }
+
+            $appid = ConfigService::get('mnp_setting', 'app_id', '');
+            if (!file_exists('../extend/miniprogram-ci/private.'.$appid.'.key')) {
+                throw new Exception('请先设置小程序上传私钥');
+            }
+
+            //更换小程序域名
+            $baseUrl = '../extend/miniprogram-ci/mp-weixin/config/index.js';
+            $baseUrlData = file_get_contents($baseUrl);
+            $domain = request()->domain(true) .'/';
+
+            $pattern = '/baseUrl:[a-zA-Z]/';
+            if (preg_match($pattern, $baseUrlData)) {
+                $replacement = 'baseUrl:"'.$domain.'"';
+                $newContent = preg_replace($pattern, $replacement, $baseUrlData);
+                file_put_contents($baseUrl, $newContent);
+            }else{
+                $pattern = '/baseUrl:"(https?:\/\/[^"]+\/?)"/';
+                if (preg_match($pattern, $baseUrlData, $matches)) {
+                    // 获取文件内域名
+                    $currentUrl = $matches[1];
+                    if ($currentUrl !== $domain) {
+                        $replacement = 'baseUrl:"' . $domain . '"';
+                        $newContent = preg_replace($pattern, $replacement, $baseUrlData);
+                        file_put_contents($baseUrl, $newContent);
+                    }
+                }
+            }
+
+            //上传小程序代码
+            $data = [
+                'version' => $params['upload_version'] ?? ConfigService::get('mnp_setting', 'app_version', '1.0.0'),
+                'desc'    => $params['upload_desc'] ?? '',
+                'appid'   => $appid,
+            ];
+            $json_data = json_encode($data);
+            $command = 'node ../extend/miniprogram-ci/upload.js ' . escapeshellarg($json_data) . ' 2>&1';
+            $output = null;
+            $retval = null;
+            exec($command, $output, $retval);
+
+            if ($retval) {
+                $result = ['code' => 0, 'msg' => $output, 'retval'=>$retval];
+            }else{
+                $result = ['code' => 1, 'msg' => '上传成功'];
+            }
+            return $result;
+        } catch (Exception $e) {
+            self::$error = $e->getMessage();
+            return false;
+        }
+    }
+
+    /**
+     * @notes 获取小程序分享配置
+     * @return array
+     * @author ljj
+     * @date 2022/2/16 9:38 上午
+     */
+    public function getShareConfig()
+    {
+        $image = ConfigService::get('mnp_setting', 'share_image', '');
+        $image = empty($image) ? $image : FileService::getFileUrl($image);
+        $config = [
+            'share_title'   => ConfigService::get('mnp_setting', 'share_title', ''),
+            'share_desc'    => ConfigService::get('mnp_setting', 'share_desc', ''),
+            'share_image' => $image,
+        ];
+
+        return $config;
+    }
+
+    /**
+     * @notes 设置小程序分享配置
+     * @param $params
+     * @author ljj
+     * @date 2022/2/16 9:51 上午
+     */
+    public function setShareConfig($params)
+    {
+        $image = isset($params['share_image']) ? FileService::setFileUrl($params['share_image']) : '';
+        ConfigService::set('mnp_setting', 'share_image', $image);
+        ConfigService::set('mnp_setting', 'share_title', $params['share_title']);
+        ConfigService::set('mnp_setting', 'share_desc', $params['share_desc']);
     }
 }

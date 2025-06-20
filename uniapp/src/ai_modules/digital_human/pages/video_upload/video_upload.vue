@@ -1,257 +1,287 @@
 <template>
     <view class="h-screen flex flex-col">
-        <view class="index-bg"></view>
-        <view class="relative z-30">
-            <u-navbar
-                :border-bottom="false"
-                :is-fixed="false"
-                :background="{
-                    background: 'transparent',
-                }"
-                :title="createType == ModeType.VIDEO ? '视频上传' : '形象克隆'"
-                title-bold>
-            </u-navbar>
-        </view>
         <view class="grow min-h-0 relative z-30">
             <scroll-view scroll-y class="h-full">
-                <view class="px-4 flex flex-col gap-4 py-4">
-                    <!-- 形象名称 -->
+                <view class="p-[32rpx]">
                     <view>
-                        <view class="flex items-center gap-1">
-                            <text class="font-bold">克隆模特名称</text>
-                            <text class="text-[#E33C64] font-bold">*</text>
+                        <view class="flex items-center gap-x-2">
+                            <image
+                                src="@/ai_modules/digital_human/static/icons/video_upload_tips_1.svg"
+                                class="w-[36rpx] h-[36rpx]"></image>
+                            <text class="opacity-80 text-[30rpx] font-bold">视频教程</text>
                         </view>
-                        <view class="mt-[24rpx]">
-                            <view class="border border-solid border-[#EBEBEB] rounded-lg px-2 py-[5rpx]">
-                                <u-input v-model="formData.name" placeholder="请输入形象名称" maxlength="10"></u-input>
+                        <view class="mt-[36rpx]">
+                            <view class="h-[384rpx] rounded-[40rpx] relative">
+                                <view class="absolute top-[40rpx] left-0 w-full px-[40rpx] z-[788]">
+                                    <view class="text-white opacity-80 text-[26rpx]"> 快速了解操作流程 </view>
+                                </view>
+                                <video-player
+                                    :play-icon-size="88"
+                                    :poster="`${config.baseUrl}static/images/dh_example_bg2.png`"
+                                    :video-url="`${config.baseUrl}static/videos/dh_example2.mp4`"></video-player>
                             </view>
                         </view>
                     </view>
-                    <!-- 驱动引擎 -->
-                    <view>
-                        <view class="flex items-center gap-1">
-                            <text class="font-bold">模型选择</text>
-                            <text class="text-[#E33C64] text-xl font-bold">*</text>
+                    <view class="mt-[26rpx]">
+                        <view class="flex items-center gap-x-2">
+                            <image
+                                src="@/ai_modules/digital_human/static/icons/video_upload_tips_2.svg"
+                                class="w-[36rpx] h-[36rpx]"></image>
+                            <text class="opacity-80 text-[30rpx] font-bold">视频要求</text>
                         </view>
-                        <view class="mt-[24rpx]">
-                            <data-select
-                                v-model="formData.model_version"
-                                placeholder="请选择模型"
-                                :clear="false"
-                                :localdata="modeLists"></data-select>
+                        <view class="mt-[30rpx] flex items-center gap-x-4">
+                            <image
+                                class="w-[320rpx] flex-shrink-0"
+                                mode="widthFix"
+                                src="@/ai_modules/digital_human/static/images/common/video_upload_temp.png"></image>
+                            <view class="flex flex-col gap-y-[24rpx]">
+                                <view
+                                    v-for="(item, index) in uploadTemplateContentLists"
+                                    :key="index"
+                                    class="flex items-center gap-x-[6rpx] leading-6">
+                                    <text
+                                        class="flex-shrink-0 w-[36rpx] h-[36rpx] rounded-full flex items-center justify-center text-[22rpx] text-primary bg-primary-light-9">
+                                        {{ index + 1 }}
+                                    </text>
+                                    <text class="text-[26rpx] opacity-80">{{ item.name }}</text>
+                                    <text class="text-[26rpx] opacity-30">{{ item.value }}</text>
+                                </view>
+                            </view>
                         </view>
                     </view>
-                    <!-- 视频要求 -->
-                    <view class="flex flex-col gap-4">
-                        <view>
-                            <view class="flex items-center gap-2">
-                                <text class="w-[6rpx] h-[24rpx] bg-primary rounded-md"></text>
-                                <text class="relative z-10 font-bold"> 视频要求 </text>
-                            </view>
-                            <view class="mt-2 flex gap-2">
-                                <view>
-                                    <image
-                                        src="@/ai_modules/digital_human/static/images/common/upload_temp1.png"
-                                        class="w-[350rpx]"
-                                        mode="widthFix"></image>
-                                </view>
-                                <view class="flex flex-col gap-y-2 grow">
-                                    <view
-                                        class="grow"
-                                        v-for="(item, index) in modelUploadRequirements[formData.model_version]"
-                                        :key="index">
-                                        <image
-                                            src="@/ai_modules/digital_human/static/images/common/success.png"
-                                            class="w-4 h-4 inline-block align-sub mr-1"></image>
-                                        <text class="text-[#7792ED] text-sm">
-                                            {{ item.desc }}
-                                        </text>
-                                    </view>
-                                </view>
-                            </view>
+                    <view class="mt-[26rpx]">
+                        <view class="flex items-center gap-x-2">
+                            <image
+                                src="@/ai_modules/digital_human/static/icons/video_upload_tips_3.svg"
+                                class="w-[36rpx] h-[36rpx]"></image>
+                            <text class="opacity-80 text-[30rpx] font-bold">错误示例</text>
                         </view>
-                        <view>
-                            <view class="flex items-center gap-2">
-                                <text class="w-[6rpx] h-[24rpx] bg-error rounded-md"></text>
-                                <text class="relative z-10 font-bold"> 错误示范 </text>
-                            </view>
-                            <view class="mt-2">
-                                <image
-                                    src="@/ai_modules/digital_human/static/images/common/upload_temp2.png"
-                                    class="w-full"
-                                    mode="widthFix"></image>
-                            </view>
+                        <view class="mt-[30rpx]">
+                            <image
+                                src="@/ai_modules/digital_human/static/images/common/video_upload_error_temp.png"
+                                class="h-[198rpx] w-full"></image>
                         </view>
                     </view>
                 </view>
             </scroll-view>
         </view>
-        <view class="bg-white px-4 pt-2 pb-4 z-30">
+        <view class="mx-[60rpx] mb-[60rpx]">
             <u-button
                 type="primary"
-                :custom-style="{ height: '96rpx', borderRadius: '16rpx' }"
-                @click="confirmUpload()">
+                shape="circle"
+                :custom-style="{
+                    height: '90rpx',
+                    boxShadow: ' 0px 3px 12px 0px rgba(0, 0, 0, 0.12)',
+                    fontSize: '26rpx',
+                }"
+                @click="startUpload()">
                 我已经知晓，开始上传视频
             </u-button>
         </view>
     </view>
+    <upload-loading
+        v-if="showUploadProgress"
+        :progress="uploadProgressNum"
+        :loading-text="loadingText"
+        :is-success="isUploadSuccess"
+        @cancel="handleUploadCancel"
+        @back="back"
+        @confirm="handelUploadConfirm"></upload-loading>
+    <recharge-popup v-if="showRechargePopup" ref="rechargePopupRef" @close="showRechargePopup = false"></recharge-popup>
 </template>
 
 <script setup lang="ts">
-import {
-    ModeType,
-    DigitalHumanModelVersionEnum,
-    DigitalHumanModelVersionEnumMap,
-} from "@/ai_modules/digital_human/enums";
-import { useUpload, uploadLimit, commonUploadLimit } from "../../hooks/useUpload";
+import config from "@/config";
+import request from "@/utils/request";
+import { createAnchor } from "@/api/digital_human";
 import { useAppStore } from "@/stores/app";
+import { TokensSceneEnum } from "@/enums/appEnums";
+import { ModeType, ListenerType, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
+import { useUpload, uploadLimit, commonUploadLimit } from "../../hooks/useUpload";
+import VideoPlayer from "@/ai_modules/digital_human/components/video-player/video-player.vue";
+import UploadLoading from "@/ai_modules/digital_human/components/upload-loading/upload-loading.vue";
+import { useUserStore } from "@/stores/user";
 
 const appStore = useAppStore();
+const userStore = useUserStore();
+const { userTokens } = toRefs(userStore);
 
-const createType = ref<ModeType>();
+const modeType = ref<ModeType>();
 
 const formData = reactive<any>({
     name: "",
     url: "",
     pic: "",
-    seconds: "",
-    model_version: DigitalHumanModelVersionEnum.STANDARD,
+    anchor_id: "",
+    model_version: "",
 });
 
-// 驱动引擎
-const modeLists = ref<any[]>([]);
+// 充值弹窗
+const showRechargePopup = ref(false);
+const rechargePopupRef = ref();
 
-// 上传视频格式限制
-const uploadVideoFormat = `.mp4,.mov`;
-
-const commonUploadRequirements = [
-    {
-        desc: "视频全程只能有一个人物，嘴型不得遮挡，不得多人出镜",
-    },
-    {
-        desc: `文件≤${commonUploadLimit.size}MB，${commonUploadLimit.videoMinDuration}秒＜时长＜${commonUploadLimit.videoMaxDuration}秒`,
-    },
-    {
-        desc: "15fps≤帧率≤60fps",
-    },
-    {
-        desc: `清晰度必须为${commonUploadLimit.minResolution}P-${commonUploadLimit.maxResolution}P以内`,
-    },
-    {
-        desc: "视频内音频需要清晰、响亮且无嘈杂背景音等干扰",
-    },
-    {
-        desc: "视频应为人物正面出镜的近景画面。避免大角度侧脸或人脸过小。",
-    },
-];
+// 上传格式
+const extension = ["mp4", "mov"];
+const showUploadProgress = ref(false);
+const uploadProgressNum = ref(0);
+const isUploadSuccess = ref(false);
+const loadingText = ref("");
+const commonUploadRequirements = {
+    resolution: `${commonUploadLimit.minResolution}P-${commonUploadLimit.maxResolution}P`,
+    fileSize: commonUploadLimit.size,
+};
 
 // 模型要求对应的上传要求描述
 const modelUploadRequirements: any = {
-    [DigitalHumanModelVersionEnum.STANDARD]: [
-        {
-            desc: "视频全程只能有一个人物，嘴型不得遮挡，不得多人出镜",
-        },
-        {
-            desc: `文件≤${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].size}MB，${
-                uploadLimit[DigitalHumanModelVersionEnum.STANDARD].videoMinDuration
-            }秒＜时长＜${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].videoMaxDuration}秒`,
-        },
-        {
-            desc: `像素${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].minResolution}P-${
-                uploadLimit[DigitalHumanModelVersionEnum.STANDARD].maxResolution
-            }P以内`,
-        },
-        {
-            desc: "人脸大小必须小于视频宽度1/2",
-        },
-        {
-            desc: "视频内音频需要清晰、响亮且无嘈杂背景音等干扰",
-        },
-    ],
-    [DigitalHumanModelVersionEnum.SUPER]: [
-        {
-            desc: "视频全程只能有一个人物，嘴型不得遮挡，不得多人出镜",
-        },
-        {
-            desc: `文件≤${uploadLimit[DigitalHumanModelVersionEnum.SUPER].size}MB，${
-                uploadLimit[DigitalHumanModelVersionEnum.SUPER].videoMinDuration
-            }秒＜时长＜${uploadLimit[DigitalHumanModelVersionEnum.SUPER].videoMaxDuration}秒`,
-        },
-        {
-            desc: "15fps≤帧率≤60fps",
-        },
-        {
-            desc: `清晰度必须为${uploadLimit[DigitalHumanModelVersionEnum.SUPER].minResolution}P-${
-                uploadLimit[DigitalHumanModelVersionEnum.SUPER].maxResolution
-            }P以内`,
-        },
-        {
-            desc: "视频内音频需要清晰、响亮且无嘈杂背景音等干扰",
-        },
-        {
-            desc: "视频应为人物正面出镜的近景画面。避免大角度侧脸或人脸过小。",
-        },
-    ],
+    [DigitalHumanModelVersionEnum.STANDARD]: {
+        resolution: `${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].minResolution}P-${
+            uploadLimit[DigitalHumanModelVersionEnum.STANDARD].maxResolution
+        }P`,
+        fileSize: uploadLimit[DigitalHumanModelVersionEnum.STANDARD].size,
+    },
+    [DigitalHumanModelVersionEnum.SUPER]: {
+        resolution: `${uploadLimit[DigitalHumanModelVersionEnum.SUPER].minResolution}P-${
+            uploadLimit[DigitalHumanModelVersionEnum.SUPER].maxResolution
+        }P`,
+        fileSize: uploadLimit[DigitalHumanModelVersionEnum.SUPER].size,
+    },
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadRequirements,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadRequirements,
 };
+
+const uploadTemplateContentLists = computed(() => {
+    return [
+        { name: "视频方向", value: "横向或纵向" },
+        { name: "文件格式", value: extension.join("、") },
+        { name: "视频时长", value: "10秒-300秒" },
+        { name: "分辨率", value: modelUploadRequirements[formData.model_version]?.resolution },
+        { name: "文件大小", value: `小于${modelUploadRequirements[formData.model_version]?.fileSize}MB` },
+    ];
+});
 
 // 上传参数
 const uploadParams = computed(() => {
     return uploadLimit[formData.model_version];
 });
 
-const confirmUpload = async () => {
-    if (!formData.name) {
-        uni.$u.toast("请输入形象名称");
-        return;
-    } else if (!formData.name.match(/^[a-zA-Z0-9\u4e00-\u9fa5]+$/)) {
-        uni.$u.toast("形象名称只限中、英文字或者字母。");
-        return;
+const getTokenByScene = (key: string) => userStore.getTokenByScene(key);
+
+const startUpload = async () => {
+    if (modeType.value == ModeType.ANCHOR) {
+        const sceneKeys = {
+            pro: {
+                avatar: TokensSceneEnum.HUMAN_AVATAR_PRO,
+            },
+            normal: {
+                avatar: TokensSceneEnum.HUMAN_AVATAR,
+            },
+            advanced: {
+                avatar: TokensSceneEnum.HUMAN_AVATAR_ADVANCED,
+            },
+            elite: {
+                avatar: TokensSceneEnum.HUMAN_AVATAR_ELITE,
+            },
+        };
+        const keys = (() => {
+            switch (parseInt(formData.model_version)) {
+                case DigitalHumanModelVersionEnum.SUPER:
+                    return sceneKeys.pro;
+                case DigitalHumanModelVersionEnum.ADVANCED:
+                    return sceneKeys.advanced;
+                case DigitalHumanModelVersionEnum.ELITE:
+                    return sceneKeys.elite;
+                default:
+                    return sceneKeys.normal;
+            }
+        })();
+        const { score } = getTokenByScene(keys.avatar);
+        if (userTokens.value < score) {
+            showRechargePopup.value = true;
+            await nextTick();
+            rechargePopupRef.value?.open();
+            return;
+        }
     }
-    const { uploadResult, upload } = useUpload({
+    // #ifndef H5
+    uni.setNavigationBarColor({
+        frontColor: "#000000",
+        backgroundColor: "#000000",
+    });
+    // #endif
+    const { upload } = useUpload({
         size: uploadParams.value?.size,
         resolution: [uploadParams.value?.minResolution, uploadParams.value?.maxResolution],
         duration: [uploadParams.value?.videoMinDuration, uploadParams.value?.videoMaxDuration],
-        extension: ["mp4", "mov"],
-        onSuccess(res) {
-            const { url, pic, seconds, duration } = res;
+        extension: extension,
+        async onSuccess(res) {
+            const { url } = res;
             formData.url = url;
-            formData.pic = pic;
-            formData.seconds = seconds;
-            formData.duration = duration;
-            const page_url =
-                createType.value == ModeType.VIDEO
-                    ? "/ai_modules/digital_human/pages/video_create/video_create"
-                    : "/ai_modules/digital_human/pages/anchor_clone/anchor_clone";
-            uni.$u.route({
-                url: page_url,
-                params: formData,
+            formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2);
+            loadingText.value = "形象克隆中...";
+            try {
+                const result = await createAnchor(formData);
+                formData.pic = result.picurl;
+                formData.anchor_id = result.id;
+                isUploadSuccess.value = true;
+                loadingText.value = "";
+            } catch (error) {
+                showUploadProgress.value = false;
+                uploadProgressNum.value = 0;
+                loadingText.value = "";
+                uni.$u.toast(error || "上传失败");
+                // #ifndef H5
+                uni.setNavigationBarColor({
+                    frontColor: "#000000",
+                    backgroundColor: "#F9FAFB",
+                });
+                // #endif
+            }
+        },
+        onProgress(res) {
+            uploadProgressNum.value = res;
+            showUploadProgress.value = true;
+        },
+        onError(err) {
+            showUploadProgress.value = false;
+            uploadProgressNum.value = 0;
+            // #ifndef H5
+            uni.setNavigationBarColor({
+                frontColor: "#000000",
+                backgroundColor: "#F9FAFB",
             });
+            // #endif
         },
     });
     upload();
 };
 
-watch(
-    () => appStore.getDigitalHumanModels,
-    (newVal) => {
-        modeLists.value = newVal.map((item: any) => ({
-            text: item.name,
-            value: parseInt(item.id),
-        }));
-        if (newVal.length) {
-            formData.model_version = newVal[0].id;
-        }
-    },
-    {
-        deep: true,
-        immediate: true,
-    }
-);
+const handleUploadCancel = () => {
+    request.cancelRequest();
+};
+
+const handelUploadConfirm = async () => {
+    uni.$u.route({
+        url: "/ai_modules/digital_human/pages/video_create/video_create",
+        type: "redirect",
+        params: {
+            type: ListenerType.UPLOAD_VIDEO,
+            data: JSON.stringify(formData),
+        },
+    });
+};
+
+const back = () => {
+    uni.$u.route({
+        url: "/ai_modules/digital_human/pages/index/index",
+        type: "redirect",
+    });
+};
 
 onLoad((options: any) => {
-    createType.value = options.type;
+    modeType.value = options.type;
+    if (options.model_version) {
+        formData.model_version = parseInt(options.model_version);
+    }
 });
 </script>
 

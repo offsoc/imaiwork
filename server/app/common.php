@@ -379,3 +379,32 @@ function clogger($log_content, $log_filename = 'log'){
     file_put_contents($path.'/'.date('Ymd').'_'.$log_filename.'.log', $log_content.PHP_EOL, FILE_APPEND);
     
 }
+
+/**
+ * @notes 卡密编码
+ * @param $table
+ * @param $field
+ * @param string $prefix
+ * @param int $randSuffixLength
+ * @param int $ruleType 生成规则：1-批次编号+随机字母；2-批次编号+随机数字；
+ * @return string
+ * @author ljj
+ * @date 2024/5/8 10:14 上午
+ */
+function card_sn($table, $field, $prefix = 'K', $randSuffixLength = 6, $ruleType = 2) : string
+{
+    $string = $prefix;
+    $letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for ($i = 0; $i < $randSuffixLength; $i++) {
+        if ($ruleType == 1) {
+            $string .= $letters[rand(0, strlen($letters) - 1)];
+        }
+        if ($ruleType == 2) {
+            $string .= rand(0, 9);
+        }
+    }
+    if (app()->make($table)->where($field, $string)->find()) {
+        return generate_sn($table, $field, $prefix, $randSuffixLength, $ruleType);
+    }
+    return $string;
+}

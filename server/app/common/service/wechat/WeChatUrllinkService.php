@@ -10,12 +10,11 @@ class WeChatUrllinkService
     protected ?AccessTokenAwareClient $client = null;
     protected $config;
 
-    
 
     public function getClient(): AccessTokenAwareClient
     {
-    
-        if (! $this->client) {
+
+        if (!$this->client) {
             $this->client = $this->createClient();
         }
 
@@ -35,7 +34,7 @@ class WeChatUrllinkService
     {
         $curlClient = new CurlHttpClient();
         $accessTokenAwareClient = new AccessTokenAwareClient();
-        
+
         // 这里不需要设置 HTTP 客户端
         return $accessTokenAwareClient;
     }
@@ -47,20 +46,20 @@ class WeChatUrllinkService
         $url = "https://api.weixin.qq.com/wxa/generate_urllink?access_token={$access_token}";
 
         $response = $client->postJson($url, [
-            'path' => $path,
+            'path'  => $path,
             'query' => $query,
         ]);
         return $response->toArray();
     }
 
-    protected function getStableAccessToken(): string
+    public function getStableAccessToken(): string
     {
         $this->config = $this->getConfig();
         $url = 'https://api.weixin.qq.com/cgi-bin/stable_token';
         $params = [
             'grant_type' => 'client_credential',
-            'appid' => $this->config['app_id'],
-            'secret' => $this->config['secret'],
+            'appid'      => $this->config['app_id'],
+            'secret'     => $this->config['secret'],
         ];
 
         $client = new CurlHttpClient();
@@ -74,5 +73,18 @@ class WeChatUrllinkService
         }
 
         throw new \Exception('Failed to get stable access token: ' . json_encode($data));
+    }
+
+    public function getVersionList(): array
+    {
+        $client = $this->getClient();
+        $access_token = $this->getStableAccessToken();
+        $url = "https://api.weixin.qq.com/wxaapi/log/get_client_version?access_token={$access_token}";
+        $response = $client->getJson($url);
+        $data = $response->toArray();
+        if (isset($data['errcode']) && $data['errcode'] === 0) {
+            return $data['cvlist'];
+        }
+        throw new \Exception('Failed to get version list: ' . json_encode($data));
     }
 }

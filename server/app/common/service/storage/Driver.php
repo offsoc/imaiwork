@@ -47,6 +47,15 @@ class Driver
         return $this->engine->setUploadFileByReal($filePath);
     }
 
+     /**
+     * 设置上传的文件信息
+     * @param string $filePath
+     * @return mixed
+     */
+    public function setUploadFileByFileName($filePath,$filename)
+    {
+        return $this->engine->setUploadFileByFileName($filePath,$filename);
+    }
     /**
      * 执行文件上传
      * @param $save_dir (保存路径)
@@ -56,7 +65,10 @@ class Driver
     {
         return $this->engine->upload($save_dir);
     }
-
+    
+    public function uploadSetPath($filePath, $save_dir){
+        return $this->engine->uploadSetPath($filePath, $save_dir);
+    }
     /**
      * Notes: 抓取网络资源
      * @param $url
@@ -103,6 +115,21 @@ class Driver
     public function getFileInfo()
     {
         return $this->engine->getFileInfo();
+    }
+
+    public function getRealPath()
+    {
+        return $this->engine->getRealPath();
+    }
+    
+    public function setRealPath($path){
+        $this->engine->setRealPath($path);
+    }
+    public function getFileSize(){
+        return $this->engine->getFileSize();
+    }
+    public function setFilename($fileName){
+        $this->engine->setFilename($fileName);
     }
 
     /**

@@ -24,7 +24,7 @@
                 <ElFormItem label="使用模型" prop="model_version">
                     <ElSelect v-model="formData.model_version" placeholder="请选择模型">
                         <ElOption
-                            v-for="item in getDigitalHumanModels"
+                            v-for="item in modelChannel"
                             :key="item.id"
                             :value="item.id"
                             :label="item.name"></ElOption>
@@ -77,8 +77,8 @@ const emit = defineEmits<{
 
 const appStore = useAppStore();
 const userStore = useUserStore();
-const { getDigitalHumanModels } = appStore;
 const { userTokens } = toRefs(userStore);
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const tokensValue = computed(() => {
     return {
@@ -144,7 +144,7 @@ const handleClose = () => {
 const { lockFn: lockSubmit, isLock } = useLockFn(handleSubmit);
 
 watch(
-    () => appStore.getDigitalHumanModels,
+    () => modelChannel.value,
     (newVal) => {
         if (newVal && newVal.length > 0) {
             formData.model_version = newVal[0].id;

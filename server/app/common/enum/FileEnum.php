@@ -17,6 +17,5 @@ class FileEnum
     // 图片来源
     const SOURCE_ADMIN = 0;  // 后台
     const SOURCE_USER = 1;   // 用户
-
-
+    const SOURCE_WECHAT = 3; // 微信
 }

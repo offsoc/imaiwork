@@ -138,6 +138,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                 } catch (error) {
                     options.onError?.({
                         error,
+                        type,
                         code: DeviceCmdCodeEnum.API_ERROR,
                     });
                 }
@@ -174,7 +175,6 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
     const handleRefreshAccount = (accounts: RefreshAccount[]) => {
         eventAction.value = EventAction.UpdateAccount;
         refreshAccount.value = accounts;
-        console.log(accounts);
         const firstAccount = refreshAccount.value[currNextIndex.value];
         completeProgress();
         sendGetUserInfo(firstAccount.device_code, firstAccount.type);

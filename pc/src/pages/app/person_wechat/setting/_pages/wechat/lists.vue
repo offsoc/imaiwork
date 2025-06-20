@@ -74,20 +74,20 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleEdit(row)">
                                         <Icon name="el-icon-EditPen"></Icon>
                                         <span>编辑</span>
                                     </div>
                                     <div
                                         v-if="row.wechat_status === 1"
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleOffline(row)">
                                         <Icon name="el-icon-SwitchButton"></Icon>
                                         <span>下线</span>
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleUpdateFriend(row)">
                                         <Icon name="el-icon-Refresh"></Icon>
                                         <span>更新好友</span>
@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { getWeChatLists, offlineWeChat, saveWeChatAi, reportWeChatFriends } from "@/api/person_wechat";
+import { getWeChatLists, saveWeChatAi, reportWeChatFriends } from "@/api/person_wechat";
 import EditPop from "./edit.vue";
 import useWeChatWs from "../../../_hooks/useWeChatWs";
 import { EnumMsgType, TriggerTaskParams } from "../../../_enums";
@@ -134,11 +134,21 @@ on("error", (data: any) => {
     feedback.closeLoading();
 });
 
-on("success", (data: any) => {
+on("message", async (data: any) => {
     const { MsgType, Content } = data;
     // @ts-ignore
-    const handler: Record<EnumMsgType, Function> = {};
-    handler[MsgType]?.();
+    const handlers: Record<EnumMsgType, Function> = {
+        [EnumMsgType.Auth]: () => {
+            actionType.value = null;
+            currentWechat.value.accessToken = Content.AccessToken;
+            feedback.loading("更新好友中...");
+            triggerTask(EnumMsgType.TriggerFriendPushTask);
+        },
+        [EnumMsgType.FriendPushNotice]: handleFriendPush,
+    };
+    if (handlers[MsgType]) {
+        await handlers[MsgType](Content);
+    }
 });
 
 on("action", async (data: any) => {
@@ -180,11 +190,9 @@ const friendPageParams = reactive({
 
 const currentWechat = ref<any>({});
 const friendList = ref<any[]>([]);
-const postLoading = ref(false);
 const handleUpdateFriend = async (row: any) => {
     await feedback.confirm("确定要更新好友吗？，如果好友数量较多，请耐心等待");
     currentWechat.value = row;
-    actionType.value = EnumMsgType.Auth;
     triggerTask(EnumMsgType.Auth, {
         deviceId: row.device_code,
     });
@@ -200,12 +208,13 @@ async function handleFriendPush(Content: any) {
         } else {
             friendList.value = friendList.value.concat(Friends);
         }
-        if (Size > Count) {
-            // 批量上报微信好友信息
-            await reportWeChatFriends({
-                wechat_id: currentWechat.value.wechat_id,
-                friends: Friends.map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
-            });
+
+        // 批量上报微信好友信息
+        reportWeChatFriends({
+            wechat_id: currentWechat.value.wechat_id,
+            friends: Friends.map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
+        });
+        if (Size * Page + Friends.length >= Count) {
             feedback.closeLoading();
             feedback.notifySuccess("更新好友成功");
         }
@@ -262,15 +271,18 @@ function handleFriendReportNotice(wechatId: string, friendInfo: any) {
 function triggerTask(taskType: EnumMsgType, params?: TriggerTaskParams) {
     let msgType;
     let content: any = {
-        DeviceId: params?.deviceId,
-        AccessToken: params?.accessToken,
-        WeChatId: params?.wechatId,
+        DeviceId: params?.deviceId || currentWechat.value.device_code,
+        AccessToken: params?.accessToken || currentWechat.value.accessToken,
+        WeChatId: params?.wechatId || currentWechat.value.wechat_id,
         TaskId: params?.TaskId || Date.now(),
     };
     msgType = taskType;
     switch (taskType) {
         case EnumMsgType.Auth:
         case EnumMsgType.WechatLogoutTask:
+            break;
+        // 处理好友推送
+        case EnumMsgType.TriggerFriendPushTask:
             break;
         default:
             return;

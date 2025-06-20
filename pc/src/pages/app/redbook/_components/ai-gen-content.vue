@@ -169,6 +169,7 @@ const handleNextStep = async () => {
             channel: props.type === ContentType.CONTENT ? 1 : 2,
         });
         getAiContent({ copywriting_id: data.id, type: props.type });
+        userStore.getUser();
         step.value = 2;
     } catch (error) {
         feedback.notifyError(error);

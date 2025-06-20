@@ -34,8 +34,9 @@ return [
             'port'   => env('cache.port','6379'),
             // 密码
             'password' => env('cache.password', ''),
+            'select' => env('cache.select', 8),
             // 缓存前缀
-            'prefix' => 'la:',
+            'prefix' =>  env('cache.prefix', ''),
         ],
     ],
 ];

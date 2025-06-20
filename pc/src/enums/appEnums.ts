@@ -50,6 +50,7 @@ export enum LoginPopupTypeEnum {
     FORGOT_PWD_MOBILE,
     FORGOT_PWD_MAILBOX,
     BIND_MOBILE,
+    WECHAT_LOGIN,
 }
 
 export enum ClientEnum {
@@ -73,15 +74,13 @@ export enum ToolEnum {
 }
 
 export const ToolEnumMap = {
-    [ToolEnum.HOME]: "工作台",
-    [ToolEnum.CHAT]: "AI对话",
-    [ToolEnum.AID]: "AI助理",
-    [ToolEnum.TOOL]: "AI员工",
-    [ToolEnum.DATABASE]: "AI知识库",
-    [ToolEnum.CREATIVE_RECORD]: "创作记录",
-    [ToolEnum.MORE]: "更多",
-    [ToolEnum.DEVICE]: "AI手机",
+    [ToolEnum.CHAT]: "智能聊天",
+    [ToolEnum.TOOL]: "智能员工",
+    [ToolEnum.AID]: "智能助理",
+    [ToolEnum.DATABASE]: "知识库",
+    [ToolEnum.DEVICE]: "手机终端",
     [ToolEnum.AGENT]: "智能体",
+    [ToolEnum.CREATIVE_RECORD]: "创作记录",
 };
 
 export enum TokensSceneEnum {
@@ -197,3 +196,66 @@ export const DeviceWsMessage = {
     [DeviceCmdCodeEnum.DEVICE_NOT_EXIST]: "设备不存在",
     [DeviceCmdCodeEnum.DEVICE_ALREADY_BOUND]: "设备已绑定",
 };
+
+export enum AppKeyEnum {
+    LADDER_PLAYER = "ladder_player",
+    INTERVIEW = "interview",
+    MEETING_MINUTES = "meeting_minutes",
+    MIND_MAP = "mind_map",
+    PERSON_WECHAT = "person_wechat",
+    DIGITAL_HUMAN = "digital_human",
+    DRAWING = "drawing",
+    TELEMARKETING = "telemarketing",
+    SERVICE = "service",
+    TAX = "tax",
+    LAW = "law",
+    WORD = "word",
+    PPT = "ppt",
+    COMPANY_WECHAT = "company_wechat",
+    STATEMENT = "statement",
+    POSTER = "poster",
+    CONTRACT = "contract",
+    REDBOOK = "redbook",
+    DOUBYIN = "douyin",
+    KUAISHOU = "kuaishou",
+    SPH = "sph",
+    LIVE = "live",
+}
+
+export const appKeyNameMap: Record<AppKeyEnum, string> = {
+    [AppKeyEnum.LADDER_PLAYER]: "智能陪练",
+    [AppKeyEnum.INTERVIEW]: "AI 人事",
+    [AppKeyEnum.MEETING_MINUTES]: "会议文书",
+    [AppKeyEnum.MIND_MAP]: "头脑风暴",
+    [AppKeyEnum.DOUBYIN]: "智能抖音",
+    [AppKeyEnum.KUAISHOU]: "智能快手",
+    [AppKeyEnum.SPH]: "视频号",
+    [AppKeyEnum.REDBOOK]: "小红书",
+    [AppKeyEnum.PERSON_WECHAT]: "微信助手",
+    [AppKeyEnum.TELEMARKETING]: "电销获客",
+    [AppKeyEnum.SERVICE]: "智能客服",
+    [AppKeyEnum.DIGITAL_HUMAN]: "智能数字人",
+    [AppKeyEnum.DRAWING]: "智能设计",
+    [AppKeyEnum.TAX]: "智能税务",
+    [AppKeyEnum.LAW]: "智能法务",
+    [AppKeyEnum.WORD]: "AI WORD",
+    [AppKeyEnum.PPT]: "AI PPT",
+    [AppKeyEnum.COMPANY_WECHAT]: "智能企微",
+    [AppKeyEnum.STATEMENT]: "智能报表",
+    [AppKeyEnum.POSTER]: "智能海报",
+    [AppKeyEnum.CONTRACT]: "合同审查",
+    [AppKeyEnum.LIVE]: "无人直播",
+};
+
+export enum FollowTypeEnum {
+    // 内务
+    INTERNAL = 1,
+    // 智能拓客
+    SMART_MARKETING = 2,
+    // 客户管理
+    CUSTOMER_MANAGEMENT = 3,
+    // 内容营销
+    CONTENT_MARKETING = 4,
+    // 其他
+    OTHER = 5,
+}

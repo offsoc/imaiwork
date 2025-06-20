@@ -38,7 +38,6 @@ class FileService
             $default = ConfigService::get('storage', 'default', 'local');
             Cache::set('STORAGE_DEFAULT', $default);
         }
-
         // 优先本地文件
         $localPath = public_path() . $uri;
         if (file_exists($localPath)) {
@@ -50,6 +49,7 @@ class FileService
 
         //第三方存储
         $storage = Cache::get('STORAGE_ENGINE');
+        //print_r($storage);die;
         if (!$storage) {
             $storage = ConfigService::get('storage', $default);
             Cache::set('STORAGE_ENGINE', $storage);

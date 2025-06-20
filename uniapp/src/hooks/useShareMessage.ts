@@ -63,16 +63,16 @@ export function useShareMessage() {
             title: "请稍后...",
         });
 
-        const { share_title, share_image, share_content, share_page } = appStore.getShareConfig;
+        const { share_title, share_image, share_desc } = appStore.getShareConfig;
         const { shop_name, shop_logo } = appStore.getWebsiteConfig;
         // 分享为首页
-        const isShareWithHome = share_page == 2;
+        const isShareWithHome = false;
         const link = await generateSharePath(isShareWithHome);
         let resolved = {
-            title: share_title || shop_name || "AI数字员工",
+            title: share_title,
             path: link,
-            desc: share_content || "AI数字员工",
-            imageUrl: share_image || shop_logo,
+            desc: share_desc,
+            imageUrl: share_image,
         };
 
         // 非首页可以合并外部参数

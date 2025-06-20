@@ -63,6 +63,15 @@ return [
             'format'         => '[%s][%s] %s',
             'apart_level'   =>  ['error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'card', 'cron', 'bind', 'init', 'note', 'post'],
         ],
+        'wechat_socket' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/wechat_socket/' . date('Ymd'),
+            'json'           => false,
+            'single'         => false,
+            'time_format'    => 'Y-m-d H:i:s',
+            'format'         => '[%s][%s] %s',
+            'apart_level'   =>  ['error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'card', 'cron', 'bind', 'init', 'note', 'post'],
+        ],
         'sv' => [
             'type'           => 'File',
             'path'           => app()->getRootPath() . '/runtime/log/sv/',

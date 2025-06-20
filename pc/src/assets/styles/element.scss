@@ -7,6 +7,11 @@
             --el-input-inner-height: 24px;
         }
     }
+
+    .el-form-item {
+        --font-size: var(--el-font-size-base);
+    }
+
     .el-select__wrapper {
         min-height: var(--el-input-wrapper-height);
     }
@@ -51,7 +56,7 @@
     }
 
     .el-dialog {
-        --el-dialog-border-radius: var(--el-border-radius-lg);
+        --el-dialog-border-radius: var(--el-border-radius-xl);
     }
     .el-button:focus-visible {
         outline: none;

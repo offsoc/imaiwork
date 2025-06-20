@@ -1,6 +1,6 @@
 <template>
     <view class="w-full h-full relative flex flex-col">
-        <view class="grow min-h-0 relative overflow-hidden rounded-lg">
+        <view class="grow min-h-0 relative overflow-hidden rounded-lg bg-black">
             <view class="h-full w-full flex items-center justify-center flex-col">
                 <view class="flex justify-center items-center h-[85%] w-[70%] relative z-10">
                     <image :src="item.pic" class="w-full mx-auto h-full rounded-lg" mode="aspectFill"></image>
@@ -89,10 +89,10 @@ const props = withDefaults(
 const emit = defineEmits(["play", "delete", "retry", "download"]);
 
 const appStore = useAppStore();
-const { getDigitalHumanModels } = appStore;
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const modelVersionMap = computed(() => {
-    return getDigitalHumanModels.reduce((acc: Record<string, string>, item: any) => {
+    return modelChannel.value.reduce((acc: Record<string, string>, item: any) => {
         acc[item.id] = item.name;
         return acc;
     }, {});

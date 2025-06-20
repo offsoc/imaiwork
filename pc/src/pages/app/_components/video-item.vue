@@ -115,10 +115,10 @@ const props = withDefaults(
 
 const emit = defineEmits(["delete", "retry"]);
 const appStore = useAppStore();
-const { getDigitalHumanModels } = toRefs(appStore);
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const modelVersionMap = computed(() => {
-    return getDigitalHumanModels.value.reduce((acc: Record<string, string>, item: any) => {
+    return modelChannel.value.reduce((acc: Record<string, string>, item: any) => {
         acc[item.id] = item.name;
         return acc;
     }, {});

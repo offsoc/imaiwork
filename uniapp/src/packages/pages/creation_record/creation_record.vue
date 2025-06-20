@@ -1,6 +1,5 @@
 <template>
     <view class="h-screen flex flex-col relative">
-        <view class="index-bg"></view>
         <view class="relative z-30">
             <u-navbar
                 :border-bottom="false"
@@ -12,12 +11,7 @@
                 title-bold>
             </u-navbar>
         </view>
-        <view class="relative z-10 px-[32rpx] my-4">
-            <view class="flex items-center justify-between">
-                <view class="px-4 py-1 bg-primary rounded-full text-white text-xs"> AI助理 </view>
-            </view>
-        </view>
-        <view class="grow min-h-0 relative z-10 flex flex-col">
+        <view class="grow min-h-0 relative z-10 flex flex-col mt-[32rpx]">
             <view class="grow min-h-0">
                 <z-paging
                     ref="pagingRef"
@@ -31,17 +25,17 @@
                             v-for="(item, index) in recordLists"
                             :key="index"
                             @click="handleRecord(item)">
-                            <view class="line-clamp-1 font-bold">
+                            <view class="line-clamp-1 font-bold text-[26rpx]">
                                 {{ item.scene_name }}
                             </view>
-                            <view class="line-clamp-3 mt-4">
+                            <view class="line-clamp-3 mt-[16rpx] opacity-30 text-[22rpx]">
                                 {{ item.message }}
                             </view>
                             <view class="my-3">
                                 <u-line></u-line>
                             </view>
                             <view class="flex items-center justify-between">
-                                <view class="text-[#858597] text-xs">
+                                <view class="text-[#858597] text-xs bg-[#F9FAFB] rounded-full px-2 py-1">
                                     {{ item.update_time }}
                                 </view>
                                 <view @click.stop="handleDelete(item.task_id, index)">

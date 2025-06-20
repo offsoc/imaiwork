@@ -33,7 +33,7 @@ class VideoTaskController extends BaseApiController
             $key = md5(json_encode($data));
             $val =  cache($key);
             if ($val){
-                return 1;
+                echo 1;die;
             }
             cache($key, 1, 20);
 

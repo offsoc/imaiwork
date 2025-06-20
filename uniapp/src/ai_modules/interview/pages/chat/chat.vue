@@ -490,7 +490,7 @@ onUnload(() => {
 }
 
 .send-btn {
-    @apply bg-[#2353F4] flex items-center justify-center w-[80rpx] h-[80rpx] rounded-[30rpx];
+    @apply bg-[#0065FB] flex items-center justify-center w-[80rpx] h-[80rpx] rounded-[30rpx];
     &[disabled] {
         @apply bg-primary-light-5 text-white;
     }

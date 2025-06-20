@@ -254,19 +254,22 @@ export const splitDomain = (domain: string) => {
 };
 
 /**
- * 将秒数格式化为 MM:SS 的时间字符串
+ * 将秒数格式化为 HH:MM:SS 的时间字符串
  *
  * @param seconds - 要格式化的时间（以秒为单位）
- * @returns 格式化后的时间字符串（格式为 MM:SS）
+ * @returns 格式化后的时间字符串（格式为 HH:MM:SS）
  */
-export const formatAudioTime = (seconds: number): string => {
-	if (!seconds) return "00:00";
-	const minutes = Math.floor(seconds / 60);
+export function formatAudioTime(seconds: number, isShowHours = false): string {
+	if (!seconds) return isShowHours ? "00:00:00" : "00:00";
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
 	const secs = Math.floor(seconds % 60);
-	return `${minutes < 10 ? "0" : ""}${minutes}:${
-		secs < 10 ? "0" : ""
-	}${secs}`;
-};
+	return isShowHours
+		? `${hours < 10 ? "0" : ""}${hours}:${
+				minutes < 10 ? "0" : ""
+		  }${minutes}:${secs < 10 ? "0" : ""}${secs}`
+		: `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+}
 
 /**
  *

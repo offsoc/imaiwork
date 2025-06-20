@@ -20,7 +20,7 @@
                 </el-form-item>
                 <el-form-item label="使用模型">
                     <el-select v-model="queryParams.model_version" class="!w-[180px]" placeholder="请选择使用模型">
-                        <el-option v-for="item in model_list" :key="item.id" :label="item.name" :value="item.id" />
+                        <el-option v-for="item in modelChannel" :key="item.id" :label="item.name" :value="item.id" />
                     </el-select>
                 </el-form-item>
                 <el-form-item label="创作时间">
@@ -71,11 +71,6 @@
                         {{ row.voice_name || "原视频声音" }}
                     </template>
                 </el-table-column>
-                <el-table-column label="模型性别" min-width="120" show-overflow-tooltip>
-                    <template #default="{ row }">
-                        {{ row.gender == "male" ? "男" : "女" }}
-                    </template>
-                </el-table-column>
                 <el-table-column label="生成模式" min-width="120" show-overflow-tooltip>
                     <template #default="{ row }">
                         {{ getVideoType(row.audio_type) }}
@@ -124,7 +119,7 @@ import feedback from "@/utils/feedback";
 
 const appStore = useAppStore();
 const { config } = toRefs(appStore);
-const model_list = computed(() => config.value.model_list);
+const modelChannel = computed(() => config.value?.digital_human.channel);
 
 enum DubTypeEnum {
     TEXT = 1, // 文本
@@ -150,7 +145,7 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
 });
 
 const getModelName = (model_version: string) => {
-    return model_list.value.find((item: any) => item.id == model_version)?.name;
+    return modelChannel.value.find((item: any) => item.id == model_version)?.name;
 };
 
 const getVideoType = (audio_type: number) => {

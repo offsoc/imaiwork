@@ -10,7 +10,7 @@
             @close="close">
             <div class="flex gap-4">
                 <div
-                    class="w-[388px] flex-shrink-0 rounded-2xl bg-primary-light-8 h-[400px] border border-dashed border-token-border-primary-2 cursor-pointer"
+                    class="w-[388px] flex-shrink-0 rounded-2xl bg-primary-light-8 h-[400px] border border-dashed border-token-primary-2 cursor-pointer"
                     :class="{
                         'hover:border-primary': fileLists.length === 0,
                     }">

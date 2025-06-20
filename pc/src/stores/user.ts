@@ -1,5 +1,5 @@
 import { getUserCenter, getTokensConfig } from "@/api/user";
-import { CHAT_LIMIT_KEY, TOKEN_KEY } from "@/enums/cacheEnums";
+import { TOKEN_KEY } from "@/enums/cacheEnums";
 import { defineStore } from "pinia";
 import { LoginPopupTypeEnum } from "~/enums/appEnums";
 
@@ -57,11 +57,9 @@ export const useUserStore = defineStore("userStore", {
         },
         logout() {
             const TOKEN = useCookie(TOKEN_KEY);
-            const LIMIT = useCookie(CHAT_LIMIT_KEY);
             this.token = null;
             this.userInfo = {};
             TOKEN.value = null;
-            LIMIT.value = null;
         },
     },
 });

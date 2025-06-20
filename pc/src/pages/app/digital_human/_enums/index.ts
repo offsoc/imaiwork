@@ -12,6 +12,7 @@ export interface CreateTaskParams {
     voice_url: string;
     voice_name: string;
     audio_url: string;
+    voice_type: number;
 }
 
 // 数字人模型版本
@@ -47,7 +48,7 @@ export enum CreateType {
 }
 
 // 高级版和尊享版公共上传限制
-export const commonUploadLimit = {
+export const CommonUploadLimit = {
     size: 300,
     // 最小分辨率
     minResolution: 360,
@@ -60,7 +61,7 @@ export const commonUploadLimit = {
 };
 
 // 上传限制
-export const uploadLimit = {
+export const UploadLimit = {
     [DigitalHumanModelVersionEnum.STANDARD]: {
         size: 100,
         // 最小分辨率
@@ -83,6 +84,6 @@ export const uploadLimit = {
         // 最大时长
         videoMaxDuration: 120,
     },
-    [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadLimit,
-    [DigitalHumanModelVersionEnum.ELITE]: commonUploadLimit,
+    [DigitalHumanModelVersionEnum.ADVANCED]: CommonUploadLimit,
+    [DigitalHumanModelVersionEnum.ELITE]: CommonUploadLimit,
 };

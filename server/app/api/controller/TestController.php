@@ -9,12 +9,23 @@ use app\api\logic\UserLogic;
 use app\api\validate\PasswordValidate;
 use app\api\validate\SetUserInfoValidate;
 use app\api\validate\UserValidate;
+use app\common\logic\OssLogic;
 use app\common\model\ModelConfig;
 use app\common\model\sv\SvCopywritingTask;
 use app\common\model\user\Group;
+use app\common\service\ConfigService;
 use TencentCloud\Teo\V20220106\Models\Sv;
 use think\response\Json;
 use think\facade\Queue;
+
+use app\common\workerman\wechat\handlers\client\VoiceTransTextTaskHandler;
+use app\common\workerman\wechat\handlers\device\TaskResultNoticeHandler;
+
+use Jubo\JuLiao\IM\Wx\Proto\{TaskResultNoticeMessage};
+use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
+use Google\Protobuf\Any;
+
+use app\common\workerman\wechat\constants\SocketType;
 /**
  * 用户控制器
  * Class UserController
@@ -22,7 +33,7 @@ use think\facade\Queue;
  */
 class TestController extends BaseApiController
 {
-    public array $notNeedLogin = ["*"];
+    public array $notNeedLogin = ["testaa", 'voTotxt'];
 
 
    
@@ -30,7 +41,8 @@ class TestController extends BaseApiController
     {
         try {
             var_dump('开始');
-            SvVideoTaskLogic::compositeAudioCron();
+            OssLogic::migrationCron();
+//            $data = ConfigService::get('storage','aliyun');
             var_dump('终止');
         } catch (\Exception $e) {
             return $this->fail('任务推送失败: ' . $e->getMessage());

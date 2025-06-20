@@ -98,4 +98,28 @@ class WebSettingController extends BaseAdminController
         $result = WebSettingLogic::getAgreement();
         return $this->data($result);
     }
+
+
+    public function getClient()
+    {
+        $result = WebSettingLogic::getClient();
+        return $this->data($result);
+    }
+
+
+    /**
+     * @notes 设置备案信息
+     * @return \think\response\Json
+     * @author 段誉
+     * @date 2021/12/28 16:10
+     */
+    public function setClient()
+    {
+        $params = $this->request->post();
+        $result = WebSettingLogic::setClient($params);
+        if (false === $result) {
+            return $this->fail(WebSettingLogic::getError() ?: '操作失败');
+        }
+        return $this->success('设置成功', [], 1, 1);
+    }
 }

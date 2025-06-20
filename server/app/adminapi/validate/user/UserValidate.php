@@ -13,17 +13,28 @@ use app\common\validate\BaseValidate;
  */
 class UserValidate extends BaseValidate
 {
+    protected $regex = [
+        'password' => '/^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)]|[\(\)])+$)([^(0-9a-zA-Z)]|[\(\)]|[a-z]|[A-Z]|[0-9]){6,20}$/'
+    ];
 
     protected $rule = [
         'id' => 'require|checkUser',
         'field' => 'require|checkField',
         'value' => 'require',
+
+        'password' => 'require|min:8|max:20|regex:password',
+
     ];
 
     protected $message = [
         'id.require' => '请选择用户',
         'field.require' => '请选择操作',
         'value.require' => '请输入内容',
+
+        'password.require' => '请填写登录密码',
+        'password.min'     => '登录密码最少8位数',
+        'password.max'     => '登录密码最少20位数',
+        'password.regex'   => '登录密码须为数字,字母或符号组合',
     ];
 
 
@@ -115,5 +126,10 @@ class UserValidate extends BaseValidate
                 break;
         }
         return true;
+    }
+
+    public function sceneCreate(): UserValidate
+    {
+        return $this->only(['mobile', 'password']);
     }
 }

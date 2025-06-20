@@ -6,11 +6,12 @@ import "./styles/index.scss";
 import { setupMixin } from "./mixins";
 
 export function createApp() {
-	const app = createSSRApp(App);
-	setupMixin(app);
-	app.use(plugins);
-	app.use(router);
-	return {
-		app,
-	};
+    const app = createSSRApp(App);
+
+    setupMixin(app);
+    app.use(plugins);
+    app.use(router);
+    return {
+        app,
+    };
 }

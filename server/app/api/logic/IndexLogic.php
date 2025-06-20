@@ -8,6 +8,7 @@ use app\common\logic\BaseLogic;
 use app\common\model\article\Article;
 use app\common\model\decorate\DecoratePage;
 use app\common\model\decorate\DecorateTabbar;
+use app\common\model\human\HumanVoice;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
 
@@ -123,7 +124,7 @@ class IndexLogic extends BaseLogic
         ];
 
         //模型
-        $modelList =  self::getModelList();
+        $modelList =  HumanVoice::getModelList();
 
         $indexConfig =  ConfigService::get('index', 'config', []);
 
@@ -135,8 +136,17 @@ class IndexLogic extends BaseLogic
             'pc_logo' => FileService::getFileUrl(ConfigService::get('website', 'pc_logo')),
             // 登录页
             'login_image' => FileService::getFileUrl(ConfigService::get('website', 'login_image')),
+            'shop_title' => ConfigService::get('website', 'shop_title', 'AI时代，企业化AI工具的新星'),
 
             'customer_service' => self::getCustomerService(),
+            'client_download'                 => [
+                'windows' =>  ConfigService::get('client_download','windows',''),
+                'mac_intel' =>  ConfigService::get('client_download','mac_intel',''),
+                'mac_apple' =>  ConfigService::get('client_download','mac_apple',''),
+                'android' =>  ConfigService::get('client_download','android',''),
+                'mini_programs' =>  ConfigService::get('client_download','mini_programs',''),
+                'h5' =>  ConfigService::get('client_download','h5',''),
+            ],
         ];
 
         // H5配置
@@ -158,21 +168,41 @@ class IndexLogic extends BaseLogic
         //练练
         $lianlian = self::getLianLianConfig();
 
+        //小程序分享配置
+        $shareImage = ConfigService::get('website', 'share_image', '');
+        $shareImage = empty($shareImage) ? $shareImage : FileService::getFileUrl($shareImage);
+        $mnpShareConfig =  [
+            'share_title'   => ConfigService::get('website', 'share_title', ''),
+            'share_desc'    => ConfigService::get('website', 'share_desc', ''),
+            'share_image'   => $shareImage,
+        ];
+
         return [
+            'copyright' => ConfigService::get('copyright', 'config',''),
             'domain' => FileService::getFileUrl(),
             'style' => $style,
             'tabbar' => $tabbar,
             'login' => $loginConfig,
             'website' => $website,
             'webPage' => $webPage,
-            'model_list' => $modelList,
             'index_config' => $indexConfig,
             'version' => $version,
             'meeting_config' => $meetingConfig,
             'lianlian' => $lianlian,
+            'mnp_share_config' => $mnpShareConfig,
             'digital_human' => [
-                'privacy' => ConfigService::get('digital_human', 'privacy', [])
+                'privacy' => ConfigService::get('digital_human', 'privacy', []),
+                'channel' => $modelList['channel'] ?? [],
+                'voice' => $modelList['voice'] ?? [],
             ],
+            'card_code'                 => [
+                'is_open'   => ConfigService::get('card_code','is_open',0),
+            ],
+            'recharge'                 => [
+                'is_ios_open'   => ConfigService::get('recharge','is_ios_open',0),
+            ],
+            'ai_live' =>  ConfigService::get('ai_live', 'config', [])
+
         ];
     }
 
@@ -204,26 +234,7 @@ class IndexLogic extends BaseLogic
         return $info;
     }
 
-    /**
-     * @desc 获取模型列表
-     * @return array
-     * @date 2024/12/30 10:18
-     * @author dagouzi
-     */
-    public static function getModelList()
-    {
-        $info =  ConfigService::get('model', 'list', []);
 
-        foreach ($info as $key => $value) {
-
-            if ($value['status'] != 1) {
-
-                unset($info[$key]);
-            }
-        }
-
-        return array_values($info);
-    }
 
     /**
      * @desc 获取会议纪要配置

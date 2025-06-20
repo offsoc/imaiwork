@@ -53,14 +53,14 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleEditRobot(item.id)">
                                         <ElButton link icon="el-icon-Edit" class="w-full !justify-start"
                                             >编辑机器人</ElButton
                                         >
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleDelete(item.id, index)">
                                         <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                             >删除</ElButton

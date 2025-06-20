@@ -1,6 +1,5 @@
 <template>
     <div class="h-full flex flex-col w-full">
-        <slot name="content"></slot>
         <div class="h-full flex-1 flex flex-col min-h-0 relative" v-if="contentList.length">
             <ElScrollbar ref="scrollbarRef" height="100%" @scroll="scroll">
                 <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto h-full">
@@ -52,126 +51,92 @@
                 </div>
             </ElScrollbar>
         </div>
-        <div class="w-full flex-none mt-2">
-            <div class="m-auto">
+        <div
+            class="w-full"
+            :class="[
+                contentList.length == 0
+                    ? 'flex-1 flex flex-col items-center justify-center -mt-[var(--nav-height)]'
+                    : 'flex-none mt-2',
+            ]">
+            <slot name="content" v-if="contentList.length == 0"></slot>
+            <div class="w-full mt-6">
                 <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto mb-4">
-                    <div class="flex justify-end">
-                        <ElButton @click="handleHistoryChat" :disabled="sendDisabled">
-                            <template #icon>
-                                <Icon name="el-icon-Clock"></Icon>
-                            </template>
-                            创作记录
-                        </ElButton>
-                        <ElButton v-if="contentList.length" @click="handleNewChat" :disabled="sendDisabled">
-                            <template #icon>
-                                <Icon name="el-icon-ChatDotRound"></Icon>
-                            </template>
-                            新建会话
-                        </ElButton>
-                    </div>
-                    <div class="send-box border-token-border-primary">
-                        <div class="flex w-full flex-col gap-1.5 p-1.5">
-                            <div class="flex flex-col gap-1.5 md:gap-2">
-                                <div
-                                    class="flex min-w-0 flex-1 flex-col mx-3 cursor-pointer"
-                                    :class="[fileLists.length < fileLimit ? '' : 'pl-4']">
-                                    <ElInput
-                                        v-model="inputContent"
-                                        type="textarea"
-                                        resize="none"
-                                        :autosize="{
-                                            minRows: 3,
-                                            maxRows: 10,
-                                        }"
-                                        @keydown="handleInputEnter"
-                                        :placeholder="placeholder"
-                                        class="content-ipt" />
-                                </div>
-                                <div class="flex items-center justify-between gap-2 mt-2 px-2 py-1">
-                                    <div class="flex items-center gap-x-2">
-                                        <div
-                                            class="flex items-center gap-x-1 border border-[#0000001f] rounded-[14px] h-[28px] px-[7px] hover:bg-[#E0E4ED] cursor-pointer"
-                                            :class="{
-                                                '!bg-primary-light-7 text-primary border-primary-light-6': selectedDeep,
-                                            }"
-                                            v-if="isDeep"
-                                            @click="handleDeep">
-                                            <Icon name="local-icon-deep" :size="16"></Icon>
-                                            <span class="text-xs">深度思考</span>
-                                        </div>
-                                        <div
-                                            class="flex items-center gap-x-1 border border-[#0000001f] rounded-[14px] h-[28px] px-[7px] hover:bg-[#E0E4ED] cursor-pointer"
-                                            :class="{
-                                                '!bg-primary-light-7 text-primary border-primary-light-6':
-                                                    selectedNetwork,
-                                            }"
-                                            v-if="isNetwork"
-                                            @click="handleNetwork">
-                                            <Icon name="local-icon-network" :size="16"></Icon>
-                                            <span class="text-xs">联网搜索</span>
-                                        </div>
-                                        <div
-                                            class="flex items-center gap-x-1 border border-[#0000001f] rounded-[14px] h-[28px] px-[7px] hover:bg-[#E0E4ED] cursor-pointer"
-                                            :class="{
-                                                '!bg-primary-light-7 text-primary border-primary-light-6':
-                                                    selectedKnowledgeBase || activeKnb.id,
-                                            }"
-                                            @click="handleKnowledgeBase">
-                                            <Icon name="el-icon-Notebook" :size="16"></Icon>
-                                            <span class="text-xs">关联知识库</span>
-                                        </div>
-                                    </div>
-                                    <!-- <ElTooltip
-										placement="top"
-										width="200"
-										v-if="false">
-										<file-upload
-											v-model="fileLists"
-											:file-limit="fileLimit"
-											:image-limit="imageLimit"
-											:accept="uploadAccept">
-											<button
-												class="flex items-center justify-center text-token-text-primary w-8 h-8 mb-1 ml-1.5 hover:bg-token-sidebar-surface-secondary p-2 rounded-lg">
-												<Icon
-													name="local-icon-file"
-													size="26"></Icon>
-											</button>
-										</file-upload>
-										<template #content>
-											<div
-												class="text-xs w-[200px] break-all">
-												{{ uploadLimitTips }}
-											</div>
-										</template>
-									</ElTooltip> -->
-                                    <button
-                                        v-if="isStop"
-                                        @click="emit('close')"
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white hover:opacity-70">
-                                        <Icon name="local-icon-chat_stop" :size="24" color="#ffffff"></Icon>
-                                    </button>
-                                    <button
-                                        v-else
-                                        @click="contentPost"
-                                        :disabled="isSendDisabled"
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white transition-colors hover:opacity-70 disabled:bg-primary-light-5 disabled:text-[#f4f4f4] disabled:hover:opacity-100">
-                                        <Icon name="local-icon-chat_post" :size="18"></Icon>
-                                    </button>
-                                </div>
+                    <div class="flex flex-col">
+                        <div
+                            class="flex items-end cursor-pointer bg-white rounded-tl-[24px] rounded-tr-[24px] border border-b-0 border-[#F1F1F2] px-[18px] relative">
+                            <div class="py-[12px] flex-1 mr-8">
+                                <ElInput
+                                    v-model="inputContent"
+                                    type="textarea"
+                                    class="content-ipt transition-all duration-300"
+                                    resize="none"
+                                    :autosize="{
+                                        minRows: 1,
+                                        maxRows: 10,
+                                    }"
+                                    @keydown="handleInputEnter"
+                                    :placeholder="placeholder" />
+                            </div>
+                            <div class="w-8 h-8 mb-[12px] absolute right-2 z-10">
+                                <button
+                                    v-if="isStop"
+                                    @click="emit('close')"
+                                    class="flex w-full h-full items-center justify-center rounded-full bg-primary-light-9">
+                                    <Icon name="local-icon-chat_stop" :size="18"></Icon>
+                                </button>
+                                <button
+                                    v-else
+                                    @click="contentPost"
+                                    :disabled="isSendDisabled"
+                                    class="flex w-full h-full items-center justify-center rounded-full bg-primary-light-9 text-white disabled:bg-[#F2F2F2] disabled:text-[#f4f4f4] disabled:hover:opacity-100">
+                                    <Icon
+                                        :name="isSendDisabled ? 'local-icon-arrow_up' : 'local-icon-arrow_up_primary'"
+                                        :size="18"></Icon>
+                                </button>
                             </div>
                         </div>
-                        <div class="bg-[#F3F5F9] px-2">
-                            <file-lists v-model:file-list="fileLists" />
+                        <div
+                            class="flex items-center h-[50px] px-[6px] bg-[#F9FAFB border border-[#F1F1F2] border-t-0 rounded-bl-[24px] rounded-br-[24px]">
+                            <div class="flex items-center">
+                                <div
+                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-primary-light-9 cursor-pointer"
+                                    :class="{
+                                        '!bg-primary-light-9 !text-primary': selectedDeep,
+                                    }"
+                                    v-if="isDeep"
+                                    @click="handleDeep">
+                                    <Icon
+                                        :name="selectedDeep ? 'local-icon-deep_s' : 'local-icon-deep'"
+                                        :size="16"
+                                        color=""></Icon>
+                                    <span class="text-xs">深度思考</span>
+                                </div>
+                                <ElDivider direction="vertical" class="!border-[#ededed]" v-if="isDeep" />
+                                <div
+                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-primary-light-9 cursor-pointer"
+                                    :class="{
+                                        '!bg-primary-light-9 !text-primary': selectedKnowledgeBase || activeKnb.id,
+                                    }"
+                                    @click="handleKnowledgeBase">
+                                    <Icon
+                                        :name="
+                                            selectedKnowledgeBase || activeKnb.id
+                                                ? 'local-icon-note_book_s'
+                                                : 'local-icon-note_book'
+                                        "
+                                        :size="16"></Icon>
+                                    <span class="text-xs">关联知识库</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div>
-            <slot name="footer"></slot>
-            <div class="text-xs text-gray-400 flex justify-center mb-8 gap-2 items-center" v-if="contentList.length">
-                <Icon name="el-icon-InfoFilled" :size="16"></Icon>
-                免责声明：内容由AI大模型生成，请仔细甄别。
+            <div class="flex justify-center">
+                <div class="text-xs flex justify-center mb-8 gap-2 items-center p-1 bg-[#00000008] rounded-full">
+                    <Icon name="local-icon-tips2" :size="16"></Icon>
+                    <span class="text-[#0000004d] text-xs">免责声明：内容由AI大模型生成，请仔细甄别。</span>
+                </div>
             </div>
         </div>
         <KnbSelect
@@ -188,8 +153,6 @@ import feedback from "@/utils/feedback";
 import { useElementSize } from "@vueuse/core";
 import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
-import FileLists from "./file-lists.vue";
-import FileUpload from "./file-upload.vue";
 import { FileParams } from "@/composables/usePasteImage";
 import KnbSelect from "@/components/knb-select/index.vue";
 
@@ -223,7 +186,7 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: "点击这里，尽管问，Shift+Enter换行，点击回车即可发送",
+        default: "在这里输入任何问题 ...",
     },
     isDeep: {
         type: Boolean,
@@ -234,11 +197,8 @@ const props = defineProps({
 });
 
 const router = useRouter();
-
-const appStore = useAppStore();
 const userStore = useUserStore();
 const { isLogin, toggleShowLogin } = userStore;
-const { userInfo } = toRefs(userStore);
 
 //输入框输入内容.
 const inputContent = ref("");
@@ -254,11 +214,6 @@ const fileIsLoad = ref(false);
 
 const uploadAccept = computed(() => {
     return "image/*,.zip,.rar,.txt,.pdf,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.ftr,.7z,.gz,.jpg,.png,.gif,.jpeg,.webp,.ico,.json,.jsonl";
-});
-
-// 上传文件限制提示
-const uploadLimitTips = computed(() => {
-    return `支持上传文件格式 ${uploadAccept.value}，最多上传${imageLimit.value}张图片，总共可${fileLimit.value}个文件`;
 });
 
 const previousScrollTop = ref(0);
@@ -311,7 +266,6 @@ const handleNewChat = () => {
     // 设置滚动到顶部
     scrollbarRef.value?.setScrollTop(0);
     disabledScroll.value = false;
-    console.log("handleNewChat", scrollbarRef.value);
     emit("newChat");
 };
 
@@ -426,20 +380,36 @@ defineExpose({ scrollToBottom, scrollTo, cleanInput, setInput });
 <style scoped lang="scss">
 .content-ipt {
     :deep(.el-textarea__inner) {
-        @apply px-0 pt-[10px] pb-[8px] text-base text-gray-950;
-        min-height: 60px !important;
+        @apply px-0 text-base text-gray-950;
+        transition: all;
+        transition-duration: 300ms;
         box-shadow: none;
         background-color: transparent;
+        &::-webkit-scrollbar {
+            cursor: pointer;
+            width: 8px;
+            background-color: #f5f5f5;
+        }
+        &::-webkit-scrollbar-thumb {
+            cursor: pointer;
+            background-color: #ccc;
+            border-radius: 4px;
+        }
         &::placeholder {
             @apply text-[#CACACA];
+        }
+        &.is-focus {
+            min-height: 100px !important;
         }
     }
 }
 :deep(.el-scrollbar__view) {
     @apply h-full;
 }
-
-.send-box {
-    @apply flex flex-col w-full mt-2 rounded-2xl border overflow-hidden bg-white shadow-[0px_8px_24px_-4px_#5B6F971F] transition-all duration-300;
+textarea {
+    resize: none;
+    &:focus-visible {
+        outline: none;
+    }
 }
 </style>

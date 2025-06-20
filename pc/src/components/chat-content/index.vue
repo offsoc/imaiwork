@@ -5,7 +5,7 @@
                 {{ error }}
             </div>
             <template v-else>
-                <div v-if="reasoningContent" class="bg-primary-light-8 rounded-xl rounded-tl-none p-2 mb-4">
+                <div v-if="reasoningContent" class="bg-primary-light-9 rounded-xl rounded-tl-none p-2 mb-4">
                     <div
                         class="flex items-center justify-between gap-x-4 p-2 rounded-xl hover:bg-[#eaedf6] cursor-pointer"
                         @click="isHide = !isHide">

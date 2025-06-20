@@ -173,6 +173,15 @@ class HumanController extends BaseApiController
     public function voiceLists()
     {
         $data = $this->request->get();
+        $data['type'] = 1;
+        $result = HumanLogic::voiceLists($data);
+        return $this->data($result);
+    }
+
+    public function builtInVoiceLists()
+    {
+        $data = $this->request->get();
+        $data['type'] = 0;
         $result = HumanLogic::voiceLists($data);
         return $this->data($result);
     }
@@ -272,7 +281,7 @@ class HumanController extends BaseApiController
             $type = $this->request->param('human_type');
             $modelVersion = $this->request->param('model_version');
             $data = $this->request->all();
-           // Log::channel('human')->write('接收数字人参数'.json_encode($data));
+            Log::channel('human')->write('接收数字人参数'.json_encode($data));
 
             if (isset($data['data'])) {
 
@@ -300,5 +309,17 @@ class HumanController extends BaseApiController
             Log::channel('human')->write('数字人参数'.json_encode($data).'数字人回调失败'.$e->getMessage());
             return $this->success('fail');
         }
+    }
+
+    /**
+     * 文案
+     * @return Json
+     * @author L
+     * @data 2024/6/12 14:04
+     */
+    public function copywriting()
+    {
+        $params = $this->request->post();
+        return HumanLogic::copywriting($params) ? $this->data(HumanLogic::getReturnData()) : $this->fail(HumanLogic::getError());
     }
 }

@@ -112,6 +112,7 @@ export default function useDeviceWs(options?: WebSocketOptions) {
         } else {
             triggerEvent("error", {
                 error: content.msg,
+                type,
                 code: DeviceCmdCodeEnum.PUSH_MESSAGE_ERROR,
                 deviceCode: deviceId,
             });

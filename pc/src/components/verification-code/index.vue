@@ -1,5 +1,5 @@
 <template>
-    <ElButton v-if="!isStart" @click="handleStart" :disabled="disabled" link>
+    <ElButton v-if="!isStart" @click="handleStart" :disabled="disabled" :loading="loading" link>
         {{ isRetry ? endText : startText }}
     </ElButton>
     <VueCountdown v-else ref="vueCountdownRef" :time="seconds * 1000" v-slot="{ totalSeconds }" @end="handleEnd">
@@ -24,12 +24,12 @@ export default defineComponent({
         // 尚未开始时提示
         startText: {
             type: String,
-            default: "获取验证码",
+            default: "发送验证码",
         },
         // 正在倒计时中的提示
         changeText: {
             type: String,
-            default: "x秒重新获取",
+            default: "发送验证码（xs）",
         },
         // 倒计时结束时的提示
         endText: {
@@ -38,6 +38,10 @@ export default defineComponent({
         },
         // 是否禁用
         disabled: {
+            type: Boolean,
+            default: false,
+        },
+        loading: {
             type: Boolean,
             default: false,
         },

@@ -46,7 +46,11 @@
         "tencentcloud/tencentcloud-sdk-php": "^3.0",
         "phpoffice/phpword": "^1.2",
         "topthink/think-swoole": "^4.1",
-        "topthink/think-worker": "^4.0"
+        "topthink/think-worker": "^4.0",
+        "workerman/channel": "1.0.6",
+        "predis/predis": "^3.0",
+        "google/protobuf": "^4.31",
+        "guzzlehttp/guzzle": "^7.9"
     },
     "require-dev": {
         "symfony/var-dumper": ">=4.2",
@@ -54,7 +58,9 @@
     },
     "autoload": {
         "psr-4": {
-            "app\\": "app"
+            "app\\": "app",
+            "Jubo\\JuLiao\\IM\\Wx\\Proto\\": "extend/lib/protobuf/Jubo/JuLiao/IM/Wx/Proto",
+            "GPBMetadata\\": "extend/lib/protobuf/GPBMetadata"
         },
         "psr-0": {
             "": "extend/"

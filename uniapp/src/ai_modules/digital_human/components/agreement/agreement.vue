@@ -18,7 +18,7 @@
                     </view>
                     <view class="w-[2rpx] h-full bg-[#f0f0f0]"> </view>
                     <view
-                        class="flex-1 text-center h-full flex items-center justify-center text-[#2353f4] font-bold"
+                        class="flex-1 text-center h-full flex items-center justify-center text-[#0065FB] font-bold"
                         @click="agreeClone()">
                         同意并使用
                     </view>
@@ -53,7 +53,7 @@ const show = computed({
 const appStore = useAppStore();
 
 const getPrivacy = computed(() => {
-    return appStore.getDigitalHumanPrivacy;
+    return appStore.getDigitalHumanConfig?.privacy;
 });
 
 const closeAgreement = () => {

@@ -15,6 +15,7 @@ interface Options {
     duration?: number[];
     extension?: any[];
     onSuccess?: (res: any) => void;
+    onProgress?: (res: any) => void;
     onError?: (e: any) => void;
 }
 
@@ -66,6 +67,7 @@ export const useUpload = (options: Options) => {
         extension = ["mp4", "mov"],
         onSuccess,
         onError,
+        onProgress,
     } = options;
     const uploadResult = reactive<Record<string, any>>({
         url: "",
@@ -75,14 +77,19 @@ export const useUpload = (options: Options) => {
     });
 
     const upload = async () => {
-        const filesResult = await chooseFile({
-            type: "video",
-            camera: "front",
-            sourceType: ["album"],
-            extension,
-            compressed: false,
-        });
-        chooseFileCallback(filesResult);
+        try {
+            const filesResult = await chooseFile({
+                type: "video",
+                camera: "front",
+                sourceType: ["album"],
+                extension,
+                compressed: false,
+            });
+            chooseFileCallback(filesResult);
+        } catch (error) {
+            onError?.(error)
+        }
+       
     };
 
     const chooseFileCallback = async (filesResult: ChooseResult) => {
@@ -113,53 +120,57 @@ export const useUpload = (options: Options) => {
             });
             return;
         }
-        uni.openVideoEditor({
-            filePath: tempFilePaths[0],
-        })
-            .then(async (res) => {
-                const resDuration = res.duration / 1000;
-                console.log("resDuration", resDuration);
-                console.log("res.duration", res.duration);
-                if (resDuration < duration[0] || resDuration > duration[1]) {
-                    uni.showToast({
-                        title: `裁剪视频时长不能小于${duration[0]}秒或大于${duration[1]}秒`,
-                        icon: "none",
-                        duration: 4000,
-                    });
-                    return;
-                }
-                uploadResult.duration = formatAudioTime(resDuration);
-                uploadResult.seconds = Math.floor(resDuration);
-                await Promise.allSettled([uploadImageFn(res.tempThumbPath), uploadVideo(res.tempFilePath)]);
-                onSuccess?.(uploadResult);
-            })
-            .catch((error) => {
-                const { errCode } = error;
-                if (errCode === 803) return;
-                uni.$u.toast(error?.errMsg || "视频编辑失败");
-                onError?.(error);
-            });
+
+        await Promise.allSettled([uploadVideo(tempFilePaths[0])]);
+        onSuccess?.(uploadResult);
+        // uni.openVideoEditor({
+        //     filePath: tempFilePaths[0],
+        // })
+        //     .then(async (res) => {
+        //         const resDuration = res.duration / 1000;
+        //         if (resDuration < duration[0] || resDuration > duration[1]) {
+        //             uni.showToast({
+        //                 title: `裁剪视频时长不能小于${duration[0]}秒或大于${duration[1]}秒`,
+        //                 icon: "none",
+        //                 duration: 4000,
+        //             });
+        //             return;
+        //         }
+        //         uploadResult.duration = formatAudioTime(resDuration);
+        //         uploadResult.seconds = Math.floor(resDuration);
+
+        //     })
+        //     .catch((error) => {
+        //         const { errCode } = error;
+        //         if (errCode === 803) return;
+        //         uni.$u.toast(error?.errMsg || "视频编辑失败");
+        //         onError?.(error);
+        //     });
     };
 
     const uploadVideo = async (file: string) => {
-        uni.showLoading({
-            title: "上传中",
-            mask: true,
-        });
         try {
-            const { uri }: any = await uploadFile("video", {
-                filePath: file,
-            });
+            const { uri }: any = await uploadFile(
+                "video",
+                {
+                    filePath: file,
+                },
+                (e) => {
+                    onProgress?.(e);
+                }
+            );
             uploadResult.url = uri;
         } catch (error) {
+            onError?.(error);
+            if (error == "uploadFile:fail abort") return;
             uni.$u.toast("上传失败");
-        } finally {
-            uni.hideLoading();
         }
     };
 
     const uploadImageFn = async (file: string) => {
-        const { uri }: any = await uploadImage(file);
+        const { uri }: any = await uploadImage(file, "", "", (e) => {
+            onProgress?.(e);
+        });
         uploadResult.pic = uri;
     };
     return {
