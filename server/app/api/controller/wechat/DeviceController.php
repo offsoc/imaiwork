@@ -44,6 +44,20 @@ class DeviceController extends BaseApiController
         }
     }
 
+    public function update()
+    {
+        try {
+            $params = (new DeviceValidate())->post()->goCheck('update');
+            $result = DeviceLogic::updateDevice($params);
+            if ($result) {
+                return $this->success();
+            }
+            return $this->fail(DeviceLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
     /**
      * @desc 删除设备
      */

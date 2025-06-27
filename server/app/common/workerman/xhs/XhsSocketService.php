@@ -345,7 +345,7 @@ class XhsSocketService
     public function send($uid, $payload){
         try {
             $content = array(
-                'appType' => $payload['appType'] ?? '',
+                'appType' => $payload['appType'] ?? 3,
                 'messageId' => 0,
                 'type' => $payload['type'],
                 'content' => !is_array($payload['reply']) ? $payload['reply'] : json_encode($payload['reply'],  JSON_UNESCAPED_UNICODE),

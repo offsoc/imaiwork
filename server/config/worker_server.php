@@ -36,11 +36,11 @@ return [
     'onWorkerReload' => function ($worker) {},
     // onConnect
     'onConnect'      => function ($connection) {
-        clogger($connection->id, 'xhs');
+//        clogger($connection->id, 'xhs');
     },
     // onMessage
     'onMessage'      => function ($connection, $data) {
-        clogger($data, 'xhs');
+//        clogger($data, 'xhs');
         $data = json_decode($data, true);
         $connection->send('send ok');
     },

@@ -1,6 +1,7 @@
 <?php
 
 namespace app\api\logic\sv;
+
 use think\facade\Db;
 
 use app\common\model\sv\SvPublishSetting;
@@ -11,6 +12,7 @@ use app\common\model\sv\SvVideoSetting;
 use app\common\model\sv\SvVideoTask;
 use app\common\model\sv\SvPublishSettingDetail;
 use app\common\service\FileService;
+
 /**
  * PublishLogic
  * @desc 机器人
@@ -19,7 +21,7 @@ use app\common\service\FileService;
 class PublishLogic extends SvBaseLogic
 {
 
-    protected static $interval = 3600;//视频发布间隔时间（秒）
+    protected static $interval = 3600; //视频发布间隔时间（秒）
     /**
      * @desc 添加机器人
      * @param array $params
@@ -32,11 +34,11 @@ class PublishLogic extends SvBaseLogic
         Db::startTrans();
         try {
             $params['user_id'] = self::$uid;
-            
-            if(is_array($params['accounts'])){
+
+            if (is_array($params['accounts'])) {
                 $params['accounts'] = implode(',', $params['accounts']);
             }
-            if(is_array($params['time_config'])){
+            if (is_array($params['time_config'])) {
                 $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
             }
             // 添加
@@ -51,11 +53,10 @@ class PublishLogic extends SvBaseLogic
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            clogger($e);
+            //            clogger($e);
             self::setError($e->getMessage());
             return false;
         }
-        
     }
 
     /**
@@ -82,13 +83,13 @@ class PublishLogic extends SvBaseLogic
                 return false;
             }
 
-            if(is_array($params['accounts'])){
+            if (is_array($params['accounts'])) {
                 $params['accounts'] = implode(',', $params['accounts']);
             }
-            if(is_array($params['time_config'])){
+            if (is_array($params['time_config'])) {
                 $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
             }
-            
+
             // 更新
             SvPublishSetting::where('id', $publish->id)->update($params);
             SvPublishSettingAccount::where('publish_id', $publish->id)->delete();
@@ -99,13 +100,14 @@ class PublishLogic extends SvBaseLogic
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-            clogger($e);
+            //            clogger($e);
             self::setError($e->getMessage());
             return false;
         }
     }
 
-    private static function batchPushlishAccount($publish, $params){
+    private static function batchPushlishAccount($publish, $params)
+    {
         $insertData = [];
         $accounts = explode(',', $params['accounts']);
         foreach ($accounts as $key => $account) {
@@ -121,7 +123,7 @@ class PublishLogic extends SvBaseLogic
                 'video_setting_id' => $params['video_setting_id'],
                 'publish_start' => $params['publish_start'],
                 'publish_end' => $params['publish_end'],
-                'next_publish_time' => self::_getPublishTime($account,  $videoSetting['video_count'], 0),//视频发布时间
+                'next_publish_time' => self::_getPublishTime($account,  $videoSetting['video_count'], 0), //视频发布时间
                 'count' => $videoSetting['video_count'],
                 'published_count' => 0,
                 'status' => 1,
@@ -132,9 +134,10 @@ class PublishLogic extends SvBaseLogic
         $model->saveAll($insertData);
     }
 
-    public static function change(array $params){
+    public static function change(array $params)
+    {
         $find = SvPublishSettingAccount::where('id', $params['id'])->findOrEmpty();
-        if($find->isEmpty()){
+        if ($find->isEmpty()) {
             self::setError('任务不存在');
             return false;
         }
@@ -164,7 +167,7 @@ class PublishLogic extends SvBaseLogic
             }
             $publish['accounts'] = explode(',', $publish['accounts']);
             $publish['time_config'] = json_decode($publish['time_config'], true);
-            
+
 
             self::$returnData = $publish->toArray();
             return true;
@@ -203,14 +206,15 @@ class PublishLogic extends SvBaseLogic
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-            clogger($e);
+            //            clogger($e);
             self::setError($e->getMessage());
             return false;
         }
     }
 
 
-    public static function recordDetail(array $params) {
+    public static function recordDetail(array $params)
+    {
         try {
             // 检查机器人是否存在
             $record = SvPublishSettingDetail::field('*')
@@ -221,7 +225,7 @@ class PublishLogic extends SvBaseLogic
                 self::setError('任务记录不存在');
                 return false;
             }
-            
+
 
             self::$returnData = $record->toArray();
             return true;
@@ -232,11 +236,12 @@ class PublishLogic extends SvBaseLogic
     }
 
 
-    public static function recordDelete(array $params) {
+    public static function recordDelete(array $params)
+    {
         $record = SvPublishSettingDetail::field('*')
-                ->where('id', $params['id'])
-                ->where('user_id', self::$uid)
-                ->findOrEmpty();
+            ->where('id', $params['id'])
+            ->where('user_id', self::$uid)
+            ->findOrEmpty();
         if ($record->isEmpty()) {
             self::setError('任务记录不存在');
             return false;
@@ -244,11 +249,11 @@ class PublishLogic extends SvBaseLogic
         $record->delete();
 
         return true;
-
     }
-    public static function recordRetry(array $params) {
+    public static function recordRetry(array $params)
+    {
         try {
-            if(time() > strtotime($params['retry_time'])){
+            if (time() > strtotime($params['retry_time'])) {
                 self::setError('重试时间不能小于当前时间');
                 return false;
             }
@@ -261,14 +266,14 @@ class PublishLogic extends SvBaseLogic
                 self::setError('任务记录不存在');
                 return false;
             }
-            
+
             $setting = SvPublishSetting::where('id', $record['publish_id'])->limit(1)->find();
-            if(empty($setting)){
+            if (empty($setting)) {
                 self::setError('任务配置不存在');
                 return false;
             }
             $time_config = json_decode($setting['time_config'], true);
-            if(empty($time_config)){
+            if (empty($time_config)) {
                 $time_config = [
                     [
                         'start_time' => date('H:i', time() + 600), // 开始时间
@@ -276,18 +281,18 @@ class PublishLogic extends SvBaseLogic
                     ]
                 ];
             }
-            $periods = array_map(function($item) use($setting) {
+            $periods = array_map(function ($item) use ($setting) {
                 return [
                     'start' => strtotime("{$setting['publish_start']} {$item['start_time']}:00"),
                     'end' => strtotime("{$setting['publish_end']} {$item['end_time']}:00")
                 ];
             }, $time_config);
             //print_r($periods);die;
-            if(strtotime($params['retry_time']) > $periods[0]['end']){
+            if (strtotime($params['retry_time']) > $periods[0]['end']) {
                 self::setError('重试时间不在任务时间段内');
                 return false;
             }
-            
+
             $record->status = 0;
             $record->publish_time = $params['retry_time'];
             $record->save();
@@ -300,7 +305,9 @@ class PublishLogic extends SvBaseLogic
         }
     }
 
-    public static function testAdd(array $params) {
+    public static function testAdd(array $params)
+    {
+        Db::startTrans();
         try {
             $device = SvDevice::where('status', 1)->where('user_id', self::$uid)->order('id asc')->limit(1)->findOrEmpty();
             if ($device->isEmpty()) {
@@ -308,46 +315,99 @@ class PublishLogic extends SvBaseLogic
                 return false;
             }
 
-            $account = SvAccount::where('device_code', $device['device_code'])->where('user_id', self::$uid)->limit(1)->findOrEmpty();
-            if ($account->isEmpty()) {
-                self::setError('该设备缺少用户信息');
+            if(mb_strlen($params['title'], 'utf-8') > 150){
+                self::setError('标题不能超过150个字');
                 return false;
             }
 
-            $url = $params['url'] ?? config('app.app_host') .'/uploads/video/20250517/7b300711-d826-4b46-8b1a-c6eaaa58cbce.mp4';
-            $payload = [
-                'publish_id' => 0,
-                'publish_account_id' => $account['id'],
-                'video_task_id' => 0,//视频任务id，关联sv_video_tas
+            if(mb_strlen($params['subtitle'], 'utf-8') > 150){
+                self::setError('正文不能超过150个字');
+                return false;
+            }
+            
+
+            $publish = SvPublishSetting::create([
                 'user_id' => self::$uid,
-                'account' => $account['account'],
-                'account_type' => $account['type'],
-                'device_code' => $device['device_code'],
-                'material_id' => 0,
-                'material_type' => 1,
-                'material_url' => $url,
-                'material_title' => '示例数据',
-                'poi' => '',
-                'material_subtitle' => '这是一条示例数据',
-                'task_id' => generate_unique_task_id(),
-                'platform' => $account['type'],
-                'status' => 0,
-                'publish_time' => date('Y-m-d H:i:s', time() + 300),//视频发布时间
+                'name' => empty($params['title']) ? '模拟发布' : $params['title'],
+                'accounts' => implode(',', $params['accounts']),
+                'video_setting_id' => 0,
+                'type' => 3,
+                'publish_start' => date('Y-m-d', time()),
+                'publish_end'  => date('Y-m-d', time()),
+                'time_config' => '[]',
+                'data_type' => 1,
                 'create_time' => time(),
-                'data_type' => 1
-            ];
-            //print_r($payload);die;
-            $result = SvPublishSettingDetail::create($payload);
-            self::$returnData = $result->toArray();
+                'update_time' => time()
+            ]);
+
+            $url = $params['url'] ?? config('app.app_host') . '/uploads/video/20250517/7b300711-d826-4b46-8b1a-c6eaaa58cbce.mp4';
+            $insertData = array();
+            $count = count($params['accounts']);
+            foreach ($params['accounts'] as $key => $account) {
+                $account = SvAccount::where('account', $account)->where('user_id', self::$uid)->limit(1)->findOrEmpty();
+                if($account->isEmpty()){
+                    self::setError("{$account}该账号信息不存在");
+                    return false;
+                }
+                $publishAccount = SvPublishSettingAccount::create([
+                    'publish_id' => $publish->id,
+                    'user_id' => self::$uid,
+                    'name' => empty($params['title']) ? '模拟发布' : $params['title'],
+                    'account' => $account['account'],
+                    'account_type' => $account['type'],
+                    'device_code' => $account['device_code'],
+                    'video_setting_id' => 0,
+                    'publish_start' => date('Y-m-d', time()),
+                    'publish_end' => date('Y-m-d', time()),
+                    'next_publish_time' => date('Y-m-d H:i:s', time()), //视频发布时间
+                    'count' => $count,
+                    'published_count' => 0,
+                    'status' => 1,
+                    'data_type' => 1,
+                    'created_time' => time(),
+                ]);
+
+                array_push($insertData, [
+                    'publish_id' => $publish->id,
+                    'publish_account_id' => $publishAccount->id,
+                    'video_task_id' => 0, //视频任务id，关联sv_video_tas
+                    'user_id' => self::$uid,
+                    'account' => $account['account'],
+                    'account_type' => $account['type'],
+                    'device_code' => $account['device_code'],
+                    'material_id' => 0,
+                    'material_type' => $params['material_type'],
+                    'material_url' => $url,
+                    'material_title' => empty($params['title']) ? ' ' : $params['title'],
+                    'material_tag' => $params['topic'],
+                    'poi' => $params['poi'],
+                    'material_subtitle' => empty($params['subtitle']) ? ' ' : $params['subtitle'],
+                    'task_id' => generate_unique_task_id(),
+                    'platform' => $account['type'],
+                    'status' => 0,
+                    'publish_time' => date('Y-m-d H:i:s', time()), //视频发布时间
+                    'create_time' => time(),
+                    'data_type' => 1
+                ]);
+            }
+            //print_r($insertData);die;
+            if (!empty($insertData)) {
+                $model = new SvPublishSettingDetail();
+                $model->saveAll($insertData);
+            }
+            Db::commit();
+            self::$returnData = [];
             return true;
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
+            Db::rollback();
             self::setError($e->getMessage());
             return false;
         }
     }
 
 
-    public static function setPublishDetail() {
+    public static function setPublishDetail()
+    {
         print_r('执行发布记录拉取任务');
         try {
             $accounts = SvPublishSettingAccount::alias('pa')
@@ -360,7 +420,7 @@ class PublishLogic extends SvBaseLogic
                 ->where('vs.status', 'in', [3, 5])
                 //->order('ps.id desc')
                 ->select()->toArray();
-                
+
             print_r(Db::getLastSql());
             print_r("count: " . count($accounts));
             $insertData = [];
@@ -377,7 +437,7 @@ class PublishLogic extends SvBaseLogic
                     //->fetchSql(true)
                     ->select()
                     ->toArray();
-                    //print_r($videos);die;
+                //print_r($videos);die;
                 $videoCount = count($videos);
                 foreach ($videos as $key => $video) {
                     $detail = SvPublishSettingDetail::where('publish_id', $account['publish_id'])
@@ -386,11 +446,11 @@ class PublishLogic extends SvBaseLogic
                         ->where('user_id', $account['user_id'])
                         ->where('account', $account['account'])
                         ->find();
-                    if(empty($detail)){
+                    if (empty($detail)) {
                         array_push($insertData, [
                             'publish_id' => $account['publish_id'],
                             'publish_account_id' => $account['id'],
-                            'video_task_id' => $video['id'],//视频任务id，关联sv_video_tas
+                            'video_task_id' => $video['id'], //视频任务id，关联sv_video_tas
                             'user_id' => $account['user_id'],
                             'account' => $account['account'],
                             'account_type' => $account['account_type'],
@@ -399,6 +459,7 @@ class PublishLogic extends SvBaseLogic
                             'material_type' => 1,
                             'material_url' => FileService::getFileUrl($video['video_result_url']),
                             'material_title' => $video['name'],
+                            'material_tag' => $video['topic'],
                             'poi' => $video['poi'],
                             'material_subtitle' => $video['name'],
                             'task_id' => generate_unique_task_id(),
@@ -409,20 +470,20 @@ class PublishLogic extends SvBaseLogic
                         ]);
                         array_push($videoIds, $video['id']);
                     }
-                    
                 }
                 //print_r($insertData);die;
             }
             //print_r($insertData);die;
-            if(!empty($insertData)){
+            if (!empty($insertData)) {
                 $model = new SvPublishSettingDetail();
                 $model->saveAll($insertData);
             }
-        
+
             self::$returnData = $insertData;
             return true;
-        }catch (\Exception $e) {
-            print_r($e);die;
+        } catch (\Exception $e) {
+            print_r($e);
+            die;
             return false;
         }
     }
@@ -435,10 +496,11 @@ class PublishLogic extends SvBaseLogic
      * @param int $type 视频发布时间分配方式 1:循环分配 2:平均分配
      * @return string 发布时间
      */
-    private static function _getPublishTime($account,  int $videoCount, int $num, int $type = 1){
+    private static function _getPublishTime($account,  int $videoCount, int $num, int $type = 1)
+    {
         $account['time_config'] = json_decode($account['time_config'], true);
         try {
-            if(empty($account['time_config'])){
+            if (empty($account['time_config'])) {
                 $account['time_config'] = [
                     [
                         'start_time' => date('H:i', time() + 600), // 开始时间
@@ -447,48 +509,48 @@ class PublishLogic extends SvBaseLogic
                 ];
             }
 
-            
+
             $timeConfig = $account['time_config'];
             // 时间配置解析
-            $periods = array_map(function($item) use($account) {
+            $periods = array_map(function ($item) use ($account) {
                 return [
                     'start' => strtotime("{$account['publish_start']} {$item['start_time']}:00"),
                     'end' => strtotime("{$account['publish_end']} {$item['end_time']}:00")
                 ];
             }, $timeConfig);
-            if($type == 1){
+            if ($type == 1) {
                 $periodCount = count($periods);
                 $currentPeriod = $num % $periodCount; // 当前视频所属时段索引
-                
+
                 // 计算当前时段内的视频序号（从0开始）
                 $periodVideoNum = (int)($num / $periodCount);
-                
+
                 // 每个时段的总视频数（向上取整）
                 $videosPerPeriod = ceil($videoCount / $periodCount);
-                
+
                 // 计算时间间隔（+1保证首尾留空）
                 $interval = ($periods[$currentPeriod]['end'] - $periods[$currentPeriod]['start']) / ($videosPerPeriod + 1);
-                
+
                 // 生成精确时间戳（秒级精度）
                 $timestamp = $periods[$currentPeriod]['start'] + ($periodVideoNum + 1) * $interval;
-    
+
                 // 确保时间不超过当前时段
                 $timestamp = min($timestamp, $periods[$currentPeriod]['end'] - 1);
-    
+
                 return date('Y-m-d H:i:s', $timestamp);
-            }else if($type == 2){
+            } else if ($type == 2) {
                 // 计算各时间段分配数量
                 $periodCount = count($periods);
                 $baseCount = floor($videoCount / $periodCount);
                 $extra = $videoCount % $periodCount;
-            
+
                 // 生成时间点
                 $timestamps = [];
                 foreach ($periods as $index => $period) {
                     $count = $baseCount + ($index < $extra ? 1 : 0);
                     $duration = $period['end'] - $period['start'];
                     $interval = $duration / ($count + 1);
-    
+
                     for ($i = 1; $i <= $count; $i++) {
                         $timestamps[] = $period['start'] + $interval * $i;
                     }
@@ -496,11 +558,9 @@ class PublishLogic extends SvBaseLogic
                 // 获取当前视频序号对应的时间
                 return isset($timestamps[$num]) ? date('Y-m-d H:i:s', $timestamps[$num]) : date('Y-m-d H:i:s', $periods[0]['start'] + 60); // 默认值
             }
-        }catch (\Exception $e) {
-            print_r($e);die;
+        } catch (\Exception $e) {
+            print_r($e);
+            die;
         }
-        
-        
-        
     }
 }

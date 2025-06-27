@@ -1366,7 +1366,7 @@ class KnowledgeLogic extends ApiLogic
             return true;
 
         } catch (\Throwable $e) {
-            clogger($e);
+//            clogger($e);
             if($params['scene'] !== 'socket'){
                 message($e->getMessage());
             }else{

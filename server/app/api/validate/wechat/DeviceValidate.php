@@ -46,7 +46,7 @@ class DeviceValidate extends BaseValidate
      */
     public function sceneUpdate()
     {
-        return $this->only(['id', 'device_code', 'device_status', 'device_model', 'sdk_version']);
+        return $this->only(['device_code', 'is_used']);
     }
 
     /**

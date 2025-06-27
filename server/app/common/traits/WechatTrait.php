@@ -299,6 +299,34 @@ trait WechatTrait
         }
     }
 
+    public static function getWxDeviceInfo(string $deviceId): array
+    {
+        return self::getDeviceInfo($deviceId);
+    }
+
+    public static function isWxDeviceOnline(string $deviceId): bool
+    {
+        return self::isDeviceOnline($deviceId);
+    }
+
+    public static function updateWxDevices(array $deviceInfo): void
+    {
+        try {
+            
+            $body = \app\common\service\ToolsService::Auth()->deviceUpdate($deviceInfo);
+            
+        } catch (\Throwable $e) {
+            //throw $th;
+            self::setLog([
+                'title' => 'Send message Device online',
+                'params' => $deviceInfo,
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'trace' => $e->getTraceAsString()
+            ], 'error');
+        }
+    }
+
     private static function checkDevice(string $deviceId): bool
     {
         // 获取设备信息    

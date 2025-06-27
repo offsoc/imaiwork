@@ -85,7 +85,7 @@ class WechatSocketService
 
         // 心跳保活（每5分钟）
         \Workerman\Lib\Timer::add(300, function() {
-            \think\facade\Db::execute('SELECT version();');
+            \think\facade\Db::connect('mysql')->query('select 1');
         });
     }
 

@@ -33,7 +33,7 @@ class MnpSettingsLogic extends BaseLogic
             'app_id'               => ConfigService::get('mnp_setting', 'app_id', ''),
             'app_secret'           => ConfigService::get('mnp_setting', 'app_secret', ''),
             'private_key'          => ConfigService::get('mnp_setting', 'private_key', ''),
-            'app_version'          => ConfigService::get('mnp_setting', 'app_version', '1.0.0'),
+            'app_version'          => ConfigService::get('mnp_setting', 'app_version', '2.0.0'),
             'request_domain'       => 'https://' . $domainName,
             'socket_domain'        => 'wss://' . $domainName,
             'upload_file_domain'   => 'https://' . $domainName,
@@ -128,7 +128,7 @@ class MnpSettingsLogic extends BaseLogic
 
             //上传小程序代码
             $data = [
-                'version' => $params['upload_version'] ?? ConfigService::get('mnp_setting', 'app_version', '1.0.0'),
+                'version' => $params['upload_version'] ?? ConfigService::get('mnp_setting', 'app_version', '2.0.0'),
                 'desc'    => $params['upload_desc'] ?? '',
                 'appid'   => $appid,
             ];
@@ -141,6 +141,9 @@ class MnpSettingsLogic extends BaseLogic
             if ($retval) {
                 $result = ['code' => 0, 'msg' => $output, 'retval'=>$retval];
             }else{
+                if (!empty($params['upload_version'])){
+                    ConfigService::set('mnp_setting', 'app_version', $params['upload_version']);
+                }
                 $result = ['code' => 1, 'msg' => '上传成功'];
             }
             return $result;
@@ -148,6 +151,19 @@ class MnpSettingsLogic extends BaseLogic
             self::$error = $e->getMessage();
             return false;
         }
+    }
+
+    /**
+     * @notes 获取小程序本地版本号
+     * @return array
+     * @author Rick
+     * @date 2025/6/23 17:36
+     */
+    public function getMnpLocalVersion(): array
+    {
+        $lastVersion = ConfigService::get('mnp_setting', 'app_version', '2.0.0');
+        $version = $this->incrementVersion($lastVersion);
+        return ['version' => $version];
     }
 
     /**
@@ -181,5 +197,35 @@ class MnpSettingsLogic extends BaseLogic
         ConfigService::set('mnp_setting', 'share_image', $image);
         ConfigService::set('mnp_setting', 'share_title', $params['share_title']);
         ConfigService::set('mnp_setting', 'share_desc', $params['share_desc']);
+    }
+
+     /**
+     * 自动递增版本号，遵循语义化版本规则，只保留个位
+     *
+     * @param string $currentVersion 当前版本号，格式为"x.y.z"
+     * @return string 递增后的新版本号
+     */
+    private function incrementVersion(string $currentVersion): string
+    {
+        $parts = explode('.', $currentVersion);
+        // 确保版本号有三个部分
+        if (count($parts) !== 3) {
+            return "2.0.0";
+        }
+        $major = (int) $parts[0];
+        $minor = (int) $parts[1];
+        $patch = (int) $parts[2];
+        $patch++;
+        // 处理进位
+        if ($patch >= 10) {
+            $patch = 0;
+            $minor++;
+            // 处理次版本号进位
+            if ($minor >= 10) {
+                $minor = 0;
+                $major++;
+            }
+        }
+        return "$major.$minor.$patch";
     }
 }

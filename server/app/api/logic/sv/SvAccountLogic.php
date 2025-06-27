@@ -136,6 +136,7 @@ class SvAccountLogic extends SvBaseLogic
                     SvSetting::create($setting);
                 }
             }else{
+                unset($params['id']);
                 SvAccount::where('id', $account->id)->update($params);
                 self::$returnData = $account->refresh()->toArray();
             }
@@ -239,7 +240,7 @@ class SvAccountLogic extends SvBaseLogic
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-            clogger($e);
+//            clogger($e);
             self::setError($e->getMessage());
             return false;
         }

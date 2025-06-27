@@ -212,7 +212,7 @@ class DeviceHandler extends BaseMessageHandler
         
             if(isset($worker->uidConnections[$uid])){
                 $worker->uidConnections[$uid]->deviceid = $payload['deviceId'] ?? '';
-                $worker->uidConnections[$uid]->apptype = $payload['appType'] ?? 'ai_xhs';
+                $worker->uidConnections[$uid]->apptype = $payload['appType'] ?? 3;
                 $worker->uidConnections[$uid]->messageid = $payload['messageId'] ?? '';
                 $worker->uidConnections[$uid]->appversion = $payload['appVersion'] ?? '';
                 $worker->uidConnections[$uid]->clientType = 'device';
@@ -221,7 +221,7 @@ class DeviceHandler extends BaseMessageHandler
                 $worker->uidConnections[$uid]->isMsgRunning = 0;
                 
                 $worker->devices[$payload['deviceId']] = $uid;
-                $worker->appType = $payload['appType'] ?? 'ai_xhs';
+                $worker->appType = $payload['appType'] ?? 3;
                 $this->service->getRedis()->set("xhs:device:" . $payload['deviceId'], $uid);
                 $this->service->setWorker($worker);
                 

@@ -170,9 +170,16 @@ class MessageHandler extends BaseMessageHandler
         $this->setLog('收到的私信消息:' . $this->payload['deviceId'], 'msg');
         $this->setLog($content, 'msg');
         try {
+            $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:accountNo");
+            if(empty($accountNo)){
+                $this->setLog('设备未更新账号信息,请先更新账号信息' , 'msg');
+                return;
+            }
+
             $account = SvAccount::alias('a')
                 ->field('*')
                 ->where('a.device_code', $this->payload['deviceId'])
+                ->where('a.account', $accountNo)
                 ->join('sv_setting s', 's.account = a.account and s.user_id = a.user_id')
                 ->limit(1)->find();
             if(empty($account)){
@@ -578,10 +585,10 @@ class MessageHandler extends BaseMessageHandler
         try {
             $this->setLog('AI回复逻辑:'. $request['device_code'],'msg');
 
-            $appType = $request['payload']['appType'] ?? 'ai_xhs';
+            $appType = $request['payload']['appType'] ?? 3;
             $this->setLog('appType:'. $appType,'msg');
             //检查扣费
-            $unit = TokenLogService::checkToken($request['user_id'], 'ai_wechat');
+            $unit = TokenLogService::checkToken($request['user_id'], 'ai_xhs');
             $this->setLog('检查扣费unit:'. $unit,'msg');
             //获取提示词
             $keyword = ChatPrompt::where('prompt_name', '小红书')->value('prompt_text') ?? '';
@@ -599,10 +606,9 @@ class MessageHandler extends BaseMessageHandler
             }
             $this->setLog('提示词:','msg');
             $this->setLog($keyword,'msg');
-        
             $keyword = str_replace(
                 ['企业背景', '角色设定', '用户备注', '用户标签', '咨询', '最近对话记录', '用户发送的内容'],
-                [$robot->company_background, $robot->description, $request['friend_remark'], "", "", json_encode($logs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), json_encode($request['message'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)],
+                [$robot->company_background, $robot->description, $request['friend_remark'], "", "", json_encode($logs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (is_array($request['message']) ? implode("\n", $request['message']) : $request['message'])],
                 $keyword
             );
             $task_id = generate_unique_task_id();
@@ -691,7 +697,7 @@ class MessageHandler extends BaseMessageHandler
                 //clogger((json_encode($this->request['knowledge'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), 'wechat');
                 if(isset($this->request['knowledge']) && !empty($this->request['knowledge'])){
                     [$chatStatus, $response] = \app\api\logic\KnowledgeLogic::socketChat([
-                        'message' => $this->request['message'],
+                        'message' => is_array($this->request['message']) ? implode("\n" , $this->request['message']) : $this->request['message'],
                         'indexid' => $this->request['knowledge']['index_id'],
                         'rerank_min_score' => $this->request['knowledge']['rerank_min_score'] ?? 0.2,
                         'stream' => false,
@@ -1112,7 +1118,7 @@ class MessageHandler extends BaseMessageHandler
             }else{
                 $payload['reply'] = array(
                     'type' => $request['message_type'],
-                    'content' => isset($request['message_list']) ? $request['message_list']: [$request['message']],
+                    'content' => isset($request['message_list']) ? (is_array($request['message_list']) ? $request['message_list'] : [$request['message_list']]): [$request['message']],
                     'link' => '',
                     'targetRecipient' => $request['content']['replyName'] ?? '',
                     'lastMessageContent' => $request['content']['replyContent'] ?? ''

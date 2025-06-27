@@ -169,7 +169,7 @@ class HumanLogic extends ApiLogic
 
                     // TODO 失败退费
                     if ($item->status == 2) {
-                        self::refundTokens($item->user_id, $item->anchor_id, $item->task_id, 'human_anchor');
+                        self::refundTokens($item->user_id, $item->audio_id, $item->task_id, 'human_audio');
                     }
 
                     // 更新视频
@@ -264,6 +264,10 @@ class HumanLogic extends ApiLogic
                 'human_voice' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE],
                 'human_audio' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO],
                 'human_video' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO],
+                'human_anchor_pro' => [1, AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_PRO],
+                'human_voice_pro' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_PRO],
+                'human_audio_pro' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_PRO],
+                'human_video_pro' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO],
                 'human_anchor_ym' => [1, AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_YM],
                 'human_voice_ym' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YM],
                 'human_audio_ym' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YM],
@@ -284,6 +288,8 @@ class HumanLogic extends ApiLogic
                 $response = \app\common\service\ToolsService::Human()->detailYmt($requestParams);
             }elseif (strpos($type, '_ym') !== false) {
                 $response = \app\common\service\ToolsService::Human()->detailYm($requestParams);
+            }elseif (strpos($type, '_pro') !== false) {
+                $response = \app\common\service\ToolsService::Human()->detailPro($requestParams);
             } else {
                 $response = \app\common\service\ToolsService::Human()->detail($requestParams);
             }
@@ -939,7 +945,8 @@ class HumanLogic extends ApiLogic
         $pageNo = ($data['page_no'] - 1) * $data['page_size'];
         $pageSize = $data['page_size'];
         $name = $data['name'] ?? '';
-        $modelVersion = $data['model_version'] ?? '';
+        $modelVersion = json_decode($data['model_version'],true);
+        $modelVersion = is_array($modelVersion) ? $modelVersion : [(int)$modelVersion];
         $status = $data['status'] ?? '';
 
         $type = $data['type'] ?? 3;
@@ -953,7 +960,7 @@ class HumanLogic extends ApiLogic
                     $query->where('name', 'like', '%' . $name . '%');
                 })
                 ->when($modelVersion, function ($query) use ($modelVersion) {
-                    $query->where('model_version', $modelVersion);
+                    $query->where('model_version', 'in' ,$modelVersion);
                 })
                 ->when($status != "", function ($query) use ($status) {
                     $query->where('status', $status);
@@ -969,7 +976,7 @@ class HumanLogic extends ApiLogic
                     $query->where('name', 'like', '%' . $name . '%');
                 })
                 ->when($modelVersion, function ($query) use ($modelVersion) {
-                    $query->where('model_version', $modelVersion);
+                    $query->where('model_version', 'in' , $modelVersion);
                 })
                 ->when($status != "", function ($query) use ($status) {
                     $query->where('status', $status);
@@ -2100,14 +2107,83 @@ class HumanLogic extends ApiLogic
      */
     private static function setTimeoutTask(string $taskId): void
     {
+        $item = HumanVideoTask::where('task_id', $taskId)->findOrEmpty()->toArray();
+
         // 任务超时  
-        HumanAudio::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+       $Audio = HumanAudio::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+        if ($Audio) {
+            switch ($item['model_version'])
+            {
+                case  1:
+                    $scene = 'human_audio';
+                    break;
+                case  2:
+                    $scene = 'human_audio_pro';
+                    break;
+                case  4:
+                    $scene = 'human_audio_ym';
+                    break;
+                case  6:
+                    $scene = 'human_audio_ymt';
+                    break;
+                default:
+                    $scene = 'human_audio';
+                    break;
+            }
+            self::refundTokens($item['user_id'], $item['audio_id'], $item['task_id'], $scene);
+        }
 
-        HumanVoice::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+       $Voice =  HumanVoice::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+        if ($Voice) {
+            switch ($item['model_version'])
+            {
+                case  1:
+                    $scene = 'human_voice';
+                    break;
+                case  2:
+                    $scene = 'human_video_pro';
+                    break;
+                case  4:
+                    $scene = 'human_video_ym';
+                    break;
+                case  6:
+                    $scene = 'human_video_ymt';
+                    break;
+                default:
+                    $scene = 'human_video';
+                    break;
+            }
+            self::refundTokens($item['user_id'], $item['voice_id'], $item['task_id'], $scene);
 
-        HumanAnchor::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+        }
 
-        HumanVideoTask::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2, 'remark' => '创作超时']);
+       $Anchor = HumanAnchor::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+
+
+       $Video = HumanVideoTask::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2, 'remark' => '创作超时']);
+        if (!$Audio && !$Voice && !$Anchor && $Video) {
+            switch ($item['model_version'])
+            {
+                case  1:
+                    $scene = 'human_video';
+                    break;
+                case  2:
+                    $scene = 'human_video_pro';
+                    break;
+                case  4:
+                    $scene = 'human_video_ym';
+                    break;
+                case  6:
+                    $scene = 'human_video_ymt';
+                    break;
+                default:
+                    $scene = 'human_video';
+                    break;
+            }
+            self::refundTokens($item['user_id'], $item['result_id'], $item['task_id'], $scene);
+
+        }
+
     }
 
 

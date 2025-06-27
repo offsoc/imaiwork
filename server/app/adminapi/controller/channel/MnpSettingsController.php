@@ -57,6 +57,19 @@ class MnpSettingsController extends BaseAdminController
     }
 
     /**
+     * @notes 获取小程序客户端本地版本号
+     * @return \think\response\Json
+     * @throws \Exception
+     * @author mjf
+     * @date 2025/1/8 17:28
+     */
+    public function getMnpLocalVersion(): \think\response\Json
+    {
+        $result = (new MnpSettingsLogic())->getMnpLocalVersion();
+        return $result ? $this->success('', $result) : $this->fail(MnpSettingsLogic::getError());
+    }
+
+    /**
      * @notes 获取小程序客户端版本号
      * @return \think\response\Json
      * @throws \Exception

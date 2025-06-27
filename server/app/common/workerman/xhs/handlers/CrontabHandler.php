@@ -31,13 +31,13 @@ class CrontabHandler extends BaseMessageHandler
             $this->connection = $connection;
             //定时任务发布内容
             //查询在线的设备
-            $this->setLog($this->connection->deviceid .' crontab running ' , 'cron');
-            $this->setLog('正在发布设备:'. $this->connection->deviceid .' 的内容' , 'cron');
+            // $this->setLog($this->connection->deviceid .' crontab running ' , 'cron');
+            // $this->setLog('正在发布设备:'. $this->connection->deviceid .' 的内容' , 'cron');
             $st = date('Y-m-d H:i:s', (time() - 300));
             $et = date('Y-m-d H:i:s', (time() + 1800));
             $account = $this->service->getRedis()->get("xhs:{$this->connection->deviceid}:accountNo");
             if(empty($account)){
-                $this->setLog('设备:'. $this->connection->deviceid .' 没有绑定账号' , 'cron');
+                //$this->setLog('设备:'. $this->connection->deviceid .' 没有绑定账号' , 'cron');
                 return;
             }
             

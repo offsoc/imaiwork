@@ -18,6 +18,10 @@ class PublishDetailValidate extends BaseValidate
         'publish_time' =>'require',
         'retry_time' => 'require',
         'url' => 'require',
+        'title' => 'require',
+        'subtitle' => 'require',
+        'accounts' => 'require',
+        'material_type' => 'require'
     ];
 
 
@@ -26,7 +30,11 @@ class PublishDetailValidate extends BaseValidate
         'id.require' => '任务id不能为空',
         'publish_time.require' => '请输入发布结束时间',
         'retry_time.require' => '请输入任务重试时间',
-        'url.require' => '请输入视频地址'
+        'url.require' => '请输入视频地址',
+        'title.require' => '请输入视频标题',
+        'subtitle.require' => '请输入视频正文',
+        'accounts.require' => '请选择发布账号',
+        'material_type.require' => '请选择发布类型'
     ];
 
 
@@ -78,6 +86,6 @@ class PublishDetailValidate extends BaseValidate
         return $this->only(['id', 'retry_time']);
     }
     public function sceneTest() {
-        return $this->only(['url']);
+        return $this->only(['url', 'accounts', 'material_type']);
     }
 }

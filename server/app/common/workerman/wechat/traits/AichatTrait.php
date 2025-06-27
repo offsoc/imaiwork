@@ -27,6 +27,7 @@ use Workerman\Lib\Timer;
 use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
 use Google\Protobuf\Any;
 use Channel\Client as ChannelClient;
+
 /**
  * ai聊天
  * @author Qasim
@@ -35,13 +36,14 @@ use Channel\Client as ChannelClient;
 trait AichatTrait
 {
     use CacheTrait;
-    protected function sendFriendTalkNoticeMessage(string $targetProcess, string $deviceId, array $data, TcpConnection $connection){
+    protected function sendFriendTalkNoticeMessage(string $targetProcess, string $deviceId, array $data, TcpConnection $connection)
+    {
         $this->sendChannelMessage(SocketType::WEBSOCKET, $deviceId, $data);
-        
+
         $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext($data)->log();
         $paylod = $data['Data']['Content'] ?? [];
-        if(empty($paylod)){
-            return; 
+        if (empty($paylod)) {
+            return;
         }
         try {
             $device  = $this->_getDeviceInfo($deviceId);
@@ -49,13 +51,15 @@ trait AichatTrait
             $friend = $this->_getFriendInfo($paylod['FriendId'], $paylod['WeChatId']);
             $reply = $this->_getReplyStrategy($device['user_id']);
             $robot = $this->_getWechatRobot($wechat['robot_id']);
-            
+
+            $historyMsg = $this->getFriendHistoryMsg($paylod, $reply);
+
             $promat = $paylod['Content'];
-            if($paylod['ContentType'] == 22){
+            if ($paylod['ContentType'] == 22) {
                 $promat = json_decode($promat, true);
                 $promat = $promat['title'];
             }
-            
+
             // 组装请求参数
             $request = [
                 'wechat_id' => $wechat['wechat_id'],
@@ -67,14 +71,21 @@ trait AichatTrait
                 'MsgSvrId' => $paylod['MsgSvrId'],
                 'message_type' => $paylod['ContentType'] == 22 ? 1 : $paylod['ContentType'],
                 'user_id' => $device['user_id'],
+                'reply_strategy' => $reply,
+                'user_message' => $promat,
             ];
-
-            if($reply->image_enable == 1 && $request['message_type'] == 2){
-                $request['message']  = $reply->image_reply;
+            if($request['message_type'] == 1){
+                $this->setFriendHistoryMsg($request);
+            }
+            
+            
+            if ($reply['image_enable'] == 1 && $request['message_type'] == 2) {
+                $request['message']  = $reply['image_reply'];
                 $request['message_type'] = 1;
                 $this->_sendMessage($request);
                 return;
             }
+
 
             //step 1. 正则匹配停止AI回复
             $stop = $this->_regularMatchStopAI($reply, $request);
@@ -84,11 +95,11 @@ trait AichatTrait
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
                     'msg' => '关闭AI接管'
                 ])->log();
-
+                
                 return true;
             }
-            if($reply->multiple_type == 0){ //逐条回复
-                 // step 2. 正则匹配关键词
+            if ($reply['multiple_type'] == 0) { //逐条回复
+                // step 2. 正则匹配关键词
                 $match = $this->_regularMatchKeyword($robot, $request);
                 if ($match) {
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
@@ -97,45 +108,28 @@ trait AichatTrait
 
                     return true;
                 }
-                if(in_array($request['message_type'], [1, 22])){
-                    $message_logs = array(
+                if (in_array($request['message_type'], [1, 22])) {
+
+                    $historyMsg[] = array(
                         'role' => 'user',
                         'content' => $request['message']
                     );
-                    $this->_parseAiPrompt($robot, $request, [$message_logs]);
-                }else if($request['message_type'] == 3){ //语音
+                    $this->_parseAiPrompt($robot, $request, $historyMsg);
+                } else if ($request['message_type'] == 3) { //语音
+                    if ((int)$reply['voice_enable'] !== 1 ) {
+                        $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
+                            'msg' => '未开启语音回复策略'
+                        ])->log();
+                        return true;
+                    }
+                
                     $TaskId = time() . mt_rand(100, 999);
-                    $voiceToText = VoiceTransTextTaskHandler::handle([
-                        'DeviceId' => $request['device_code'],
-                        'WeChatId' => $request['wechat_id'],
-                        'FriendId' => $request['friend_id'],
-                        'TaskId' => $TaskId,
-                        'MsgSvrId' => $paylod['MsgSvrId'],
-                    ]);
-                    
-                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('VoiceTransTextTaskHandler')->withContext([
-                        'DeviceId' => $request['device_code'],
-                        'WeChatId' => $request['wechat_id'],
-                        'FriendId' => $request['friend_id'],
-                        'TaskId' => $TaskId,
-                        'MsgSvrId' => $paylod['MsgSvrId'],
-                    ])->log();
-                    
-                    $message = new TransportMessage();
-                    $message->setMsgType($voiceToText['MsgType']);
-                    $any = new Any();
-                    $any->pack($voiceToText['Content']);
-                    $message->setContent($any);
-                    $voiceToTextMsg = $message->serializeToString();
-                    
-                    $channel = "{$targetProcess}.{$deviceId}.message";
-                    ChannelClient::publish($channel, [
-                        'data' => is_array($voiceToTextMsg) ? json_encode($voiceToTextMsg) : $voiceToTextMsg
-                    ]);
+                    $this->formatVoiceToText($TaskId, $request, $paylod, $targetProcess, $deviceId);
+
                     $statusKey = "device:{$deviceId}:voiceToText";
                     $this->redis()->set($statusKey, 1);
                     $key = "device:{$deviceId}:voice:{$request['wechat_id']}:taskid:{$TaskId}";
-                    $timerid = Timer::add(10, function () use($key, $statusKey, &$timerid, $request, $robot){
+                    $timerid = Timer::add(10, function () use ($key, $statusKey, &$timerid, $request, $robot, $historyMsg) {
                         $text = $this->redis()->get($key);
                         echo "\n------------timerid------------\n";
                         print_r($text);
@@ -145,71 +139,88 @@ trait AichatTrait
                             'text' => $text
                         ])->log();
                         Timer::del($timerid);
+                        
                         $this->redis()->del($statusKey, 1);
-                        if(!empty($text)){
-                            $message_logs = array(
+                        if (!empty($text)) {
+                            $text = rtrim($text, '。');
+                            $historyMsg[] = array(
                                 'role' => 'user',
                                 'content' => $text
                             );
+                            $request['message'] = $text;
+                            $request['user_message'] = $text;
                             $request['message_type'] = 1;
-                            $this->_parseAiPrompt($robot, $request, [$message_logs]);
+                            $this->setFriendHistoryMsg($request);
+                            
+                            $match = $this->_regularMatchKeyword($robot, $request);
+                            if ($match) {
+                                $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
+                                    'msg' => '语音正则匹配关键词回复'
+                                ])->log();
+            
+                                return true;
+                            }
+                
+                            $this->_parseAiPrompt($robot, $request, $historyMsg);
                         }
-                        
                     });
-                    
                 }
-            }else{
+            } else {
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
                     'msg' => 'n监听消息2分钟'
                 ])->log();
-                if(!empty($connection->timerId)){
+                if (!empty($connection->timerId)) {
                     Timer::del($connection->timerId);
                 }
                 $key = $this->getDeviceKey($deviceId, 'msgs');
-                if($paylod['ContentType'] == 1){
+                if ($paylod['ContentType'] == 1) {
                     $this->redis()->rPush($key, json_encode([
                         'time' => time(),
                         'content' => $request['message'],
                         'role' => 'user',
                         'type' => $request['message_type']
-                    ]));
+                    ], JSON_UNESCAPED_UNICODE));
                 }
-                $connection->timerId = Timer::add(120, function () use($deviceId, $robot, $request, $reply, $friend, $wechat, &$connection) {
+                $connection->timerId = Timer::add(120, function () use ($deviceId, $robot, $request, $reply, $friend, $wechat, &$connection) {
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
                         'msg' => '开始推送'
                     ])->log();
                     $key = $this->getDeviceKey($deviceId, 'msgs');
                     $msgs = $this->redis()->lRange($key, 0, -1);
-                    if(empty($msgs)){
+                    if (empty($msgs)) {
+                        $this->redis()->del($key);
                         Timer::del($connection->timerId);
                         return;
                     }
-                    if($reply->multiple_type == 1){ 
-                        $message_logs = [];
-                        foreach($msgs as $msg){
-                            $msg = json_decode($msg, true);
-                            $message_logs[] = [
-                                'role' => $msg['role'],
-                                'content' => $msg['content']
-                            ];
-                        }
-                        $this->_parseAiPrompt($robot, $request, $message_logs);
-                    }else{
+                    if ($reply['multiple_type'] == 1) {
+                        $_content = implode("\n", array_column(array_map(function($item){
+                            return json_decode($item, true);
+                        }, $msgs), 'content'));
+                        $historyMsg[] = array(
+                            'role' => 'user',
+                            'content' => $_content
+                        );
+                        $request['user_message'] = $_content;
+                        $this->_parseAiPrompt($robot, $request, $historyMsg);
+                    } else {
                         $lastMessage = $msgs[count($msgs) - 1];
                         $lastMessage = json_decode($lastMessage, true);
                         $request['message'] = $lastMessage['content'];
                         $request['message_type'] = $lastMessage['type'];
-                        
+                        $request['user_message'] = $lastMessage['content'];
+
                         $match = $this->_regularMatchKeyword($robot, $request);
                         if ($match) {
+                            $this->redis()->del($key);
+                            Timer::del($connection->timerId);
                             return true;
                         }
 
-                        $message_logs = array(
+                        $historyMsg = array(
                             'role' => 'user',
                             'content' => $request['message']
                         );
-                        $this->_parseAiPrompt($robot, $request, [$message_logs]);
+                        $this->_parseAiPrompt($robot, $request, $historyMsg);
                     }
 
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
@@ -233,6 +244,40 @@ trait AichatTrait
             // $this->sendChannelMessage(SocketType::WEBSOCKET, $deviceId, $response);
         }
     }
+
+
+    private function formatVoiceToText(string $TaskId, array $request, array $payload, string $targetProcess, string $deviceId): void
+    {
+        
+        $voiceToText = VoiceTransTextTaskHandler::handle([
+            'DeviceId' => $request['device_code'],
+            'WeChatId' => $request['wechat_id'],
+            'FriendId' => $request['friend_id'],
+            'TaskId' => $TaskId,
+            'MsgSvrId' => $payload['MsgSvrId'],
+        ]);
+
+        $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('VoiceTransTextTaskHandler')->withContext([
+            'DeviceId' => $request['device_code'],
+            'WeChatId' => $request['wechat_id'],
+            'FriendId' => $request['friend_id'],
+            'TaskId' => $TaskId,
+            'MsgSvrId' => $payload['MsgSvrId'],
+        ])->log();
+
+        $message = new TransportMessage();
+        $message->setMsgType($voiceToText['MsgType']);
+        $any = new Any();
+        $any->pack($voiceToText['Content']);
+        $message->setContent($any);
+        $voiceToTextMsg = $message->serializeToString();
+        
+        $channel = "{$targetProcess}.{$deviceId}.message";
+        ChannelClient::publish($channel, [
+            'data' => is_array($voiceToTextMsg) ? json_encode($voiceToTextMsg) : $voiceToTextMsg
+        ]);
+    }
+
 
     private function _parseAiPrompt(AiWechatRobot $robot, array $request, array $logs): void
     {
@@ -278,6 +323,8 @@ trait AichatTrait
             'now'       => time(),
             'messages' => array_merge([['role' => 'system', 'content' => $keyword]], $logs),
             'knowledge' => $knowledge,
+            'reply_strategy' => $request['reply_strategy'],
+            'user_message' => $request['user_message']
         ];
 
         // 任务数据
@@ -289,12 +336,15 @@ trait AichatTrait
             'user_id' => $request['user_id'],
             'request' => $request,
             'knowledge' => $knowledge,
+            'reply_strategy' => $request['reply_strategy'],
+            'user_message' => $request['user_message']
         ];
         $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('请求数据')->withContext($data)->log();
         $this->_beforeSend($data);
     }
 
-    private function _beforeSend(array $payload){
+    private function _beforeSend(array $payload)
+    {
         // 检查AI 是否已有回复记录
         $log = ChatLog::where('task_id', $payload['task_id'])->findOrEmpty();
         $reply = '未找到相关信息,请详细说明';
@@ -308,13 +358,13 @@ trait AichatTrait
                     'user_id' => $payload['user_id'],
                     'scene' => '个微聊天'
                 ]);
-                if($chatStatus === false){
+                if ($chatStatus === false) {
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('队列请求知识库失败:')->withContext([
                         'response' => $response
                     ])->log();
-                }else{
+                } else {
                     if (isset($response['choices'][0]) && !empty($response['choices'][0])) {
-                        $reply =  $response['choices'][0]['message']['content']; 
+                        $reply =  $response['choices'][0]['message']['content'];
                     }
                 }
             } else {
@@ -339,15 +389,18 @@ trait AichatTrait
             'wechat_id' => $payload['wechat_id'],
             'friend_id' => $payload['friend_id'],
             'device_code' => $payload['device_code'],
-            'message' => $reply,
+            'message' => $this->formatMarkdown($reply),
             'message_id' => $payload['request']['message_id'],
             'MsgSvrId' => $payload['request']['MsgSvrId'],
-            'message_type' => $payload['request']['message_type'],  
-            'MsgSvrId' => $payload['request']['MsgSvrId'],  
+            'message_type' => $payload['request']['message_type'],
+            'MsgSvrId' => $payload['request']['MsgSvrId'],
+            'reply_strategy' => $payload['reply_strategy'],
+            'user_message' => $payload['user_message']
         ]);
     }
 
-    private function _handleResponse(array $response, array $request){
+    private function _handleResponse(array $response, array $request)
+    {
         //检查扣费
         $unit = TokenLogService::checkToken($request['user_id'], 'ai_wechat');
         // 获取回复内容
@@ -380,30 +433,36 @@ trait AichatTrait
         return $reply;
     }
 
-    private function _sendMessage(array $request){
+    private function _sendMessage(array $request)
+    {
         $aiContent = TalkToFriendTaskHandler::handle([
             'DeviceId' => $request['device_code'],
             'WeChatId' => $request['wechat_id'],
             'FriendId' => $request['friend_id'],
             'TaskId' => time(),
-           'ContentType' => $request['message_type'] != 2 ? 22 : $request['message_type'],
+            //'ContentType' => $request['message_type'] != 2 ? 22 : $request['message_type'],
+            'ContentType' => $request['message_type'],
             'Remark' => $request['MsgSvrId'] ?? '',
             'MsgId' => time(),
-            'Content' => $request['message'],  
+            'Content' => $request['message'],
             'Immediate' => true
         ]);
-        
+
         $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage Send')->withContext([
             'DeviceId' => $request['device_code'],
             'WeChatId' => $request['wechat_id'],
             'FriendId' => $request['friend_id'],
             'TaskId' => time(),
-           'ContentType' => $request['message_type'] != 2 ? 22 : $request['message_type'],
+            //'ContentType' => $request['message_type'] != 2 ? 22 : $request['message_type'],
+            'ContentType' => $request['message_type'],
             'Remark' => $request['MsgSvrId'] ?? '',
             'MsgId' => time(),
             'Content' => $request['message'],
             'Immediate' => true
         ])->log();
+
+        //$this->setFriendHistoryMsg($request, true);
+
         $this->sendChannelMessage(SocketType::SOCKET, $request['device_code'], $aiContent);
     }
 
@@ -453,8 +512,7 @@ trait AichatTrait
 
             // 模糊匹配
             if ($item->match_type == 0) {
-                if (str_contains($request['message'], $item->keyword)) {
-
+                if(strpos($item->keyword, $request['message']) !== false){
                     $this->_parseMessage($request, $item->reply);
                     $match = true;
                 }
@@ -470,13 +528,60 @@ trait AichatTrait
         return $match;
     }
 
+    private function formatMarkdown(string $content)
+    {
+        $content = strip_tags($content);
+        $content = preg_replace(['/#+/', '/`+/', '/\*+/', '/\|+/', '/-+/', '/\n(&gt;|\\>)/', '/^>{1}/'], '', $content);
+        $content = str_replace("\n\n", "\n", $content);
+        return $content;
+    }
 
+    private function getFriendHistoryMsg(array $payload, array $reply)
+    {
+        $key = $this->getDeviceKey($payload['DeviceId'], 'friendHistory:' . $payload['FriendId']);
+        $json = $this->redis()->get($key);
+        $msgs = array();
+        if ($json) {
+            $msgs = json_decode($json, true);
+        }
+        return $msgs;
+    }
 
-    private function _regularMatchStopAI(AiWechatReplyStrategy $reply, array $request): bool
+    private function setFriendHistoryMsg(array $payload, bool $isSend = false)
+    {
+        $reply = $payload['reply_strategy'];
+        $number_chat_rounds = $reply['number_chat_rounds'];
+        $key = $this->getDeviceKey($payload['device_code'], 'friendHistory:' . $payload['friend_id']);
+        $json = $this->redis()->get($key);
+        $role = $isSend ? 'assistant' : 'user';
+        $msgs = array();
+        if ($json) {
+            $msgs = json_decode($json, true);
+            array_push($msgs, [
+                'role' => $role,
+                'content' => $payload['user_message'],
+                'content_type' => $payload['message_type']
+            ]);
+        } else {
+            array_push($msgs, [
+                'role' => $role,
+                'content' => $payload['user_message'],
+                'content_type' => $payload['message_type']
+            ]);
+        }
+
+        $msgs = count($msgs) > $number_chat_rounds ? array_slice($msgs, -$number_chat_rounds) : $msgs;
+        $this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE));
+        return $msgs;
+    }
+
+    private function _regularMatchStopAI(array $reply, array $request): bool
     {
         $stop = false;
-
-        $keywords = explode(';', $reply->stop_keywords);
+        if($reply['stop_enable'] == 0){
+            return $stop;
+        }
+        $keywords = explode(';', $reply['stop_keywords']);
 
         // 获取微信机器人设置的正关键词
         foreach ($keywords as $keyword) {
@@ -495,7 +600,7 @@ trait AichatTrait
     private function _getWechatRobot(int $robotId): array|AiWechatRobot
     {
         $robot = AiWechatRobot::where('id', $robotId)->find();
-        if(empty($robot)){
+        if (empty($robot)) {
             throw new \Exception('robot not found');
         }
         return $robot;
@@ -505,28 +610,38 @@ trait AichatTrait
     {
         $reply = AiWechatReplyStrategy::where('user_id', $userId)->findOrEmpty();
         if ($reply->isEmpty()) {
-            throw new \Exception('请先设置回复的配置');
+            return [
+                "multiple_type" => 0,
+                "number_chat_rounds" => 3,
+                "voice_enable" => 0,
+                "image_enable" => 0,
+                "image_reply" => "",
+                "stop_enable" => 0,
+                "stop_keywords" => ""
+            ];
         }
-        return $reply;
+        return $reply->toArray();
     }
-    
-    private function _getFriendInfo(string $friendId, string $wechatId): array{
+
+    private function _getFriendInfo(string $friendId, string $wechatId): array
+    {
         $friend = AiWechatContact::where('friend_id', $friendId)->where('wechat_id', $wechatId)->find();
-        if(empty($friend)){
+        if (empty($friend)) {
             throw new \Exception('friend not found');
         }
-        if($friend->open_ai == 0){
+        if ($friend->open_ai == 0) {
             throw new \Exception('未开启全局AI');
         }
         return $friend->toArray();
     }
-    private function _getWechatInfo(string $wechatId, array $device): array{
+    private function _getWechatInfo(string $wechatId, array $device): array
+    {
         $wechat = AiWechat::alias('w')
-                ->join('ai_wechat_setting s', 's.wechat_id = w.wechat_id')
-                ->where('w.wechat_id', $wechatId)
-                ->where('w.device_code', $device['device_code'])
-                ->where('w.user_id', $device['user_id'])->find();
-        if(empty($wechat)){
+            ->join('ai_wechat_setting s', 's.wechat_id = w.wechat_id')
+            ->where('w.wechat_id', $wechatId)
+            ->where('w.device_code', $device['device_code'])
+            ->where('w.user_id', $device['user_id'])->find();
+        if (empty($wechat)) {
             throw new \Exception('wechat not found');
         }
         return $wechat->toArray();
@@ -535,11 +650,9 @@ trait AichatTrait
     private function _getDeviceInfo(string $deviceId): array
     {
         $device = AiWechatDevice::where('device_code', $deviceId)->find();
-        if(empty($device)){
+        if (empty($device)) {
             throw new \Exception('device not found');
         }
         return $device->toArray();
     }
-
-    
 }

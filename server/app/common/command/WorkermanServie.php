@@ -1,5 +1,6 @@
 <?php
-declare (strict_types = 1);
+
+declare(strict_types=1);
 
 namespace app\common\command;
 
@@ -20,17 +21,16 @@ class WorkermanServie extends Command
             ->addArgument('action', Argument::OPTIONAL, "start|stop|restart|reload|status|connections", 'start')
             ->addOption('mode', 'm', Option::VALUE_OPTIONAL, 'Run the workerman server in daemon mode.')
             ->setDescription('Wechat server');
-        
     }
-    
+
     protected function execute(Input $input, Output $output)
     {
         // 指令输出
         $output->writeln('convert start');
-        
+
         $action = $input->getArgument('action');
         $mode = $input->getOption('mode');
-        
+
         // 重新构造命令行参数,以便兼容workerman的命令
         global $argv;
         $argv = [];
@@ -40,9 +40,9 @@ class WorkermanServie extends Command
         } else if ($mode == 'g') {
             $argv[] = '-g';
         }
-        
+
         try {
-            
+
             // 初始化Channel服务（用于跨进程通信）
             $channel_server = new \Channel\Server('0.0.0.0', 2206);
             // 在这里放心的实例化worker,
@@ -80,16 +80,10 @@ class WorkermanServie extends Command
             $tcpWorker->onClose       = array($deviceService, 'onClose');
             $tcpWorker->onError       = array($deviceService, 'onError');
 
-            if(!defined('GLOBAL_START'))
-            {
-                
-            }
             Worker::runAll();
-            
         } catch (\Exception $e) {
-            clogger($e);
+            //            clogger($e);
             print_r($e->__toString());
         }
-        
     }
 }

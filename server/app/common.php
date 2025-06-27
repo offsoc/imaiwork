@@ -373,6 +373,7 @@ function format_json($text)
 }
 
 function clogger($log_content, $log_filename = 'log'){
+    return '';
     $max_size = 500000;
     $path = public_path().'/logs/knowledge';
     !is_dir($path) && mkdir($path, 0777, true);

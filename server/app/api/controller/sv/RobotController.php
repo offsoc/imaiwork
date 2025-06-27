@@ -4,6 +4,8 @@
 namespace app\api\controller\sv;
 
 use app\api\controller\BaseApiController;
+use app\common\service\ConfigService;
+use app\common\service\FileService;
 use think\exception\HttpResponseException;
 use app\api\validate\sv\RobotValidate;
 use app\api\logic\sv\RobotLogic;
@@ -88,6 +90,32 @@ class RobotController extends BaseApiController
             $result = RobotLogic::detailRobot($params);
             if ($result) {
                 return $this->data(RobotLogic::getReturnData());
+            }
+            return $this->fail(RobotLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
+    /**
+     * @desc 添加机器人
+     */
+    public function defaultAdd()
+    {
+        try {
+            $web_logo = FileService::getFileUrl(ConfigService::get('website', 'web_logo'));
+            $params = [
+                "id"=>"",
+                "logo"=>$web_logo,
+                "name"=>"默认助理",
+                "profile"=>"默认助理描述",
+                "description"=>"",
+                "company_background"=>"",
+                "index_id"=>""
+            ];
+            $result = RobotLogic::addRobot($params);
+            if ($result) {
+                return $this->success(data: RobotLogic::getReturnData());
             }
             return $this->fail(RobotLogic::getError());
         } catch (HttpResponseException $e) {

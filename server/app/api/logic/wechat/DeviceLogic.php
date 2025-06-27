@@ -28,17 +28,25 @@ class DeviceLogic extends WechatBaseLogic
             // 获取设备信息
             $device = self::deviceInfo($params['device_code'], false);
             if ($device instanceof AiWechatDevice) {
-                self::setError('设备已存在');
-                return false;
+                
+                if($device['user_id'] == self::$uid){
+                    // 更新设备  
+                    $params['update_time'] = time();
+                    AiWechatDevice::where('id', $device->id)->update($params);
+                    $data =$device->refresh()->toArray();
+                }else{
+                    self::setError('设备不属于当前用户');
+                    return false;
+                }
+
+            }else{
+                $params['user_id'] = self::$uid;
+                // 添加设备  
+                $device = AiWechatDevice::create($params);
+                // 返回设备信息 
+                $data = $device->toArray();
             }
 
-            $params['user_id'] = self::$uid;
-
-            // 添加设备  
-            $device = AiWechatDevice::create($params);
-
-            // 返回设备信息 
-            $data = $device->toArray();
             self::$returnData = $data;
             return true;
         } catch (\Exception $e) {
@@ -55,15 +63,21 @@ class DeviceLogic extends WechatBaseLogic
     public static function updateDevice(array $params)
     {
         try {
+            
             // 获取设备信息
-            $device = self::deviceInfo($params['device_code']);
-            if (is_bool($device)) {
+            $deviceInfo = self::getWxDeviceInfo($params['device_code']);
+            // 检查设备是否被使用
+            if (empty($deviceInfo)) {
+                self::setError('设备不存在');
                 return false;
             }
+            
+            // 更新设备信息
+            $deviceInfo['IsUsed'] = (bool)$params['is_used'];
+            $deviceInfo['IsOnline'] = self::isWxDeviceOnline($params['device_code']);
 
-            // 更新设备  
-            AiWechatDevice::where('id', $device->id)->update($params);
-            self::$returnData = $device->refresh()->toArray();
+            self::updateWxDevices($deviceInfo);
+            self::$returnData = $deviceInfo;
             return true;
         } catch (\Exception $e) {
             self::setError($e->getMessage());
@@ -100,7 +114,6 @@ class DeviceLogic extends WechatBaseLogic
             });
 
             $device->delete();
-
             return true;
         } catch (\Exception $e) {
             self::setError($e->getMessage());

@@ -578,7 +578,7 @@ class MessageHandler extends BaseMessageHandler
         try {
             $this->setLog('AI回复逻辑:'. $request['device_code'],'msg');
 
-            $appType = $request['payload']['appType'] ?? 'ai_xhs';
+            $appType = $request['payload']['appType'] ?? 3;
             $this->setLog('appType:'. $appType,'msg');
             //检查扣费
             $unit = TokenLogService::checkToken($request['user_id'], 'ai_wechat');

@@ -64,7 +64,7 @@ class PublishLogic extends BaseLogic
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-            clogger($e);
+//            clogger($e);
             self::setError($e->getMessage());
             return false;
         }

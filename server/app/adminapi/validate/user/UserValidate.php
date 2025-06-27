@@ -132,4 +132,9 @@ class UserValidate extends BaseValidate
     {
         return $this->only(['mobile', 'password']);
     }
+
+    public function sceneSetInfo(): UserValidate
+    {
+        return $this->only(['id', 'field', 'value']);
+    }
 }

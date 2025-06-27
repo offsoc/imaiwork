@@ -524,7 +524,7 @@ class LianLianLogic extends ApiLogic
                 foreach ($drafts as $draft){
                     LlChat::destroy(['analysis_id'=>$draft['id']]);
                     LlAnalysis::destroy($draft['id']);
-                    Log::write('场景ID：'.$data['scene_id'].'对话ID：'.$draft['id'].'删除成功');
+//                    Log::write('场景ID：'.$data['scene_id'].'对话ID：'.$draft['id'].'删除成功');
                 }
             }
 

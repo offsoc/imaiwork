@@ -21,13 +21,14 @@ class CompletedHandler extends BaseMessageHandler
             $this->userId = $content['userId'] ?? 0;
             $this->connection = $connection;
         
-    
+            
             $worker = $this->service->getWorker();
             if(!isset($worker->uidConnections[$uid])){
                 throw new \Exception('设备未连接');
             }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
             $worker->uidConnections[$uid]->initial = 1;
             $worker->uidConnections[$uid]->crontabId = Timer::add(90, function() use ($uid, $payload, $worker){
+                $uid = $this->service->getRedis()->get("xhs:device:{$payload['deviceId']}") ?? $uid;
                 if(!isset($worker->uidConnections[$uid])){
                     $msg = '设备不在线';
                     $this->setLog('设备绑定定时器, 设备号:'. $payload['deviceId']. ', uid:'. $uid . '  msg:' . $msg, 'device');
@@ -53,6 +54,7 @@ class CompletedHandler extends BaseMessageHandler
             
                 $find = SvPublishSettingDetail::where('data_type', 1)->where('status', 0)->limit(1)->findOrEmpty();
                 if(!$find->isEmpty()){
+                    $uid = $this->service->getRedis()->get("xhs:device:{$payload['deviceId']}") ?? $uid;
                     if(!isset($worker->uidConnections[$uid])){
                         $msg = '设备不在线';
                        // $this->setLog('设备绑定定时器, 设备号:'. $payload['deviceId']. ', uid:'. $uid . '  msg:' . $msg, 'device');

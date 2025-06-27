@@ -40,7 +40,7 @@ class AddDeviceHandler extends BaseHandler
         // 更新设备信息
         $deviceInfo['IsUsed'] = true;
         $deviceInfo['IsOnline'] = $this->isDeviceOnline($deviceId);
-        $this->updateDevices($deviceInfo);
+        //$this->updateDevices($deviceInfo);
 
         // 构建内容
         $content = $deviceInfo;

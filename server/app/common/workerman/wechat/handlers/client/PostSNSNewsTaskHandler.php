@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace app\common\workerman\wechat\handlers\client;
 
-use Jubo\JuLiao\IM\Wx\Proto\{PostSNSNewsTaskMessage, PostSNSNewsTaskMessage\AttachmentMessage};
+use Jubo\JuLiao\IM\Wx\Proto\{
+    PostSNSNewsTaskMessage, 
+    PostSNSNewsTaskMessage\AttachmentMessage,
+    PostSNSNewsTaskMessage\PoiMessage,
+    PostSNSNewsTaskMessage\VisibleMessage
+
+};
 use Jubo\JuLiao\IM\Wx\Proto\EnumMsgType;
 
 /**
@@ -97,9 +103,40 @@ class PostSNSNewsTaskHandler extends BaseHandler
         
         // TODO 待实现
         if (isset($data['Poi'])) {
+            $poi = new PoiMessage();
+            if(isset($data['Poi']['City'])){
+                $poi->setCity($data['Poi']['City']);
+            }
+            if(isset($data['Poi']['Name'])){
+                $poi->setName($data['Poi']['Name']);
+            }
+
+            if(isset($data['Poi']['Address'])){
+                $poi->setAddress($data['Poi']['Address']);
+            }
+
+            if(isset($data['Poi']['Lat'])){
+                $poi->setLat($data['Poi']['Lat']);
+            }
+
+            if(isset($data['Poi']['Lng'])){
+                $poi->setLng($data['Poi']['Lng']);
+            }
         }
         
         if (isset($data['Visible'])) {
+            $visible = new VisibleMessage();
+            if(isset($data['visible']['Type'])){
+                $visible->setType($data['visible']['Type']);
+            }
+
+            if(isset($data['visible']['Labels'])){
+                $visible->setLabels($data['visible']['Labels']);
+            }
+
+            if(isset($data['visible']['Friends'])){
+                $visible->setFriends($data['visible']['Friends']);
+            }
         }
         
         if (isset($data['ExtComment'])) {

@@ -131,7 +131,6 @@ class WorkbenchLogic extends BaseLogic
         }
 
         $data = $response['data']['cast_list'];
-
         foreach ($data as $key => $value) {
 
             $info = ModelConfig::where('scene', $value['code'])->field('name,unit,score,code,scene,description')->findOrEmpty();
@@ -148,7 +147,7 @@ class WorkbenchLogic extends BaseLogic
             $data[$key]['name']         = $info['name'];
             $data[$key]['code']         = $info['code'];
             $data[$key]['scene']        = $info['scene'];
-            $data[$key]['description']  = $info['description'];
+            $data[$key]['description']  = $value['description'];
         }
 
         return $data;
