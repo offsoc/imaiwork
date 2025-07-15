@@ -55,14 +55,14 @@
                             </template>
                             <div class="flex flex-col gap-2">
                                 <div
-                                    class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                    class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                     @click="handleAccountSetting(item.id)">
                                     <ElButton link icon="el-icon-Setting" class="w-full !justify-start"
                                         >编辑智能体</ElButton
                                     >
                                 </div>
                                 <div
-                                    class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                    class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                     @click="handleDelete(item.id, index)">
                                     <ElButton link icon="el-icon-Delete" class="w-full !justify-start">删除</ElButton>
                                 </div>
@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { getAgentList, deleteAgent } from "@/api/agent";
+import { getAgentList, deleteAgent, addDefaultAgent } from "@/api/agent";
 import dayjs from "dayjs";
 
 const router = useRouter();
@@ -112,12 +112,26 @@ const handleDelete = async (id: number, index: number) => {
     }
 };
 
-const handleAccountSetting = (id?: number) => {
+const handleAccountSetting = async (id?: number) => {
+    let query = {
+        type: "add",
+        id: "",
+    };
+    if (!id) {
+        try {
+            const data = await addDefaultAgent();
+            query.type = "edit";
+            query.id = data.id;
+        } catch (error) {
+            query.type = "add";
+            query.id = "";
+        }
+    } else {
+        query.type = "edit";
+        query.id = String(id);
+    }
     router.replace({
-        query: {
-            type: id ? "edit" : "add",
-            id,
-        },
+        query,
     });
 };
 

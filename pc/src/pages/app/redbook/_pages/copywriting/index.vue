@@ -61,14 +61,14 @@
                                         </template>
                                         <div class="flex flex-col gap-2">
                                             <div
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                                class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                                 @click.stop="handleEdit(item)">
                                                 <ElButton link icon="el-icon-Edit" class="w-full !justify-start"
                                                     >编辑文案</ElButton
                                                 >
                                             </div>
                                             <div
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                                class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                                 @click.stop="handleDelete(item.id, index)">
                                                 <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                                     >删除</ElButton
@@ -103,7 +103,7 @@ import ContentLists from "./_components/content-lists.vue";
 import { type UpdateSliderIndexParams } from "~/pages/app/_hooks/useSidebar";
 
 const emit = defineEmits<{
-    (event: "update:sliderIndex", params: UpdateSliderIndexParams): void;
+    (event: "update:sidebarIndex", params: UpdateSliderIndexParams): void;
 }>();
 
 const route = useRoute();
@@ -154,7 +154,7 @@ const handleEdit = async (item: any) => {
 
 const handleAddTask = async (item: any) => {
     const { id, keyword } = item;
-    emit("update:sliderIndex", {
+    emit("update:sidebarIndex", {
         type: 2,
         create_id: id,
         mode: "new",

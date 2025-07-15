@@ -42,6 +42,7 @@
                 <el-button type="primary" @click="handleEditPrompt">markdown内置提示词编辑 </el-button>
             </div>
             <el-table
+                ref="tableRef"
                 size="large"
                 v-loading="pager.loading"
                 :data="pager.lists"
@@ -92,9 +93,9 @@
 import { getMindMapRecordLists, deleteMindMapRecord } from "@/api/ai_application/mind_map";
 import { usePaging } from "@/hooks/usePaging";
 import feedback from "@/utils/feedback";
+import { ElTable } from "element-plus";
 import ReplyPop from "./replyPop.vue";
 import PromptPop from "./prompt.vue";
-
 const replyPopRef = shallowRef<InstanceType<typeof ReplyPop>>();
 const promptRef = shallowRef<InstanceType<typeof PromptPop>>();
 
@@ -109,6 +110,8 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
     fetchFun: getMindMapRecordLists,
     params: queryParams,
 });
+
+const tableRef = ref<InstanceType<typeof ElTable>>();
 
 const showPrompt = ref<boolean>(false);
 
@@ -136,6 +139,8 @@ const handleDelete = async (id: number | number[]) => {
     await feedback.confirm("确定要删除吗？");
     await deleteMindMapRecord({ id });
     getLists();
+    multipleSelection.value = [];
+    tableRef.value?.clearSelection();
 };
 
 getLists();

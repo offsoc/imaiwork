@@ -83,12 +83,12 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleDetail(row.id)">
                                         <ElButton link icon="el-icon-View" class="w-full !justify-start">详情</ElButton>
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleDelete(row.id)">
                                         <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                             >删除</ElButton
@@ -96,7 +96,7 @@
                                     </div>
                                     <div
                                         v-if="row.status == 7"
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleReanalyze(row.id)">
                                         <ElButton link icon="el-icon-Refresh" class="w-full !justify-start"
                                             >重新分析</ElButton

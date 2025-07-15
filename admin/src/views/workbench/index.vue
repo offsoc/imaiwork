@@ -180,7 +180,7 @@
             </el-card>
             <ConfigTable title="通用聊天" :data="getCommonConfig" />
             <ConfigTable title="AI数字人" :data="getAiPersonConfig" />
-            <ConfigTable title="AI绘图" :data="getAiDrawConfig" />
+            <ConfigTable title="美工设计" :data="getAiDrawConfig" />
             <ConfigTable title="思维导图" :data="getMindMapConfig" />
             <ConfigTable title="会议纪要" :data="getMeetingConfig" />
             <ConfigTable title="AI陪练" :data="getAiTrainConfig" />
@@ -219,9 +219,7 @@
 import { getWorkbench } from "@/api/app";
 import { upgradeCheck } from "@/api/setting/update";
 import { rechargeCDK } from "@/api/marketing/recharge";
-import { Refresh } from "@element-plus/icons-vue";
 import useAppStore from "@/stores/modules/app";
-import { ElMessageBox } from "element-plus";
 import feedback from "@/utils/feedback";
 import { useLockFn } from "@/hooks/useLockFn";
 import ConfigTable from "./config-table.vue";
@@ -302,7 +300,19 @@ const getAiPersonConfig = computed(() => {
 
 const getAiDrawConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["text_to_image", "image_to_image", "goods_image", "model_image", "image_prompt"].includes(item.scene)
+        [
+            "text_to_image",
+            "image_to_image",
+            "goods_image",
+            "model_image",
+            "image_prompt",
+            "volc_txt_to_img",
+            "txt_to_posterimg",
+            "volc_txt_to_posterimg",
+            "volc_text_to_video",
+            "volc_image_to_video",
+            "ai_draw_video_prompt",
+        ].includes(item.scene)
     );
 });
 

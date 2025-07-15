@@ -92,7 +92,7 @@
             </div>
         </div>
         <div class="flex justify-end px-4">
-            <pagination v-model="pager" @change="checkVideoStatus()"></pagination>
+            <pagination v-model="pager" @change="getLists()"></pagination>
         </div>
     </popup>
     <PreviewVideo ref="previewVideoRef" v-if="showPreviewVideo" @close="showPreviewVideo = false" />
@@ -178,33 +178,13 @@ const previewVideo = async (url: string) => {
 const open = (id: string) => {
     popupRef.value?.open();
     queryParams.video_setting_id = id;
-    checkVideoStatus();
+    getLists();
 };
 
 const close = () => {
     emit("close");
     popupRef.value?.close();
 };
-
-/**
- * 检查视频是否包含有未生成的，如果有位生成，需要循环查询getLists，直到视频生成
- */
-const timer = ref<NodeJS.Timeout>();
-const checkVideoStatus = async () => {
-    await getLists();
-    const flag = pager.lists.some((item) => item.status === VideoStatus.VIDEO_COMPOSITION_SUCCESS);
-    if (!flag) {
-        clearTimeout(timer.value);
-        return;
-    }
-    timer.value = setTimeout(() => {
-        checkVideoStatus();
-    }, 3000);
-};
-
-onUnmounted(() => {
-    clearTimeout(timer.value);
-});
 
 defineExpose({
     open,

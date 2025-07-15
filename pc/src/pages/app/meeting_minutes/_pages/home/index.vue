@@ -134,19 +134,19 @@
                                                 </template>
                                                 <div class="flex flex-col gap-2">
                                                     <div
-                                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                                         v-if="[TurnStatus.ERROR].includes(row.status)">
                                                         <Icon name="el-icon-Refresh"></Icon>
                                                         <span>重试</span>
                                                     </div>
                                                     <div
-                                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                                         @click="handleDelete(row.id)">
                                                         <Icon name="el-icon-Delete"></Icon>
                                                         <span>删除</span>
                                                     </div>
                                                     <div
-                                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg"
+                                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg"
                                                         v-if="row.status == TurnStatus.SUCCESS">
                                                         <ElButton link icon="el-icon-DocumentAdd" @click="onTrain(row)">
                                                             训练知识库

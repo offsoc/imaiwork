@@ -52,7 +52,7 @@
                                 <div class="flex flex-col gap-2">
                                     <div
                                         v-if="row.status == 2"
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleCheckError(row.remark)">
                                         <ElButton link icon="el-icon-View" class="w-full !justify-start"
                                             >查看原因</ElButton
@@ -60,7 +60,7 @@
                                     </div>
                                     <div
                                         v-if="false"
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleCheckData(row)">
                                         <ElButton link icon="el-icon-View" class="w-full !justify-start"
                                             >查看数据</ElButton
@@ -68,7 +68,7 @@
                                     </div>
                                     <div
                                         v-if="row.status == 0"
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleChangeDate(row, 'changeDate')">
                                         <ElButton link icon="el-icon-Calendar" class="w-full !justify-start"
                                             >更改时间</ElButton
@@ -76,14 +76,22 @@
                                     </div>
                                     <div
                                         v-if="row.status == 2"
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleChangeDate(row, 'retry')">
                                         <ElButton link icon="el-icon-Refresh" class="w-full !justify-start"
                                             >重试</ElButton
                                         >
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
+                                        @click="handleCopy(row.id)">
+                                        <ElButton link icon="el-icon-CopyDocument" class="w-full !justify-start"
+                                            >复制</ElButton
+                                        >
+                                    </div>
+                                    <div
+                                        v-if="row.status == 1"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleDelete(row)">
                                         <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                             >删除</ElButton
@@ -179,6 +187,7 @@ import dayjs from "dayjs";
 
 const emit = defineEmits<{
     (e: "close"): void;
+    (e: "copy", id: string): void;
 }>();
 
 const route = useRoute();
@@ -231,6 +240,10 @@ const handleChangeDate = async (row, type: "changeDate" | "retry") => {
     showDatePopup.value = true;
     await nextTick();
     datePopupRef.value.open();
+};
+
+const handleCopy = (id: string) => {
+    emit("copy", id);
 };
 
 const handleDelete = async (row) => {

@@ -41,6 +41,7 @@
                 </el-button>
             </div>
             <el-table
+                ref="tableRef"
                 size="large"
                 v-loading="pager.loading"
                 :data="pager.lists"
@@ -60,7 +61,9 @@
                         {{ formatAudioTime(row.duration) }}
                     </template>
                 </el-table-column>
-                <el-table-column label="消耗算力" prop="points" min-width="120" />
+                <el-table-column label="消耗算力" prop="points" min-width="120">
+                    <template #default="{ row }"> {{ row.status == 3 ? 0 : row.points || 0 }}算力 </template>
+                </el-table-column>
                 <el-table-column label="当前状态" width="120">
                     <template #default="{ row }">
                         <el-tag type="success" v-if="row.status == 2">成功</el-tag>
@@ -111,13 +114,15 @@ import { formatAudioTime } from "@/utils/util";
 import { usePaging } from "@/hooks/usePaging";
 import { getRoutePath } from "@/router";
 import feedback from "@/utils/feedback";
-
+import { ElTable } from "element-plus";
 const queryParams = reactive({
     name: "",
     user: "",
     start_time: "",
     end_time: "",
 });
+
+const tableRef = ref<InstanceType<typeof ElTable>>();
 
 const { pager, getLists, resetPage, resetParams } = usePaging({
     fetchFun: getLpRecordLists,
@@ -134,6 +139,8 @@ const handleDelete = async (id: number | number[]) => {
     await feedback.confirm("确定要删除吗？");
     await lpRecordDelete({ id });
     getLists();
+    multipleSelection.value = [];
+    tableRef.value?.clearSelection();
 };
 
 const handleReanalysis = async (id: number | number[]) => {

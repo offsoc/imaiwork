@@ -40,10 +40,10 @@ class SvVideoTaskLists extends BaseApiDataLists implements ListsSearchInterface
             } else {
                 $item['extra'] = [];
             }
-            $item['audio_url']            = FileService::getFileUrl($item['audio_url']);
-            $item['upload_audio_url']     = FileService::getFileUrl($item['upload_audio_url']);
-            $item['upload_video_url']         = FileService::getFileUrl($item['upload_video_url']);
-            $item['video_result_url']         = FileService::getFileUrl($item['video_result_url']);
+            $item['audio_url']            = trim($item['audio_url']) ?  FileService::getFileUrl($item['audio_url']) : "";
+            $item['upload_audio_url']     = trim($item['upload_audio_url']) ? FileService::getFileUrl($item['upload_audio_url']): "";
+            $item['upload_video_url']         = trim($item['upload_video_url']) ? FileService::getFileUrl($item['upload_video_url']): "";
+            $item['video_result_url']         = trim($item['video_result_url']) ? FileService::getFileUrl($item['video_result_url']): "";
         }
         
         return $list;

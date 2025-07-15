@@ -16,10 +16,11 @@
                     :class="{ 'border-token-primary': item.key == currSidebar.key }"
                     @click="handleSidebar(item)">
                     <div
-                        class="w-full rounded-md flex items-center gap-x-3 px-[10px] h-full hover:bg-[rgba(0,0,0,0.02)] hover:text-primary group"
-                        :class="{ 'text-primary bg-[rgba(0,0,0,0.02)]': item.key == currSidebar.key }">
+                        class="w-full rounded-md flex items-center gap-x-3 px-[10px] h-full hover:bg-[#00000005] hover:text-primary group"
+                        :class="{ 'text-primary bg-[#00000005]': item.key == currSidebar.key }">
                         <div
-                            class="w-5 h-5 rounded bg-[rgba(0,0,0,0.05)] flex items-center justify-center group-hover:bg-primary-light-9">
+                            class="w-5 h-5 rounded bg-[#0000000d] flex items-center justify-center group-hover:bg-primary-light-9"
+                            :class="{ 'bg-primary-light-9': item.key == currSidebar.key }">
                             <Icon :name="`local-icon-${item.icon}`"></Icon>
                         </div>
                         <div class="font-bold text-base">{{ item.name }}</div>
@@ -34,21 +35,21 @@
                             {{ currSidebar.name }}
                         </div>
                         <ElDivider />
-                        <div v-html="contentData[currSidebar.key]" class="text-[rgba(0,0,0,0.5)] !text-base"></div>
+                        <div v-html="contentData[currSidebar.key]" class="text-[#00000080] !text-base"></div>
                     </div>
                 </ElScrollbar>
                 <div v-else-if="currSidebar.key == SidebarEnum.ABOUT" class="flex flex-col h-full px-[90px]">
                     <div class="flex flex-col items-center flex-1 justify-center mt-[100px]">
                         <img :src="webSiteConfig.shop_logo" class="w-[70px] h-[70px] rounded-full" />
                         <div class="text-[15px] font-bold mt-5">{{ webSiteConfig.shop_name }}</div>
-                        <div class="text-[rgba(0,0,0,0.5)] mt-[10px]">{{ webSiteConfig.shop_title }}</div>
+                        <div class="text-[#00000080] mt-[10px]">{{ webSiteConfig.shop_title }}</div>
                     </div>
                     <div class="text-center mt-[100px] text-base">
-                        <span class="text-[rgba(0,0,0,0.50)]">当前版本：</span><span>Version {{ getVersionName }}</span>
+                        <span class="text-[#00000080]">当前版本：</span><span>Version {{ getVersionName }}</span>
                     </div>
                     <ElDivider class="!my-[18px]" />
                     <div class="mt-[15px] mb-[50px]">
-                        <div class="text-[11px] text-[rgba(0,0,0,0.3)]">
+                        <div class="text-[11px] text-[#00000080]">
                             <div v-for="(item, index) in copyrightConfig" :key="index" class="text-center mb-1">
                                 {{ item.key }}
                             </div>

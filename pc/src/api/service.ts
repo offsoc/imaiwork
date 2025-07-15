@@ -97,3 +97,28 @@ export function deleteAccountKeyword(params: any) {
 export function getAccountKeywordDetail(params: any) {
     return $request.get({ url: "/sv.accountKeyword/detail", params });
 }
+
+// 自动添加微信保存
+export function updateAutoAddWechat(params: any) {
+    return $request.post({ url: "/sv.addWechat/strategyUpdate", params });
+}
+
+// 自动添加微信配置
+export function getAutoAddWechatConfig(params: any) {
+    return $request.get({ url: "/sv.addWechat/strategyDetail", params });
+}
+
+// 自动添加微信记录
+export function getAutoAddWechatRecord(params: any) {
+    return $request.get({ url: "/sv.addWechat/lists", params });
+}
+
+// 自动添加微信删除
+export function deleteAutoAddWechat(params: any) {
+    return $request.post({ url: "/sv.addWechat/delete", params });
+}
+
+// 自动添加微信重试
+export function retryAutoAddWechat(params: any) {
+    return $request.post({ url: "/sv.addWechat/retry", params });
+}

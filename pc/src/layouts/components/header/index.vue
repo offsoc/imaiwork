@@ -1,11 +1,12 @@
 <template>
     <div
         class="h-[var(--nav-height)] pr-[18px]"
-        :class="[
-            isFixed
-                ? 'fixed top-0 left-0 right-0 z-[888] ml-[var(--aside-width)]'
-                : 'bg-white shadow-lg flex items-center justify-between',
-        ]">
+        :class="{
+            'min-w-[375px] fixed top-0 left-0 right-0 z-[888]': isFixed,
+            'ml-[var(--aside-width)]': isFixed && !hideSidebar,
+            'shadow-lg flex items-center justify-between': !isFixed,
+        }"
+        :style="{ backgroundColor: getTheme.bgColor }">
         <Back v-if="isBack" />
         <div class="h-full flex justify-end">
             <User />
@@ -16,6 +17,12 @@
 <script setup lang="ts">
 import User from "./user.vue";
 import Back from "./back.vue";
+import { useAppStore } from "@/stores/app";
+import { AppKeyEnum } from "@/enums/appEnums";
+
+const route = useRoute();
+
+const hideSidebar = computed(() => useAppStore().hideSidebar);
 
 const props = defineProps({
     isBack: {
@@ -26,6 +33,25 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+});
+
+interface Theme {
+    bgColor: string;
+}
+
+const getTheme = computed<Theme>(() => {
+    const key = route.meta.key;
+    switch (key) {
+        case AppKeyEnum.DIGITAL_HUMAN:
+        case AppKeyEnum.DRAWING:
+            return {
+                bgColor: "var(--color-digital-human-bg)",
+            };
+        default:
+            return {
+                bgColor: !props.isFixed ? "#ffffff" : "transparent",
+            };
+    }
 });
 </script>
 

@@ -14,20 +14,20 @@
                     <ElCard
                         shadow="never"
                         class="!rounded-xl bg-white relative hover:scale-[1.02] hover:shadow-[0_14px_24px_0_rgba(0,0,0,0.05)]">
-                        <NuxtLink
+                        <router-link
                             to="/app/mind_map/editor"
                             class="flex w-full h-72 items-center justify-center flex-col gap-4 cursor-pointer">
                             <Icon name="el-icon-Plus" color="var(--color-primary)" :size="32"></Icon>
                             <div class="text-primary">新增思维导图</div>
-                        </NuxtLink>
+                        </router-link>
                     </ElCard>
                     <ElCard
                         shadow="never"
                         class="cursor-pointer !rounded-xl bg-white relative hover:scale-[1.02] hover:shadow-[0_14px_24px_0_rgba(0,0,0,0.05)] !p-0 group"
-                        :class="[activeMindMap == item.id ? 'shadow-[0_14px_24px_0_rgba(0,0,0,0.05)]' : '']"
                         v-for="(item, index) in pager.lists"
+                        :class="[activeMindMap == item.id ? 'shadow-[0_14px_24px_0_rgba(0,0,0,0.05)]' : '']"
                         :key="index">
-                        <NuxtLink
+                        <router-link
                             :to="`/app/mind_map/editor?id=${item.id}`"
                             class="w-full flex-grow h-72 group flex flex-col">
                             <div class="bg-[#F2F2F2] grow w-full relative">
@@ -42,7 +42,7 @@
                                     {{ item.create_time }}
                                 </div>
                             </div>
-                        </NuxtLink>
+                        </router-link>
                         <div
                             class="h-full absolute top-4 right-2 z-50 invisible group-hover:visible"
                             :class="[activeMindMap == item.id ? '!visible' : '']">
@@ -58,17 +58,17 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg"
                                         @click="handleExport(index)">
                                         <ElButton link :icon="Download"> 导出文件 </ElButton>
                                     </div>
-                                    <div class="px-2 py-1 hover:bg-primary-light-8 rounded-lg">
+                                    <div class="px-2 py-1 hover:bg-primary-light-9 rounded-lg">
                                         <ElButton link :icon="DocumentAdd" @click="handleKnbBind(item)">
                                             训练知识库
                                         </ElButton>
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg"
                                         @click="handleDelete(item.id, index)">
                                         <ElButton link :icon="Delete"> 删除 </ElButton>
                                     </div>

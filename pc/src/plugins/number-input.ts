@@ -1,95 +1,78 @@
 /**
  * 数字输入框
  *
- * 使用方法：
- * <ElInput v-model="formData.keyword" type="number" v-number-input="{ max: 100, min: 0, decimal: 2, positive: true }" />
+ * 功能：
+ * 1. 限制输入为数字和小数点。
+ * 2. 在用户输入时提供即时过滤，在失焦时进行最终格式化。
+ * 3. 支持最大值、最小值和自定义小数位数。
  *
- * 参数：
- * max: 最大值
- * min: 最小值
- * decimal: 小数位数
- * positive: 是否只能输入正数
+ * 使用方法：
+ * <ElInput v-model="formData.keyword" v-number-input="{ max: 100, min: 0, decimal: 2 }" />
+ *
+ * 参数 (options):
+ * - max?: number - 允许的最大值
+ * - min?: number - 允许的最小值 (如需正数，请设置 min: 0)
+ * - decimal?: number - 允许的小数位数 (默认为 0，即整数)
  */
-import type { DirectiveBinding } from "vue";
+import type { Directive, DirectiveBinding } from "vue";
 
+// 定义指令的选项接口
 interface NumberInputOptions {
     max?: number;
     min?: number;
     decimal?: number;
-    positive?: boolean;
 }
 
-export default defineNuxtPlugin((nuxtApp) => {
-    nuxtApp.vueApp.directive("number-input", {
-        mounted(el: HTMLElement | any, binding: DirectiveBinding<NumberInputOptions>) {
-            const input = el.tagName === "INPUT" ? el : el.querySelector("input");
-            if (!input) return;
+// 使用 WeakMap 存储事件处理器，避免内存泄漏
+const handlerMap = new WeakMap<HTMLElement, Record<string, EventListener>>();
 
-            const options = binding.value || {};
-            const { max, min, decimal = 0, positive = false } = options;
+/**
+ * 格式化并约束值
+ * @param value 当前值
+ * @param options 指令选项
+ * @returns 格式化后的值
+ */
+const formatValue = (value: string, options: NumberInputOptions): string => {
+    if (value === "" || value === "-") return "";
 
-            const handleInput = (e: Event) => {
-                const target: any = e.target as HTMLInputElement;
-                let value = target.value;
+    const { max, min, decimal = 0 } = options;
+    let numValue = parseFloat(value);
 
-                // 防止重复触发
-                if (target._processing) return;
-                target._processing = true;
+    if (isNaN(numValue)) return "";
 
-                // 格式化处理
-                value = value.replace(/[^\d.]/g, "");
+    // 约束最大/最小值
+    if (min !== undefined && numValue < min) {
+        numValue = min;
+    }
+    if (max !== undefined && numValue > max) {
+        numValue = max;
+    }
 
-                // 处理小数点
-                const parts = value.split(".");
-                if (parts.length > 2) {
-                    value = parts[0] + "." + parts.slice(1).join("");
-                }
+    // 根据小数位数格式化
+    return numValue.toFixed(decimal);
+};
 
-                // 处理小数位数
-                if (parts[1] && decimal >= 0) {
-                    value = parts[0] + "." + parts[1].slice(0, decimal);
-                }
+const numberInputDirective: Directive<HTMLElement, NumberInputOptions> = {
+    mounted(el, binding) {
+        const input = (el.tagName === "INPUT" ? el : el.querySelector("input")) as HTMLInputElement | null;
+        if (!input) return;
 
-                // 处理正负数
-                if (positive && parseFloat(value) < 0) {
-                    value = "0";
-                }
+        const options = binding.value || {};
+        const { decimal = 0 } = options;
 
-                // 处理最大最小值
-                let numValue = parseFloat(value);
-                if (!isNaN(numValue)) {
-                    if (max !== undefined && numValue > max) {
-                        numValue = max;
-                    }
-                    if (min !== undefined && numValue < min) {
-                        numValue = min;
-                    }
-                    value = decimal > 0 ? numValue.toFixed(decimal) : String(numValue);
-                }
+        // 派发 input 事件以更新 v-model
+        const dispatchInput = (target: HTMLInputElement) => {
+            // 使用 nextTick 确保 DOM 更新后再通知 v-model
+            nextTick(() => {
+                target.dispatchEvent(new Event("input", { bubbles: true }));
+            });
+        };
 
-                // 只有当值真正改变时才更新
-                if (target.value !== value) {
-                    target.value = value;
-                    // 使用 nextTick 确保值更新后再触发事件
-                    nextTick(() => {
-                        target.dispatchEvent(new Event("input"));
-                    });
-                }
-
-                // 清除处理标记
-                target._processing = false;
-            };
-
-            const handlePaste = (e: ClipboardEvent) => {
-                e.preventDefault();
-                const text = e.clipboardData?.getData("text");
-                if (!text) return;
-                const filtered = text.replace(/[^\d.]/g, "");
-                document.execCommand("insertText", false, filtered);
-            };
-
-            const handleKeydown = (e: KeyboardEvent) => {
-                const allowedKeys = [
+        const handleKeydown = (e: KeyboardEvent) => {
+            // 允许: 数字, 小数点, Backspace, Delete, Tab, Escape, Enter, Home, End, Arrow keys
+            // 允许: Ctrl/Cmd+A, C, V, X, Z
+            if (
+                [
                     "0",
                     "1",
                     "2",
@@ -103,38 +86,83 @@ export default defineNuxtPlugin((nuxtApp) => {
                     ".",
                     "Backspace",
                     "Delete",
+                    "Tab",
+                    "Escape",
+                    "Enter",
+                    "Home",
+                    "End",
                     "ArrowLeft",
                     "ArrowRight",
-                    "Tab",
-                ];
-
-                if (!allowedKeys.includes(e.key)) {
+                    "ArrowUp",
+                    "ArrowDown",
+                ].includes(e.key) ||
+                ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x", "z"].includes(e.key.toLowerCase()))
+            ) {
+                // 如果是小数点，检查是否已存在或是否允许小数
+                if (e.key === "." && (input.value.includes(".") || decimal === 0)) {
                     e.preventDefault();
                 }
+            } else {
+                // 阻止其他所有按键
+                e.preventDefault();
+            }
+        };
 
-                if (e.key === "." && ((input as HTMLInputElement).value.includes(".") || decimal === 0)) {
-                    e.preventDefault();
+        const handleInput = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            let value = target.value;
+
+            // 清理粘贴或通过其他方式输入的无效字符 (例如，在中文输入法下输入)
+            // 只保留数字和第一个小数点
+            const oldValue = value;
+            value = value.replace(/[^\d.]/g, "");
+            const parts = value.split(".");
+            if (parts.length > 2) {
+                value = parts[0] + "." + parts.slice(1).join("");
+            }
+
+            // 如果值被清理，则更新输入框的值
+            if (value !== oldValue) {
+                target.value = value;
+            }
+        };
+
+        const handleBlur = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            if (target.value) {
+                const formatted = formatValue(target.value, binding.value || {});
+                if (target.value !== formatted) {
+                    target.value = formatted;
+                    dispatchInput(target);
                 }
-            };
+            }
+        };
 
-            input.addEventListener("input", handleInput);
-            input.addEventListener("paste", handlePaste);
-            input.addEventListener("keydown", handleKeydown);
-            el._handlers = {
-                input: handleInput,
-                paste: handlePaste,
-                keydown: handleKeydown,
-            };
-        },
+        input.addEventListener("keydown", handleKeydown);
+        input.addEventListener("input", handleInput);
+        input.addEventListener("blur", handleBlur);
 
-        unmounted(el: HTMLElement | any) {
-            const input = el.tagName === "INPUT" ? el : el.querySelector("input");
-            if (!input || !(el as any)._handlers) return;
+        handlerMap.set(el, {
+            keydown: handleKeydown,
+            input: handleInput,
+            blur: handleBlur,
+        });
+    },
 
-            input.removeEventListener("input", el._handlers.input);
-            input.removeEventListener("paste", el._handlers.paste);
-            input.removeEventListener("keydown", el._handlers.keydown);
-            delete el._handlers;
-        },
-    });
+    unmounted(el) {
+        const handlers = handlerMap.get(el);
+        if (!handlers) return;
+
+        const input = el.tagName === "INPUT" ? el : el.querySelector("input");
+        if (input) {
+            input.removeEventListener("keydown", handlers.keydown);
+            input.removeEventListener("input", handlers.input);
+            input.removeEventListener("blur", handlers.blur);
+        }
+        handlerMap.delete(el);
+    },
+};
+
+export default defineNuxtPlugin((nuxtApp) => {
+    nuxtApp.vueApp.directive("number-input", numberInputDirective);
 });

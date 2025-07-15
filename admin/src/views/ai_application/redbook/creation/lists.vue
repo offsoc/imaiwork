@@ -54,7 +54,9 @@
                 <el-table-column label="创作时间" prop="create_time" min-width="100" />
                 <el-table-column label="生成进度" prop="call_num" min-width="100">
                     <template #default="{ row }">
-                        {{ getStatusText(row.status) }}
+                        <el-tag :type="row.status == 4 ? 'error' : 'success'">
+                            {{ getStatusText(row.status) }}
+                        </el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作" width="140" fixed="right">

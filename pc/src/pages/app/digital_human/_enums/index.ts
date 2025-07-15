@@ -48,7 +48,7 @@ export enum CreateType {
 }
 
 // 高级版和尊享版公共上传限制
-export const CommonUploadLimit = {
+export const commonUploadLimit = {
     size: 300,
     // 最小分辨率
     minResolution: 360,
@@ -61,7 +61,7 @@ export const CommonUploadLimit = {
 };
 
 // 上传限制
-export const UploadLimit = {
+export const uploadLimit = {
     [DigitalHumanModelVersionEnum.STANDARD]: {
         size: 100,
         // 最小分辨率
@@ -84,6 +84,6 @@ export const UploadLimit = {
         // 最大时长
         videoMaxDuration: 120,
     },
-    [DigitalHumanModelVersionEnum.ADVANCED]: CommonUploadLimit,
-    [DigitalHumanModelVersionEnum.ELITE]: CommonUploadLimit,
+    [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadLimit,
+    [DigitalHumanModelVersionEnum.ELITE]: commonUploadLimit,
 };

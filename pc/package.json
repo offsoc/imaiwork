@@ -1,13 +1,13 @@
 {
     "name": "imai.work",
-    "version": "2.0.3",
+    "version": "2.0.9",
     "private": true,
     "license": "MIT",
     "scripts": {
         "init": "node initialize.js",
         "build": "nuxt generate",
         "build:test": "nuxt generate --dotenv .env.development",
-        "dev": "nuxt dev",
+        "dev": "nuxt dev --max-old-space-size=10240",
         "test": "nuxt dev --dotenv .env.test",
         "start": "nuxt start",
         "build:ssr": "nuxt build",

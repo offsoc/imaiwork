@@ -209,6 +209,7 @@ class MessageLogic extends SvBaseLogic
                 self::setError('设备不存在');
                 return false;
             }
+            Cache::store('redis')->select(env('redis.WS_SELECT', 8));
             $account = Cache::store('redis')->get("xhs:{$device_code}:accountNo");
 
             self::$returnData = $account === $accountinfo['account'] ? 1 : 0;

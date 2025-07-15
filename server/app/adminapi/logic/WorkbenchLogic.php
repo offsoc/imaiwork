@@ -150,7 +150,7 @@ class WorkbenchLogic extends BaseLogic
             $data[$key]['description']  = $value['description'];
         }
 
-        return $data;
+        return array_values($data);
     }
 
     /**

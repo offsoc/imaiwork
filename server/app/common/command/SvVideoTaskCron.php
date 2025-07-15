@@ -3,6 +3,7 @@
 
 namespace app\common\command;
 
+use app\api\logic\sv\SvVideoSettingLogic;
 use app\api\logic\sv\SvVideoTaskLogic;
 use think\console\Command;
 use think\console\Input;
@@ -23,6 +24,7 @@ class SvVideoTaskCron extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        SvVideoSettingLogic::check();
         SvVideoTaskLogic::compositeAudioCron();
         SvVideoTaskLogic::compositeVideoCron();
         return true;

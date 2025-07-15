@@ -1,35 +1,54 @@
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex items-center justify-between bg-white p-4 rounded-lg">
-            <ElButton type="primary" @click="handleAdd()">新增音色</ElButton>
-            <div class="flex items-center gap-2">
-                <ElRadioGroup v-model="queryParams.model_version" @change="getLists">
-                    <ElRadioButton label="全部" value=""></ElRadioButton>
-                    <ElRadioButton
-                        v-for="item in modelChannel"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id"></ElRadioButton>
-                </ElRadioGroup>
-                <div>
-                    <ElInput v-model="queryParams.name" class="h-[32px] !w-[240px]" placeholder="请输入音色名称">
-                        <template #append>
-                            <ElButton @click="getLists()">
-                                <Icon name="el-icon-Search"></Icon>
-                            </ElButton>
-                        </template>
-                    </ElInput>
+        <div class="bg-digital-human flex-shrink-0 rounded-[20px] px-[14px]">
+            <ElScrollbar>
+                <div class="flex items-center justify-between h-[68px]">
+                    <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
+                        <ElTabPane label="全部" name=""></ElTabPane>
+                        <ElTabPane
+                            v-for="item in modelChannel"
+                            :label="item.name"
+                            :name="item.id"
+                            :key="item.id"></ElTabPane>
+                    </ElTabs>
+                    <div class="flex items-center gap-[14px]">
+                        <ElInput
+                            v-model="queryParams.name"
+                            prefix-icon="el-icon-Search"
+                            class="!w-[240px] search-name-input"
+                            placeholder="请输入音色名称"
+                            clearable
+                            @clear="getLists()"
+                            @keydown.enter="getLists()">
+                            <template #append>
+                                <ElButton text @click="getLists()"> 搜索 </ElButton>
+                            </template>
+                        </ElInput>
+                        <ElButton type="primary" class="!rounded-full !h-10 !w-[116px]" @click="handleAdd">
+                            <Icon name="local-icon-add_circle" color="#ffffff"></Icon>
+                            <span class="ml-2">新增音色</span>
+                        </ElButton>
+                        <div>
+                            <ElTooltip content="刷新">
+                                <ElButton
+                                    circle
+                                    color="#1f1f1f"
+                                    icon="el-icon-Refresh"
+                                    class="!w-10 !h-10"
+                                    @click="getLists()"></ElButton>
+                            </ElTooltip>
+                        </div>
+                    </div>
                 </div>
-                <ElButton :icon="Refresh" @click="getLists()" />
-            </div>
+            </ElScrollbar>
         </div>
-        <div class="grow min-h-0 flex flex-col bg-white rounded-lg pt-4 mt-4">
+        <div class="grow min-h-0 bg-digital-human overflow-hidden flex flex-col rounded-[20px] mt-4">
             <div class="grow min-h-0">
                 <ElTable
                     :data="pager.lists"
-                    stripe
                     height="100%"
-                    :row-style="{ height: '60px' }"
+                    :header-row-style="{ height: '62px' }"
+                    :row-style="{ height: '50px' }"
                     v-loading="pager.loading">
                     >
                     <ElTableColumn prop="id" label="ID" width="60" fixed="left"></ElTableColumn>
@@ -45,14 +64,17 @@
                             <div class="flex items-center gap-2 justify-center">
                                 <template v-if="[0, 3, 4, 5].includes(row.status)">
                                     <Icon name="local-icon-clone" color="var(--el-color-warning)" :size="16"></Icon>
-                                    <span class="text-warning">克隆中</span>
+                                    <span class="text-warning">克隆中...</span>
                                 </template>
                                 <template v-if="row.status === 1">
-                                    <Icon name="el-icon-CircleCheck" color="var(--el-color-success)" :size="16"></Icon>
+                                    <Icon
+                                        name="local-icon-success_fill"
+                                        color="var(--el-color-success)"
+                                        :size="16"></Icon>
                                     <span class="text-success">成功</span>
                                 </template>
                                 <template v-if="row.status === 2">
-                                    <Icon name="el-icon-CircleClose" color="var(--el-color-danger)" :size="16"></Icon>
+                                    <Icon name="local-icon-fail_fill" :size="16"></Icon>
                                     <span class="text-danger">失败</span>
                                 </template>
                             </div>
@@ -64,33 +86,31 @@
                         </template>
                     </ElTableColumn>
                     <template #empty>
-                        <ElEmpty description="暂无数据"></ElEmpty>
+                        <div class="leading-6">
+                            <Empty btn-text="新增音色" msg="快去创建你的专属音色吧" :custom-click="handleAdd" />
+                        </div>
                     </template>
                 </ElTable>
             </div>
-            <div class="flex justify-end p-4">
-                <pagination v-model="pager" @change="getLists"></pagination>
+            <div class="flex justify-center p-4">
+                <pagination v-model="pager" layout="prev, pager, next" @change="getLists"></pagination>
             </div>
         </div>
         <add-pop v-if="showAddPopup" ref="addPopRef" @close="showAddPopup = false" @success="getLists()"></add-pop>
-        <tone-pop v-if="showTonePopup" ref="tonePopRef" @close="showTonePopup = false"></tone-pop>
     </div>
 </template>
 
 <script setup lang="ts">
 import { getVoiceList, deleteVoice, retryVoice } from "@/api/digital_human";
 import AddPop from "./_components/add-pop.vue";
-import TonePop from "./_components/tone-pop.vue";
 import { useAppStore } from "@/stores/app";
-import { Refresh } from "@element-plus/icons-vue";
+import Empty from "@/pages/app/digital_human/_components/empty.vue";
 const appStore = useAppStore();
 
 const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const showAddPopup = ref<boolean>(false);
-const showTonePopup = ref<boolean>(false);
 const addPopRef = shallowRef<InstanceType<typeof AddPop>>();
-const tonePopRef = shallowRef<InstanceType<typeof TonePop>>();
 
 const queryParams = reactive({
     name: "",
@@ -98,10 +118,15 @@ const queryParams = reactive({
     model_version: "",
 });
 
-const { pager, getLists, resetParams } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getVoiceList,
     params: queryParams,
 });
+
+const handleTabClick = (tab: any) => {
+    queryParams.model_version = tab.paneName;
+    resetPage();
+};
 
 const getModelType = (type: number) => {
     const data = modelChannel.value.find((item) => item.id == type);
@@ -114,16 +139,21 @@ const handleAdd = async () => {
     addPopRef.value?.open();
 };
 
-const handleAudio = async (row: any) => {
-    showTonePopup.value = true;
-    await nextTick();
-    tonePopRef.value?.open(row);
-};
-
 const handleDelete = async (id: number) => {
-    await feedback.confirm("是否删除该音色");
-    await deleteVoice({ id });
-    getLists();
+    useNuxtApp().$confirm({
+        title: "提示",
+        message: "是否删除该音色",
+        theme: "dark",
+        onConfirm: async () => {
+            try {
+                await deleteVoice({ id });
+                getLists();
+                feedback.msgSuccess("删除成功");
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 onMounted(() => {
@@ -132,12 +162,5 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-:deep(.el-radio-group) {
-    .el-radio-button__inner {
-        padding: 8.5px 30px;
-    }
-}
-:deep(.el-input-group__append) {
-    background-color: transparent;
-}
+@import "../../_assets/styles/index.scss";
 </style>

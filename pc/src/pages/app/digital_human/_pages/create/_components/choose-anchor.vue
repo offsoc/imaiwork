@@ -1,34 +1,39 @@
 <template>
     <popup
         ref="popupRef"
-        width="1100px"
-        title="选择形象"
+        width="528px"
         class="choose-anchor-popup"
-        :style="{ padding: '0' }"
-        :append-to-body="false"
+        style="padding: 0; background-color: var(--color-digital-human)"
+        confirm-button-text=""
+        cancel-button-text=""
+        :show-close="false"
         @close="close"
         @confirm="handleConfirm">
-        <div class="rounded-xl overflow-hidden flex flex-col">
-            <div
-                class="h-[62px] flex items-center justify-between px-4"
-                style="background: linear-gradient(156.65deg, #c1fedd 0%, #aeecff 53.87%, #c7c2ff 100%)">
-                <div class="text-2xl font-bold">从创建的历史形象中选择</div>
-                <div class="cursor-pointer p-1 hover:bg-primary-light-7 rounded-full leading-[0]" @click="close()">
-                    <Icon name="el-icon-Close" :size="22"></Icon>
+        <div class="">
+            <div class="flex items-center justify-between h-[50px] px-4">
+                <div class="flex items-center gap-x-2">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center rounded-md border border-[rgba(255,255,255,0.1)]">
+                        <Icon name="local-icon-windows" :size="14"></Icon>
+                    </div>
+                    <div class="text-[20px] text-white font-bold">从创建的历史形象中选择</div>
+                </div>
+                <div class="w-6 h-6" @click="close">
+                    <close-btn />
                 </div>
             </div>
             <div class="px-4 my-4">
-                <div class="flex items-center justify-end">
-                    <div>
-                        <ElInput
-                            v-model="queryParams.name"
-                            class="w-[200px]"
-                            suffix-icon="el-icon-Search"
-                            clearable
-                            placeholder="请输入形象名称"
-                            @clear="resetPage"
-                            @keyup.enter="resetPage"></ElInput>
-                    </div>
+                <div class="flex items-center rounded-full h-[50px] border border-[#2a2a2a] px-[5px]">
+                    <ElInput
+                        v-model="queryParams.name"
+                        class="flex-1 search-input"
+                        prefix-icon="el-icon-Search"
+                        clearable
+                        placeholder="请输入形象名称"
+                        input-style="color: #ffffff"
+                        @clear="resetPage"
+                        @keyup.enter="resetPage"></ElInput>
+                    <ElButton type="primary" class="!text-white !rounded-full !w-[116px] !h-10">搜索</ElButton>
                 </div>
             </div>
             <div
@@ -37,9 +42,9 @@
                 :infinite-scroll-disabled="!isLoad"
                 :infinite-scroll-distance="10"
                 v-infinite-scroll="load">
-                <div class="grid grid-cols-5 gap-4 p-4" v-if="pager.lists.length > 0">
-                    <div v-for="item in pager.lists" :key="item.id" class=" " @click="choose(item)">
-                        <div class="cursor-pointer bg-black rounded-lg w-full relative h-[250px] flex flex-col">
+                <div class="grid grid-cols-3 gap-2 p-2" v-if="pager.lists.length > 0">
+                    <div v-for="item in pager.lists" :key="item.id" @click="choose(item)">
+                        <div class="cursor-pointer bg-black rounded-lg w-full relative h-[210px] flex flex-col">
                             <video-item
                                 :item="{
                                     id: item.id,
@@ -51,26 +56,18 @@
                                     remark: item.remark,
                                     create_time: item.create_time,
                                 }" />
-                            <div
-                                class="absolute -top-2 -right-2 z-[1000] w-6 h-6 bg-white rounded-full"
-                                v-if="isChoose(item.id)">
-                                <Icon name="el-icon-SuccessFilled" color="var(--color-primary)" :size="24"></Icon>
+                            <div class="absolute top-2 right-2 z-[1000] w-6 h-6 rounded-full">
+                                <Icon
+                                    name="local-icon-success_fill"
+                                    :size="20"
+                                    :color="isChoose(item.id) ? 'var(--color-primary)' : '#ffffff1a'"></Icon>
                             </div>
-                        </div>
-                        <div class="text-center mt-2">
-                            {{ item.name }}
                         </div>
                     </div>
                 </div>
                 <div v-else class="h-full flex items-center justify-center">
                     <ElEmpty description="暂无数据"></ElEmpty>
                 </div>
-            </div>
-            <div class="flex justify-center py-2 shadow">
-                <ElButton type="primary" class="!text-white !w-[166px] !h-[40px]" @click="handleConfirm"
-                    >确定选择</ElButton
-                >
-                <ElButton class="!w-[166px] !h-[40px]" @click="close">取消</ElButton>
             </div>
         </div>
     </popup>
@@ -109,6 +106,7 @@ const choose = (item: any) => {
     } else {
         currAnchor.value = item;
     }
+    handleConfirm();
 };
 
 const setChooseAnchor = (item: any) => {
@@ -121,6 +119,7 @@ const load = async () => {
 };
 
 const handleConfirm = () => {
+    console.log(currAnchor.value);
     emit("confirm", currAnchor.value);
     close();
 };
@@ -139,6 +138,18 @@ defineExpose({
     setChooseAnchor,
 });
 </script>
+
+<style lang="scss" scoped>
+:deep(.search-input) {
+    .el-input__wrapper {
+        background-color: transparent;
+        box-shadow: none;
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+    }
+}
+</style>
 
 <style scoped>
 .choose-anchor-popup {

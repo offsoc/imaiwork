@@ -125,6 +125,7 @@ class IndexLogic extends BaseLogic
 
         //模型
         $modelList =  HumanVoice::getModelList();
+        $hdList = ConfigService::get('hd', 'list', []);
 
         $indexConfig =  ConfigService::get('index', 'config', []);
 
@@ -194,6 +195,9 @@ class IndexLogic extends BaseLogic
                 'privacy' => ConfigService::get('digital_human', 'privacy', []),
                 'channel' => $modelList['channel'] ?? [],
                 'voice' => $modelList['voice'] ?? [],
+            ],
+            'draw' => [
+                'channel' => $hdList['channel'] ?? [],
             ],
             'card_code'                 => [
                 'is_open'   => ConfigService::get('card_code','is_open',0),

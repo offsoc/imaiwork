@@ -25,7 +25,7 @@ return [
             // 单文件日志写入
             'single'         => false,
             // 独立日志级别
-            'apart_level'    => ['system', 'openai', 'sd', 'audio', 'error', 'sql', 'suno', 'hi_dream', 'wxchat', 'analyse', 'wxPay', 'qw', "phone_list", 'qwen', 'human'],
+            'apart_level'    => ['system', 'openai', 'sd', 'audio', 'error', 'sql', 'suno', 'hi_dream', 'wxchat', 'analyse', 'wxPay', 'qw', "phone_list", 'qwen', 'human', 'draw_video'],
             // 最大日志文件数量
             'max_files'      => 0,
             // 使用JSON格式记录

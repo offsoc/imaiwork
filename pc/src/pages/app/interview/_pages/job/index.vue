@@ -27,8 +27,13 @@
                     <div
                         v-for="(item, index) in pager.lists"
                         :key="index"
-                        class="h-[168px] rounded-[6px] bg-white px-6 py-4 group relative cursor-pointer flex flex-col">
-                        <div class="flex items-center gap-4">
+                        class="h-[168px] rounded-[6px] bg-white px-6 py-4 group relative cursor-pointer flex flex-col hover:shadow-lighter transition-all duration-300">
+                        <div class="absolute right-10 top-3 z-[77] group-hover:visible invisible">
+                            <ElButton link icon="el-icon-CopyDocument" @click="handleCopyLink(item.id)"
+                                >复制链接</ElButton
+                            >
+                        </div>
+                        <div class="flex items-center gap-4 mr-5">
                             <ElImage :src="item.avatar" lazy fit="cover" class="w-10 h-10 rounded-[5px]" />
                             <span class="text-lg">{{ item.name }}</span>
                         </div>
@@ -59,35 +64,28 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleEdit(item.id)">
                                         <ElButton link icon="el-icon-Edit" class="w-full !justify-start"
                                             >编辑岗位</ElButton
                                         >
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleRpaSetting(item)">
                                         <ElButton link icon="el-icon-Setting" class="w-full !justify-start"
                                             >RPA设置</ElButton
                                         >
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleInterviewRecord(item.id)">
                                         <ElButton link icon="el-icon-VideoCamera" class="w-full !justify-start"
                                             >面试记录</ElButton
                                         >
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
-                                        @click="handleCopyLink(item.id)">
-                                        <ElButton link icon="el-icon-CopyDocument" class="w-full !justify-start"
-                                            >复制链接</ElButton
-                                        >
-                                    </div>
-                                    <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                         @click="handleDelete(item.id, index)">
                                         <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                             >删除</ElButton
@@ -124,11 +122,10 @@ const emit = defineEmits(["history"]);
 const { copy } = useCopy();
 
 const showEditPop = ref<boolean>(false);
-const showTonePopup = ref<boolean>(false);
 const editPopRef = shallowRef<InstanceType<typeof EditPop>>();
 const rpaEditRef = shallowRef<InstanceType<typeof RpaEditPop>>();
 const showRpaEditPopup = ref<boolean>(false);
-
+const showMore = ref<boolean>(false);
 const queryParams = reactive({
     page_no: 1,
 });
@@ -151,7 +148,7 @@ const visibleChange = (flag: boolean, id: number) => {
 const handleShareLink = async () => {
     try {
         const { url } = await generateJobAllLink();
-        copy(url);
+        copy(url, { successMsg: "复制链接成功" });
     } catch (error) {
         feedback.msgError(error);
     }
@@ -191,7 +188,11 @@ const handleCopyLink = async (id: number) => {
     feedback.loading("复制中...");
     try {
         const { url } = await generateJobLink({ job_id: id });
-        copy(url, { errMsg: "小程序未配置，请联系站长" });
+        if (url) {
+            copy(url, { successMsg: "复制链接成功" });
+        } else {
+            feedback.msgError("小程序未配置，请联系站长");
+        }
     } catch (error) {
         feedback.msgError(error);
     } finally {

@@ -23,7 +23,7 @@
                             @click.stop="currHotAgentKey = currHotAgentKey == item.key ? '' : item.key">
                             <view
                                 class="absolute top-4 right-4 w-[28rpx] h-[28rpx] rounded-full z-20"
-                                @click.stop="handleDetail(item.key)">
+                                @click.stop="handleAgent(item.key)">
                             </view>
                             <view class="bottom-[50rpx] right-8 z-20 absolute" v-if="currHotAgentKey != item.key">
                                 <view class="h-[40rpx] w-[140rpx]" @click.stop="handleAgent(item.key)"> </view>

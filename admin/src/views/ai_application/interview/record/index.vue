@@ -41,6 +41,7 @@
                 </el-button>
             </div>
             <el-table
+                ref="tableRef"
                 size="large"
                 v-loading="pager.loading"
                 :data="pager.lists"
@@ -66,11 +67,13 @@
                     <template #default="{ row }"> {{ row.chat_score }}算力 </template>
                 </el-table-column>
                 <el-table-column label="面试时长" width="120" prop="duration" show-overflow-tooltip> </el-table-column>
-                <el-table-column
-                    label="面试状态"
-                    prop="status_text"
-                    width="120"
-                    show-overflow-tooltip></el-table-column>
+                <el-table-column label="面试状态" prop="status_text" width="120" show-overflow-tooltip>
+                    <template #default="{ row }">
+                        <el-tag :type="getStatusType(row.status)">
+                            {{ row.status_text }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column
                     label="面试时间"
                     prop="create_time"
@@ -112,13 +115,15 @@ import { formatAudioTime } from "@/utils/util";
 import { usePaging } from "@/hooks/usePaging";
 import { getRoutePath } from "@/router";
 import feedback from "@/utils/feedback";
-
+import { ElTable } from "element-plus";
 const queryParams = reactive({
     job_name: "",
     user: "",
     start_time: "",
     end_time: "",
 });
+
+const tableRef = ref<InstanceType<typeof ElTable>>();
 
 const { pager, getLists, resetPage, resetParams } = usePaging({
     fetchFun: getInterviewRecordList,
@@ -135,6 +140,16 @@ const handleDelete = async (id: number | number[]) => {
     await feedback.confirm("确定要删除吗？");
     await deleteInterviewRecord({ id });
     getLists();
+    multipleSelection.value = [];
+    tableRef.value?.clearSelection();
+};
+
+const getStatusType = (status: number) => {
+    if (status == 1) return "success";
+    if (status == 2) return "warning";
+    if (status == 3) return "warning";
+    if (status == 6) return "error";
+    return "primary";
 };
 
 getLists();

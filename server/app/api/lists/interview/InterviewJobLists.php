@@ -15,7 +15,7 @@ use app\common\model\interview\InterviewJob;
  * Class RechargeLists
  * @package app\api\lists\recharge
  */
-class InterviewJobLists extends BaseApiDataLists implements ListsSearchInterface
+class InterviewJobLists extends  BaseApiDataLists implements ListsSearchInterface
 {
     public function setSearch(): array
     {
@@ -38,6 +38,7 @@ class InterviewJobLists extends BaseApiDataLists implements ListsSearchInterface
         $lists = InterviewJob::where($this->searchWhere)
             ->where('user_id', '=', $this->userId)
             ->order('id', 'desc')
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
                 $item['tips'] = json_decode($item['tips']);

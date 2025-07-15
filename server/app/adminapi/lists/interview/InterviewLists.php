@@ -65,6 +65,7 @@ class InterviewLists extends BaseApiDataLists implements ListsSearchInterface
                 $query->whereBetween('create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
             })
             ->order('id', 'desc')
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
         foreach ($lists as &$item){

@@ -60,9 +60,9 @@ class RequestTalkDetailTaskHandler extends BaseHandler
 
         $request->setWeChatId($data['WeChatId']);
 
-        if (isset($data['Contact'])) {
-            $request->setContact($data['Contact']);
-        }
+        // if (isset($data['Contact'])) {
+        //     $request->setContact($data['Contact']);
+        // }
 
         if (isset($data['MsgId'])) {
             $request->setMsgId($data['MsgId']);

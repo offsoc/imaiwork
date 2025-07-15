@@ -1,227 +1,224 @@
 <template>
-    <u-popup
-        v-model="showModel"
-        mode="bottom"
-        :mask="false"
-        :mask-close-able="false"
-        border-radius="24"
-        height="28%"
-    >
-        <view class="recorder-container">
-            <view class="pt-8">
-                <view class="items-center flex justify-center flex-col">
-                    <view class="flex justify-center items-center h-[170rpx]">
-                        <canvas
-                            type="2d"
-                            class="audio-canvas flex h-full flex-col justify-center items-center"
-                            :height="100"
-                        ></canvas>
+    <view>
+        <u-popup
+            v-model="showModel"
+            mode="bottom"
+            :mask="false"
+            :mask-close-able="false"
+            border-radius="24"
+            height="28%">
+            <view class="recorder-container">
+                <view class="pt-8">
+                    <view class="items-center flex justify-center flex-col">
+                        <view class="flex justify-center items-center h-[170rpx]">
+                            <canvas
+                                type="2d"
+                                class="audio-canvas flex h-full flex-col justify-center items-center"
+                                :height="100"></canvas>
+                        </view>
+                        <view class="text-white mt-2"
+                            >录音中<text class="ml-2 font-bold">{{ formatAudioTime(recordTime / 1000) }}</text></view
+                        >
                     </view>
-                    <view class="text-white mt-2"
-                        >录音中<text class="ml-2 font-bold">{{
-                            formatAudioTime(recordTime / 1000)
-                        }}</text></view
-                    >
+                </view>
+                <view class="flex justify-between px-[80rpx] gap-4 mt-5">
+                    <view
+                        class="w-[246rpx] rounded-full border border-solid border-white text-white h-[76rpx] text-xl flex items-center justify-center"
+                        @click="reply()">
+                        重录
+                    </view>
+                    <view
+                        class="w-[246rpx] rounded-full bg-white text-primary h-[76rpx] text-xl font-bold flex items-center justify-center"
+                        @click="confirm()">
+                        发送
+                    </view>
+                </view>
+                <view class="absolute top-2 right-3">
+                    <text class="text-white" @click="closePop">关闭</text>
                 </view>
             </view>
-            <view class="flex justify-between px-[80rpx] gap-4 mt-5">
-                <view
-                    class="w-[246rpx] rounded-full border border-solid border-white text-white h-[76rpx] text-xl flex items-center justify-center"
-                    @click="reply()"
-                >
-                    重录
-                </view>
-                <view
-                    class="w-[246rpx] rounded-full bg-white text-primary h-[76rpx] text-xl font-bold flex items-center justify-center"
-                    @click="confirm()"
-                >
-                    发送
-                </view>
-            </view>
-            <view class="absolute top-2 right-3">
-                <text class="text-white" @click="closePop">关闭</text>
-            </view>
-        </view>
-    </u-popup>
+        </u-popup>
+    </view>
 </template>
 
 <script setup lang="ts">
-import { uploadFile } from '@/api/app'
-import { formatAudioTime } from '@/utils/util'
-import useRecorder from '../../hooks/useRecorder'
-import { lpSceneSpeechToText } from '@/api/ladder_player'
+import { uploadFile } from "@/api/app";
+import { formatAudioTime } from "@/utils/util";
+import useRecorder from "../../hooks/useRecorder";
+import { lpSceneSpeechToText } from "@/api/ladder_player";
 
 const props = withDefaults(
     defineProps<{
-        show: boolean
+        show: boolean;
     }>(),
     {
-        show: false
+        show: false,
     }
-)
+);
 
 const emit = defineEmits<{
-    (event: 'update:show', show: boolean): void
-    (event: 'success', data: any): void
-    (event: 'close'): void
-}>()
+    (event: "update:show", show: boolean): void;
+    (event: "success", data: any): void;
+    (event: "close"): void;
+}>();
 
 const showModel = computed({
     get() {
-        return props.show
+        return props.show;
     },
     set(value) {
-        emit('update:show', value)
-    }
-})
+        emit("update:show", value);
+    },
+});
 
-const { proxy }: any = getCurrentInstance()
-const isReply = ref(false)
-const isClose = ref(false)
-const isError = ref(false)
-const recorderResult = ref<any>(null)
+const { proxy }: any = getCurrentInstance();
+const isReply = ref(false);
+const isClose = ref(false);
+const isError = ref(false);
+const recorderResult = ref<any>(null);
 const { start, stop, pause, resume, authorize, recordTime, isRecording } = useRecorder(
     {
-        duration: 3 * 60 * 1000
+        duration: 3 * 60 * 1000,
     },
     {
         onstart: () => {
-            isReply.value = false
+            isReply.value = false;
         },
         ondata: (data: any) => {
-            const { pcmData, powerLevel, sampleRate, duration } = data
+            const { pcmData, powerLevel, sampleRate, duration } = data;
             if (proxy.audioCanvas) {
-                proxy.audioCanvas.input(pcmData, powerLevel, sampleRate)
+                proxy.audioCanvas.input(pcmData, powerLevel, sampleRate);
             }
         },
         onstop: async (data: any) => {
-            if (isReply.value || isClose.value) return
-            recorderResult.value = data
-            await upload()
+            if (isReply.value || isClose.value) return;
+            recorderResult.value = data;
+            await upload();
         },
         ondrawAudio: (findCanvas: Function, Recorder: any) => {
             findCanvas(
                 proxy,
-                ['.audio-canvas'],
-                `proxy.audioCanvas=Recorder.WaveView({compatibleCanvas:canvas,lineWidth: 5,width: 300, height: 100});`,
-                (canvas: any) => {
+                [".audio-canvas"],
+                `this.audioCanvas=Recorder.WaveView({compatibleCanvas:canvas1,lineWidth: 5,width: 300, height: 100});`,
+                (canvas1: any) => {
                     proxy.audioCanvas = Recorder.WaveView({
-                        compatibleCanvas: canvas,
+                        compatibleCanvas: canvas1,
                         width: 300,
                         height: 100,
                         lineWidth: 3,
-                        keep: false
-                    })
+                        keep: false,
+                    });
                 }
-            )
-        }
+            );
+        },
     }
-)
+);
 
 const reply = async () => {
-    pause()
+    pause();
     const result = await uni.showModal({
-        content: '确认重新录制么？',
-        cancelText: '考虑一下',
-        confirmText: '立即重录'
-    })
+        content: "确认重新录制么？",
+        cancelText: "考虑一下",
+        confirmText: "立即重录",
+    });
     if (result.cancel) {
-        resume()
-        return
+        resume();
+        return;
     }
-    isReply.value = true
+    isReply.value = true;
     uni.showLoading({
         mask: true,
-        title: '正在重新录制中'
-    })
-    stop()
-    start()
-    uni.hideLoading()
-}
+        title: "正在重新录制中",
+    });
+    stop();
+    start(proxy);
+    uni.hideLoading();
+};
 
 const confirm = async () => {
     if (isError.value) {
-        upload()
-        return
+        upload();
+        return;
     }
     if (recordTime.value < 1000) {
-        uni.$u.toast('说话时间太短')
-        return
+        uni.$u.toast("说话时间太短");
+        return;
     }
-    stop()
-}
+    stop();
+};
 
 const closePop = () => {
-    showModel.value = false
-    isClose.value = true
-    stop()
-    emit('close')
-}
+    showModel.value = false;
+    isClose.value = true;
+    stop();
+    emit("close");
+};
 
 const upload = async () => {
-    const { tempFilePath, duration } = recorderResult.value
+    const { tempFilePath, duration } = recorderResult.value;
     uni.showLoading({
         mask: true,
-        title: '正在上传中'
-    })
+        title: "正在上传中",
+    });
     try {
-        const { uri }: any = await uploadFile('audio', {
-            filePath: tempFilePath
-        })
+        const { uri }: any = await uploadFile("audio", {
+            filePath: tempFilePath,
+        });
         // message 如果为空，重新获取，直到获取到为止，最多获取 3 次，
-        let message
+        let message;
         for (let i = 0; i < 3; i++) {
-            message = await getMessage(uri)
-            if (message) break
+            message = await getMessage(uri);
+            if (message) break;
         }
-        emit('success', {
+        emit("success", {
             link: uri,
             duration,
-            message
-        })
-        recorderResult.value = null
-        isError.value = false
+            message,
+        });
+        recorderResult.value = null;
+        isError.value = false;
     } catch (error) {
-        isError.value = true
+        isError.value = true;
         uni.showToast({
-            title: '上传失败',
-            icon: 'none',
-            duration: 2000
-        })
+            title: "上传失败",
+            icon: "none",
+            duration: 2000,
+        });
     } finally {
-        uni.hideLoading()
+        uni.hideLoading();
     }
-}
+};
 
 const getMessage = async (uri: string) => {
     return new Promise((resolve, reject) => {
         lpSceneSpeechToText({
-            audio: uri
+            audio: uri,
         })
             .then((res) => {
-                resolve(res.message)
+                resolve(res.message);
             })
             .catch((err) => {
-                reject(err)
-            })
-    })
-}
+                reject(err);
+            });
+    });
+};
 
 watch(showModel, async (value) => {
     if (value) {
-        isClose.value = false
-        isReply.value = false
-        start()
+        isClose.value = false;
+        isReply.value = false;
+        start(proxy);
     }
-})
+});
 
 onUnmounted(() => {
-    stop()
-})
+    stop();
+});
 
 defineExpose({
-    authorize
-})
+    authorize,
+    proxy,
+});
 </script>
 
 <style lang="scss" scoped>
@@ -237,7 +234,7 @@ defineExpose({
 }
 </style>
 <!-- #ifdef APP -->
-<script module="yourModuleName" lang="renderjs">
+<script module="recorder" lang="renderjs">
 import 'recorder-core'
 import RecordApp from 'recorder-core/src/app-support/app'
 import '../../static/Recorder-UniCore/app-uni-support.js'
@@ -248,14 +245,21 @@ import 'recorder-core/src/engine/mp3-engine'
 
 import 'recorder-core/src/extensions/waveview'
 
+//@ts-ignore
 export default {
     mounted(){
-        //App的renderjs必须调用的函数，传入当前模块this
         RecordApp.UniRenderjsRegister(this);
     },
     methods: {
-        //这里定义的方法，在逻辑层中可通过 RecordApp.UniWebViewVueCall(this,'this.xxxFunc()') 直接调用
-        //调用逻辑层的方法，请直接用 this.$ownerInstance.callMethod("xxxFunc",{args}) 调用，二进制数据需转成base64来传递
+        //@ts-ignore
+        callback(data) {
+             const { pcmData, powerLevel, sampleRate } = data
+             //@ts-ignore
+            if (this.audioCanvas) {
+                //@ts-ignore
+                this.audioCanvas.input(pcmData, powerLevel, sampleRate)
+            }
+        }
     }
 }
 </script>

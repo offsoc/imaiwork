@@ -166,6 +166,7 @@ class PcLogic extends BaseLogic
 
         //模型
         $modelList =  HumanVoice::getModelList();
+        $hdList = ConfigService::get('hd', 'list', []);
 
         //模型
         $indexConfig =  ConfigService::get('index', 'config', []);
@@ -213,6 +214,9 @@ class PcLogic extends BaseLogic
             ],
             'recharge'                 => [
                 'is_ios_open'   => ConfigService::get('recharge','is_ios_open',0),
+            ],
+            'draw' => [
+                'channel' => $hdList['channel'] ?? [],
             ],
             'ai_live' =>  ConfigService::get('ai_live', 'config', [])
 

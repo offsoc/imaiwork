@@ -5,6 +5,7 @@ namespace app\adminapi\logic\hd;
 use app\common\logic\BaseLogic;
 use app\common\model\hd\HdImage;
 use app\common\model\hd\HdLog;
+use app\common\service\FileService;
 
 /**
  * 图片
@@ -35,5 +36,26 @@ class HdImageLogic extends BaseLogic
             self::setError($exception->getMessage());
             return false;
         }
+    }
+
+    /**
+     * @desc 获取详情
+     * @param $params
+     * @return array
+     * @date 2024/5/23 11:33
+     * @author dagouzi
+     */
+    public static function detail($params): array
+    {
+        $data = HdLog::findOrEmpty($params['id'])->toArray();
+        if ($data){
+            $data['params'] = json_decode( $data['params']);
+            $image = HdImage::where('log_id', $data['id'])->value('image');
+            $data['image']  = '';
+            if ($image){
+                $data['image'] = FileService::getFileUrl($image);
+            }
+        }
+        return $data;
     }
 }

@@ -37,6 +37,9 @@ class HdLists extends BaseApiDataLists implements ListsSearchInterface, ListsExt
         if (!empty($request['type'])) {
             $where['hl.type'] = $request['type'];
         }
+        if (!empty($request['model_type'])) {
+            $where['hl.model_type'] = $request['model_type'];
+        }
         $where['hl.user_id'] = $this->userId;
         $where['hi.task_status'] = 1;
         $result = HdImage::alias('hi')
@@ -77,6 +80,11 @@ class HdLists extends BaseApiDataLists implements ListsSearchInterface, ListsExt
         if (!empty($request['type'])) {
             $where['type'] = $request['type'];
         }
+        if (!empty($request['model_type'])) {
+            $where['model_type'] = $request['model_type'];
+        }
+        $where['hl.user_id'] = $this->userId;
+        $where['hi.task_status'] = 1;
         return HdImage::alias('hi')->join('hd_log hl', 'hl.id = hi.log_id')->where($where)->count();
     }
 }

@@ -10,6 +10,7 @@ use app\api\lists\hd\HdImageCaseLists;
 
 class HdController extends BaseApiController
 {
+    public array $notNeedLogin = ['cueImage'];
     /**
      * @notes 文件
      * @author 段誉
@@ -222,4 +223,23 @@ class HdController extends BaseApiController
         HdLogic::cron();
         return true;
     }
+
+
+    /**
+     * @desc 提交文生图任务
+     * @return Json
+     * @date 2024/7/20 11:09
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author dagouzi
+     */
+    public function txt2volcimg()
+    {
+        $params = $this->request->post();
+        $result = HdLogic::txt2volcimg($params);
+        if ($result) {
+            return $this->data(HdLogic::getReturnData());
+        }
+        return $this->data(HdLogic::getError());
+    }
+
 }

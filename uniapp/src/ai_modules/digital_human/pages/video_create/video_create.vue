@@ -210,6 +210,7 @@ const userStore = useUserStore();
 
 const formData = reactive<any>({
     name: "",
+    pic: "",
     anchor_id: "",
     anchor_name: "",
     gender: "male" as "male" | "female",
@@ -254,7 +255,7 @@ const modelVersionMap = computed(() => {
 const anchorLists = ref<any[]>([]);
 
 const chooseAnchor = (item: any) => {
-    const { name, model_version, anchor_id, url } = item;
+    const { name, model_version, anchor_id, url, pic } = item;
     if (formData.model_version != model_version) {
         formData.msg = "";
         isRandomCopywriter.value = false;
@@ -271,6 +272,7 @@ const chooseAnchor = (item: any) => {
     formData.anchor_name = name;
     formData.model_version = model_version;
     formData.video_url = url;
+    formData.pic = pic;
 };
 
 /** 形象列表操作逻辑 End */
@@ -427,6 +429,7 @@ const confirmCreate = async () => {
         await createTask({
             name: uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2),
             msg: formData.msg,
+            pic: formData.pic,
             video_url: formData.video_url,
             anchor_id: formData.anchor_id,
             anchor_name: formData.anchor_name,
@@ -486,7 +489,7 @@ onLoad((options: any) => {
     if (type === ListenerType.UPLOAD_VIDEO) {
         try {
             const parsedData = JSON.parse(decodeURIComponent(data));
-            const { name, url, model_version, anchor_id } = parsedData;
+            const { name, url, model_version, anchor_id, pic } = parsedData;
             if (!formData.model_version && formData.model_version != anchor_id) {
                 clearData();
             }
@@ -495,11 +498,10 @@ onLoad((options: any) => {
                 video_url: url,
                 model_version,
                 anchor_id,
+                pic,
             });
             anchorLists.value = [...anchorLists.value, parsedData];
-        } catch (error) {
-            uni.$u.toast("数据解析失败");
-        }
+        } catch (error) {}
     }
 });
 </script>

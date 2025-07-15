@@ -10,6 +10,30 @@
                         clearable
                         @keyup.enter="resetPage" />
                 </el-form-item>
+                <el-form-item label="生成模型">
+                    <el-select
+                        v-model="queryParams.model_type"
+                        class="!w-[160px]"
+                        placeholder="请选择生成模型"
+                        clearable>
+                        <el-option
+                            v-for="(item, index) in modelList"
+                            :key="index"
+                            :label="item.name"
+                            :value="item.id" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="创作类型">
+                    <el-select
+                        v-model="type"
+                        class="!w-[160px]"
+                        placeholder="请选择创作类型"
+                        clearable
+                        @change="changeType">
+                        <el-option label="文生图" value="3" />
+                        <el-option label="图生图" value="4" />
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="创建时间">
                     <daterange-picker
                         v-model:startTime="queryParams.start_time"
@@ -24,7 +48,7 @@
         <el-card class="!border-none mt-4" shadow="never">
             <div class="mb-4 flex justify-between">
                 <el-button
-                    v-perms="['draw_sd.record/del']"
+                    v-perms="['draw_sd.record/delete']"
                     type="default"
                     :plain="true"
                     :disabled="!multipleSelection.length"
@@ -37,6 +61,7 @@
                 </div>
             </div>
             <el-table
+                ref="tableRef"
                 size="large"
                 v-loading="pager.loading"
                 :data="pager.lists"
@@ -50,6 +75,13 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="昵称" prop="nickname" min-width="140" show-overflow-tooltip />
+                <el-table-column label="生成模型" prop="model_type" min-width="120">
+                    <template #default="{ row }">
+                        <div class="whitespace-pre">
+                            {{ modelList.find((item: any) => item.id == row.model_type)?.name }}
+                        </div>
+                    </template>
+                </el-table-column>
                 <el-table-column label="生成图" min-width="120">
                     <template #default="{ row }">
                         <div class="flex" v-if="row.images && row.images.length > 0">
@@ -64,11 +96,14 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="创作类型" prop="type_name" min-width="120" />
-                <el-table-column label="消耗算力" prop="points" min-width="120"> </el-table-column>
+                <el-table-column label="消耗算力" prop="points" min-width="120">
+                    <template #default="{ row }"> {{ row.points || 0 }}算力 </template>
+                </el-table-column>
                 <el-table-column label="创建时间" prop="create_time" min-width="180" show-overflow-tooltip />
-                <el-table-column label="操作" width="80" fixed="right">
+                <el-table-column label="操作" width="120" fixed="right">
                     <template #default="{ row }">
-                        <el-button v-perms="['draw_sd.record/del']" type="danger" link @click="handleDelete(row.id)">
+                        <el-button type="primary" link @click="handleDetail(row)">详情</el-button>
+                        <el-button v-perms="['draw_sd.record/delete']" type="danger" link @click="handleDelete(row.id)">
                             删除
                         </el-button>
                     </template>
@@ -80,14 +115,25 @@
         </el-card>
     </div>
     <prompt-pop ref="promptPopRef" v-if="showPrompt" @close="showPrompt = false" />
+    <detail-pop ref="detailPopupRef" v-if="showDetail" @close="showDetail = false" />
 </template>
 <script lang="ts" setup>
 import { getDrawRecordList, delDrawRecord } from "@/api/ai_application/draw/draw_records";
+import useAppStore from "@/stores/modules/app";
 import { usePaging } from "@/hooks/usePaging";
 import feedback from "@/utils/feedback";
 import PromptPop from "./prompt.vue";
+import DetailPop from "./detail.vue";
+import { ElTable } from "element-plus";
+
+const appStore = useAppStore();
+const modelList = computed(() => appStore.config.draw?.channel);
+
+const type = ref();
+
 const queryParams = reactive({
     user: "",
+    model_type: "",
     start_time: "",
     end_time: "",
     type: [3, 4],
@@ -98,8 +144,16 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
     params: queryParams,
 });
 
+const tableRef = ref<InstanceType<typeof ElTable>>();
+
+const changeType = (val: any) => {
+    queryParams.type = [val];
+};
+
 const promptPopRef = shallowRef<InstanceType<typeof PromptPop> | null>(null);
 const showPrompt = ref(false);
+const detailPopupRef = shallowRef<InstanceType<typeof DetailPop> | null>(null);
+const showDetail = ref(false);
 
 const handlePromptConfig = async (mode: string) => {
     showPrompt.value = true;
@@ -113,10 +167,18 @@ const handleSelectionChange = (val: any[]) => {
     multipleSelection.value = val;
 };
 
+const handleDetail = async (row: any) => {
+    showDetail.value = true;
+    await nextTick();
+    detailPopupRef.value?.open(row);
+};
+
 const handleDelete = async (id: number | number[]) => {
     await feedback.confirm("确定要删除吗？");
     await delDrawRecord({ id });
     getLists();
+    multipleSelection.value = [];
+    tableRef.value?.clearSelection();
 };
 
 getLists();

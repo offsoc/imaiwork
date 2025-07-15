@@ -1127,6 +1127,11 @@ class KnowledgeLogic extends ApiLogic
                 self::saveKnowledgeRecord($request, $response['data']);
             }
         }
+
+        if((int)$response['code'] === 10005){
+            message($response['message']);
+        }
+        
         return $response['data'] ?? [];
     }
     
@@ -1410,13 +1415,7 @@ class KnowledgeLogic extends ApiLogic
                 'scene' => $params['scene'] ?? '未知聊天',
                 'assistant_id' => $params['assistant_id'] ?? 0
             ];
-
-            if($params['scene'] == '陪练聊天'){
-                $request['voice'] = $params['voice']?? '';
-                $request['emotion'] =  $params['emotion']?? '';
-                $request['intensity'] =  $params['intensity']?? '';
-            }
-        
+            
             self::__getRequestData($request, $params);
         
             $record = array(
@@ -1447,13 +1446,25 @@ class KnowledgeLogic extends ApiLogic
                 $prompt = "请根据以下知识库内容回答问题：
                         {$texts}
                         问题：{$message}";
-
+                
+                $messages = $params['messages'] ?? [];
+                if(isset($messages[0]['content'])){
+                    $messages[0]['content'] = str_replace(
+                        ['相关知识库检索结果'],
+                        [$texts],
+                        $messages[0]['content']
+                    );
+                }
+                
+                
                 $request['user_id'] = $uid; // 替换为实际的用户ID
                 $request['prompt'] = $prompt;
                 $request['knowledge_tokens'] = ceil($textLength / 4);
                 $request['chat_type'] = 9006;
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;
+                $request['messages'] = $messages;
+                
 
                 $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
                 return [true, $result];

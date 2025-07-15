@@ -3,7 +3,7 @@
         v-model="show"
         ref="popupRef"
         :async="true"
-        size="500px"
+        size="100%"
         confirm-button-text=""
         cancel-button-text=""
         @close="handleClose">
@@ -15,8 +15,7 @@
                 </div>
             </div>
         </template>
-
-        <div class="h-full flex flex-col">
+        <div class="h-full flex flex-col w-[500px] mx-auto">
             <div class="grow min-h-0 -mx-4">
                 <ElScrollbar>
                     <div class="px-4">
@@ -51,8 +50,18 @@
                                                     color="var(--color-primary)"
                                                     :size="18"></Icon>
                                             </div>
-                                            <div class="flex flex-col justify-center items-center h-full w-full" v-else>
+                                            <div
+                                                class="flex flex-col justify-center items-center h-full w-full relative"
+                                                v-else>
                                                 <ElImage :src="formData.avatar" />
+                                                <div
+                                                    class="cursor-pointer absolute -top-4 -right-4"
+                                                    @click.stop="formData.avatar = ''">
+                                                    <Icon
+                                                        name="el-icon-CircleCloseFilled"
+                                                        color="var(--color-redbook)"
+                                                        :size="16"></Icon>
+                                                </div>
                                             </div>
                                         </div>
                                     </upload>
@@ -133,11 +142,9 @@
                     </div>
                 </ElScrollbar>
             </div>
-            <div class="flex-shrink-0">
-                <div class="flex justify-end mt-3">
-                    <ElButton @click="handleClose">取消</ElButton>
-                    <ElButton type="primary" :loading="isLock" @click="lockSubmit">确定 </ElButton>
-                </div>
+            <div class="flex-shrink-0 flex justify-center">
+                <ElButton @click="handleClose">取消</ElButton>
+                <ElButton type="primary" :loading="isLock" @click="lockSubmit">确定 </ElButton>
             </div>
         </div>
     </ElDrawer>
@@ -145,14 +152,20 @@
 
 <script setup lang="ts">
 import { addJob, editJob, getJobDetail } from "@/api/interview";
-import Popup from "@/components/popup/index.vue";
-import { voiceClone } from "@/api/digital_human";
 import type { FormInstance } from "element-plus";
+import { useAppStore } from "@/stores/app";
 
 const emit = defineEmits<{
     (event: "success"): void;
     (event: "close"): void;
 }>();
+
+const appStore = useAppStore();
+
+const getWebSiteLogo = computed(() => {
+    const { shop_logo } = appStore.getWebsiteConfig || {};
+    return shop_logo;
+});
 
 const show = ref(false);
 
@@ -184,12 +197,6 @@ const title = computed(() => {
     return mode.value === "add" ? "添加面试岗位" : "编辑面试岗位";
 });
 
-const fileLists = ref<any[]>([]);
-
-const getAccept = computed(() => {
-    return ".mp3";
-});
-
 const deleteAttentionItem = (index: number) => {
     formData.attention.splice(index, 1);
 };
@@ -208,6 +215,9 @@ const handleFileSuccess = (result: any) => {
 const open = (type: string = "add") => {
     mode.value = type;
     show.value = true;
+    if (mode.value === "add") {
+        formData.avatar = getWebSiteLogo.value;
+    }
 };
 
 const handleSubmit = async () => {

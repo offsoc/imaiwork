@@ -28,6 +28,8 @@ export const useAppStore = defineStore("appStore", {
         getMeetingConfig: (state) => state.config.meeting_config || {},
         getCardCodeConfig: (state) => state.config.card_code || {},
         getCopyRightConfig: (state) => state.config.copyright || [],
+        getAppLiveConfig: (state) => state.config.ai_live || {},
+        getHdConfig: (state) => state.config.draw || {},
     },
     actions: {
         async getConfig() {

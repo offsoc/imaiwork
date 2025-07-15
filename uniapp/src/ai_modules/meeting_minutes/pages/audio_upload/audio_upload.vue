@@ -122,7 +122,7 @@ const fileLimit = 10;
 const extension = ["mp3", "wav", "wma", "aac", "ogg", "amr", "flac", "aiff"];
 
 const openFile = async () => {
-    if (tokensValue.value <= 0) {
+    if (tokensValue <= 0) {
         uni.$u.toast("算力不足，请充值！");
         rechargePopupRef.value?.open();
         return;
@@ -130,13 +130,13 @@ const openFile = async () => {
     const filesResult = await chooseFile({
         type: "file",
         count: fileLimit,
-        extension,
+        extension: extension,
     });
     chooseFileCallback(filesResult);
 };
 
 const chooseFileCallback = async (filesResult: ChooseResult) => {
-    const { tempFilePaths, tempFiles } = filesResult;
+    const { tempFiles } = filesResult;
     const maxSize = maxFileSize * 1024 * 1024;
     if (tempFiles.some((item) => item.size > maxSize)) {
         uni.$u.toast(`单个文件最大${maxFileSize}M,已过滤超出限制的文件`);
@@ -144,7 +144,7 @@ const chooseFileCallback = async (filesResult: ChooseResult) => {
     const filterFiles = tempFiles.filter((item, index) => {
         if (item.size > maxSize) {
             //@ts-ignore
-            tempFilePaths.splice(index, 1);
+            tempFiles.splice(index, 1);
         }
         return item.size < maxSize;
     });
@@ -157,7 +157,7 @@ const chooseFileCallback = async (filesResult: ChooseResult) => {
             url: "",
             loading: true,
             file: item,
-            file_url: tempFilePaths[index],
+            file_url: item.path,
             status: 2,
         });
         fileLists.value.push(fileItem);

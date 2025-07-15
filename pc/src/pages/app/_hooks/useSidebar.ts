@@ -9,28 +9,26 @@ export default function useSidebar() {
 
     const routerParams = ref<Record<string, any>>({});
 
-    const slider = ref<any[]>([]);
-    const sliderIndex = ref<number>(0);
+    const sidebar = ref<Array<{ type: number; components: any; icon?: string; name: string }>>([]);
+    const sidebarIndex = ref<number>(0);
 
     const getComponents = computed(() => {
-        if (sliderIndex.value == -1 || !slider.value[sliderIndex.value - 1]) {
-            return null;
-        }
-        return slider.value[sliderIndex.value - 1].components;
+        const index = sidebar.value.findIndex((item) => item.type == sidebarIndex.value);
+        return sidebar.value[index]?.components;
     });
 
     const setSlider = (lists: any[]) => {
-        slider.value = lists;
+        sidebar.value = lists;
     };
 
     const getSliderIndex = (index: number) => {
-        sliderIndex.value = index + 1;
+        sidebarIndex.value = index;
         routerParams.value = {};
         pushHistory();
     };
 
     const updateSliderIndex = (params: UpdateSliderIndexParams) => {
-        sliderIndex.value = params.type;
+        sidebarIndex.value = Number(params.type);
         routerParams.value = params;
         pushHistory();
     };
@@ -39,7 +37,7 @@ export default function useSidebar() {
         router.replace({
             query: {
                 ...routerParams.value,
-                type: sliderIndex.value.toString(),
+                type: sidebarIndex.value,
             },
         });
     };
@@ -47,10 +45,10 @@ export default function useSidebar() {
     const init = async () => {
         await nextTick();
         const type = Number(route.query.type);
-        if (type == -1 || !type || slider.value.every((item) => item.type != type)) {
-            sliderIndex.value = 1;
+        if (type == -1 || !type || sidebar.value.every((item) => item.type != type)) {
+            sidebarIndex.value = sidebar.value[0].type;
         } else {
-            sliderIndex.value = type;
+            sidebarIndex.value = type;
         }
         routerParams.value = route.query;
         pushHistory();
@@ -59,8 +57,8 @@ export default function useSidebar() {
     init();
 
     return {
-        slider,
-        sliderIndex,
+        sidebar,
+        sidebarIndex,
         getComponents,
         routerParams,
         init,

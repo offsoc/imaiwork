@@ -85,14 +85,15 @@
                                     </template>
                                     <div class="flex flex-col gap-2">
                                         <div
-                                            class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                            class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                             @click="handleCheck(row)">
                                             <ElButton link icon="el-icon-View" class="w-full !justify-start"
                                                 >发布记录</ElButton
                                             >
                                         </div>
+
                                         <div
-                                            class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                            class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                             @click="handleDelete(row.id)">
                                             <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                                 >删除任务</ElButton
@@ -113,18 +114,21 @@
             </div>
         </template>
         <AddTask v-else-if="showAddTask" @close="changeBack" />
-        <PublishRecord v-else-if="showPublishRecord" @close="changeBack" @success="getLists()" />
+        <PublishRecord v-else-if="showPublishRecord" @close="changeBack" @success="getLists()" @copy="handleCopy" />
     </div>
+    <SimulatePublish
+        v-if="showSimulatePublish"
+        ref="simulatePublishRef"
+        @close="showSimulatePublish = false"
+        @success="getLists()" />
 </template>
 
 <script setup lang="ts">
-import { getPublishTaskList, deletePublishTask, changePublishTaskStatus, mockPublishTask } from "@/api/redbook";
-import { getDeviceLists, addWeChat, deleteDevice } from "@/api/person_wechat";
-import Popup from "@/components/popup/index.vue";
+import { getPublishTaskList, getPublishRecordDetail, deletePublishTask, changePublishTaskStatus } from "@/api/redbook";
 import { Refresh } from "@element-plus/icons-vue";
 import AddTask from "./_components/add-task.vue";
 import PublishRecord from "./_components/publish-record.vue";
-
+import SimulatePublish from "./_components/simulate-publish.vue";
 const router = useRouter();
 const route = useRoute();
 
@@ -138,20 +142,12 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
     params: queryParams,
 });
 
+const showSimulatePublish = ref(false);
+const simulatePublishRef = ref();
 const publishTest = async () => {
-    ElMessageBox.prompt("请输入你要RPA模拟发布到小红书的视频链接地址", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        inputPattern: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-        inputErrorMessage: "请输入正确的视频链接地址",
-        type: "warning",
-    }).then(async (res) => {
-        try {
-            await mockPublishTask({ url: res.value });
-        } catch (error) {
-            feedback.msgError(error || "发布失败");
-        }
-    });
+    showSimulatePublish.value = true;
+    await nextTick();
+    simulatePublishRef.value.open();
 };
 
 const showAddTask = ref(false);
@@ -177,6 +173,21 @@ const handleCheck = async (row) => {
             mode: "record",
             id: row.id,
         },
+    });
+};
+
+const handleCopy = async (id) => {
+    const data = await getPublishRecordDetail({ id });
+    showSimulatePublish.value = true;
+    await nextTick();
+    simulatePublishRef.value.open();
+    simulatePublishRef.value.setFormData({
+        ...data,
+        url: data.material_url,
+        title: data.material_title,
+        subtitle: data.material_subtitle,
+        accounts: [data.account],
+        topic: data.material_tag ? data.material_tag.split(",") : [],
     });
 };
 

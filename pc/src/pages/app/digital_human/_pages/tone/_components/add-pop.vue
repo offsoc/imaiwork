@@ -1,28 +1,58 @@
 <template>
-    <div>
-        <popup
-            title="上传本地音频"
-            ref="popupRef"
-            :async="true"
-            width="500px"
-            confirm-button-text=""
-            cancel-button-text=""
-            @close="handleClose">
-            <div class="text-[#B4B4B4] text-sm mb-4">
-                <ElAlert title="注意：请根据性别上传对应的音频文件" type="warning" show-icon closable />
+    <popup
+        ref="popupRef"
+        width="400px"
+        async
+        style="padding: 18px; background-color: var(--color-digital-human)"
+        confirm-button-text=""
+        cancel-button-text=""
+        :show-close="false"
+        @close="close">
+        <div class="-my-4">
+            <div class="w-6 h-6 absolute top-4 right-4" @click="close">
+                <close-btn />
             </div>
-            <ElForm :model="formData" :rules="formRules" ref="formRef" label-position="top" :disabled="isLock">
+            <div class="flex items-center gap-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect width="20" height="20" rx="10" fill="#0065FB" />
+                    <path d="M6 8V12" stroke="white" stroke-width="1.2" />
+                    <path d="M14 8V12" stroke="white" stroke-width="1.2" />
+                    <path d="M10 6V14" stroke="white" stroke-width="1.2" />
+                </svg>
+                <span class="text-white font-bold text-[20px]">上传本地音频</span>
+            </div>
+            <div class="flex items-center gap-x-1 rounded-full bg-[#ffffff08] p-1 mt-5 w-fit">
+                <Icon name="local-icon-tips" :size="16"></Icon>
+                <span class="text-[#ffffff4d] text-xs">注意：请根据性别上传对应的音频文件素材。</span>
+            </div>
+            <ElForm
+                class="mt-[17px]"
+                :model="formData"
+                :rules="formRules"
+                ref="formRef"
+                label-position="top"
+                :disabled="isLock">
                 <ElFormItem label="音色名称" prop="name">
-                    <ElInput v-model="formData.name" placeholder="请输入音色名称" />
+                    <ElInput v-model="formData.name" class="!h-11" placeholder="请输入音色名称" />
                 </ElFormItem>
                 <ElFormItem label="性别" prop="gender">
-                    <ElSelect v-model="formData.gender" placeholder="请选择性别">
+                    <ElSelect
+                        v-model="formData.gender"
+                        class="!h-11"
+                        placeholder="请选择性别"
+                        popper-class="digital-human-select"
+                        :show-arrow="false">
                         <ElOption value="male" label="男"></ElOption>
                         <ElOption value="female" label="女"></ElOption>
                     </ElSelect>
                 </ElFormItem>
                 <ElFormItem label="使用模型" prop="model_version">
-                    <ElSelect v-model="formData.model_version" placeholder="请选择模型">
+                    <ElSelect
+                        v-model="formData.model_version"
+                        class="!h-11"
+                        popper-class="digital-human-select"
+                        :show-arrow="false"
+                        placeholder="请选择模型">
                         <ElOption
                             v-for="item in modelChannel"
                             :key="item.id"
@@ -40,10 +70,13 @@
                         :size="20"
                         :accept="getAccept"
                         @success="handleFileSuccess">
-                        <div class="h-[90px] rounded-lg flex flex-col justify-center items-center">
-                            <img src="@/assets/images/audio.png" class="w-[48px] h-[48px]" />
-                            <div class="text-primary text-xl mt-2">上传录音文件</div>
-                            <div class="text-xs text-[#B4B4B4] text-center mt-4">
+                        <div class="h-[166px] bg-digital-human-bg rounded-lg flex flex-col justify-center items-center">
+                            <div
+                                class="w-12 h-12 rounded-xl flex items-center justify-center border border-dashed border-[#ffffff1a] hover:border-[#ffffff33] cursor-pointer mt-8 flex-shrink-0">
+                                <Icon name="el-icon-Plus" color="#ffffff"></Icon>
+                            </div>
+                            <div class="text-white text-xs mt-3">上传录音文件</div>
+                            <div class="text-xs text-[rgba(255,255,255,0.3)] text-center mt-4">
                                 文件不超过20MB,不支持gif/avif等音频格式以外的文件
                             </div>
                         </div>
@@ -51,14 +84,14 @@
                 </ElFormItem>
             </ElForm>
 
-            <div class="flex justify-end mt-3">
-                <ElButton type="primary" :loading="isLock" @click="lockSubmit"
+            <div class="px-[35px] mt-[18px]">
+                <ElButton type="primary" class="w-full !h-[50px] !rounded-full" :loading="isLock" @click="lockSubmit"
                     >开始转写
                     <template v-if="tokensValue">（消耗{{ tokensValue }}算力）</template>
                 </ElButton>
             </div>
-        </popup>
-    </div>
+        </div>
+    </popup>
 </template>
 
 <script setup lang="ts">
@@ -104,8 +137,6 @@ const formRules = {
     model_version: [{ required: true, message: "请选择模型" }],
 };
 
-const fileLists = ref<any[]>([]);
-
 const getAccept = computed(() => {
     return ".mp3,.m4a,.wav";
 });
@@ -137,7 +168,7 @@ const handleSubmit = async () => {
     }
 };
 
-const handleClose = () => {
+const close = () => {
     emit("close");
 };
 
@@ -160,4 +191,28 @@ defineExpose({
 });
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+@import "../../../_assets/styles/index.scss";
+
+:deep(.el-upload-dragger) {
+    padding: 0;
+    border-color: var(--color-digital-human-border);
+    background-color: transparent;
+    border-radius: 10px;
+    &:hover {
+        border-color: #ffffff33;
+    }
+    &.is-dragover {
+        border-width: 1px;
+        border-color: #ffffff33;
+    }
+}
+
+:deep(.el-form) {
+    .el-form-item {
+        &__label {
+            color: #ffffff;
+        }
+    }
+}
+</style>

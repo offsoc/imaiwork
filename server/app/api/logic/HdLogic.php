@@ -17,7 +17,10 @@ class HdLogic extends ApiLogic
 {
 
     const HD_TXT2IMG = 'hd_txt_to_img'; //文生图
+    const HD_TXT2POSTERIMG = 'hd_txt_to_posterimg'; //文生海报图
+
     const HD_TXT2IMG_STATUS = 'hd_txt_to_img_status'; //文生图状态
+    const HD_TXT2POSTERIMG_STATUS = 'hd_txt_to_posterimg_status'; //文生海报图状态
     const HD_IMG2IMG = 'hd_img_to_img'; //图生图
     const HD_IMG2IMG_STATUS = 'hd_img_to_img_status'; //图生图状态
     const HD_TEMPLATE_LISTS = 'hd_template_lists'; //模板列表
@@ -27,6 +30,8 @@ class HdLogic extends ApiLogic
     const HD_AI_TRY = 'hd_ai_try'; //AI试衣生图
     const HD_AI_TRY_STATUS = 'hd_ai_try_status'; //AI试衣生图状态
 
+    const VOLC_TXT2IMG = 'volc_txt_to_img'; //文生图
+    const VOLC_TXT2POSTERIMG = 'volc_txt_to_posterimg'; //文生海报图
     /**
      * @desc 删除图片
      * @param array $data
@@ -64,13 +69,19 @@ class HdLogic extends ApiLogic
      * @date 2024/7/6 15:57
      * @author dagouzi
      */
-    public static function saveLog($type, $request_id, $params, $task_id, $sub_task_id)
+    public static function saveLog($type, $request_id, $params, $task_id, $sub_task_id,$status = 0,$model = 1,$image = '')
     {
+
+        if($image != ''){
+            $image = FileService::downloadFileBySource($image, 'image');
+        }
 
         $data = [
             'user_id' => self::$uid,
             'request_id' => $request_id,
+            'task_status' => $status,
             'type' => $type,
+            'model_type' => $model,
             'params' => json_encode($params, JSON_UNESCAPED_UNICODE),
             'task_id' => $task_id,
             'sub_task_ids' => json_encode($sub_task_id, JSON_UNESCAPED_UNICODE)
@@ -80,9 +91,10 @@ class HdLogic extends ApiLogic
         foreach ($sub_task_id as $id) {
             $imageData = [
                 'log_id' => $log->id,
-                'image' => '',
+                'image' => $image,
+                'model_type' => $model,
                 'sub_task_id' => $id,
-                'task_status' => 0,
+                'task_status' => $status,
                 'task_completion' => 0,
             ];
             HdImage::create($imageData);
@@ -267,7 +279,10 @@ class HdLogic extends ApiLogic
         $request = [];
         // 组装数据
         foreach ($params as $key => $value) {
-            if (in_array($key, ['negative_prompt', 'aspect_ratio', 'img_count'])) {
+            if (in_array($key, ['negative_prompt', 'aspect_ratio', 'img_count',
+                'poster_type', 'poster_color', 'poster_title',
+                'poster_subtitle', 'poster_description'
+            ])) {
                 if (!empty($value)) {
                     if ($key == 'img_count') {
                         $request[$key] = (int)$value;
@@ -277,15 +292,29 @@ class HdLogic extends ApiLogic
                 }
             }
         }
+
+        $scene = self::HD_TXT2IMG;
+        $type = 3;
+        if ($params['prompt'] == ''){
+            $scene = self::HD_TXT2POSTERIMG;
+            $type = 5;
+        }
+
+
+
         $request['prompt'] = $params['prompt'];
 
-        $response = self::requestUrl($request, self::HD_TXT2IMG, self::$uid);
+        $response = self::requestUrl($request, $scene, self::$uid);
 
-        if (!$response) {
+        if ($params['prompt'] != '' && !$response){
             throw new \Exception('提交文生图任务错误');
         }
+
+        if ($params['prompt'] == '' && !$response ) {
+            throw new \Exception('提交文生海报图任务错误');
+        }
         $sub_task_ids = $response['sub_task_ids'] ?? '';
-        self::saveLog(3, $response['request_id'], $params, $response['task_id'], $sub_task_ids);
+        self::saveLog($type, $response['request_id'], $params, $response['task_id'], $sub_task_ids);
 
         self::$returnData = ['result' => $response];
         return true;
@@ -313,12 +342,11 @@ class HdLogic extends ApiLogic
                 }
             }
         }
-        if(empty($params['prompt'])){
-            throw new \Exception('请输入图片描述');
-        }
+
         foreach ($params['image'] as $item) {
             $request['image'][] = self::imageToStream($item);
         }
+        Log::write('画图参数1'.json_encode($request));
 
         $response = self::requestUrl($request, self::HD_IMG2IMG, self::$uid);
 
@@ -380,6 +408,10 @@ class HdLogic extends ApiLogic
                 $scene = self::HD_IMG2IMG_STATUS;
                 $typeName = '图生图';
                 break;
+            case 5:
+                $scene = self::HD_TXT2POSTERIMG_STATUS;
+                $typeName = '文生海报图';
+                break;
             default:
                 throw new \Exception('参数错误');
         }
@@ -404,6 +436,7 @@ class HdLogic extends ApiLogic
                 2 => ['scene' => 'model_image', "type" => AccountLogEnum::TOKENS_DEC_MODEL_IMAGE],
                 3 => ['scene' => 'text_to_image', "type" => AccountLogEnum::TOKENS_DEC_TEXT_TO_IMAGE],
                 4 => ['scene' => 'image_to_image', "type" => AccountLogEnum::TOKENS_DEC_IMAGE_TO_IMAGE],
+                5 => ['scene' => 'txt_to_posterimg', "type" => AccountLogEnum::TOKENS_DEC_TEXT_TO_POSTERIMAGE],
             };
             $unit = TokenLogService::getTypeScore($scene['scene']);
 
@@ -500,9 +533,13 @@ class HdLogic extends ApiLogic
 
         [$tokenScene, $tokenCode] = match ($scene) {
             self::HD_TXT2IMG => ['text_to_image', AccountLogEnum::TOKENS_DEC_TEXT_TO_IMAGE],
+            self::HD_TXT2POSTERIMG => ['txt_to_posterimg', AccountLogEnum::TOKENS_DEC_TEXT_TO_POSTERIMAGE],
             self::HD_IMG2IMG => ['image_to_image', AccountLogEnum::TOKENS_DEC_IMAGE_TO_IMAGE],
             self::HD_SHOP_IMG2IMG => ['goods_image', AccountLogEnum::TOKENS_DEC_GOODS_IMAGE],
             self::HD_AI_TRY => ['model_image', AccountLogEnum::TOKENS_DEC_MODEL_IMAGE],
+            self::VOLC_TXT2IMG => ['volc_txt_to_img', AccountLogEnum::TOKENS_DEC_VOLC_TEXT_TO_IMAGE],
+            self::VOLC_TXT2POSTERIMG => ['volc_txt_to_posterimg', AccountLogEnum::TOKENS_DEC_VOLC_TEXT_TO_POSTERIMAGE],
+
             default => ['', '']
         };
 
@@ -511,12 +548,19 @@ class HdLogic extends ApiLogic
             //补充
             $request['img_count'] = $request['img_count'] ?? 1;
         }
-
         switch ($scene) {
 
             case self::HD_TXT2IMG:
-
                 $response = $requestService->txt2Img($request);
+                break;
+            case self::HD_TXT2POSTERIMG:
+                $response = $requestService->txt2PosterImg($request);
+                break;
+            case self::VOLC_TXT2IMG:
+                $response = $requestService->volctxt2Img($request);
+                break;
+            case self::VOLC_TXT2POSTERIMG:
+                $response = $requestService->volctxt2PosterImg($request);
                 break;
             case self::HD_IMG2IMG:
 
@@ -538,6 +582,10 @@ class HdLogic extends ApiLogic
 
                 $response = $requestService->txt2ImgStatus($request);
                 break;
+            case self::HD_TXT2POSTERIMG_STATUS:
+
+                $response = $requestService->txt2PosterImgStatus($request);
+                break;
             case self::HD_IMG2IMG_STATUS:
 
                 $response = $requestService->img2ImgStatus($request);
@@ -551,6 +599,7 @@ class HdLogic extends ApiLogic
                 $response = $requestService->vtonStatus($request);
                 break;
             default:
+                break;
         }
         if ($tokenScene && isset($response['code']) && $response['code'] == 10000) {
 
@@ -588,4 +637,41 @@ class HdLogic extends ApiLogic
 
         return base64_encode($img);
     }
+
+
+    /**
+     * @desc 提交文生图任务
+     * @return bool
+     * @date 2024/7/20 10:50
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author dagouzi
+     */
+    public static function txt2volcimg($params)
+    {
+
+        $prompt = trim($params['prompt']);
+        $scene = self::VOLC_TXT2IMG;
+        $type = 3;
+        if ($prompt == ''){
+            $scene = self::VOLC_TXT2POSTERIMG;
+            $type = 5;
+        }
+
+        $response = self::requestUrl($params, $scene, self::$uid);
+        if ($prompt != '' && !$response){
+          throw new \Exception('提交文生图任务错误');
+        }
+
+        if ($prompt == '' && !$response ) {
+            throw new \Exception('提交文生海报图任务错误');
+        }
+
+
+
+        $sub_task_ids[0] = $response['sub_task_ids'] ?? '';
+        self::saveLog($type, $response['request_id'], $params, $response['task_id'], $sub_task_ids,1,2,$response['image_urls']);
+        self::$returnData = ['result' => $response];
+        return true;
+    }
+
 }

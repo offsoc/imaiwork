@@ -20,16 +20,25 @@
                 <template #reference>
                     <menu-header />
                 </template>
-                <menu-container />
+                <div>
+                    <menu-container />
+                    <div class="is-border relative">
+                        <menu-footer />
+                    </div>
+                </div>
             </ElPopover>
         </template>
         <menu-header v-else />
         <div
-            class="h-full absolute z-20 w-[var(--aside-width)] transition-all duration-300 shadow-lg"
+            class="h-full absolute z-20 w-[var(--aside-width)] transition-all duration-300 shadow-lg bg-white flex flex-col"
             :class="[hideSidebar ? '-translate-x-full' : '']">
-            <div class="is-border h-full flex flex-col min-h-0 pt-[76px] bg-white w-full">
-                <menu-container class="flex-1 min-h-0" />
-                <!-- <menu-footer /> -->
+            <div class="relative mt-[76px] grow min-h-0">
+                <div class="is-border flex flex-col min-h-0 w-full">
+                    <menu-container />
+                </div>
+            </div>
+            <div class="is-border relative">
+                <menu-footer />
             </div>
         </div>
     </div>
@@ -49,7 +58,7 @@ const hideSidebar = computed(() => useAppStore().hideSidebar);
     &::after {
         content: "";
         position: absolute;
-        top: 76px;
+        top: 0;
         left: 18px;
         width: calc(200% - 72px);
         height: 1px;

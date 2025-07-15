@@ -83,7 +83,7 @@ class SvVideoTaskLogic extends SvBaseLogic
                     $response = self::requestUrl([
                         'msg' => $task->msg,
                         'voice_id' => $task->voice_id,
-                        'language' => 2,
+                        'language' => 0,
                         'notify_url' => '/api/sv.videoTask/notify'
                     ], $scene, $task->user_id, $task->task_id);
 

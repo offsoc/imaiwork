@@ -3,7 +3,7 @@
         <ElScrollbar>
             <div class="p-[18px]">
                 <div class="h-full flex flex-col gap-2 mt-[18px]">
-                    <NuxtLink
+                    <router-link
                         :to="item.link"
                         class="h-11 flex items-center rounded-lg px-[10px] hover:bg-[#fbfbfb]"
                         :class="{
@@ -25,7 +25,7 @@
                                 新功能
                             </div>
                         </div>
-                    </NuxtLink>
+                    </router-link>
                 </div>
             </div>
         </ElScrollbar>

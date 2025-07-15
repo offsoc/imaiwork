@@ -231,7 +231,10 @@ const handleDeleteFile = () => {
     fileData.name = "";
     fileData.date = "";
     fileData.size = "";
-    setFormData({});
+    resumeStatus.value = 0;
+    Object.keys(formData).forEach((key) => {
+        formData[key] = "";
+    });
 };
 
 function showLoading(title: string) {
@@ -260,14 +263,14 @@ const handleAddResume = async () => {
         url: `/ai_modules/interview/pages/resume_form/resume_form`,
         params: {
             id: state.id,
-            data: formData.name ? JSON.stringify(formData) : "",
+            data: JSON.stringify(formData),
         },
     });
 };
 
 const handleSubmit = async () => {
     uni.$u.route({
-        url: `/ai_modules/interview/pages/chat/chat`,
+        url: `/ai_modules/interview/pages/full_screen/full_screen`,
         params: {
             id: state.id,
         },

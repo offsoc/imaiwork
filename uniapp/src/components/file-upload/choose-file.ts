@@ -3,14 +3,17 @@ interface BaseOptions {
     type: "file" | "image" | "video";
 }
 type ChooseFileOptions = UniApp.ChooseFileOptions;
-type ChooseImageOptions = UniApp.ChooseImageOptions;
+type ChooseMediaOption = UniApp.ChooseMediaOption;
 type ChooseVideoOptions = UniApp.ChooseVideoOptions;
-type ChooseOptions = BaseOptions & (ChooseFileOptions | ChooseImageOptions | ChooseVideoOptions);
+type ChooseMediaSuccessCallbackResult = UniApp.ChooseMediaSuccessCallbackResult;
+type ChooseOptions = BaseOptions & (ChooseFileOptions | ChooseMediaOption | ChooseVideoOptions);
 
 export interface ChooseResult {
     tempFilePaths: string[] | string;
     tempFiles: any[];
+    failedCount: number;
     errMsg?: string;
+    type?: "image" | "video";
 }
 
 export interface FileData {
@@ -27,16 +30,21 @@ export interface FileData {
     errMsg: string;
 }
 
-function chooseImage(opts: ChooseImageOptions) {
-    const { count, sizeType = ["original", "compressed"], sourceType, extension } = opts;
+function chooseImage(opts: ChooseMediaOption) {
+    const { count, sizeType = ["original", "compressed"], sourceType } = opts;
     return new Promise<ChooseResult>((resolve, reject) => {
-        uni.chooseImage({
+        uni.chooseMedia({
             count,
             sizeType,
             sourceType,
-            extension,
-            success(res) {
-                resolve(normalizeFileRes(res as ChooseResult, "image"));
+            success(res: ChooseMediaSuccessCallbackResult) {
+                const normalizedRes: ChooseResult = {
+                    tempFilePaths: res.tempFiles.map((file) => file.tempFilePath),
+                    tempFiles: res.tempFiles,
+                    failedCount: 0,
+                    errMsg: res.errMsg,
+                };
+                resolve(normalizeFileRes(normalizedRes, "image"));
             },
             fail(res) {
                 reject({
@@ -47,38 +55,17 @@ function chooseImage(opts: ChooseImageOptions) {
     });
 }
 
-function chooseVideo(opts: ChooseVideoOptions) {
-    const { camera, compressed, maxDuration, sourceType, extension } = opts;
+function chooseVideo(opts: ChooseMediaOption) {
+    const { count, camera, maxDuration, sourceType } = opts;
     return new Promise<ChooseResult>((resolve, reject) => {
-        uni.chooseVideo({
+        uni.chooseMedia({
+            count,
+            mediaType: ["video"],
             camera,
-            compressed,
             maxDuration,
             sourceType,
-            extension,
             success(res) {
-                const { tempFilePath, duration, size, height, width } = res;
-                resolve(
-                    normalizeFileRes(
-                        {
-                            errMsg: "chooseVideo:ok",
-                            tempFilePaths: [tempFilePath],
-                            tempFiles: [
-                                {
-                                    name: (res.tempFile && res.tempFile.name) || "",
-                                    path: tempFilePath,
-                                    size,
-                                    type: (res.tempFile && res.tempFile.type) || "",
-                                    width,
-                                    height,
-                                    duration,
-                                    fileType: "video",
-                                },
-                            ],
-                        },
-                        "video"
-                    )
-                );
+                resolve(normalizeFileRes(res as ChooseResult, "video"));
             },
             fail(res) {
                 reject({
@@ -123,14 +110,14 @@ function chooseAll(opts: ChooseFileOptions) {
 function normalizeFileRes(res: ChooseResult, fileType?: BaseOptions["type"]) {
     res.tempFiles.forEach((item) => {
         if (!item.name) {
-            item.name = item.path.substring(item.path.lastIndexOf("/") + 1);
+            item.name = item.tempFilePath.substring(item.tempFilePath.lastIndexOf("/") + 1);
         }
         if (fileType) {
             item.fileType = fileType;
         }
     });
     if (!res.tempFilePaths) {
-        res.tempFilePaths = res.tempFiles.map((file) => file.path);
+        res.tempFilePaths = res.tempFiles.map((file) => file.tempFilePath);
     }
     return res;
 }
@@ -141,9 +128,9 @@ function chooseFile(
     }
 ): Promise<ChooseResult> {
     if (opts.type === "image") {
-        return chooseImage(opts as ChooseImageOptions);
+        return chooseImage(opts as ChooseMediaOption);
     } else if (opts.type === "video") {
-        return chooseVideo(opts as ChooseVideoOptions);
+        return chooseVideo(opts as ChooseMediaOption);
     }
     return chooseAll(opts as ChooseFileOptions);
 }

@@ -709,4 +709,30 @@ class SvVideoSettingLogic extends SvBaseLogic
 
 
     }
+
+    public static function check(){
+
+        try {
+            SvVideoSetting::whereIn('status',[1,2])
+                ->where('create_time', '<=', strtotime('-1440 minutes'))
+                ->select()->each(function ($item) {
+
+                    if ($item->success_num > 0 ){
+                        $update['error_num'] = $item->video_count - $item->success_num;
+                        $update['status'] = 5;
+                    }else{
+                        $update['error_num'] = $item->video_count;
+                        $update['status'] = 4;
+                    };
+
+                    SvVideoSetting::where('id',$item->id)->update($update);
+
+                });
+
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+
+    }
 }

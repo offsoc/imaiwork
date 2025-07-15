@@ -33,7 +33,7 @@
                 <ElTableColumn prop="create_time" label="创建时间" width="180px"> </ElTableColumn>
                 <ElTableColumn label="操作" width="100px" fixed="right">
                     <template #default="{ row }">
-                        <ElButton type="text" @click="handleView(row.content)">查看</ElButton>
+                        <ElButton link type="primary" @click="handleView(row.content)">查看</ElButton>
                     </template>
                 </ElTableColumn>
                 <template #empty>

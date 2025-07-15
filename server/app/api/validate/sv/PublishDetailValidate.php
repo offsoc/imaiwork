@@ -85,6 +85,13 @@ class PublishDetailValidate extends BaseValidate
     public function sceneRetry() {
         return $this->only(['id', 'retry_time']);
     }
+
+    public function sceneRepublish()
+    {
+        return $this->only(['id', 'time']);
+        
+    }
+
     public function sceneTest() {
         return $this->only(['url', 'accounts', 'material_type']);
     }

@@ -24,7 +24,7 @@
                             <div
                                 v-for="(item, index) in materialLists"
                                 class="w-full h-[72px] border border-[#E0E0E0] rounded p-2 flex items-center gap-2 cursor-pointer relative"
-                                :class="{ 'border-primary bg-primary-light-8': chooseIds.includes(item.id) }"
+                                :class="{ 'border-primary bg-primary-light-9': chooseIds.includes(item.id) }"
                                 :key="index"
                                 @click="handleChoose(item.id)">
                                 <div class="leading-6">

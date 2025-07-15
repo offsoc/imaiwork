@@ -56,6 +56,7 @@ class InterviewLists extends BaseApiDataLists implements ListsSearchInterface
             ->field(['user_id', 'job_id'])
             ->order('id', 'desc')
             ->group(['user_id', 'job_id'])
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
         foreach ($groups as &$group)

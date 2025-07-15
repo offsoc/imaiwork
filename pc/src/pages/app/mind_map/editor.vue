@@ -33,7 +33,13 @@
                                         >立即生成
                                     </ElButton>
                                 </ElFormItem>
-                                <ElFormItem label="内容大纲">
+                                <ElFormItem>
+                                    <template #label>
+                                        <div class="flex items-center justify-between gap-x-2">
+                                            <span>内容大纲</span>
+                                            <ElButton type="primary" link @click="handleExample()">试试示例</ElButton>
+                                        </div>
+                                    </template>
                                     <ElInput
                                         v-model="formData.reply"
                                         type="textarea"
@@ -74,11 +80,12 @@
 <script setup lang="ts">
 import { mindMapDetail, mindMapEditChat } from "@/api/mind_map";
 import { chatPrompt } from "@/api/chat";
-import { ElScrollbar } from "element-plus";
+import { ElFormItem, ElScrollbar } from "element-plus";
 import { useUserStore } from "@/stores/user";
-import { TokensSceneEnum } from "@/enums/appEnums";
-import { ScenePromptEnum } from "../_enums/chatEnum";
 import { useMindMap } from "@/composables/useMindMap";
+import { TokensSceneEnum } from "@/enums/appEnums";
+import { mindMapExample } from "@/config/common";
+import { ScenePromptEnum } from "../_enums/chatEnum";
 const route = useRoute();
 const router = useRouter();
 
@@ -96,12 +103,19 @@ const formData = reactive({
 const mindMapContainer = shallowRef(null);
 const { markmap, toolbarContainer, isFullscreen, mindMapInit, mindMapFit, mindMapExportAsPNG } = useMindMap();
 
+const handleExample = async () => {
+    formData.reply = mindMapExample;
+    markmap.value && markmap.value.destroy();
+    await nextTick();
+    initMindMap();
+};
+
 const handleExport = () => {
     mindMapExportAsPNG(mindMapContainer.value);
 };
 
 const { lockFn: lockHandleGenerate, isLock } = useLockFn(async () => {
-    if (userTokens.value <= 0) {
+    if (userTokens.value <= tokensValue.value) {
         feedback.msgPowerInsufficient();
         return;
     }

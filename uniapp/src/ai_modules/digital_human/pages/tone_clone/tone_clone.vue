@@ -312,12 +312,12 @@ const validateAudioSize = (size: number) => {
 };
 
 const chooseFileCallback = async (filesResult: ChooseResult) => {
-    const { tempFilePaths, tempFiles } = filesResult;
-    const { size, type } = tempFiles[0];
+    const { tempFiles } = filesResult;
+    const { size } = tempFiles[0];
     if (!validateAudioSize(size)) {
         return;
     }
-    await uploadAudio(tempFilePaths[0]);
+    await uploadAudio(tempFiles[0].path);
 };
 
 const uploadAudio = async (file: string) => {

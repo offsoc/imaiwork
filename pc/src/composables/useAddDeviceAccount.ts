@@ -32,8 +32,9 @@ interface UseAddDeviceAccountOptions {
 
 interface RefreshAccount {
     id: number;
-    device_code: string;
+    account: string;
     type: AppTypeEnum;
+    device_code?: string;
 }
 
 export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
@@ -51,8 +52,6 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
     // 刷新账号数据
     const refreshAccount = ref<RefreshAccount[]>([]);
 
-    // 当前索引
-    const currNextIndex = ref(0);
     // 事件动作
     const eventAction = ref<any>(null);
 
@@ -79,7 +78,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                     sdk_version: content.sdkVersion,
                 };
                 if (socialPlatformList.length > 0) {
-                    sendGetUserInfo(content.deviceId, socialPlatformList[currNextIndex.value].type);
+                    sendGetUserInfo(content.deviceId, socialPlatformList[0].type);
                 }
                 eventAction.value = EventAction.AddAccount;
                 break;
@@ -98,41 +97,46 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
 
                     if (eventAction.value == EventAction.AddAccount) {
                         // 添加设备
-                        if (currNextIndex.value == 0 && addDeviceParams.value) {
+                        if (addDeviceParams.value) {
                             await addDeviceApi(addDeviceParams.value);
                         }
-                        await addAccountApi(params);
-                        currNextIndex.value++;
-                        // 添加账号 账号添加存在多个平台
-                        while (currNextIndex.value < socialPlatformList.length) {
-                            sendGetUserInfo(deviceId, socialPlatformList[currNextIndex.value].type);
-                        }
-                        if (currNextIndex.value == socialPlatformList.length) {
+                        try {
+                            await addAccountApi(params);
                             showAddDevice.value = false;
-                            currNextIndex.value = 0;
                             eventAction.value = null;
                             progressValue.value = 100;
-
-                            msg = "添加设备成功";
+                            options.onSuccess?.({ msg: "添加账号成功", type, data });
+                        } catch (error) {
+                            options.onError?.({
+                                error,
+                                type,
+                                code: DeviceCmdCodeEnum.API_ERROR,
+                            });
                         }
                     }
                     if (eventAction.value == EventAction.UpdateAccount) {
-                        const firstAccount = refreshAccount.value[currNextIndex.value];
-                        await updateAccountApi({
-                            id: firstAccount.id,
-                            ...params,
-                        });
-                        currNextIndex.value++;
-                        while (currNextIndex.value < refreshAccount.value.length) {
-                            const nextAccount = refreshAccount.value[currNextIndex.value];
-                            sendGetUserInfo(nextAccount.device_code, nextAccount.type);
-                        }
-
-                        if (currNextIndex.value == refreshAccount.value.length) {
-                            currNextIndex.value = 0;
+                        const currentAccount = refreshAccount.value
+                            .filter((item: any) => item.type == params.type)
+                            .find((item: any) => item.account == params.account);
+                        try {
+                            if (currentAccount) {
+                                await updateAccountApi({
+                                    id: currentAccount.id,
+                                    ...params,
+                                });
+                            } else {
+                                await addAccountApi(params);
+                            }
                             eventAction.value = null;
                             progressValue.value = 100;
-                            msg = "更新成功";
+                            options.onSuccess?.({ msg: "更新成功", type, data });
+                        } catch (error) {
+                            console.log(error);
+                            options.onError?.({
+                                error,
+                                type,
+                                code: DeviceCmdCodeEnum.API_ERROR,
+                            });
                         }
                     }
                 } catch (error) {
@@ -147,9 +151,9 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                 clearInterval(progressInterval.value);
                 break;
             default:
+                options.onSuccess?.({ msg, type, data });
                 break;
         }
-        options.onSuccess?.({ msg, type, data });
     });
 
     onEvent("error", (error: any) => {
@@ -172,12 +176,10 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
     };
 
     // 刷新账号
-    const handleRefreshAccount = (accounts: RefreshAccount[]) => {
+    const handleRefreshAccount = (deviceId: string, type: AppTypeEnum) => {
         eventAction.value = EventAction.UpdateAccount;
-        refreshAccount.value = accounts;
-        const firstAccount = refreshAccount.value[currNextIndex.value];
         completeProgress();
-        sendGetUserInfo(firstAccount.device_code, firstAccount.type);
+        sendGetUserInfo(deviceId, type);
     };
 
     // 添加账号
@@ -195,7 +197,6 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
         progressValue.value = 0;
         progressInterval.value = setInterval(() => {
             const elapsedTime = Date.now() - startTime;
-            const progress = Math.min(99, (elapsedTime / duration) * 100);
             const randomIncrement = Math.min(maxIncrementPerInterval, Math.random() * (99 - progressValue.value) * 0.1);
             progressValue.value = Math.floor(Math.min(99, progressValue.value + randomIncrement));
 
@@ -211,6 +212,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
         addDeviceLoading,
         progressValue,
         eventAction,
+        refreshAccount,
         handleAddDeviceConfirm,
         handleAddAccount,
         handleRefreshAccount,

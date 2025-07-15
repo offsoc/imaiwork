@@ -51,13 +51,13 @@
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleAccountDetail(row)">
                                         <Icon name="el-icon-User"></Icon>
                                         <span>账号详情</span>
                                     </div>
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleRefreshData(row)">
                                         <span class="flex items-center justify-center">
                                             <Icon name="el-icon-Refresh"></Icon>
@@ -65,13 +65,13 @@
                                         <span>更新数据</span>
                                     </div>
                                     <!-- <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleConfigRPA(row.id)">
                                         <Icon name="el-icon-Setting"></Icon>
                                         <span>配置RPA</span>
                                     </div> -->
                                     <div
-                                        class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleDelete(row)">
                                         <Icon name="el-icon-Delete"></Icon>
                                         <span>删除</span>
@@ -92,14 +92,14 @@
             </div>
         </div>
     </div>
-    <RpaSetting ref="rpaSettingRef" v-if="showRpaSetting" @close="showRpaSetting = false" />
-    <DeviceAdd
+    <rpa-setting ref="rpaSettingRef" v-if="showRpaSetting" @close="showRpaSetting = false" />
+    <device-add
         ref="addDeviceRef"
         v-if="showAddDevice"
         :bind-loading="addDeviceLoading"
         @close="showAddDevice = false"
         @confirm="confirmAddDevice" />
-    <DeviceProgress
+    <device-progress
         v-if="showProgress"
         :progress-value="progressValue"
         :progress-error="progressError"
@@ -131,15 +131,15 @@ const {
     addDeviceLoading,
     progressValue,
     eventAction,
+    refreshAccount,
     handleAddDeviceConfirm,
     handleAddAccount,
     handleRefreshAccount,
-    completeProgress,
 } = useAddDeviceAccount({
     send,
     onEvent,
     onSuccess: (res) => {
-        const { msg, type, data } = res;
+        const { msg, type } = res;
         if (msg) feedback.msgSuccess(msg);
         switch (type) {
             case DeviceCmdEnum.GET_USER_INFO:
@@ -168,9 +168,8 @@ const addDeviceId = ref("");
 const retryAddDevice = () => {
     progressError.value = false;
     if (eventAction.value == EventAction.UpdateAccount) {
-        const { account, device_code } = currDevice.value;
-        const accounts = account.map((item) => ({ ...item, device_code }));
-        handleRefreshAccount(accounts);
+        console.log(currDevice.value);
+        handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
     } else {
         handleAddDeviceConfirm(addDeviceId.value);
     }
@@ -185,17 +184,16 @@ const confirmAddDevice = (deviceId: string) => {
 
 const currDevice = ref(null);
 const handleRefreshData = (row: any) => {
-    const { account, device_code } = row;
-    currDevice.value = row;
-    if (account.length) {
+    currDevice.value = row.device_code;
+    refreshAccount.value = row.account;
+    if (row.account.length) {
         showProgress.value = true;
-        const accounts = account.map((item) => ({ ...item, device_code }));
-        handleRefreshAccount(accounts);
+        handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
     } else {
         showProgress.value = true;
         handleAddAccount({
-            device_code,
-            type: row.type,
+            device_code: currDevice.value,
+            type: AppTypeEnum.REDBOOK,
         });
     }
 };

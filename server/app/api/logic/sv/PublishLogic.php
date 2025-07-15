@@ -157,7 +157,7 @@ class PublishLogic extends SvBaseLogic
     {
         try {
             // 检查机器人是否存在
-            $publish = SvPublishSetting::field('*')
+            $publish = SvPublishSettingAccount::field('*')
                 ->where('id', $params['id'])
                 ->where('user_id', self::$uid)
                 ->findOrEmpty();
@@ -165,8 +165,8 @@ class PublishLogic extends SvBaseLogic
                 self::setError('任务不存在');
                 return false;
             }
-            $publish['accounts'] = explode(',', $publish['accounts']);
-            $publish['time_config'] = json_decode($publish['time_config'], true);
+            // $publish['accounts'] = explode(',', $publish['accounts']);
+            // $publish['time_config'] = json_decode($publish['time_config'], true);
 
 
             self::$returnData = $publish->toArray();
@@ -300,6 +300,36 @@ class PublishLogic extends SvBaseLogic
             self::$returnData = $record->toArray();
             return true;
         } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    public static function recordRepublish(array $params){
+        try {
+            $record = SvPublishSettingDetail::field('*')
+                ->where('id', $params['id'])
+                ->where('user_id', self::$uid)
+                ->findOrEmpty();
+            if ($record->isEmpty()) {
+                self::setError('任务记录不存在');
+                return false;
+            }
+
+            if(isset($params['time']) && !empty($params['time']) && strtotime($params['time']) < time()){
+                self::setError('重新发布时间不能小于当前时间');
+                return false;
+            }
+
+            $record->status = 5;//重新发布
+            $record->publish_time = $params['time'] != '' ? $params['time'] : date('Y-m-d H:i:s', time() + 90);
+            $record->save();
+
+            self::$returnData = $record->toArray();
+            return true;
+
+        } catch (\Throwable $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -458,10 +488,10 @@ class PublishLogic extends SvBaseLogic
                             'material_id' => $video['id'],
                             'material_type' => 1,
                             'material_url' => FileService::getFileUrl($video['video_result_url']),
-                            'material_title' => $video['name'],
+                            'material_title' => $video['title'],
                             'material_tag' => $video['topic'],
                             'poi' => $video['poi'],
-                            'material_subtitle' => $video['name'],
+                            'material_subtitle' => $video['subtitle'],
                             'task_id' => generate_unique_task_id(),
                             'platform' => $account['account_type'],
                             'status' => 0,

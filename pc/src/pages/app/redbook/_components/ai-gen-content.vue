@@ -166,7 +166,7 @@ const handleNextStep = async () => {
         const data = await addCopywriting({
             ...formData,
             add_type: props.type,
-            channel: props.type === ContentType.CONTENT ? 1 : 2,
+            channel: 2,
         });
         getAiContent({ copywriting_id: data.id, type: props.type });
         userStore.getUser();

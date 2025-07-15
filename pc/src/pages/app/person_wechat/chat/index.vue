@@ -38,7 +38,7 @@ import ChattingPanel from "./_components/chatting-panel.vue";
 import UserPanel from "./_components/user-panel.vue";
 import PreviewVideo from "@/components/preview-video/index.vue";
 import { isJson } from "@/utils/validate";
-import { addWeChat, getWeChatLists, reportWeChatFriends, messageGreet, updateWeChatFriend } from "@/api/person_wechat";
+import { getWeChatLists, reportWeChatFriends } from "@/api/person_wechat";
 import {
     EnumMsgType,
     EnumFriendPanel,
@@ -502,7 +502,7 @@ function handleFriendTalk(result: any) {
 
 // 处理消息已读
 function handlePostMessageRead(Content: any) {
-    const { FriendId, WeChatId } = Content;
+    const { FriendId } = Content;
     conversationList.value.forEach((item: any) => {
         if (item.UserName === FriendId) {
             item.UnreadCnt = 0;

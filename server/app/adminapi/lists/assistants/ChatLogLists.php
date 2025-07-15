@@ -28,9 +28,9 @@ class ChatLogLists extends BaseAdminDataLists implements ListsSearchInterface
         $chat_type = $this->request->get('chat_type', 0);
 
         if ($chat_type == 0) {
-            $this->searchWhere[] = ['l.chat_type', '=', AccountLogEnum::TOKENS_DEC_COMMON_CHAT];
+            $this->searchWhere[] = ['l.chat_type', 'in', [AccountLogEnum::TOKENS_DEC_COMMON_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT]];
         } else {
-            $this->searchWhere[] = ['l.chat_type', '=', AccountLogEnum::TOKENS_DEC_SCENE_CHAT];
+            $this->searchWhere[] = ['l.chat_type', 'in', [AccountLogEnum::TOKENS_DEC_SCENE_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT]];
         }
 
         return ChatLog::alias('l')
@@ -90,9 +90,9 @@ class ChatLogLists extends BaseAdminDataLists implements ListsSearchInterface
         $chat_type = $this->request->get('chat_type', 0);
 
         if ($chat_type == 0) {
-            $this->searchWhere[] = ['l.chat_type', '=', AccountLogEnum::TOKENS_DEC_COMMON_CHAT];
+            $this->searchWhere[] = ['l.chat_type', 'in', [AccountLogEnum::TOKENS_DEC_COMMON_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT]];
         } else {
-            $this->searchWhere[] = ['l.chat_type', '=', AccountLogEnum::TOKENS_DEC_SCENE_CHAT];
+            $this->searchWhere[] = ['l.chat_type', 'in', [AccountLogEnum::TOKENS_DEC_COMMON_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT]];
         }
 
         return ChatLog::alias('l')

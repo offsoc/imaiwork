@@ -97,6 +97,16 @@ class AccountLogEnum
     //模特图
     const TOKENS_DEC_IMAGE_PROMPT = 2005;
 
+    const TOKENS_DEC_VOLC_TEXT_TO_IMAGE = 2006;
+    const TOKENS_DEC_VOLC_TEXT_TO_POSTERIMAGE = 2007;
+
+    //文生视频
+    const TOKENS_DEC_VOLC_TEXT_TO_VIDEO = 2008;
+    //图生视频
+    const TOKENS_DEC_VOLC_IMAGE_TO_VIDEO = 2009;
+    const TOKENS_DEC_TEXT_TO_POSTERIMAGE = 2010;
+    const TOKENS_DEC_VOLC_VIDEO_PROMPT = 2011;
+
     //会议纪要
     const TOKENS_DEC_MEETING = 3001;
 
@@ -170,6 +180,9 @@ class AccountLogEnum
         self::TOKENS_DEC_RECHARGE_REFUND,
         self::TOKENS_DEC_COMMON_CHAT,
         self::TOKENS_DEC_TEXT_TO_IMAGE,
+        self::TOKENS_DEC_TEXT_TO_POSTERIMAGE,
+        self::TOKENS_DEC_VOLC_TEXT_TO_IMAGE,
+        self::TOKENS_DEC_VOLC_TEXT_TO_POSTERIMAGE,
         self::TOKENS_DEC_IMAGE_TO_IMAGE,
         self::TOKENS_DEC_GOODS_IMAGE,
         self::TOKENS_DEC_MODEL_IMAGE,
@@ -207,8 +220,11 @@ class AccountLogEnum
         self::TOKENS_DEC_KNOWLEDGE_CHAT,
         self::KEYWORD_TO_TITLE,
         self::KEYWORD_TO_SUBTITLE,
-        self::KEYWORD_TO_COPYWRITING
-    
+        self::KEYWORD_TO_COPYWRITING,
+        self::TOKENS_DEC_VOLC_TEXT_TO_VIDEO,
+        self::TOKENS_DEC_VOLC_IMAGE_TO_VIDEO,
+        self::TOKENS_DEC_VOLC_VIDEO_PROMPT,
+
     ];
 
 
@@ -267,6 +283,9 @@ class AccountLogEnum
             self::TOKENS_DEC_RECHARGE_REFUND        => '充值订单退款减少算力',
             self::TOKENS_DEC_COMMON_CHAT            => '通用聊天减少算力',
             self::TOKENS_DEC_TEXT_TO_IMAGE          => '文生图减少算力',
+            self::TOKENS_DEC_TEXT_TO_POSTERIMAGE          => '文生海报图减少算力',
+            self::TOKENS_DEC_VOLC_TEXT_TO_IMAGE     => '即梦文生图减少算力',
+            self::TOKENS_DEC_VOLC_TEXT_TO_POSTERIMAGE => '即梦文生海报图减少算力',
             self::TOKENS_DEC_IMAGE_TO_IMAGE         => '图生图减少算力',
             self::TOKENS_DEC_GOODS_IMAGE            => '商品图减少算力',
             self::TOKENS_DEC_MODEL_IMAGE            => '模特图减少算力',
@@ -274,7 +293,7 @@ class AccountLogEnum
             self::TOKENS_DEC_MIND_MAP               => '思维导图减少算力',
             self::TOKENS_DEC_SCENE_CHAT             => '场景聊天减少算力',
             self::TOKENS_DEC_IMAGE_PROMPT           => '生图文案减少算力',
-
+            self::TOKENS_DEC_VOLC_VIDEO_PROMPT      => '生成视频文案减少算力',
             self::TOKENS_DEC_EXPIRE                 => 'token 加油包过期',
 
             self::TOKENS_DEC_HUMAN_AVATAR           => '数字人形象 - 标准版减少算力',
@@ -315,8 +334,9 @@ class AccountLogEnum
             self::KEYWORD_TO_SUBTITLE               => '关键词转副标题减少算力',
             self::KEYWORD_TO_COPYWRITING            => '关键词转文案减少算力',
 
-            self::TOKENS_INC_CARDCODE_GIVE        => '卡密兑换增加算力',
-
+            self::TOKENS_INC_CARDCODE_GIVE          => '卡密兑换增加算力',
+            self::TOKENS_DEC_VOLC_TEXT_TO_VIDEO     => '即梦文生视频减少算力',
+            self::TOKENS_DEC_VOLC_IMAGE_TO_VIDEO    => '即梦图生视频减少算力',
         ];
         if ($flag) {
             return $desc;

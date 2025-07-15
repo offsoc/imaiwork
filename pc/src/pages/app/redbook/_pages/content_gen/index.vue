@@ -124,9 +124,12 @@
                                     <div
                                         class="invisible group-hover:visible"
                                         v-if="
-                                            [GenStatus.SUCCESS, GenStatus.PARTIAL_SUCCESS, GenStatus.DRAFT].includes(
-                                                item.status
-                                            )
+                                            [
+                                                GenStatus.SUCCESS,
+                                                GenStatus.PARTIAL_SUCCESS,
+                                                GenStatus.DRAFT,
+                                                GenStatus.FAILED,
+                                            ].includes(item.status)
                                         ">
                                         <ElButton
                                             type="danger"
@@ -167,7 +170,7 @@
 import { getContentGenList, deleteContentGen, retryContentGen } from "@/api/redbook";
 import BadgeDraftImg from "@/pages/app/redbook/_assets/images/badge_draft.png";
 import BadgeIngImg from "@/pages/app/redbook/_assets/images/badge_ing.png";
-import BadgeNotImg from "@/pages/app/redbook/_assets/images/badge_not.png";
+import BadgeFailedImg from "@/pages/app/redbook/_assets/images/badge_fail.svg";
 import BadgeSuccessImg from "@/pages/app/redbook/_assets/images/badge_success.png";
 import BadgePartialSuccessImg from "@/pages/app/redbook/_assets/images/badge_partial_success.png";
 import dayjs from "dayjs";
@@ -220,7 +223,7 @@ const getGenStatusType = (status: number) => {
         [GenStatus.WAITING]: { text: "待处理", badge_img: BadgeIngImg },
         [GenStatus.GENERATING]: { text: "生成中", badge_img: BadgeIngImg },
         [GenStatus.SUCCESS]: { text: "已完成", badge_img: BadgeSuccessImg },
-        [GenStatus.FAILED]: { text: "生成失败", badge_img: BadgeNotImg },
+        [GenStatus.FAILED]: { text: "生成失败", badge_img: BadgeFailedImg },
         [GenStatus.PARTIAL_SUCCESS]: { text: "部分完成", badge_img: BadgePartialSuccessImg },
     }?.[status];
 };

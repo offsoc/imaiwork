@@ -33,7 +33,7 @@ class PublishLists extends BaseApiDataLists implements ListsSearchInterface
         $this->searchWhere[] = ['ps.user_id', '=', $this->userId];
         return SvPublishSettingAccount::alias('ps')
             ->field('ps.*, a.nickname, a.avatar')
-            ->join('sv_account a', 'a.account = ps.account and a.device_code = ps.device_code and a.type = ps.account_type')
+            ->join('sv_account a', 'a.account = ps.account and a.device_code = ps.device_code and a.type = ps.account_type', 'left')
             ->where($this->searchWhere)
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('ps.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);

@@ -36,5 +36,7 @@ return [
 
         //oss迁移
         'oss_migration_cron' => 'app\common\command\OssMigrationCron',
+        //即梦视频队列
+        'draw_video_task' => 'app\common\command\DrawVideoTaskCron',
     ],
 ];

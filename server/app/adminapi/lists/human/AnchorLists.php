@@ -81,10 +81,14 @@ class AnchorLists extends BaseAdminDataLists implements ListsSearchInterface
                         $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_YMT;
                         break;
                 }
-
-
                 // 消耗情况
-                $item['points'] = UserTokensLog::where('user_id', $item['user_id'])->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+                $points1 = UserTokensLog::where('user_id', $item['user_id'])->where('action',1)
+                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+
+                $points2 = UserTokensLog::where('user_id', $item['user_id'])->where('action',2)
+                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+                $item['points'] = $points1 + $points2 ;
+
             })
             ->toArray();
     }

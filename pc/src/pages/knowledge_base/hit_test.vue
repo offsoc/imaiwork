@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <ElBreadcrumb>
                 <ElBreadcrumbItem>
-                    <NuxtLink to="/knowledge_base">知识库</NuxtLink>
+                    <router-link to="/knowledge_base">知识库</router-link>
                 </ElBreadcrumbItem>
                 <ElBreadcrumbItem>命中测试</ElBreadcrumbItem>
             </ElBreadcrumb>

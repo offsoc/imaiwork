@@ -1,6 +1,6 @@
 import useWebSocket, { WebSocketOptions } from "@/composables/useWebSocket";
 import { EnumMsgType, EnumMsgErrorCode } from "../_enums";
-import { addDevice, addWeChat } from "@/api/person_wechat";
+import { addDevice, addWeChat, updateDevice } from "@/api/person_wechat";
 
 // WebSocket 事件类型
 type WeChatWsEvent = "open" | "message" | "close" | "success" | "error" | "heartbeat" | "action";
@@ -27,20 +27,11 @@ interface WeChatWsMessage {
     };
 }
 
-// WebSocket 操作类型
-interface WeChatWsAction {
-    type: EnumMsgType;
-    accessToken: string;
-    deviceId: string;
-    wechatId: string;
-    content: any;
-}
-
 // 事件回调存储
 const eventHandlers = new Map<WeChatWsEvent, WeChatWsEventCallback>();
 
 export default function useWeChatWs(options: WebSocketOptions = {}) {
-    const wssUrl = `wss://${window.location.host}/wechat`;
+    const wssUrl = `wss://${location.host}/wechat`;
     const {
         on: wssOn,
         send,
@@ -158,6 +149,10 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
                 wechat_avatar: content.Avatar || "",
                 wechat_status: content.Status === "online",
                 wechat_no: content.WeChatNo,
+            });
+            updateDevice({
+                device_code: content.DeviceId,
+                is_used: true,
             });
             feedback.notifySuccess("设备添加成功");
             triggerEvent("success", { type: "add-device" });

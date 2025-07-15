@@ -20,16 +20,18 @@
                                 :value="item.id"></ElOption>
                         </ElSelect>
                         <div class="flex justify-end mt-2">
-                            <NuxtLink :to="`${getBaseUrl()}/agent`" target="_blank">
+                            <router-link to="/app/agent" target="_blank">
                                 <ElButton link type="primary" size="small"> 点击这里创建您的专属机器人 > </ElButton>
-                            </NuxtLink>
+                            </router-link>
                         </div>
                     </div>
                 </ElFormItem>
             </ElForm>
         </div>
         <div class="flex items-center justify-center my-4">
-            <ElButton type="primary" class="w-[166px] !h-[40px]" @click="lockSubmit"> 保存 </ElButton>
+            <ElButton type="primary" class="w-[166px] !h-[40px]" :loading="isLockSubmit" @click="lockSubmit">
+                保存
+            </ElButton>
         </div>
     </div>
 </template>
@@ -38,7 +40,7 @@
 import { getAgentList } from "@/api/agent";
 import { getAccountDetail, changeAccountStatus } from "@/api/service";
 import { type FormInstance } from "element-plus";
-import { getBaseUrl } from "@/utils/env";
+
 const emit = defineEmits<{
     (e: "close"): void;
     (e: "success"): void;

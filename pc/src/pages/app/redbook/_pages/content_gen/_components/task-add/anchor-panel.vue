@@ -24,7 +24,7 @@
                         show-progress
                         :limit="count - anchorList.length"
                         :show-file-list="false"
-                        :max-size="CommonUploadLimit.size"
+                        :max-size="commonUploadLimit.size"
                         @change="changeAnchor">
                         <ElButton color="#F45D5D" class="!text-white">
                             <Icon name="local-icon-click" :size="16"></Icon>
@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import PreviewVideo from "@/components/preview-video/index.vue";
-import { CommonUploadLimit } from "@/pages/app/digital_human/_enums";
+import { commonUploadLimit } from "@/pages/app/digital_human/_enums";
 import { DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
 import VideoMaterial from "../../../../_components/video-material.vue";
 

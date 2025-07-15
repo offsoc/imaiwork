@@ -62,6 +62,7 @@
                             </div>
                         </template>
                     </ElTableColumn>
+                    <ElTableColumn prop="create_time" label="创建时间" width="180"></ElTableColumn>
                     <ElTableColumn label="操作" width="120" fixed="right">
                         <template #default="{ row }">
                             <ElPopover

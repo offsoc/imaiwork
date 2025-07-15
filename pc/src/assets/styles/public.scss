@@ -15,7 +15,13 @@ body {
     -o-tab-size: 4;
     tab-size: 4;
 }
-
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-transition-delay: 99999s;
+    -webkit-transition: color 99999s ease-out, background-color 99999s ease-out;
+}
 .form-tips {
     @apply text-tx-secondary text-sm leading-6 mt-1;
 }
@@ -113,7 +119,7 @@ body {
     width: fit-content;
     font-weight: bold;
     font-family: monospace;
-    font-size: 24rpx;
+    font-size: 12px;
     clip-path: inset(0 3ch 0 0);
     animation: chatLoader 1s steps(4) infinite;
 }
@@ -129,27 +135,31 @@ body {
 .dynamic-scroller {
     // 美化滚动条
     &::-webkit-scrollbar {
-        width: 8px;
-        background-color: #f5f5f5;
+        width: 6px;
+        background-color: rgba(255, 255, 255, 0.05);
     }
     &::-webkit-scrollbar-thumb {
-        background-color: #ccc;
-        border-radius: 4px;
+        background-color: var(--color-primary);
+        border-radius: 3px;
         cursor: pointer;
     }
 }
 
-.version-tag {
-    background: linear-gradient(
-        90deg,
-        rgba(193, 255, 221, 1) 0%,
-        rgba(189, 250, 227, 1) 45.05%,
-        rgba(177, 238, 252, 1) 75.33%,
-        rgba(198, 193, 255, 1) 100%
-    );
-
-    box-shadow: 0rpx 4rpx 8rpx rgba(0, 0, 0, 0.11);
-    @apply rounded-lg px-[10px] py-[1px];
+.digital-human-tag {
+    @apply rounded-full px-[18px] py-[4px] text-white  shadow-[0px_6px_12px_0px_rgba(0,0,0,0.24)];
+    backdrop-filter: blur(6px);
+    &-1 {
+        background: linear-gradient(180deg, rgba(26, 247, 207, 0.5) 0%, rgba(0, 101, 251, 0.5) 100%);
+    }
+    &-2 {
+        background: linear-gradient(180deg, rgba(202, 255, 177, 0.5) 0%, rgba(59, 184, 64, 0.5) 100%);
+    }
+    &-4 {
+        background: linear-gradient(180deg, rgba(255, 252, 171, 0.5) 0%, rgba(255, 98, 216, 0.5) 100%);
+    }
+    &-6 {
+        background: linear-gradient(180deg, rgba(77, 246, 255, 0.5) 0%, rgba(136, 26, 187, 0.5) 100%);
+    }
 }
 
 .rotation {
@@ -175,20 +185,46 @@ body {
     background: linear-gradient(135deg, transparent 50%, #999 50%);
 }
 
-.app-item-card {
-    @apply gap-x-4 h-20 border border-[transparent] rounded-[10px] p-[1px] cursor-pointer relative;
-    &:hover {
-        border-color: var(--border-primary);
-        &::after {
-            display: none;
+.font-digital-number {
+    font-family: "digital-number";
+}
+
+.digital-human-select {
+    background-color: var(--color-digital-human) !important;
+    border-color: var(--color-digital-human-border) !important;
+    .el-select__wrapper {
+        min-height: 40px;
+        background-color: var(--color-digital-human);
+        box-shadow: 0px 0px 0px 1px rgba(255, 255, 255, 0.1);
+        border-radius: 100px;
+    }
+
+    .el-select__selected-item {
+        color: #ffffff;
+        font-size: 13px;
+    }
+    &.el-popper {
+        background-color: var(--color-digital-human);
+        border-color: #333333;
+        border-radius: 12px;
+        .el-select-dropdown {
+            border-radius: 12px;
+        }
+        .el-select-dropdown__list {
+            padding: 0 8px;
+        }
+        .el-select-dropdown__item {
+            height: 44px;
+            line-height: 44px;
+            border-radius: 6px;
+            margin: 4px 0;
+            color: #ffffff;
+            &:hover,
+            &.is-selected,
+            &.is-hovering {
+                box-shadow: 0px 0px 0px 1px rgba(255, 255, 255, 0.1);
+                background-color: var(--color-digital-human-bg);
+            }
         }
     }
-    &:after {
-        @apply content-[''] absolute w-[calc(200%-16px)] h-[1px] left-[10px] bottom-0;
-        transform: scale(0.5) translate(-50%, 0);
-        background: var(--border-primary);
-    }
-}
-.app-more-btn {
-    @apply cursor-pointer  text-xs flex items-center gap-x-1 hover:underline;
 }

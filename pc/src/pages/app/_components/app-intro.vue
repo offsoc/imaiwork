@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-[#0000009c] z-[2012]" v-if="show">
+    <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-[#0000009c] z-[5012]" v-if="show">
         <div class="relative w-[502px]">
             <template v-if="!loading">
                 <img src="@/assets/images/app_tips_bg.png" class="w-full h-[582px]" />

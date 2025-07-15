@@ -99,7 +99,7 @@
     </div>
 </template>
 <script lang="ts" setup name="weappUpload">
-import { uploadMnp } from "@/api/channel/weapp";
+import { uploadMnp, getWeappVersion as getWeappVersionApi } from "@/api/channel/weapp";
 import { useLockFn } from "@/hooks/useLockFn";
 import useAppStore from "@/stores/modules/app";
 import feedback from "@/utils/feedback";
@@ -184,8 +184,15 @@ const handleNext = async () => {
         currStep.value++;
     }
 };
+
+const getWeappVersion = async () => {
+    const data = await getWeappVersionApi();
+    formData.upload_version = data.version;
+};
+
 onMounted(() => {
     const info = cache.get(cacheKey);
     info && Object.assign(uploadInfo, info);
+    getWeappVersion();
 });
 </script>

@@ -1,6 +1,11 @@
 <template>
-    <ElButton class="w-full" type="primary" size="large" :loading="createIsLock" @click="createLockFn">
-        <span class="font-bold text-lg">确定</span>
+    <ElButton
+        class="w-full !rounded-full !h-[50px]"
+        type="primary"
+        size="large"
+        :loading="createIsLock"
+        @click="createLockFn">
+        确定
     </ElButton>
 </template>
 
@@ -10,7 +15,6 @@ import { useUserStore } from "@/stores/user";
 import { useAppStore } from "@/stores/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { CreateType, DigitalHumanModelVersionEnum, CreateTaskParams } from "../../../_enums";
-import dayjs from "dayjs";
 
 interface CostTokens {
     video_cost: number;
@@ -161,6 +165,8 @@ const handleNext = () => {
     const {
         url,
         msg,
+        name,
+        pic,
         anchor_id,
         anchor_name,
         model_version,
@@ -173,11 +179,10 @@ const handleNext = () => {
         audio_duration,
     } = props.formData;
 
-    if (!validateFormData(props.formData)) return;
-
     createTaskParams.value = {
         ...createTaskParams.value,
-        name: dayjs().format("YYYYMMDD"),
+        name,
+        pic,
         video_url: url,
         voice_type,
         anchor_id,

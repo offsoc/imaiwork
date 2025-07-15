@@ -19,7 +19,6 @@
                 <ElBreadcrumbItem>新增矩阵任务</ElBreadcrumbItem>
             </ElBreadcrumb>
         </div>
-
         <!-- 新增创作模板提示 -->
         <div class="rounded-lg px-[30px] h-[107px] bg-white flex items-center justify-between mt-4 flex-shrink-0">
             <div>
@@ -73,8 +72,7 @@
                                 <AnchorPanel
                                     v-model:model-value="formData.anchor"
                                     :collapse-name="2"
-                                    :count="taskCount"
-                                    @update:model-value="(val) => (formData.anchor = val)" />
+                                    :count="taskCount" />
                             </div>
                             <!-- 音色选择面板 -->
                             <div ref="voicePanelRef" class="mt-4 bg-white rounded-lg p-5">

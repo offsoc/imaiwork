@@ -6,7 +6,8 @@
                 background: 'transparent',
             }"
             title="登录"
-            title-bold>
+            title-bold
+            :custom-back="back">
         </u-navbar>
         <view class="grow min-h-0">
             <scroll-view scroll-y class="h-full">
@@ -256,6 +257,18 @@ const handleLogin = async () => {
     }
     if (!agreementRef.value?.checkAgreement()) return;
     await mobileLoginLock(formData);
+};
+
+const back = () => {
+    // #ifdef APP
+    uni.navigateBack();
+    // #endif
+    // #ifdef MP
+    uni.$u.route({
+        url: "/pages/login/login",
+        type: "redirect",
+    });
+    // #endif
 };
 </script>
 

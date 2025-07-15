@@ -76,7 +76,6 @@ import { type FormInstance, type FormRules } from "element-plus";
 import { forgotPassword } from "@/api/user";
 import { smsSend } from "@/api/app";
 import { SMSEnum } from "@/enums/appEnums";
-import Agreement from "./agreement.vue";
 import { useUserLogin } from "../hooks/userLogin";
 import { LoginPopupTypeEnum } from "@/enums/appEnums";
 
@@ -148,7 +147,7 @@ const sendSms = async () => {
     }
 };
 
-const agreementRef = shallowRef<InstanceType<typeof Agreement>>();
+const agreementRef = shallowRef();
 
 const { lockFn: confirmLock, isLock } = useLockFn(async () => {
     await formRef.value?.validate();

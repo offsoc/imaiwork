@@ -1,24 +1,50 @@
 <template>
     <div>
         <el-card class="!border-none" shadow="never">
-            <el-page-header :content="headerTitle" @back="$router.back()" />
+            <div class="flex justify-between items-center">
+                <el-page-header :content="headerTitle" @back="$router.back()" />
+                <el-button type="primary" @click="handleExample">一键填入示例数据</el-button>
+            </div>
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
+            <div class="flex justify-end">
+                <el-tooltip popper-class="!w-[500px]">
+                    <div>
+                        <el-button>查看字段说明</el-button>
+                    </div>
+                    <template #content>
+                        <div class="flex flex-col gap-y-4">
+                            <p>助理图标： 助理名称（原名称）：</p>
+                            <p>助理简介（原简介）：</p>
+                            <p>简要介绍这个助理的功能定位和核心用途，让用户一眼明白它能帮什么忙。</p>
+                            <p>
+                                助理人设（原指令）：设定助理的角色性格和行为逻辑，比如它像谁、语气如何、怎么回答、回答什么不回答什么。
+                            </p>
+                            <p>用户提示词（原表单词提问配置）：向模型提供用户指令，如查询或任何基于文本输入的提问。</p>
+                            <p>助理开场白（原开场白）：当用户新建对话时助理自动发起的第一句话</p>
+                            <p>助理分类（原所属类目）：决定了用户在哪个分类下可找到该助理</p>
+                            <p>
+                                用户填写参数（原填写表单）：用户需要主动填写的关键参数字段，这些信息将直接影响生成结果。适合用表单方式引导填写。
+                            </p>
+                        </div>
+                    </template>
+                </el-tooltip>
+            </div>
             <el-form class="ls-form" ref="formRef" :rules="rules" :model="formData" label-width="120px">
-                <el-form-item label="图标" prop="logo">
+                <el-form-item label="助理图标" prop="logo">
                     <material-picker v-model="formData.logo" :limit="1" />
                 </el-form-item>
-                <el-form-item label="名称" prop="name">
+                <el-form-item label="助理名称" prop="name">
                     <div class="w-[380px]">
                         <el-input placeholder="请输入名称" v-model="formData.name" />
                     </div>
                 </el-form-item>
-                <el-form-item label="简介" prop="description">
+                <el-form-item label="助理简介" prop="description">
                     <div class="w-[380px]">
                         <el-input placeholder="添加有关于此机器人的功能简短描述" v-model="formData.description" />
                     </div>
                 </el-form-item>
-                <el-form-item label="指令" prop="instructions">
+                <el-form-item label="助理人设" prop="instructions">
                     <div class="w-[380px]">
                         <el-input
                             placeholder="此机器人能做些什么?它的行为是怎么样的？它应该避免些什么?"
@@ -27,7 +53,24 @@
                             v-model="formData.instructions" />
                     </div>
                 </el-form-item>
-                <el-form-item label="表单词提问配置" prop="form_info" required>
+                <el-form-item label="助理分类" prop="scene_id">
+                    <div class="w-[380px]">
+                        <el-cascader
+                            v-model="formData.scene_id"
+                            :options="optionsData.categoryList"
+                            :props="{
+                                value: 'id',
+                                label: 'name',
+                                children: 'sub_list',
+                            }"
+                            clearable
+                            filterable
+                            placeholder="请选择所属类目"
+                            class="w-full">
+                        </el-cascader>
+                    </div>
+                </el-form-item>
+                <el-form-item label="用户提示词" prop="form_info" required>
                     <div class="w-[380px]">
                         <el-input
                             v-model="formData.form_info"
@@ -46,7 +89,7 @@
                     </div>
                 </el-form-item>
 
-                <el-form-item label="对话开场白">
+                <el-form-item label="助理开场白">
                     <div class="w-[380px] flex flex-col gap-y-1">
                         <div class="w-full" v-for="(item, index) in formData.preliminary_ask" :key="index">
                             <el-input
@@ -63,17 +106,7 @@
                         </div>
                     </div>
                 </el-form-item>
-                <el-form-item label="所属类目" prop="scene_id">
-                    <div class="w-[380px]">
-                        <el-select v-model="formData.scene_id" placeholder="请选择所属类目" class="w-full">
-                            <el-option
-                                v-for="(item, index) in getCategoryList"
-                                :key="index"
-                                :label="item.name"
-                                :value="item.id" />
-                        </el-select>
-                    </div>
-                </el-form-item>
+
                 <el-form-item label="填写表单" prop="template_info.form">
                     <div class="flex-1 min-w-0 max-w-[1000px]">
                         <div class="flex">
@@ -140,13 +173,14 @@
     </div>
 </template>
 <script lang="ts" setup>
+import { getWebsite } from "@/api/setting/website";
 import type { FormInstance, FormRules, InputInstance } from "element-plus";
 import { getAssistantCategoryList } from "@/api/ai_assistant/category";
 import { useThrottleFn } from "@vueuse/core";
 import feedback from "@/utils/feedback";
-import Sortable from "sortablejs";
 import { setRangeText } from "@/utils/dom";
 import { useDictOptions } from "@/hooks/useDictOptions";
+
 const formRef = shallowRef<FormInstance>();
 
 const props = defineProps<{
@@ -251,13 +285,6 @@ const rules: FormRules = {
             message: "请选择模型图标",
         },
     ],
-    "template_info.form": [
-        {
-            type: "array",
-            required: true,
-            message: "请添加表单内容",
-        },
-    ],
 };
 const formDesignerRef = shallowRef();
 //添加
@@ -274,6 +301,7 @@ const handleFormAdd = useThrottleFn((value: any) => {
     if (isSameField) {
         return feedback.msgError("字段值重复，请修改字段值");
     }
+
     formData.value.template_info.form.push(value);
     formDesignerRef.value?.close();
 });
@@ -303,20 +331,82 @@ const { optionsData } = useDictOptions<{ categoryList: any[]; kbList: any[] }>({
     },
 });
 
-const getCategoryList = computed(() => {
-    const { categoryList = [] } = optionsData;
-    const lists: any = [];
-    categoryList.forEach((item) => {
-        if (item.sub_list.length) {
-            lists.push(...item.sub_list);
-        }
-    });
-    return lists;
-});
-
 //提交
 const handleSave = async () => {
     await formRef.value?.validate();
     emit("submit");
+};
+
+const handleExample = async () => {
+    await feedback.confirm("确定一键填入示例数据？");
+    const data = await getWebsite();
+    formData.value.logo = data.pc_logo;
+    formData.value.name = "AI创业文案助理";
+    formData.value.description =
+        "我是你的AI创业文案助理，专为创业者和内容运营打造。无论你在构思产品介绍、广告文案，还是品牌口号，我都能快速生成专业又打动人心的文字内容，助你高效推广产品、打磨品牌语言。";
+    formData.value.instructions =
+        "人设：灵感型创意合伙人，语言富有感染力，节奏感强，理解用户需求快速出击。恢复逻辑：当用户说“重新写一版”或“换个方向”，系统将清空当前创意并重新生成，同时记录前一版本以供回溯。";
+    formData.value.preliminary_ask = [
+        {
+            value: "嗨，欢迎使用AI创业文案助理！告诉我你的产品、用户和推广场景，我将帮你生成打动人心的文案，让你的创意一语中的",
+        },
+        { value: "" },
+    ];
+    const formFields = [
+        {
+            name: "WidgetInput",
+            title: "单行文本",
+            id: "mc4o2en3",
+            props: {
+                field: "input1",
+                title: "品牌名",
+                placeholder: "",
+                maxlength: 200,
+                isRequired: false,
+            },
+        },
+        {
+            name: "WidgetInput",
+            title: "单行文本",
+            id: "mc4o2en3",
+            props: {
+                field: "input2",
+                title: "产品类型",
+                placeholder: "",
+                maxlength: 200,
+                isRequired: false,
+            },
+        },
+        {
+            name: "WidgetInput",
+            title: "单行文本",
+            id: "mc4o2en3",
+            props: {
+                field: "input3",
+                title: "目标用户推广场景",
+                placeholder: "",
+                maxlength: 200,
+                isRequired: false,
+            },
+        },
+        {
+            name: "WidgetInput",
+            title: "单行文本",
+            id: "mc4o2en3",
+            props: {
+                field: "input4",
+                title: "希望语气",
+                placeholder: "",
+                maxlength: 200,
+                isRequired: false,
+            },
+        },
+    ];
+
+    formData.value.template_info.form = formFields;
+    formData.value.form_info = `用户提供给你的参数是：${formFields
+        .filter((item) => item.props)
+        .map((item) => `${item.props.title}\${${item.props.field}}`)
+        .join("；")}`;
 };
 </script>

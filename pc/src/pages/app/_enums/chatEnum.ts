@@ -20,4 +20,5 @@ export enum CopywritingTypeEnum {
     AI_IMAGE_TO_IMAGE = 4,
     AI_GOODS_IMAGE = 5,
     AI_DIGITAL_HUMAN_COPYWRITING = 6,
+    AI_GENERATION_VIDEO = 20,
 }

@@ -33,6 +33,7 @@
                 </el-button>
             </div>
             <el-table
+                ref="tableRef"
                 size="large"
                 v-loading="pager.loading"
                 :data="pager.lists"
@@ -53,7 +54,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="消耗算力" prop="points" min-width="100">
-                    <template #default="{ row }"> {{ row.points || 0 }}算力 </template>
+                    <template #default="{ row }"> {{ row.status == 2 ? 0 : row.points || 0 }}算力 </template>
                 </el-table-column>
                 <el-table-column label="生成状态" min-width="120">
                     <template #default="{ row }">
@@ -91,7 +92,7 @@ import { getAudioRecord, deleteAudioRecord } from "@/api/ai_application/digital_
 import { usePaging } from "@/hooks/usePaging";
 import feedback from "@/utils/feedback";
 import useAppStore from "@/stores/modules/app";
-
+import { ElTable } from "element-plus";
 const appStore = useAppStore();
 const { config } = toRefs(appStore);
 const modelChannel = computed(() => config.value?.digital_human.channel);
@@ -104,6 +105,8 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
     fetchFun: getAudioRecord,
     params: queryParams,
 });
+
+const tableRef = ref<InstanceType<typeof ElTable>>();
 
 const getModelName = (model_version: string) => {
     return modelChannel.value.find((item: any) => item.id == model_version)?.name;
@@ -128,6 +131,8 @@ const handleDelete = async (id: number | number[]) => {
     await feedback.confirm("确定要删除吗？");
     await deleteAudioRecord({ id });
     getLists();
+    multipleSelection.value = [];
+    tableRef.value?.clearSelection();
 };
 
 getLists();

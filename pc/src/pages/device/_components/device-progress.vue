@@ -11,7 +11,7 @@
                         <ElProgress :percentage="progressValue" :stroke-width="10" striped striped-flow />
                     </div>
                     <div class="text-[#C4C4C4] mt-4 text-center text-xs">
-                        请暂时不要关闭窗口，如果超过一分钟为响应，可以尝试刷新页面
+                        请暂时不要关闭窗口，如果超过一分钟未响应，可以尝试刷新页面
                     </div>
                 </template>
                 <template v-else>

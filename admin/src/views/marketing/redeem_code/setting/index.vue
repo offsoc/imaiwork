@@ -34,7 +34,6 @@ const getData = async () => {
 };
 const handleSubmit = async () => {
     await cardcodeConfigSet(formData);
-    feedback.msgSuccess("保存成功");
     getData();
 };
 

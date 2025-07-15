@@ -5,6 +5,7 @@ namespace app\adminapi\lists\hd;
 
 
 use app\adminapi\lists\BaseAdminDataLists;
+use app\common\model\hd\HdCueWord;
 use app\common\model\hd\HdCueWordCategory;
 use app\common\lists\ListsSearchInterface;
 
@@ -46,7 +47,9 @@ class HdCueWordCategoryLists extends BaseAdminDataLists implements ListsSearchIn
         return HdCueWordCategory::where($this->searchWhere)
             ->limit($this->limitOffset, $this->limitLength)
             ->order(['sort' => 'desc', 'id' => 'desc'])
-            ->select()
+            ->select()->each(function ($item) {
+                $item->number = HdCueWord::where('cid', $item->id)->count();
+            })
             ->toArray();
     }
 

@@ -21,7 +21,10 @@
                 class="flex items-center justify-end cursor-pointer invisible group-hover:visible absolute bottom-0 right-0 translate-y-1/2"
                 v-if="message">
                 <ElTooltip content="拷贝">
-                    <ElButton :icon="CopyDocument" size="small" @click="copyMyContent"></ElButton>
+                    <ElButton
+                        :icon="isCopying === 'my' ? 'el-icon-Check' : 'el-icon-CopyDocument'"
+                        size="small"
+                        @click="copyMyContent"></ElButton>
                 </ElTooltip>
             </div>
         </div>
@@ -64,7 +67,9 @@
                                 <div
                                     class="leading-[0] cursor-pointer p-1 hover:bg-token-sidebar-surface-secondary rounded-md"
                                     @click="copyContent">
-                                    <Icon name="el-icon-CopyDocument" :size="16"></Icon>
+                                    <Icon
+                                        :name="isCopying === 'his' ? 'el-icon-Check' : 'el-icon-CopyDocument'"
+                                        :size="16"></Icon>
                                 </div>
                             </ElTooltip>
                         </div>
@@ -123,14 +128,21 @@ const props = defineProps({
     },
 });
 
-//复制我的
-const copyMyContent = () => {
-    emit("copyMyContent");
+const isMyCopy = ref(false);
+
+const isCopying = ref<"my" | "his" | null>(null);
+
+const handleCopy = (type: "my" | "his") => {
+    if (isCopying.value) return;
+    isCopying.value = type;
+    setTimeout(() => {
+        isCopying.value = null;
+    }, 1000);
+    emit(type === "my" ? "copyMyContent" : "copyContent");
 };
-//复制
-const copyContent = () => {
-    emit("copyContent");
-};
+
+const copyMyContent = () => handleCopy("my");
+const copyContent = () => handleCopy("his");
 </script>
 
 <style lang="scss" scoped>

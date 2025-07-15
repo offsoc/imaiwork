@@ -164,6 +164,21 @@ class PublishController extends BaseApiController
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
+
+
+    public function recordRepublish(){
+        try {
+            $params = (new PublishDetailValidate())->post()->goCheck('republish');
+            $result = PublishLogic::recordRepublish($params);
+            if ($result) {
+                return $this->data(PublishLogic::getReturnData());
+            }
+            return $this->fail(PublishLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
     public function testAdd(){
         try {
             $params = (new PublishDetailValidate())->post()->goCheck('test');

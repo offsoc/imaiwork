@@ -298,11 +298,13 @@ class HumanLogic extends ApiLogic
                 return true;
             }
 
+            $count = UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 2)->where('task_id', $taskId)->count();
+            Log::channel('human')->write('扣费计算'.$taskId.'总数 '.$count);
+
             //查询是否已返还
-            if (UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 1)->where('task_id', $taskId)->count() == 0) {
+            if (UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 1)->where('task_id', $taskId)->count() != $count) {
 
                 $points = UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('task_id', $taskId)->value('change_amount') ?? 0;
-
                 AccountLogLogic::recordUserTokensLog(false, $userId, $typeID, $points, $taskId);
             }
 
@@ -945,10 +947,15 @@ class HumanLogic extends ApiLogic
         $pageNo = ($data['page_no'] - 1) * $data['page_size'];
         $pageSize = $data['page_size'];
         $name = $data['name'] ?? '';
-        $modelVersion = json_decode($data['model_version'],true);
-        $modelVersion = is_array($modelVersion) ? $modelVersion : [(int)$modelVersion];
-        $status = $data['status'] ?? '';
 
+        if (empty($data['model_version'])){
+            $modelVersion = '';
+        }else{
+            $modelVersion = json_decode($data['model_version'],true);
+            $modelVersion = is_array($modelVersion) ? $modelVersion : [(int)$modelVersion];
+        }
+
+        $status = $data['status'] ?? '';
         $type = $data['type'] ?? 3;
         $result = [];
         $count = 0;

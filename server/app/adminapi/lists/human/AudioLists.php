@@ -86,13 +86,17 @@ class AudioLists extends BaseAdminDataLists implements ListsSearchInterface
                 UserTokensLog::where('user_id', $item['user_id'])
                     ->where('change_type',   $change_type)
                     ->where('task_id', $item['task_id'])
-                    ->field('extra, change_type')
+                    ->field('extra, change_type,change_amount, action')
                     ->select()
                     ->each(function ($item) use (&$points, &$duration) {
                         $info = json_decode($item['extra'], true);
 
-                        $duration   += $info['音视频时长'] ?? 0;
-                        $points     += $info['实际消耗算力'] ?? 0;
+                        if ($item['action'] == 1){
+                            $points    -=$item['change_amount'];
+                        }else{
+                            $duration   = $info['音视频时长'] ?? 0;
+                            $points     += $item['change_amount'] ?? 0;
+                        }
                     });
 
                 $item['points']          = $points;

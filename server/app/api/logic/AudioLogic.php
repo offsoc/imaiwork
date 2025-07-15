@@ -206,7 +206,7 @@ class AudioLogic extends ApiLogic
                 if (!isset($response['data']['task_id']) || !isset($response['data']['duration'])) {
 
                     $audioInfo->status = 5;
-                    $audioInfo->remark = '转写失败';
+                    $audioInfo->remark = 'FAILED';
                     $audioInfo->save();
                     continue;
                 }
@@ -441,7 +441,7 @@ class AudioLogic extends ApiLogic
         if (!isset($response['data']['task_id']) || !isset($response['data']['duration'])) {
 
             $audioInfo->status = 5;
-            $audioInfo->remark = '转写失败';
+            $audioInfo->remark = 'FAILED';
             $audioInfo->save();
             self::setError('转写失败');
             return false;

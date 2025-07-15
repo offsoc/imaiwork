@@ -1,5 +1,5 @@
 <template>
-    <div class="h-[80px] shadow-lighter relative px-4 z-[999] bg-black">
+    <div class="h-[76px] shadow-lighter relative px-4 z-[999] bg-black">
         <div class="h-full items-center justify-between flex">
             <Back />
             <div class="flex-1 mx-[80px] justify-center">

@@ -41,6 +41,7 @@
                 </el-button>
             </div>
             <el-table
+                ref="tableRef"
                 size="large"
                 v-loading="pager.loading"
                 :data="pager.lists"
@@ -99,7 +100,7 @@ import { getDialogueRecord, deleteDialogueRecord } from "@/api/ai_application/ch
 import { usePaging } from "@/hooks/usePaging";
 import ReplyPop from "./replyPop.vue";
 import feedback from "@/utils/feedback";
-
+import { ElTable } from "element-plus";
 const queryParams = reactive({
     user: "", //用户信息
     message: "", //关键词
@@ -113,6 +114,8 @@ const replyPopRef = shallowRef<InstanceType<typeof ReplyPop>>();
 const showReply = ref<boolean>(false);
 
 const multipleSelection = ref<any[]>([]);
+
+const tableRef = ref<InstanceType<typeof ElTable>>();
 
 //打开弹框
 const openPop = async (row: any) => {
@@ -134,6 +137,8 @@ const handleDelete = async (id: number | number[]) => {
     await feedback.confirm("确定要删除？");
     await deleteDialogueRecord({ id });
     getLists();
+    multipleSelection.value = [];
+    tableRef.value?.clearSelection();
 };
 
 getLists();

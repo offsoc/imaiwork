@@ -1,12 +1,5 @@
-import {
-    ChooseResult,
-    FileData,
-    chooseFile,
-    getFilesByExtname,
-    normalizeFileData,
-} from "@/components/file-upload/choose-file";
+import { ChooseResult, chooseFile } from "@/components/file-upload/choose-file";
 import { uploadImage, uploadFile } from "@/api/app";
-import { formatAudioTime } from "@/utils/util";
 import { DigitalHumanModelVersionEnum } from "../enums";
 
 interface Options {
@@ -79,17 +72,16 @@ export const useUpload = (options: Options) => {
     const upload = async () => {
         try {
             const filesResult = await chooseFile({
+                count: 1,
                 type: "video",
                 camera: "front",
                 sourceType: ["album"],
                 extension,
-                compressed: false,
             });
             chooseFileCallback(filesResult);
         } catch (error) {
-            onError?.(error)
+            onError?.(error);
         }
-       
     };
 
     const chooseFileCallback = async (filesResult: ChooseResult) => {
@@ -120,32 +112,9 @@ export const useUpload = (options: Options) => {
             });
             return;
         }
-
-        await Promise.allSettled([uploadVideo(tempFilePaths[0])]);
+        await uploadImageFn(file.thumbTempFilePath);
+        await uploadVideo(file.tempFilePath);
         onSuccess?.(uploadResult);
-        // uni.openVideoEditor({
-        //     filePath: tempFilePaths[0],
-        // })
-        //     .then(async (res) => {
-        //         const resDuration = res.duration / 1000;
-        //         if (resDuration < duration[0] || resDuration > duration[1]) {
-        //             uni.showToast({
-        //                 title: `裁剪视频时长不能小于${duration[0]}秒或大于${duration[1]}秒`,
-        //                 icon: "none",
-        //                 duration: 4000,
-        //             });
-        //             return;
-        //         }
-        //         uploadResult.duration = formatAudioTime(resDuration);
-        //         uploadResult.seconds = Math.floor(resDuration);
-
-        //     })
-        //     .catch((error) => {
-        //         const { errCode } = error;
-        //         if (errCode === 803) return;
-        //         uni.$u.toast(error?.errMsg || "视频编辑失败");
-        //         onError?.(error);
-        //     });
     };
 
     const uploadVideo = async (file: string) => {
@@ -156,7 +125,7 @@ export const useUpload = (options: Options) => {
                     filePath: file,
                 },
                 (e) => {
-                    onProgress?.(e);
+                    onProgress?.({ type: "video", progress: e });
                 }
             );
             uploadResult.url = uri;
@@ -169,7 +138,7 @@ export const useUpload = (options: Options) => {
 
     const uploadImageFn = async (file: string) => {
         const { uri }: any = await uploadImage(file, "", "", (e) => {
-            onProgress?.(e);
+            onProgress?.({ type: "image", progress: e });
         });
         uploadResult.pic = uri;
     };

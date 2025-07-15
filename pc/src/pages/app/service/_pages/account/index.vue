@@ -6,8 +6,8 @@
                     <div
                         v-for="(item, index) in socialPlatformList"
                         :key="index"
-                        class="flex items-center gap-x-3 px-4 hover:bg-primary-light-8 py-1.5 rounded-lg cursor-pointer"
-                        :class="{ 'bg-primary-light-8': currentSocialPlatform === item.type }"
+                        class="flex items-center gap-x-3 px-4 hover:bg-primary-light-9 py-1.5 rounded-lg cursor-pointer"
+                        :class="{ 'bg-primary-light-9': currentSocialPlatform === item.type }"
                         @click="handleChangeSocialPlatform(item.type)">
                         <img :src="item.icon" class="w-6 h-6" />
                         <div>{{ item.name }}</div>
@@ -86,20 +86,11 @@ import { AppTypeEnum } from "@/enums/appEnums";
 import { useSocialPlatform } from "@/composables/useSocialPlatform";
 import useAccount from "../../_hooks/useAccount";
 import AccountSetting from "./_components/account-setting.vue";
-
 const router = useRouter();
 const route = useRoute();
 
 const { socialPlatformList, currentSocialPlatform } = useSocialPlatform();
-const {
-    accountLists,
-    accountPager,
-    currentAccount,
-    queryParams,
-    getAccountList,
-    resetAccountPage,
-    resetAccountParams,
-} = useAccount({
+const { accountPager, queryParams, getAccountList, resetAccountPage, resetAccountParams } = useAccount({
     type: currentSocialPlatform.value,
 });
 

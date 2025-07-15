@@ -69,7 +69,7 @@
                 <div class="grow min-h-0 bg-white rounded-xl form-panel">
                     <ElScrollbar>
                         <div class="mt-4 px-[20px]">
-                            <ElForm ref="formRef" label-position="top" :model="formData">
+                            <ElForm ref="formRef" label-position="top" :model="formData" @submit.prevent>
                                 <ElFormItem
                                     :label="item.props.title"
                                     :prop="item.props.field"
@@ -84,7 +84,8 @@
                                         <ElInput
                                             v-model="formData[`${item.props.field}`]"
                                             :maxlength="item.props.maxlength"
-                                            :placeholder="item.props.placeholder"></ElInput>
+                                            :placeholder="item.props.placeholder"
+                                            @keydown.enter.prevent></ElInput>
                                     </template>
                                     <template v-else-if="item.name === FieldEnum.TEXTAREA">
                                         <ElInput

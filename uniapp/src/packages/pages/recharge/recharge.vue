@@ -227,13 +227,12 @@
 </template>
 
 <script lang="ts" setup>
-import { getRechargeList, getPaymentList, createRechargeOrder, prePay, getPayResult } from "@/api/recharge";
+import { getRechargeList, getPaymentList, createRechargeOrder, prePay } from "@/api/recharge";
 import { accountLog } from "@/api/user";
-import { pay, PayWayEnum } from "@/utils/pay";
+import { pay } from "@/utils/pay";
 import { useLockFn } from "@/hooks/useLockFn";
 import { PayStatusEnum } from "@/enums/appEnums";
 import { useUserStore } from "@/stores/user";
-import { useDictOptions } from "@/hooks/useDictOptions";
 import { series } from "@/utils/util";
 import { isIOS } from "@/utils/client";
 import { useAppStore } from "@/stores/app";
@@ -242,7 +241,6 @@ import config from "@/config";
 const appStore = useAppStore();
 
 const userStore = useUserStore();
-const { userInfo } = toRefs(userStore);
 
 const userTokens = computed(() => userStore.userTokens);
 const cardCodeConfig = computed(() => appStore.getCardCodeConfig);
@@ -280,9 +278,6 @@ const handleRecharge = (id: number) => {
 const payFrom = "tokens";
 const payWay = ref(-1);
 const payWayList = ref<any[]>([]);
-const getPayWay = computed(() => {
-    return payWayList.value.find((item) => item.id == payWay.value) || {};
-});
 
 const getPayWayListData = async () => {
     const { lists } = await getPaymentList({
@@ -292,10 +287,6 @@ const getPayWayListData = async () => {
         payWayList.value = lists;
         payWay.value = payWayList.value[0].id;
     }
-};
-
-const getPackageAvgPrice = (item: any) => {
-    return (parseFloat(item.price) / parseFloat(item.package_info?.tokens)).toFixed(4);
 };
 
 const payment = (() => {
@@ -314,7 +305,7 @@ const payment = (() => {
             uni.showToast({
                 icon: "none",
                 title: error || "创建订单失败",
-                duration: 3000,
+                duration: 5000,
             });
             return Promise.reject(error);
         } finally {
@@ -338,7 +329,7 @@ const payment = (() => {
             uni.showToast({
                 title: error || "支付失败",
                 icon: "none",
-                duration: 3000,
+                duration: 5000,
             });
             return Promise.reject(error);
         } finally {
@@ -355,7 +346,7 @@ const payment = (() => {
             uni.showToast({
                 title: error || "支付失败",
                 icon: "none",
-                duration: 3000,
+                duration: 5000,
             });
             return Promise.reject(error);
         }
@@ -371,7 +362,7 @@ const { isLock, lockFn: handlePay } = useLockFn(async () => {
         uni.showToast({
             title: error || "支付失败",
             icon: "none",
-            duration: 2000,
+            duration: 5000,
         });
     } finally {
         uni.hideLoading();

@@ -152,7 +152,7 @@
                         <view class="mt-[60rpx] flex items-center gap-x-2">
                             <view class="text-[#299FD7] font-bold"> 专属客服全程陪伴 </view>
                             <view
-                                class="h-[36rpx] w-[72rpx] flex items-center justify-center border border-solid border-white rounded-[24rpx] rounded-bl-[0] bg-primary gf-badge">
+                                class="h-[36rpx] w-[72rpx] flex items-center justify-center border border-solid border-white rounded-[24rpx] rounded-bl-[0] bg-primary">
                                 <text class="text-[20rpx] text-white font-bold">官方</text>
                             </view>
                         </view>

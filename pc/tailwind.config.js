@@ -55,6 +55,10 @@ module.exports = {
             "gray-950": "var(--gray-950)",
             "black/5": "rgba(0,0,0,0.5)",
             redbook: "var(--color-redbook)",
+            "digital-human": "var(--color-digital-human)",
+            "digital-human-bg": "var(--color-digital-human-bg)",
+            "draw-bg": "var(--color-draw-bg)",
+            "draw-border": "var(--color-draw-border)",
         },
         fontFamily: {
             sans: ["PingFang SC", "Arial", "Hiragino Sans GB", "Microsoft YaHei", "sans-serif"],

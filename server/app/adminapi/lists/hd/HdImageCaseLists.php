@@ -44,6 +44,7 @@ class HdImageCaseLists extends BaseAdminDataLists implements ListsSearchInterfac
      */
     public function lists(): array
     {
+
         return HdImageCases::alias('aic')
             ->leftJoin('user u', 'u.id = aic.user_id and aic.user_id <> 0')
             ->where($this->searchWhere)
@@ -70,10 +71,10 @@ class HdImageCaseLists extends BaseAdminDataLists implements ListsSearchInterfac
 
                 $item['params'] = $params;
 
-                $item['result_image'] = FileService::getFileUrl($item['result_image']);
 
                 $item['nickname']   = $item['nickname'] ?? '';
                 $item['avatar']     = $item['avatar'] ? FileService::getFileUrl($item['avatar']) : '';
+                $item['result_image']     = $item['result_image'] ? FileService::getFileUrl($item['result_image']) : '';
             })
             ->toArray();
     }

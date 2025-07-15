@@ -84,6 +84,7 @@
         :progress="uploadProgressNum"
         :loading-text="loadingText"
         :is-success="isUploadSuccess"
+        :progress-type="uploadProgressType"
         @cancel="handleUploadCancel"
         @back="back"
         @confirm="handelUploadConfirm"></upload-loading>
@@ -97,10 +98,11 @@ import { createAnchor } from "@/api/digital_human";
 import { useAppStore } from "@/stores/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { ModeType, ListenerType, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
-import { useUpload, uploadLimit, commonUploadLimit } from "../../hooks/useUpload";
 import VideoPlayer from "@/ai_modules/digital_human/components/video-player/video-player.vue";
 import UploadLoading from "@/ai_modules/digital_human/components/upload-loading/upload-loading.vue";
 import { useUserStore } from "@/stores/user";
+import { useUpload, uploadLimit, commonUploadLimit } from "../../hooks/useUpload";
+import requestCancel from "@/utils/request/cancel";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
@@ -124,6 +126,7 @@ const rechargePopupRef = ref();
 const extension = ["mp4", "mov"];
 const showUploadProgress = ref(false);
 const uploadProgressNum = ref(0);
+const uploadProgressType = ref<"video" | "image">();
 const isUploadSuccess = ref(false);
 const loadingText = ref("");
 const commonUploadRequirements = {
@@ -214,13 +217,13 @@ const startUpload = async () => {
         duration: [uploadParams.value?.videoMinDuration, uploadParams.value?.videoMaxDuration],
         extension: extension,
         async onSuccess(res) {
-            const { url } = res;
+            const { url, pic } = res;
             formData.url = url;
+            formData.pic = pic;
             formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2);
             loadingText.value = "形象克隆中...";
             try {
                 const result = await createAnchor(formData);
-                formData.pic = result.picurl;
                 formData.anchor_id = result.id;
                 isUploadSuccess.value = true;
                 loadingText.value = "";
@@ -229,34 +232,30 @@ const startUpload = async () => {
                 uploadProgressNum.value = 0;
                 loadingText.value = "";
                 uni.$u.toast(error || "上传失败");
-                // #ifndef H5
-                uni.setNavigationBarColor({
-                    frontColor: "#000000",
-                    backgroundColor: "#F9FAFB",
-                });
-                // #endif
+                resetNavigationBarColor();
             }
         },
         onProgress(res) {
-            uploadProgressNum.value = res;
+            uploadProgressType.value = res.type;
+            uploadProgressNum.value = res.progress;
+            loadingText.value = uploadProgressType.value == "video" ? "视频正在上传中..." : "图片正在上传中...";
             showUploadProgress.value = true;
         },
         onError(err) {
             showUploadProgress.value = false;
             uploadProgressNum.value = 0;
-            // #ifndef H5
-            uni.setNavigationBarColor({
-                frontColor: "#000000",
-                backgroundColor: "#F9FAFB",
-            });
-            // #endif
+            resetNavigationBarColor();
         },
     });
     upload();
 };
 
 const handleUploadCancel = () => {
-    request.cancelRequest();
+    requestCancel.remove("/upload/video");
+    requestCancel.remove("/upload/image");
+    showUploadProgress.value = false;
+    uploadProgressNum.value = 0;
+    resetNavigationBarColor();
 };
 
 const handelUploadConfirm = async () => {
@@ -275,6 +274,15 @@ const back = () => {
         url: "/ai_modules/digital_human/pages/index/index",
         type: "redirect",
     });
+};
+
+const resetNavigationBarColor = () => {
+    // #ifndef H5
+    uni.setNavigationBarColor({
+        frontColor: "#000000",
+        backgroundColor: "#F9FAFB",
+    });
+    // #endif
 };
 
 onLoad((options: any) => {

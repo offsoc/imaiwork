@@ -10,7 +10,6 @@
         <template #header>
             <div class="font-bold text-xl text-black">{{ title }}</div>
         </template>
-
         <div class="pb-10">
             <ElForm :model="formData" :rules="formRules" ref="formRef" label-position="top">
                 <ElFormItem label="机器人logo" prop="logo">
@@ -101,10 +100,19 @@
 import { addRobot, updateRobot, robotDetail } from "@/api/person_wechat";
 import { knowledgeBaseLists } from "@/api/knowledge_base";
 import { type FormInstance, type ElDrawer } from "element-plus";
+import { useAppStore } from "@/stores/app";
+
 const emit = defineEmits<{
     (event: "success"): void;
     (event: "close"): void;
 }>();
+
+const appStore = useAppStore();
+
+const getWebSiteLogo = computed(() => {
+    const { shop_logo } = appStore.getWebsiteConfig || {};
+    return shop_logo;
+});
 
 const popupRef = shallowRef<InstanceType<typeof ElDrawer>>();
 const visible = ref(false);
@@ -112,7 +120,7 @@ const visible = ref(false);
 const formRef = ref<FormInstance>();
 const formData = reactive({
     id: "",
-    logo: "",
+    logo: getWebSiteLogo.value,
     name: "",
     description: "",
     company_background: "",
@@ -160,6 +168,7 @@ const handleFileSuccess = (result: any) => {
 const open = (type: string = "add") => {
     mode.value = type;
     visible.value = true;
+    formData.logo = getWebSiteLogo.value;
 };
 
 const handleSubmit = async () => {

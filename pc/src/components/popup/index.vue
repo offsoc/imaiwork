@@ -8,12 +8,12 @@
             v-model="visible"
             draggable
             :show-close="showClose"
-            :custom-class="customClass"
             :center="center"
             :append-to-body="appendToBody"
             :width="width"
             :close-on-click-modal="clickModalClose"
             :style="style"
+            v-bind="$attrs"
             @closed="close">
             <!-- 弹窗内容 -->
             <template v-if="title" #header>{{ title }}</template>
@@ -95,10 +95,6 @@ export default defineComponent({
             // 是否居中布局
             type: Boolean,
             default: false,
-        },
-        customClass: {
-            type: String,
-            default: "",
         },
         appendToBody: {
             type: Boolean,

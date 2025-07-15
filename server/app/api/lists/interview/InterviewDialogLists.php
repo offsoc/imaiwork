@@ -78,18 +78,6 @@ class InterviewDialogLists extends BaseApiDataLists implements ListsSearchInterf
             $this->page = 1;
         }
 
-        // 获取每页数量，设置默认值和最大值
-        $this->limit = (int)$this->request->param('limit', self::DEFAULT_LIMIT);
-        if ($this->limit < 1) {
-            $this->limit = self::DEFAULT_LIMIT;
-        }
-        if ($this->limit > self::MAX_LIMIT) {
-            $this->limit = self::MAX_LIMIT;
-        }
-
-        // 计算偏移量
-        $this->offset = ($this->page - 1) * $this->limit;
-
         // 添加未删除条件
         $this->searchWhere[] = ['delete_time', 'null', null];
         
@@ -117,7 +105,7 @@ class InterviewDialogLists extends BaseApiDataLists implements ListsSearchInterf
                                     question_duration, create_time, update_time')
             ->where($this->searchWhere)
             ->order('id', 'desc')
-            ->limit($this->offset, $this->limit)
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
                 // 使用模型方法获取类型文本

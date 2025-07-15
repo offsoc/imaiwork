@@ -8,8 +8,8 @@
                 <ElInput
                     v-model="formData.code"
                     placeholder="请输入验证码"
-                    @keydown.enter="loginLock"
-                    class="sms-code-input">
+                    class="sms-code-input"
+                    @keydown.enter="loginLock">
                 </ElInput>
                 <div
                     class="absolute right-[18px] top-0 h-full flex items-center before:content-[''] before:left-0 before:mr-[14px] before:w-[1px] before:h-[14px] before:bg-[rgba(0,0,0,0.05)]">
@@ -87,7 +87,6 @@ import { useUserStore } from "@/stores/user";
 import { login } from "@/api/account";
 import { smsSend } from "@/api/app";
 import { SMSEnum } from "@/enums/appEnums";
-import Agreement from "./agreement.vue";
 import { LoginPopupTypeEnum } from "@/enums/appEnums";
 import { useUserLogin } from "../hooks/userLogin";
 
@@ -161,7 +160,7 @@ const forgetPassword = () => {
     changeLoginType(LoginPopupTypeEnum.FORGOT_PWD_MOBILE);
 };
 
-const agreementRef = shallowRef<InstanceType<typeof Agreement>>();
+const agreementRef = shallowRef();
 
 const { lockFn: loginLock, isLock } = useLockFn(async () => {
     await formRef.value?.validate();

@@ -1,101 +1,88 @@
-import img_meituan from "../_assets/images/meituan.png";
-import img_xianyu from "../_assets/images/xianyu.png";
-import img_shopify from "../_assets/images/shopify.png";
-import img_vinted from "../_assets/images/vinted.png";
-import img_xiaohongshu from "../_assets/images/xiaohongshu.png";
-import img_taobao from "../_assets/images/taobao.png";
-import img_ebay from "../_assets/images/ebay.png";
-import img_amazon from "../_assets/images/amazon.png";
-import { ScenePromptEnum } from "../../_enums/chatEnum";
+export enum SidebarEnum {
+    IMAGE_GENERATION = 1,
+    GOODS_IMAGE = 2,
+    FASHION_IMAGE = 3,
+    POSTER_IMAGE = 4,
+    VIDEO_GENERATION = 5,
+}
+
+export enum ModelEnum {
+    HIDREAMAI = 1,
+    GENERAL = 2,
+}
 
 export enum DrawTypeEnum {
-	GOODS = "商品图助手",
-	MODEL = "试衣助手",
-	TXT2IMAGE = "文生图助手",
-	IMAGE2IMAGE = "图生图助手",
+    GOODS = "goods",
+    MODEL = "model",
+    TXT2IMAGE = "txt2image",
+    IMAGE2IMAGE = "image2image",
+    IMAGE_GENERATION = "image-generation",
+    GOODS_IMAGE = "goods-image",
+    POSTER_IMAGE = "poster-image",
+    FASHION_IMAGE = "fashion-image",
+    VIDEO_GENERATION = "video-generation",
 }
 
 export const drawTypeEnumMap = {
-	[DrawTypeEnum.GOODS]: 1,
-	[DrawTypeEnum.MODEL]: 2,
-	[DrawTypeEnum.TXT2IMAGE]: 3,
-	[DrawTypeEnum.IMAGE2IMAGE]: 4,
+    [DrawTypeEnum.GOODS_IMAGE]: 1,
+    [DrawTypeEnum.FASHION_IMAGE]: 2,
+    [DrawTypeEnum.TXT2IMAGE]: 3,
+    [DrawTypeEnum.IMAGE2IMAGE]: 4,
+    [DrawTypeEnum.POSTER_IMAGE]: 5,
+    [DrawTypeEnum.IMAGE_GENERATION]: 6,
+    [DrawTypeEnum.VIDEO_GENERATION]: 9,
 };
 
-export const drawRatio = [
-	{
-		name: "小红书",
-		ratio: "300*300",
-		value: [300, 300],
-		image: img_xiaohongshu,
-	},
-	{
-		name: "咸鱼",
-		ratio: "800*600",
-		value: [800, 600],
-		image: img_xianyu,
-	},
-	{
-		name: "亚马逊",
-		ratio: "2000*2000",
-		value: [2000, 2000],
-		image: img_amazon,
-	},
-	{
-		name: "淘宝",
-		ratio: "970*600",
-		value: [970, 600],
-		image: img_taobao,
-	},
-	{
-		name: "美团",
-		ratio: "1080*1080",
-		value: [1080, 1080],
-		image: img_meituan,
-	},
-	{
-		name: "shopify",
-		ratio: "1600*2000",
-		value: [1600, 2000],
-		image: img_shopify,
-	},
-	{
-		name: "vinted",
-		ratio: "2000*1800",
-		value: [2000, 1800],
-		image: img_vinted,
-	},
-	{
-		name: "ebay",
-		ratio: "1600*1600",
-		value: [1600, 1600],
-		image: img_ebay,
-	},
+// 生成视频类型
+export enum GenerateVideoTypeEnum {
+    TXT2VIDEO = 0,
+    IMG2VIDEO = 1,
+}
+
+export enum FashionImageTypeEnum {
+    // 上下装
+    UPPER_LOWER_CLOTHES = 1,
+    // 连衣裙
+    DRESS = 2,
+}
+
+// 图片分辨率
+export const resolutionOptions = [
+    { label: "1:1", value: "512*512" },
+    { label: "4:3", value: "512*384" },
+    { label: "3:4", value: "384*512" },
+    { label: "3:2", value: "512*341" },
+    { label: "2:3", value: "341*512" },
+    { label: "16:9", value: "512*288" },
+    { label: "9:16", value: "288*512" },
+];
+
+// 视频分辨率
+export const videoResolutionOptions = [
+    { label: "16:9", value: "1280*720" },
+    { label: "9:16", value: "720*1280" },
+    { label: "1:1", value: "960*960" },
+    { label: "4:3", value: "960*720" },
+    { label: "3:4", value: "720*960" },
+    { label: "21:9", value: "1680*720" },
+];
+
+// 商品图分辨率
+export const goodsResolutionOptions = [
+    { label: "300*300", value: [300, 300] },
+    { label: "800*600", value: [800, 600] },
+    { label: "970*600", value: [970, 600] },
+    { label: "1080*1080", value: [1080, 1080] },
+    { label: "1600*1600", value: [1600, 1600] },
+    { label: "1601*1601", value: [1601, 1601] },
+    { label: "1600*2000", value: [1600, 2000] },
+    { label: "2000*1800", value: [2000, 1800] },
+    { label: "2000*2000", value: [2000, 2000] },
+    { label: "2048*2048", value: [2048, 2048] },
 ];
 
 // 生成风格
 export enum GenerateEnum {
-	AMOZON = "amozon",
-	DEFAULT = "default",
-}
-
-// 生成风格映射
-export const generateEnumMap = {
-	[GenerateEnum.AMOZON]: "简介风格",
-	[GenerateEnum.DEFAULT]: "经典风格",
-};
-
-export enum PreviewTypeEnum {
-	RESULT = "result",
-	EXAMPLE = "example",
-}
-
-export enum FormGoodsTypeEnum {
-	TEMP = 1,
-	TEXT = 2,
-}
-
-export enum FormModelTypeEnum {
-	UPPER_CLOTHES = 1,
-	LOWER_CLOTHES = 2,
+    AMOZON = "amozon",
+    DEFAULT = "default",
 }

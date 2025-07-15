@@ -100,7 +100,7 @@
                                     <ElAvatar :src="row.avatar"></ElAvatar>
                                 </template>
                             </ElTableColumn>
-                            <ElTableColumn label="账号/昵称" prop="account" min-width="140">
+                            <ElTableColumn label="账号/昵称" prop="account" min-width="180">
                                 <template #default="{ row }">
                                     <div class="flex items-center justify-center gap-x-2">
                                         <div>
@@ -120,6 +120,7 @@
                                 <template #default="{ row }">
                                     <div class="flex flex-col gap-2">
                                         <div
+                                            v-if="row.status == 1"
                                             class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                             @click="handleRefreshData(row)">
                                             <span class="flex items-center justify-center">
@@ -128,14 +129,14 @@
                                             <span>刷新数据</span>
                                         </div>
                                         <div
-                                            v-if="row.account_type == 1"
-                                            class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                            v-if="row.account_type == 1 && row.status == 1"
+                                            class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                             @click="handleGetBusinessCard(row)">
                                             <Icon name="el-icon-Postcard"></Icon>
                                             <span>名片获取</span>
                                         </div>
                                         <div
-                                            class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-2"
+                                            class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                             @click="handleDelete(row)">
                                             <Icon name="el-icon-Delete"></Icon>
                                             <span>账号移除</span>
@@ -162,13 +163,13 @@
             </div>
         </div>
     </div>
-    <DeviceAdd
+    <device-add
         ref="addDeviceRef"
         v-if="showAddDevice"
         :bind-loading="addDeviceLoading"
         @close="showAddDevice = false"
         @confirm="handleAddDeviceConfirm" />
-    <DeviceProgress
+    <device-progress
         v-if="showProgress"
         :progress-value="progressValue"
         :progress-error="progressError"
@@ -203,8 +204,9 @@ const {
     showAddDevice,
     addDeviceLoading,
     progressValue,
-    handleAddDeviceConfirm,
     handleAddAccount: addAccount,
+    refreshAccount,
+    handleAddDeviceConfirm,
     handleRefreshAccount,
 } = useAddDeviceAccount({
     send,
@@ -320,16 +322,14 @@ const handleAddAccount = () => {
 
 const handleRefreshData = (row: any) => {
     showProgress.value = true;
-    currAccount.value = row;
-    const accounts = [
+    refreshAccount.value = [
         {
             id: row.id,
             account: row.account,
             type: row.type,
-            device_code: row.device_code,
         },
     ];
-    handleRefreshAccount(accounts);
+    handleRefreshAccount(row.device_code, AppTypeEnum.REDBOOK);
 };
 
 const retryAddAccount = () => {

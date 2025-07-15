@@ -738,7 +738,7 @@ class UploadService
 
         } catch (Exception $e) {
             //throw new Exception($e->getMessage());
-            print_r($e);die;
+            //print_r($e);die;
             return [
                 'bizCode' => 6001,
                 'data' => [],

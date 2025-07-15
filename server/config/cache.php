@@ -29,14 +29,14 @@ return [
             // 驱动方式
             'type'   => 'redis',
             // 服务器地址
-            'host'   => env('cache.host','like-redis'),
+            'host'   => env('REDIS.HOST','127.0.0.1'),
             // 端口
-            'port'   => env('cache.port','6379'),
+            'port'   => env('REDIS.PORT','6379'),
             // 密码
-            'password' => env('cache.password', ''),
-            'select' => env('cache.select', 8),
+            'password' => env('REDIS.PASSWORD', ''),
+            'select' => env('CACHE.SELECT', 2),
             // 缓存前缀
-            'prefix' =>  env('cache.prefix', ''),
+            'prefix' =>  env('CACHE.PREFIX', 'draw_'),
         ],
     ],
 ];

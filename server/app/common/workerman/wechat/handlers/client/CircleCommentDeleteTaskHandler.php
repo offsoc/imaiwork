@@ -25,7 +25,7 @@ class CircleCommentDeleteTaskHandler extends BaseHandler
         // 构造推送任务请求
         $content = $this->buildRequestContent($data);
 
-        return $this->buildProtobufResponse(EnumMsgType::ContactLabelTask, $content);
+        return $this->buildProtobufResponse(EnumMsgType::CircleCommentDeleteTask, $content);
     }
 
     protected function buildRequestContent(array $data) : CircleCommentDeleteTaskMessage

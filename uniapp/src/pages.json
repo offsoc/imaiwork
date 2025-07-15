@@ -520,6 +520,18 @@
 					"meta": {
 						"share": true
 					}
+				},
+				{
+					"path": "pages/full_screen/full_screen",
+					"style": {
+						"navigationStyle": "custom",
+						"app-plus": {
+							"animationType": "fade-in",
+							"background": "transparent",
+							"backgroundColor": "rgba(0,0,0,0)",
+							"popGesture": "none"
+						}
+					}
 				}
 			]
 		}

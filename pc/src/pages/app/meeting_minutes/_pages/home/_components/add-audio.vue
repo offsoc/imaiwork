@@ -10,7 +10,7 @@
             @close="close">
             <div class="flex gap-4">
                 <div
-                    class="w-[388px] flex-shrink-0 rounded-2xl bg-primary-light-8 h-[400px] border border-dashed border-token-primary-2 cursor-pointer"
+                    class="w-[388px] flex-shrink-0 rounded-2xl bg-primary-light-9 h-[400px] border border-dashed border-token-primary-2 cursor-pointer"
                     :class="{
                         'hover:border-primary': fileLists.length === 0,
                     }">
@@ -106,7 +106,7 @@
                                     :key="index"
                                     class="bg-[#F5F5F5] rounded-lg px-6 py-1.5 cursor-pointer"
                                     :class="{
-                                        'bg-primary-light-8 text-primary': formData.speaker === item.value,
+                                        'bg-primary-light-9 text-primary': formData.speaker === item.value,
                                     }"
                                     @click="formData.speaker = item.value">
                                     {{ item.label }}

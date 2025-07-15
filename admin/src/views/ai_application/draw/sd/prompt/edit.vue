@@ -29,7 +29,9 @@
                         </div>
                         <div class="flex items-center">
                             <el-button type="primary" link>
-                                <router-link to="/ai_application/sd/prompt_category">新建分类</router-link>
+                                <router-link :to="getRoutePath('ai_application.draw_sd/prompt_category')"
+                                    >新建分类</router-link
+                                >
                             </el-button>
                             <el-divider direction="vertical"></el-divider>
                             <el-button type="primary" link @click="refresh"> 刷新 </el-button>
@@ -54,6 +56,7 @@ import type { FormInstance } from "element-plus";
 import { addPrompt, editPrompt, getDrawCategoryList } from "@/api/ai_application/draw/draw_sd";
 import Popup from "@/components/popup/index.vue";
 import { useDictOptions } from "@/hooks/useDictOptions";
+import { getRoutePath } from "@/router";
 
 const emit = defineEmits(["success", "close"]);
 //表单ref

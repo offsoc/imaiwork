@@ -34,9 +34,8 @@
                         <view
                             class="text-danger hover:text-white rounded-md w-[88rpx] h-[72rpx] bg-white hover:bg-danger cursor-pointer flex items-center justify-center"
                             @click="handleStopRecord">
-                            <image
-                                src="@/ai_modules/meeting_minutes/static/icons/stop.svg"
-                                class="w-[42rpx] h-[42rpx]"></image>
+                            <image src="@/ai_modules/meeting_minutes/static/icons/stop.svg" class="w-[42rpx] h-[42rpx]">
+                            </image>
                         </view>
                         <view
                             class="text-primary hover:text-white font-bold rounded-md w-[88rpx] h-[72rpx] bg-white hover:bg-primary cursor-pointer flex items-center justify-center"
@@ -121,10 +120,10 @@
 
 <script setup lang="ts">
 import Recorder from "recorder-core";
+import RecordApp from "recorder-core/src/app-support/app";
 import "recorder-core/src/engine/mp3";
 import "recorder-core/src/engine/mp3-engine";
 import "recorder-core/src/extensions/waveview";
-import RecordApp from "recorder-core/src/app-support/app";
 import "../../static/Recorder-UniCore/app-uni-support.js";
 // #ifdef MP-WEIXIN
 import "recorder-core/src/app-support/app-miniProgram-wx-support.js";
@@ -173,50 +172,10 @@ const recordTime = ref<number>(0);
 const recordResult = ref<any>(null);
 const openRecorder = () => {
     isRecording.value = true;
-    RecordApp.Start(
-        {
-            type: "mp3",
-            bitRate: 16,
-            sampleRate: 16000,
-            onProcess: (
-                buffers: any,
-                powerLevel: any,
-                bufferDuration: any,
-                bufferSampleRate: any,
-                newBufferIdx: any,
-                asyncEnd: any
-            ) => {
-                // 记录录音时长
-                recordTime.value = bufferDuration;
-                if (
-                    recordTime.value > recordTimeLimit ||
-                    (recordTime.value / 1000) * tokensValueSecond.value > userTokens.value
-                ) {
-                    stopRecord();
-                    return;
-                }
-                if (proxy.waveView) {
-                    proxy.waveView.input(buffers[buffers.length - 1], powerLevel, bufferSampleRate);
-                }
-            },
-        },
-        () => {
-            RecordApp.UniFindCanvas(
-                proxy,
-                [".recorder-wave-view"],
-                `proxy.waveView=Recorder.WaveView({compatibleCanvas:canvas,lineWidth: 5,width: 375, height: 200});`,
-                (canvas: any) => {
-                    proxy.waveView = Recorder.WaveView({
-                        compatibleCanvas: canvas,
-                        width: 375,
-                        height: 200,
-                        lineWidth: 5,
-                        keep: false,
-                    });
-                }
-            );
-        }
-    );
+    RecordApp.UniWebViewActivate(proxy);
+    RecordApp.RequestPermission(() => {
+        startRecord();
+    });
 };
 
 // 将毫秒转换为时间格式
@@ -236,6 +195,51 @@ const msToTime = (milliseconds: number) => {
     seconds = seconds.toString().padStart(2, "0");
 
     return `${hours}:${minutes}:${seconds}`;
+};
+
+// 开始录音
+const startRecord = () => {
+    RecordApp.UniWebViewActivate(proxy);
+    RecordApp.Start(
+        {
+            type: "mp3",
+            bitRate: 16,
+            sampleRate: 16000,
+            onProcess: (buffers: any, powerLevel: any, bufferDuration: any, bufferSampleRate: any) => {
+                // 记录录音时长
+                recordTime.value = bufferDuration;
+                if (
+                    recordTime.value > recordTimeLimit ||
+                    (recordTime.value / 1000) * tokensValueSecond.value > userTokens.value
+                ) {
+                    stopRecord();
+                    return;
+                }
+                if (proxy.waveView) {
+                    proxy.waveView.input(buffers[buffers.length - 1], powerLevel, bufferSampleRate);
+                }
+            },
+            onProcess_renderjs: `function(buffers,powerLevel,duration,bufferSampleRate,newBufferIdx,asyncEnd){
+                if(this.waveView) this.waveView.input(buffers[buffers.length-1],powerLevel,bufferSampleRate);
+            }`,
+        },
+        () => {
+            RecordApp.UniFindCanvas(
+                proxy,
+                [".recorder-wave-view"],
+                `this.waveView=Recorder.WaveView({compatibleCanvas:canvas1,lineWidth: 5,width: 375, height: 200});`,
+                (canvas1: any) => {
+                    proxy.waveView = Recorder.WaveView({
+                        compatibleCanvas: canvas1,
+                        width: 375,
+                        height: 200,
+                        lineWidth: 5,
+                        keep: false,
+                    });
+                }
+            );
+        }
+    );
 };
 
 // 结束录音
@@ -377,7 +381,7 @@ const cratedTask = async () => {
         setTimeout(() => {
             uni.$u.route({
                 url: "/ai_modules/meeting_minutes/pages/index/index",
-                type: "redirect",
+                type: "reLaunch",
             });
         }, 1000);
     } catch (error: any) {
@@ -393,6 +397,9 @@ const cratedTask = async () => {
 };
 
 const initRecorder = async () => {
+    uni.setKeepScreenOn({
+        keepScreenOn: true,
+    });
     await nextTick();
     uni.showLoading({
         title: "正在加载录音器...",
@@ -400,6 +407,7 @@ const initRecorder = async () => {
     recordTime.value = 0;
     isPaused.value = false;
     isRecording.value = false;
+
     setTimeout(() => {
         uni.hideLoading();
         openRecorder();
@@ -446,9 +454,8 @@ onHide(() => {
 });
 </script>
 
-<style scoped lang="scss"></style>
 <!-- #ifdef APP -->
-<script module="yourModuleName" lang="renderjs">
+<script module="recorder" lang="renderjs">
 import 'recorder-core'
 import RecordApp from 'recorder-core/src/app-support/app'
 import '../../static/Recorder-UniCore/app-uni-support.js'
@@ -459,15 +466,11 @@ import 'recorder-core/src/engine/mp3-engine'
 
 import 'recorder-core/src/extensions/waveview'
 
+//@ts-ignore
 export default {
-    mounted(){
-        //App的renderjs必须调用的函数，传入当前模块this
-        RecordApp.UniRenderjsRegister(this);
-    },
-    methods: {
-        //这里定义的方法，在逻辑层中可通过 RecordApp.UniWebViewVueCall(this,'this.xxxFunc()') 直接调用
-        //调用逻辑层的方法，请直接用 this.$ownerInstance.callMethod("xxxFunc",{args}) 调用，二进制数据需转成base64来传递
-    }
+	mounted() {
+		RecordApp.UniRenderjsRegister(this);
+	},
 }
 </script>
 <!-- #endif -->

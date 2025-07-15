@@ -140,8 +140,8 @@ class FileService
         $filename = basename($url); // 提取文件名
 
         //如果文件没有后缀，按类型不补充默认后缀
-        if (!str_contains($filename, '.')) {
-
+        if (!str_contains(substr($filename, -7), '.')) {
+            $filename = date('YmdHis').md5(rand(100000,999999).time());
             $filename .= match ($type) {
                 'avatar'    => '.jpg',
                 'audio'     => '.mp3',

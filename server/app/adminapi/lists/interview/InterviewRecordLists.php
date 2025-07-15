@@ -53,6 +53,7 @@ class InterviewRecordLists extends BaseAdminDataLists implements ListsSearchInte
             })
             ->append(['status_text'])
             ->order('id', 'desc')
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
          

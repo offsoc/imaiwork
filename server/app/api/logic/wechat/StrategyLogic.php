@@ -63,7 +63,9 @@ class StrategyLogic extends WechatBaseLogic
                     "image_enable" => 0,
                     "image_reply" => "",
                     "stop_enable" => 0,
-                    "stop_keywords" => ""
+                    "stop_keywords" => "",
+                    "bottom_enable" => 0,
+                    "bottom_reply" => ""
                 ];
                 return true;
             }

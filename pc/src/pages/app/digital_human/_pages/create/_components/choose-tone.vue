@@ -1,76 +1,81 @@
 <template>
     <popup
         ref="popupRef"
-        width="800px"
+        width="528px"
         class="choose-anchor-popup"
-        :style="{ padding: '0' }"
-        :append-to-body="false"
+        style="padding: 0; background-color: var(--color-digital-human)"
+        confirm-button-text=""
+        cancel-button-text=""
+        :show-close="false"
         @close="close"
         @confirm="handleConfirm">
         <div class="rounded-xl overflow-hidden flex flex-col">
-            <div
-                class="h-[62px] flex items-center justify-between px-4"
-                style="background: linear-gradient(156.65deg, #c1fedd 0%, #aeecff 53.87%, #c7c2ff 100%)">
-                <div class="text-2xl font-bold">从已有音色中选择</div>
-                <div class="cursor-pointer p-1 hover:bg-primary-light-7 rounded-full leading-[0]" @click="close()">
-                    <Icon name="el-icon-Close" :size="22"></Icon>
+            <div class="flex items-center justify-between h-[50px] px-4">
+                <div class="flex items-center gap-x-2">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center rounded-md border border-[rgba(255,255,255,0.1)]">
+                        <Icon name="local-icon-windows" :size="14"></Icon>
+                    </div>
+                    <div class="text-[20px] text-white font-bold">从已有音色中选择</div>
+                </div>
+                <div class="w-6 h-6" @click="close">
+                    <close-btn />
                 </div>
             </div>
             <div class="px-4 my-4">
-                <div class="flex items-center justify-end">
+                <div class="flex items-center rounded-full h-[50px] border border-[#2a2a2a] px-[5px]">
                     <ElInput
                         v-model="queryParams.name"
-                        class="!w-[200px]"
-                        suffix-icon="el-icon-Search"
+                        class="flex-1 search-input"
                         clearable
+                        prefix-icon="el-icon-Search"
                         placeholder="请输入音色名称"
+                        input-style="color: #ffffff"
                         @clear="resetPage"
                         @keyup.enter="resetPage"></ElInput>
+                    <ElButton type="primary" class="!text-white !rounded-full !w-[116px] !h-10">搜索</ElButton>
                 </div>
             </div>
+
             <div class="h-[500px] flex flex-col">
                 <div class="grow min-h-0 cursor-pointer">
                     <ElTable :data="pager.lists" height="100%" @row-click="choose">
                         <ElTableColumn label="音色名称" prop="name"> </ElTableColumn>
                         <ElTableColumn label="音色类型">
                             <template #default="{ row }">
-                                <ElTag
-                                    v-if="row.voice_id == -1"
-                                    type="primary"
-                                    effect="dark"
-                                    :disable-transitions="true"
-                                    >当前视频</ElTag
-                                >
-                                <ElTag v-else-if="row.type == 0" type="primary" :disable-transitions="true"
-                                    >内置音色(免费)</ElTag
-                                >
-                                <ElTag v-else type="success" :disable-transitions="true">用户音色(免费)</ElTag>
+                                <div v-if="row.voice_id == -1">
+                                    <span>当前视频</span>
+                                    <ElTag class="ml-3" effect="dark" type="primary" round :disable-transitions="true"
+                                        >原生</ElTag
+                                    >
+                                </div>
+                                <div v-else>
+                                    <span>{{ row.type == 0 ? "内置音色" : "用户音色" }}</span>
+                                    <ElTag
+                                        class="ml-3 !border-none !text-white"
+                                        color="#3BB840"
+                                        round
+                                        :disable-transitions="true"
+                                        >免费</ElTag
+                                    >
+                                </div>
                             </template>
                         </ElTableColumn>
                         <ElTableColumn label="操作">
                             <template #default="{ row }">
-                                <div
-                                    class="w-5 h-5 flex items-center justify-center rounded-full border border-token-primary mx-auto"
-                                    :class="{ 'bg-primary': isChoose(row.voice_id) }">
+                                <div class="w-5 h-5 flex items-center justify-center rounded-full mx-auto">
                                     <Icon
-                                        name="el-icon-Select"
-                                        v-if="isChoose(row.voice_id)"
-                                        color="#ffffff"
-                                        :size="10"></Icon>
+                                        name="local-icon-success_fill"
+                                        :size="20"
+                                        :color="isChoose(row.voice_id) ? 'var(--color-primary)' : '#ffffff1a'"></Icon>
                                 </div>
                             </template>
                         </ElTableColumn>
                     </ElTable>
                 </div>
-                <div class="flex justify-end my-2 px-2">
-                    <pagination v-model="pager" @change="changePage"></pagination>
+                <div class="flex justify-center my-2 px-2">
+                    <pagination v-model="pager" layout="prev, pager, next" @change="changePage"></pagination>
                 </div>
-            </div>
-            <div class="flex justify-center py-2 shadow">
-                <ElButton type="primary" class="!text-white !w-[166px] !h-[40px]" @click="handleConfirm"
-                    >确定选择</ElButton
-                >
-                <ElButton class="!w-[166px] !h-[40px]" @click="close">取消</ElButton>
             </div>
         </div>
     </popup>
@@ -80,7 +85,6 @@
 import { getVoiceList } from "@/api/digital_human";
 import Popup from "@/components/popup/index.vue";
 import { useAppStore } from "@/stores/app";
-
 const emit = defineEmits(["close", "confirm"]);
 
 const popupRef = ref<InstanceType<typeof Popup>>();
@@ -124,6 +128,7 @@ const choose = (item: any) => {
             type,
         };
     }
+    handleConfirm();
 };
 
 const setChooseTone = (item: any) => {
@@ -160,6 +165,17 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
+@import "../../../_assets/styles/index.scss";
+:deep(.search-input) {
+    .el-input__wrapper {
+        background-color: transparent;
+        box-shadow: none;
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+    }
+}
+
 .choose-anchor-popup {
     :deep() {
         .el-dialog__header,

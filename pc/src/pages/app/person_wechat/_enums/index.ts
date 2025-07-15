@@ -175,7 +175,7 @@ export enum EnumMsgType {
     // 设备信息
     DeviceInfo = "DeviceInfo",
     // 清除缓存
-    ClearCache = "CleanCache",
+    CleanCache = "CleanCache",
     // 移除设备
     RemoveDevice = "RemoveDevice",
     // 上传文件

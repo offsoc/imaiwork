@@ -8,6 +8,11 @@ export function addAgent(params: any) {
     return $request.post({ url: "/sv.robot/add", params });
 }
 
+// 添加默认智能体
+export function addDefaultAgent() {
+    return $request.post({ url: "/sv.robot/defaultAdd" });
+}
+
 // 更新智能体
 export function updateAgent(params: any) {
     return $request.post({ url: "/sv.robot/update", params });

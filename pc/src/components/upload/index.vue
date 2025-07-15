@@ -146,12 +146,9 @@ export default defineComponent({
         const visible = ref(false);
         const fileList = ref<any[]>([]);
 
-        const { maxSize, minSize, ratioSize } = props;
-
         const beforeUpload: UploadProps["beforeUpload"] = async (rawFile) => {
             const { type, ratioSize, videoMaxWidth, videoMinWidth, minDuration, maxDuration, minSize, maxSize } = props;
             const sizeInMB = rawFile.size / 1024 / 1024;
-            const sizeInKB = rawFile.size / 1024;
 
             // 文件大小校验
             const validateFileSize = () => {
@@ -215,6 +212,7 @@ export default defineComponent({
                     video.addEventListener("loadedmetadata", () => {
                         const { videoWidth, duration } = video;
                         const isResolutionValid = videoWidth >= videoMinWidth && videoWidth <= videoMaxWidth;
+
                         const isDurationValid = duration >= minDuration && duration <= maxDuration;
 
                         if (!isResolutionValid) {

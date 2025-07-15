@@ -27,7 +27,7 @@
                             <div
                                 v-for="item in row.reply"
                                 :key="item.id"
-                                class="flex flex-col text-left gap-2 bg-primary-light-8 rounded px-4 py-2">
+                                class="flex flex-col text-left gap-2 bg-primary-light-9 rounded px-4 py-2">
                                 <span class="font-bold">{{ item.name }}</span>
                                 <span>{{ item.code }}</span>
                             </div>

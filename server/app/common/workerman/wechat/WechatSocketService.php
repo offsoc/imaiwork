@@ -82,7 +82,7 @@ class WechatSocketService
 
             }
         });
-
+        \Workerman\Lib\Timer::del($timerid);
         // 心跳保活（每5分钟）
         \Workerman\Lib\Timer::add(300, function() {
             \think\facade\Db::connect('mysql')->query('select 1');

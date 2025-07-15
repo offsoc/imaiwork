@@ -114,11 +114,9 @@ import {
 } from "@/api/ladder_player";
 import Chatting from "../../components/chatting/chatting.vue";
 import Recorder from "../../components/recorder/recorder.vue";
-import { useAudio } from "@/hooks/useAudio";
 import { useAppStore } from "@/stores/app";
 
 const appStore = useAppStore();
-const { getLadderConfig } = appStore;
 
 const getCurrVoice = computed(() => {
     const data = appStore.getLadderConfig?.voice || [];
@@ -138,7 +136,7 @@ const contentList = ref<any[]>([]);
 const isReceiving = ref(false);
 
 const showRecorder = ref(false);
-const recorderRef = shallowRef<InstanceType<typeof Recorder>>();
+const recorderRef = shallowRef();
 const showTipsPop = ref(false);
 const tips = ref<any>(null);
 const tipsLoading = ref(false);
@@ -178,6 +176,7 @@ const getRecordList = async () => {
         })
         .flat();
     contentList.value = transformedLists;
+    chattingRef.value?.scrollToBottom();
 };
 
 const createResult = (logo: string) =>
@@ -304,7 +303,7 @@ const openRecorder = async () => {
         chattingBeginToast();
         return;
     }
-    await recorderRef.value?.authorize();
+    await recorderRef.value?.authorize(recorderRef.value.proxy);
     chattingRef.value?.pauseAll();
     showRecorder.value = true;
 };

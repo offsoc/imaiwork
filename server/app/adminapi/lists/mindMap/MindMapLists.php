@@ -43,7 +43,7 @@ class MindMapLists extends BaseAdminDataLists implements ListsSearchInterface
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
-                $item['avatar'] = FileService::getFileUrl($item['avatar']);
+                $item['avatar']     = $item['avatar'] ? FileService::getFileUrl($item['avatar']) : '';
 
                 $points = 0;
                 $tokens = 0;

@@ -5,9 +5,9 @@
                 <div
                     v-for="(item, index) in accountLists"
                     :key="index"
-                    class="w-full h-[66px] mx-auto flex items-center justify-center cursor-pointer rounded hover:bg-primary-light-8"
+                    class="w-full h-[66px] mx-auto flex items-center justify-center cursor-pointer rounded hover:bg-primary-light-9"
                     :class="{
-                        'bg-primary-light-8': currentAccount === item.account,
+                        'bg-primary-light-9': currentAccount === item.account,
                     }"
                     @click="handleSelectAccount(item)">
                     <ElTooltip :content="item.nickname" placement="right">

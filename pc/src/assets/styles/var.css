@@ -23,7 +23,6 @@
 	--el-color-primary: var(--color-primary);
 	--color-minor: var(--gray-950);
 	--color-btn-text: white;
-	--el-bg-color-page: #F6F6F6;
 	--el-color-primary-dark-2: #4448e0;
 	--el-color-primary: var(--color-primary);
 	--el-color-primary-light-1: #1A74FB;
@@ -35,7 +34,6 @@
 	--el-color-primary-light-7: #B3D0FE;
 	--el-color-primary-light-8: #CCDFFF;
 	--el-color-primary-light-9: #E6EFFF;
-	--el-color-error-light-9: #ef4444;
 	--el-font-weight-primary: 400;
 	--el-menu-item-height: 40px;
 	--el-menu-sub-item-height: var(--el-menu-item-height);
@@ -93,12 +91,11 @@
 	--el-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.12);
 	--el-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.08),
 		0px 12px 32px rgba(0, 0, 0, 0.12), 0px 8px 16px -8px rgba(0, 0, 0, 0.16);
-
-	--el-color-success: #01b574;
-	--el-color-error: var(--el-color-error-light-9);
-	--el-color-success-light-9: #c9fbd5;
-	--el-color-warning-light-9: #fde0d0;
+	--el-color-error-fill: #ef4444;
+	--el-color-success-fill: #56BF60;
+	--el-color-warning-fill: #2D2F33;
 	--el-popover-border-radius: 6px;
+	--el-color-danger: #FF3C26;
 
 	--sidebar-surface-secondary: var(--gray-100);
 	--sidebar-surface-secondary-primary: #e5f0ff;
@@ -119,4 +116,11 @@
 	--color-redbook: #f45d5d;
 	--aside-width: 228px;
 	--nav-height: 76px;
+	/* 数字人主题 */
+	--color-digital-human: #181818;
+	--color-digital-human-bg: #1f1f1f;
+	--color-digital-human-border: #292929;
+	/* 绘制主题 */
+	--color-draw-bg: #121212;
+	--color-draw-border: #2a2a2a;
 }

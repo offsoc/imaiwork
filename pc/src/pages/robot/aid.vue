@@ -43,7 +43,7 @@
                 <div
                     class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 mx-4"
                     v-if="pager.lists.length">
-                    <NuxtLink
+                    <router-link
                         v-for="(item, index) in pager.lists"
                         :key="index"
                         :to="`/robot/chat?ppid=${getSceneId}&pid=${queryParams.scene_id}&id=${item.id}`"
@@ -57,7 +57,7 @@
                         <div class="text-xs text-[#8F8F8F] mt-3 line-clamp-3">
                             {{ item.description }}
                         </div>
-                    </NuxtLink>
+                    </router-link>
                 </div>
                 <div v-else>
                     <ElEmpty />

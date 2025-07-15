@@ -34,7 +34,7 @@ class ContactLabelAddNoticeHandler extends BaseHandler
         $content = $this->buildResponseContent($request, $deviceId);
 
         // 返回响应体
-        return $this->buildJsonResponse(EnumMsgType::ContactLabelInfoNotice, $content);
+        return $this->buildJsonResponse(EnumMsgType::ContactLabelAddNotice, $content);
     }
 
     /**

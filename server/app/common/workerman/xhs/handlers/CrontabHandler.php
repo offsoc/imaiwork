@@ -48,7 +48,7 @@ class CrontabHandler extends BaseMessageHandler
                 // ->join('sv_video_setting s', 's.id = v.video_setting_id')
                 ->where('ps.device_code', '=', $this->connection->deviceid)
                 ->where('ps.account', $account)
-                ->where('ps.status', 0)
+                ->where('ps.status', 'in', [0, 5])
                 ->where('ps.data_type', $dataType)
                 ->where('ps.publish_time', 'between', [$st, $et])
                 ->order('ps.publish_time asc')

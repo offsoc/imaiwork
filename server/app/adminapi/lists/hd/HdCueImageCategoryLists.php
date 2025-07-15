@@ -5,6 +5,7 @@ namespace app\adminapi\lists\hd;
 
 
 use app\adminapi\lists\BaseAdminDataLists;
+use app\common\model\hd\HdCueImage;
 use app\common\model\hd\HdCueImageCategory;
 use app\common\lists\ListsSearchInterface;
 
@@ -46,7 +47,9 @@ class HdCueImageCategoryLists extends BaseAdminDataLists implements ListsSearchI
         return HdCueImageCategory::where($this->searchWhere)
             ->limit($this->limitOffset, $this->limitLength)
             ->order(['sort' => 'desc', 'id' => 'desc'])
-            ->select()
+            ->select() ->each(function ($item) {
+                $item->number = HdCueImage::where('cid', $item->id)->count();
+            })
             ->toArray();
     }
 

@@ -99,32 +99,23 @@
                             class="flex items-center h-[50px] px-[6px] bg-[#F9FAFB border border-[#F1F1F2] border-t-0 rounded-bl-[24px] rounded-br-[24px]">
                             <div class="flex items-center">
                                 <div
-                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-primary-light-9 cursor-pointer"
+                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#1ba7991a] cursor-pointer"
                                     :class="{
-                                        '!bg-primary-light-9 !text-primary': selectedDeep,
+                                        '!bg-[#1ba7991a] !text-[#1BA799]': selectedDeep,
                                     }"
                                     v-if="isDeep"
                                     @click="handleDeep">
-                                    <Icon
-                                        :name="selectedDeep ? 'local-icon-deep_s' : 'local-icon-deep'"
-                                        :size="16"
-                                        color=""></Icon>
+                                    <Icon name="local-icon-deep" color="#1BA799" :size="16"></Icon>
                                     <span class="text-xs">深度思考</span>
                                 </div>
                                 <ElDivider direction="vertical" class="!border-[#ededed]" v-if="isDeep" />
                                 <div
-                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-primary-light-9 cursor-pointer"
+                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#FF79191a] cursor-pointer"
                                     :class="{
-                                        '!bg-primary-light-9 !text-primary': selectedKnowledgeBase || activeKnb.id,
+                                        '!bg-[#FF79191a] !text-[#FF7919]': selectedKnowledgeBase || activeKnb.id,
                                     }"
                                     @click="handleKnowledgeBase">
-                                    <Icon
-                                        :name="
-                                            selectedKnowledgeBase || activeKnb.id
-                                                ? 'local-icon-note_book_s'
-                                                : 'local-icon-note_book'
-                                        "
-                                        :size="16"></Icon>
+                                    <Icon name="local-icon-note_book" color="#FF7919" :size="16"></Icon>
                                     <span class="text-xs">关联知识库</span>
                                 </div>
                             </div>
@@ -148,10 +139,9 @@
 </template>
 
 <script setup lang="ts">
-import { ElInput, ElButton, ElScrollbar } from "element-plus";
+import { ElInput, ElScrollbar } from "element-plus";
 import feedback from "@/utils/feedback";
 import { useElementSize } from "@vueuse/core";
-import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import { FileParams } from "@/composables/usePasteImage";
 import KnbSelect from "@/components/knb-select/index.vue";

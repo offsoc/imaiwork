@@ -70,7 +70,7 @@
                 <el-form-item label="PC端LOGO" prop="pc_logo">
                     <div>
                         <material-picker v-model="formData.pc_logo" :limit="1" />
-                        <div class="form-tips">建议尺寸：120*28px，支持jpg，jpeg，png格式</div>
+                        <div class="form-tips">建议尺寸：100*100px，支持jpg，jpeg，png格式</div>
                     </div>
                 </el-form-item>
                 <el-form-item label="网站标题" prop="pc_title">
@@ -118,15 +118,6 @@
                             v-model.trim="formData.share_title"
                             placeholder="请输入小程序分享标题"
                             maxlength="12"
-                            show-word-limit />
-                    </div>
-                </el-form-item>
-                <el-form-item label="分享描述" prop="share_desc">
-                    <div class="w-80">
-                        <el-input
-                            v-model.trim="formData.share_desc"
-                            placeholder="请输入小程序分享描述"
-                            maxlength="50"
                             show-word-limit />
                     </div>
                 </el-form-item>

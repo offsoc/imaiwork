@@ -22,6 +22,7 @@
             <div class="grow min-h-0 mt-4">
                 <BaseSetting v-if="activeTab === 'base-setting'"></BaseSetting>
                 <PublishSetting v-if="activeTab === 'publish-setting'"></PublishSetting>
+                <AutoAddWechatSetting v-if="activeTab === 'auto-add-wechat'"></AutoAddWechatSetting>
             </div>
         </div>
     </div>
@@ -30,7 +31,7 @@
 <script setup lang="ts">
 import BaseSetting from "./base-setting.vue";
 import PublishSetting from "./publish-setting.vue";
-
+import AutoAddWechatSetting from "./auto-add-wechat.vue";
 const emit = defineEmits<{
     (e: "close"): void;
 }>();
@@ -46,6 +47,11 @@ const tabs = [
         label: "名片推送设置",
         name: "publish-setting",
         icon: "local-icon-id_card",
+    },
+    {
+        label: "自动加微信设置",
+        name: "auto-add-wechat",
+        icon: "local-icon-wechat3",
     },
 ];
 </script>

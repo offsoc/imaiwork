@@ -38,4 +38,17 @@ class HdImageController extends BaseAdminController
         $params = $this->request->post();
         return HdImageLogic::delete($params) ? $this->success() : $this->fail(HdImageLogic::getError());
     }
+
+    /**
+     * @desc 获取详情
+     * @return \think\response\Json
+     * @date 2024/5/23 11:36
+     * @author dagouzi
+     */
+    public function detail()
+    {
+        $params = $this->request->get();
+        $result = HdImageLogic::detail($params);
+        return $this->data($result);
+    }
 }

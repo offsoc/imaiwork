@@ -3,13 +3,13 @@
         trigger="click"
         :show-arrow="false"
         :teleported="false"
-        popper-class="!border-none !rounded-2xl !p-6 !w-[422px]"
-        @show="getMiniQrCode">
+        popper-class="!border-none !rounded-2xl !p-6 !w-[422px]">
         <template #reference>
             <div
-                class="px-[18px] h-10 cursor-pointer flex items-center justify-center rounded-full border border-token-primary gap-x-[6px] hover:bg-[var(--border-primary)] btn-group">
-                <Icon name="local-icon-more_utils"></Icon>
-                <span class="btn-name">下载客户端</span>
+                :class="`px-[18px] h-10 cursor-pointer flex items-center justify-center rounded-full border gap-x-[6px] hover:bg-[${getTheme.hoverBgColor}] btn-group`"
+                :style="{ borderColor: getTheme.borderColor, color: getTheme.iconColor }">
+                <Icon name="local-icon-phone"></Icon>
+                <span class="btn-name" :style="{ color: getTheme.textColor }">下载客户端</span>
             </div>
         </template>
         <div>
@@ -83,7 +83,7 @@
                         popper-class="!border-none !rounded-xl !p-[10px] !w-[172px]">
                         <div class="w-full h-full flex items-center justify-center">
                             <div class="w-[152px] h-[152px]">
-                                <img :src="qrcode" class="w-full h-full" />
+                                <img :src="getCustomerService.wx_image" class="w-full h-full" />
                             </div>
                         </div>
                         <template #reference>
@@ -97,23 +97,44 @@
 </template>
 
 <script setup lang="ts">
-import { getMnpQrcode } from "@/api/app";
+import { AppKeyEnum } from "@/enums/appEnums";
 import { useAppStore } from "@/stores/app";
 import DownLoadMacImg from "@/assets/images/down_mac_icon.png";
 import DownLoadWebImg from "@/assets/images/down_windows_icon.png";
 import DownLoadAndImg from "@/assets/images/down_and_icon.png";
 import DownLoadMiniImg from "@/assets/images/down_mini_icon.png";
 
+const route = useRoute();
+
 const appStore = useAppStore();
 const websiteConfig = computed(() => appStore.getWebsiteConfig);
 
-const qrcode = ref("");
-const getMiniQrCode = async () => {
-    const result = await getMnpQrcode({
-        path: `pages/index/index`,
-    });
-    qrcode.value = result.url;
-};
+interface Theme {
+    borderColor: string;
+    iconColor: string;
+    textColor: string;
+    hoverBgColor: string;
+}
+
+const getTheme = computed<Theme>(() => {
+    const key = route.meta.key;
+    switch (key) {
+        case AppKeyEnum.DIGITAL_HUMAN:
+            return {
+                borderColor: "rgba(255,255,255,0.1)",
+                iconColor: "rgba(255,255,255,0.8)",
+                textColor: "rgba(255,255,255,0.8)",
+                hoverBgColor: "rgba(255,255,255,0.1)",
+            };
+        default:
+            return {
+                borderColor: "#ededed",
+                iconColor: "#000000",
+                textColor: "#000000",
+                hoverBgColor: "rgba(0,0,0,0.03)",
+            };
+    }
+});
 
 enum ClientDownloadType {
     MacIntel = "mac_intel",
@@ -137,11 +158,21 @@ const getClient = computed(() => {
     return {};
 });
 
+const getCustomerService = computed(() => {
+    if (websiteConfig.value.customer_service) {
+        const { wx_image } = websiteConfig.value.customer_service;
+        return {
+            wx_image,
+        };
+    }
+    return {};
+});
 const handleDownload = (key: string) => {
     if (getClient.value[key]?.url && key != ClientDownloadType.MiniPrograms) {
         window.open(getClient.value[key].url, "_blank");
     }
 };
+
 let render;
 const DefineTemplate = {
     setup(_, { slots }) {

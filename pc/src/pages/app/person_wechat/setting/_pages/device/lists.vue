@@ -35,6 +35,7 @@
                     <ElTableColumn prop="device_code" label="设备码" min-width="160"> </ElTableColumn>
                     <ElTableColumn prop="wechat_id" label="微信ID" width="180"> </ElTableColumn>
                     <ElTableColumn prop="sdk_version" label="SDK版本" min-width="160"> </ElTableColumn>
+                    <ElTableColumn prop="create_time" label="创建时间" width="180"></ElTableColumn>
                     <ElTableColumn label="操作" width="100" fixed="right">
                         <template #default="{ row }">
                             <ElPopover
@@ -91,7 +92,7 @@
 
 <script setup lang="ts">
 import Popup from "@/components/popup/index.vue";
-import { getDeviceLists, addWeChat, deleteDevice } from "@/api/person_wechat";
+import { getDeviceLists, deleteDevice, updateDevice } from "@/api/person_wechat";
 import useWeChatWs from "../../../_hooks/useWeChatWs";
 import { EnumMsgType, TriggerTaskParams } from "../../../_enums";
 import { Refresh } from "@element-plus/icons-vue";
@@ -113,36 +114,30 @@ const addWeChatPopRef = ref<InstanceType<typeof Popup>>();
 const { on, send, addDeviceLoading, actionType } = useWeChatWs();
 
 on("message", (data: any) => {
-    const { MsgType, Content } = data;
-
+    const { MsgType } = data;
     // @ts-ignore
     const handler: Record<EnumMsgType, Function> = {
-        [EnumMsgType.WxInfo]: () => {
-            showAddWeChatPop.value = false;
-            getLists();
-        },
-        [EnumMsgType.RemoveDevice]: async () => {
-            try {
-                await deleteDevice({
-                    id: currentDevice.value.id,
-                    device_code: currentDevice.value.device_code,
-                });
-                feedback.notifySuccess("移除成功");
-                getLists();
-            } catch (error) {
-                feedback.notifyError(error || "移除失败");
-            }
+        [EnumMsgType.CleanCache]: () => {
+            feedback.notifySuccess("清除缓存成功");
         },
     };
     handler[MsgType]?.();
 });
 
+on("success", (data: any) => {
+    const { type } = data;
+    if (type === "add-device") {
+        showAddWeChatPop.value = false;
+        getLists();
+    }
+});
+
 on("action", async (data: any) => {
-    const { type, accessToken, deviceId, wechatId, content } = data;
+    const { type, accessToken, deviceId, wechatId } = data;
     // @ts-ignore
     const actionHandlers: Record<EnumMsgType, Function> = {
-        [EnumMsgType.ClearCache]: () => {
-            triggerTask(EnumMsgType.ClearCache, {
+        [EnumMsgType.CleanCache]: () => {
+            triggerTask(EnumMsgType.CleanCache, {
                 deviceId,
                 accessToken,
                 wechatId,
@@ -185,11 +180,20 @@ const confirmAddWeChat = async () => {
 
 const handleRemove = async (row: any) => {
     await feedback.confirm("确定要移除设备吗？");
-    currentDevice.value = row;
-    triggerTask(EnumMsgType.Auth, {
-        deviceId: row.device_code,
-    });
-    actionType.value = EnumMsgType.RemoveDevice;
+    try {
+        await deleteDevice({
+            id: row.id,
+            device_code: row.device_code,
+        });
+        updateDevice({
+            device_code: row.device_code,
+            is_used: false,
+        });
+        feedback.notifySuccess("移除成功");
+        getLists();
+    } catch (error) {
+        feedback.notifyError(error || "移除失败");
+    }
 };
 
 const handleClearCache = async (row: any) => {
@@ -197,7 +201,7 @@ const handleClearCache = async (row: any) => {
     triggerTask(EnumMsgType.Auth, {
         deviceId: row.device_code,
     });
-    actionType.value = EnumMsgType.ClearCache;
+    actionType.value = EnumMsgType.CleanCache;
 };
 
 // 触发任务
@@ -214,7 +218,7 @@ function triggerTask(taskType: EnumMsgType, params?: TriggerTaskParams) {
         case EnumMsgType.AddDevice:
         case EnumMsgType.Auth:
         case EnumMsgType.WxInfo:
-        case EnumMsgType.ClearCache:
+        case EnumMsgType.CleanCache:
         case EnumMsgType.RemoveDevice:
             break;
         default:

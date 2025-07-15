@@ -28,29 +28,25 @@
         width="422"
         cancel-button-text=""
         confirm-button-text=""
+        :style="{ padding: '0' }"
         :click-modal-close="true"
         :show-close="false"
         @close="showPop = false">
-        <div class="-mb-10 mt-4">
-            <div class="flex flex-col items-center justify-center">
-                <div class="w-[200px] h-[200px] rounded-xl p-1 border border-token-primary">
-                    <img :src="getClient.mini_programs.url" class="w-full h-full" />
-                </div>
-                <ElTooltip content="点击复制客服电话">
-                    <div
-                        class="mt-6 text-base border border-token-primary rounded-full flex items-center justify-center h-[38px] w-[122px] hover:bg-[var(--border-primary)] cursor-pointer"
-                        @click="copy(getCustomerService.phone)">
-                        联系客服
-                    </div>
-                </ElTooltip>
+        <div class="-mt-4 relative">
+            <div class="absolute right-4 top-4 w-6 h-6" @click="showPop = false">
+                <close-btn></close-btn>
             </div>
-            <ElDivider class="!my-4 !border-token-primary" />
-            <div>
-                <div class="font-bold text-[#00000cc]">立即下载，畅享智能新体验！</div>
-                <div class="text-[#00000080] mt-3 text-[11px]">
+            <div class="download-notice-cover h-[366px] p-6 flex flex-col justify-end rounded-t-3xl">
+                <div class="font-bold text-white">
+                    立即下载 <br />
+                    畅享智能新体验！
+                </div>
+                <div class="text-[#ffffff50] mt-[10px] text-xs">
                     功能齐全，操作流畅，立即下载，开启全新智能数字时代。
                 </div>
-                <div class="mt-[15px] grid grid-cols-2 gap-[10px]">
+            </div>
+            <div class="px-6 mt-[15px]">
+                <div class="grid grid-cols-2 gap-[10px]">
                     <DefineTemplate v-slot="{ img, title, clientKey }">
                         <div class="client-item" @click="handleDownload(clientKey)">
                             <div class="flex items-center gap-x-[10px]">
@@ -99,18 +95,18 @@
                     </template>
                 </div>
                 <div class="flex mt-4">
-                    <div
-                        class="text-xs flex justify-center mb-8 gap-2 items-center p-1 bg-primary-light-9 rounded-full">
+                    <div class="text-xs flex justify-center gap-2 items-center p-1 bg-primary-light-9 rounded-full">
                         <Icon name="local-icon-tips3" :size="16" color="#ffffff"></Icon>
                         <span class="text-[#0000004d]">如在扫码或下载过程中遇到任何问题 </span>
                         <ElPopover
                             trigger="click"
                             :show-arrow="false"
                             :teleported="false"
-                            popper-class="!border-none !rounded-xl !p-[10px] !w-[172px]">
+                            width="172"
+                            popper-class="!border-none !rounded-xl !p-[10px]">
                             <div class="w-full h-full flex items-center justify-center">
                                 <div class="w-[152px] h-[152px]">
-                                    <img :src="qrcode" class="w-full h-full" />
+                                    <img :src="getCustomerService.wx_image" class="w-full h-full" />
                                 </div>
                             </div>
                             <template #reference>
@@ -246,5 +242,11 @@ init();
 
 .client-item {
     @apply cursor-pointer rounded-lg py-[6.5px] px-[10px] bg-black gap-x-[10px] flex items-center justify-between;
+}
+
+.download-notice-cover {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 50%, #000 94.07%), url(@/assets/images/download_notice_bg.png);
+    background-size: cover;
+    background-position: center;
 }
 </style>

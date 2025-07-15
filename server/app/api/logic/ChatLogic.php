@@ -244,6 +244,10 @@ class ChatLogic extends ApiLogic
                 $scene = 'image_prompt';
                 $scene_type = AccountLogEnum::TOKENS_DEC_IMAGE_PROMPT;
                 break;
+            case 20:
+                $scene = 'ai_draw_video_prompt';
+                $scene_type = AccountLogEnum::TOKENS_DEC_VOLC_VIDEO_PROMPT;
+                break;
         }
 
         $request = [
@@ -294,11 +298,10 @@ class ChatLogic extends ApiLogic
 
         //计算消耗tokens
         $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+        $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit.'tokens/算力', '实际消耗算力' => $points];
 
         //token扣除
         User::userTokensChange(self::$uid, $points);
-
-        $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit, '实际消耗算力' => $points];
 
         //扣费记录
         AccountLogLogic::recordUserTokensLog(true, self::$uid, $scene_type, $points, $request['task_id'], $extra);

@@ -14,7 +14,6 @@ composer.lock
 !/runtime/.gitkeep
 /public/uploads/*
 !/public/uploads/.gitkeep
-/vendor
 /public/pc
 /public/admin
 swoole.php

@@ -52,7 +52,7 @@
                                             :key="index"
                                             class="bg-[#F5F5F5] rounded-lg px-[47px] py-1.5 cursor-pointer"
                                             :class="{
-                                                'bg-primary-light-8 text-primary': formData.speaker === item.value,
+                                                'bg-primary-light-9 text-primary': formData.speaker === item.value,
                                             }"
                                             @click="formData.speaker = item.value">
                                             {{ item.label }}
@@ -159,19 +159,19 @@
                                             </template>
                                             <div class="flex flex-col gap-2">
                                                 <div
-                                                    class="px-2 py-1 hover:bg-primary-light-8 rounded-lg"
+                                                    class="px-2 py-1 hover:bg-primary-light-9 rounded-lg"
                                                     v-if="[TurnStatus.ERROR].includes(item.status)">
                                                     <ElButton link :icon="Refresh" @click="handleAgain(item.id)">
                                                         重试
                                                     </ElButton>
                                                 </div>
-                                                <div class="px-2 py-1 hover:bg-primary-light-8 rounded-lg">
+                                                <div class="px-2 py-1 hover:bg-primary-light-9 rounded-lg">
                                                     <ElButton link :icon="Delete" @click="handleDelete(item.id)">
                                                         删除
                                                     </ElButton>
                                                 </div>
                                                 <div
-                                                    class="px-2 py-1 hover:bg-primary-light-8 rounded-lg"
+                                                    class="px-2 py-1 hover:bg-primary-light-9 rounded-lg"
                                                     v-if="item.status == TurnStatus.SUCCESS">
                                                     <ElButton link :icon="DocumentAdd" @click="openKnbBind(item)">
                                                         训练知识库

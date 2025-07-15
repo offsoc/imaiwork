@@ -47,7 +47,7 @@
                     @click="choose(item)">
                     <div class="grow min-h-0 w-full flex items-center justify-center border border-gray-200 rounded-lg">
                         <video
-                            :src="item.url || item.video_result_url"
+                            :src="item.url || item.video_result_url || item.result_url"
                             class="w-full h-full rounded-lg object-cover hover:scale-105 transition-all duration-300"></video>
                     </div>
                     <div class="text-center w-full line-clamp-1 mt-2 flex-shrink-0">{{ item.name }}</div>
@@ -76,13 +76,12 @@
 
 <script setup lang="ts">
 import Popup from "@/components/popup/index.vue";
-import { getAnchorList } from "@/api/digital_human";
+import { getAnchorList, getVideoList } from "@/api/digital_human";
 import { getWorkList } from "@/api/redbook";
 import { DigitalHumanModelVersionEnum } from "~/pages/app/digital_human/_enums";
-import { cloneDeep } from "lodash-es";
 const props = withDefaults(
     defineProps<{
-        type: "anchor" | "video";
+        type: "anchor" | "video" | "video-result";
         videoList: any[];
     }>(),
     {
@@ -101,7 +100,7 @@ const title = computed(() => {
     return props.type === "anchor" ? "形象" : "视频";
 });
 
-const queryParams = reactive({
+const queryParams = reactive<Record<string, any>>({
     model_version: DigitalHumanModelVersionEnum.ADVANCED,
     status: 1,
     name: "",
@@ -109,7 +108,7 @@ const queryParams = reactive({
 });
 
 const getListsApi = computed(() => {
-    return props.type === "anchor" ? getAnchorList : getWorkList;
+    return props.type === "anchor" ? getAnchorList : props.type === "video" ? getWorkList : getVideoList;
 });
 
 const loading = ref(true);
@@ -119,7 +118,7 @@ const { pager, isLoad, getLists, resetPage } = usePaging({
     isScroll: true,
 });
 
-const chooseList = ref<any[]>(cloneDeep(props.videoList));
+const chooseList = ref<any[]>([]);
 
 const search = () => {
     resetPage();
@@ -136,6 +135,14 @@ const isChoose = (item: any) => {
 };
 
 const choose = (item: any) => {
+    if (props.type === "video-result") {
+        if (isChoose(item)) {
+            chooseList.value = [];
+        } else {
+            chooseList.value = [item];
+        }
+        return;
+    }
     if (isChoose(item)) {
         chooseList.value = chooseList.value.filter((val) => val.id !== item.id);
     } else {
@@ -158,14 +165,18 @@ const handleConfirm = () => {
                       anchor_url: item.url,
                       name: item.name,
                   }
-                : {
-                      model_version: item.model_version,
+                : props.type === "video"
+                ? {
                       video_result_url: item.video_result_url,
+                      name: item.name,
+                  }
+                : {
+                      video_result_url: item.result_url,
                       name: item.name,
                   }
         )
     );
-    popupRef.value?.close();
+    close();
 };
 
 const load = async () => {
@@ -178,8 +189,11 @@ const open = async () => {
     try {
         if (props.type === "anchor") {
             queryParams.status = 1;
-        } else {
+        } else if (props.type === "video") {
             queryParams.status = 6;
+        } else {
+            queryParams.status = 1;
+            queryParams.model_version = "";
         }
         getLists();
     } finally {
@@ -189,7 +203,6 @@ const open = async () => {
 
 const close = () => {
     emit("close");
-    popupRef.value?.close();
 };
 
 defineExpose({

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\common\workerman\wechat\services;
 
-use app\common\workerman\wechat\traits\{LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait};
+use app\common\workerman\wechat\traits\{LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait, TaskNoticeTrait};
 use app\common\workerman\wechat\validators\MessageValidator;
 use app\common\workerman\wechat\exceptions\ResponseException;
 use Workerman\Connection\TcpConnection;
@@ -32,7 +32,7 @@ use app\common\workerman\wechat\services\Service;
  */
 class MessageService
 {
-    use LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait;
+    use LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait, TaskNoticeTrait;
 
     private MessageValidator $validator;
     protected Service $service;
@@ -107,13 +107,9 @@ class MessageService
             }
             
             if($msgType == 1025){
-                $statusKey = "device:{$deviceId}:voiceToText";
-                $isVoiceToText = $this->redis()->get($statusKey);
-                if($isVoiceToText == 1 && $response['Data']['MsgType'] == 'VoiceTransTextTask'){
-                    $_content = $response['Data']['Content'];
-                    $key = "device:{$deviceId}:voice:{$_content['WeChatId']}:taskid:{$_content['TaskId']}";
-                    $this->redis()->setex($key, 30, $_content['ErrMsg']);
-                }
+                
+                $this->voiceToTextOpt($deviceId, $response);
+                $this->AddFriendsTaskOpt($deviceId, $response);
             }
             // 根据消息类型处理响应
             match ($msgType) {

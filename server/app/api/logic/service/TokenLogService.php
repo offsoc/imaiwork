@@ -86,6 +86,8 @@ class TokenLogService
             $need_token = 100;
         } else if(in_array($scene, ['keyword_to_title','keyword_to_subtitle','keyword_to_copywriting'])) {
             $need_token = 100;
+        }else if(in_array($scene, ['volc_text_to_video','volc_image_to_video'])) {
+            $need_token = 325;
         }
         if ($userInfo['tokens'] < $need_token) {
             throw new \Exception('用户算力不足');

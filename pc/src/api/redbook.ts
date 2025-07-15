@@ -108,6 +108,11 @@ export function getPublishTaskDetail(params: any) {
     return $request.get({ url: "/sv.publish/detail", params });
 }
 
+// 发布任务记录详情
+export function getPublishRecordDetail(params: any) {
+    return $request.get({ url: "/sv.publish/recordDetail", params });
+}
+
 // 发布任务状态修改
 export function changePublishTaskStatus(params: any) {
     return $request.post({ url: "/sv.publish/change", params });
@@ -116,11 +121,6 @@ export function changePublishTaskStatus(params: any) {
 // 发布记录列表
 export function getPublishRecordList(params: any) {
     return $request.get({ url: "/sv.publish/recordLists", params });
-}
-
-// 发布记录详情
-export function getPublishRecordDetail(params: any) {
-    return $request.get({ url: "/sv.publish/recordDetail", params });
 }
 
 // 发布记录重试

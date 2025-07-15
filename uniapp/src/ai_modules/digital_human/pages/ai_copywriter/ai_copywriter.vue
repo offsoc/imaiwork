@@ -95,7 +95,7 @@ const chatContentList = ref<any[]>([]);
 
 const promptList = [
     { id: 1, name: "短", length: 150 },
-    { id: 2, name: "中", length: 500 },
+    { id: 2, name: "中", length: 300 },
     { id: 3, name: "长", length: 1000 },
 ];
 const getPromptList = computed(() => {

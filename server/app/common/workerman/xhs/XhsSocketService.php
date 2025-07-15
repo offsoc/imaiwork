@@ -479,9 +479,9 @@ class XhsSocketService
                 $this->redis->delete("xhs:device:{$deviceid}:status");
                 $this->redis->delete("xhs:init:{$deviceid}");
                 $this->redis->delete("xhs:getUser:{$deviceid}");
-                $account = $this->redis->get("xhs:{$deviceid}:accountNo");
-                $this->redis->delete("xhs:{$deviceid}:accountNo");
-                $this->redis->delete("xhs:{$deviceid}:accountInfo:{$account}");
+                // $account = $this->redis->get("xhs:{$deviceid}:accountNo");
+                // $this->redis->delete("xhs:{$deviceid}:accountNo");
+                // $this->redis->delete("xhs:{$deviceid}:accountInfo:{$account}");
                 
                 $find = SvDevice::where('device_code', $deviceid)->limit(1)->find();
                 if(!empty($find)){
@@ -523,7 +523,7 @@ class XhsSocketService
                     'code' => WorkerEnum::DEVICE_OFFLINE,
                     'msg' => '设备已断开连接'
                 ]);
-                unset($this->worker->devices[$deviceid]);
+                //unset($this->worker->devices[$deviceid]);
             }
             
             $userId = $this->worker->uidConnections[$uid] ? $this->worker->uidConnections[$uid]->userid : 0;

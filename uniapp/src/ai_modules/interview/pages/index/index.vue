@@ -104,7 +104,7 @@ const handleInterviewDetail = async (item: any) => {
                 });
             } else if ([2, 3, 4, 5].includes(type)) {
                 uni.$u.route({
-                    url: "/ai_modules/interview/pages/chat/chat",
+                    url: "/ai_modules/interview/pages/full_screen/full_screen",
                     params: {
                         id: item.id,
                         type,

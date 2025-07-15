@@ -3,8 +3,12 @@
         <div class="flex items-center gap-2 overflow-y-auto">
             <div
                 v-for="(item, index) in categoryLists"
-                class="px-2 py-1 rounded-md cursor-pointer whitespace-nowrap bg-white"
-                :class="[sceneIndex == index ? 'text-[#000000] font-bold ' : '']"
+                class="px-2 py-1 rounded-md cursor-pointer"
+                :class="[
+                    sceneIndex == index
+                        ? 'text-[#000000] font-bold bg-[rgba(120,96,254,.08)]'
+                        : 'bg-[rgba(139,95,95,0.04)]',
+                ]"
                 @click="handleSceneType(index)">
                 <span class="text-base">
                     {{ item.name }}
@@ -52,14 +56,14 @@
                                         </template>
                                         <div class="flex flex-col gap-2">
                                             <div
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer"
+                                                class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer"
                                                 @click="handleDelete(item.task_id, index)">
                                                 <ElButton link icon="el-icon-Delete" class="w-full !justify-start"
                                                     >删除</ElButton
                                                 >
                                             </div>
                                             <div
-                                                class="px-2 py-1 hover:bg-primary-light-8 rounded-lg cursor-pointer flex items-center gap-1.5"
+                                                class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-1.5"
                                                 @click="handleTrain(item)">
                                                 <ElButton link icon="el-icon-DocumentAdd" class="w-full !justify-start"
                                                     >训练知识库</ElButton

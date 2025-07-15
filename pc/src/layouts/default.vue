@@ -33,10 +33,15 @@ import LayoutHeader from "./components/header/index.vue";
 import LayoutMain from "./components/main/index.vue";
 import { useAppStore } from "@/stores/app";
 
-const hideSidebar = computed(() => useAppStore().hideSidebar);
+const appStore = useAppStore();
+const hideSidebar = computed(() => appStore.hideSidebar);
 
 const { height: windowHeight, width: windowWidth } = useWindowSize({
     includeScrollbar: false,
+});
+
+watchEffect(() => {
+    appStore.toggleSidebar(windowWidth.value < 1000);
 });
 </script>
 <style lang="scss" scoped>

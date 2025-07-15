@@ -49,15 +49,6 @@
                     :disabled="isLock"
                     placeholder="请在此输入您需要生成文案的关键词或内容"></ElInput>
                 <div class="flex items-center justify-between mt-2">
-                    <div v-if="props.promptType == CopywritingTypeEnum.AI_DIGITAL_HUMAN_COPYWRITING">
-                        <ElRadioGroup v-model="currentPromptLength">
-                            <ElRadioButton
-                                v-for="item in getPromptList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.length" />
-                        </ElRadioGroup>
-                    </div>
                     <ElButton
                         type="primary"
                         size="small"
@@ -97,7 +88,6 @@
 
 <script setup lang="ts">
 import { chatPrompt } from "@/api/chat";
-import { generatePrompt } from "@/api/digital_human";
 import { useUserStore } from "@/stores/user";
 import { CopywritingTypeEnum } from "@/pages/app/_enums/chatEnum";
 
@@ -125,17 +115,6 @@ const contentVal = ref<string>("");
 const chatContentList = ref<any[]>([]);
 const isReceiving = ref(false);
 
-const promptList = [
-    { id: 1, name: "短", length: 150 },
-    { id: 2, name: "中", length: 500 },
-    { id: 3, name: "长", length: 1000 },
-];
-const currentPromptLength = ref<any>(promptList[0].length);
-
-const getPromptList = computed(() => {
-    return promptList.filter((item) => item.length <= props.maxSize) || [];
-});
-
 const handleGeneratePrompt = async () => {
     if (userTokens.value <= 0) {
         feedback.msgPowerInsufficient();
@@ -143,17 +122,11 @@ const handleGeneratePrompt = async () => {
     }
     try {
         isReceiving.value = true;
-        const { reply, content } =
-            props.promptType == CopywritingTypeEnum.AI_DIGITAL_HUMAN_COPYWRITING
-                ? await generatePrompt({
-                      keywords: contentVal.value,
-                      number: currentPromptLength.value,
-                  })
-                : await chatPrompt({
-                      message: contentVal.value,
-                      prompt_id: props.promptType,
-                  });
-        chatContentList.value.push(reply || content);
+        const { reply } = await chatPrompt({
+            message: contentVal.value,
+            prompt_id: props.promptType,
+        });
+        chatContentList.value.push(reply);
         contentVal.value = "";
     } catch (error) {
         feedback.msgError(error || "生成失败，请重试");

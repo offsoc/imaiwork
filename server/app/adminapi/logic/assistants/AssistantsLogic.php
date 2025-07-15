@@ -5,6 +5,7 @@ namespace app\adminapi\logic\assistants;
 use app\common\logic\BaseLogic;
 use app\common\model\chat\Assistants;
 use app\common\model\chat\Scene;
+use app\common\service\ConfigService;
 use app\common\service\FileService;
 
 class AssistantsLogic extends BaseLogic
@@ -196,9 +197,10 @@ class AssistantsLogic extends BaseLogic
                 $preliminaryAsk[$key]['logo'] = FileService::getFileUrl($value['logo']);
             }
         }
-
+        $image = ConfigService::get('website', 'chat_logo', '');
+        $image = empty($image) ? $image : FileService::getFileUrl($image);
         $assistant->preliminary_ask     = $preliminaryAsk;
-        $assistant->logo                = FileService::getFileUrl($assistant['logo']);
+        $assistant->logo                = $image;
         $assistant->banner              = FileService::getFileUrl($extra['banner'] ?? '');
         $assistant->new_chat_prompt     = $extra['new_chat_prompt'] ?? '';
         $assistant->file_prompt         = $extra['file_prompt'] ?? '';
@@ -238,8 +240,8 @@ class AssistantsLogic extends BaseLogic
             'new_chat_prompt'   => $postData['new_chat_prompt'],
             'file_prompt'       => $postData['file_prompt'],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-        $assistant->logo            = FileService::setFileUrl($postData['logo']);
+        $image = isset($postData['logo']) ? FileService::setFileUrl($postData['logo']) : '';
+        $assistant->logo            = ConfigService::set('website', 'chat_logo', $image);
         $assistant->preliminary_ask = json_encode($preliminaryAsk, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $assistant->save();
         self::$returnData = $assistant->toArray();
