@@ -253,16 +253,3 @@ export const appKeyNameMap: Record<AppKeyEnum, string> = {
     [AppKeyEnum.CONTRACT]: "合同审查",
     [AppKeyEnum.LIVE]: "无人直播",
 };
-
-export enum FollowTypeEnum {
-    // 内务
-    INTERNAL = 1,
-    // 智能拓客
-    SMART_MARKETING = 2,
-    // 客户管理
-    CUSTOMER_MANAGEMENT = 3,
-    // 内容营销
-    CONTENT_MARKETING = 4,
-    // 其他
-    OTHER = 5,
-}
