@@ -1,0 +1,175 @@
+:deep(.el-table) {
+    background-color: var(--color-digital-human);
+    tr {
+        background-color: var(--color-digital-human);
+    }
+    .el-table__cell {
+        border-color: var(--color-digital-human-border);
+        color: #ffffff;
+        &.is-leaf {
+            border-color: var(--color-digital-human-border);
+        }
+    }
+    .el-table--border .el-table__inner-wrapper:after,
+    .el-table--border:after,
+    .el-table--border:before,
+    .el-table__inner-wrapper:before {
+        background-color: var(--color-digital-human-border);
+    }
+    .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+        background-color: var(--color-digital-human-border);
+    }
+    .el-table__empty-block {
+        background-color: var(--color-digital-human);
+        .el-table__empty-text {
+            color: #ffffff;
+        }
+    }
+    &.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+        background-color: var(--color-digital-human-border);
+    }
+    .el-table__body tr.hover-row.current-row > td.el-table__cell,
+    .el-table__body tr.hover-row.el-table__row--striped.current-row > td.el-table__cell,
+    .el-table__body tr.hover-row.el-table__row--striped > td.el-table__cell,
+    .el-table__body tr.hover-row > td.el-table__cell,
+    .el-table__body tr > td.hover-cell {
+        background-color: var(--color-digital-human-border);
+    }
+}
+
+:deep(.el-pagination) {
+    .el-select__wrapper,
+    .el-input__wrapper {
+        background-color: var(--color-digital-human-bg);
+        box-shadow: 0 0 0 1px var(--color-digital-human-border);
+    }
+    .el-select__input,
+    .el-input__inner,
+    .el-pagination__total,
+    .el-select__selected-item,
+    .el-pagination__goto {
+        color: #ffffff;
+    }
+    .btn-prev,
+    .btn-next {
+        color: #ffffff;
+        background-color: var(--color-digital-human-bg);
+        &:disabled {
+            background-color: var(--color-digital-human-bg);
+        }
+    }
+    .el-pager {
+        .number {
+            color: #ffffff;
+            background-color: var(--color-digital-human-bg);
+        }
+    }
+}
+
+:deep(.el-tabs) {
+    @apply px-[30px];
+    .el-tabs__header {
+        margin: 0;
+    }
+
+    .el-tabs__item {
+        height: 66px;
+        &:not(.is-active) {
+            @apply text-white;
+        }
+    }
+    .el-tabs__content {
+        display: none;
+    }
+    .el-tabs__nav-wrap {
+        &::after {
+            display: none;
+        }
+    }
+    .el-tabs__item {
+        min-width: 86px;
+    }
+}
+
+:deep(.el-loading-mask) {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+:deep(.el-upload-list) {
+    .el-upload-list__item {
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    }
+    .el-upload-list__item-file-name,
+    .el-icon--close-tip,
+    .el-progress__text {
+        color: #ffffff;
+    }
+    .el-icon--close {
+        color: #ffffff;
+    }
+}
+
+:deep(.el-input) {
+    .el-input__wrapper {
+        background-color: var(--color-digital-human-bg);
+        box-shadow: 0 0 0 1px var(--color-digital-human-border);
+    }
+    .el-input__inner {
+        color: #ffffff;
+    }
+}
+
+:deep(.el-select) {
+    .el-select__wrapper {
+        background-color: var(--color-digital-human-bg);
+        box-shadow: 0 0 0 1px var(--color-digital-human-border);
+    }
+    .el-select__selected-item {
+        color: #ffffff;
+    }
+}
+
+:deep(.status-select) {
+    .el-select__wrapper {
+        min-height: 40px;
+        border-radius: 100px;
+    }
+    .el-select__selected-item {
+        color: #ffffff;
+        font-size: 13px;
+    }
+}
+
+:deep(.search-name-input) {
+    height: 40px;
+    .el-input__wrapper {
+        border-top-left-radius: 100px;
+        border-bottom-left-radius: 100px;
+        box-shadow: 0 0 0 1px var(--color-digital-human-border);
+        .el-input__inner {
+            color: #ffffff;
+            &::placeholder {
+                color: rgba(255, 255, 255, 0.2);
+            }
+        }
+    }
+    .el-input-group__append {
+        background-color: var(--color-digital-human-bg);
+        box-shadow: 0 0 0 1px var(--color-digital-human-border);
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 100px;
+        overflow: hidden;
+        color: #ffffff;
+        .el-button {
+            background-color: var(--color-digital-human-bg);
+            border-radius: 0;
+            color: #ffffff;
+            height: 100%;
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+    }
+}
