@@ -5,6 +5,7 @@ namespace app\api\lists\sv;
 use app\api\lists\BaseApiDataLists;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\sv\SvVideoSetting;
+use app\common\model\sv\SvVideoTask;
 
 /**
  * 视频设置列表
@@ -41,6 +42,12 @@ class SvVideoSettingLists extends BaseApiDataLists implements ListsSearchInterfa
                 } else {
                     $item[$field] = [];
                 }
+            }
+
+            $item['latest_submission_time'] = SvVideoTask::where('video_setting_id',$item['id'])->order('update_time', 'desc') // 按 update_time 降序排序
+            ->value('update_time') ?? '暂无';
+            if ( $item['latest_submission_time'] != '暂无'){
+                $item['latest_submission_time'] = date('Y-m-d H:i:s', $item['latest_submission_time']);
             }
         }
         

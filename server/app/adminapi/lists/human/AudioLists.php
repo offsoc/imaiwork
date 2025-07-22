@@ -36,18 +36,25 @@ class AudioLists extends BaseAdminDataLists implements ListsSearchInterface
      * @date 2023/2/23 18:43
      */
     public function lists(): array
-    {
+    {$type = $this->request->get('type','0');
+        if (trim($type) == ''){
+            $type = 0;
+        }
         //模型版本
         $modelList = ConfigService::get('model', 'list', []);
         $modelVersion = $modelList['channel'];
         return HumanAudio::alias('ha')
             ->join('user u', 'u.id = ha.user_id')
-            ->field('ha.id,ha.name,ha.user_id,ha.model_version,ha.task_id,ha.create_time,ha.url,ha.status,u.nickname,u.avatar')
+            ->field('ha.id,ha.name,ha.user_id,ha.model_version,ha.type,
+            ha.task_id,ha.create_time,ha.url,ha.status,u.nickname,u.avatar')
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
             })
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('ha.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
+            })
+            ->when($type, function ($query)use ($type){
+                $query->where('ha.type', $type );
             })
             ->where($this->searchWhere)
             ->order(['ha.create_time' => 'desc'])
@@ -114,10 +121,17 @@ class AudioLists extends BaseAdminDataLists implements ListsSearchInterface
      */
     public function count(): int
     {
+        $type = $this->request->get('type','0');
+        if (trim($type) == ''){
+            $type = 0;
+        }
         return HumanAudio::alias('ha')
             ->join('user u', 'u.id = ha.user_id')
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
+            })
+            ->when($type, function ($query)use ($type){
+                $query->where('ha.type', $type );
             })
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('ha.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);

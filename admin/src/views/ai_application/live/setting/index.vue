@@ -55,16 +55,3 @@ const submit = async () => {
 
 const { lockFn: lockSubmit, isLock } = useLockFn(submit);
 </script>
-
-<style scoped lang="scss">
-.banner-upload {
-    :deep(.upload-btn) {
-        width: 500px !important;
-        height: 145px !important;
-    }
-    :deep(.file-item) {
-        width: 500px !important;
-        height: 145px !important;
-    }
-}
-</style>

@@ -74,8 +74,9 @@ class XhsSocketService
                     8 => new \app\common\workerman\xhs\handlers\MessageHandler($this), #最新私信消息
                     9 => new \app\common\workerman\xhs\handlers\TaskHandler($this), #任务执行状态回复
                     11 => new \app\common\workerman\xhs\handlers\CompletedHandler($this), #设备初始化完成
-                    12 => new \app\common\workerman\xhs\handlers\MsgReplyHandler($this), #设备初始化检测
-                    13 => new \app\common\workerman\xhs\handlers\MsgReplyHandler($this),#心跳
+                    12 => new \app\common\workerman\xhs\handlers\MsgReplyHandler($this), #正在回复消息状态
+                    13 => new \app\common\workerman\xhs\handlers\MsgReplyHandler($this),#设备回复消息完成
+                    14 => new \app\common\workerman\xhs\handlers\MediaStatusHandler($this),#图文视频发布状态更新
                     'bindSocket' => new \app\common\workerman\xhs\handlers\WebWorkerHandler($this), #web端绑定socket
                     'addDevice' => new \app\common\workerman\xhs\handlers\DeviceHandler($this), #web端添加设备
                     'getUserInfo' => new \app\common\workerman\xhs\handlers\UserHandler($this), #web端获取设备账号信息

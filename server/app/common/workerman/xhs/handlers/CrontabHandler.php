@@ -33,7 +33,7 @@ class CrontabHandler extends BaseMessageHandler
             //查询在线的设备
             // $this->setLog($this->connection->deviceid .' crontab running ' , 'cron');
             // $this->setLog('正在发布设备:'. $this->connection->deviceid .' 的内容' , 'cron');
-            $st = date('Y-m-d H:i:s', (time() - 300));
+            $st = date('Y-m-d H:i:s', (time() - 600));
             $et = date('Y-m-d H:i:s', (time() + 1800));
             $account = $this->service->getRedis()->get("xhs:{$this->connection->deviceid}:accountNo");
             if(empty($account)){
@@ -45,17 +45,18 @@ class CrontabHandler extends BaseMessageHandler
             $publishes = SvPublishSettingDetail::alias('ps')
                 ->field('ps.*')
                 // ->join('sv_video_task v', 'v.id = ps.video_task_id')
-                // ->join('sv_video_setting s', 's.id = v.video_setting_id')
+                ->join('sv_publish_setting_account s', 's.id = ps.publish_account_id')
                 ->where('ps.device_code', '=', $this->connection->deviceid)
                 ->where('ps.account', $account)
                 ->where('ps.status', 'in', [0, 5])
+                ->where('s.status', 'in', [1])
                 ->where('ps.data_type', $dataType)
                 ->where('ps.publish_time', 'between', [$st, $et])
                 ->order('ps.publish_time asc')
                 ->limit(1)
                 ->select()->toArray();
-            $this->setLog('sql:'. Db::getLastSql(), 'cron');
-            $this->setLog('待发布的数据有:'. count($publishes) .' 条' , 'cron');
+            //$this->setLog('sql:'. Db::getLastSql(), 'cron');
+            //$this->setLog('待发布的数据有:'. count($publishes) .' 条' , 'cron');
             foreach ($publishes as $publish){
                 $payload = array(
                     'appType' => $this->connection->apptype ?? '',
@@ -69,16 +70,15 @@ class CrontabHandler extends BaseMessageHandler
                     'reply' => [
                         'title' => $publish['material_title'],
                         'type' => $publish['material_type'] ?? 1,
-                        'list' => array(
-                            $publish['material_url']
-                        ),
+                        'list' => explode(',', $publish['material_url']),
                         'isLocation' => !empty($publish['poi']) ? 1 : 0,
                         'location' => $publish['poi'],
                         'isScheduledTime' => true,
                         'scheduledTime' => $publish['publish_time'],
                         'taskId' => $publish['task_id'],
                         'body' => $publish['material_subtitle'],
-                        'tag' => $publish['material_tag'] ?? ''
+                        'tag' => $publish['material_tag'] ?? '',
+                        'material_id' => $publish['id']
                     ]
                 );
                 $payload['code'] = WorkerEnum::SUCCESS_CODE;
@@ -106,7 +106,7 @@ class CrontabHandler extends BaseMessageHandler
             $detail = SvPublishSettingDetail::where('id', $publish['id'])->findOrEmpty();
             if(!$detail->isEmpty()){
                 $detail->save([
-                    'status' => 1,
+                    'status' => 3,
                     'update_time' => time(),
                     'exec_time' => time()
                 ]);

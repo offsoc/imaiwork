@@ -74,12 +74,12 @@ export enum ToolEnum {
 }
 
 export const ToolEnumMap = {
-    [ToolEnum.CHAT]: "智能聊天",
+    [ToolEnum.CHAT]: "AI聊天",
     [ToolEnum.TOOL]: "智能员工",
-    [ToolEnum.AID]: "智能助理",
-    [ToolEnum.DATABASE]: "知识库",
-    [ToolEnum.DEVICE]: "手机终端",
-    [ToolEnum.AGENT]: "智能体",
+    [ToolEnum.AID]: "AI助理",
+    [ToolEnum.DATABASE]: "AI知识库",
+    [ToolEnum.DEVICE]: "AI终端",
+    [ToolEnum.AGENT]: "AI智能体",
     [ToolEnum.CREATIVE_RECORD]: "创作记录",
 };
 
@@ -253,3 +253,16 @@ export const appKeyNameMap: Record<AppKeyEnum, string> = {
     [AppKeyEnum.CONTRACT]: "合同审查",
     [AppKeyEnum.LIVE]: "无人直播",
 };
+
+export enum FollowTypeEnum {
+    // 内务
+    INTERNAL = 1,
+    // 智能拓客
+    SMART_MARKETING = 2,
+    // 客户管理
+    CUSTOMER_MANAGEMENT = 3,
+    // 内容营销
+    CONTENT_MARKETING = 4,
+    // 其他
+    OTHER = 5,
+}

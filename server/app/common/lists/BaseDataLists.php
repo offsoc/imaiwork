@@ -139,7 +139,6 @@ abstract class BaseDataLists implements ListsInterface
 
         $this->field = $this->request->get('field', '');
         $this->orderBy = $this->request->get('order_by', '');
-
         return $this->sortOrder = $this->createOrder($this->setSortFields(), $this->setDefaultOrder());
     }
 

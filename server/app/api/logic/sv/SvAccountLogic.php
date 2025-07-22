@@ -84,7 +84,9 @@ class SvAccountLogic extends SvBaseLogic
             }
 
             $account->robot_id = $account->robot_id ?? 0;
-
+            if($account->robot_id === 0){
+                $account->robot_id = '';
+            }
             // 返回设备信息 
             self::$returnData = $account->toArray();
             return true;

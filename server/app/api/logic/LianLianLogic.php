@@ -366,8 +366,7 @@ class LianLianLogic extends ApiLogic
             }
 
             //替换数据
-            $keyWords = str_replace(['场景名称', '对话内容'], [$sceneInfo->name, $logs], $keyWords);
-            //print_r($keyWords);die;
+            $keyWords = str_replace(['我的身份','场景名称', '对话内容'], [$sceneInfo->practitioner_persona , $sceneInfo->name, $logs], $keyWords);
             // 检查是否挂载知识库
             $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
             if (!empty($bind)) {
@@ -456,19 +455,18 @@ class LianLianLogic extends ApiLogic
             $keyWords = str_replace(['方向1', '方向2', '方向3', '方向4', '方向5'], $sceneInfo->analysis_report_config, $keyWords);
 
             //替换数据
-            $keyWords = str_replace(['场景名称', '对话内容'], [$sceneInfo->name, $logs], $keyWords);
-
+            $keyWords = str_replace(['我的身份', '场景名称', '对话内容'], [$sceneInfo->practitioner_persona ,$sceneInfo->name, $logs], $keyWords);
             // 检查是否挂载知识库
-            $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
-            if (!empty($bind)) {
-                $response = self::knowledgeChat($bind, $keyWords, $sceneInfo);
-            }else{
+//            $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
+//            if (!empty($bind)) {
+//                $response = self::knowledgeChat($bind, $keyWords, $sceneInfo);
+//            }else{
                 //发送聊天
                 $response = \app\common\service\ToolsService::Ll()->chat([
                     'action'    => 'performance',
                     'messages'  => $keyWords
                 ]);
-            }
+//            }
 
             
             //聊天
@@ -634,7 +632,7 @@ class LianLianLogic extends ApiLogic
         $response['data'] = array(
             'message' => $knResponse['choices'][0]['message']['content']?? '',
             'audio_url' => $knResponse['audio_url'] ?? '',
-            'audio_duration' => $knResponse['audio_duration'] ?? 0,
+            'audio_duration' => $knResponse['duration'] ?? 0,
         );
         return $response;
     }

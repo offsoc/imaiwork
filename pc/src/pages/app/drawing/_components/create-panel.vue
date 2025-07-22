@@ -1,6 +1,6 @@
 <template>
     <div
-        class="w-[350px] h-full rounded-[20px] shadow-[0_0_0_1px_#333333] bg-digital-human flex flex-col relative"
+        class="w-[350px] h-full rounded-[20px] shadow-[0_0_0_1px_#333333] bg-app-bg-2 flex flex-col relative"
         :class="{ 'rounded-tr-none rounded-br-none': showPromptDialog }">
         <div class="grow min-h-0">
             <component
@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
-import { SidebarEnum, drawTypeEnumMap, DrawTypeEnum, GenerateVideoTypeEnum, ModelEnum } from "../_enums/drawEnums";
+import { SidebarEnum, drawTypeEnumMap, DrawTypeEnum, GenerateVideoTypeEnum, ModelEnum } from "../_enums";
 import GenerationImageForm from "./generation-image-form.vue";
 import GoodsImageForm from "./goods-image-form.vue";
 import FashionImageForm from "./fashion-image-form.vue";
@@ -176,5 +176,3 @@ watch(
     }
 );
 </script>
-
-<style scoped></style>

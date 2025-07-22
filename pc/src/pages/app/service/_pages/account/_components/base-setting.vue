@@ -20,7 +20,7 @@
                                 :value="item.id"></ElOption>
                         </ElSelect>
                         <div class="flex justify-end mt-2">
-                            <router-link to="/app/agent" target="_blank">
+                            <router-link to="/agent" target="_blank">
                                 <ElButton link type="primary" size="small"> 点击这里创建您的专属机器人 > </ElButton>
                             </router-link>
                         </div>

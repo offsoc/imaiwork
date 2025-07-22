@@ -28,7 +28,7 @@ class CopywritingController extends BaseApiController
     {
         try {
             $params = (new SvCopywritingValidate())->post()->goCheck('add');
-            $params['channel'] =  $params['channel'] ?? 1 ;
+            $params['channel'] =  $params['channel'] ?? 2 ;
             $result = SvCopywritingLogic::addSvCopywriting($params);
             if ($result) {
                 return $this->success(data: SvCopywritingLogic::getReturnData());
@@ -46,6 +46,20 @@ class CopywritingController extends BaseApiController
             $result = SvCopywritingLogic::detailSvCopywriting($params);
             if ($result) {
                 return $this->data(SvCopywritingLogic::getReturnData());
+            }
+            return $this->fail(SvCopywritingLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
+    public function update()
+    {
+        try {
+            $params = (new SvCopywritingValidate())->post()->goCheck('update');
+            $result = SvCopywritingLogic::updateSvCopywriting($params);
+            if ($result) {
+                return $this->success('操作成功');
             }
             return $this->fail(SvCopywritingLogic::getError());
         } catch (HttpResponseException $e) {
@@ -86,6 +100,21 @@ class CopywritingController extends BaseApiController
         } catch (\Exception $e) {
             Log::channel('sv')->write('接收批量生产参数'.json_encode($data).'数字人批量生产失败'.$e->getMessage());
             return $this->success('fail');
+        }
+    }
+
+    public function addName()
+    {
+        try {
+            $params = (new SvCopywritingValidate())->post()->goCheck('addname');
+            $params['channel'] =  $params['channel'] ?? 2 ;
+            $result = SvCopywritingLogic::addSvCopywritingName($params);
+            if ($result) {
+                return $this->success(data: SvCopywritingLogic::getReturnData());
+            }
+            return $this->fail(SvCopywritingLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
 }

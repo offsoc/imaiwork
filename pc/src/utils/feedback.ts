@@ -45,10 +45,7 @@ export class Feedback {
     }
     // 错误通知
     notifyError(msg: string) {
-        ElNotification.error({
-            message: msg,
-            duration: 500000,
-        });
+        ElNotification.error(msg);
     }
     // 成功通知
     notifySuccess(msg: string) {

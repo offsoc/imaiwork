@@ -104,10 +104,11 @@
 import { drawingRecord, drawingVideoRecord, drawingVideoDelete } from "@/api/drawing";
 import { drawingDelete } from "@/api/drawing";
 import { downloadFile } from "@/utils/util";
-import { DrawTypeEnum, drawTypeEnumMap } from "~/pages/app/drawing/_enums/drawEnums";
+import { ModelEnum, DrawTypeEnum, drawTypeEnumMap } from "@/pages/app/drawing/_enums";
 
-const router = useRouter();
-const route = useRoute();
+const isHd = (modelId: number) => {
+    return modelId == ModelEnum.HIDREAMAI;
+};
 
 const sceneType = ref<number>(drawTypeEnumMap[DrawTypeEnum.GOODS_IMAGE]);
 const activeImage = ref<any>("");

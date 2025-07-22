@@ -47,6 +47,13 @@ export enum CreateType {
     AUDIO = 2, // 音频
 }
 
+// 音色类型
+export enum ToneType {
+    BUILTIN = 0, // 系统音色
+    USER = 1, // 用户音色
+    ALL = 3, // 全部音色
+}
+
 // 高级版和尊享版公共上传限制
 export const commonUploadLimit = {
     size: 300,

@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="mt-4">
-            <div class="p-1.5 rounded-xl bg-primary-light-7 inline-flex">
+            <div class="p-1.5 rounded-xl bg-primary-light-8 inline-flex">
                 <ElSegmented v-model="currentTab" :options="tabs">
                     <template #default="{ item }">
                         <div class="flex items-center gap-2">

@@ -12,7 +12,6 @@ export default function useDeviceWs(options?: WebSocketOptions) {
     const userStore = useUserStore();
 
     const { userInfo } = toRefs(userStore);
-
     const wsUrl = `wss://${location.host}/wss`;
 
     const {

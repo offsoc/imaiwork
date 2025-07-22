@@ -51,7 +51,7 @@ enum Theme {
 const props = withDefaults(
     defineProps<{
         width?: string;
-        title: string;
+        title?: string;
         message: string;
         theme?: Theme;
         confirmButtonText?: string;
@@ -80,12 +80,12 @@ const getTheme = computed(() => {
         };
     } else {
         return {
-            bgColor: "var(--color-digital-human)",
+            bgColor: "var(--app-bg-color-2)",
             textColor: "#ffffff",
-            borderColor: "var(--color-digital-human-border)",
+            borderColor: "var(--app-border-color-1)",
             titleColor: "rgba(255,255,255,0.8)",
             msgColor: "rgba(255,255,255,0.5)",
-            cancelBgColor: "var(--color-digital-human)",
+            cancelBgColor: "var(--app-bg-color-2)",
         };
     }
 });

@@ -75,6 +75,7 @@ class ConfigLogic
             'draw' => [
                 'channel' => $hdList['channel'] ?? [],
             ],
+            'app_config' => ConfigService::get('app_config', 'redbook', []),
             'ai_live' =>  ConfigService::get('ai_live', 'config', [])
         ];
         return $config;

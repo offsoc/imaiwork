@@ -46,25 +46,18 @@ class PublishLogic extends BaseLogic
     {
         Db::startTrans();
         try {
-            // 检查机器人是否存在
-            $publish = SvPublishSettingAccount::where('id', $params['id'])->findOrEmpty();
-            if ($publish->isEmpty()) {
-                self::setError('任务不存在');
-                return false;
+            if (is_string($params['id'])) {
+                SvPublishSettingAccount::destroy(['id' => $params['id']]);
+            } else {
+                SvPublishSettingAccount::destroy($params['id']);
             }
 
-            //查询任务明细是否存在
-            $publishDetial = SvPublishSettingDetail::where('publish_id', $params['id'])->findOrEmpty();
-            if (!$publishDetial->isEmpty()) {
-                self::setError('任务正在执行中，不能删除');
-                return false;
-            }
-            $publish->delete();
+            SvPublishSettingDetail::where('publish_account_id', 'in', $params['id'])->select()->delete();
+
             Db::commit();
             return true;
         } catch (\Exception $e) {
             Db::rollback();
-//            clogger($e);
             self::setError($e->getMessage());
             return false;
         }

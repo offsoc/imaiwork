@@ -7,9 +7,7 @@
     </DefineTemplate>
     <div class="flex flex-col gap-5 min-w-[700px]">
         <div v-for="item in resultLists">
-            <div class="text-white">
-                {{ item.date }}
-            </div>
+            <div class="text-white">{{ item.date }}</div>
             <div class="flex flex-wrap items-center gap-2 mt-[11px]">
                 <template v-for="tag in item.tags">
                     <div class="tag-item" v-if="tag">
@@ -18,9 +16,7 @@
                 </template>
             </div>
             <div class="mt-[11px] flex items-center gap-2" v-if="item.prompt">
-                <span class="text-[#ffffffcc]">
-                    {{ item.prompt }}
-                </span>
+                <span class="text-[#ffffffcc]"> {{ item.prompt }} </span>
                 <span class="cursor-pointer" @click="copy(item.prompt)">
                     <Icon name="local-icon-copy2"></Icon>
                 </span>
@@ -36,6 +32,7 @@
                         :class="{ 'pb-[80%] loading': image.loading }">
                         <div class="leading-[0]" v-if="!image.loading && image.status == 1">
                             <div
+                                v-if="isHd(item.formData.model)"
                                 class="absolute rounded-lg bg-[#000000a3] py-[2px] px-2 top-2 right-2 z-[22] w-fit gap-2 group-hover:visible invisible">
                                 <ElTooltip content="下载" placement="top">
                                     <div
@@ -110,6 +107,8 @@
 
 <script setup lang="ts">
 import PreviewVideo from "@/components/preview-video/index.vue";
+import { ModelEnum } from "../_enums";
+
 const props = withDefaults(
     defineProps<{
         type?: "image" | "video";
@@ -126,6 +125,10 @@ const emit = defineEmits<{
 }>();
 
 const { copy } = useCopy();
+
+const isHd = (modelId: number) => {
+    return modelId == ModelEnum.HIDREAMAI;
+};
 
 const showPreviewVideo = ref(false);
 const previewVideoRef = shallowRef<InstanceType<typeof PreviewVideo>>();
@@ -152,8 +155,8 @@ const ErrorTemplate = (props) => {
 </script>
 <style scoped lang="scss">
 .tag-item {
-    background-color: var(--color-digital-human-bg);
-    border: 1px solid var(--color-digital-human-border);
+    background-color: var(--app-bg-color-1);
+    border: 1px solid var(--app-border-color-1);
     color: #ffffff80;
     font-size: 11px;
     border-radius: 6px;

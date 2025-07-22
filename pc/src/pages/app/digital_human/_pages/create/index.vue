@@ -7,7 +7,7 @@
             </div>
         </DefineTemplate>
         <div class="flex-1 flex gap-4 flex-col overflow-hidden">
-            <div class="grow min-h-0 w-full flex flex-col bg-digital-human rounded-xl overflow-hidden">
+            <div class="grow min-h-0 w-full flex flex-col bg-app-bg-2 rounded-xl overflow-hidden">
                 <div class="upload-container" v-if="!formData.url">
                     <div class="upload-title">领先的定制数字人形象</div>
                     <div class="text-xs text-white mt-[10px]">开始创作，打造你的专属数字人分身</div>
@@ -22,7 +22,7 @@
                     <video :src="formData.url" class="w-full h-full object-contain" controls />
                 </div>
             </div>
-            <div class="h-[252px] bg-digital-human flex flex-col rounded-lg flex-shrink-0 anchor-box">
+            <div class="h-[252px] bg-app-bg-2 flex flex-col rounded-lg flex-shrink-0 anchor-box">
                 <div class="relative">
                     <ElTabs :model-value="`clone`" class="w-full">
                         <ElTabPane name="clone" label="克隆数字人"> </ElTabPane>
@@ -47,8 +47,8 @@
                             形象克隆
                         </div>
                     </div>
-                    <ElScrollbar always v-loading="anchorPager.loading">
-                        <div class="flex gap-[14px] py-6 px-4">
+                    <ElScrollbar always>
+                        <div class="flex gap-[14px] py-6 px-4" v-loading="anchorPager.loading">
                             <div
                                 class="anchor-item group bg-black flex-shrink-0"
                                 v-for="(item, index) in anchorPager.lists"
@@ -119,7 +119,7 @@
         </div>
         <div class="create-card">
             <div
-                class="px-4 py-[1px] bg-digital-human-bg rounded-md flex items-center gap-x-3 border border-[var(--color-digital-human-border)]">
+                class="px-4 py-[1px] bg-app-bg-1 rounded-md flex items-center gap-x-3 border border-[var(--app-border-color-1)]">
                 <div class="text-[#ffffff80]">视频名称</div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="2" height="12" viewBox="0 0 2 12" fill="none">
                     <path opacity="0.1" d="M1 0V12" stroke="white" />
@@ -144,10 +144,10 @@
                 </div>
                 <div class="grow min-h-0 mt-4">
                     <div
-                        class="rounded-md border border-[var(--color-digital-human-border)]"
+                        class="rounded-md border border-[var(--app-border-color-1)]"
                         v-if="createType == CreateType.TEXT">
                         <div
-                            class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--color-digital-human-border)]">
+                            class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--app-border-color-1)]">
                             <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
                                 <Icon name="local-icon-txt2" :size="14"></Icon>
                             </div>
@@ -228,10 +228,10 @@
                         </div>
                     </div>
                     <div
-                        class="rounded-md border border-[var(--color-digital-human-border)]"
+                        class="rounded-md border border-[var(--app-border-color-1)]"
                         v-if="createType == CreateType.AUDIO">
                         <div
-                            class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--color-digital-human-border)]">
+                            class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--app-border-color-1)]">
                             <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
                                 <Icon name="local-icon-audio" :size="14"></Icon>
                             </div>
@@ -491,10 +491,10 @@ const openChooseTone = async () => {
 };
 
 const getChooseTone = (data: any) => {
-    const { type, voice_id, name } = data;
+    const { builtin, voice_id, name } = data;
     formData.voice_name = name;
     formData.voice_id = voice_id;
-    formData.voice_type = type;
+    formData.voice_type = builtin;
 };
 
 /** 音色操作 End  */
@@ -638,8 +638,8 @@ getAnchorLists();
 
 :deep(.name-input) {
     .el-input__wrapper {
-        box-shadow: none;
-        background: transparent;
+        box-shadow: none !important;
+        background: transparent !important;
     }
 }
 

@@ -136,6 +136,7 @@ input:-webkit-autofill:active {
     // 美化滚动条
     &::-webkit-scrollbar {
         width: 6px;
+        height: 6px;
         background-color: rgba(255, 255, 255, 0.05);
     }
     &::-webkit-scrollbar-thumb {
@@ -189,12 +190,12 @@ input:-webkit-autofill:active {
     font-family: "digital-number";
 }
 
-.digital-human-select {
-    background-color: var(--color-digital-human) !important;
-    border-color: var(--color-digital-human-border) !important;
+.custom-select-popper {
+    background-color: var(--app-bg-color-2) !important;
+    border-color: var(--app-border-color-1) !important;
     .el-select__wrapper {
         min-height: 40px;
-        background-color: var(--color-digital-human);
+        background-color: var(--app-bg-color-2);
         box-shadow: 0px 0px 0px 1px rgba(255, 255, 255, 0.1);
         border-radius: 100px;
     }
@@ -204,7 +205,7 @@ input:-webkit-autofill:active {
         font-size: 13px;
     }
     &.el-popper {
-        background-color: var(--color-digital-human);
+        background-color: var(--app-bg-color-2);
         border-color: #333333;
         border-radius: 12px;
         .el-select-dropdown {
@@ -223,8 +224,32 @@ input:-webkit-autofill:active {
             &.is-selected,
             &.is-hovering {
                 box-shadow: 0px 0px 0px 1px rgba(255, 255, 255, 0.1);
-                background-color: var(--color-digital-human-bg);
+                background-color: var(--app-bg-color-1);
+            }
+            &.is-disabled {
+                color: #ffffff80;
             }
         }
+    }
+}
+
+.custom-daterange-picker-popper,
+.custom-date-picker-popper {
+    --el-bg-color-overlay: var(--app-bg-color-3);
+    --el-text-color-regular: var(--color-white);
+    --el-datepicker-border-color: var(--app-border-color-1) !important;
+    --el-border-color-lighter: var(--app-border-color-1) !important;
+    --el-fill-color-light: #ffffff1a !important;
+    --el-fill-color-blank: var(--app-bg-color-3) !important;
+    --el-border-color: var(--app-border-color-1) !important;
+    --el-text-color-primary: var(--color-white) !important;
+    --el-border-color-light: var(--app-border-color-1) !important;
+    .el-date-range-picker,
+    .el-date-picker {
+        --el-datepicker-icon-color: var(--color-white);
+        --el-datepicker-inner-border-color: var(--app-border-color-1);
+        --el-datepicker-inrange-bg-color: var(--app-bg-color-1);
+        --el-datepicker-inrange-hover-bg-color: var(--app-bg-color-1);
+        --el-datepicker-border-color: var(--app-border-color-1) !important;
     }
 }

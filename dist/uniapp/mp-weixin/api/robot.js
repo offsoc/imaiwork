@@ -1,0 +1,1 @@
+"use strict";const t=require("../utils/request/index.js");exports.robotCategory=function(e){return t.request.get({url:"/chat/sceneLists",data:e})},exports.robotDetail=function(e){return t.request.get({url:"/chat/sceneChatInfo",data:e})},exports.robotLists=function(e){return t.request.get({url:"/chat/sceneAassistantLists",data:e})};

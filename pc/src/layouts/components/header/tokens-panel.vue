@@ -153,6 +153,7 @@ const getTheme = computed<Theme>(() => {
     switch (key) {
         case AppKeyEnum.DIGITAL_HUMAN:
         case AppKeyEnum.DRAWING:
+        case AppKeyEnum.REDBOOK:
             return {
                 shadow: "0 0 0 1px rgba(255,255,255,0.2)",
             };

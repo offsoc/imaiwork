@@ -20,7 +20,9 @@ class PublishValidate extends BaseValidate
         'video_setting_id' => 'require',
         'publish_start' => 'require',
         'publish_end' => 'require',
-        'status' =>'require'
+        'status' =>'require',
+        'media_type' => 'require',
+        'date_type' => 'in:0,1'
     ];
 
 
@@ -29,10 +31,12 @@ class PublishValidate extends BaseValidate
         'id.require' => '请输入主键ID',
         'name.require' => '请输入任务名称',
         'accounts.require' => '请选择账号',
-        'video_setting_id.require' => '请选择视频集',
+        'video_setting_id.require' => '请选择发布媒体集',
         'publish_start.require' => '请输入发布开始时间',
         'publish_end.require' => '请输入发布结束时间',
-        'status.require' => '缺少状态参数'
+        'status.require' => '缺少状态参数',
+        'media_type.require' => '缺少媒体类型参数',
+        'date_type.in' => '时间类型值只能是0或1',
     ];
 
 
@@ -42,7 +46,7 @@ class PublishValidate extends BaseValidate
      */
     public function sceneAdd()
     {
-        return $this->only([ 'name', 'accounts', 'video_setting_id', 'publish_start', 'publish_end']);
+        return $this->only([ 'name']);
     }
 
     /**
@@ -51,7 +55,7 @@ class PublishValidate extends BaseValidate
      */
     public function sceneUpdate()
     {
-        return $this->only(['id', 'name', 'accounts', 'video_setting_id', 'publish_start', 'publish_end']);
+        return $this->only(['id', 'name', 'accounts', 'video_setting_id']);
     }
 
     /**

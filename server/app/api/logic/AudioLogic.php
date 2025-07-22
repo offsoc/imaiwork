@@ -202,7 +202,12 @@ class AudioLogic extends ApiLogic
                 ]);
 
                 $response = \app\common\service\ToolsService::Asr()->text($request);
-
+                if (isset($response['code']) && $response['code'] == 10005) {
+                    $audioInfo->status = 5;
+                    $audioInfo->remark = 'FAILED';
+                    $audioInfo->save();
+                    throw new \Exception('当前平台算力余额不足，请联系站长');
+                }
                 if (!isset($response['data']['task_id']) || !isset($response['data']['duration'])) {
 
                     $audioInfo->status = 5;
@@ -210,6 +215,7 @@ class AudioLogic extends ApiLogic
                     $audioInfo->save();
                     continue;
                 }
+
 
                 $audioInfo->status  = 3;
 

@@ -19,7 +19,7 @@ class PublishLists extends BaseApiDataLists implements ListsSearchInterface
     public function setSearch(): array
     {
         return [
-            '=' => ['ps.status'],
+            '=' => ['ps.status', 'ps.media_type'],
             '%like%' => ['ps.name', 'a.account']
         ];
     }
@@ -31,6 +31,8 @@ class PublishLists extends BaseApiDataLists implements ListsSearchInterface
     public function lists(): array
     {
         $this->searchWhere[] = ['ps.user_id', '=', $this->userId];
+        $this->searchWhere[] = ['ps.media_type', '=', $this->request->get('media_type', 1)];
+        
         return SvPublishSettingAccount::alias('ps')
             ->field('ps.*, a.nickname, a.avatar')
             ->join('sv_account a', 'a.account = ps.account and a.device_code = ps.device_code and a.type = ps.account_type', 'left')
@@ -42,10 +44,22 @@ class PublishLists extends BaseApiDataLists implements ListsSearchInterface
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
+                if(((int)$item['published_count'] === (int)$item['count']) && (int)$item['status'] === 1){
+                    $item['status'] = 2;
+                    $item->save();
+                }
+                
                 // 请求在线状态
                 $detial = SvPublishSettingDetail::where('publish_account_id',$item->id)->where('status', 0)->order('id', 'asc')->limit(1)->find();
                 $item['next_publish_time'] = !empty($detial) ? $detial['publish_time'] : '';
-                $item['exec_time'] = !empty($detial) ? date('Y-m-d H:i:s', $item['exec_time']) : '';;
+                $item['exec_time'] = !empty($detial) ? date('Y-m-d H:i:s', $item['exec_time']) : '';
+
+                $startDate =strtotime($item['publish_start']);
+                $endDate = strtotime($item['publish_end']);
+                $item['publish_cycle'] = (int)(($endDate - $startDate) / 86400);
+
+                
+
             })
             ->toArray();
     }
@@ -58,8 +72,9 @@ class PublishLists extends BaseApiDataLists implements ListsSearchInterface
     public function count(): int
     {
         $this->searchWhere[] = ['ps.user_id', '=', $this->userId];
+        $this->searchWhere[] = ['ps.media_type', '=', $this->request->get('media_type', 1)];
         return SvPublishSettingAccount::alias('ps')->field('id')
-                ->join('sv_account a', 'a.account = ps.account and a.device_code = ps.device_code and a.type = ps.account_type')
+                ->join('sv_account a', 'a.account = ps.account and a.device_code = ps.device_code and a.type = ps.account_type', 'left')
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('ps.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
             })

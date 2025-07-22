@@ -4,6 +4,7 @@ use think\facade\Log;
 use think\facade\Config;
 use Workerman\Connection\TcpConnection;
 use app\common\model\sv\SvDevice;
+use Channel\Client as ChannelClient;
 abstract class BaseMessageHandler
 {
     protected XhsSocketService $service;
@@ -214,5 +215,23 @@ abstract class BaseMessageHandler
                 Log::channel('socket')->write($e, $level);
             }
         }
+    }
+
+
+    /**
+     * 注册Channel监听
+     * 
+     * @param TcpConnection $connection 连接实例
+     * @return void
+     */
+    public function registerChannelListener(TcpConnection $connection, string $deviceId, string $type = 'device'): void
+    {
+        ChannelClient::connect('127.0.0.1', 2206);
+        // 注册进程消息监听
+        ChannelClient::on("{$type}.{$deviceId}.message", function ($data) use ($connection, $type) {
+            $message = $data['data'];
+            $connection->send($message);
+        });
+        $this->setLog('Channel listener registered: '. $deviceId, 'device');
     }
 }

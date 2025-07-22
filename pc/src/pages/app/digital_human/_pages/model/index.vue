@@ -1,97 +1,112 @@
 <template>
-    <div class="h-full flex flex-col">
-        <div class="flex items-center justify-between bg-digital-human h-[68px] rounded-[20px] px-[14px] flex-shrink-0">
-            <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
-                <ElTabPane label="全部" name=""></ElTabPane>
-                <ElTabPane v-for="item in modelChannel" :label="item.name" :name="item.id" :key="item.id"></ElTabPane>
-            </ElTabs>
-            <div class="flex items-center gap-[14px]">
-                <ElSelect
-                    v-model="queryParams.status"
-                    class="!w-[260px] status-select"
-                    popper-class="digital-human-select"
-                    clearable
-                    :show-arrow="false"
-                    :empty-values="[null, undefined]"
-                    :value-on-clear="null"
-                    @change="resetPage">
-                    <ElOption
-                        v-for="item in statusList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"></ElOption>
-                </ElSelect>
-                <template v-if="pager.lists.length > 0">
-                    <ElButton
-                        type="primary"
-                        class="!h-10 !rounded-full !w-[116px]"
-                        v-if="!isDelete"
-                        @click="isDelete = true">
-                        批量管理
-                    </ElButton>
-                    <div class="flex items-center gap-2" v-else>
-                        <ElCheckbox v-model="isAllSelect" @change="handleAllSelect"> 全选 </ElCheckbox>
-                        <ElButton type="danger" class="!h-10 !rounded-full !w-[90px]" @click="handleDelete(deleteIds)">
-                            删除
-                        </ElButton>
-                        <div>
-                            <ElButton link @click="handleExitDelete">
-                                <span class="text-white">退出管理</span>
+    <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
+        <div class="flex-shrink-0 px-[14px]">
+            <ElScrollbar>
+                <div class="flex items-center justify-between h-[88px]">
+                    <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
+                        <ElTabPane label="全部" name=""></ElTabPane>
+                        <ElTabPane
+                            v-for="item in modelChannel"
+                            :label="item.name"
+                            :name="item.id"
+                            :key="item.id"></ElTabPane>
+                    </ElTabs>
+                    <div class="flex items-center gap-[14px]">
+                        <ElSelect
+                            v-model="queryParams.status"
+                            class="!w-[260px] status-select"
+                            popper-class="custom-select-popper"
+                            clearable
+                            :show-arrow="false"
+                            :empty-values="[null, undefined]"
+                            :value-on-clear="null"
+                            @change="resetPage">
+                            <ElOption
+                                v-for="item in statusList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"></ElOption>
+                        </ElSelect>
+                        <template v-if="pager.lists.length > 0">
+                            <ElButton
+                                type="primary"
+                                class="!h-10 !rounded-full !w-[116px]"
+                                v-if="!isDelete"
+                                @click="isDelete = true">
+                                批量管理
                             </ElButton>
+                            <div class="flex items-center gap-2" v-else>
+                                <ElCheckbox v-model="isAllSelect" @change="handleAllSelect"> 全选 </ElCheckbox>
+                                <ElButton
+                                    type="danger"
+                                    class="!h-10 !rounded-full !w-[90px]"
+                                    @click="handleDelete(deleteIds)">
+                                    删除
+                                </ElButton>
+                                <div>
+                                    <ElButton link @click="handleExitDelete">
+                                        <span class="text-white">退出管理</span>
+                                    </ElButton>
+                                </div>
+                            </div>
+                        </template>
+                        <div>
+                            <ElTooltip content="刷新">
+                                <ElButton
+                                    circle
+                                    color="#1f1f1f"
+                                    icon="el-icon-Refresh"
+                                    class="!w-10 !h-10"
+                                    @click="resetPage()"></ElButton>
+                            </ElTooltip>
                         </div>
                     </div>
-                </template>
-                <div>
-                    <ElTooltip content="刷新">
-                        <ElButton
-                            circle
-                            color="#1f1f1f"
-                            icon="el-icon-Refresh"
-                            class="!w-10 !h-10"
-                            @click="resetPage()"></ElButton>
-                    </ElTooltip>
                 </div>
-            </div>
+            </ElScrollbar>
         </div>
         <div
-            class="grow min-h-0 bg-digital-human overflow-y-auto px-4 rounded-[20px] mt-4 dynamic-scroller"
+            class="grow min-h-0 overflow-y-auto px-4 dynamic-scroller"
             :infinite-scroll-immediate="false"
             :infinite-scroll-disabled="!isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="h-full" v-loading="pager.loading">
-                <div
-                    v-if="pager.lists.length > 0"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 py-4">
+                <div v-if="pager.lists.length">
                     <div
-                        v-for="(item, index) in pager.lists"
-                        class="h-[295px] group relative cursor-pointer overflow-hidden"
-                        :key="index"
-                        @click="handleChoose(item.id)">
-                        <video-item
-                            :item="{
-                                id: item.id,
-                                name: item.name,
-                                pic: item.pic,
-                                status: item.status,
-                                video_url: item.url,
-                                model_version: item.model_version,
-                                remark: item.remark,
-                                create_time: item.create_time,
-                            }"
-                            @delete="handleDelete"
-                            @retry="handleRetry" />
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 py-4">
                         <div
-                            class="absolute top-0 right-0 z-[1000] w-full h-full bg-black/5 flex justify-end p-2"
-                            v-if="isDelete">
-                            <div class="w-6 h-6 rounded-full">
-                                <Icon
-                                    name="local-icon-success_fill"
-                                    :size="20"
-                                    :color="deleteIds.includes(item.id) ? 'var(--el-color-error)' : '#ffffff1a'"></Icon>
+                            v-for="(item, index) in pager.lists"
+                            class="h-[295px] relative cursor-pointer overflow-hidden"
+                            :key="index"
+                            @click="handleChoose(item.id)">
+                            <video-item
+                                :item="{
+                                    id: item.id,
+                                    name: item.name,
+                                    pic: item.pic,
+                                    status: item.status,
+                                    video_url: item.url,
+                                    model_version: item.model_version,
+                                    remark: item.remark,
+                                    create_time: item.create_time,
+                                }"
+                                @delete="handleDelete"
+                                @retry="handleRetry" />
+                            <div
+                                class="absolute top-0 right-0 z-[1000] w-full h-full bg-black/5 flex justify-end p-2"
+                                v-if="isDelete">
+                                <div class="w-6 h-6 rounded-full">
+                                    <Icon
+                                        name="local-icon-success_fill"
+                                        :size="20"
+                                        :color="
+                                            deleteIds.includes(item.id) ? 'var(--el-color-error)' : '#ffffff1a'
+                                        "></Icon>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                 </div>
                 <div class="h-full flex items-center justify-center" v-else>
                     <Empty />
@@ -135,6 +150,7 @@ const deleteIds = ref<number[]>([]);
 const queryParams = reactive({
     page_no: 1,
     page_size: 20,
+    type: 0,
     status: "",
     model_version: "",
 });
@@ -214,8 +230,6 @@ getLists();
 </script>
 
 <style scoped lang="scss">
-@import "../../_assets/styles/index.scss";
-
 :deep(.el-checkbox) {
     .el-checkbox__inner {
         background-color: transparent;

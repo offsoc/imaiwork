@@ -17,10 +17,10 @@ class PublishController extends BaseAdminController
      */
     public function lists()
     { 
-       return $this->dataLists(new PublishLists());
+        return $this->dataLists(new PublishLists());
     }
 
-      /**
+    /**
      * @desc 详情
      */
     public function detail()

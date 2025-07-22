@@ -3,8 +3,22 @@ namespace app\adminapi\lists\sv;
 use app\adminapi\lists\BaseAdminDataLists;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\sv\SvVideoSetting;
+use app\common\model\sv\SvVideoTask;
+use app\common\model\user\User;
+
 class VideoSettingLists extends BaseAdminDataLists implements ListsSearchInterface
 {
+
+    public function setSearch(): array
+    {
+        return [
+            '=' => [ 'type'],
+            '%like%' => ['name'],
+            'between' => ['create_time'],
+            'in' => ['status']
+            // 其他搜索条件
+        ];
+    }
      /**
      * @notes 列表
      * @return array
@@ -14,16 +28,38 @@ class VideoSettingLists extends BaseAdminDataLists implements ListsSearchInterfa
      */
      public function lists(): array
      {
-        return SvVideoSetting::where($this->searchWhere)
-            ->field('id,name,video_count,create_time,status')
-            ->where('type',$this->request->param('type'))
-            ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
-                $query->whereBetween('create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
+        $lists = SvVideoSetting::alias('sv')
+            ->join('user u', 'u.id = sv.user_id')
+
+            ->field('sv.id,sv.name,sv.video_count,sv.create_time,sv.status,sv.update_time,sv.success_num,sv.error_num,sv.user_id,u.nickname')
+            ->order('sv.id','desc')
+            ->when($this->request->get('user'), function ($query) {
+                $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
             })
-            ->order('id','desc')
+            ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
+                $query->whereBetween('sv.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
+            })
+            ->where($this->searchWhere)
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
+
+        foreach ($lists as &$item){
+            $item['anchor_token'] = SvVideoTask::where('video_setting_id',$item['id'])->sum('anchor_token') ?? 0;
+            $item['voice_token'] = SvVideoTask::where('video_setting_id',$item['id'])->sum('voice_token')?? 0;
+            $item['audio_token'] = SvVideoTask::where('video_setting_id',$item['id'])->sum('audio_token')?? 0;
+            $item['video_token'] = SvVideoTask::where('video_setting_id',$item['id'])->sum('video_token')?? 0;
+            $item['all_token'] = $item['anchor_token'] + $item['voice_token']+$item['audio_token']+$item['video_token'];
+            $latest_time = SvVideoTask::where('video_setting_id',$item['id'])->where('status',6)
+                ->max('update_time') ?? '';
+            $item['latest_time'] = '暂无视频合成成功';
+            if ($latest_time){
+                $item['latest_time'] = date('Y-m-d H:i:s',$latest_time);
+            }
+
+        }
+
+         return $lists;
      }
      /**
      * @notes  获取数量
@@ -31,24 +67,16 @@ class VideoSettingLists extends BaseAdminDataLists implements ListsSearchInterfa
      */
     public function count(): int
     {
-        return SvVideoSetting::where($this->searchWhere)
-            ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
-                $query->whereBetween('create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
+        return SvVideoSetting::alias('sv')
+            ->join('user u', 'u.id = sv.user_id')
+            ->when($this->request->get('user'), function ($query) {
+                $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
             })
+            ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
+                $query->whereBetween('sv.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
+            })
+            ->where($this->searchWhere)
             ->count();
     }
 
-     /**
-     * @notes 搜索条件
-     * @return array
-     * @author L
-     * @date 2024-07-10 09:40:09
-     */
-    public function setSearch(): array
-    {
-        return [
-            "%like%" =>  ['name'],
-            '=' => ['status'],
-        ];
-    }
 }

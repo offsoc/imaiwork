@@ -46,11 +46,9 @@ class WorkermanServie extends Command
             // 初始化Channel服务（用于跨进程通信）
             $channel_server = new \Channel\Server('0.0.0.0', 2206);
             // 在这里放心的实例化worker,
-            // 就像参照workerman文档写一样,
-
             $xhsWorker = new Worker('websocket://0.0.0.0:2345');
             $xhsWorker->count = 1;
-            $xhsWorker->name = 'IMAIWORK-XhsSocketService';
+            $xhsWorker->name = 'ImaiworkXhsService';
             $service = new \app\common\workerman\xhs\XhsSocketService($xhsWorker);
             $xhsWorker->onWorkerStart = array($service, 'onWorkerStart');
             $xhsWorker->onConnect     = array($service, 'onConnect');
@@ -58,10 +56,9 @@ class WorkermanServie extends Command
             $xhsWorker->onClose       = array($service, 'onClose');
             $xhsWorker->onError       = array($service, 'onError');
 
-            // 无非在workerman的文档里,代码是新建纯php文件,但在这里,写到了一个方法里.
             $worker = new Worker('websocket://0.0.0.0:2347');
             $worker->count = 4;
-            $worker->name = 'IMAIWORK-WechatSocketService';
+            $worker->name = 'ImaiworkWechatService';
             $service = new \app\common\workerman\wechat\WechatSocketService();
             $worker->onWorkerStart = array($service, 'onWorkerStart');
             $worker->onConnect     = array($service, 'onConnect');
@@ -72,7 +69,7 @@ class WorkermanServie extends Command
             //设备socket
             $tcpWorker = new Worker('tcp://0.0.0.0:6489');
             $tcpWorker->count = 4;
-            $tcpWorker->name = 'IMAIWORK-DeviceSocketService';
+            $tcpWorker->name = 'ImaiworkWechatService';
             $deviceService = new \app\common\workerman\wechat\DeviceSocketService();
             $tcpWorker->onWorkerStart = array($deviceService, 'onWorkerStart');
             $tcpWorker->onConnect     = array($deviceService, 'onConnect');

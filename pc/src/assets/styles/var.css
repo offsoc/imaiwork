@@ -116,11 +116,11 @@
 	--color-redbook: #f45d5d;
 	--aside-width: 228px;
 	--nav-height: 76px;
-	/* 数字人主题 */
-	--color-digital-human: #181818;
-	--color-digital-human-bg: #1f1f1f;
-	--color-digital-human-border: #292929;
-	/* 绘制主题 */
-	--color-draw-bg: #121212;
-	--color-draw-border: #2a2a2a;
+
+	--app-bg-color-1: #1f1f1f;
+	--app-bg-color-2: #181818;
+	--app-bg-color-3: #121212;
+	--app-bg-color-4: #262626;
+	--app-border-color-1: #292929;
+	--app-border-color-2: #2a2a2a;
 }

@@ -19,14 +19,14 @@
                                     :class="[
                                         generateType === item.id
                                             ? 'bg-primary'
-                                            : 'shadow-[0_0_0_1px_#2A2A2A] bg-digital-human-bg ',
+                                            : 'shadow-[0_0_0_1px_#2A2A2A] bg-app-bg-1 ',
                                     ]"
                                     @click="generateType = item.id">
                                     {{ item.name }}
                                 </div>
                             </div>
                             <div
-                                class="mt-3 rounded-md bg-draw-bg border border-draw-border p-[6px]"
+                                class="mt-3 rounded-md bg-bg-app-bg-3 border border-app-border-2 p-[6px]"
                                 v-if="generateType === GenerateTypeEnum.PLATFORM_CHOICE">
                                 <div class="flex items-center gap-2 text-[11px] px-[6px] h-[26px]">
                                     <div
@@ -41,7 +41,7 @@
                                         {{ item.category_zh }}
                                     </div>
                                 </div>
-                                <div class="mt-[6px] h-[232px] bg-draw-bg rounded-md shadow-[0_0_0_1px_#2A2A2A]">
+                                <div class="mt-[6px] h-[232px] bg-bg-app-bg-3 rounded-md shadow-[0_0_0_1px_#2A2A2A]">
                                     <ElScrollbar>
                                         <div class="grid grid-cols-3 gap-2 p-[6px]">
                                             <div
@@ -103,7 +103,7 @@
                                     :class="[
                                         styleKey === item.key
                                             ? 'bg-primary'
-                                            : 'shadow-[0_0_0_1px_#2A2A2A] bg-digital-human-bg ',
+                                            : 'shadow-[0_0_0_1px_#2A2A2A] bg-app-bg-1 ',
                                     ]"
                                     @click="styleKey = item.key">
                                     {{ item.label }}
@@ -121,7 +121,7 @@
                         <div class="w-full flex gap-2">
                             <ElSelect
                                 v-model="currResolution"
-                                popper-class="digital-human-select"
+                                popper-class="custom-select-popper"
                                 class="!w-[120px]"
                                 :show-arrow="false"
                                 @change="handleResolutionChange">
@@ -133,13 +133,13 @@
                             </ElSelect>
                             <div class="flex-1 flex items-center">
                                 <div
-                                    class="h-11 flex-1 flex items-center gap-x-2 bg-draw-bg border border-draw-border px-3 rounded-lg">
+                                    class="h-11 flex-1 flex items-center gap-x-2 bg-bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
                                     <span class="text-white">宽</span>
                                     <span class="text-[#ffffff80]">{{ getResolutionSize.width }}</span>
                                 </div>
                                 <div>x</div>
                                 <div
-                                    class="h-11 flex-1 flex items-center gap-x-2 bg-draw-bg border border-draw-border px-3 rounded-lg">
+                                    class="h-11 flex-1 flex items-center gap-x-2 bg-bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
                                     <span class="text-white">高</span>
                                     <span class="text-[#ffffff80]">{{ getResolutionSize.height }}</span>
                                 </div>
@@ -171,7 +171,7 @@
 <script setup lang="ts">
 import { getApiUrl } from "@/utils/env";
 import { getTemplateList } from "@/api/drawing";
-import { goodsResolutionOptions as resolutionOptions } from "../_enums/drawEnums";
+import { goodsResolutionOptions as resolutionOptions } from "../_enums";
 import { CopywritingTypeEnum } from "../../_enums/chatEnum";
 import ImageUpload from "./image-upload.vue";
 import CaseImageV2 from "./case-image-v2.vue";
@@ -377,7 +377,3 @@ defineExpose({
     setPrompt,
 });
 </script>
-
-<style scoped lang="scss">
-@import "../_assets/styles/index.scss";
-</style>

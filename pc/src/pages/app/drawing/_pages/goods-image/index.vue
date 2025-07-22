@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { dayjs, ElScrollbar } from "element-plus";
 import { drawingGoods } from "@/api/drawing";
-import { drawTypeEnumMap, DrawTypeEnum } from "../../_enums/drawEnums";
+import { drawTypeEnumMap, DrawTypeEnum } from "../../_enums";
 import useCreateForm from "../../_hooks/useCreateForm";
 import useDrawingTask, { ResultItem } from "../../_hooks/useDrawingTask";
 import ResultContent from "../../_components/result-content.vue";

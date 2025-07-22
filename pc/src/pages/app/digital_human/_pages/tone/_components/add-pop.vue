@@ -3,7 +3,7 @@
         ref="popupRef"
         width="400px"
         async
-        style="padding: 18px; background-color: var(--color-digital-human)"
+        style="padding: 18px; background-color: var(--app-bg-color-2)"
         confirm-button-text=""
         cancel-button-text=""
         :show-close="false"
@@ -40,7 +40,7 @@
                         v-model="formData.gender"
                         class="!h-11"
                         placeholder="请选择性别"
-                        popper-class="digital-human-select"
+                        popper-class="custom-select-popper"
                         :show-arrow="false">
                         <ElOption value="male" label="男"></ElOption>
                         <ElOption value="female" label="女"></ElOption>
@@ -50,7 +50,7 @@
                     <ElSelect
                         v-model="formData.model_version"
                         class="!h-11"
-                        popper-class="digital-human-select"
+                        popper-class="custom-select-popper"
                         :show-arrow="false"
                         placeholder="请选择模型">
                         <ElOption
@@ -70,7 +70,7 @@
                         :size="20"
                         :accept="getAccept"
                         @success="handleFileSuccess">
-                        <div class="h-[166px] bg-digital-human-bg rounded-lg flex flex-col justify-center items-center">
+                        <div class="h-[166px] bg-app-bg-1 rounded-lg flex flex-col justify-center items-center">
                             <div
                                 class="w-12 h-12 rounded-xl flex items-center justify-center border border-dashed border-[#ffffff1a] hover:border-[#ffffff33] cursor-pointer mt-8 flex-shrink-0">
                                 <Icon name="el-icon-Plus" color="#ffffff"></Icon>
@@ -192,11 +192,11 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-@import "../../../_assets/styles/index.scss";
+@import "@/pages/app/_assets/styles/index.scss";
 
 :deep(.el-upload-dragger) {
     padding: 0;
-    border-color: var(--color-digital-human-border);
+    border-color: var(--app-border-color-1);
     background-color: transparent;
     border-radius: 10px;
     &:hover {

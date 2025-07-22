@@ -5,7 +5,7 @@
         confirm-button-text=""
         cancel-button-text=""
         :show-close="false"
-        style="padding: 0; background-color: var(--color-digital-human-bg)">
+        style="padding: 0; background-color: var(--app-bg-color-1)">
         <div class="py-[18px] -my-4">
             <div class="absolute top-[18px] right-[18px] w-6 h-6" @click="close">
                 <close-btn></close-btn>
@@ -38,7 +38,8 @@
             </div>
             <div class="mt-5 px-4">
                 <template v-if="optionsData.assembleLists.length > 0">
-                    <div class="bg-draw-bg border border-draw-border rounded-lg px-4 py-2 min-h-[40px] relative mt-4">
+                    <div
+                        class="bg-bg-app-bg-3 border border-app-border-2 rounded-lg px-4 py-2 min-h-[40px] relative mt-4">
                         <div class="text-white text-xs">
                             {{ `${getAssemblePrompt}` }}
                         </div>
@@ -130,11 +131,11 @@ defineExpose({
 :deep(.el-tabs) {
     .el-tabs__nav,
     .el-tabs__header {
-        border-color: var(--color-draw-border);
+        border-color: var(--app-border-color-2);
     }
     .el-tabs__item {
         color: #ffffff;
-        border-color: var(--color-draw-border);
+        border-color: var(--app-border-color-2);
     }
 }
 .title-text {

@@ -16,14 +16,14 @@
                 },
             ],
         }"
-        popper-class="!rounded-xl !bg-digital-human !shadow-none !border-none"
+        popper-class="!rounded-xl !bg-app-bg-2 !shadow-none !border-none"
         class="">
         <template #reference>
             <ElButton
                 type="primary"
                 size="small"
                 color="rgba(255, 255, 255, 0.1)"
-                class="!px-3 !border !border-[var(--color-digital-human-border)]"
+                class="!px-3 !border !border-[var(--app-border-color-1)]"
                 :disabled="disabled">
                 <div class="gap-1 flex items-center justify-center">
                     <Icon name="local-icon-fabang" color="#ffffff"></Icon>
@@ -64,7 +64,7 @@
                 <div class="flex items-center justify-between mt-2">
                     <ElSegmented
                         v-model="currentPromptValue"
-                        class="w-full !bg-digital-human-bg !h-11 !rounded-full"
+                        class="w-full !bg-app-bg-1 !h-11 !rounded-full"
                         :props="{}"
                         :options="getPromptList"></ElSegmented>
                 </div>
@@ -86,7 +86,7 @@
                             <div
                                 v-for="(content, index) in chatContentList"
                                 :key="index"
-                                class="border border-[var(--color-digital-human-border)] bg-digital-human-bg leading-[22px] rounded-lg p-4">
+                                class="border border-[var(--app-border-color-1)] bg-app-bg-1 leading-[22px] rounded-lg p-4">
                                 <div class="text-white">
                                     {{ content }}
                                 </div>
@@ -200,8 +200,8 @@ const { lockFn: lockSubmit, isLock } = useLockFn(handleGeneratePrompt);
     color: #ffffff;
     border-radius: 100px;
     &.is-active {
-        background-color: var(--color-digital-human-bg);
-        border-color: var(--color-digital-human-bg);
+        background-color: var(--app-bg-color-1);
+        border-color: var(--app-bg-color-1);
     }
 
     &:not(.is-disabled):not(.is-selected):hover {

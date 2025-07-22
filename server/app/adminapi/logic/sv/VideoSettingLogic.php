@@ -42,7 +42,7 @@ class VideoSettingLogic extends BaseLogic
      * @param array $params
      * @return bool
      */
-    public static function deleteSvVideoSetting(array $params)
+    public static function del(array $params)
     {
         try {
             if (is_string($params['id'])) {

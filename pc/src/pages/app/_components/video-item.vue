@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-full flex flex-col bg-black rounded-xl overflow-hidden border border-[rgba(255,255,255,0.2)]">
+    <div class="video-item group">
         <div
             class="grow min-h-0 relative"
             :style="{
@@ -16,7 +16,7 @@
                 :class="[activeVideo == item.id ? '!visible' : '']"
                 style="backdrop-filter: blur(5px)">
                 <ElPopover
-                    popper-class="!w-[212px] !min-w-[212px] !p-2 !rounded-xl !border-[#333333] !bg-digital-human"
+                    popper-class="!w-[212px] !min-w-[212px] !p-2 !rounded-xl !border-[#333333] !bg-app-bg-2"
                     :show-arrow="false"
                     :popper-options="{
                         modifiers: [{ name: 'offset', options: { offset: [100, 20] } }],
@@ -24,14 +24,14 @@
                     @show="visibleChange(true, item.id)"
                     @hide="visibleChange(false, item.id)">
                     <template #reference>
-                        <div class="rotate-90 origin-center mr-1">
+                        <div class="rotate-90 origin-center mr-1 cursor-pointer">
                             <Icon name="el-icon-MoreFilled" color="#ffffff"></Icon>
                         </div>
                     </template>
                     <div class="flex flex-col gap-2 text-white">
                         <DefineTemplate v-slot="{ label, icon }">
                             <div
-                                class="h-11 px-3 rounded-lg cursor-pointer flex items-center gap-3 hover:shadow-[0_0_0_1px_rgba(42,42,42,1)] hover:bg-digital-human-bg">
+                                class="h-11 px-3 rounded-lg cursor-pointer flex items-center gap-3 hover:shadow-[0_0_0_1px_rgba(42,42,42,1)] hover:bg-app-bg-1">
                                 <span
                                     class="flex w-5 h-5 rounded bg-[rgba(255,255,255,0.05)] items-center justify-center">
                                     <Icon :name="icon" color="#ffffff"></Icon>
@@ -40,25 +40,23 @@
                             </div>
                         </DefineTemplate>
                         <div v-if="item.status == 1" @click="handleDownLoad(item.video_url)">
-                            <SelectItemTemplate label="下载视频" icon="el-icon-Download" />
+                            <SelectItemTemplate label="下载视频" icon="local-icon-download" />
                         </div>
                         <div v-if="[2, 5].includes(item.status)" @click="handleRetry(item.id)">
                             <SelectItemTemplate label="重试视频" icon="el-icon-Refresh" />
                         </div>
                         <div @click="handleDelete(item.id)">
-                            <SelectItemTemplate label="删除视频" icon="el-icon-Delete" />
+                            <SelectItemTemplate label="删除视频" icon="local-icon-delete" />
                         </div>
                     </div>
                 </ElPopover>
             </div>
             <template v-if="item.status == 1">
                 <div
-                    class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-70%] z-[99]"
+                    class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-[99]"
                     @click="handlePlay(item.video_url)">
-                    <div
-                        class="w-12 h-12 rounded-full flex items-center justify-center bg-[#ffffff33]"
-                        style="backdrop-filter: blur(5px)">
-                        <Icon name="local-icon-play2" :size="40"></Icon>
+                    <div class="w-12 h-12">
+                        <play-btn></play-btn>
                     </div>
                 </div>
             </template>
@@ -177,16 +175,11 @@ const handlePlay = async (url: string) => {
     videoPlayerRef.value.setUrl(url);
 };
 
-let render;
-const DefineTemplate = {
-    setup(_, { slots }) {
-        return () => {
-            render = slots.default;
-        };
-    },
-};
-
-const SelectItemTemplate = (props) => {
-    return render && render(props);
-};
+const { DefineTemplate, UseTemplate: SelectItemTemplate } = useTemplate();
 </script>
+
+<style lang="scss" scoped>
+.video-item {
+    @apply flex gap-x-4 h-[295px] relative overflow-hidden border border-[#ffffff33] rounded-xl;
+}
+</style>

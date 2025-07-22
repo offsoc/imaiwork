@@ -1,6 +1,10 @@
 <template>
-    <div class="p-4 flex gap-[10px] h-full bg-digital-human-bg">
-        <Sidebar :sidebar="sidebar" :sidebar-index="sidebarIndex" @update:sidebar-index="getSliderIndex" />
+    <div class="p-4 flex gap-[10px] h-full bg-app-bg-1">
+        <Sidebar
+            :sidebar="sidebar"
+            :sidebar-index="sidebarIndex"
+            :theme="ThemeEnum.DARK"
+            @update:sidebar-index="getSliderIndex" />
         <div class="grow overflow-hidden">
             <component :is="getComponents"></component>
         </div>
@@ -8,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { AppKeyEnum, ThemeEnum } from "@/enums/appEnums";
 import Sidebar from "../_components/sidebar.vue";
 import Create from "./_pages/create/index.vue";
 import Model from "./_pages/model/index.vue";
@@ -15,7 +20,6 @@ import Tone from "./_pages/tone/index.vue";
 import Audio from "./_pages/audio/index.vue";
 import Video from "./_pages/video/index.vue";
 import useSidebar from "../_hooks/useSidebar";
-import { AppKeyEnum } from "@/enums/appEnums";
 
 const { sidebar, sidebarIndex, getComponents, getSliderIndex } = useSidebar();
 
@@ -33,3 +37,6 @@ definePageMeta({
     key: AppKeyEnum.DIGITAL_HUMAN,
 });
 </script>
+<style scoped lang="scss">
+@import "@/pages/app/_assets/styles/index.scss";
+</style>

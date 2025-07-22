@@ -1065,7 +1065,8 @@ class KnowledgeLogic extends ApiLogic
      * @return array
      * @throws \Exception
      */
-    private static function requestUrl(array $request, string $scene, int $userId, array $record = []): array
+    private static function requestUrl(array $request, string $scene, int $userId, array $record = [], bool $isReturn = false): array
+
     {
 
         $requestService = \app\common\service\ToolsService::Knowledge();
@@ -1129,9 +1130,13 @@ class KnowledgeLogic extends ApiLogic
         }
 
         if((int)$response['code'] === 10005){
-            message($response['message']);
+            if($isReturn){
+                return $response;
+            }else{
+                message($response['message']);
+            }
         }
-        
+
         return $response['data'] ?? [];
     }
     
@@ -1415,7 +1420,7 @@ class KnowledgeLogic extends ApiLogic
                 'scene' => $params['scene'] ?? '未知聊天',
                 'assistant_id' => $params['assistant_id'] ?? 0
             ];
-            
+
             self::__getRequestData($request, $params);
         
             $record = array(
@@ -1446,7 +1451,7 @@ class KnowledgeLogic extends ApiLogic
                 $prompt = "请根据以下知识库内容回答问题：
                         {$texts}
                         问题：{$message}";
-                
+
                 $messages = $params['messages'] ?? [];
                 if(isset($messages[0]['content'])){
                     $messages[0]['content'] = str_replace(
@@ -1455,8 +1460,8 @@ class KnowledgeLogic extends ApiLogic
                         $messages[0]['content']
                     );
                 }
-                
-                
+
+
                 $request['user_id'] = $uid; // 替换为实际的用户ID
                 $request['prompt'] = $prompt;
                 $request['knowledge_tokens'] = ceil($textLength / 4);
@@ -1464,9 +1469,13 @@ class KnowledgeLogic extends ApiLogic
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;
                 $request['messages'] = $messages;
-                
 
-                $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
+
+                $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record, true);
+                if(isset($result['code']) && (int)$result['code'] !== 10000){
+                    return [false, $result['message'] ?? '知识库检索失败'];
+                }
+
                 return [true, $result];
             }else{
                 return [false, $response['message'] ?? '知识库检索失败'];

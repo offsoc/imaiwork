@@ -9,7 +9,7 @@ export default function useSidebar() {
 
     const routerParams = ref<Record<string, any>>({});
 
-    const sidebar = ref<Array<{ type: number; components: any; icon?: string; name: string }>>([]);
+    const sidebar = ref<Array<{ type: number; components: any; icon?: string; name: string; disabled?: boolean }>>([]);
     const sidebarIndex = ref<number>(0);
 
     const getComponents = computed(() => {

@@ -52,7 +52,7 @@ class MessageHandler extends BaseMessageHandler
 
 
             $worker = $this->service->getWorker();
-            $this->setLog(array_keys($worker->uidConnections), 'msg');
+            //$this->setLog(array_keys($worker->uidConnections), 'msg');
             $device_uid = $worker->devices[$this->payload['deviceId']] ?? '';
             if ($device_uid == '') {
                 $this->payload['reply'] = "设备{$this->payload['deviceId']}不在线,无法获取账号信息";
@@ -67,7 +67,7 @@ class MessageHandler extends BaseMessageHandler
                 $this->sendResponse($this->uid, $this->payload, $this->payload['reply']);
                 return;
             }
-            $this->setLog('当前设备对应进程名称:' . $this->connection->name .  ' : ' . $this->connection->uid, 'msg');
+            //$this->setLog('当前设备对应进程名称:' . $this->connection->name .  ' : ' . $this->connection->uid, 'msg');
 
             if ($this->msgType == WorkerEnum::RPA_NEW_PRIVATE_MESSAGE) {
                 $this->connection->replyMessage = [];
@@ -190,7 +190,7 @@ class MessageHandler extends BaseMessageHandler
                 $where[] = ['a.account', '=', $accountNo];
             }
             $this->setLog('accountNo:' . $accountNo, 'msg');
-            $this->setLog($where, 'msg');
+            //$this->setLog($where, 'msg');
             $account = SvAccount::alias('a')
                 ->field('*')
                 ->where($where)
@@ -214,7 +214,7 @@ class MessageHandler extends BaseMessageHandler
                 $this->sendErrorResponse($content, $this->payload['reply']);
                 return;
             }
-
+            //只解析文字消息中的微信号
             list($autoStatus, $autoStrategy) = $this->autoAddWechatOperation($content, $account);
             if($autoStatus){
                 $this->setLog('加微后回复:'. $this->payload['deviceId'],'msg');
@@ -227,10 +227,11 @@ class MessageHandler extends BaseMessageHandler
                     'lastMessageContent' => $content['replyContent'] ?? ''
                 );
                 $this->payload['type'] = 6;
-
                 $this->sendResponse($this->uid, $this->payload, $this->payload['reply']);
                 return;
             }
+            
+
             //接收到的消息
             $content['type'] = WorkerEnum::WEB_RECEIVE_PRIVATE_MESSAGE_TEXT;
             $this->sendToWeb($account, $content);
@@ -276,7 +277,7 @@ class MessageHandler extends BaseMessageHandler
                 $robot = SvRobot::where('id', $account['robot_id'])->findOrEmpty();
                 if ($robot->isEmpty()) {
                     $this->setLog('机器人不存在:' . $this->payload['deviceId'], 'msg');
-                    $this->setLog($account, 'msg');
+                    //$this->setLog($account, 'msg');
 
                     $this->payload['reply'] = "机器人不存在";
                     $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
@@ -305,7 +306,7 @@ class MessageHandler extends BaseMessageHandler
                     'device_code' => $this->payload['deviceId'],
                     'message' => array_values(array_filter($content['replyContent'])),
                     'message_id' => $this->payload['messageId'],
-                    'message_type' => 1,
+                    'message_type' => $content['message_type'] ?? 1,
                 ];
                 $keys = $this->checkCradKeyword($account, $request);
                 $request['message'] = empty($keys) ? $content['replyContent'] : $keys;
@@ -314,6 +315,7 @@ class MessageHandler extends BaseMessageHandler
                     $this->setLog('图片回复' . $this->payload['deviceId'], 'msg');
                     $request['message']  = $reply->image_reply;
                     $request['message_list'] = [$reply->image_reply];
+                    $request['message_type'] = 1;
                     $this->send($request);
                     $this->updatePrivateMessageStatus($account, $friend);
                     return;
@@ -346,13 +348,7 @@ class MessageHandler extends BaseMessageHandler
                     $this->updatePrivateMessageStatus($account, $friend);
                     return;
                 }
-
-                //7匹配预设的关键词,匹配到则回复
-                // $match = $this->regularMatchKeyword($robot, $request);
-                // if ($match) {
-                //     $this->setLog('正则匹配关键词:'. $this->payload['deviceId'], 'msg');
-                //     return;
-                // }
+                
                 SvPrivateMessage::where('user_id', '=', $request['user_id'])
                     ->where('account', $request['account'])
                     ->where('friend_id', $request['friend_id'])
@@ -374,6 +370,16 @@ class MessageHandler extends BaseMessageHandler
 
                     foreach ($messages as $message) {
                         $request['message'] = $message['message_content'];
+                        list($request['message'], $messageType) = $this->parseContent($request['message']);
+                        if ($reply->image_enable == 1 && $messageType === 2) {
+                            $this->setLog('图片回复' . $this->payload['deviceId'], 'msg');
+                            
+                            if ($this->connection->multipleType) {
+                                array_push($this->connection->replyMessage,  $reply->image_reply);
+                            }
+                            $this->updatePrivateMessageStatus($account, $friend);
+                            continue;
+                        }
 
                         $matchAccount = $this->regularAccountKeyword($account, $request);
                         if ($matchAccount) {
@@ -391,7 +397,7 @@ class MessageHandler extends BaseMessageHandler
 
                         $message_logs = array(
                             'role' => 'user',
-                            'content' => $message['message_content']
+                            'content' => $request['message']
                         );
                         $this->parseAiPrompt($robot, $request, [$message_logs]);
 
@@ -457,6 +463,8 @@ class MessageHandler extends BaseMessageHandler
                         if ($reply->multiple_type == 1) { //合并回复
                             $message_logs = array();
                             foreach ($messages as $message) {
+                                list($message['message_content'], $messageType) = $this->parseContent($message['message_content']);
+
                                 array_push($message_logs, array(
                                     'role' => 'user',
                                     'content' => $message['message_content']
@@ -468,7 +476,16 @@ class MessageHandler extends BaseMessageHandler
                             $lastMessage = $messages[count($messages) - 1]['message_content'];
 
                             $request['message'] = $lastMessage;
-
+                            list($request['message'], $messageType) = $this->parseContent($request['message']);
+                            if ($reply->image_enable == 1 && $messageType === 2) {
+                                $this->setLog('图片回复' . $this->payload['deviceId'], 'msg');
+                                $request['message']  = $reply->image_reply;
+                                $request['message_list'] = [$reply->image_reply];
+                                $request['message_type'] = 1;
+                                $this->send($request);
+                                $this->updatePrivateMessageStatus($account, $friend);
+                                return;
+                            }
                             $matchAccount = $this->regularAccountKeyword($account, $request);
                             if ($matchAccount) {
                                 $this->setLog('固定话术匹配:' . $this->payload['deviceId'], 'msg');
@@ -485,7 +502,7 @@ class MessageHandler extends BaseMessageHandler
                             } else {
                                 $message_logs = array(
                                     'role' => 'user',
-                                    'content' => $lastMessage
+                                    'content' => $request['message']
                                 );
 
                                 $this->parseAiPrompt($robot, $request, [$message_logs]);
@@ -555,8 +572,12 @@ class MessageHandler extends BaseMessageHandler
 
                 $isInWechat = false;
                 foreach($replyContent  as $key => $content){
-                    $this->setLog($content , 'msg');
-                    
+                    //$this->setLog($content , 'msg');
+                    list($content, $messageType) = $this->parseContent($content);
+                    $content = str_replace(["加vx", "加VX", "加v", "加V", "加wx", "加WX", "+wx", "+WX", "+vx", "+VX", "+v", "+V"], '', $content);
+                    if($messageType === 2){
+                        continue;
+                    }
                     $matchs = [];
                     if($strategy['wechat_reg_type'] == 0){
                         preg_match_all($pattern, $content, $matchs, PREG_SET_ORDER);
@@ -570,7 +591,7 @@ class MessageHandler extends BaseMessageHandler
                     }
                     
                     if(!empty($matchs)){
-                        $this->setLog($matchs , 'msg');
+                        //$this->setLog($matchs , 'msg');
                         $isInWechat = true;
                         foreach($matchs as $match){
                             $this->setLog($match , 'msg');
@@ -755,8 +776,8 @@ class MessageHandler extends BaseMessageHandler
                         'new_message_count' => 1,
                         'create_time' => time()
                     ]);
-                    $this->setLog('addMessage消息记录:', 'msg');
-                    $this->setLog($result, 'msg');
+                    //$this->setLog('addMessage消息记录:', 'msg');
+                    //$this->setLog($result, 'msg');
                 }
             } else {
                 $result = SvPrivateMessage::create([
@@ -772,8 +793,8 @@ class MessageHandler extends BaseMessageHandler
                     'new_message_count' => 1,
                     'create_time' => time()
                 ]);
-                $this->setLog('addMessage消息记录:', 'msg');
-                $this->setLog($result, 'msg');
+                //$this->setLog('addMessage消息记录:', 'msg');
+                //$this->setLog($result, 'msg');
             }
         } catch (\Exception $e) {
             $this->setLog('addMessage' . $e, 'error');
@@ -825,7 +846,7 @@ class MessageHandler extends BaseMessageHandler
             $this->setLog('AI回复逻辑:' . $request['device_code'], 'msg');
 
             $appType = $request['payload']['appType'] ?? 3;
-            $this->setLog('appType:' . $appType, 'msg');
+            //$this->setLog('appType:' . $appType, 'msg');
             //检查扣费
             $unit = TokenLogService::checkToken($request['user_id'], 'ai_xhs');
             $this->setLog('检查扣费unit:' . $unit, 'msg');
@@ -1004,11 +1025,6 @@ class MessageHandler extends BaseMessageHandler
         }
     }
 
-    private function formatResponse(string $content)
-    {
-        $content = str_replace(['根据知识库内容'], '', $content);
-        return $content;
-    }
 
     /**
      * 处理响应
@@ -1066,6 +1082,11 @@ class MessageHandler extends BaseMessageHandler
             SvAccountKeyword::where('account', $account->account)->select()->each(function ($item) use ($request, &$keywords) {
                 $types = array_column($item->reply, 'type');
                 foreach ($request['message'] as $_message) {
+                    list($_message, $messageType) = $this->parseContent($_message);
+                    if($messageType === 2){
+                        continue;
+                    }
+
                     // 模糊匹配
                     if ($item->match_type == 0) {
                         if (strpos($item->keyword, $_message) !== false || strpos($_message, $item->keyword) !== false) {
@@ -1165,7 +1186,7 @@ class MessageHandler extends BaseMessageHandler
         try {
             // 获取微信机器人设置的正关键词
             SvRobotKeyword::where('robot_id', $robot->id)->select()->each(function ($item) use ($request, &$match) {
-                $this->setLog('匹配类型:' . $item->match_type . " msg: {$request['message']},   key: {$item->keyword}   reg: " . str_contains($request['message'], $item->keyword), 'msg');
+                //$this->setLog('匹配类型:' . $item->match_type . " msg: {$request['message']},   key: {$item->keyword}   reg: " . str_contains($request['message'], $item->keyword), 'msg');
                 // 模糊匹配
                 if ((int)$item->match_type === 0) {
                     // if (str_contains($request['message'], $item->keyword)) {
@@ -1202,18 +1223,17 @@ class MessageHandler extends BaseMessageHandler
         $stop = false;
 
         $keywords = explode(';', $reply->stop_keywords);
-
+        $messages = $request['message'];
         // 获取微信机器人设置的正关键词
         foreach ($keywords as $keyword) {
-
-            if ((string)$keyword === $request['message']) {
-
-                $stop = true;
-
-                break;
+            foreach ($messages as $message){
+                list($message, $messageType) = $this->parseContent($message);
+                if ((string)$keyword === $message && $messageType === 1) {
+                    $stop = true;
+                    break;
+                }
             }
         }
-
         return $stop;
     }
 
@@ -1287,6 +1307,16 @@ class MessageHandler extends BaseMessageHandler
             $this->payload['reply'] = "AI 回复异常:" . $e->getMessage();
             $this->payload['code'] = WorkerEnum::MSG_ERROR_CODE;
         }
+    }
+
+
+    private function parseContent(string $content): array
+    {
+        $content = explode(" && ", $content);
+        return [
+            $content[0],
+            isset($content[1]) ? (int)$content[1] : 1
+        ];
     }
 
     private function addReplyMessage(array $request)

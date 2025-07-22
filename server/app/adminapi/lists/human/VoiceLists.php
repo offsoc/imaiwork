@@ -20,7 +20,7 @@ class VoiceLists extends BaseAdminDataLists implements ListsSearchInterface
     {
         return [
             "%like%" => ['name'],
-            "=" => ['model_version']
+            "=" => ['model_version',]
         ];
     }
 
@@ -36,16 +36,22 @@ class VoiceLists extends BaseAdminDataLists implements ListsSearchInterface
     public function lists(): array
     {
 
+        $type = $this->request->get('type','0');
+        if (trim($type) == ''){
+            $type = 0;
+        }
         //模型版本
         $modelList = ConfigService::get('model', 'list', []);
         $modelVersion = $modelList['channel'];
         return HumanVoice::alias('hv')
             ->join('user u', 'u.id = hv.user_id')
-            ->field('hv.id,hv.name,hv.gender,hv.user_id,hv.model_version,hv.task_id,hv.create_time,hv.voice_urls,hv.status,u.nickname,u.avatar')
-            ->field('hv.id,hv.name,hv.user_id,hv.model_version,hv.gender,
+            ->field('hv.id,hv.name,hv.user_id,hv.model_version,hv.gender,hv.type,
             hv.task_id,hv.create_time,hv.voice_urls,hv.status,u.nickname,u.avatar')
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
+            })
+            ->when($type, function ($query)use ($type){
+                $query->where('hv.type', $type );
             })
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('hv.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
@@ -56,7 +62,7 @@ class VoiceLists extends BaseAdminDataLists implements ListsSearchInterface
             ->select()
             ->each(function ($item) use ($modelVersion) {
                 $item['url']        = FileService::getFileUrl($item['voice_urls']);
-                $item['avatar']     = FileService::getFileUrl($item['avatar']);
+                $item['avatar']     =  trim($item['avatar']) ?  FileService::getFileUrl($item['avatar']) : "";
 
                 //模型版本
                 foreach ($modelVersion as $value) {
@@ -77,16 +83,16 @@ class VoiceLists extends BaseAdminDataLists implements ListsSearchInterface
                         break;
                     case 6:
                         $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT;
-                                
+
                         break;
-                }   
+                }
 
                 // 消耗情况
                 $points1 = UserTokensLog::where('user_id', $item['user_id'])->where('action',1)
-                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? 0;
 
                 $points2 = UserTokensLog::where('user_id', $item['user_id'])->where('action',2)
-                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? 0;
                 $item['points'] = $points1 + $points2 ;
             })
             ->toArray();
@@ -101,10 +107,17 @@ class VoiceLists extends BaseAdminDataLists implements ListsSearchInterface
      */
     public function count(): int
     {
+        $type = $this->request->get('type','0');
+        if (trim($type) == ''){
+            $type = 0;
+        }
         return HumanVoice::alias('hv')
             ->join('user u', 'u.id = hv.user_id')
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
+            })
+            ->when($type, function ($query)use ($type){
+                $query->where('hv.type', $type );
             })
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('hv.create_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);

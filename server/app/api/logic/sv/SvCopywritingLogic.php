@@ -39,8 +39,20 @@ class SvCopywritingLogic extends SvBaseLogic
             Db::startTrans();
             try {
                 // 添加文案
-                $copywriting = SvCopywriting::create($params);
-                
+                if ($params['id'] > 0){
+                    $copywriting = SvCopywriting::where('id',$params['id'])
+                        ->where('user_id', $params['user_id'])
+                        ->findOrEmpty();
+                    if ($copywriting->isEmpty()){
+                        throw new \Exception('文案不存在');
+                    }
+                    SvCopywriting::where('id',$params['id'])
+                        ->where('user_id', $params['user_id'])
+                        ->update(['keyword'=> $params['keyword'],'total_num'=> $params['total_num']]);
+                }else{
+                    $copywriting = SvCopywriting::create($params);
+                }
+                $params['status'] = $params['channel'] == 2 ? 0 : $params['status'];
                 // 如果状态为待处理，则创建任务
                 if ($params['status'] == 0) {
                     // 准备基础任务数据
@@ -61,7 +73,6 @@ class SvCopywritingLogic extends SvBaseLogic
                         $taskTypes = [
                             ['type' => 1, 'scene' => self::KEYWORD_TO_TITLE],
                             ['type' => 2, 'scene' => self::KEYWORD_TO_SUBTITLE],
-                            ['type' => 3, 'scene' => self::KEYWORD_TO_COPYWRITING]
                         ];
 
                         foreach ($taskTypes as $type) {
@@ -95,10 +106,14 @@ class SvCopywritingLogic extends SvBaseLogic
                     }
                     $copywriting->save();
                 }
+                foreach ($tasks as &$task){
+                    $task['response_content'] = json_decode($task['response_content'], JSON_UNESCAPED_UNICODE);
+                }
 
+                self::$returnData = $tasks;
                 Db::commit();
                 // 返回文案信息
-                self::$returnData = $copywriting->toArray();
+
                 return true;
             } catch (\Exception $e) {
                 Db::rollback();
@@ -168,7 +183,14 @@ class SvCopywritingLogic extends SvBaseLogic
                 ];
             }
             if(count( $contents )>0){
-                (new SvCopywritingContent())->saveAll( $contents);
+                $result =  (new SvCopywritingContent())->saveAll( $contents);
+                $insertIds = [];
+                foreach ($result as $key => $item) {
+                    $response['content'][$key] = [
+                        'id' => $item->id,
+                        'content' => $response['content'][$key]
+                    ];
+                }
             }
         }
         $taskData['response_content'] = json_encode($response);
@@ -191,9 +213,9 @@ class SvCopywritingLogic extends SvBaseLogic
                 return false;
             }
 
-            $params['writingtype'] = $params['writingtype'] ?? 1;
+            $params['type'] = $params['type'] ?? 1;
             $SvCopywritingContent =SvCopywritingContent::where('copywriting_id', $params['id'])
-            ->where('type', $params['writingtype'])->select();
+            ->where('type', $params['type'])->select();
          
             // 返回文案信息
             self::$returnData = $SvCopywritingContent->toArray();
@@ -393,5 +415,63 @@ class SvCopywritingLogic extends SvBaseLogic
         }
 
     }
+
+
+    public static function addSvCopywritingName(array $params)
+    {
+        try {
+            $params['user_id'] = self::$uid;
+            $params['status'] = 2;
+
+            $item = [
+              '0'=>'内容文案',
+              '1'=>'标题',
+              '2'=>'副标题',
+              '3'=>'口播文案'
+            ];
+            $params['name'] = $item[$params['add_type']] . ' '. date('Y-m-d H:i', time());
+            // 开启事务
+            try {
+                // 添加文案
+                $copywriting = SvCopywriting::create($params);
+                self::$returnData = $copywriting->toArray();;
+                return true;
+            } catch (\Exception $e) {
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * @desc 更新文案内容
+     * @param array $params
+     * @return bool
+     */
+    public static function updateSvCopywriting(array $params)
+    {
+        try {
+            // 检查文案内容是否存在
+            $content = SvCopywriting::where('id', $params['id'])->where('user_id',self::$uid)->find();
+            if (!$content) {
+                self::setError('文案内容不存在');
+                return false;
+            }
+            $res = SvCopywriting::where('id', $params['id'])->update($params);
+            if ($res){
+                return true;
+            }
+            // 更新文案内容信息
+            self::setError('更新失败');
+            return false;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
 
 }

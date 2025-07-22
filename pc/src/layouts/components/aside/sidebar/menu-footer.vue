@@ -15,7 +15,7 @@
                 ],
             }">
             <template #reference>
-                <div class="flex items-center !h-11 px-[10px] cursor-pointer bg-digital-human-bg rounded-lg">
+                <div class="flex items-center !h-11 px-[10px] cursor-pointer bg-app-bg-1 rounded-lg">
                     <span
                         class="flex-shrink-0 flex items-center justify-center rounded w-5 h-5 shadow-[0px_0px_0px_1px_rgba(255,255,255,0.1)]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">

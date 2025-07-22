@@ -13,7 +13,7 @@ class DefaultHandler extends BaseMessageHandler
         try {
             $message = array(
                 'messageId' => $uid,
-                'type' => 'default',
+                'type' => -1,
                 'code' => 400,
                 'reply' => '指令有误'
             );

@@ -44,8 +44,9 @@ const getTheme = computed<Theme>(() => {
     switch (key) {
         case AppKeyEnum.DIGITAL_HUMAN:
         case AppKeyEnum.DRAWING:
+        case AppKeyEnum.REDBOOK:
             return {
-                bgColor: "var(--color-digital-human-bg)",
+                bgColor: "var(--app-bg-color-1)",
             };
         default:
             return {

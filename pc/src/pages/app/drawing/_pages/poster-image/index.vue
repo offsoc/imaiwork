@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { dayjs, ElScrollbar } from "element-plus";
 import { drawingTextToImage, drawingTextToImageVolc } from "@/api/drawing";
-import { ModelEnum, drawTypeEnumMap, DrawTypeEnum } from "../../_enums/drawEnums";
+import { ModelEnum, drawTypeEnumMap, DrawTypeEnum } from "../../_enums";
 import useCreateForm from "../../_hooks/useCreateForm";
 import useDrawingTask, { ResultItem } from "../../_hooks/useDrawingTask";
 import ResultContent from "../../_components/result-content.vue";

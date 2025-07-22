@@ -1,5 +1,5 @@
 <template>
-    <div class="rounded-md bg-draw-bg border border-draw-border p-[6px] flex gap-x-2 w-full">
+    <div class="rounded-md bg-bg-app-bg-3 border border-app-border-2 p-[6px] flex gap-x-2 w-full">
         <div class="flex-1 flex flex-col items-center justify-center">
             <upload
                 class="w-full h-[112px]"
@@ -32,7 +32,7 @@
             </upload>
         </div>
         <div
-            class="w-[112px] h-[112px] rounded-md border border-draw-border flex items-center justify-center overflow-hidden text-white"
+            class="w-[112px] h-[112px] rounded-md border border-app-border-2 flex items-center justify-center overflow-hidden text-white"
             v-if="!formData[imgKey]">
             <video :src="templateVideoUrl" class="w-full h-full object-cover" autoplay loop></video>
         </div>

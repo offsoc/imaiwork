@@ -58,7 +58,9 @@
                                 <div class="" v-for="item in aiCustomerList" :key="item.key">
                                     <div>
                                         <div>
-                                            <img :src="appImageData[item.key].src" class="w-12 h-12" />
+                                            <img
+                                                :src="appImageData[item.key].src"
+                                                class="w-12 h-12 hover:scale-150 transition-all duration-500" />
                                             <div class="text-lg font-bold mt-4">
                                                 {{ item.title }}
                                             </div>
@@ -238,14 +240,14 @@ const aiContentList = [
     {
         id: 1,
         key: "digital_human",
-        title: "智能数字人",
+        title: "AI数字人",
         desc: "自定台词精准匹配口型",
         desc2: "打造专属于您的数字伙伴，智能（AI）为您提升效率、降低成本、创造无限可能。",
     },
     {
         id: 3,
         key: "drawing",
-        title: "智能设计",
+        title: "AI美工",
         desc: "输入需求定制专属创意",
         desc2: "为品牌注入新活力，助力企业实现更具影响力的视觉表达。",
     },
@@ -255,26 +257,26 @@ const aiContentList = [
 const aiCustomerManagementList = [
     {
         key: "person_wechat",
-        title: "微信助手",
+        title: "AI微信",
         desc: "轻松实现自动化管理",
         desc2: "高效回复、智能提醒、自动归类，助你轻松管理微信消息，告别漏消息与重复操作。",
     },
     {
         id: 10,
         key: "telemarketing",
-        title: "电销获客",
+        title: "AI电销",
         desc: "大幅提升销售转化率",
         desc2: "全天候高效运转，精准筛选意向客户，自动跟进、智能对话，大幅提升销售转化率。",
     },
     {
         key: "service",
-        title: "智能客服",
+        title: "AI客服",
         desc: "智能应答每一个问题",
         desc2: "智能应答每一个问题，释放人力成本，让您的团队专注于更重要的业务拓展。",
     },
     {
         key: "live",
-        title: "无人直播",
+        title: "AI直播",
         desc: "无需人工值守",
         desc2: "无需人工值守，大幅降低运营成本，轻松实现高效、可持续的内容传播。",
     },
@@ -324,7 +326,7 @@ const aiBaseList = [
     },
     {
         key: "ai_iphone",
-        title: "AI iphone",
+        title: "AI手机",
     },
 ];
 

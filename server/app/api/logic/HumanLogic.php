@@ -299,10 +299,9 @@ class HumanLogic extends ApiLogic
             }
 
             $count = UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 2)->where('task_id', $taskId)->count();
-            Log::channel('human')->write('扣费计算'.$taskId.'总数 '.$count);
 
             //查询是否已返还
-            if (UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 1)->where('task_id', $taskId)->count() != $count) {
+            if (UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 1)->where('task_id', $taskId)->count() < $count) {
 
                 $points = UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('task_id', $taskId)->value('change_amount') ?? 0;
                 AccountLogLogic::recordUserTokensLog(false, $userId, $typeID, $points, $taskId);
@@ -695,12 +694,17 @@ class HumanLogic extends ApiLogic
         $modelVersion = $data['model_version'] ?? '';
         $status = $data['status'] ?? '';
         $name = $data['name'] ?? '';
+        $type = $data['type'] ?? '';
         $result = HumanAnchor::where(['user_id' => self::$uid])
             ->when($name, function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             })
             ->when($modelVersion, function ($query) use ($modelVersion) {
                 $query->where('model_version', $modelVersion);
+            })
+            ->when($type != "", function ($query) use ($type) {
+                $query->where('type', $type);
+
             })
             ->when($status != "", function ($query) use ($status) {
                 $query->where('status', $status);
@@ -715,6 +719,16 @@ class HumanLogic extends ApiLogic
             'count' => HumanAnchor::where(['user_id' => self::$uid])
                 ->when($modelVersion, function ($query) use ($modelVersion) {
                     $query->where('model_version', $modelVersion);
+                })
+                ->when($name, function ($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%');
+                })
+                ->when($type != "", function ($query) use ($type) {
+                    $query->where('type', $type);
+
+                })
+                ->when($status != "", function ($query) use ($status) {
+                    $query->where('status', $status);
                 })
                 ->count(),
             'page_no' => $data['page_no'],
@@ -956,12 +970,15 @@ class HumanLogic extends ApiLogic
         }
 
         $status = $data['status'] ?? '';
-        $type = $data['type'] ?? 3;
+
+
+
+        $builtin = $data['builtin'] ?? 3;
+        $type = $data['type'] ?? '';
         $result = [];
         $count = 0;
-        if (in_array($type,[1,3])) {
+        if (in_array($builtin,[1,3])) {
             $result = HumanVoice::where(['user_id' => self::$uid])
-                ->order('create_time', 'desc')
                 ->limit($pageNo, $pageSize)
                 ->when($name, function ($query) use ($name) {
                     $query->where('name', 'like', '%' . $name . '%');
@@ -969,18 +986,24 @@ class HumanLogic extends ApiLogic
                 ->when($modelVersion, function ($query) use ($modelVersion) {
                     $query->where('model_version', 'in' ,$modelVersion);
                 })
+                ->when($type!= "", function ($query) use ($type) {
+                    $query->where('type', $type);
+                })
                 ->when($status != "", function ($query) use ($status) {
                     $query->where('status', $status);
                 })
                 ->order('create_time', 'desc')
                 ->select()->each(function ($item) {
-                    $item->type = 1;
+                    $item->builtin = 1;
                 })
                 ->toArray();
 
             $count = HumanVoice::where(['user_id' => self::$uid])
                 ->when($name, function ($query) use ($name) {
                     $query->where('name', 'like', '%' . $name . '%');
+                })
+                ->when($type != "", function ($query) use ($type) {
+                    $query->where('type', $type);
                 })
                 ->when($modelVersion, function ($query) use ($modelVersion) {
                     $query->where('model_version', 'in' , $modelVersion);
@@ -991,11 +1014,14 @@ class HumanLogic extends ApiLogic
                 ->count();
         }
 
-        if (in_array($type,[0,3])) {
+        if (in_array($builtin,[0,3])) {
             $voice = HumanVoice::getModelList();
             if ($voice) {
-                foreach ($voice['voice'] as &$v) {
-                    $v['type'] = 0;
+                foreach ($voice['voice'] as $key => &$v) {
+                    $v['builtin'] = 0;
+                    if ($name != '' && strpos($v['name'], $name) === false) {
+                        unset($voice['voice'][$key]); // 移除匹配的元素
+                    }
                 };
                 $result = array_merge($voice['voice'], $result);
             }
@@ -1316,11 +1342,14 @@ class HumanLogic extends ApiLogic
         $name = $data['name'] ?? '';
         $modelVersion = $data['model_version'] ?? '';
         $status = $data['status'] ?? '';
+        $type = $data['type'] ?? '';
         $result = HumanAudio::where(['user_id' => self::$uid])
-            ->order('create_time', 'desc')
             ->limit($pageNo, $pageSize)
             ->when($name, function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
+            })
+            ->when($type != "", function ($query) use ($type) {
+                $query->where('type',  $type );
             })
             ->when($modelVersion, function ($query) use ($modelVersion) {
                 $query->where('model_version', $modelVersion);
@@ -1337,6 +1366,15 @@ class HumanLogic extends ApiLogic
             'count' => HumanAudio::where(['user_id' => self::$uid])
                 ->when($modelVersion, function ($query) use ($modelVersion) {
                     $query->where('model_version', $modelVersion);
+                })
+                ->when($name, function ($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%');
+                })
+                ->when($type != "", function ($query) use ($type) {
+                    $query->where('type',  $type );
+                })
+                ->when($status != "", function ($query) use ($status) {
+                    $query->where('status', $status);
                 })
                 ->count(),
             'page_no' => $data['page_no'],
@@ -1565,8 +1603,7 @@ class HumanLogic extends ApiLogic
                         ]);
                     }
 
-                    // var_dump('人像训练');
-                    // 如果没有训练，请求训练
+            
                     if ($anchor->anchor_id == ""){
                         // var_dump('开始训练');
                         switch ($item->model_version) {

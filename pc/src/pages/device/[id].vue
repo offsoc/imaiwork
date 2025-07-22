@@ -94,7 +94,8 @@
                             :data="pager.lists"
                             height="100%"
                             stripe
-                            :row-style="{ height: '60px' }">
+                            :row-style="{ height: '60px', cursor: 'pointer' }"
+                            @row-click="handleRowClick">
                             <ElTableColumn label="头像" width="80">
                                 <template #default="{ row }">
                                     <ElAvatar :src="row.avatar"></ElAvatar>
@@ -186,6 +187,7 @@ import DeviceProgress from "./_components/device-progress.vue";
 import { ElTableColumn } from "element-plus";
 
 const route = useRoute();
+const router = useRouter();
 const { socialPlatformList, currentSocialPlatform } = useSocialPlatform();
 
 const deviceLists = ref<any[]>([]);
@@ -309,6 +311,15 @@ const { pager, getLists, resetParams } = usePaging({
     fetchFun: getAccountList,
     params: queryParams,
 });
+
+const handleRowClick = (row: any) => {
+    router.push({
+        path: "/app/service",
+        query: {
+            type: AppTypeEnum.REDBOOK,
+        },
+    });
+};
 
 const containerRef = ref<HTMLElement>();
 const currAccount = ref<any>(null);

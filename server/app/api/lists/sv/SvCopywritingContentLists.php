@@ -24,11 +24,20 @@ class SvCopywritingContentLists extends BaseApiDataLists implements ListsSearchI
     public function lists(): array
     {
         $this->searchWhere[] = ['user_id', '=', $this->userId];
-        return SvCopywritingContent::where($this->searchWhere)
+        $list = SvCopywritingContent::where($this->searchWhere)
             ->order(['id' => 'desc'])
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
+
+        foreach ($list as &$item) {
+            if (!empty($item['topic'])) {
+                $item['topic'] = json_decode($item['topic'], true);
+            } else {
+                $item['topic'] = [];
+            }
+        }
+        return $list;
     }
 
     public function count(): int

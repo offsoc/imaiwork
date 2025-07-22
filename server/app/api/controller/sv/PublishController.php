@@ -115,12 +115,7 @@ class PublishController extends BaseApiController
 
     public function recordLists(){
 
-        try {
-            $params = (new PublishDetailValidate())->get()->goCheck('lists');
-            return $this->dataLists(new PublishDetailLists());
-        } catch (HttpResponseException $e) {
-            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
-        }
+        return $this->dataLists(new PublishDetailLists());
     }
 
     public function recordDetail(){

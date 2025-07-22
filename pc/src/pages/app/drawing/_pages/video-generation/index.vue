@@ -16,7 +16,7 @@
 import { dayjs, ElScrollbar } from "element-plus";
 import { drawingTextToVideo, drawingImageToVideo } from "@/api/drawing";
 import useCreateForm from "../../_hooks/useCreateForm";
-import { GenerateVideoTypeEnum } from "../../_enums/drawEnums";
+import { GenerateVideoTypeEnum } from "../../_enums";
 import useDrawingTask from "../../_hooks/useDrawingTask";
 import ResultContent from "../../_components/result-content.vue";
 

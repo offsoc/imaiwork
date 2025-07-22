@@ -25,6 +25,8 @@ class SvVideoTaskCron extends Command
     protected function execute(Input $input, Output $output)
     {
         SvVideoSettingLogic::check();
+        SvVideoTaskLogic::compositeAnchorCron();
+        SvVideoTaskLogic::compositeVoiceCron();
         SvVideoTaskLogic::compositeAudioCron();
         SvVideoTaskLogic::compositeVideoCron();
         return true;

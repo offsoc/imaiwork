@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from "vue";
 import { drawingHdImageStatus, drawingVolcVideoStatus } from "@/api/drawing";
 import { cloneDeep } from "lodash-es";
-import { DrawTypeEnum, drawTypeEnumMap } from "../_enums/drawEnums";
+import { DrawTypeEnum, drawTypeEnumMap } from "../_enums";
 
 // --- 接口定义 ---
 

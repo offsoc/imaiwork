@@ -20,7 +20,6 @@ class SvVideoSettingValidate extends BaseValidate
         'status' => 'require|in:0,1,2,3,4,5',
         'setting_type' => 'require|in:1,2',
         'poi' => 'require|max:100',
-        'video_count' => 'require|integer',
         'type' => 'require|in:3',
         'speed' => 'require|in:0,1,2',
         'anchor' => 'json',
@@ -46,27 +45,23 @@ class SvVideoSettingValidate extends BaseValidate
         'status.in' => '状态值不正确',
         'poi.require' => '请输入位置信息',
         'poi.max' => '位置信息长度不能超过100个字符',
-        'video_count.require' => '请输入视频数量',
-        'video_count.integer' => '视频数量必须是整数',
         'type.require' => '请输入视频类型',
         'type.in' => '视频类型值不正确',
         'speed.require' => '请输入视频合成速度类型',
         'speed.in' => '视频合成速度类型值不正确',
         'extra.require' => '请输入附加字段内容',
-        'setting_type.require' => '请输入作品类型',
-        'setting_type.in' => '作品类型不正确',
     ];
 
     // 添加场景
     public function sceneAdd()
     {
-        return $this->only([ 'name', 'status', 'video_count', 'type', 'speed','setting_type']);
+        return $this->only([ 'name', 'status', 'type', 'speed']);
     }
 
     // 更新场景
     public function sceneUpdate()
     {
-        return $this->only(['id','name', 'status', 'video_count', 'type', 'speed']);
+        return $this->only(['id','name', 'status', 'type', 'speed']);
     }
 
     // 详情场景

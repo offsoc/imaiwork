@@ -1,6 +1,6 @@
 <template>
     <div class="w-full flex gap-2">
-        <ElSelect v-model="currResolution" popper-class="digital-human-select" class="!w-[120px]" :show-arrow="false">
+        <ElSelect v-model="currResolution" popper-class="custom-select-popper" class="!w-[120px]" :show-arrow="false">
             <ElOption
                 v-for="(item, index) in getResolutionOptions"
                 :key="index"
@@ -8,12 +8,14 @@
                 :value="item.value"></ElOption>
         </ElSelect>
         <div class="flex-1 flex items-center">
-            <div class="h-11 flex-1 flex items-center gap-x-2 bg-draw-bg border border-draw-border px-3 rounded-lg">
+            <div
+                class="h-11 flex-1 flex items-center gap-x-2 bg-bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
                 <span class="text-white">宽</span>
                 <span class="text-[#ffffff80]">{{ getResolutionSize.width }}</span>
             </div>
             <div>x</div>
-            <div class="h-11 flex-1 flex items-center gap-x-2 bg-draw-bg border border-draw-border px-3 rounded-lg">
+            <div
+                class="h-11 flex-1 flex items-center gap-x-2 bg-bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
                 <span class="text-white">高</span>
                 <span class="text-[#ffffff80]">{{ getResolutionSize.height }}</span>
             </div>
@@ -22,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { resolutionOptions, videoResolutionOptions } from "../_enums/drawEnums";
+import { resolutionOptions, videoResolutionOptions } from "../_enums";
 
 const props = withDefaults(
     defineProps<{

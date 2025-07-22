@@ -318,7 +318,7 @@ trait WechatTrait
         } catch (\Throwable $e) {
             //throw $th;
             self::setLog([
-                'title' => 'Send message Device online',
+                'title' => 'updateWxDevices',
                 'params' => $deviceInfo,
                 'error' => $e->getMessage(),
                 'code' => $e->getCode(),

@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 /**
  * @description 添加单位
  * @param {String | Number} value 值 100
@@ -60,6 +62,23 @@ export function objectToQuery(params: Record<string, any>): string {
         }
     }
     return query.slice(0, -1);
+}
+
+/**
+ * @description 将window.location.search转换为对象
+ * @return {Object}
+ */
+export function queryToObject(): Record<string, any> {
+    const searchParams = new URLSearchParams(window.location.search);
+    const result = {};
+    for (const [key, value] of searchParams.entries()) {
+        if (value == "undefined" || value == "null") {
+            result[key] = undefined;
+        } else {
+            result[key] = value;
+        }
+    }
+    return result;
 }
 
 /**
@@ -252,4 +271,41 @@ export const setFormData = (data: Record<any, any>, sourceData: Record<any, any>
             sourceData[key] = data[key];
         }
     }
+};
+
+/**
+ * 截取视频第一帧作为封面
+ * @param url 视频URL
+ * @returns 封面URL
+ */
+export const getVideoFirstFrame = (url: string, callback: (data: any) => void) => {
+    const video = document.createElement("video");
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    video.src = url;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    // 允许跨域
+    video.crossOrigin = "anonymous";
+    video.addEventListener("loadedmetadata", () => {
+        const aspectRatio = video.videoWidth / video.videoHeight;
+        canvas.width = 443;
+        canvas.height = canvas.width / aspectRatio;
+        video.currentTime = 0.5;
+        video.addEventListener("seeked", async () => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const fileResult = await base64ToBlob(
+                canvas.toDataURL("image/jpeg", 0.7), // 使用JPEG格式并设置质量为70%
+                `${dayjs().format("YYYYMMDDHHmmss")}.jpg`
+            );
+            URL.revokeObjectURL(video.src);
+            callback(fileResult);
+        });
+    });
+
+    video.addEventListener("error", () => {
+        callback(false);
+    });
+    video.load();
 };

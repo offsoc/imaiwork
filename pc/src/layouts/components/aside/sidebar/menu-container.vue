@@ -11,9 +11,7 @@
                         }"
                         v-for="item in tools">
                         <div class="link-icon">
-                            <Icon
-                                :name="`local-icon-${activeMenu?.id === item.id ? item.icon_active : item.icon}`"
-                                :size="14"></Icon>
+                            <Icon :name="`local-icon-${item.icon}`" :size="14"></Icon>
                         </div>
                         <div class="flex-1 flex items-center ml-3">
                             <div class="leading-5">
@@ -55,7 +53,6 @@ const tools = ref<Tools[]>([
         id: ToolEnum.TOOL,
         name: ToolEnumMap[ToolEnum.TOOL],
         icon: "menu_tool",
-        icon_active: "menu_tool_active",
         link: "/",
         is_new: false,
     },
@@ -63,14 +60,12 @@ const tools = ref<Tools[]>([
         id: ToolEnum.CHAT,
         name: ToolEnumMap[ToolEnum.CHAT],
         icon: "menu_chat",
-        icon_active: "menu_chat_active",
         link: "/chat",
     },
     {
         id: ToolEnum.AID,
         name: ToolEnumMap[ToolEnum.AID],
         icon: "menu_aid",
-        icon_active: "menu_aid_active",
         link: "/robot/aid",
         is_new: true,
     },
@@ -78,14 +73,12 @@ const tools = ref<Tools[]>([
         id: ToolEnum.DATABASE,
         name: ToolEnumMap[ToolEnum.DATABASE],
         icon: "menu_database",
-        icon_active: "menu_database_active",
         link: "/knowledge_base",
     },
     {
         id: ToolEnum.DEVICE,
         name: ToolEnumMap[ToolEnum.DEVICE],
         icon: "menu_terminal",
-        icon_active: "menu_terminal_active",
         link: "/device",
         is_new: true,
     },
@@ -93,14 +86,12 @@ const tools = ref<Tools[]>([
         id: ToolEnum.AGENT,
         name: ToolEnumMap[ToolEnum.AGENT],
         icon: "menu_agent",
-        icon_active: "menu_agent_active",
         link: "/agent",
     },
     {
         id: ToolEnum.CREATIVE_RECORD,
         name: ToolEnumMap[ToolEnum.CREATIVE_RECORD],
         icon: "menu_creation",
-        icon_active: "menu_creation_active",
         link: "/creation",
     },
     // {

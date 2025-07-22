@@ -1,6 +1,6 @@
 <template>
     <div
-        class="absolute w-[350px] h-full bg-draw-bg rounded-tr-[20px] rounded-br-[20px] shadow-[0_0_0_1px_#333333] left-full flex flex-col py-[16px] z-20">
+        class="absolute w-[350px] h-full bg-bg-app-bg-3 rounded-tr-[20px] rounded-br-[20px] shadow-[0_0_0_1px_#333333] left-full flex flex-col py-[16px] z-20">
         <div class="absolute w-6 h-6 top-4 right-4 cursor-pointer" @click="emit('close')">
             <close-btn />
         </div>
@@ -10,20 +10,20 @@
                     <div class="text-white">Deepseek- R1 灵感版</div>
                     <div v-for="(item, index) in prompts" :key="index" class="mt-4">
                         <div
-                            class="rounded-md border border-draw-border bg-draw-bg mt-[11px] relative p-3"
+                            class="rounded-md border border-app-border-2 bg-bg-app-bg-3 mt-[11px] relative p-3"
                             :key="index">
                             <div class="text-[#ffffff4d]">
                                 {{ item }}
                             </div>
                             <div class="mt-4">
                                 <ElButton
-                                    class="shadow-[0_0_0_1px_var(--color-draw-border)] !h-[26px]"
+                                    class="shadow-[0_0_0_1px_var(--app-border-color-2)] !h-[26px]"
                                     color="#1F1F1F"
                                     @click="handleDelete(index)"
                                     >删除</ElButton
                                 >
                                 <ElButton
-                                    class="shadow-[0_0_0_1px_var(--color-draw-border)] !h-[26px]"
+                                    class="shadow-[0_0_0_1px_var(--app-border-color-2)] !h-[26px]"
                                     color="#1F1F1F"
                                     @click="copy(item)"
                                     >复制</ElButton
@@ -39,7 +39,7 @@
             </ElScrollbar>
         </div>
         <div class="flex-shrink-0 px-[16px] mt-4">
-            <div class="relative rounded-md shadow-[0_0_0_1px_var(--color-draw-border)] bg-draw-bg">
+            <div class="relative rounded-md shadow-[0_0_0_1px_var(--app-border-color-2)] bg-bg-app-bg-3">
                 <ElInput
                     v-model="prompt"
                     placeholder="请输入创意描述"
@@ -147,7 +147,7 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-@import "../_assets/styles/index.scss";
+@import "@/pages/app/_assets/styles/index.scss";
 :deep(.el-textarea__inner) {
     box-shadow: none !important;
     padding-bottom: 10px !important;

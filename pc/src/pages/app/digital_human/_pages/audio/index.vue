@@ -1,8 +1,8 @@
 <template>
-    <div class="h-full flex flex-col">
-        <div class="bg-digital-human flex-shrink-0 rounded-[20px] px-[14px]">
+    <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
+        <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[68px]">
+                <div class="flex items-center justify-between h-[88px]">
                     <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
                         <ElTabPane label="全部" name=""></ElTabPane>
                         <ElTabPane
@@ -36,7 +36,7 @@
                 </div>
             </ElScrollbar>
         </div>
-        <div class="grow min-h-0 bg-digital-human flex flex-col rounded-[20px] mt-4 overflow-hidden">
+        <div class="grow min-h-0 flex flex-col overflow-hidden">
             <div class="grow min-h-0">
                 <ElTable
                     :data="pager.lists"
@@ -90,7 +90,7 @@
                 <pagination v-model="pager" layout="prev, pager, next" @change="getLists"></pagination>
             </div>
         </div>
-        <div class="w-full flex justify-center gap-10 bg-digital-human p-4 rounded-lg mt-2" v-if="currentAudio.url">
+        <div class="w-full flex justify-center gap-10 bg-app-bg-2 p-4 rounded-lg mt-2" v-if="currentAudio.url">
             <audio :src="currentAudio.url" controls class="w-full" autoplay></audio>
         </div>
     </div>
@@ -178,7 +178,3 @@ const handleDelete = async (id: number) => {
 
 getLists();
 </script>
-
-<style scoped lang="scss">
-@import "../../_assets/styles/index.scss";
-</style>

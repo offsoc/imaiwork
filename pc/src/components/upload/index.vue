@@ -26,6 +26,7 @@
             v-if="showProgress && fileList.length"
             v-model="visible"
             title="上传进度"
+            append-to-body
             :close-on-click-modal="false"
             :close-on-press-escape="false"
             :show-close="false"
@@ -190,7 +191,7 @@ export default defineComponent({
                         const duration = Math.floor(audio.duration);
                         const isValid = duration >= minDuration && duration <= maxDuration;
                         if (!isValid) {
-                            feedback.msgError(`上传音频时长不能小于 ${minDuration}秒或大于${maxDuration}秒`);
+                            feedback.msgError(`上传音频时长不能小于${minDuration}秒或大于${maxDuration}秒`);
                         }
                         resolve(isValid);
                     });
@@ -219,7 +220,7 @@ export default defineComponent({
                             feedback.msgError(`上传视频分辨率不能满足${videoMinWidth}*${videoMaxWidth}`);
                         }
                         if (!isDurationValid) {
-                            feedback.msgError(`上传视频时长不能小于 ${minDuration}秒或大于${maxDuration}秒`);
+                            feedback.msgError(`上传视频时长不能小于${minDuration}秒或大于${maxDuration}秒`);
                         }
                         resolve(isResolutionValid && isDurationValid);
                     });

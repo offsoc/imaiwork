@@ -37,14 +37,21 @@ class AnchorLists extends BaseAdminDataLists implements ListsSearchInterface
      */
     public function lists(): array
     {
+        $type = $this->request->get('type','0');
+        if (trim($type) == ''){
+            $type = 0;
+        }
         //模型版本
         $modelList = ConfigService::get('model', 'list', []);
         $modelVersion = $modelList['channel'];
 
         return HumanAnchor::alias('ha')
             ->join('user u', 'u.id = ha.user_id')
-            ->field('ha.id,ha.name,ha.user_id,ha.model_version,ha.task_id,ha.gender,
+            ->field('ha.id,ha.name,ha.user_id,ha.model_version,ha.task_id,ha.gender,ha.type,
             ha.create_time,ha.pic,ha.url,ha.status,u.nickname,u.avatar')
+            ->when($type, function ($query)use ($type){
+                $query->where('ha.type', $type );
+            })
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
             })
@@ -83,10 +90,10 @@ class AnchorLists extends BaseAdminDataLists implements ListsSearchInterface
                 }
                 // 消耗情况
                 $points1 = UserTokensLog::where('user_id', $item['user_id'])->where('action',1)
-                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? 0;
 
                 $points2 = UserTokensLog::where('user_id', $item['user_id'])->where('action',2)
-                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? '';
+                    ->where('task_id', $item['task_id'])->where('change_type', $change_type)->value('change_amount') ?? 0;
                 $item['points'] = $points1 + $points2 ;
 
             })
@@ -102,9 +109,16 @@ class AnchorLists extends BaseAdminDataLists implements ListsSearchInterface
      */
     public function count(): int
     {
+        $type = $this->request->get('type','0');
+        if (trim($type) == ''){
+            $type = 0;
+        }
         return HumanAnchor::alias('ha')
             ->join('user u', 'u.id = ha.user_id')
             ->field('ha.id,ha.name,ha.model_version,ha.create_time,ha.logo,ha.url,ha.status,u.nickname,u.avatar')
+            ->when($type, function ($query)use ($type){
+                $query->where('ha.type', $type );
+            })
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
             })

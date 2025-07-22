@@ -3,7 +3,7 @@
         ref="uploadPopRef"
         width="778px"
         class="digital-human-upload-popup"
-        style="padding: 0; background-color: var(--color-digital-human)"
+        style="padding: 0; background-color: var(--app-bg-color-2)"
         cancel-button-text=""
         confirm-button-text=""
         :show-close="false"
@@ -53,12 +53,12 @@
                 </div>
                 <ElPopover
                     :visible="modelVersionVisible"
-                    popper-class="!w-[318px] !p-2 !bg-digital-human !border-[--color-digital-human-border] !rounded-xl"
+                    popper-class="!w-[318px] !p-2 !bg-app-bg-2 !border-[--app-border-color-1] !rounded-xl"
                     teleported
                     :show-arrow="false">
                     <template #reference>
                         <div
-                            class="mt-[15px] border border-[var(--color-digital-human-border)] bg-digital-human-bg rounded-lg h-[48px] flex items-center justify-between px-3 cursor-pointer"
+                            class="mt-[15px] border border-[var(--app-border-color-1)] bg-app-bg-1 rounded-lg h-[48px] flex items-center justify-between px-3 cursor-pointer"
                             @click="modelVersionVisible = true">
                             <div class="text-[#ffffff80]">模型选择</div>
                             <div class="flex items-center gap-x-3">
@@ -74,10 +74,9 @@
                             <div
                                 v-for="item in modelChannel"
                                 :key="item.id"
-                                class="flex items-center h-11 rounded-md hover:bg-digital-human-bg border border-[transparent] hover:border-[var(--color-digital-human-border)] gap-x-3 px-3 cursor-pointer"
+                                class="flex items-center h-11 rounded-md hover:bg-app-bg-1 border border-[transparent] hover:border-[var(--app-border-color-1)] gap-x-3 px-3 cursor-pointer"
                                 :class="{
-                                    'bg-digital-human-bg border-[var(--color-digital-human-border)]':
-                                        formData.model_version == item.id,
+                                    'bg-app-bg-1 border-[var(--app-border-color-1)]': formData.model_version == item.id,
                                 }"
                                 @click="changeModel(item.id)">
                                 <img :src="item.icon" class="w-5 h-5" />
@@ -103,11 +102,11 @@
                         :max-size="uploadLimit[formData.model_version].size"
                         :min-duration="uploadLimit[formData.model_version].videoMinDuration"
                         :max-duration="uploadLimit[formData.model_version].videoMaxDuration"
-                        :video-min-width="getUploadVideoMinWidth"
-                        :video-max-width="getUploadVideoMaxWidth"
+                        :video-min-width="uploadLimit[formData.model_version].minResolution"
+                        :video-max-width="uploadLimit[formData.model_version].maxResolution"
                         :accept="uploadVideoFormat"
                         @success="getVideo">
-                        <div class="w-full rounded-lg h-[256px] bg-digital-human-bg">
+                        <div class="w-full rounded-lg h-[256px] bg-app-bg-1">
                             <template v-if="!formData.url">
                                 <div class="flex flex-col items-center justify-center h-full">
                                     <div
@@ -142,7 +141,7 @@
                                     </div>
                                     <div class="absolute top-2 right-2 z-[11]">
                                         <ElTooltip content="删除">
-                                            <ElButton circle color="rgba(255,255,255,0.1)" @click="changeModel()">
+                                            <ElButton circle color="rgba(255,255,255,0.1)" @click.stop="changeModel()">
                                                 <Icon name="el-icon-Delete" :size="14" color="#ffffff"></Icon>
                                             </ElButton>
                                         </ElTooltip>
@@ -188,6 +187,7 @@ import { useAppStore } from "@/stores/app";
 import { dayjs } from "element-plus";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { useUserStore } from "@/stores/user";
+import { getVideoFirstFrame } from "@/utils/util";
 import Popup from "@/components/popup/index.vue";
 import {
     DigitalHumanModelVersionEnum,
@@ -298,19 +298,11 @@ const uploadTemplateContentLists = computed(() => {
 });
 
 const getUploadVideoMinWidth = computed(() => {
-    return [DigitalHumanModelVersionEnum.ADVANCED, DigitalHumanModelVersionEnum.ELITE].includes(
-        parseInt(formData.model_version)
-    )
-        ? 0
-        : uploadLimit[formData.model_version].minResolution;
+    return uploadLimit[formData.model_version].minResolution;
 });
 
 const getUploadVideoMaxWidth = computed(() => {
-    return [DigitalHumanModelVersionEnum.ADVANCED, DigitalHumanModelVersionEnum.ELITE].includes(
-        parseInt(formData.model_version)
-    )
-        ? 0
-        : uploadLimit[formData.model_version].maxResolution;
+    return uploadLimit[formData.model_version].maxResolution;
 });
 
 const modelVersionVisible = ref<boolean>(false);
@@ -330,45 +322,19 @@ const getVideo = (result: any) => {
 
 const parseLoading = ref<boolean>(false);
 const parseVideo = (url: string) => {
-    const video = document.createElement("video");
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    video.src = formData.url;
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = "auto";
     parseLoading.value = true;
-    // 允许跨域
-    video.crossOrigin = "anonymous";
-    video.addEventListener("loadedmetadata", () => {
-        const aspectRatio = video.videoWidth / video.videoHeight;
-        canvas.width = 443;
-        canvas.height = canvas.width / aspectRatio;
-        video.currentTime = 0.5;
-        video.addEventListener("seeked", async () => {
-            try {
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const fileResult = await base64ToBlob(
-                    canvas.toDataURL("image/jpeg", 0.7), // 使用JPEG格式并设置质量为70%
-                    `${dayjs().format("YYYYMMDDHHmmss")}.jpg`
-                );
-                uploadImage({
-                    file: fileResult,
-                }).then((res) => {
-                    formData.pic = res.uri;
-                    parseLoading.value = false;
-                });
-                URL.revokeObjectURL(video.src);
-            } catch (error) {
+    getVideoFirstFrame(url, (data) => {
+        if (data) {
+            uploadImage({
+                file: data,
+            }).then((res) => {
+                formData.pic = res.uri;
                 parseLoading.value = false;
-            }
-        });
+            });
+        } else {
+            parseLoading.value = false;
+        }
     });
-
-    video.addEventListener("error", () => {
-        parseLoading.value = false;
-    });
-    video.load();
 };
 
 const changeModel = (value?: number) => {
@@ -490,7 +456,7 @@ defineExpose({
         .el-upload-dragger {
             background-color: transparent;
             border-radius: 10px;
-            border-color: var(--color-digital-human-border);
+            border-color: var(--app-border-color-1);
             &:hover {
                 border-color: #ffffff33;
             }

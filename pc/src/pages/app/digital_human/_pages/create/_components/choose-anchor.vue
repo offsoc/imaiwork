@@ -3,7 +3,11 @@
         ref="popupRef"
         width="528px"
         class="choose-anchor-popup"
-        style="padding: 0; background-color: var(--color-digital-human)"
+        style="
+            padding: 0;
+            background-color: var(--app-bg-color-2);
+            box-shadow: 0px 0px 0px 1px var(--app-border-color-2);
+        "
         confirm-button-text=""
         cancel-button-text=""
         :show-close="false"

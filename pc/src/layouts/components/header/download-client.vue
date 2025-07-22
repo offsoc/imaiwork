@@ -6,10 +6,9 @@
         popper-class="!border-none !rounded-2xl !p-6 !w-[422px]">
         <template #reference>
             <div
-                :class="`px-[18px] h-10 cursor-pointer flex items-center justify-center rounded-full border gap-x-[6px] hover:bg-[${getTheme.hoverBgColor}] btn-group`"
-                :style="{ borderColor: getTheme.borderColor, color: getTheme.iconColor }">
+                class="px-[18px] h-10 cursor-pointer flex items-center justify-center rounded-full border border-token-primary gap-x-[6px] hover:bg-[rgba(0,0,0,0.03)] btn-group">
                 <Icon name="local-icon-phone"></Icon>
-                <span class="btn-name" :style="{ color: getTheme.textColor }">下载客户端</span>
+                <span class="btn-name">下载客户端</span>
             </div>
         </template>
         <div>
@@ -108,33 +107,6 @@ const route = useRoute();
 
 const appStore = useAppStore();
 const websiteConfig = computed(() => appStore.getWebsiteConfig);
-
-interface Theme {
-    borderColor: string;
-    iconColor: string;
-    textColor: string;
-    hoverBgColor: string;
-}
-
-const getTheme = computed<Theme>(() => {
-    const key = route.meta.key;
-    switch (key) {
-        case AppKeyEnum.DIGITAL_HUMAN:
-            return {
-                borderColor: "rgba(255,255,255,0.1)",
-                iconColor: "rgba(255,255,255,0.8)",
-                textColor: "rgba(255,255,255,0.8)",
-                hoverBgColor: "rgba(255,255,255,0.1)",
-            };
-        default:
-            return {
-                borderColor: "#ededed",
-                iconColor: "#000000",
-                textColor: "#000000",
-                hoverBgColor: "rgba(0,0,0,0.03)",
-            };
-    }
-});
 
 enum ClientDownloadType {
     MacIntel = "mac_intel",

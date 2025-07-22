@@ -105,6 +105,14 @@ class UserHandler extends BaseMessageHandler
             if(!isset($content['xhsId'])){
                 //return;
                 $content['xhsId'] = time();
+                $this->payload['reply'] = "获取账号信息失败,请重新获取";
+                $this->payload['code'] = WorkerEnum::WEB_GET_USER_INFO_FAIL;
+                $postData = [
+                    'code' => WorkerEnum::WEB_GET_USER_INFO_FAIL,
+                    'msg' => '获取账号信息失败,请重新获取'
+                ];
+                $this->_sendWeb($postData);
+                return;
             }
             
             $content['xhsId'] = str_replace('小红书号：', '', $content['xhsId']);

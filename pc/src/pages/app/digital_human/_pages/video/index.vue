@@ -1,8 +1,8 @@
 <template>
-    <div class="h-full flex flex-col">
-        <div class="bg-digital-human flex-shrink-0 rounded-[20px] px-[14px]">
+    <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
+        <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[68px]">
+                <div class="flex items-center justify-between h-[88px]">
                     <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
                         <ElTabPane label="全部" name=""></ElTabPane>
                         <ElTabPane
@@ -15,7 +15,7 @@
                         <ElSelect
                             v-model="queryParams.status"
                             class="!w-[260px] status-select"
-                            popper-class="digital-human-select"
+                            popper-class="custom-select-popper"
                             clearable
                             :show-arrow="false"
                             :empty-values="[null, undefined]"
@@ -66,44 +66,47 @@
             </ElScrollbar>
         </div>
         <div
-            class="grow min-h-0 bg-digital-human overflow-y-auto p-4 rounded-[20px] mt-4 dynamic-scroller"
+            class="grow min-h-0 overflow-y-auto p-4 dynamic-scroller"
             :infinite-scroll-immediate="false"
             :infinite-scroll-disabled="!isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="h-full" v-loading="pager.loading">
-                <div
-                    v-if="pager.lists.length"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-                    <div
-                        v-for="(item, index) in pager.lists"
-                        class="h-[295px] group relative cursor-pointer overflow-hidden"
-                        :key="index"
-                        @click="handleChoose(item.id)">
-                        <video-item
-                            :item="{
-                                id: item.id,
-                                name: item.name,
-                                pic: item.pic,
-                                status: item.status,
-                                video_url: item.result_url,
-                                model_version: item.model_version,
-                                remark: item.remark,
-                                create_time: item.create_time,
-                            }"
-                            @retry="handleRetry"
-                            @delete="handleDelete" />
+                <div v-if="pager.lists.length">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
                         <div
-                            class="absolute top-0 right-0 z-[1000] w-full h-full bg-black/5 flex justify-end p-2"
-                            v-if="isDelete">
-                            <div class="w-6 h-6 rounded-full">
-                                <Icon
-                                    name="local-icon-success_fill"
-                                    :size="20"
-                                    :color="deleteIds.includes(item.id) ? 'var(--el-color-error)' : '#ffffff1a'"></Icon>
+                            v-for="(item, index) in pager.lists"
+                            class="h-[295px] relative cursor-pointer overflow-hidden"
+                            :key="index"
+                            @click="handleChoose(item.id)">
+                            <video-item
+                                :item="{
+                                    id: item.id,
+                                    name: item.name,
+                                    pic: item.pic,
+                                    status: item.status,
+                                    video_url: item.result_url,
+                                    model_version: item.model_version,
+                                    remark: item.remark,
+                                    create_time: item.create_time,
+                                }"
+                                @retry="handleRetry"
+                                @delete="handleDelete" />
+                            <div
+                                class="absolute top-0 right-0 z-[1000] w-full h-full bg-black/5 flex justify-end p-2"
+                                v-if="isDelete">
+                                <div class="w-6 h-6 rounded-full">
+                                    <Icon
+                                        name="local-icon-success_fill"
+                                        :size="20"
+                                        :color="
+                                            deleteIds.includes(item.id) ? 'var(--el-color-error)' : '#ffffff1a'
+                                        "></Icon>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                 </div>
                 <div class="h-full flex items-center justify-center" v-else>
                     <Empty />
@@ -147,6 +150,7 @@ const deleteIds = ref<number[]>([]);
 const queryParams = reactive({
     page_no: 1,
     page_size: 20,
+    type: 0,
     status: "",
     model_version: "",
 });
@@ -233,8 +237,6 @@ getLists();
 </script>
 
 <style scoped lang="scss">
-@import "../../_assets/styles/index.scss";
-
 :deep(.el-checkbox) {
     .el-checkbox__inner {
         background-color: transparent;

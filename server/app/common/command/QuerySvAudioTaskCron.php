@@ -23,6 +23,7 @@ class QuerySvAudioTaskCron extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        SvVideoTaskLogic::queryVoiceCron();
         SvVideoTaskLogic::queryAudioCron();
         return true;
     }

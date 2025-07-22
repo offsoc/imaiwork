@@ -30,6 +30,7 @@ export const useAppStore = defineStore("appStore", {
         getCopyRightConfig: (state) => state.config.copyright || [],
         getAppLiveConfig: (state) => state.config.ai_live || {},
         getHdConfig: (state) => state.config.draw || {},
+        getAppConfig: (state) => state.config.app_config || {},
     },
     actions: {
         async getConfig() {

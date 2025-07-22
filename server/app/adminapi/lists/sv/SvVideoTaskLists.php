@@ -2,10 +2,12 @@
 
 namespace app\adminapi\lists\sv;
 
+use app\common\enum\user\AccountLogEnum;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\human\HumanAnchor;
 use app\common\model\sv\SvVideoTask;
 use app\adminapi\lists\BaseAdminDataLists;
+use app\common\model\user\UserTokensLog;
 use app\common\service\FileService;
 
 /**
@@ -18,9 +20,10 @@ class SvVideoTaskLists extends BaseAdminDataLists implements ListsSearchInterfac
     public function setSearch(): array
     {
         return [
-            '=' => [ 'type', 'status', 'video_setting_id', 'audio_type', 'model_version'],
-            '%like%' => ['name', 'title', 'subtitle'],
+            '=' => [ 'type','video_setting_id', 'audio_type', 'model_version'],
+            '%like%' => ['name'],
             'between' => ['create_time'],
+            'in' => ['status']
             // 其他搜索条件
         ];
     }
@@ -45,6 +48,50 @@ class SvVideoTaskLists extends BaseAdminDataLists implements ListsSearchInterfac
             $item['upload_audio_url']     = trim($item['upload_audio_url']) ? FileService::getFileUrl($item['upload_audio_url']): "";
             $item['upload_video_url']         = trim($item['upload_video_url']) ? FileService::getFileUrl($item['upload_video_url']): "";
             $item['video_result_url']         = trim($item['video_result_url']) ? FileService::getFileUrl($item['video_result_url']): "";
+
+            if(in_array($item['status'],[4,5,6])){
+                switch ($item['model_version']) {
+                    case 1:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO;
+                        break;
+                    case 2:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO;
+                        break;
+                    case 4:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YM;
+                        break;
+                    case 6:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT;
+
+                        break;
+                }
+
+                $points = 0;
+                $duration = 0;
+
+                //扣费记录
+                UserTokensLog::where('user_id', $item['user_id'])
+                    ->where('change_type', $change_type)
+                    ->where('task_id', $item['task_id'])
+                    ->field('extra, change_type,action,change_amount')
+                    ->select()
+                    ->each(function ($item) use (&$points, &$duration) {
+
+                        $info = json_decode($item['extra'], true);
+
+                        if ($item['action'] == 1){
+                            $points    -=$item['change_amount'];
+                        }else{
+                            $duration   = $info['音视频时长'] ?? 0;
+                            $points     += $item['change_amount'] ?? 0;
+                        }
+
+                    });
+
+                $item['points']          = $points;
+                $item['duration']        = $duration;
+            }
+
         }
         
         return $list;

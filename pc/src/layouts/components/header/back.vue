@@ -32,6 +32,7 @@ const getTheme = computed<Theme>(() => {
     switch (key) {
         case AppKeyEnum.DIGITAL_HUMAN:
         case AppKeyEnum.DRAWING:
+        case AppKeyEnum.REDBOOK:
             return {
                 iconColor: "#ffffff",
                 iconBgColor: "rgba(255,255,255,0.1)",

@@ -13,7 +13,7 @@
                         <ElSelect
                             v-model="formData.model"
                             class="!h-11"
-                            popper-class="digital-human-select"
+                            popper-class="custom-select-popper"
                             placeholder="请选择模型名称"
                             :show-arrow="false"
                             @change="handleModelChange">
@@ -71,7 +71,7 @@
                             popper-class="w-[228px]"
                             content="开启后可将【生成规格】中的宽高均乘以2返回，如上述宽高均为512和512，此参数关闭出图 512*512 ，此参数打开出图1024 * 1024">
                             <div
-                                class="flex items-center justify-between w-full border border-draw-border rounded-lg bg-draw-bg px-3 h-11">
+                                class="flex items-center justify-between w-full border border-app-border-2 rounded-lg bg-bg-app-bg-3 px-3 h-11">
                                 <div class="flex items-center gap-2 text-white">
                                     超分辨率生成
                                     <Icon name="local-icon-question" :size="16"></Icon>
@@ -105,7 +105,7 @@
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
 import ResolutionSelect from "./resolution-select.vue";
-import { ModelEnum } from "../_enums/drawEnums";
+import { ModelEnum } from "../_enums";
 
 const emit = defineEmits<{
     (event: "update:formData", value: any): void;
@@ -240,7 +240,3 @@ defineExpose({
     },
 });
 </script>
-
-<style scoped lang="scss">
-@import "../_assets/styles/index.scss";
-</style>

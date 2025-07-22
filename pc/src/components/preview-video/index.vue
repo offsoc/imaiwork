@@ -4,7 +4,7 @@
         width="800px"
         confirm-button-text=""
         cancel-button-text=""
-        style="background-color: var(--color-digital-human)"
+        style="background-color: var(--app-bg-color-2)"
         :show-close="false"
         @close="close">
         <div class="-my-4">
@@ -25,7 +25,7 @@
                 </svg>
                 <div class="text-white text-[20px] font-bold">视频预览</div>
             </div>
-            <video :src="videoUrl" controls class="w-full max-h-[50vh] rounded-xl mt-4"></video>
+            <video :src="videoUrl" controls class="w-full max-h-[50vh] rounded-xl mt-4" autoplay></video>
         </div>
     </popup>
 </template>

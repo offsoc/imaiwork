@@ -17,7 +17,7 @@
                             <ElSelect
                                 v-model="formData.model"
                                 class="!h-11"
-                                popper-class="digital-human-select"
+                                popper-class="custom-select-popper"
                                 placeholder="请选择模型名称"
                                 :show-arrow="false"
                                 @change="handleModelChange">
@@ -54,18 +54,18 @@
                                             单图参考
                                         </div>
                                         <div
-                                            class="h-[26px] rounded-md px-[11px] bg-draw-bg border border-draw-border flex items-center cursor-not-allowed">
+                                            class="h-[26px] rounded-md px-[11px] bg-bg-app-bg-3 border border-app-border-2 flex items-center cursor-not-allowed">
                                             多图参考（开发中）
                                         </div>
                                     </div>
-                                    <div class="mt-3 rounded-md bg-draw-bg border border-draw-border p-[6px]">
+                                    <div class="mt-3 rounded-md bg-bg-app-bg-3 border border-app-border-2 p-[6px]">
                                         <div class="flex items-center gap-1 text-[11px] px-[6px]">
                                             <div
                                                 v-for="(item, index) in imageTypeTabs"
                                                 class="text-white px-[11px] rounded-md h-[26px] flex items-center"
                                                 :class="
                                                     imageTypeTabActive === item.id
-                                                        ? 'shadow-[0_0_0_1px_rgba(255,255,255,0.10)] bg-draw-bg cursor-pointer'
+                                                        ? 'shadow-[0_0_0_1px_rgba(255,255,255,0.10)] bg-bg-app-bg-3 cursor-pointer'
                                                         : 'cursor-not-allowed'
                                                 ">
                                                 {{ item.label }}
@@ -107,7 +107,7 @@
                                 popper-class="w-[228px]"
                                 content="开启后可将【生成规格】中的宽高均乘以2返回，如上述宽高均为512和512，此参数关闭出图 512*512 ，此参数打开出图1024 * 1024">
                                 <div
-                                    class="flex items-center justify-between w-full border border-draw-border rounded-lg bg-draw-bg px-3 h-11">
+                                    class="flex items-center justify-between w-full border border-app-border-2 rounded-lg bg-bg-app-bg-3 px-3 h-11">
                                     <div class="flex items-center gap-2 text-white">
                                         超分辨率生成
                                         <Icon name="local-icon-question" :size="16"></Icon>
@@ -147,7 +147,7 @@
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
 import { getApiUrl } from "@/utils/env";
-import { ModelEnum, drawTypeEnumMap, DrawTypeEnum } from "../_enums/drawEnums";
+import { ModelEnum, drawTypeEnumMap, DrawTypeEnum } from "../_enums";
 import { CopywritingTypeEnum } from "../../_enums/chatEnum";
 import ImageUpload from "./image-upload.vue";
 import ResolutionSelect from "./resolution-select.vue";
@@ -346,7 +346,3 @@ defineExpose({
     setPrompt,
 });
 </script>
-
-<style scoped lang="scss">
-@import "../_assets/styles/index.scss";
-</style>

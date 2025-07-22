@@ -15,8 +15,9 @@ class SvCopywritingValidate extends BaseValidate
         'id' => 'require',
         'status' => 'require|in:0,4',
         'type' => 'require|in:1,2,3',
-        'add_type' => 'require|in:0,1',
+        'add_type' => 'require|in:0,1,2,3',
         'keyword' => 'require|max:600',
+        'name' => 'require|max:255',
         'total_num' => 'require|integer',
     ];
 
@@ -29,19 +30,21 @@ class SvCopywritingValidate extends BaseValidate
         'add_type.in' => '输入新增类型不对',
         'keyword.require' => '请输入关键词',
         'keyword.max' => '输入关键词最长600',
+        'name.require' => '请输入文案',
+        'name.max' => '输入文案名称最长255',
         'total_num.require' => '请输入数量',
     ];
 
     // 添加场景
     public function sceneAdd()
     {
-        return $this->only([ 'status', 'type', 'keyword', 'total_num']);
+        return $this->only(['type']);
     }
 
     // 更新场景
     public function sceneUpdate()
     {
-        return $this->only(['id', 'status', 'type', 'keyword', 'total_num']);
+        return $this->only(['id',  'name']);
     }
 
     // 更新场景
@@ -55,5 +58,10 @@ class SvCopywritingValidate extends BaseValidate
     public function sceneDelete()
     {
         return $this->only(['id']);
+    }
+
+    public function sceneAddname()
+    {
+        return $this->only(['type']);
     }
 }

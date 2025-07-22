@@ -20,6 +20,7 @@
                 <el-table-column label="迁移状态" min-width="80">
                     <template #default="{ row }">
                         <el-tag v-if="row.migration == 1">迁移中</el-tag>
+                        <el-tag type="success" v-else-if="row.migration == 2">迁移成功</el-tag>
                         <el-tag type="danger" v-else>未迁移</el-tag>
                     </template>
                 </el-table-column>

@@ -173,7 +173,6 @@ class HumanController extends BaseApiController
     public function voiceLists()
     {
         $data = $this->request->get();
-        $data['type'] = 1;
         $result = HumanLogic::voiceLists($data);
         return $this->data($result);
     }
@@ -181,7 +180,6 @@ class HumanController extends BaseApiController
     public function builtInVoiceLists()
     {
         $data = $this->request->get();
-        $data['type'] = 0;
         $result = HumanLogic::voiceLists($data);
         return $this->data($result);
     }

@@ -1,88 +1,3 @@
-// 文案列表
-export function getCopywritingList(params: any) {
-    return $request.get({ url: "/sv.copywriting/lists", params });
-}
-
-// 文案新增
-export function addCopywriting(params: any) {
-    return $request.post({ url: "/sv.copywriting/add", params });
-}
-
-// 文案删除
-export function deleteCopywriting(params: any) {
-    return $request.post({ url: "/sv.copywriting/delete", params });
-}
-
-// 文案详情
-export function getCopywritingDetail(params: any) {
-    return $request.get({ url: "/sv.copywriting/detail", params });
-}
-
-// 口播文案列表
-export function getKbContentList(params: any) {
-    return $request.get({ url: "/sv.copywritingContent/lists", params });
-}
-
-// 口播文案新增
-export function addKbContent(params: any) {
-    return $request.post({ url: "/sv.copywritingContent/add", params });
-}
-
-// 口播文案删除
-export function deleteKbContent(params: any) {
-    return $request.post({ url: "/sv.copywritingContent/delete", params });
-}
-
-// 口播文案更新
-export function updateKbContent(params: any) {
-    return $request.post({ url: "/sv.copywritingContent/update", params });
-}
-
-// 内容创作列表
-export function getContentGenList(params: any) {
-    return $request.get({ url: "/sv.videoSetting/lists", params });
-}
-
-// 内容创作新增
-export function addContentGen(params: any) {
-    return $request.post({ url: "/sv.videoSetting/add", params });
-}
-
-// 内容创作更新
-export function updateContentGen(params: any) {
-    return $request.post({ url: "/sv.videoSetting/update", params });
-}
-
-// 内容创作删除
-export function deleteContentGen(params: any) {
-    return $request.post({ url: "/sv.videoSetting/delete", params });
-}
-
-// 内容创作详情
-export function getContentGenDetail(params: any) {
-    return $request.get({ url: "/sv.videoSetting/detail", params });
-}
-
-// 内容创作重试
-export function retryContentGen(params: any) {
-    return $request.get({ url: "/sv.videoSetting/retry", params });
-}
-
-// 作品列表
-export function getWorkList(params: any) {
-    return $request.get({ url: "/sv.videoTask/lists", params });
-}
-
-// 更新作品
-export function updateWork(params: any) {
-    return $request.post({ url: "/sv.videoTask/update", params });
-}
-
-// 作品重试
-export function retryWork(params: any) {
-    return $request.get({ url: "/sv.videoTask/retry", params });
-}
-
 // 发布任务列表
 export function getPublishTaskList(params: any) {
     return $request.get({ url: "/sv.publish/lists", params });
@@ -136,4 +51,109 @@ export function deletePublishRecord(params: any) {
 // 模拟发布视频任务
 export function mockPublishTask(params: any) {
     return $request.post({ url: "/sv.publish/testAdd", params });
+}
+
+// 文案素材添加
+export function addCopywritingMaterial(params: any) {
+    return $request.post({ url: "/sv.mediaSetting/add", params });
+}
+
+// 文案素材详情
+export function getCopywritingMaterialDetail(params: any) {
+    return $request.get({ url: "/sv.mediaSetting/detail", params });
+}
+
+// 内容素材更新
+export function updateCopywritingMaterial(params: any) {
+    return $request.post({ url: "/sv.mediaSetting/update", params });
+}
+
+// 内容素材删除
+export function deleteCopywritingMaterial(params: any) {
+    return $request.post({ url: "/sv.mediaSetting/delete", params });
+}
+
+// 素材库列表
+export function getMaterialLibraryList(params: any) {
+    return $request.get({ url: "/sv.mediaMaterial/lists", params });
+}
+
+// 素材库新增
+export function addMaterialLibrary(params: any) {
+    return $request.post({ url: "/sv.mediaMaterial/add", params });
+}
+
+// 素材库更新
+export function updateMaterialLibrary(params: any) {
+    return $request.post({ url: "/sv.mediaMaterial/update", params });
+}
+
+// 素材库删除
+export function deleteMaterialLibrary(params: any) {
+    return $request.post({ url: "/sv.mediaMaterial/delete", params });
+}
+
+// 数字人新增
+export function addDigitalHuman(params: any) {
+    return $request.post({ url: "/sv.videoSetting/add", params });
+}
+
+// 数字人列表
+export function getDigitalHumanList(params: any) {
+    return $request.get({ url: "/sv.videoSetting/lists", params });
+}
+
+// 数字人更新
+export function updateDigitalHuman(params: any) {
+    return $request.post({ url: "/sv.videoSetting/update", params });
+}
+
+// 数字人删除
+export function deleteDigitalHuman(params: any) {
+    return $request.post({ url: "/sv.videoSetting/delete", params });
+}
+
+// 数字人详情
+export function getDigitalHumanDetail(params: any) {
+    return $request.get({ url: "/sv.videoSetting/detail", params });
+}
+
+// 数字人查看生成视频
+export function getDigitalHumanVideo(params: any) {
+    return $request.get({ url: "/sv.videoTask/lists", params });
+}
+
+// 数字人删除生成视频
+export function deleteDigitalHumanVideo(params: any) {
+    return $request.post({ url: "/sv.videoTask/delete", params });
+}
+
+// 文案库列表
+export function getCopywritingLibraryList(params: any) {
+    return $request.get({ url: "/sv.copywritingLibrary/lists", params });
+}
+
+// 文案库新增
+export function addCopywritingLibrary(params: any) {
+    return $request.post({ url: "/sv.copywritingLibrary/add", params });
+}
+
+// 文案库更新
+export function updateCopywritingLibrary(params: any) {
+    return $request.post({ url: "/sv.copywritingLibrary/update", params });
+}
+
+// 文案库删除
+export function deleteCopywritingLibrary(params: any) {
+    return $request.post({ url: "/sv.copywritingLibrary/del", params });
+}
+
+// 文案库详情
+export function getCopywritingLibraryDetail(params: any) {
+    return $request.get({ url: "/sv.copywritingLibrary/detail", params });
+}
+
+// 文案库内容AI生成
+export function getCopywritingLibraryContentAi(params: any) {
+    return $request.post({ url: "/sv.copywritingLibrary/addAi", params });
 }

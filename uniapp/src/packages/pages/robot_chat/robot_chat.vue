@@ -91,7 +91,7 @@ import { TokensSceneEnum } from "@/enums/appEnums";
 const sidebarRef = shallowRef<InstanceType<typeof Sidebar>>();
 
 const userStore = useUserStore();
-const { userTokens } = toRefs(userStore);
+const { userTokens, isLogin } = toRefs(userStore);
 const getSceneTokens = userStore.getTokenByScene(TokensSceneEnum.SCENE_CHAT)?.score;
 
 const rechargePopupRef = ref();
@@ -173,6 +173,12 @@ const getChatList = async () => {
 let streamReader: any = null;
 
 const contentPost = async (userInput?: any, isNewChat: boolean = false) => {
+    if (!isLogin.value) {
+        uni.$u.route({
+            url: "/pages/login/login",
+        });
+        return;
+    }
     if (userTokens.value <= 0) {
         uni.$u.toast("算力不足，请充值！");
         rechargePopupRef.value?.open();

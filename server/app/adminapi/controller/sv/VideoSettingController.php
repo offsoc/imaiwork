@@ -34,11 +34,11 @@ class VideoSettingController extends BaseAdminController
         }
     }
 
-    public function delete()
+    public function del()
     {
         try {
             $params = (new VideoSettingValidate())->post()->goCheck('delete');
-            $result = VideoSettingLogic::deleteSvVideoSetting($params);
+            $result = VideoSettingLogic::del($params);
             if ($result) {
                 return $this->success();
             }

@@ -84,6 +84,7 @@ class WorkerEnum
     public const DEVICE_RUNNING_REPLY_MSG = 4032;//设备正在回复消息中, 请稍后再试y;
     public const DEVICE_INVALID_REQUEST = 4033;//设备参数无效;
     public const WEB_USER_INVALID_REQUEST = 4034;//用户参数无效;
+    public const WEB_GET_USER_INFO_FAIL = 4035;//获取账号信息失败,请重新获取;
     
     #指令映射
     public const WEB_SOCKET_STATUS_TEXT = 'bindSocket';
@@ -173,6 +174,7 @@ class WorkerEnum
         self::DEVICE_RUNNING_REPLY_MSG => '设备正在回复消息中, 请稍后再试',
         self::DEVICE_INVALID_REQUEST => '设备参数无效',
         self::WEB_USER_INVALID_REQUEST => '用户参数无效',
+        self::WEB_GET_USER_INFO_FAIL => '获取账号信息失败,请重新获取'
     ];
     /**
      * 获取错误消息

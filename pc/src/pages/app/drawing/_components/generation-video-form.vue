@@ -17,7 +17,7 @@
                             <ElSelect
                                 v-model="formData.model"
                                 class="!h-11"
-                                popper-class="digital-human-select"
+                                popper-class="custom-select-popper"
                                 placeholder="请选择模型名称"
                                 :show-arrow="false">
                                 <ElOption
@@ -37,7 +37,7 @@
                                         :class="[
                                             imageTypeTabActive === item.id
                                                 ? 'bg-primary'
-                                                : 'shadow-[0_0_0_1px_#2A2A2A] bg-digital-human-bg ',
+                                                : 'shadow-[0_0_0_1px_#2A2A2A] bg-app-bg-1 ',
                                         ]"
                                         @click="
                                             imageTypeTabActive = item.id;
@@ -57,7 +57,7 @@
                                 </div>
                                 <div
                                     v-else-if="imageTypeTabActive === ImageTypeEnum.LINK_IMAGE"
-                                    class="h-[126px] rounded-md border border-draw-border bg-draw-bg p-4 flex flex-col items-center justify-center">
+                                    class="h-[126px] rounded-md border border-app-border-2 bg-bg-app-bg-3 p-4 flex flex-col items-center justify-center">
                                     <div class="text-[11px] text-white mb-5">输入图片链接开始制作吧</div>
                                     <ElInput v-model="formData.image_url" placeholder="请输入图片链接"> </ElInput>
                                 </div>
@@ -98,7 +98,7 @@
 
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
-import { GenerateVideoTypeEnum, ModelEnum } from "../_enums/drawEnums";
+import { GenerateVideoTypeEnum, ModelEnum } from "../_enums";
 import { CopywritingTypeEnum } from "../../_enums/chatEnum";
 import ResolutionSelect from "./resolution-select.vue";
 import ImageUpload from "./image-upload.vue";
@@ -213,7 +213,3 @@ defineExpose({
     setPrompt,
 });
 </script>
-
-<style scoped lang="scss">
-@import "../_assets/styles/index.scss";
-</style>

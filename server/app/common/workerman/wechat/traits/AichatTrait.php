@@ -52,15 +52,31 @@ trait AichatTrait
             ])->log();
             return;
         }
+        
+        if(in_array($payload['FriendId'], ['weixin'])){
+            $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('微信团队')->withContext([
+                'msg' => '微信团队消息,不需要回复'
+            ])->log();
+            return;
+        }
 
 
         try {
             $device  = $this->_getDeviceInfo($deviceId);
             $wechat = $this->_getWechatInfo($payload['WeChatId'], $device);
-            
             $friend = $this->_getFriendInfo($payload['FriendId'], $payload['WeChatId']);
             $reply = $this->_getReplyStrategy($device['user_id']);
             $robot = $this->_getWechatRobot($wechat['robot_id']);
+
+            if($wechat['open_ai'] === 0 || $wechat['takeover_mode'] === 0){
+                $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('未开启ai')->withContext([
+                    'data' => $wechat,
+                    'msg' => '账号未开启ai'
+                ])->log();
+                return;
+            }
+
+
 
             $historyMsg = $this->getFriendHistoryMsg($payload, $reply);
             $isChatroom = strpos($payload['FriendId'], '@chatroom') !== false ? 1 : 0;
@@ -100,8 +116,6 @@ trait AichatTrait
                 $promat = str_replace(["@{$wechat['wechat_nickname']}", " "], '', $promat);
                 
             }
-
-
 
             // 组装请求参数
             $request = [
@@ -642,7 +656,7 @@ trait AichatTrait
         }
 
         $msgs = count($msgs) > $number_chat_rounds ? array_slice($msgs, -$number_chat_rounds) : $msgs;
-        $this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE));
+        $this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE), 'EX', 86400 * 15);
         return $msgs;
     }
 
@@ -716,6 +730,7 @@ trait AichatTrait
         }
         return $friend->toArray();
     }
+
     private function _getWechatInfo(string $wechatId, array $device): array
     {
         $wechat = AiWechat::alias('w')

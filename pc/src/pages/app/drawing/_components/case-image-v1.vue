@@ -5,7 +5,7 @@
         confirm-button-text=""
         cancel-button-text=""
         :show-close="false"
-        style="padding: 0; background-color: var(--color-digital-human-bg)">
+        style="padding: 0; background-color: var(--app-bg-color-1)">
         <div class="py-[18px] -my-4">
             <div class="absolute top-[18px] right-[18px] w-6 h-6 cursor-pointer" @click="close">
                 <close-btn></close-btn>

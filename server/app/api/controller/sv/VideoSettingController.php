@@ -27,15 +27,11 @@ class VideoSettingController extends BaseApiController
             // 检查状态值
             $status = isset($params['status']) ? (int)$params['status'] : null;
             if ($status === null || ($status !== 0 && $status !== 1)) {
-                self::setError('非法操作：status参数只能为0或1');
-                return false;
+                return $this->fail('非法操作：status参数只能为0或1');
             }
-            $setting_type = isset($params['setting_type']) ? (int)$params['setting_type'] : null;
-            if ($setting_type == 2) {
-                $result = SvVideoSettingLogic::addExistSvVideoSetting($params);
-            }else{
-                $result = SvVideoSettingLogic::addSvVideoSetting($params);
-            }
+           
+            $result = SvVideoSettingLogic::addSvVideoSetting($params);
+          
             if ($result) {
                 return $this->data(SvVideoSettingLogic::getReturnData());
             }
@@ -91,21 +87,4 @@ class VideoSettingController extends BaseApiController
     }
 
 
-    /**
-     * @desc 重试
-     * @return \think\response\Json
-     */
-    public function retry()
-    {
-        try {
-            $params = (new SvVideoSettingValidate())->get()->goCheck('retry');
-            $result = SvVideoSettingLogic::retry($params);
-            if ($result) {
-                return $this->success('操作成功');
-            }
-            return $this->fail(SvVideoSettingLogic::getError());
-        } catch (HttpResponseException $e) {
-            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
-        }
-    }
 }

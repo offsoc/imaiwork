@@ -1,8 +1,8 @@
 <template>
-    <div class="h-full flex flex-col">
-        <div class="bg-digital-human flex-shrink-0 rounded-[20px] px-[14px]">
+    <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
+        <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[68px]">
+                <div class="flex items-center justify-between h-[88px]">
                     <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
                         <ElTabPane label="全部" name=""></ElTabPane>
                         <ElTabPane
@@ -42,15 +42,14 @@
                 </div>
             </ElScrollbar>
         </div>
-        <div class="grow min-h-0 bg-digital-human overflow-hidden flex flex-col rounded-[20px] mt-4">
+        <div class="grow min-h-0 overflow-hidden flex flex-col">
             <div class="grow min-h-0">
                 <ElTable
-                    :data="pager.lists"
                     height="100%"
+                    :data="pager.lists"
                     :header-row-style="{ height: '62px' }"
                     :row-style="{ height: '50px' }"
                     v-loading="pager.loading">
-                    >
                     <ElTableColumn prop="id" label="ID" width="60" fixed="left"></ElTableColumn>
                     <ElTableColumn prop="name" label="音色名称" min-width="200"></ElTableColumn>
                     <ElTableColumn label="创建时间" prop="create_time" min-width="200"></ElTableColumn>
@@ -101,10 +100,11 @@
 </template>
 
 <script setup lang="ts">
-import { getVoiceList, deleteVoice, retryVoice } from "@/api/digital_human";
+import { getVoiceList, deleteVoice } from "@/api/digital_human";
 import AddPop from "./_components/add-pop.vue";
 import { useAppStore } from "@/stores/app";
 import Empty from "@/pages/app/digital_human/_components/empty.vue";
+import { ToneType } from "@/pages/app/digital_human/_enums";
 const appStore = useAppStore();
 
 const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
@@ -114,8 +114,9 @@ const addPopRef = shallowRef<InstanceType<typeof AddPop>>();
 
 const queryParams = reactive({
     name: "",
-    type: 1,
+    type: 0,
     model_version: "",
+    builtin: ToneType.USER,
 });
 
 const { pager, getLists, resetPage } = usePaging({
@@ -160,7 +161,3 @@ onMounted(() => {
     getLists();
 });
 </script>
-
-<style scoped lang="scss">
-@import "../../_assets/styles/index.scss";
-</style>
