@@ -312,17 +312,22 @@ import dayjs from "dayjs";
 import { uploadImage } from "@/api/app";
 import { AppTypeEnum } from "@/enums/appEnums";
 import { queryToObject } from "@/utils/util";
+import { useUserStore } from "@/stores/user";
 import { getDigitalHumanDetail, addDigitalHuman, updateDigitalHuman } from "@/api/redbook";
 import { commonUploadLimit, DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
 import VoiceMaterial from "@/pages/app/digital_human/_pages/create/_components/choose-tone.vue";
 import MaterialPicker from "../../../_components/material-picker.vue";
 import KbCopywritingMaterial from "../../../_components/kb-copywriting-material.vue";
 import MaterialPopup from "../../../_components/material-popup.vue";
-import { MaterialTypeEnum, MaterialActionType, SidebarEnum } from "../../../_enums";
+import { MaterialTypeEnum, MaterialActionType, SidebarTypeEnum } from "../../../_enums";
 
 const emit = defineEmits(["back"]);
 
 const route = useRoute();
+
+const userStore = useUserStore();
+
+const { userTokens } = toRefs(userStore);
 
 interface RedbookCreationFormData {
     id?: string;
@@ -366,7 +371,7 @@ const handleCancel = () => {
         message: "确定要取消创建吗？",
         theme: "dark",
         onConfirm: () => {
-            emit("back");
+            handleBack();
         },
     });
 };
@@ -608,11 +613,11 @@ const handleUpdateCreateTask = async () => {
         if (anchor.length && !pic) {
             if (anchor[0]) {
                 const getVideoPicFn = async (): Promise<string> => {
-                    return new Promise((resolve, reject) => {
-                        getVideoFirstFrame(anchor[0], (data) => {
-                            if (data) {
+                    return new Promise(async (resolve, reject) => {
+                        getVideoFirstFrame(anchor[0]).then(({ file }) => {
+                            if (file) {
                                 uploadImage({
-                                    file: data,
+                                    file,
                                 }).then((res) => {
                                     resolve(res.uri);
                                 });
@@ -664,6 +669,9 @@ const handleCreate = async (type: CreateType) => {
     } else if (VoiceType.Custom == formData.extra.currentVoiceType && voice.length == 0) {
         feedback.msgWarning("请添加音色");
         return;
+    } else if (userTokens.value == 0) {
+        feedback.msgPowerInsufficient();
+        return;
     }
     try {
         // 过滤copywriting
@@ -678,7 +686,7 @@ const handleCreate = async (type: CreateType) => {
             window.history.replaceState(
                 "",
                 "",
-                `?type=${SidebarEnum.PUBLISH_VIDEO_TASK}&is_publish=1&dh_create_id=${formData.id || data.id}`
+                `?type=${SidebarTypeEnum.PUBLISH_VIDEO_TASK}&is_publish=1&dh_create_id=${formData.id || data.id}`
             );
             setTimeout(() => {
                 window.location.reload();

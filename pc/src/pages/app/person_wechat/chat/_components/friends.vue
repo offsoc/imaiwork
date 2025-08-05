@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import pinyin from "@/utils/pinyin";
-import useHandle from "../_hooks/useHandle";
+import useHandle from "../../_hooks/useHandle";
 
 const props = withDefaults(
     defineProps<{

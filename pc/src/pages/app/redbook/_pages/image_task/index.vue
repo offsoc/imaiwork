@@ -138,12 +138,11 @@
 import { getPublishTaskList, deletePublishTask, changePublishTaskStatus } from "@/api/redbook";
 import Empty from "@/pages/app/redbook/_components/empty.vue";
 import dayjs from "dayjs";
-import { PublishTaskType } from "@/pages/app/redbook/_enums";
+import { PublishTaskType, SidebarTypeEnum } from "@/pages/app/redbook/_enums";
 import PublishPanel from "@/pages/app/redbook/_components/publish-panel.vue";
 import PublishRecord from "@/pages/app/redbook/_components/publish-record.vue";
 
-import { SidebarEnum } from "../../_enums";
-const route = useRoute();
+const { query } = useRoute();
 
 const queryParams = reactive({
     name: "",
@@ -152,7 +151,7 @@ const queryParams = reactive({
     media_type: PublishTaskType.IMAGE,
 });
 
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getPublishTaskList,
     params: queryParams,
 });
@@ -167,7 +166,7 @@ const getPublishCycle = (row: any) => {
 };
 
 // 添加发布视频 Start
-const isPublish = ref(route.query.is_publish == "1");
+const isPublish = ref(query.is_publish == "1" && parseInt(query.type as string) == SidebarTypeEnum.PUBLISH_IMAGE_TASK);
 const handlePublish = () => {
     isPublish.value = true;
     replaceState({
@@ -178,7 +177,7 @@ const handlePublish = () => {
 const publishBack = () => {
     isPublish.value = false;
     isRecord.value = false;
-    window.history.replaceState("", "", `?type=${SidebarEnum.PUBLISH_IMAGE_TASK}`);
+    window.history.replaceState("", "", `?type=${SidebarTypeEnum.PUBLISH_IMAGE_TASK}`);
     getLists();
 };
 
@@ -191,7 +190,7 @@ const handleDelete = async (id) => {
         onConfirm: async () => {
             try {
                 await deletePublishTask({ id });
-                feedback.notifySuccess("删除成功");
+                feedback.msgSuccess("删除成功");
                 getLists();
             } catch (error) {
                 feedback.msgError(error || "删除失败");
@@ -219,7 +218,7 @@ const handleEdit = (row: any) => {
     });
 };
 
-const isRecord = ref(route.query.is_record == "1");
+const isRecord = ref(query.is_record == "1" && parseInt(query.type as string) == SidebarTypeEnum.PUBLISH_IMAGE_TASK);
 const handleDetail = (row: any) => {
     isRecord.value = true;
     replaceState({
@@ -229,7 +228,7 @@ const handleDetail = (row: any) => {
 };
 
 onMounted(() => {
-    if (!isPublish.value) {
+    if (!isPublish.value && !isRecord.value) {
         getLists();
     }
 });

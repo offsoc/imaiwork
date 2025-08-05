@@ -173,6 +173,7 @@ const emit = defineEmits<{
     (e: "copy", id: string): void;
 }>();
 
+const nuxtApp = useNuxtApp();
 const query = queryToObject();
 const queryParams = reactive({
     id: query.publish_id,
@@ -194,7 +195,7 @@ const statusMap = {
 };
 
 const handleCheckError = (remark: string) => {
-    useNuxtApp().$confirm({
+    nuxtApp.$confirm({
         title: "未通过原因",
         message: remark,
         theme: "dark",
@@ -241,15 +242,19 @@ const handleChangeDate = async (row, type: "changeDate" | "retry") => {
     datePopupRef.value.open();
 };
 
-const handleDelete = async (row) => {
-    await feedback.confirm("确定删除该记录吗？");
-    try {
-        await deletePublishRecord(row.id);
-        feedback.msgSuccess("删除成功");
-        getLists();
-    } catch (error) {
-        feedback.msgWarning("删除失败");
-    }
+const handleDelete = (row) => {
+    nuxtApp.$confirm({
+        message: "确定删除该记录吗？",
+        onConfirm: async () => {
+            try {
+                await deletePublishRecord(row.id);
+                feedback.msgSuccess("删除成功");
+                getLists();
+            } catch (error) {
+                feedback.msgWarning("删除失败");
+            }
+        },
+    });
 };
 
 const handleChangeDateConfirm = async () => {

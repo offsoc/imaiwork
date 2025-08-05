@@ -83,7 +83,7 @@
                                             :accept="accept"
                                             @success="getUploadModelImage">
                                             <div
-                                                class="h-[127px] w-full flex-col rounded-md flex items-center justify-center bg-bg-app-bg-3">
+                                                class="h-[127px] w-full flex-col rounded-md flex items-center justify-center bg-app-bg-3">
                                                 <Icon name="local-icon-draw_upload" :size="28" color="#ffffff"></Icon>
                                                 <span class="mt-2 text-[11px] text-[#ffffff80]">点击添加模特</span>
                                             </div>
@@ -91,7 +91,7 @@
                                         <div
                                             v-for="(img, index) in optionsData.modelList"
                                             :key="index"
-                                            class="relative h-[130px] w-full flex-col rounded-md flex items-center justify-center bg-bg-app-bg-3 overflow-hidden border-[2px] border-[#ffffff33] cursor-pointer group"
+                                            class="relative h-[130px] w-full flex-col rounded-md flex items-center justify-center bg-app-bg-3 overflow-hidden border-[2px] border-[#ffffff33] cursor-pointer group"
                                             :class="formData.persons.includes(img) ? 'border-primary' : ''"
                                             @click="handleModelImageClick(img)">
                                             <ElImage :src="img" class="w-full h-full" fit="cover" />

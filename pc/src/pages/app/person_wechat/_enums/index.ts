@@ -1,4 +1,4 @@
-export enum EnumMsgType {
+export enum MsgTypeEnum {
     UnknownMsg = "UnknownMsg", //未知消息
     HeartBeatReq = "HeartBeatReq", //客户端发送的心跳包
     MsgReceivedAck = "MsgReceivedAck", //消息接收确认回复（接收或拒绝接收）
@@ -19,7 +19,7 @@ export enum EnumMsgType {
     FriendTalkNotice = "FriendTalkNotice", //微信好友发来聊天消息
     TaskResultNotice = "TaskResultNotice", //任务执行结果通知
     WeChatTalkToFriendNotice = "WeChatTalkToFriendNotice", // 手机上回复好友的聊天消息
-    FriendAddReqeustNotice = "FriendAddReqeustNotice", // 有好友请求添加好友的通知
+    FriendAddRequestNotice = "FriendAddReqeustNotice", // 有好友请求添加好友的通知
     TalkToFriendTaskResultNotice = "TalkToFriendTaskResultNotice", // 手机端向服务端通知聊天执行结果
     RequestTalkDetailTaskResultNotice = "RequestTalkDetailTaskResultNotice", //图片或视频消息的详细内容结果
     PullWeChatQrCodeTaskResultNotice = "PullWeChatQrCodeTaskResultNotice", //上传手机客户端上微信的二维码
@@ -192,7 +192,7 @@ export enum EnumMsgType {
     RequestChatRoomInfoTaskMessage = "RequestChatRoomInfoTaskMessage",
 }
 
-export enum EnumMsgErrorCode {
+export enum MsgErrorCodeEnum {
     Success = 0, // 成功
     DeviceNotFound = 1013, // 设备未找到
     DeviceOffline = 1014, // 设备离线
@@ -203,15 +203,8 @@ export enum EnumMsgErrorCode {
     SystemError = 6001, // 系统错误
 }
 
-// 性别枚举
-export enum EnumGender {
-    UnknownGender = 0, //未知
-    Male = 1, //男
-    Female = 2, //女
-}
-
 // 聊天内容类型
-export enum EnumContentType {
+export enum ContentTypeEnum {
     UnknownContent = 0, // 未知内容
     Text = 1, // 文本内容
     Picture = 2, // 图片消息
@@ -238,70 +231,38 @@ export enum EnumContentType {
     UnSupport = 99, // 不支持的消息
 }
 
-export const EnumContentTypeMap = {
-    [EnumContentType.UnknownContent]: "未知",
-    [EnumContentType.Text]: "文本",
-    [EnumContentType.Picture]: "图片",
-    [EnumContentType.Video]: "视频",
-    [EnumContentType.Voice]: "语音",
-    [EnumContentType.File]: "文件",
-    [EnumContentType.System]: "系统",
-    [EnumContentType.Emoji]: "动画表情",
-    [EnumContentType.RoomManage]: "群管理",
-    [EnumContentType.Sys_LuckyMoney]: "领取红包",
-    [EnumContentType.RoomSystem]: "群聊系统",
-    [EnumContentType.BizLink]: "公众号文章",
-    [EnumContentType.AudioCall]: "语音通话",
-    [EnumContentType.VideoCall]: "视频通话",
-    [EnumContentType.NotifyMsg]: "服务通知",
-    [EnumContentType.QuoteMsg]: "引用通知",
-    [EnumContentType.UnSupport]: "不支持的消息",
-    [EnumContentType.LuckyMoney]: "红包",
-    [EnumContentType.MoneyTrans]: "转账",
-    [EnumContentType.WeApp]: "小程序",
-    [EnumContentType.Location]: "位置",
-    [EnumContentType.Link]: "链接",
-    [EnumContentType.LinkExt]: "扩展链接",
-    [EnumContentType.NameCard]: "名片",
+export const ContentTypeEnumMap = {
+    [ContentTypeEnum.UnknownContent]: "未知",
+    [ContentTypeEnum.Text]: "文本",
+    [ContentTypeEnum.Picture]: "图片",
+    [ContentTypeEnum.Video]: "视频",
+    [ContentTypeEnum.Voice]: "语音",
+    [ContentTypeEnum.File]: "文件",
+    [ContentTypeEnum.System]: "系统",
+    [ContentTypeEnum.Emoji]: "动画表情",
+    [ContentTypeEnum.RoomManage]: "群管理",
+    [ContentTypeEnum.Sys_LuckyMoney]: "领取红包",
+    [ContentTypeEnum.RoomSystem]: "群聊系统",
+    [ContentTypeEnum.BizLink]: "公众号文章",
+    [ContentTypeEnum.AudioCall]: "语音通话",
+    [ContentTypeEnum.VideoCall]: "视频通话",
+    [ContentTypeEnum.NotifyMsg]: "服务通知",
+    [ContentTypeEnum.QuoteMsg]: "引用通知",
+    [ContentTypeEnum.UnSupport]: "不支持的消息",
+    [ContentTypeEnum.LuckyMoney]: "红包",
+    [ContentTypeEnum.MoneyTrans]: "转账",
+    [ContentTypeEnum.WeApp]: "小程序",
+    [ContentTypeEnum.Location]: "位置",
+    [ContentTypeEnum.Link]: "链接",
+    [ContentTypeEnum.LinkExt]: "扩展链接",
+    [ContentTypeEnum.NameCard]: "名片",
 };
 
-// 设备 ~ 微信号 在线状态枚举
-export enum EnumOnlineState {
-    UnknownState = 0, // 未知，在条件中可认为是全部
-    Online = 1, // 在线
-    Offline = 2, // 离线
-}
-
-// 任务类型
-export enum EnumTaskType {
-    UnknownTask = 0, // 未知，不应该出现，但是协议需要
-    ReadTencentNews = 1, // 阅读腾讯新闻
-    ReadMPArticles = 2, // 阅读公众号文章
-    ReadKYKArticles = 3, // 阅读看一看文章
-}
-
 // 账号类型
-export enum EnumAccountType {
+export enum AccountTypeEnum {
     UnknownAccountType = 0, // 未知
     Main = 1, // 主账号
     SubUser = 2, // 子账号
-}
-
-// 消息发送状态
-export enum EnumSendStatus {
-    NoAction = 0x00, // 无状态
-    Sending = 0x01, // 发送中
-    SendSuccess = 0x11, // 发送成功
-    SendError = 0x10, // 发送失败
-}
-
-//被强制下线的原因
-export enum EnumForceOfflineReason {
-    NoReason = 0, //就是要下线你
-    FuckedByOtherAuthorizer = 1, //别处登录挤下线了
-    ByReAlloc = 2, // 被重新分配
-    ByDeviceOffline = 3, // 设备下线而下线
-    ByWeChatOffline = 4, // 微信主动下线
 }
 
 // 账号来源
@@ -322,7 +283,7 @@ export const AccountSource = {
     [1000048]: "通过雷达添加",
 };
 
-export enum EnumFriendPanel {
+export enum FriendPanelEnum {
     Dialogue = "dialogue",
     Friend = "friend",
     Group = "group",
@@ -336,7 +297,7 @@ export interface TriggerTaskParams {
 }
 
 // 账号类型
-export enum EnumAccountType {
+export enum AccountTypeEnum {
     // 个人
     Personal = 1,
     // 企业
@@ -345,11 +306,11 @@ export enum EnumAccountType {
 
 // 账号类型Map
 export const AccountTypeMap = {
-    [EnumAccountType.Personal]: "个微",
-    [EnumAccountType.Enterprise]: "企微",
+    [AccountTypeEnum.Personal]: "个微",
+    [AccountTypeEnum.Enterprise]: "企微",
 };
 
-export enum EnumTalkActionType {
+export enum TalkActionTypeEnum {
     PostHistory = "PostHistory",
     GetHistory = "GetHistory",
     VoiceToText = "VoiceToText",
@@ -357,16 +318,31 @@ export enum EnumTalkActionType {
     PostPicture = "PostPicture",
 }
 
-export enum EnumHandleEvent {
+export enum HandleEventEnum {
     UpdateUserInfo = "UpdateUserInfo",
     DownloadFile = "DownloadFile",
     PreviewVideo = "PreviewVideo",
     ChooseEmoji = "ChooseEmoji",
     VoiceToText = "VoiceToText",
+    PreviewImage = "PreviewImage",
+    SendComment = "SendComment",
+    Like = "Like",
+    DeleteCircle = "DeleteCircle",
+    DeleteComment = "DeleteComment",
+    PullCircleDetail = "PullCircleDetail",
 }
 
 export enum EnumTalkType {
     Single = 0,
     Merge = 1,
     Number = 2,
+}
+
+export enum MaterialTypeEnum {
+    TEXT = 0,
+    IMAGE = 1,
+    VIDEO = 2,
+    LINK = 3,
+    MINI_PROGRAM = 4,
+    FILE = 5,
 }

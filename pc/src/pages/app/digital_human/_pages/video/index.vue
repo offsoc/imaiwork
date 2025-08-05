@@ -68,7 +68,7 @@
         <div
             class="grow min-h-0 overflow-y-auto p-4 dynamic-scroller"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="h-full" v-loading="pager.loading">
@@ -106,7 +106,7 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
+                    <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                 </div>
                 <div class="h-full flex items-center justify-center" v-else>
                     <Empty />
@@ -150,12 +150,11 @@ const deleteIds = ref<number[]>([]);
 const queryParams = reactive({
     page_no: 1,
     page_size: 20,
-    type: 0,
     status: "",
     model_version: "",
 });
 
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getVideoList,
     params: queryParams,
     isScroll: true,

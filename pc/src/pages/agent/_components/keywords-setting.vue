@@ -86,7 +86,7 @@ const props = defineProps<{
     agentId: string | string[];
 }>();
 
-const route = useRoute();
+const nuxtApp = useNuxtApp();
 
 const queryParams = reactive<{
     keyword: string;
@@ -118,14 +118,18 @@ const handleEdit = async (row: any) => {
 };
 
 const handleDelete = async (id: number) => {
-    await feedback.confirm("确定删除该问答话术吗？");
-    try {
-        await deleteRobotKeywords({ id });
-        feedback.msgSuccess("删除成功");
-        getLists();
-    } catch (error) {
-        feedback.msgError("删除失败");
-    }
+    nuxtApp.$confirm({
+        message: "确定删除该问答话术吗？",
+        onConfirm: async () => {
+            try {
+                await deleteRobotKeywords({ id });
+                feedback.msgSuccess("删除成功");
+                getLists();
+            } catch (error) {
+                feedback.msgError("删除失败");
+            }
+        },
+    });
 };
 
 const showImport = ref<boolean>(false);

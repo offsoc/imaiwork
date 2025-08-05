@@ -111,6 +111,9 @@ class MessageService
                 $this->voiceToTextOpt($deviceId, $response);
                 $this->AddFriendsTaskOpt($deviceId, $response);
             }
+            if($msgType == 1027){
+                $this->AcceptFriendAddRequestTaskOpt($deviceId, $response);
+            }
             // 根据消息类型处理响应
             match ($msgType) {
                 // Socket设备消息响应

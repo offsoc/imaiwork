@@ -19,7 +19,7 @@
         <div
             class="grow min-h-0 flex flex-col mt-6 overflow-y-auto"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <template v-if="pager.lists.length > 0">
@@ -96,7 +96,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="!isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
+                <div v-if="!pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
             </template>
             <div v-else class="grow flex items-center justify-center bg-white rounded-xl">
                 <ElEmpty description="暂无数据"></ElEmpty>
@@ -120,17 +120,16 @@ import RpaEditPop from "./_components/rpa-edit.vue";
 const emit = defineEmits(["history"]);
 
 const { copy } = useCopy();
-
+const nuxtApp = useNuxtApp();
 const showEditPop = ref<boolean>(false);
 const editPopRef = shallowRef<InstanceType<typeof EditPop>>();
 const rpaEditRef = shallowRef<InstanceType<typeof RpaEditPop>>();
 const showRpaEditPopup = ref<boolean>(false);
-const showMore = ref<boolean>(false);
 const queryParams = reactive({
     page_no: 1,
 });
 
-const { pager, isLoad, getLists, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getJobList,
     params: queryParams,
     isScroll: true,
@@ -201,9 +200,13 @@ const handleCopyLink = async (id: number) => {
 };
 
 const handleDelete = async (id: number, index) => {
-    await feedback.confirm("是否删除该岗位？");
-    await deleteJob({ id });
-    pager.lists.splice(index, 1);
+    nuxtApp.$confirm({
+        message: "是否删除该岗位？",
+        onConfirm: async () => {
+            await deleteJob({ id });
+            pager.lists.splice(index, 1);
+        },
+    });
 };
 
 const load = async () => {

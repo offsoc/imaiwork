@@ -14,9 +14,14 @@
 
 <script setup lang="ts">
 import { dayjs, ElScrollbar } from "element-plus";
-import { drawingTextToVideo, drawingImageToVideo } from "@/api/drawing";
+import {
+    drawingTextToVideo,
+    drawingImageToVideo,
+    drawingTextToVideoDoubao,
+    drawingImageToVideoDoubao,
+} from "@/api/drawing";
 import useCreateForm from "../../_hooks/useCreateForm";
-import { GenerateVideoTypeEnum } from "../../_enums";
+import { GenerateVideoTypeEnum, ModelEnum } from "../../_enums";
 import useDrawingTask from "../../_hooks/useDrawingTask";
 import ResultContent from "../../_components/result-content.vue";
 
@@ -31,32 +36,53 @@ onEvent("update:formData", async (data: any) => {
         return;
     }
     isAllTasksCompleted.value = true;
-    const { type, type_name, model_name, params } = data;
+    const { type, type_name, model, model_name, aspect_ratio, params } = data;
     const resultData = reactive({
         date: dayjs().format("YYYY-MM-DD HH:mm"),
         prompt: params.prompt,
         video: [] as any[],
-        tags: [type_name, model_name],
+        tags: [type_name, aspect_ratio, model_name],
         formData: data,
     });
     resultLists.value.unshift(resultData);
     try {
-        resultData.video = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
-        const { data, request_id } =
-            type == GenerateVideoTypeEnum.TXT2VIDEO
-                ? await drawingTextToVideo(params)
-                : await drawingImageToVideo(params);
-        const { processDrawingTask } = useDrawingTask({
-            type,
-            task_id: data?.task_id || request_id,
-            dataLists: resultData.video,
-            drawType: "video",
-        });
-        await processDrawingTask({
-            callback: (data) => {
-                resultData.video = data;
-            },
-        });
+        if (model == ModelEnum.GENERAL) {
+            resultData.video = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
+            const { data, request_id } =
+                type == GenerateVideoTypeEnum.TXT2VIDEO
+                    ? await drawingTextToVideo(params)
+                    : await drawingImageToVideo(params);
+            const { processDrawingTask } = useDrawingTask({
+                type,
+                model,
+                task_id: data?.task_id || request_id,
+                dataLists: resultData.video,
+                drawType: "video",
+            });
+            await processDrawingTask({
+                callback: (data) => {
+                    resultData.video = data;
+                },
+            });
+        } else if (model == ModelEnum.SEEDANCE) {
+            resultData.video = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
+            const { task_id } =
+                type == GenerateVideoTypeEnum.TXT2VIDEO
+                    ? await drawingTextToVideoDoubao(params)
+                    : await drawingImageToVideoDoubao(params);
+            const { processDrawingTask } = useDrawingTask({
+                type,
+                model,
+                task_id,
+                dataLists: resultData.video,
+                drawType: "video",
+            });
+            await processDrawingTask({
+                callback: (data) => {
+                    resultData.video = data;
+                },
+            });
+        }
     } catch (error) {
         resultData.video = resultData.video.map((item) => ({
             ...item,

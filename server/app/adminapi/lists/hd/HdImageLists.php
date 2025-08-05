@@ -85,11 +85,11 @@ class HdImageLists extends BaseAdminDataLists implements ListsSearchInterface
                         $typeName = '模特换衣图';
                         break;
                     case 3:
-                        $scene = [AccountLogEnum::TOKENS_DEC_TEXT_TO_IMAGE,AccountLogEnum::TOKENS_DEC_VOLC_TEXT_TO_IMAGE];
+                        $scene = [AccountLogEnum::TOKENS_DEC_TEXT_TO_IMAGE,AccountLogEnum::TOKENS_DEC_VOLC_TEXT_TO_IMAGE, AccountLogEnum::TOKENS_DEC_DOUBAO_TEXT_TO_IMAGE];
                         $typeName = '文生图';
                         break;
                     case 4:
-                        $scene = AccountLogEnum::TOKENS_DEC_IMAGE_TO_IMAGE;
+                        $scene = [AccountLogEnum::TOKENS_DEC_IMAGE_TO_IMAGE, AccountLogEnum::TOKENS_DEC_DOUBAO_IMAGE_TO_IMAGE];
                         $typeName = '图生图';
                         break;
                     case 5:

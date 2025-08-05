@@ -50,7 +50,6 @@
                     :header-row-style="{ height: '62px' }"
                     :row-style="{ height: '50px' }"
                     v-loading="pager.loading">
-                    <ElTableColumn prop="id" label="ID" width="60" fixed="left"></ElTableColumn>
                     <ElTableColumn prop="name" label="音色名称" min-width="200"></ElTableColumn>
                     <ElTableColumn label="创建时间" prop="create_time" min-width="200"></ElTableColumn>
                     <ElTableColumn label="使用模型" min-width="120">
@@ -62,7 +61,7 @@
                         <template #default="{ row }">
                             <div class="flex items-center gap-2 justify-center">
                                 <template v-if="[0, 3, 4, 5].includes(row.status)">
-                                    <Icon name="local-icon-clone" color="var(--el-color-warning)" :size="16"></Icon>
+                                    <Icon name="local-icon-clone" color="#ffffff" :size="16"></Icon>
                                     <span class="text-warning">克隆中...</span>
                                 </template>
                                 <template v-if="row.status === 1">
@@ -114,7 +113,6 @@ const addPopRef = shallowRef<InstanceType<typeof AddPop>>();
 
 const queryParams = reactive({
     name: "",
-    type: 0,
     model_version: "",
     builtin: ToneType.USER,
 });

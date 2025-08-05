@@ -105,6 +105,7 @@ const queryParams = reactive<any>({
     name: "",
     model_version: props.modelVersion,
     status: "",
+    builtin: 1,
 });
 const queryList = async (page_no: number, page_size: number) => {
     try {

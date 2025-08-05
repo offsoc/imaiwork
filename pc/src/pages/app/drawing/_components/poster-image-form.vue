@@ -71,7 +71,7 @@
                             popper-class="w-[228px]"
                             content="开启后可将【生成规格】中的宽高均乘以2返回，如上述宽高均为512和512，此参数关闭出图 512*512 ，此参数打开出图1024 * 1024">
                             <div
-                                class="flex items-center justify-between w-full border border-app-border-2 rounded-lg bg-bg-app-bg-3 px-3 h-11">
+                                class="flex items-center justify-between w-full border border-app-border-2 rounded-lg bg-app-bg-3 px-3 h-11">
                                 <div class="flex items-center gap-2 text-white">
                                     超分辨率生成
                                     <Icon name="local-icon-question" :size="16"></Icon>
@@ -84,10 +84,9 @@
                         <template #label>
                             <div class="flex items-center gap-2 text-white">
                                 <span>生成模型</span>
-                                <Icon name="local-icon-question" :size="16"></Icon>
                             </div>
                         </template>
-                        <resolution-select @update:resolution="handleResolutionChange" />
+                        <resolution-select :model="formData.model" @update:resolution="handleResolutionChange" />
                     </ElFormItem>
                     <ElFormItem label="生成张数" v-if="formData.model == ModelEnum.HIDREAMAI">
                         <ElInput
@@ -114,7 +113,12 @@ const emit = defineEmits<{
 
 const appStore = useAppStore();
 const getModelChannel = computed(() => {
-    return appStore.getHdConfig.channel;
+    return appStore.getHdConfig?.channel
+        .filter((item) => [ModelEnum.GENERAL, ModelEnum.HIDREAMAI, ModelEnum.SEEDREAM].includes(parseInt(item.id)))
+        .map((item) => ({
+            ...item,
+            id: parseInt(item.id),
+        }));
 });
 const formData = reactive<any>({
     model: "",
@@ -180,8 +184,17 @@ watchEffect(() => {
 
 defineExpose({
     getFormData: () => {
-        const { width, height, use_sr, poster_type, poster_color, poster_title, poster_subtitle, poster_description } =
-            formData;
+        const {
+            width,
+            height,
+            use_sr,
+            poster_type,
+            poster_color,
+            poster_title,
+            poster_subtitle,
+            poster_description,
+            model,
+        } = formData;
         let params: any = {
             prompt: "",
             poster_type,
@@ -189,15 +202,16 @@ defineExpose({
             poster_title,
             poster_subtitle,
             poster_description,
+            model,
         };
-        if (formData.model == ModelEnum.HIDREAMAI) {
+        if (model == ModelEnum.HIDREAMAI) {
             params = {
                 ...params,
                 negative_prompt: "",
                 img_count: formData.img_count,
                 aspect_ratio: formData.resolution,
             };
-        } else if (formData.model == ModelEnum.GENERAL) {
+        } else if (model == ModelEnum.GENERAL || model == ModelEnum.SEEDREAM) {
             params = {
                 ...params,
                 use_sr: `${use_sr}`,
@@ -207,8 +221,8 @@ defineExpose({
         }
         return {
             params,
-            model: formData.model,
-            model_name: getModelChannel.value.find((item) => item.id == formData.model)?.name,
+            model,
+            model_name: getModelChannel.value.find((item) => item.id == model)?.name,
         };
     },
     validateForm: () => {

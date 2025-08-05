@@ -93,7 +93,7 @@ onEvent("error", (err: any) => {
         });
     }
     if (code != DeviceCmdCodeEnum.CONNECT_ERROR) {
-        feedback.notifyError(error);
+        feedback.msgError(error);
     }
 });
 

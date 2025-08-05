@@ -111,6 +111,12 @@ const getCostRules = async () => {
             audio: TokensSceneEnum.HUMAN_AUDIO_ELITE,
             avatar: TokensSceneEnum.HUMAN_AVATAR_ELITE,
         },
+        chanjing: {
+            video: TokensSceneEnum.HUMAN_VIDEO_CHANJING,
+            voice: TokensSceneEnum.HUMAN_VOICE_CHANJING,
+            audio: TokensSceneEnum.HUMAN_AUDIO_CHANJING,
+            avatar: TokensSceneEnum.HUMAN_AVATAR_CHANJING,
+        },
     };
 
     const keys = (() => {
@@ -121,6 +127,8 @@ const getCostRules = async () => {
                 return sceneKeys.advanced;
             case DigitalHumanModelVersionEnum.ELITE:
                 return sceneKeys.elite;
+            case DigitalHumanModelVersionEnum.CHANJING:
+                return sceneKeys.chanjing;
             default:
                 return sceneKeys.normal;
         }
@@ -177,6 +185,8 @@ const handleNext = () => {
         voice_name,
         audio_url,
         audio_duration,
+        width,
+        height,
     } = props.formData;
 
     createTaskParams.value = {
@@ -191,6 +201,8 @@ const handleNext = () => {
         audio_type,
         gender,
         audio_url,
+        width,
+        height,
     };
 
     const setAudioDetails = (message: string, duration: number, voice_id?: number) => {

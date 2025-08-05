@@ -32,6 +32,11 @@ class HdLogic extends ApiLogic
 
     const VOLC_TXT2IMG = 'volc_txt_to_img'; //文生图
     const VOLC_TXT2POSTERIMG = 'volc_txt_to_posterimg'; //文生海报图
+    
+    const DB_TXT2IMG = 'volc_txt_to_img_v2'; //文生图
+    const DB_IMG2IMG = 'volc_img_to_img_v2'; //图生图
+    const DB_IMG2IMG_STATUS = 'volc_img_to_img_v2_status'; //图生图状态
+    const DB_TXT2POSTERIMG = 'volc_txt_to_posterimg_v2'; //文生海报图
     /**
      * @desc 删除图片
      * @param array $data
@@ -412,6 +417,10 @@ class HdLogic extends ApiLogic
                 $scene = self::HD_TXT2POSTERIMG_STATUS;
                 $typeName = '文生海报图';
                 break;
+            case 7:
+                $scene = self::DB_IMG2IMG_STATUS;
+                $typeName = '豆包图生图';
+                break;
             default:
                 throw new \Exception('参数错误');
         }
@@ -437,6 +446,7 @@ class HdLogic extends ApiLogic
                 3 => ['scene' => 'text_to_image', "type" => AccountLogEnum::TOKENS_DEC_TEXT_TO_IMAGE],
                 4 => ['scene' => 'image_to_image', "type" => AccountLogEnum::TOKENS_DEC_IMAGE_TO_IMAGE],
                 5 => ['scene' => 'txt_to_posterimg', "type" => AccountLogEnum::TOKENS_DEC_TEXT_TO_POSTERIMAGE],
+                7 => ['scene' => 'volc_img_to_img_v2', "type" => AccountLogEnum::TOKENS_DEC_DOUBAO_IMAGE_TO_IMAGE],
             };
             $unit = TokenLogService::getTypeScore($scene['scene']);
 
@@ -539,7 +549,9 @@ class HdLogic extends ApiLogic
             self::HD_AI_TRY => ['model_image', AccountLogEnum::TOKENS_DEC_MODEL_IMAGE],
             self::VOLC_TXT2IMG => ['volc_txt_to_img', AccountLogEnum::TOKENS_DEC_VOLC_TEXT_TO_IMAGE],
             self::VOLC_TXT2POSTERIMG => ['volc_txt_to_posterimg', AccountLogEnum::TOKENS_DEC_VOLC_TEXT_TO_POSTERIMAGE],
-
+            self::DB_TXT2IMG => ['volc_txt_to_img_v2', AccountLogEnum::TOKENS_DEC_DOUBAO_TEXT_TO_IMAGE],
+            self::DB_IMG2IMG => ['volc_img_to_img_v2', AccountLogEnum::TOKENS_DEC_DOUBAO_IMAGE_TO_IMAGE],
+            self::DB_TXT2POSTERIMG => ['volc_txt_to_posterimg_v2', AccountLogEnum::TOKENS_DEC_DOUBAO_TEXT_TO_POSTERIMAGE],
             default => ['', '']
         };
 
@@ -549,7 +561,18 @@ class HdLogic extends ApiLogic
             $request['img_count'] = $request['img_count'] ?? 1;
         }
         switch ($scene) {
-
+            case self::DB_TXT2IMG:
+                $response = $requestService->doubaoTxt2Img($request);
+                break;
+            case self::DB_IMG2IMG:
+                $response = $requestService->doubaoImg2Img($request);
+                break;
+            case self::DB_IMG2IMG_STATUS:
+                $response = $requestService->doubaoImg2ImgStatus($request);
+                break;
+            case self::DB_TXT2POSTERIMG:
+                $response = $requestService->doubaoTxt2PosterImg($request);
+                break;
             case self::HD_TXT2IMG:
                 $response = $requestService->txt2Img($request);
                 break;
@@ -604,7 +627,8 @@ class HdLogic extends ApiLogic
         if ($tokenScene && isset($response['code']) && $response['code'] == 10000) {
 
             $taskId = $response['data']['task_id'];
-            if(!isset($response['data']['sub_task_ids'])){
+
+            if(!isset($response['data']['sub_task_ids']) && $scene !== self::DB_IMG2IMG){
                 throw new \Exception('目前生图正在维护中，请稍后再试');
             };
             //计费
@@ -659,19 +683,66 @@ class HdLogic extends ApiLogic
 
         $response = self::requestUrl($params, $scene, self::$uid);
         if ($prompt != '' && !$response){
-          throw new \Exception('提交文生图任务错误');
+            throw new \Exception('提交文生图任务错误');
         }
 
         if ($prompt == '' && !$response ) {
             throw new \Exception('提交文生海报图任务错误');
         }
 
-
-
         $sub_task_ids[0] = $response['sub_task_ids'] ?? '';
         self::saveLog($type, $response['request_id'], $params, $response['task_id'], $sub_task_ids,1,2,$response['image_urls']);
         self::$returnData = ['result' => $response];
         return true;
     }
+
+
+    public static function text2img($params){
+        $prompt = trim($params['prompt']);
+        $scene = self::DB_TXT2IMG;
+        $type = 3;
+        if ($prompt == ''){
+            $scene = self::DB_TXT2POSTERIMG;
+            $type = 5;
+        }
+
+        TokenLogService::checkToken(self::$uid, $scene);
+        
+        $response = self::requestUrl($params, $scene, self::$uid);
+        if ($prompt != '' && !$response){
+            throw new \Exception('提交文生图任务错误');
+        }
+
+        if ($prompt == '' && !$response ) {
+            throw new \Exception('提交文生海报图任务错误');
+        }
+
+        $sub_task_ids[0] = $response['sub_task_ids'] ?? '';
+        //豆包文生图
+        self::saveLog($type, $response['request_id'], $params, $response['task_id'], $sub_task_ids, 1, 3, $response['image_urls']);
+        self::$returnData = ['result' => $response];
+        return true;
+    }
+
+    public static function img2volcimg($params)
+    {
+        try {
+            $scene = self::DB_IMG2IMG;
+            TokenLogService::checkToken(self::$uid, $scene);
+            $response = self::requestUrl($params, $scene, self::$uid);
+
+            $sub_task_ids[0] = $response['sub_task_ids'] ?? $response['task_id'];
+
+            self::saveLog(4, $response['request_id'], $params, $response['task_id'], $sub_task_ids, 1, 3);
+            self::$returnData = ['result' => $response];
+            return true;
+        } catch (\Throwable $th) {
+            //self::setError($th->getMessage());
+            throw new \Exception($th->getMessage());
+            return false;
+        }
+    }
+
+
 
 }

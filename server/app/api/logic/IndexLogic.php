@@ -206,7 +206,9 @@ class IndexLogic extends BaseLogic
                 'is_ios_open'   => ConfigService::get('recharge','is_ios_open',0),
             ],
             'app_config' => ConfigService::get('app_config', 'redbook', []),
-            'ai_live' =>  ConfigService::get('ai_live', 'config', [])
+            'ai_live' =>  ConfigService::get('ai_live', 'config', []),
+            'by_name'=>  self::getByName(),
+
 
         ];
     }
@@ -325,5 +327,11 @@ class IndexLogic extends BaseLogic
         }
 
         return $info;
+    }
+    public static function getByName()
+    {
+        $response =  \app\common\service\ToolsService::Auth()->checkby();;
+
+        return  $response['byname'] ?? '';
     }
 }

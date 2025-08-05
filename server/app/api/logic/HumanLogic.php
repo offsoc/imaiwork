@@ -8,15 +8,14 @@ use app\common\logic\AccountLogLogic;
 use app\common\model\human\HumanAnchor;
 use app\common\model\human\HumanAudio;
 use app\common\model\human\HumanTask;
-use app\common\model\human\HumanVideo;
 use app\common\model\human\HumanVideoTask;
 use app\common\model\human\HumanVoice;
 use app\common\model\user\User;
+use app\common\model\user\UserTokensLog;
 use app\common\service\FileService;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
-use app\common\model\user\UserTokensLog;
 use think\facade\Log;
 
 class HumanLogic extends ApiLogic
@@ -43,6 +42,11 @@ class HumanLogic extends ApiLogic
     const AUDIO_TRAINING_YMT = 'audioTrainingYmt'; //文字转音频
     const VIDEO_TRAINING_YMT = 'videoTrainingYmt'; //视频训练
 
+    const AVATAR_TRAINING_CHANJING = 'avatarTrainingChanjing'; //形象训练
+    const VOICE_TRAINING_CHANJING = 'voiceTrainingChanjing'; //音色训练
+    const AUDIO_TRAINING_CHANJING = 'audioTrainingChanjing'; //文字转音频
+    const VIDEO_TRAINING_CHANJING = 'videoTrainingChanjing'; //视频训练
+
     /**
      * 更新形象
      * @param array $data
@@ -56,10 +60,10 @@ class HumanLogic extends ApiLogic
     {
         $model = HumanAnchor::where('model_version', $modelVersion)->where('status', 0);
 
-        if ($modelVersion == 1) {
+        if (in_array($modelVersion,[1,7])) {
 
             $model = $model->where('anchor_id', $data['id']);
-        } elseif ($modelVersion == 2) {
+        }elseif ($modelVersion == 2) {
             // 目前是同步的  没有回调
 
             return true;
@@ -83,6 +87,38 @@ class HumanLogic extends ApiLogic
                         $item->status = 0;
                     }
                 } elseif ($item->model_version === 2) {
+
+                }elseif ($item->model_version === 7) {
+
+                    if (in_array($data['status'], [2, 4, 5])) {
+                        $item->status = ($data['status'] == 2) ? 1 : 2;
+                        // TODO 失败退费
+                        if ($item->status == 2) {
+                            self::refundTokens($item->user_id, $item->anchor_id, $item->task_id, 'human_anchor_chanjing');
+                        }else{
+                            $voice_id = HumanVideoTask::where('task_id', $item->task_id)->value('voice_id') ?? '';
+                            if (isset($data['audio_man_id']) && $data['audio_man_id'] != '' && $voice_id == '') {
+                                $addData = [
+                                    'user_id'       => $item->user_id,
+                                    'status'        => 1,
+                                    'voice_id'      => $data['audio_man_id'],
+                                    'name'          => $data['name'],
+                                    'gender'        => $item->gender,
+                                    'model_version' => 7,
+                                    'task_id'       => $item->task_id,
+                                    'voice_urls'    => $item->url
+                                ];
+                                HumanVoice::create($addData);
+                                HumanVideoTask::where('task_id', $item->task_id)->update([
+                                    'voice_id' => $data['audio_man_id']
+                                ]);
+                            }
+
+
+                        }
+                    } else {
+                        $item->status = 0;
+                    }
                 }
                 $item->save();
             });
@@ -104,7 +140,7 @@ class HumanLogic extends ApiLogic
 
         //查询形象
         $model = HumanVoice::where('model_version', $modelVersion)->where('status', 0);
-        if ($modelVersion == 1) {
+        if (in_array($modelVersion,[1,7])) {
             $model = $model->where('voice_id', $data['id']);
         } elseif ($modelVersion == 2) {
             // 目前是同步的  没有回调
@@ -129,6 +165,18 @@ class HumanLogic extends ApiLogic
                         $item->status = 0;
                     }
                 }
+                if ($item->model_version === 7) {
+
+                    if (in_array($data['status'], [2, 3, 4])) {
+                        $item->status = ($data['status'] == 2) ? 1 : 2;
+                        // TODO 失败退费
+                        if ($item->status == 2) {
+                            self::refundTokens($item->user_id, $item->voice_id, $item->task_id, 'human_voice_chanjing');
+                        }
+                    } else {
+                        $item->status = 0;
+                    }
+                }
                 $item->save();
             });
 
@@ -149,7 +197,7 @@ class HumanLogic extends ApiLogic
 
         //查询形象
         $model = HumanAudio::where('model_version', $modelVersion)->where('status', 0);
-        if ($modelVersion == 1) {
+        if (in_array($modelVersion,[1,7])) {
             $model = $model->where('audio_id', $data['id']);
         } elseif ($modelVersion == 2) {
             // 目前是同步的  没有回调
@@ -177,6 +225,30 @@ class HumanLogic extends ApiLogic
                         'audio_url' => FileService::setFileUrl($item->url)
                     ]);
                 }
+
+                if ($item->model_version === 7) { //标准版
+                    $audio_url = $data['full']['url'] ?? '';
+                    if ($audio_url != '' && $data['status'] == 9) {
+                        $item->url = FileService::downloadFileBySource($audio_url, 'audio');
+                        $item->status = 1;
+                    }
+                    if ($audio_url == '' && $data['status'] == 9) {
+                        $item->status = 2;
+                    }
+
+                    // TODO 失败退费
+                    if ($item->status == 2) {
+                        self::refundTokens($item->user_id, $item->audio_id, $item->task_id, 'human_audio_chanjing');
+                    }
+
+                    if ($audio_url != ''){
+                        // 更新视频
+                        HumanVideoTask::where('task_id', $item->task_id)->update([
+                            'audio_url' => FileService::setFileUrl($item->url)
+                        ]);
+                    }
+
+                }
                 $item->save();
             });
 
@@ -197,9 +269,9 @@ class HumanLogic extends ApiLogic
 
         //查询形象
         $model = HumanVideoTask::where('model_version', $modelVersion)->where('status', 0);
-        if ($modelVersion == 1) {
+        if (in_array($modelVersion,[1,7])) {
             $model = $model->where('result_id', $data['id']);
-        } elseif (in_array($modelVersion,[4,6])) {
+        }elseif (in_array($modelVersion,[4,6])) {
             $model = $model->where('result_id', $data['job_id']);
         }elseif ($modelVersion == 2) {
             return true;
@@ -225,11 +297,11 @@ class HumanLogic extends ApiLogic
                     $item->remark       = $data['msg'] ?? '';
                 }
                 if (in_array($item->model_version,[4,6])) { //高级版
-                   //这里对应 status=3 或 status=4） 3成功 4失败
+                    //这里对应 status=3 或 status=4） 3成功 4失败
                     if (in_array($data['status'], [3,4])) {
                         $item->status = ($data['status'] == 3) ? 1 : 2;
                         $scene = $item->model_version == 4 ? "human_video_ym" : "human_video_ymt";
-            
+
                         if($item->status == 2){
                             self::refundTokens($item->user_id, $item->result_id, $item->task_id, $scene);
                         }
@@ -238,6 +310,25 @@ class HumanLogic extends ApiLogic
                         $item->status = 0;
                     }
                     $item->result_url   = FileService::downloadFileBySource($data['video_Url'], 'video');
+                    $item->remark       = $data['msg'] ?? '';
+                }
+                if ($item->model_version === 7) { //标准版
+                    $status = (int)$data['status'];
+                    if ($status != 10) {
+                        $item->status = ($data['status'] == 30) ? 1 : 2;
+
+                        if ($item->status == 2) {
+                            self::refundTokens($item->user_id, $item->result_id, $item->task_id, 'human_video_chanjing');
+                        }
+
+                    } else {
+                        $item->status = 0;
+                    }
+
+                    if ($status == 30){
+                        $item->result_url   = FileService::downloadFileBySource($data['video_url'], 'video');
+                        $item->audio_url   = FileService::downloadFileBySource($data['audio_urls'][0], 'audio');
+                    }
                     $item->remark       = $data['msg'] ?? '';
                 }
                 $item->save();
@@ -276,6 +367,10 @@ class HumanLogic extends ApiLogic
                 'human_voice_ymt' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT],
                 'human_audio_ymt' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT],
                 'human_video_ymt' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT],
+                'human_anchor_chanjing' => [1, AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_CHANJING],
+                'human_voice_chanjing' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_CHANJING],
+                'human_audio_chanjing' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_CHANJING],
+                'human_video_chanjing' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_CHANJING],
             };
             // 请求查询接口
             $requestParams = [
@@ -290,19 +385,17 @@ class HumanLogic extends ApiLogic
                 $response = \app\common\service\ToolsService::Human()->detailYm($requestParams);
             }elseif (strpos($type, '_pro') !== false) {
                 $response = \app\common\service\ToolsService::Human()->detailPro($requestParams);
+            }elseif (strpos($type, '_chanjing') !== false) {
+                $response = \app\common\service\ToolsService::Human()->detailChanjing($requestParams);
             } else {
                 $response = \app\common\service\ToolsService::Human()->detail($requestParams);
             }
-           
             if(isset($response['data']['task_status']) && $response['data']['task_status'] == 1) {
                 return true;
             }
-
             $count = UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 2)->where('task_id', $taskId)->count();
-
             //查询是否已返还
             if (UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('action', 1)->where('task_id', $taskId)->count() < $count) {
-
                 $points = UserTokensLog::where('user_id', $userId)->where('change_type', $typeID)->where('task_id', $taskId)->value('change_amount') ?? 0;
                 AccountLogLogic::recordUserTokensLog(false, $userId, $typeID, $points, $taskId);
             }
@@ -337,8 +430,9 @@ class HumanLogic extends ApiLogic
             $voice_id = $request['voice_id'] ?? '';
             $voice_name = $request['voice_name'] ?? '';
             $voice_type = $request['voice_type'] ?? 1;
-
-            if (empty($anchor_name) || empty($name) || !in_array($model_version, [1, 2, 4, 6]) || !in_array($gender, ['male', 'female'])) {
+            $width = $request['width'] ?? '';
+            $height = $request['height'] ?? '';
+            if (empty($anchor_name) || empty($name) || !in_array($model_version, [1, 2, 4, 6, 7]) || !in_array($gender, ['male', 'female'])) {
 
                 throw new \Exception('参数错误');
             }
@@ -364,8 +458,8 @@ class HumanLogic extends ApiLogic
 
                         throw new \Exception('字数不能超过30000字节');
                     }
-                     //模型2 字数超过2000字
-                     if (in_array($model_version, [4, 6]) &&  mb_strlen($msg, 'UTF-8') > 6200) {
+                    //模型2 字数超过2000字
+                    if (in_array($model_version, [4, 6]) &&  mb_strlen($msg, 'UTF-8') > 6200) {
 
                         throw new \Exception('字数不能超过2000');
                     }
@@ -377,7 +471,7 @@ class HumanLogic extends ApiLogic
 
                         throw new \Exception('目前不支持标准版');
                     }
-                  
+
                     // 音频驱动 音频链接不能为空
                     if (empty($audio_url)) {
                         throw new \Exception('音频文件不能为空');
@@ -401,6 +495,8 @@ class HumanLogic extends ApiLogic
                 TokenLogService::checkToken(self::$uid, self::VIDEO_TRAINING_YM);
             } elseif ($model_version == 6) {
                 TokenLogService::checkToken(self::$uid, self::VIDEO_TRAINING_YMT);
+            }elseif ($model_version == 7) {
+                TokenLogService::checkToken(self::$uid, self::VIDEO_TRAINING_CHANJING);
             }else {
                 TokenLogService::checkToken(self::$uid, self::VIDEO_TRAINING_PRO);
             }
@@ -415,7 +511,7 @@ class HumanLogic extends ApiLogic
 
                 throw new \Exception('当前您已有5个任务正在排队处理中，请等待任务完成后再创建');
             }
-            
+
 
             // 形象ID 已有形象
             if ($anchor_id) {
@@ -455,6 +551,8 @@ class HumanLogic extends ApiLogic
                 'name' => $name,
                 'pic' => $pic,
                 'gender' => $gender,
+                'width' => $width,
+                'height' => $height,
                 'audio_type' => $audio_type,
                 'anchor_id' => $anchor_id,
                 'anchor_name' => $anchor_name,
@@ -498,15 +596,18 @@ class HumanLogic extends ApiLogic
             TokenLogService::checkToken(self::$uid, 'human_anchor_ym');
         }elseif ($data['model_version'] == 6){
             TokenLogService::checkToken(self::$uid, 'human_anchor_ymt');
+        }elseif ($data['model_version'] == 7){
+            TokenLogService::checkToken(self::$uid, 'human_anchor_chanjing');
         }else {
             TokenLogService::checkToken(self::$uid, 'human_anchor_pro');
         }
-
         $name = $data['name'] ?? '';
+        $width = $data['width'] ?? '';
+        $height = $data['height'] ?? '';
         $gender = $data['gender'] ?? 'male';
         $anchor_url = $data['url'] ?? '';
         $model_version = $data['model_version'] ?? '';
-        if (empty($name) || !in_array($model_version, [1, 2, 4, 6]) || !in_array($gender, ['male', 'female']) || empty($anchor_url)) {
+        if (empty($name) || !in_array($model_version, [1, 2, 4, 6, 7]) || !in_array($gender, ['male', 'female']) || empty($anchor_url)) {
             message('参数错误');
         }
 
@@ -569,6 +670,9 @@ class HumanLogic extends ApiLogic
             case 6:
                 $scene = self::AVATAR_TRAINING_YMT;
                 break;
+            case 7:
+                $scene = self::AVATAR_TRAINING_CHANJING;
+                break;
             default:
                 $scene = self::AVATAR_TRAINING;
                 break;
@@ -587,6 +691,8 @@ class HumanLogic extends ApiLogic
                 'anchor_id' => $result['id'],
                 'name' => $name,
                 'gender' => $gender,
+                'width' => $width,
+                'height' => $height,
                 'url' => $anchor_url,
                 'task_id' => $taskId,
                 'model_version' => $model_version,
@@ -654,6 +760,9 @@ class HumanLogic extends ApiLogic
                 break;
             case 6:
                 $scene = self::AVATAR_TRAINING_YMT;
+                break;
+            case 7:
+                $scene = self::AVATAR_TRAINING_CHANJING;
                 break;
             default:
                 $scene = self::AVATAR_TRAINING;
@@ -779,6 +888,8 @@ class HumanLogic extends ApiLogic
             TokenLogService::checkToken(self::$uid, 'human_voice_ym');
         }elseif ($data['model_version'] == 6) {
             TokenLogService::checkToken(self::$uid, 'human_voice_ymt');
+        }elseif ($data['model_version'] == 7) {
+            TokenLogService::checkToken(self::$uid, 'human_voice_chanjing');
         }else {
             TokenLogService::checkToken(self::$uid, 'human_voice_pro');
         }
@@ -786,7 +897,7 @@ class HumanLogic extends ApiLogic
         $gender = $data['gender'] ?? '';
         $voice_url = $data['url'] ?? '';
         $model_version = $data['model_version'] ?? '';
-        if (empty($name) || !in_array($model_version, [1, 2, 4, 6]) || !in_array($gender, ['male', 'female']) || empty($voice_url)) {
+        if (empty($name) || !in_array($model_version, [1, 2, 4, 6, 7]) || !in_array($gender, ['male', 'female']) || empty($voice_url)) {
             message('参数错误');
         }
 
@@ -818,6 +929,9 @@ class HumanLogic extends ApiLogic
                 break;
             case 6:
                 $scene = self::VOICE_TRAINING_YMT;
+                break;
+            case 7:
+                $scene = self::VOICE_TRAINING_CHANJING;
                 break;
             default:
                 $scene = self::VOICE_TRAINING_PRO;
@@ -851,7 +965,7 @@ class HumanLogic extends ApiLogic
                     'type' => 2,
                 ]);
             }
-           
+
         } else {
             self::setError('合成失败');
             return false;
@@ -896,11 +1010,11 @@ class HumanLogic extends ApiLogic
                 'gender'    => $voice->gender,
                 'audio_url' => $voice->voice_urls
             ];
-    
+
             switch ($voice->model_version) {
                 case 1:
                     $scene = self::VOICE_TRAINING;
-                    break;  
+                    break;
                 case 2:
                     $scene = self::VOICE_TRAINING_PRO;
                     break;
@@ -910,26 +1024,23 @@ class HumanLogic extends ApiLogic
                 case 6:
                     $scene = self::VOICE_TRAINING_YMT;
                     break;
+                case 7:
+                    $scene = self::VOICE_TRAINING_CHANJING;
+                    break;
                 default:
                     $scene = self::VOICE_TRAINING_PRO;
                     break;
             }
-            $result = self::requestUrl($request, $scene, $voice->user_id, $voice->task_id); 
+            $result = self::requestUrl($request, $scene, $voice->user_id, $voice->task_id);
         }else{
             $result = [];
         }
-       
+
 
         if (!empty($result) && isset($result['id'])) {
 
             $voice->voice_id  = $result['id'];
             $voice->status    = $voice->model_version == 2 ? 1 : 0;
-
-            if ($voice->model_version == 2) {
-
-                $voice->status = 1;
-            }
-
             $voice->save();
 
             // 更新音频
@@ -1078,6 +1189,8 @@ class HumanLogic extends ApiLogic
             TokenLogService::checkToken(self::$uid, 'human_audio_ym');
         }elseif ($data['model_version'] == 6){
             TokenLogService::checkToken(self::$uid, 'human_audio_ymt');
+        }elseif ($data['model_version'] == 7){
+            TokenLogService::checkToken(self::$uid, 'human_audio_chanjing');
         }else {
             TokenLogService::checkToken(self::$uid, 'human_audio_pro');
         }
@@ -1086,7 +1199,7 @@ class HumanLogic extends ApiLogic
         $voice_id = $data['voice_id'] ?? '';
         $model_version = $data['model_version'] ?? '';
 
-        if (empty($msg) || !in_array($model_version, [1, 2, 4,5,6]) || empty($voice_id)) {
+        if (empty($msg) || !in_array($model_version, [1, 2, 4,5,6,7]) || empty($voice_id)) {
             message('参数错误');
         }
 
@@ -1125,6 +1238,9 @@ class HumanLogic extends ApiLogic
                 break;
             case 6:
                 $scene = self::AUDIO_TRAINING_YMT;
+                break;
+            case 7:
+                $scene = self::AUDIO_TRAINING_CHANJING;
                 break;
             default:
                 $scene = self::AUDIO_TRAINING_PRO;
@@ -1211,6 +1327,9 @@ class HumanLogic extends ApiLogic
                 break;
             case 6:
                 $scene = self::AUDIO_TRAINING_YMT;
+                break;
+            case 7:
+                $scene = self::AUDIO_TRAINING_CHANJING;
                 break;
             default:
                 $scene = self::AUDIO_TRAINING_PRO;
@@ -1301,6 +1420,9 @@ class HumanLogic extends ApiLogic
                 break;
             case 6:
                 $scene = self::VIDEO_TRAINING_YMT;
+                break;
+            case 7:
+                $scene = self::VIDEO_TRAINING_CHANJING;
                 break;
             default:
                 $scene = self::VIDEO_TRAINING_PRO;
@@ -1486,7 +1608,7 @@ class HumanLogic extends ApiLogic
      */
     public static function videoInfoCron(): bool
     {
-       
+
         try {
             HumanVideoTask::where('status', 0)
                 ->where('result_id', '<>', '')
@@ -1495,40 +1617,40 @@ class HumanLogic extends ApiLogic
                 ->limit(3)
                 ->select()
                 ->each(function ($item) {
-                        try {
-                            $response = \app\common\service\ToolsService::Human()->detailPro([
-                                'id' => $item['result_id']
-                            ]);
-                            //阿里极速版  2
-                          //  Log::write('阿里获取视频结果' . json_encode($response));
-                            if (!empty($response['data']['url'])) {
-                                $item->status = 1;
-                                $item->tries = $item['tries'] + 1;
-                                $item->result_url = FileService::downloadFileBySource($response['data']['url'], 'video');
-                                $item->save();
-                                return true;
-                            }else{
-                                $item->tries = $item['tries'] + 1;
-                                $item->save();
-                                return true;
-                            }
-                        } catch (\think\exception\HttpResponseException $e) {
-                                Log::write('数字人视频保存失败' .$item['tries'].'----' . $e->getResponse()->getData()['msg']);
-                                $item->remark = $e->getResponse()->getData()['msg'] ?? '';
-                                $item->tries = $item['tries'] + 1;
-                                $item->status = 2;
-                                $item->save();
-                            //退费
-                            //查询是否已返还
-                            if (UserTokensLog::where('user_id', $item->user_id)->where('change_type', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO)->where('action', 1)->where('task_id', $item->task_id)->count() == 0) {
-
-                                $points = UserTokensLog::where('user_id', $item->user_id)->where('change_type', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO)->where('task_id', $item->task_id)->value('change_amount') ?? 0;
-
-                                AccountLogLogic::recordUserTokensLog(false, $item->user_id, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO, $points, $item->task_id);
-                            }
-
-                            return true;    
+                    try {
+                        $response = \app\common\service\ToolsService::Human()->detailPro([
+                            'id' => $item['result_id']
+                        ]);
+                        //阿里极速版  2
+                        //  Log::write('阿里获取视频结果' . json_encode($response));
+                        if (!empty($response['data']['url'])) {
+                            $item->status = 1;
+                            $item->tries = $item['tries'] + 1;
+                            $item->result_url = FileService::downloadFileBySource($response['data']['url'], 'video');
+                            $item->save();
+                            return true;
+                        }else{
+                            $item->tries = $item['tries'] + 1;
+                            $item->save();
+                            return true;
                         }
+                    } catch (\think\exception\HttpResponseException $e) {
+                        Log::write('数字人视频保存失败' .$item['tries'].'----' . $e->getResponse()->getData()['msg']);
+                        $item->remark = $e->getResponse()->getData()['msg'] ?? '';
+                        $item->tries = $item['tries'] + 1;
+                        $item->status = 2;
+                        $item->save();
+                        //退费
+                        //查询是否已返还
+                        if (UserTokensLog::where('user_id', $item->user_id)->where('change_type', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO)->where('action', 1)->where('task_id', $item->task_id)->count() == 0) {
+
+                            $points = UserTokensLog::where('user_id', $item->user_id)->where('change_type', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO)->where('task_id', $item->task_id)->value('change_amount') ?? 0;
+
+                            AccountLogLogic::recordUserTokensLog(false, $item->user_id, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO, $points, $item->task_id);
+                        }
+
+                        return true;
+                    }
                     return true;
                 });
             return true;
@@ -1558,7 +1680,7 @@ class HumanLogic extends ApiLogic
                     ->where('create_time', '<=', strtotime('-30 minutes'))
                     ->select()
                     ->each(function ($item) {
-                       self::setTimeoutTask($item->task_id);
+                        self::setTimeoutTask($item->task_id);
                     });
             }
             // 第一步：获取任务列表
@@ -1566,7 +1688,6 @@ class HumanLogic extends ApiLogic
                 ->where('result_id', '')
                 ->where('tries', '<', 3)
                 ->limit(3);
-           
 
             if ($taskId) {
 
@@ -1575,10 +1696,8 @@ class HumanLogic extends ApiLogic
 
             $modellist = HumanVoice::getModelList();
 
-
             //第二步遍历任务
             $taskModel->select()->each(function ($item) {
-                // var_dump('运行');
                 // //如果存在失败，且还没到执行时间（1分钟后执行）
                 if ($item->tries >= 1 && strtotime($item->update_time) > strtotime('-1 minute')) {
 
@@ -1602,10 +1721,7 @@ class HumanLogic extends ApiLogic
                             'user_id' => $item['user_id']
                         ]);
                     }
-
-            
                     if ($anchor->anchor_id == ""){
-                        // var_dump('开始训练');
                         switch ($item->model_version) {
                             case 1:
                                 $scene = self::AVATAR_TRAINING;
@@ -1619,6 +1735,9 @@ class HumanLogic extends ApiLogic
                             case 6:
                                 $scene = self::AVATAR_TRAINING_YMT;
                                 break;
+                            case 7:
+                                $scene = self::AVATAR_TRAINING_CHANJING;
+                                break;
                             default:
                                 $scene = self::AVATAR_TRAINING_PRO;
                                 break;
@@ -1629,7 +1748,6 @@ class HumanLogic extends ApiLogic
                             'gender' => $anchor->gender,
                             'video_url' => $anchor->url,
                         ], $scene, $item->user_id, $item->task_id);
-                        // var_dump(  $response);
                         if (empty($response['id'])) {
 
                             message('形象创建失败');
@@ -1647,18 +1765,15 @@ class HumanLogic extends ApiLogic
                         $item->anchor_id = $anchor->anchor_id;
                         $item->save();
                     }
-                //   var_dump('请求完成');
                     // 形象还没有训练完成
                     if ($anchor->status != 1) {
 
                         return true;
                     }
-
                     // 文案驱动
                     if ($item->audio_type == 1) {
                         //step2 音色
                         $voice = HumanVoice::where('user_id', $item['user_id'])->where('voice_id', $item->voice_id)->findOrEmpty();
-
                         $voiceres = false;
                         // 如果音色不存在，则创建音色
                         if ($voice->isEmpty()) {
@@ -1669,6 +1784,7 @@ class HumanLogic extends ApiLogic
                                     'model_version' => $item->model_version,
                                     'name' => $item->voice_name ? $item->voice_name : $item->name,
                                     'gender' => $item->gender,
+                                    'status' => 1,
                                     'voice_urls' => $item->upload_video_url,
                                     'user_id' => $item['user_id']
                                 ]);
@@ -1678,13 +1794,10 @@ class HumanLogic extends ApiLogic
                                 $voice->voice_id = $item->voice_id;
                                 $voiceres = true;
                             }
-
-
                         }
-                        // var_dump('ys开始');
+
                         // 如果没有训练，请求训练
                         if ($voice->voice_id == "" && !$voiceres) {
-                        //    var_dump('创建音色');
                             switch ($item->model_version) {
                                 case 1:
                                     $scene = self::VOICE_TRAINING;
@@ -1695,11 +1808,13 @@ class HumanLogic extends ApiLogic
                                 case 4:
                                     $scene = self::VOICE_TRAINING_YM;
                                     $item->upload_video_url = FileService::getFileUrl($item->upload_video_url);
-                                //    var_dump( $item->upload_video_url );
                                     break;
                                 case 6:
                                     $scene = self::VOICE_TRAINING_YMT;
                                     $item->upload_video_url = FileService::getFileUrl($item->upload_video_url);
+                                    break;
+                                case 7:
+                                    $scene = self::VOICE_TRAINING_CHANJING;
                                     break;
                                 default:
                                     $scene = self::VOICE_TRAINING_PRO;
@@ -1711,7 +1826,6 @@ class HumanLogic extends ApiLogic
                                 'is_video' => true,
                                 'audio_url' => $item->upload_video_url
                             ], $scene, $item->user_id, $item->task_id);
-                            // var_dump( $response );
                             if (empty($response['id'])) {
 
                                 message('音色创建失败');
@@ -1725,9 +1839,6 @@ class HumanLogic extends ApiLogic
                             $voice->voice_id = $response['id'];
                             $voice->save();
 
-                            $item->voice_id = $response['id'];
-                            $item->save();
-
                             if(in_array($item->model_version,[4,6])){
                                 $humantask = HumanTask::where([
                                     'user_id'=> $item['user_id'],
@@ -1739,7 +1850,7 @@ class HumanLogic extends ApiLogic
 
                                 // 如果音色不存在，则创建音色
                                 if ($humantask->isEmpty()) {
-        
+
                                     HumanTask::create([
                                         'user_id' => $item['user_id'],
                                         'video_task_id' => $item->id,
@@ -1754,14 +1865,34 @@ class HumanLogic extends ApiLogic
                                 }
                             }
                         }
-
                         // 音色还没有训练完成
                         if ($voice->status != 1 && !$voiceres) {
 
                             return true;
                         }
-                    //    var_dump('创建音频');
+                        if ($item->model_version == 7) {
 
+                            $scene = self::VIDEO_TRAINING_CHANJING;
+                            $response = self::requestUrl([
+                                'name'      => $item->name,
+                                'msg'       => $item->msg,
+                                'width'     => $item->width,
+                                'height'    => $item->height,
+                                'avatar_id' => $item->anchor_id,
+                                'voice_id'  => $item->voice_id,
+                                'video_url' => $item->upload_video_url,
+                                'audio_url' => $item->audio_url
+                            ], $scene, $item->user_id, $item->task_id);
+                            // Log::write( $item->task_id .'高级版视频合成' . json_encode($response));
+                            if (empty($response['id'])) {
+
+                                message('视频创建失败');
+                            }
+                            $item->voice_name = $item->voice_name ? $item->voice_name : $item->name;
+                            $item->result_id = $response['id'];
+                            $item->save();
+                            return ;
+                        }
                         //step3 音频
                         $audio = HumanAudio::where('user_id', $item['user_id'])->where('task_id', $item->task_id)->findOrEmpty();
 
@@ -1780,7 +1911,6 @@ class HumanLogic extends ApiLogic
 
                         // 如果没有训练，请求训练
                         if ($audio->audio_id == "") {
-                        //   var_dump('训练音频');
                             switch ($item->model_version) {
                                 case 1:
                                     $scene = self::AUDIO_TRAINING;
@@ -1803,8 +1933,7 @@ class HumanLogic extends ApiLogic
                                 'msg' => $item->msg,
                                 'voice_id' => $voice->voice_id
                             ], $scene, $item->user_id, $item->task_id);
-//var_dump(  $response );
-                     //      Log::write( $item->task_id .'高级版音频合成' . json_encode($response));
+                            //      Log::write( $item->task_id .'高级版音频合成' . json_encode($response));
                             if ($item->model_version == 2) {
 
                                 if (empty($response['url'])) {
@@ -1833,11 +1962,9 @@ class HumanLogic extends ApiLogic
                                     'user_id'=> $item['user_id'],
                                 ])->findOrEmpty();
 
-
-                            //    var_dump('音频定时任务'.$humantask->isEmpty());
                                 // 如果声音不存在，则创建
                                 if ($humantask->isEmpty()) {
-        
+
                                     HumanTask::create([
                                         'task_id' => $item->task_id,
                                         'video_task_id' => $item->id,
@@ -1871,10 +1998,9 @@ class HumanLogic extends ApiLogic
                         // 保存音频url
                         $item->audio_url = $audio->url;
                         $item->save();
+
                     }
 
-
-                  //  var_dump('视频开始合成');
                     //最终合成视频 有形象了，有音频了
                     if ($item->anchor_id != "" && $item->audio_url != "") {
 
@@ -1902,7 +2028,7 @@ class HumanLogic extends ApiLogic
                             'video_url' => $item->upload_video_url,
                             'audio_url' => $item->audio_url
                         ], $scene, $item->user_id, $item->task_id);
-                       // Log::write( $item->task_id .'高级版视频合成' . json_encode($response));
+                        // Log::write( $item->task_id .'高级版视频合成' . json_encode($response));
                         if (empty($response['id'])) {
 
                             message('视频创建失败');
@@ -1931,7 +2057,7 @@ class HumanLogic extends ApiLogic
         return true;
     }
 
-     /**
+    /**
      * @desc 数字人定时任务
      * @return bool
      */
@@ -1945,137 +2071,130 @@ class HumanLogic extends ApiLogic
                 ->limit(3)
                 ->select()
                 ->each(function ($item) {
-                        try {
-                            $methodMap = [
-                                4 => 'detailYm',
-                                6 => 'detailYmt',
-                            ];
-                            
-                            $method = $methodMap[$item['model_version']] ?? 'detailYmt';
-                            if($item['type'] == 2){
-                           //     var_dump('获取音色'. $item['task_id']);
-                            
-                                $response = \app\common\service\ToolsService::Human()->$method([
-                                    'type' => $item['type'],
-                                    'id' => $item['data_id']
-                                ]);
-                               // Log::write('高级版获取音色结果' . json_encode($response));
-                                if (isset($response['data']['status']) && $response['data']['status'] == 3) {
-                                    $item->result_id = $response['data']['train_id'];
-                                    $item->status = 1;
-                                    $item->tries = $item['tries'] + 1;
-                                    $item->result_url = $response['data']['demo_audio'];
-                                    $item->upload_url = FileService::downloadFileBySource($response['data']['demo_audio'], 'audio');
-                                    $item->save();
-                                  
-                                    $task = HumanVoice::where([
-                                        'user_id'=> $item['user_id'],
-                                        'task_id'=> $item['task_id'],
-                                        'status' =>0
-                                    ])->update([
-                                        'status' =>1,
-                                        'voice_urls'=> $item->upload_url
-                                    ]);
-                                //  var_dump('音色更新'. $task);
-                                    $tt = HumanVideoTask::where([
-                                        'user_id'=> $item['user_id'],
-                                        'task_id'=> $item['task_id'],
-                                        'status' =>0
-                                    ])->update([
-                                        'tries'=> 1
-                                    ]);
-                                  // var_dump('任务重组'.$tt);
-                                    return true;
-                                }else{
-                                    $item->tries = $item['tries'] + 1;
-                                    $item->save();
-                                    return true;
-                                }
-                            }
-                           
-                           
-                            if($item['type'] == 3){
-                            //    var_dump('获取声音合成结果'. $item['task_id']);
-                                $response = \app\common\service\ToolsService::Human()->$method([
-                                    'type' => $item['type'],
-                                    'id' => $item['data_id']
-                                ]);
-                           //    var_dump( $response);
-                                 //阿里极速版  2
-                                if (isset($response['data']['status']) && $response['data']['status'] == 3) {
-                                    $upload_url = FileService::downloadFileBySource($response['data']['speech_url'], 'audio');
-                                    $item->result_id = $response['data']['id'];
-                                    $item->status = 1;
-                                    $item->tries = $item['tries'] + 1;
-                                    $item->result_url = $response['data']['speech_url'];
-                                    $item->upload_url =  $upload_url;
-                                    $item->save();
-                                  
-                                    $task = HumanAudio::where([
-                                        'user_id'=> $item['user_id'],
-                                        'task_id'=> $item['task_id'],
-                                        'status' =>0,
-                                        'audio_id'=> $response['data']['task_id'],
-                                    ])->update([
-                                        'status' =>1,
-                                        'url' => $upload_url
-                                    ]);
-                                  //var_dump('音色更新'. $task);
-                                    $tt = HumanVideoTask::where([
-                                        'user_id'=> $item['user_id'],
-                                        'task_id'=> $item['task_id'],
-                                        'status' =>0
-                                    ])->update([
-                                        'tries'=> 1,
-                                        'audio_url' => $upload_url
-                        
-                                    ]);
-                                  // var_dump('任务重组'.$tt);
-                                    return true;
-                                }else{
-                                    $item->tries = $item['tries'] + 1;
-                                    $item->save();
-                                    return true;
-                                }
-                            }
+                    try {
+                        $methodMap = [
+                            4 => 'detailYm',
+                            6 => 'detailYmt',
+                        ];
 
-                        } catch (\think\exception\HttpResponseException $e) {
-                                Log::write('数字人保存失败' .$item['tries'].'----' . $e->getResponse()->getData()['msg']);
-                                $item->remark = $e->getResponse()->getData()['msg'] ?? '';
+                        $method = $methodMap[$item['model_version']] ?? 'detailYmt';
+                        if($item['type'] == 2){
+
+                            $response = \app\common\service\ToolsService::Human()->$method([
+                                'type' => $item['type'],
+                                'id' => $item['data_id']
+                            ]);
+                            // Log::write('高级版获取音色结果' . json_encode($response));
+                            if (isset($response['data']['status']) && $response['data']['status'] == 3) {
+                                $item->result_id = $response['data']['train_id'];
+                                $item->status = 1;
                                 $item->tries = $item['tries'] + 1;
-                                $item->status = 2;
+                                $item->result_url = $response['data']['demo_audio'];
+                                $item->upload_url = FileService::downloadFileBySource($response['data']['demo_audio'], 'audio');
                                 $item->save();
-                                if($item->type == 2){
-                                    if($item->model_version == 4){
-                                       $scene = AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YM;
-                                    }else{
-                                        $scene = AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT;
-                                    }
-                           //查询是否已返还
-                                    if (UserTokensLog::where('user_id', $item->user_id)->where('change_type', $scene)->where('action', 1)->where('task_id', $item->task_id)->count() == 0) {
 
-                                        $points = UserTokensLog::where('user_id', $item->user_id)->where('change_type', $scene)->where('task_id', $item->task_id)->value('change_amount') ?? 0;
-
-                                        AccountLogLogic::recordUserTokensLog(false, $item->user_id, $scene, $points, $item->task_id);
-                                    }
-                                }else{
-                                    if($item->model_version == 4){
-                                        $scene = AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YM;
-                                     }else{
-                                        $scene = AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT;
-                                     }
-                                    if (UserTokensLog::where('user_id', $item->user_id)->where('change_type', $scene)->where('action', 1)->where('task_id', $item->task_id)->count() == 0) {
-
-                                        $points = UserTokensLog::where('user_id', $item->user_id)->where('change_type',  $scene)->where('task_id', $item->task_id)->value('change_amount') ?? 0;
-
-                                        AccountLogLogic::recordUserTokensLog(false, $item->user_id,  $scene, $points, $item->task_id);
-                                    }
-                                }
-                            //退费
-                           
-
-                            return true;    
+                                $task = HumanVoice::where([
+                                    'user_id'=> $item['user_id'],
+                                    'task_id'=> $item['task_id'],
+                                    'status' =>0
+                                ])->update([
+                                    'status' =>1,
+                                    'voice_urls'=> $item->upload_url
+                                ]);
+                                $tt = HumanVideoTask::where([
+                                    'user_id'=> $item['user_id'],
+                                    'task_id'=> $item['task_id'],
+                                    'status' =>0
+                                ])->update([
+                                    'tries'=> 1
+                                ]);
+                                return true;
+                            }else{
+                                $item->tries = $item['tries'] + 1;
+                                $item->save();
+                                return true;
+                            }
                         }
+
+
+                        if($item['type'] == 3){
+                            $response = \app\common\service\ToolsService::Human()->$method([
+                                'type' => $item['type'],
+                                'id' => $item['data_id']
+                            ]);
+                            //阿里极速版  2
+                            if (isset($response['data']['status']) && $response['data']['status'] == 3) {
+                                $upload_url = FileService::downloadFileBySource($response['data']['speech_url'], 'audio');
+                                $item->result_id = $response['data']['id'];
+                                $item->status = 1;
+                                $item->tries = $item['tries'] + 1;
+                                $item->result_url = $response['data']['speech_url'];
+                                $item->upload_url =  $upload_url;
+                                $item->save();
+
+                                $task = HumanAudio::where([
+                                    'user_id'=> $item['user_id'],
+                                    'task_id'=> $item['task_id'],
+                                    'status' =>0,
+                                    'audio_id'=> $response['data']['task_id'],
+                                ])->update([
+                                    'status' =>1,
+                                    'url' => $upload_url
+                                ]);
+                                $tt = HumanVideoTask::where([
+                                    'user_id'=> $item['user_id'],
+                                    'task_id'=> $item['task_id'],
+                                    'status' =>0
+                                ])->update([
+                                    'tries'=> 1,
+                                    'audio_url' => $upload_url
+
+                                ]);
+                                return true;
+                            }else{
+                                $item->tries = $item['tries'] + 1;
+                                $item->save();
+                                return true;
+                            }
+                        }
+
+                    } catch (\think\exception\HttpResponseException $e) {
+                        Log::write('数字人保存失败' .$item['tries'].'----' . $e->getResponse()->getData()['msg']);
+                        $item->remark = $e->getResponse()->getData()['msg'] ?? '';
+                        $item->tries = $item['tries'] + 1;
+                        $item->status = 2;
+                        $item->save();
+                        if($item->type == 2){
+                            if($item->model_version == 4){
+                                $scene = AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YM;
+                            }else{
+                                $scene = AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT;
+                            }
+                            //查询是否已返还
+                            if (UserTokensLog::where('user_id', $item->user_id)->where('change_type', $scene)->where('action', 1)->where('task_id', $item->task_id)->count() == 0) {
+
+                                $points = UserTokensLog::where('user_id', $item->user_id)->where('change_type', $scene)->where('task_id', $item->task_id)->value('change_amount') ?? 0;
+
+                                AccountLogLogic::recordUserTokensLog(false, $item->user_id, $scene, $points, $item->task_id);
+                            }
+                        }else{
+                            if($item->model_version == 4){
+                                $scene = AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YM;
+                            }else{
+                                $scene = AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT;
+                            }
+                            if (UserTokensLog::where('user_id', $item->user_id)->where('change_type', $scene)->where('action', 1)->where('task_id', $item->task_id)->count() == 0) {
+
+                                $points = UserTokensLog::where('user_id', $item->user_id)->where('change_type',  $scene)->where('task_id', $item->task_id)->value('change_amount') ?? 0;
+
+                                AccountLogLogic::recordUserTokensLog(false, $item->user_id,  $scene, $points, $item->task_id);
+                            }
+                        }
+                        //退费
+
+
+                        return true;
+                    }
                     return true;
                 });
             return true;
@@ -2154,7 +2273,7 @@ class HumanLogic extends ApiLogic
         $item = HumanVideoTask::where('task_id', $taskId)->findOrEmpty()->toArray();
 
         // 任务超时  
-       $Audio = HumanAudio::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+        $Audio = HumanAudio::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
         if ($Audio) {
             switch ($item['model_version'])
             {
@@ -2177,7 +2296,7 @@ class HumanLogic extends ApiLogic
             self::refundTokens($item['user_id'], $item['audio_id'], $item['task_id'], $scene);
         }
 
-       $Voice =  HumanVoice::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+        $Voice =  HumanVoice::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
         if ($Voice) {
             switch ($item['model_version'])
             {
@@ -2201,10 +2320,10 @@ class HumanLogic extends ApiLogic
 
         }
 
-       $Anchor = HumanAnchor::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
+        $Anchor = HumanAnchor::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2]);
 
 
-       $Video = HumanVideoTask::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2, 'remark' => '创作超时']);
+        $Video = HumanVideoTask::where('task_id', $taskId)->whereIn('status', 0)->update(['status' => 2, 'remark' => '创作超时']);
         if (!$Audio && !$Voice && !$Anchor && $Video) {
             switch ($item['model_version'])
             {
@@ -2263,6 +2382,10 @@ class HumanLogic extends ApiLogic
             self::AVATAR_TRAINING_YMT => ['human_avatar_ymt', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_YMT],
             self::VOICE_TRAINING_YMT => ['human_voice_ymt', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT],
             self::VIDEO_TRAINING_YMT => ['human_video_ymt', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT],
+            self::AVATAR_TRAINING_CHANJING => ['human_avatar_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_CHANJING],
+            self::VOICE_TRAINING_CHANJING => ['human_voice_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_CHANJING],
+            self::AUDIO_TRAINING_CHANJING => ['human_audio_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_CHANJING],
+            self::VIDEO_TRAINING_CHANJING => ['human_video_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_CHANJING],
         };
 
         //计费
@@ -2278,7 +2401,7 @@ class HumanLogic extends ApiLogic
 
                 $response = $requestService->avatarTraining($request);
                 break;
-          
+
             case self::VOICE_TRAINING:
 
                 $response = $requestService->voiceTraining($request);
@@ -2288,7 +2411,7 @@ class HumanLogic extends ApiLogic
 
                 $response = $requestService->audioTraining($request);
                 break;
-           
+
             case self::VIDEO_TRAINING:
 
                 $response = $requestService->videoTraining($request);
@@ -2309,14 +2432,13 @@ class HumanLogic extends ApiLogic
 
                 $response = $requestService->audioTrainingPro($request);
                 break;
-             case self::VIDEO_TRAINING_PRO:
+            case self::VIDEO_TRAINING_PRO:
 
                 $response = $requestService->videoTrainingPro($request);
                 break;
-           
+
             case self::AVATAR_TRAINING_YM:
                 $response = $requestService->avatarTrainingYm($request);
-             //   var_dump( $response);
                 break;
             case self::VOICE_TRAINING_YM:
                 $response = $requestService->voiceTrainingYm($request);
@@ -2328,19 +2450,32 @@ class HumanLogic extends ApiLogic
                 break;
             case self::VIDEO_TRAINING_YM:
                 $response = $requestService->videoTrainingYm($request);
-                break; 
+                break;
             case self::AVATAR_TRAINING_YMT:
                 $response = $requestService->avatarTrainingYmt($request);
-                break;  
+                break;
             case self::VOICE_TRAINING_YMT:
                 $response = $requestService->voiceTrainingYmt($request);
                 break;
             case self::AUDIO_TRAINING_YMT:
                 $response = $requestService->audioTrainingYmt($request);
-                break;  
+                break;
             case self::VIDEO_TRAINING_YMT:
                 $response = $requestService->videoTrainingYmt($request);
-                break;  
+                break;
+            case self::AVATAR_TRAINING_CHANJING:
+                $response = $requestService->avatarTrainingChanjing($request);
+                break;
+            case self::VOICE_TRAINING_CHANJING:
+                $response = $requestService->voiceTrainingChanjing($request);
+                break;
+            case self::AUDIO_TRAINING_CHANJING:
+                $response = $requestService->audioTrainingChanjing($request);
+                break;
+            case self::VIDEO_TRAINING_CHANJING:
+                $response = $requestService->videoTrainingChanjing($request);
+                break;
+
             default:
         }
         //成功响应，需要扣费
@@ -2354,10 +2489,11 @@ class HumanLogic extends ApiLogic
 
                 //合成视频按时长扣费
                 if (in_array($scene, [
-                    self::AUDIO_TRAINING, self::VIDEO_TRAINING, 
+                    self::AUDIO_TRAINING, self::VIDEO_TRAINING,
                     self::AUDIO_TRAINING_PRO, self::VIDEO_TRAINING_PRO,
-                   self::AUDIO_TRAINING_YM, self::VIDEO_TRAINING_YM,
-                   self::AUDIO_TRAINING_YMT, self::VIDEO_TRAINING_YMT
+                    self::AUDIO_TRAINING_YM, self::VIDEO_TRAINING_YM,
+                    self::AUDIO_TRAINING_YMT, self::VIDEO_TRAINING_YMT,
+                    self::AUDIO_TRAINING_CHANJING, self::VIDEO_TRAINING_CHANJING
                 ])) {
 
                     $duration = $response['data']['duration'] ?? 1;
@@ -2408,7 +2544,7 @@ class HumanLogic extends ApiLogic
         $request['id'] = $id;
         $request['type'] = $type;
         $request['now'] = time();
-       
+
         if($response == []){
             switch ($scene) {
 
@@ -2420,14 +2556,14 @@ class HumanLogic extends ApiLogic
                     break;
                 case self::VIDEO_TRAINING_YM:
                     $response = $requestService->detailYm($request);
-                    break;   
+                    break;
                 default:
             }
         }
-       
+
         //成功响应，需要扣费
         if (isset($response['code']) && $response['code'] == 10000) {
-           if($scene == self::VIDEO_TRAINING_YM){
+            if($scene == self::VIDEO_TRAINING_YM){
                 $response['data']['status'] = $response['data']['task_status'] ?? 0;
             }
 
@@ -2436,7 +2572,7 @@ class HumanLogic extends ApiLogic
                 $extra = [];
                 //合成视频按时长扣费
                 if (in_array($scene, [
-                   self::AUDIO_TRAINING_YM, self::VIDEO_TRAINING_YM
+                    self::AUDIO_TRAINING_YM, self::VIDEO_TRAINING_YM
                 ])) {
 
                     $duration = $response['data']['duration'] ?? 1;
@@ -2583,7 +2719,7 @@ class HumanLogic extends ApiLogic
             }
         } catch (\Exception $e) {
             Log::write('获取图片任务失败11' . $e->getMessage());
-              return false;
+            return false;
         }
     }
 }

@@ -22,9 +22,14 @@
                             <span>刷新</span>
                         </el-button>
                     </div>
-                    <div class="flex leading-9">
+                    <div class="flex leading-9 items-center">
                         <div class="w-20">平台名称</div>
-                        <span> {{ workbenchData.version.name }}</span>
+                        <span> {{ getWebName }}</span>
+                        <div class="ml-2 leading-[0]">
+                            <router-link :to="getRoutePath('setting.web.web_setting/getWebsite')">
+                                <Icon name="el-icon-Edit"></Icon>
+                            </router-link>
+                        </div>
                     </div>
                     <div class="flex leading-9">
                         <div class="w-20">更新时间</div>
@@ -37,7 +42,7 @@
                     <div class="flex leading-9">
                         <div class="w-20">授权状态</div>
                         <span>
-                            <el-tag type="success" v-if="config.tips == 'ok'">已授权</el-tag>
+                            <el-tag type="success" v-if="config.is_auth == '1'">已授权</el-tag>
                             <el-tag type="danger" v-else>未授权</el-tag>
                         </span>
                         <router-link to="/setting/system/update" v-if="workbenchData.is_update">
@@ -47,6 +52,15 @@
                     <div class="flex leading-9">
                         <div class="w-20">当前版本</div>
                         <span> {{ workbenchData.version.version_name }}</span>
+                    </div>
+                    <div class="flex leading-9 items-center">
+                        <div class="w-20">技术标识</div>
+                        <span> {{ config.by_name }}</span>
+                        <div class="ml-2 leading-[0]">
+                            <router-link :to="getRoutePath('setting.setting/activate')">
+                                <Icon name="el-icon-Edit"></Icon>
+                            </router-link>
+                        </div>
                     </div>
                 </div>
             </el-card>
@@ -222,6 +236,8 @@ import { rechargeCDK } from "@/api/marketing/recharge";
 import useAppStore from "@/stores/modules/app";
 import feedback from "@/utils/feedback";
 import { useLockFn } from "@/hooks/useLockFn";
+import { getRoutePath } from "@/router";
+
 import ConfigTable from "./config-table.vue";
 const appStore = useAppStore();
 const { config } = toRefs(appStore);
@@ -246,6 +262,8 @@ const rechargeForm = reactive({
 const rechargeRules = reactive({
     cdkey: [{ required: true, message: "请输入兑换CDK", trigger: "blur" }],
 });
+
+const getWebName = computed(() => config.value.web_name);
 
 const getUpdate = async () => {
     const result = await upgradeCheck({
@@ -294,6 +312,10 @@ const getAiPersonConfig = computed(() => {
             "human_audio_ymt",
             "human_voice_ymt",
             "human_avatar_ymt",
+            "human_avatar_chanjing",
+            "human_voice_chanjing",
+            "human_audio_chanjing",
+            "human_video_chanjing",
         ].includes(item.scene)
     );
 });
@@ -309,8 +331,13 @@ const getAiDrawConfig = computed(() => {
             "volc_txt_to_img",
             "txt_to_posterimg",
             "volc_txt_to_posterimg",
+            "volc_txt_to_posterimg_v2",
             "volc_text_to_video",
             "volc_image_to_video",
+            "volc_img_to_img_v2",
+            "volc_txt_to_img_v2",
+            "doubao_txt_to_video",
+            "doubao_img_to_video",
             "ai_draw_video_prompt",
         ].includes(item.scene)
     );

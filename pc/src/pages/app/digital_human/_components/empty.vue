@@ -29,7 +29,7 @@ const props = defineProps({
     },
     customClick: {
         type: Function,
-        default: () => {},
+        default: null,
     },
 });
 

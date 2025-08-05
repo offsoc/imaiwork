@@ -19,7 +19,7 @@
             class="mt-4"
             :infinite-scroll-distance="10"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             v-infinite-scroll="load">
             <div class="pb-6" v-loading="pager.loading">
                 <template v-if="pager.lists.length">
@@ -75,7 +75,7 @@
                             </div>
                         </ElCard>
                     </div>
-                    <div v-if="!isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
+                    <div v-if="!pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
                 </template>
                 <template v-else>
                     <div v-if="!pager.loading" class="mt-20">
@@ -95,11 +95,9 @@ import KnbBind from "@/components/knb-bind/index.vue";
 import { dayjs } from "element-plus";
 
 const router = useRouter();
-const route = useRoute();
-
+const nuxtApp = useNuxtApp();
 const appStore = useAppStore();
 
-const sceneType = ref<number>(1);
 const sceneIndex = ref<number>(0);
 
 const activeRecord = ref<any>("");
@@ -109,20 +107,12 @@ const queryParams = reactive({
     page_no: 1,
     scene_id: categoryLists.value[sceneIndex.value]?.id,
 });
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     size: 25,
     fetchFun: getCreativeRecord,
     params: queryParams,
     isScroll: true,
 });
-
-const handleTab = async (e: any) => {
-    sceneIndex.value = 0;
-    await nextTick();
-    queryParams.page_no = 1;
-    queryParams.scene_id = categoryLists.value[sceneIndex.value]?.id;
-    resetPage();
-};
 
 const handleSceneType = (index: number) => {
     if (index == sceneIndex.value) return;
@@ -150,14 +140,18 @@ const handleRecord = (row: any) => {
 };
 
 const handleDelete = async (task_id: number, index: number) => {
-    await feedback.confirm("确定删除此机器人吗？");
-    try {
-        await deleteCreativeRecord({ task_id });
-        feedback.msgSuccess("删除成功");
-        pager.lists.splice(index, 1);
-    } catch (error) {
-        feedback.msgError(error || "删除失败");
-    }
+    await nuxtApp.$confirm({
+        message: "确定删除此机器人吗？",
+        onConfirm: async () => {
+            try {
+                await deleteCreativeRecord({ task_id });
+                feedback.msgSuccess("删除成功");
+                pager.lists.splice(index, 1);
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 const showKnbBind = ref(false);

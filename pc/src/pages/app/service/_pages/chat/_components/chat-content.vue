@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import useHandle from "~/pages/app/person_wechat/chat/_hooks/useHandle";
+import useHandle from "@/pages/app/person_wechat/_hooks/useHandle";
 
 const props = withDefaults(
     defineProps<{

@@ -43,7 +43,6 @@ class TokenLogService
         if (empty($userInfo)) {
             throw new \Exception('用户查询失败');
         }
-
         // AI聊天 - 1算力
         // AI美工 
         // - 文生图、图生图  - 40算力
@@ -88,6 +87,10 @@ class TokenLogService
             $need_token = 100;
         }else if(in_array($scene, ['volc_text_to_video','volc_image_to_video'])) {
             $need_token = 325;
+        }else if(in_array($scene, ['doubao_txt_to_video','doubao_image_to_video'])) {
+            $need_token = 100;
+        }else if(in_array($scene, ['volc_img_to_img_v2','volc_txt_to_img_v2', 'volc_txt_to_posterimg_v2'])) {
+            $need_token = 30;
         }
         if ($userInfo['tokens'] < $need_token) {
             throw new \Exception('用户算力不足');

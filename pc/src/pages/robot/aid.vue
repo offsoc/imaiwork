@@ -37,7 +37,7 @@
                 v-loading="pager.loading"
                 class=""
                 :infinite-scroll-immediate="false"
-                :infinite-scroll-disabled="!isLoad"
+                :infinite-scroll-disabled="!pager.isLoad"
                 :infinite-scroll-distance="10"
                 v-infinite-scroll="load">
                 <div
@@ -63,7 +63,7 @@
                     <ElEmpty />
                 </div>
             </div>
-            <div v-if="!isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
+            <div v-if="!pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
         </div>
     </div>
 </template>
@@ -113,12 +113,14 @@ const handleSceneSubTab = (e: any) => {
 const queryParams = reactive<any>({
     type: 3,
     scene_id: "",
+    page_no: 1,
 });
 
-const { pager, getLists, isLoad } = usePaging({
+const { pager, getLists } = usePaging({
     fetchFun: robotLists,
     params: queryParams,
     isScroll: true,
+    size: 40,
 });
 
 const load = async () => {

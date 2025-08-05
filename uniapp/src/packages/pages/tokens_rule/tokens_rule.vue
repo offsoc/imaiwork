@@ -29,7 +29,7 @@
                             <view
                                 v-for="(item, index) in tokensConfig"
                                 :key="index"
-                                class="border-b border-solid border-[#151924] border-0 h-[92rpx] flex items-center justify-between">
+                                class="border-b border-solid border-[#151924] border-0 h-[92rpx] flex items-center justify-between gap-x-2">
                                 <view class="text-white text-[26rpx] flex items-center gap-x-1 flex-shrink-0">
                                     <view
                                         class="rounded-full bg-[#1F222E] w-[32rpx] h-[32rpx] flex items-center justify-center"
@@ -37,16 +37,15 @@
                                     >
                                     <text class="text-white">{{ item.name }}</text>
                                 </view>
-                                <view class="flex-1 flex items-center justify-end gap-x-2">
-                                    <text class="text-[#ffffff80] text-[26rpx]"> {{ item.unit }}</text>
+                                <view class="flex-1 flex items-center justify-end">
                                     <view
-                                        class="flex items-center h-[40rpx] rounded-full bg-[#16f49f1a] relative pr-3 pl-5 border border-solid border-[#16f49f33]">
+                                        class="flex items-center h-[40rpx] rounded-full bg-[#16f49f1a] p-[4rpx] relative border border-solid border-[#16f49f33]">
                                         <image
                                             src="@/packages/static/icons/tokens.svg"
-                                            class="w-[32rpx] h-[32rpx] absolute left-[2rpx]"></image>
-                                        <view class="text-[#16F49F] text-[26rpx] flex-1 text-center">{{
-                                            item.score
-                                        }}</view>
+                                            class="w-[32rpx] h-[32rpx]"></image>
+                                        <view class="text-[#16F49F] text-[26rpx] flex-1 text-center mx-[4rpx]">
+                                            {{ item.score }}{{ item.unit }}
+                                        </view>
                                     </view>
                                 </view>
                             </view>

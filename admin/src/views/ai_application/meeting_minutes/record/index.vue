@@ -32,7 +32,7 @@
         <el-card class="!border-none mt-4" shadow="never">
             <div class="mb-4">
                 <el-button
-                    v-perms="['meeting_minutes.record/del']"
+                    v-perms="['ai_application.meeting_minutes.record/delete']"
                     type="default"
                     :plain="true"
                     :disabled="!multipleSelection.length"
@@ -59,7 +59,7 @@
                 <el-table-column label="选择语种" prop="language_name" min-width="120" />
                 <el-table-column label="会议时长" width="100">
                     <template #default="{ row }">
-                        {{ formatAudioTime(row.duration) }}
+                        {{ getAudioTime(row) }}
                     </template>
                 </el-table-column>
                 <el-table-column label="消耗算力" prop="points" min-width="120">
@@ -77,10 +77,10 @@
                 <el-table-column label="创建时间" prop="create_time" min-width="180" show-overflow-tooltip />
                 <el-table-column label="操作" width="120" fixed="right">
                     <template #default="{ row }">
-                        <el-button v-perms="['meeting_minutes.record/detail']" type="primary" link>
+                        <el-button v-perms="['ai_application.meeting_minutes.record/detail']" type="primary" link>
                             <router-link
                                 :to="{
-                                    path: getRoutePath('ai_application.meeting_minutes/detail'),
+                                    path: getRoutePath('ai_application.meeting_minutes.record/detail'),
                                     query: {
                                         id: row.id,
                                     },
@@ -89,7 +89,7 @@
                             </router-link>
                         </el-button>
                         <el-button
-                            v-perms="['meeting_minutes.record/del']"
+                            v-perms="['ai_application.meeting_minutes.record/delete']"
                             type="danger"
                             link
                             @click="handleDelete([row.id])">
@@ -137,6 +137,11 @@ const handleDelete = async (id: number | number[]) => {
     getLists();
     multipleSelection.value = [];
     tableRef.value?.clearSelection();
+};
+
+const getAudioTime = (row: any) => {
+    const { AudioInfo } = row.response.Result.Transcription.Transcription;
+    return formatAudioTime(AudioInfo.Duration / 1000);
 };
 
 getLists();

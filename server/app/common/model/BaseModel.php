@@ -217,11 +217,15 @@ class BaseModel extends Model
     public function getVoiceUrlsAttr($value)
     {
 
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
+        if (is_array($value))
+        {
+            foreach ($value as $k => $v)
+            {
                 $value[$k] = FileService::getFileUrl($v);
             }
-        } else {
+        }
+        else
+        {
             $value = FileService::getFileUrl($value);
         }
 
@@ -237,11 +241,15 @@ class BaseModel extends Model
      */
     public function setVoiceUrlsAttr($value)
     {
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
+        if (is_array($value))
+        {
+            foreach ($value as $k => $v)
+            {
                 $value[$k] = FileService::setFileUrl($v);
             }
-        } else {
+        }
+        else
+        {
             $value = FileService::setFileUrl($value);
         }
         return $value;
@@ -266,6 +274,30 @@ class BaseModel extends Model
      * @date 2021/9/10 11:04
      */
     public function setFilePathAttr($value)
+    {
+        return $value ? FileService::setFileUrl($value) : '';
+    }
+
+
+    /**
+     * 补全文件路径
+     * @param $value
+     * @return string
+     */
+    public function getFileUrlAttr($value)
+    {
+
+        return $value ? FileService::getFileUrl($value) : '';
+    }
+
+    /**
+     * @notes 公共文件路径处理,去除文件路径域名
+     * @param $value
+     * @return mixed|string
+     * @author 张无忌
+     * @date 2021/9/10 11:04
+     */
+    public function setFileUrlAttr($value)
     {
         return $value ? FileService::setFileUrl($value) : '';
     }

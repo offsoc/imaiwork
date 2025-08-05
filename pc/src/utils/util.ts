@@ -112,9 +112,13 @@ export function formatAudioTime(seconds: number, isShowHours = false): string {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    return isShowHours
-        ? `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`
-        : `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    // 判断seconds 是不是大于3600
+    if (seconds > 3600) {
+        return isShowHours
+            ? `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`
+            : `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    }
+    return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
 /**
@@ -276,36 +280,88 @@ export const setFormData = (data: Record<any, any>, sourceData: Record<any, any>
 /**
  * 截取视频第一帧作为封面
  * @param url 视频URL
- * @returns 封面URL
+ * @returns 视频宽高、封面文件
  */
-export const getVideoFirstFrame = (url: string, callback: (data: any) => void) => {
-    const video = document.createElement("video");
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    video.src = url;
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = "auto";
-    // 允许跨域
-    video.crossOrigin = "anonymous";
-    video.addEventListener("loadedmetadata", () => {
-        const aspectRatio = video.videoWidth / video.videoHeight;
-        canvas.width = 443;
-        canvas.height = canvas.width / aspectRatio;
-        video.currentTime = 0.5;
-        video.addEventListener("seeked", async () => {
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const fileResult = await base64ToBlob(
-                canvas.toDataURL("image/jpeg", 0.7), // 使用JPEG格式并设置质量为70%
-                `${dayjs().format("YYYYMMDDHHmmss")}.jpg`
-            );
-            URL.revokeObjectURL(video.src);
-            callback(fileResult);
-        });
-    });
+/**
+ * 截取视频第一帧作为封面
+ * @param url 视频URL
+ * @param options 可选配置项
+ * @returns Promise<{file: Blob, width: number, height: number} | false>
+ */
+export const getVideoFirstFrame = (
+    url: string,
+    options: {
+        width?: number;
+        quality?: number;
+        frameTime?: number;
+    } = {}
+): Promise<{ file: Blob; width: number; height: number }> => {
+    const { width = 443, quality = 0.7, frameTime = 0.5 } = options;
 
-    video.addEventListener("error", () => {
-        callback(false);
+    return new Promise((resolve) => {
+        const video = document.createElement("video");
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+            resolve(null);
+            return;
+        }
+
+        // 视频基本设置
+        video.src = url;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "auto";
+        video.crossOrigin = "anonymous";
+
+        // 清理函数
+        const cleanup = () => {
+            URL.revokeObjectURL(video.src);
+            video.remove();
+            canvas.remove();
+        };
+
+        // 错误处理
+        video.addEventListener("error", () => {
+            cleanup();
+            resolve(null);
+        });
+
+        // 视频元数据加载完成后处理
+        video.addEventListener("loadedmetadata", () => {
+            const aspectRatio = video.videoWidth / video.videoHeight;
+            canvas.width = width;
+            canvas.height = width / aspectRatio;
+            video.currentTime = frameTime;
+
+            // 视频跳转到指定时间后截图
+            video.addEventListener(
+                "seeked",
+                async () => {
+                    try {
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const fileResult = await base64ToBlob(
+                            canvas.toDataURL("image/jpeg", quality),
+                            `${dayjs().format("YYYYMMDDHHmmss")}.jpg`
+                        );
+
+                        resolve({
+                            file: fileResult,
+                            width: video.videoWidth,
+                            height: video.videoHeight,
+                        });
+                    } catch (error) {
+                        console.error("获取视频首帧失败:", error);
+                        resolve(null);
+                    } finally {
+                        cleanup();
+                    }
+                },
+                { once: true }
+            );
+        });
+
+        video.load();
     });
-    video.load();
 };

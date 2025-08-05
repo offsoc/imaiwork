@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace app\common\traits;
 
-use Channel\Client;
+use Channel\Client as ChannelClient;
 use app\common\workerman\wechat\handlers\client\TalkToFriendTaskHandler;
 use app\common\workerman\wechat\handlers\client\AcceptFriendAddRequestTaskHandler;
 use app\common\workerman\wechat\handlers\client\PostSNSNewsTaskHandler;
@@ -12,6 +12,8 @@ use app\common\workerman\wechat\traits\{ DeviceTrait, CacheTrait};
 use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
 use Google\Protobuf\Any;
 use think\facade\Log;
+
+use app\common\service\FileService;
 use Predis\Client as redisClient;
 use GuzzleHttp\Client as httpClient;
 /**
@@ -31,10 +33,7 @@ trait WechatTrait
     protected static function wxPush(array $params): array
     {
         try {
-            // self::setLog([
-            //     'title' => 'Send message Device push',
-            //     'params' => $params,
-            // ]);
+            
             // 1. 参数验证
             if (!isset($params['wechat_id']) || !isset($params['friend_id']) || !isset($params['message']) || !isset($params['device_code'])) {
                 throw new \Exception(ResponseCode::getMessage(ResponseCode::INVALID_PARAMS), ResponseCode::INVALID_PARAMS);
@@ -57,9 +56,26 @@ trait WechatTrait
                 'Immediate' => true,
                 'OptType' => $params['opt_type'] ?? 'send'
             ];
-            $key = "push:device:{$deviceId}";
-            self::redis()->lpush($key, json_encode($data, JSON_UNESCAPED_UNICODE));
+            // $key = "push:device:{$deviceId}";
+            // self::redis()->lpush($key, json_encode($data, JSON_UNESCAPED_UNICODE));
             
+
+                // 3. 构建消息发送请求
+            $content = \app\common\workerman\wechat\handlers\client\TalkToFriendTaskHandler::handle($data);
+            // 4. 构建protobuf消息
+            $message = new \Jubo\JuLiao\IM\Wx\Proto\TransportMessage();
+            $message->setMsgType($content['MsgType']);
+            $any = new \Google\Protobuf\Any();
+            $any->pack($content['Content']);
+            $message->setContent($any);
+            $data = $message->serializeToString();
+            // 5. 发送到设备端
+            $channel = "socket.{$deviceId}.message";
+            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::publish($channel, [
+                'data' => $data
+            ]);
+
             return [
                 'code' => 10000,
                 'message' => 'success'
@@ -72,7 +88,7 @@ trait WechatTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode(),
                 'trace' => $th->getTraceAsString()
-            ], 'error');
+            ]);
             //throw new \Exception($th->getMessage(), $th->getCode());
             return [
                 'code' => $th->getCode(),
@@ -89,11 +105,7 @@ trait WechatTrait
     public static function wxOnline(array $params): array
     {
         try {
-
-            // self::setLog([
-            //     'title' => 'Send message Device online',
-            //     'params' => $params,
-            // ]);
+            
             // 1. 参数验证
             if (!isset($params['wechat_id']) || !isset($params['device_code']) || !isset($params['type'])) {
                 throw new \Exception(ResponseCode::getMessage(ResponseCode::INVALID_PARAMS), ResponseCode::INVALID_PARAMS);
@@ -128,7 +140,7 @@ trait WechatTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode(),
                 'trace' => $th->getTraceAsString()
-            ], 'error');
+            ]);
             
             return [
                 'code' => $th->getCode(),
@@ -143,7 +155,7 @@ trait WechatTrait
      * @param array $params
      * @return array
      */
-    protected function wxAccept(array $params): array
+    protected static function wxAccept(array $params): array
     {
         try {
             self::setLog([
@@ -180,7 +192,8 @@ trait WechatTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
-            Client::publish($channel, [
+            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::publish($channel, [
                 'data' => $data
             ]);
 
@@ -196,7 +209,7 @@ trait WechatTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode(),
                 'trace' => $th->getTraceAsString()
-            ], 'error');
+            ]);
             return [
                 'code' => $th->getCode(),
                 'message' => $th->getMessage()
@@ -204,7 +217,7 @@ trait WechatTrait
         }
     }
 
-    protected function wxCircle(array $params): array
+    protected static function wxCircle(array $params): array
     {
         try {
             self::setLog([
@@ -236,34 +249,50 @@ trait WechatTrait
                 case 2:
                     $attachment = [
                         'Type' => 3,
-                        'Content' => $params['attachment_content'] ?? []
+                        'Content' => explode(',', $params['attachment_content']) ?? []
                     ];  
                     break;
                 case 3:
                     $attachment = [
-                        'Type' => 4,
-                        'Content' => $params['attachment_content'] ?? []
+                        'Type' => 0,
+                        'Content' => [
+                            'title' => $params['attachment_content']['link'] ?? '',
+                            'desc' => $params['attachment_content']['desc'] ?? '',
+                            'url' => $params['attachment_content']['link'] ?? '',
+                            'thumb' => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
+                        ]
                     ];  
                     break;
                 case 4:
                     $attachment = [
-                        'Type' => 0,
-                        'Content' => $params['attachment_content'] ?? []
+                        'Type' => 6,
+                        'Content' => [json_encode([
+                            "Title" => $params['attachment_content']['title'] ?? '',
+                            "Url" => "https://mp.weixin.qq.com/mp/waerrpage?appid={$params['attachment_content']['appid']}&type=upgrade&upgradetype=3#wechat_redirect",
+                            "PagePath" => $params['attachment_content']['link'] ?? '',
+                            "Source" => $params['attachment_content']['source'] ?? '',
+                            "SourceName" => $params['attachment_content']['title'] ?? '',
+                            "Thumb" => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
+                            "AppId" => $params['attachment_content']['appid'] ?? '',
+                            "Icon" => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
+                        ])]
                     ];      
                     break;
                 
                 default:
                     break;
             }
-
-            // 3. 构建消息发送请求
-            $content = PostSNSNewsTaskHandler::handle([
+            
+            $data = [
                 'WeChatId' => $params['wechat_id'],
                 'Content' => $params['content'],
                 'Attachment' => $attachment,
                 'ExtComment' => $params['comment'] ?? [],
                 'TaskId' => time(),
-            ]);
+            ];
+            self::setLog($data);
+            // 3. 构建消息发送请求
+            $content = PostSNSNewsTaskHandler::handle($data);
 
             // 4. 构建protobuf消息
             $message = new TransportMessage();
@@ -275,7 +304,8 @@ trait WechatTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
-            Client::publish($channel, [
+            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::publish($channel, [
                 'data' => $data
             ]);
             
@@ -291,7 +321,7 @@ trait WechatTrait
                 'error' => $th->getMessage(),
                 'code' => $th->getCode(),
                 'trace' => $th->getTraceAsString()
-            ], 'error');
+            ]);
             return [
                 'code' => $th->getCode(),
                 'message' => $th->getMessage()
@@ -323,7 +353,7 @@ trait WechatTrait
                 'error' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'trace' => $e->getTraceAsString()
-            ], 'error');
+            ]);
         }
     }
 
@@ -356,7 +386,7 @@ trait WechatTrait
                 'title' => 'getDeviceInfo',
                 'deviceId' => $deviceId,
                 'trace' => $e->getTraceAsString(),
-            ], 'error');
+            ]);
             return [];
         }
     }
@@ -404,11 +434,10 @@ trait WechatTrait
     }
 
 
-    private static function setLog($content, $level = 'info'){
+    private static function setLog($content){
         if(is_array($content)){
             $content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
-        Log::channel('wechat_socket')->write($content, $level);
-        
+        Log::write($content, 'wxchat');
     }
 }

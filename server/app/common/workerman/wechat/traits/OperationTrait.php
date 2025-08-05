@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
+use app\api\logic\wechat\sop\StageLogic;
 use app\common\workerman\wechat\constants\SocketType;
 use app\common\model\wechat\AiWechatDevice;
 use app\common\model\wechat\AiWechat;
@@ -40,6 +41,7 @@ trait OperationTrait
             if(empty($wechat)){
                 throw new \Exception('wechat not found');
             }
+
             $params = array(
                 'wechat_id' => $payload['WeChatId'],
                 'friend_id' => $payload['FriendInfo']['FriendId'],
@@ -73,6 +75,14 @@ trait OperationTrait
                 AiWechatContact::where('id', $find->id)->update($params);
             }
 
+            StageLogic::sopActionStagetrigger([
+                                                  'friend_id'=>$payload['FriendInfo']['FriendId'],
+                                                  'wechat_id'=>$payload['WeChatId'],
+                                                  'avatar' => $payload['FriendInfo']['Avatar'],
+                                                  'nickname' => $payload['FriendInfo']['FriendNick'],
+                                                  'remark' => $payload['FriendInfo']['Memo'],
+                                              ]);
+           
             $this->greetMessage($wechat, $find);
 
         } catch (\Throwable $e) {
@@ -104,10 +114,8 @@ trait OperationTrait
 
         // 给好友发消息
         foreach ($greet->greet_content as $key => $content) {
-            if ($key !== 0) {
-                $seconds = (int)$greet->interval_time * 60;
-                sleep($seconds);
-            }
+            $seconds = (int)$greet->interval_time * 60;
+            sleep($seconds);
 
             $message = [
                 'wechat_id' => $wechat->wechat_id,
@@ -121,12 +129,51 @@ trait OperationTrait
                 case 0: //文本
                     // 推送消息
                     $message['message'] = str_replace('${remark}', $friend->remark, $content['content']);
+                    $message['message_type'] = 1;
                     break;
-
                 case 1: //图片
                     // 推送消息
                     $message['message'] = FileService::getFileUrl($content['content']);
                     $message['message_type'] = 2;
+                    break;
+                case 2: //视频
+                    // 推送消息
+                    $message['message'] =  FileService::getFileUrl($content['content']);
+                    $message['message_type'] = 4;
+                    break;
+                case 3: //链接
+                    // 推送消息
+                    $message['message'] = json_encode([
+                        'title' => $content['content']['name'] ?? '',
+                        'desc' => $content['content']['desc'] ?? '',
+                        'url' => $content['content']['link'] ?? '',
+                        'thumb' => FileService::getFileUrl($content['content']['img'] ?? ''),
+                    ]);
+                    $message['message_type'] = 6;
+                    break;
+                case 4: //小程序
+                    // 推送消息
+                    $message['message'] = json_encode([
+                        "Title" => $content['content']['name'] ?? '',
+                        "Url" => "https://mp.weixin.qq.com/mp/waerrpage?appid={$content['content']['appid']}&type=upgrade&upgradetype=3#wechat_redirect",
+                        "PagePath" => $content['content']['link'] ?? 'pages/index/index.html',
+                        "Source" => $content['content']['Source'] ?? '',
+                        "SourceName" => $content['content']['SourceName'] ?? '',
+                        "Thumb" => FileService::getFileUrl($content['content']['pic'] ?? ''),
+                        "AppId" => $content['content']['appid'] ?? '',
+                        "Icon" =>  FileService::getFileUrl($content['content']['pic'] ?? ''),
+                        // "Des" => '',
+                        // "Type" => 33,
+                        // "TypeStr" => ['小程序'],
+                        // 'disForward' => 0,
+                        'version' => 48,
+                    ], JSON_UNESCAPED_UNICODE);
+                    $message['message_type'] = 13;
+                    break;
+                case 5: //文件
+                    // 推送消息
+                    $message['message'] = json_encode($content['content']);
+                    $message['message_type'] = 8;
                     break;
 
                 default:
@@ -155,7 +202,7 @@ trait OperationTrait
             $data = $message->serializeToString();
             // 5. 发送到设备端
             $channel = "socket.{$wechat->device_code}.message";
-            \Channel\Client::connect('127.0.0.1', 2206);
+            //\Channel\Client::connect('127.0.0.1', 2206);
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);

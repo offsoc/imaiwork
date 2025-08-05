@@ -10,6 +10,8 @@ import { TokensSceneEnum } from "@/enums/appEnums";
 import { useAppStore } from "@/stores/app";
 
 export default function useHandleApi(options?: any) {
+    const nuxtApp = useNuxtApp();
+
     const { onSuccess } = options || {};
 
     const router = useRouter();
@@ -50,24 +52,32 @@ export default function useHandleApi(options?: any) {
     });
 
     const handleAgain = async (id: number) => {
-        await feedback.confirm("确定要重新转写？");
-        try {
-            const data = await meetingMinutesRetry({ id });
-            feedback.msgSuccess("重试成功");
-            onSuccess?.("retry");
-        } catch (error) {
-            feedback.msgError(error || "重试失败");
-        }
+        nuxtApp.$confirm({
+            message: "确定要重新转写？",
+            onConfirm: async () => {
+                try {
+                    await meetingMinutesRetry({ id });
+                    feedback.msgSuccess("重试成功");
+                    onSuccess?.("retry");
+                } catch (error) {
+                    feedback.msgError(error || "重试失败");
+                }
+            },
+        });
     };
     const handleDelete = async (id: number) => {
-        await feedback.confirm("确定删除此会议纪要吗？");
-        try {
-            await meetingMinutesDelete({ id });
-            feedback.msgSuccess("删除成功");
-            onSuccess?.("delete");
-        } catch (error) {
-            feedback.msgError(error || "删除失败");
-        }
+        nuxtApp.$confirm({
+            message: "确定删除此会议纪要吗？",
+            onConfirm: async () => {
+                try {
+                    await meetingMinutesDelete({ id });
+                    feedback.msgSuccess("删除成功");
+                    onSuccess?.("delete");
+                } catch (error) {
+                    feedback.msgError(error || "删除失败");
+                }
+            },
+        });
     };
 
     const handleItem = (row: any) => {
@@ -80,9 +90,9 @@ export default function useHandleApi(options?: any) {
                 },
             });
         } else if (status == TurnStatus.ERROR) {
-            feedback.notifyWarning("文件转写失败，不可查看");
+            feedback.msgWarning("文件转写失败，不可查看");
         } else if (status == TurnStatus.ING) {
-            feedback.notifyWarning("文件转写中，不可查看");
+            feedback.msgWarning("文件转写中，不可查看");
         }
     };
 

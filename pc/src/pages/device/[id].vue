@@ -188,6 +188,7 @@ import { ElTableColumn } from "element-plus";
 
 const route = useRoute();
 const router = useRouter();
+const nuxtApp = useNuxtApp();
 const { socialPlatformList, currentSocialPlatform } = useSocialPlatform();
 
 const deviceLists = ref<any[]>([]);
@@ -233,7 +234,7 @@ const {
     onError: (err) => {
         progressError.value = true;
         feedback.closeLoading();
-        feedback.notifyError(err.error);
+        feedback.msgError(err.error);
     },
 });
 
@@ -244,12 +245,12 @@ const refreshData = async () => {
         isRefreshData.value = true;
         const { lists } = await getAccountList({ status: 1, device_code: queryParams.device_code });
         if (lists.length == 0) {
-            feedback.notifyError("暂无在线账号");
+            feedback.msgError("暂无在线账号");
             return;
         }
         handleRefreshData(lists[0]);
     } catch (error) {
-        feedback.notifyError(error);
+        feedback.msgError(error);
     } finally {
         isRefreshData.value = false;
     }
@@ -270,7 +271,7 @@ const handleAddBusinessCard = async (content: string) => {
         getLists();
         feedback.msgSuccess("添加成功");
     } catch (error) {
-        feedback.notifyError(error);
+        feedback.msgError(error);
     }
     currAccount.value = null;
     feedback.closeLoading();
@@ -361,18 +362,22 @@ const handleGetBusinessCard = async (row: any) => {
     });
 };
 
-const handleDelete = async (row: any) => {
-    await feedback.confirm("删除账号时，当前执行的任务将中断并无法继续，确定要删除该账号吗？");
-    feedback.loading("删除中...", containerRef.value);
-    try {
-        await deleteAccount({ id: row.id });
-        feedback.msgSuccess("删除成功");
-        getLists();
-    } catch (error) {
-        feedback.notifyError(error);
-    } finally {
-        feedback.closeLoading();
-    }
+const handleDelete = (row: any) => {
+    nuxtApp.$confirm({
+        message: "删除账号时，当前执行的任务将中断并无法继续，确定要删除该账号吗？",
+        onConfirm: async () => {
+            feedback.loading("删除中...", containerRef.value);
+            try {
+                await deleteAccount({ id: row.id });
+                feedback.msgSuccess("删除成功");
+                getLists();
+            } catch (error) {
+                feedback.msgError(error);
+            } finally {
+                feedback.closeLoading();
+            }
+        },
+    });
 };
 
 onMounted(async () => {

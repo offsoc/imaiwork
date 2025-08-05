@@ -35,7 +35,7 @@
                 <el-table-column label="类别名称" prop="name" min-width="180" />
                 <el-table-column label="类别logo" prop="logo" min-width="120">
                     <template #default="{ row }">
-                        <el-image v-if="row.logo" :src="row.logo" class="w-[44px] h-[44px]" />
+                        <el-image v-if="row.logo" :src="row.logo" class="w-[44px] h-[44px]" fir="cover" />
                     </template>
                 </el-table-column>
                 <el-table-column label="类型描述" prop="description" min-width="160" />

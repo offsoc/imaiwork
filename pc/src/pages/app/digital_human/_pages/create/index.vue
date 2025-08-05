@@ -161,7 +161,9 @@
                                 <div class="absolute top-2 right-2">
                                     <Icon name="local-icon-success_fill" :size="20" color="var(--color-primary)"></Icon>
                                 </div>
-                                <div class="absolute left-0 bottom-4 w-full flex justify-center">
+                                <div
+                                    class="absolute left-0 bottom-4 w-full flex justify-center"
+                                    v-if="modelVersionMap[formData.model_version]">
                                     <div
                                         class="digital-human-tag"
                                         :class="`digital-human-tag-${formData.model_version}`">
@@ -448,6 +450,8 @@ const handleSelectAnchor = (data: any, index?: number) => {
         model_version: data.model_version,
         anchor_id: data.anchor_id,
         anchor_name: data.anchor_name,
+        width: data.width,
+        height: data.height,
     };
 
     Object.assign(formData, anchorData);
@@ -509,6 +513,7 @@ const textLimit = computed(() => {
         [DigitalHumanModelVersionEnum.SUPER]: 300,
         [DigitalHumanModelVersionEnum.ADVANCED]: 1000,
         [DigitalHumanModelVersionEnum.ELITE]: 1000,
+        [DigitalHumanModelVersionEnum.CHANJING]: 4000,
     };
     return limits[formData.model_version] || 150;
 });
@@ -520,6 +525,7 @@ const getAudioDurationLimits = computed(() => {
         [DigitalHumanModelVersionEnum.SUPER]: { min: 2, max: 120, size: 30 },
         [DigitalHumanModelVersionEnum.ADVANCED]: { min: 5, max: 600, size: 100 },
         [DigitalHumanModelVersionEnum.ELITE]: { min: 5, max: 600, size: 100 },
+        [DigitalHumanModelVersionEnum.CHANJING]: { min: 30, max: 600, size: 100 },
     };
     return formData.model_version ? limits[formData.model_version] : {};
 });
@@ -577,7 +583,7 @@ const getAudio = (result: any) => {
 
 const getPromptContent = (content: string) => {
     if (content.length > textLimit.value) {
-        feedback.notifyWarning(`内容过长，将截取前${textLimit.value}字符`);
+        feedback.msgWarning(`内容过长，将截取前${textLimit.value}字符`);
         formData.msg = content.substring(0, textLimit.value);
     } else {
         formData.msg = content;

@@ -130,7 +130,7 @@ const handleNext = async () => {
             emit("success");
         }
     } catch (error) {
-        feedback.notifyError(error || "操作失败");
+        feedback.msgError(error || "操作失败");
     }
 };
 

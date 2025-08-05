@@ -1,5 +1,5 @@
 <template>
-    <div class="rounded-md bg-bg-app-bg-3 border border-app-border-2 p-[6px] flex gap-x-2 w-full">
+    <div class="rounded-md bg-app-bg-3 border border-app-border-2 p-[6px] flex gap-x-2 w-full">
         <div class="flex-1 flex flex-col items-center justify-center">
             <upload
                 class="w-full h-[112px]"

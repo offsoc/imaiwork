@@ -60,7 +60,7 @@ onEvent("update:formData", async (data: any) => {
                     resultData.images = data;
                 },
             });
-        } else if (model == ModelEnum.GENERAL) {
+        } else if (model == ModelEnum.GENERAL || model == ModelEnum.SEEDREAM) {
             resultData.images = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
             const { result } = await drawingTextToImageVolc(params);
             resultData.images = [result.image_urls].map((item) => ({

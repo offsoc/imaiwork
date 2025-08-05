@@ -42,7 +42,7 @@ class RobotValidate extends BaseValidate
      */
     public function sceneAdd()
     {
-        return $this->only(['logo', 'name', 'description', 'company_background', 'question', 'answer']);
+        return $this->only(['logo', 'name', 'description', 'company_background']);
     }
 
     /**
@@ -51,7 +51,7 @@ class RobotValidate extends BaseValidate
      */
     public function sceneUpdate()
     {
-        return $this->only(['id', 'logo', 'name', 'description', 'company_background', 'question', 'answer']);
+        return $this->only(['id', 'logo', 'name', 'description', 'company_background']);
     }
 
     /**

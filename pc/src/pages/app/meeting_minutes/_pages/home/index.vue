@@ -221,7 +221,7 @@ const handleMainCard = async (key: string) => {
     } else if (key === "meeting-card") {
         router.push("/app/meeting_minutes/realtime");
     } else {
-        feedback.notifyWarning("暂未开放");
+        feedback.msgWarning("暂未开放");
     }
 };
 

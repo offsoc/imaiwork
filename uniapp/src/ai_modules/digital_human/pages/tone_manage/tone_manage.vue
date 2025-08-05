@@ -42,7 +42,10 @@
                         <view class="h-[96rpx] flex items-center bg-white rounded-full px-4 justify-between">
                             <view class="flex items-center gap-4">
                                 <view class="w-[12rpx] h-[12rpx] bg-primary rounded-full"> </view>
-                                <view class="version-tag" v-if="modelVersionMap[item.model_version]">
+                                <view
+                                    class="digital-human-tag !px-[18rpx] !py-[8rpx]"
+                                    :class="`digital-human-tag-${item.model_version}`"
+                                    v-if="modelVersionMap[item.model_version]">
                                     {{ modelVersionMap[item.model_version] }}
                                 </view>
                                 <view>{{ item.name }}</view>
@@ -122,8 +125,6 @@ const active = ref<number[]>([-1]);
 
 const queryParams = reactive<any>({
     name: "",
-    model_version: "",
-    status: "",
 });
 
 const pagingRef = shallowRef();
@@ -133,7 +134,7 @@ const queryList = async (page_no: number, page_size: number) => {
             page_no,
             page_size,
             name: queryParams.name,
-            model_version: queryParams.model_version,
+            builtin: 1,
         });
         pagingRef.value?.complete(lists);
     } catch (error) {

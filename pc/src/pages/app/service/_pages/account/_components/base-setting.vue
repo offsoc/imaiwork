@@ -47,6 +47,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+
 const account = computed(() => route.query.account);
 
 const formRef = ref<FormInstance>();
@@ -85,9 +86,8 @@ const handleSubmit = async () => {
 const { lockFn: lockSubmit, isLock: isLockSubmit } = useLockFn(handleSubmit);
 
 const getDetail = async () => {
-    const { takeover_mode, robot_id } = await getAccountDetail({ account: route.query.account });
-    formData.takeover_mode = takeover_mode;
-    formData.robot_id = robot_id;
+    const data = await getAccountDetail({ account: route.query.account });
+    setFormData(data, formData);
 };
 watch(
     () => route.query.account,

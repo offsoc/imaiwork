@@ -126,7 +126,7 @@ const queryParams = reactive<any>({
     page_no: 1,
     type: sceneType.value,
 });
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     size: 25,
     fetchFun: drawingRecord,
     params: queryParams,
@@ -136,7 +136,6 @@ const { pager, getLists, isLoad, resetPage } = usePaging({
 const {
     pager: videoPager,
     getLists: getVideoLists,
-    isLoad: isVideoLoad,
     resetPage: resetVideoPage,
 } = usePaging({
     size: 25,
@@ -150,7 +149,7 @@ const getRecordLists = computed(() => {
 });
 
 const getIsLoad = computed(() => {
-    return sceneType.value == drawTypeEnumMap[DrawTypeEnum.VIDEO_GENERATION] ? isVideoLoad.value : isLoad.value;
+    return sceneType.value == drawTypeEnumMap[DrawTypeEnum.VIDEO_GENERATION] ? videoPager.isLoad : pager.isLoad;
 });
 
 const getPagerLoading = computed(() => {

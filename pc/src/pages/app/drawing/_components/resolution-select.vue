@@ -8,14 +8,12 @@
                 :value="item.value"></ElOption>
         </ElSelect>
         <div class="flex-1 flex items-center">
-            <div
-                class="h-11 flex-1 flex items-center gap-x-2 bg-bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
+            <div class="h-11 flex-1 flex items-center gap-x-2 bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
                 <span class="text-white">宽</span>
                 <span class="text-[#ffffff80]">{{ getResolutionSize.width }}</span>
             </div>
             <div>x</div>
-            <div
-                class="h-11 flex-1 flex items-center gap-x-2 bg-bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
+            <div class="h-11 flex-1 flex items-center gap-x-2 bg-app-bg-3 border border-app-border-2 px-3 rounded-lg">
                 <span class="text-white">高</span>
                 <span class="text-[#ffffff80]">{{ getResolutionSize.height }}</span>
             </div>
@@ -24,11 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import { resolutionOptions, videoResolutionOptions } from "../_enums";
+import { resolutionOptions, videoResolutionOptions, ModelEnum, seedreamResolutionOptions } from "../_enums";
 
 const props = withDefaults(
     defineProps<{
         type?: "image" | "video";
+        model?: ModelEnum;
     }>(),
     {
         type: "image",
@@ -41,6 +40,9 @@ const emit = defineEmits<{
 
 const getResolutionOptions = computed(() => {
     if (props.type === "image") {
+        if (props.model == ModelEnum.SEEDREAM) {
+            return seedreamResolutionOptions;
+        }
         return resolutionOptions;
     }
     return videoResolutionOptions;
@@ -60,6 +62,13 @@ const getResolutionSize = computed(() => {
         height: height,
     };
 });
+
+watch(
+    () => props.model,
+    () => {
+        currResolution.value = getResolutionOptions.value[0].value;
+    }
+);
 </script>
 
 <style scoped></style>

@@ -13,7 +13,7 @@ interface AppSate {
 export const useAppStore = defineStore("appStore", {
     state: (): AppSate => ({
         config: {},
-        hideSidebar: false,
+        hideSidebar: true,
         menuList: [],
         // 通用聊天配置
         chatConfig: {},
@@ -31,6 +31,8 @@ export const useAppStore = defineStore("appStore", {
         getAppLiveConfig: (state) => state.config.ai_live || {},
         getHdConfig: (state) => state.config.draw || {},
         getAppConfig: (state) => state.config.app_config || {},
+        getByName: (state) => state.config.by_name || "",
+        getAiModelConfig: (state) => state.config.ai_model || {},
     },
     actions: {
         async getConfig() {

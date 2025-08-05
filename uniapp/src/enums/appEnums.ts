@@ -98,5 +98,9 @@ export enum TokensSceneEnum {
     HUMAN_AUDIO_ELITE = "human_audio_ymt",
     HUMAN_VOICE_ELITE = "human_voice_ymt",
     HUMAN_AVATAR_ELITE = "human_avatar_ymt",
+    HUMAN_AVATAR_CHANJING = "human_avatar_chanjing",
+    HUMAN_VIDEO_CHANJING = "human_video_chanjing",
+    HUMAN_AUDIO_CHANJING = "human_audio_chanjing",
+    HUMAN_VOICE_CHANJING = "human_voice_chanjing",
     AI_LADDER_PLAYER = "lianlian",
 }

@@ -81,6 +81,9 @@ class VideoLists extends BaseAdminDataLists implements ListsSearchInterface
                     case 6:
                         $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT;
                         break;
+                    case 7:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_CHANJING;
+                        break;
                 }   
                 $points = 0;
                 $duration = 0;

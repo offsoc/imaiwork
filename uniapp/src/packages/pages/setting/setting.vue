@@ -90,7 +90,7 @@
                                     {{ config.version }}
                                 </view>
                                 <u-line />
-                                <view class="opacity-30 text-[22rpx] mt-[30rpx]">
+                                <view class="text-[#0000004d] text-[22rpx] mt-[30rpx]">
                                     <view
                                         v-for="(item, index) in copyrightConfig"
                                         :key="index"
@@ -98,6 +98,9 @@
                                         {{ item.key }}
                                     </view>
                                 </view>
+                            </view>
+                            <view class="text-[22rpx] text-center text-[#0000004d] mb-2">
+                                {{ byName }}
                             </view>
                         </view>
                         <view
@@ -182,12 +185,12 @@ import config from "@/config";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
-const { userInfo, isLogin, userTokens } = toRefs(userStore);
+const { userInfo, isLogin } = toRefs(userStore);
 
 const domain = computed(() => appStore.config.domain);
 const websiteConfig = computed(() => appStore.getWebsiteConfig);
 const copyrightConfig = computed(() => appStore.getCopyRightConfig);
-
+const byName = computed(() => appStore.getByName);
 enum HandleType {
     // 编辑资料
     EDIT_PROFILE = "edit_profile",

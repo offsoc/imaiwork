@@ -4,6 +4,12 @@ namespace app\api\logic\wechat;
 
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatSetting;
+use app\common\model\wechat\AiWechatReplyStrategy;
+use app\common\model\wechat\AiWechatGreetStrategy;
+use app\common\model\wechat\AiWechatAcceptFriendStrategy;
+use app\common\model\wechat\AiWechatCircleReplyStrategy;
+use app\common\model\wechat\AiWechatCircleLikeStrategy;
+use think\facade\Db;
 
 /**
  * WechatLogic
@@ -21,16 +27,20 @@ class WechatLogic extends WechatBaseLogic
     public static function addWechat(array $params)
     {
 
-        try {
+        Db::startTrans();
+        try
+        {
             // 获取设备信息
             $device = self::deviceInfo($params['device_code']);
-            if (is_bool($device)) {
+            if (is_bool($device))
+            {
                 return false;
             }
 
             // 获取微信信息
             $wechat = self::wechatInfo($params['wechat_id'], false);
-            if ($wechat instanceof AiWechat) {
+            if ($wechat instanceof AiWechat)
+            {
                 self::setError('微信账号已存在');
                 return false;
             }
@@ -42,18 +52,68 @@ class WechatLogic extends WechatBaseLogic
 
             // 添加微信默认设置
             $setting = AiWechatSetting::where('wechat_id', $wechat->id)->findOrEmpty();
-            if ($setting->isEmpty()) {
+            if ($setting->isEmpty())
+            {
                 $setting = [
                     'wechat_id' => $wechat->wechat_id,
                 ];
                 AiWechatSetting::create($setting);
             }
 
-            // 返回设备信息 
+            // 添加回复策略
+            $reply = AiWechatReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($reply->isEmpty())
+            {
+                AiWechatReplyStrategy::create([
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            // 添加打招呼策略
+            $greet = AiWechatGreetStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($greet->isEmpty())
+            {
+                AiWechatGreetStrategy::create([
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            // 自动接受好友策略
+            $accept = AiWechatAcceptFriendStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($accept->isEmpty())
+            {
+                AiWechatAcceptFriendStrategy::create([
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            // 自动朋友圈评论策略
+            $accept = AiWechatCircleReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($accept->isEmpty())
+            {
+                AiWechatCircleReplyStrategy::create([
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            // 自动朋友圈点赞策略
+            $accept = AiWechatCircleLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($accept->isEmpty())
+            {
+                AiWechatCircleLikeStrategy::create([
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            Db::commit();
+            // 返回设备信息
             $data = $wechat->toArray();
             self::$returnData = $data;
             return true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
+            Db::rollback();
             self::setError($e->getMessage());
             return false;
         }
@@ -67,7 +127,8 @@ class WechatLogic extends WechatBaseLogic
     public static function detailWechat(array $params)
     {
 
-        try {
+        try
+        {
             // 检查微信是否存在
             $wechat = AiWechat::alias('w')
                 ->join('ai_wechat_setting s', 's.wechat_id = w.wechat_id')
@@ -75,17 +136,20 @@ class WechatLogic extends WechatBaseLogic
                 ->where('w.user_id', self::$uid)
                 ->findOrEmpty();
 
-            if ($wechat->isEmpty()) {
+            if ($wechat->isEmpty())
+            {
                 self::setError('微信账号不存在');
                 return false;
             }
 
             $wechat->robot_id = $wechat->robot_id ?? 0;
 
-            // 返回设备信息 
+            // 返回设备信息
             self::$returnData = $wechat->toArray();
             return true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             self::setError($e->getMessage());
             return false;
         }
@@ -98,24 +162,29 @@ class WechatLogic extends WechatBaseLogic
      */
     public static function updateWechat(array $params)
     {
-        try {
+        try
+        {
             // 获取微信信息
             $wechat = self::wechatInfo($params['wechat_id']);
-            if (is_bool($wechat)) {
+            if (is_bool($wechat))
+            {
                 return false;
             }
 
             // 获取设备信息
             $device = self::deviceInfo($params['device_code']);
-            if (is_bool($device)) {
+            if (is_bool($device))
+            {
                 return false;
             }
 
-            // 更新设备  
+            // 更新设备
             AiWechat::where('id', $wechat->id)->update($params);
             self::$returnData = $wechat->refresh()->toArray();
             return true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             self::setError($e->getMessage());
             return false;
         }
@@ -129,16 +198,19 @@ class WechatLogic extends WechatBaseLogic
      */
     public static function updateWechatAi(array $params)
     {
-        try {
+        try
+        {
             // 获取微信信息
             $wechat = self::wechatInfo($params['wechat_id']);
-            if (is_bool($wechat)) {
+            if (is_bool($wechat))
+            {
                 return false;
             }
 
             // 是否存在设置
             $setting = AiWechatSetting::where('wechat_id', $wechat->wechat_id)->findOrEmpty();
-            if ($setting->isEmpty()) {
+            if ($setting->isEmpty())
+            {
                 $setting = [
                     'wechat_id' => $wechat->wechat_id,
                 ];
@@ -150,7 +222,9 @@ class WechatLogic extends WechatBaseLogic
 
             self::$returnData = $setting->refresh()->toArray();
             return true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             self::setError($e->getMessage());
             return false;
         }
@@ -163,10 +237,12 @@ class WechatLogic extends WechatBaseLogic
      */
     public static function offlineWechat(array $params)
     {
-        try {
+        try
+        {
             // 获取微信信息
             $wechat = self::wechatInfo($params['wechat_id']);
-            if (is_bool($wechat)) {
+            if (is_bool($wechat))
+            {
                 return false;
             }
 
@@ -175,7 +251,9 @@ class WechatLogic extends WechatBaseLogic
 
             self::$returnData = $wechat->refresh()->toArray();
             return true;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             self::setError($e->getMessage());
             return false;
         }

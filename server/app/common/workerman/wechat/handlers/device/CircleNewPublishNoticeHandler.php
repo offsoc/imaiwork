@@ -77,7 +77,7 @@ class CircleNewPublishNoticeHandler extends BaseHandler
         $circle = [
             
             'WeChatId' => $circle->getWeChatId(),
-            'CircleId' => $circle->getCircleId(),
+            'CircleId' => (string)$circle->getCircleId(),
             'Content'  => $this->parseCircleContent($circle->getContent()),
             'Likes'     => $this->parseCircleLikes($circle->getLikes()),
             'Comments'  => $this->parseCircleComments($circle->getComments())

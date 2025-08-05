@@ -4,6 +4,7 @@
 namespace app\api\controller\wechat;
 
 use app\api\controller\BaseApiController;
+use app\api\lists\wechat\WechatContactLists;
 use app\api\logic\wechat\FriendLogic;
 use app\api\validate\wechat\FriendValidate;
 use think\exception\HttpResponseException;
@@ -18,36 +19,49 @@ class FriendController extends BaseApiController
 
     public array $notNeedLogin = [];
 
-    /**     
+
+    public function lists(){
+        return $this->dataLists(new WechatContactLists());
+    }
+
+    /**
      * @desc 添加微信好友
      */
     public function add()
     {
-        try {
+        try
+        {
             $params = (new FriendValidate())->post()->goCheck('add');
             $result = FriendLogic::addFriend($params);
-            if ($result) {
+            if ($result)
+            {
                 return $this->success(data: FriendLogic::getReturnData());
             }
             return $this->fail(FriendLogic::getError());
-        } catch (HttpResponseException $e) {
+        }
+        catch (HttpResponseException $e)
+        {
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
 
-    /**     
+    /**
      * @desc 批量添加微信好友
      */
     public function batch()
     {
-        try {
+        try
+        {
             $params = (new FriendValidate())->post()->goCheck('batch');
             $result = FriendLogic::batchAddFriend($params);
-            if ($result) {
+            if ($result)
+            {
                 return $this->success(data: FriendLogic::getReturnData());
             }
             return $this->fail(FriendLogic::getError());
-        } catch (HttpResponseException $e) {
+        }
+        catch (HttpResponseException $e)
+        {
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
@@ -57,14 +71,18 @@ class FriendController extends BaseApiController
      */
     public function update()
     {
-        try {
+        try
+        {
             $params = (new FriendValidate())->post()->goCheck('update');
             $result = FriendLogic::updateFriend($params);
-            if ($result) {
+            if ($result)
+            {
                 return $this->success(data: FriendLogic::getReturnData());
             }
             return $this->fail(FriendLogic::getError());
-        } catch (HttpResponseException $e) {
+        }
+        catch (HttpResponseException $e)
+        {
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
@@ -75,14 +93,18 @@ class FriendController extends BaseApiController
      */
     public function info()
     {
-        try {
+        try
+        {
             $params = (new FriendValidate())->get()->goCheck('info');
             $result = FriendLogic::friendDetail($params);
-            if ($result) {
+            if ($result)
+            {
                 return $this->success(data: FriendLogic::getReturnData());
             }
             return $this->fail(FriendLogic::getError());
-        } catch (HttpResponseException $e) {
+        }
+        catch (HttpResponseException $e)
+        {
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
@@ -93,15 +115,34 @@ class FriendController extends BaseApiController
      */
     public function delete()
     {
-        try {
+        try
+        {
             $params = (new FriendValidate())->post()->goCheck('delete');
             $result = FriendLogic::deleteFriend($params);
-            if ($result) {
+            if ($result)
+            {
                 return $this->success(data: FriendLogic::getReturnData());
             }
             return $this->fail(FriendLogic::getError());
-        } catch (HttpResponseException $e) {
+        }
+        catch (HttpResponseException $e)
+        {
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
+    }
+
+
+    /**
+     * @desc 接受好友请求
+     */
+    public function accept()
+    {
+        $params = $this->request->post();
+        $result = FriendLogic::acceptFriend($params);
+        if ($result)
+        {
+            return $this->success(data: FriendLogic::getReturnData());
+        }
+        return $this->fail(FriendLogic::getError());
     }
 }

@@ -42,7 +42,7 @@
             <div
                 class="h-[600px] overflow-y-auto relative dynamic-scroller"
                 :infinite-scroll-immediate="false"
-                :infinite-scroll-disabled="!isLoad"
+                :infinite-scroll-disabled="!pager.isLoad"
                 :infinite-scroll-distance="10"
                 v-infinite-scroll="load">
                 <div class="h-full" v-loading="pager.loading">
@@ -74,7 +74,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
+                        <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                     </div>
                     <div v-else class="h-full flex items-center justify-center">
                         <ElEmpty description="暂无数据"></ElEmpty>
@@ -122,7 +122,7 @@ const queryParams = reactive<Record<string, any>>({
     m_type: props.type,
 });
 
-const { pager, isLoad, getLists, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getMaterialLibraryList,
     params: queryParams,
     isScroll: true,

@@ -11,6 +11,11 @@ export function saveConfig(params: any) {
     return request.post({ url: "/config/setConfig", params });
 }
 
+// 平台版权名称修改
+export function saveAuthByName(params: any) {
+    return request.post({ url: "/config/updateByname", params });
+}
+
 // 工作台主页
 export function getWorkbench() {
     return request.get({ url: "/workbench/index" });

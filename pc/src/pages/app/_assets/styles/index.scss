@@ -80,12 +80,13 @@
 
 :deep(.el-tabs) {
     @apply px-[30px];
+    --el-tabs-header-height: 66px;
     .el-tabs__header {
         margin: 0;
     }
 
     .el-tabs__item {
-        height: 66px;
+        height: var(--el-tabs-header-height);
         &:not(.is-active) {
             @apply text-white;
         }
@@ -168,7 +169,6 @@
 
 :deep(.el-select) {
     .el-select__wrapper {
-        border-radius: 100px;
         background-color: var(--app-bg-color-3);
         box-shadow: 0 0 0 1px var(--app-border-color-2);
     }

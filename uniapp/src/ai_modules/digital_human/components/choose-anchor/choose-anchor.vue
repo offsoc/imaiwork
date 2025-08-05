@@ -24,7 +24,9 @@
                                     </view>
                                 </view>
                             </view>
-                            <view class="text-center mt-1 text-xs">{{ item.name }}</view>
+                            <view class="text-center mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+                                {{ item.name }}
+                            </view>
                         </view>
                     </view>
                     <template #empty>

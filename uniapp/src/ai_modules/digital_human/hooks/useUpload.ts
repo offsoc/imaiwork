@@ -50,6 +50,13 @@ export const uploadLimit: any = {
     },
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadLimit,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadLimit,
+    [DigitalHumanModelVersionEnum.CHANJING]: {
+        size: 2000,
+        minResolution: 360,
+        maxResolution: 2048,
+        videoMinDuration: 30,
+        videoMaxDuration: 300,
+    },
 };
 
 export const useUpload = (options: Options) => {
@@ -67,6 +74,8 @@ export const useUpload = (options: Options) => {
         pic: "",
         seconds: 0,
         duration: "00:00",
+        width: 0,
+        height: 0,
     });
 
     const upload = async () => {
@@ -85,11 +94,16 @@ export const useUpload = (options: Options) => {
     };
 
     const chooseFileCallback = async (filesResult: ChooseResult) => {
-        const { tempFilePaths, tempFiles } = filesResult;
+        const { tempFiles } = filesResult;
         const file = tempFiles[0];
         // 判断是否大于100M
         const fileSize = file.size;
         const fileWidth = file.width;
+        const fileHeight = file.height;
+
+        uploadResult.width = fileWidth;
+        uploadResult.height = fileHeight;
+
         if (fileSize > size * 1024 * 1024) {
             uni.showToast({
                 title: `视频大小不能超过${size}M`,

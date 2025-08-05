@@ -4,6 +4,8 @@
 namespace app\common\command;
 
 use app\api\logic\VolcLogic;
+use app\api\logic\hd\DoubaoLogic;
+
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -25,6 +27,8 @@ class DrawVideoTaskCron extends Command
     {
         VolcLogic::videoQueue();
         VolcLogic::videoQueueStatus();
+        DoubaoLogic::videoQueue();
+        DoubaoLogic::videoQueueStatus();
         return true;
     }
 }

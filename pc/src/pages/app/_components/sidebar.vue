@@ -56,8 +56,6 @@ const getTheme = computed(() => {
         };
     }
 });
-
-const route = useRoute();
 </script>
 
 <style scoped></style>

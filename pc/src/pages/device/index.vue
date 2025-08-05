@@ -116,7 +116,7 @@ import DeviceProgress from "./_components/device-progress.vue";
 import { EventAction } from "@/composables/useAddDeviceAccount";
 
 const router = useRouter();
-
+const nuxtApp = useNuxtApp();
 const { pager, getLists } = usePaging({
     fetchFun: getDeviceList,
 });
@@ -158,7 +158,7 @@ const {
         progressValue.value = 0;
         const { code, error, type } = err;
         if (code != DeviceCmdCodeEnum.CONNECT_ERROR && type != DeviceCmdEnum.BIND_WS) {
-            feedback.notifyError(error);
+            feedback.msgError(error);
         }
     },
 });
@@ -227,7 +227,7 @@ const handleConfigRPA = async (id: number) => {
 const addDeviceRef = ref<InstanceType<typeof DeviceAdd>>();
 const handleAddDevice = async () => {
     if (!isConnected.value) {
-        feedback.notifyError("连接失败，请检查网络连接");
+        feedback.msgError("连接失败，请检查网络连接");
         return;
     }
     showAddDevice.value = true;
@@ -235,15 +235,19 @@ const handleAddDevice = async () => {
     addDeviceRef.value?.open();
 };
 
-const handleDelete = async (row: any) => {
-    await feedback.confirm("确定删除该设备吗？");
-    try {
-        await deleteDevice({ id: row.id, device_code: row.device_code });
-        feedback.msgSuccess("删除设备成功");
-        getLists();
-    } catch (error) {
-        feedback.notifyError(error || "删除失败");
-    }
+const handleDelete = (row: any) => {
+    nuxtApp.$confirm({
+        message: "确定删除该设备吗？",
+        onConfirm: async () => {
+            try {
+                await deleteDevice({ id: row.id, device_code: row.device_code });
+                feedback.msgSuccess("删除设备成功");
+                getLists();
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 getLists();

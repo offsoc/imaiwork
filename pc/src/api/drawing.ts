@@ -12,6 +12,11 @@ export function drawingImageToImage(params: any) {
     return $request.post({ url: "/hd/img2img", params });
 }
 
+// 绘制图生图-即梦
+export function drawingImageToImageVolc(params: any) {
+    return $request.post({ url: "/hd/img2volcimg", params });
+}
+
 // 生成商品图片
 export function drawingGoods(params: any) {
     return $request.post({ url: "/hd/segmentImage", params });
@@ -22,28 +27,45 @@ export function drawingFitting(params: any) {
     return $request.post({ url: "/hd/vton", params });
 }
 
-// 文生视频
+// 即梦文生视频
 export function drawingTextToVideo(params: any) {
     return $request.post({ url: "/volc/text2Video", params });
 }
 
-// 图生视频
+// 即梦图生视频
 export function drawingImageToVideo(params: any) {
     return $request.post({ url: "/volc/image2Video", params });
 }
 
+// 豆包文生视频
+export function drawingTextToVideoDoubao(params: any) {
+    return $request.post({ url: "/hd.doubao/txt2video", params });
+}
+
+// 豆包图生视频
+export function drawingImageToVideoDoubao(params: any) {
+    return $request.post({ url: "/hd.doubao/img2video", params });
+}
 // 查询图片生成状态
-export function drawingHdImageStatus(params: any) {
+export function drawingImageStatus(params: any) {
     return $request.post({
         url: "/hd/getTaskStatus",
         params,
     });
 }
 
-// 查询视频生成状态
+// 即梦查询视频生成状态
 export function drawingVolcVideoStatus(params: any) {
     return $request.post({
         url: "/volc/getTaskStatus",
+        params,
+    });
+}
+
+// 豆包查询视频生成状态
+export function drawingDoubaoVideoStatus(params: any) {
+    return $request.post({
+        url: "/hd.doubao/getTaskStatus",
         params,
     });
 }

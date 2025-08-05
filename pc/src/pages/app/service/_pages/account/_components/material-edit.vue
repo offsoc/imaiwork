@@ -143,11 +143,11 @@ const handleConfirm = async () => {
     await formRef.value.validate();
     try {
         formData.id ? await updateAccountKeyword(formData) : await addAccountKeyword(formData);
-        feedback.notifySuccess(`${mode.value === "add" ? "新增" : "编辑"}成功`);
+        feedback.msgSuccess(`${mode.value === "add" ? "新增" : "编辑"}成功`);
         popupRef.value?.close();
         emit("success");
     } catch (error) {
-        feedback.notifyError(error || `${mode.value === "add" ? "新增" : "编辑"}失败`);
+        feedback.msgError(error || `${mode.value === "add" ? "新增" : "编辑"}失败`);
     }
 };
 

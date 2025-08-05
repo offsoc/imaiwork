@@ -27,7 +27,7 @@
         <div
             class="grow min-h-0 flex flex-col mt-4 overflow-y-auto -mx-4"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <template v-if="pager.lists.length > 0">
@@ -102,7 +102,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="!isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
+                <div v-if="pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
             </template>
             <div v-else class="grow flex items-center justify-center">
                 <ElEmpty description="暂无数据"></ElEmpty>
@@ -123,6 +123,7 @@ import FileAdd from "./_components/file-add.vue";
 import CreatePanel from "./_components/create-panel.vue";
 const router = useRouter();
 const route = useRoute();
+const nuxtApp = useNuxtApp();
 enum Tab {
     MyKn = "my_kn",
     AidKn = "aid_kn",
@@ -148,7 +149,7 @@ const queryParams = reactive({
     page_no: 1,
 });
 
-const { pager, getLists, resetPage, isLoad } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: knowledgeBaseLists,
     params: queryParams,
     isScroll: true,
@@ -195,17 +196,21 @@ const handleViewDetail = (id: number) => {
     router.push(`/knowledge_base/detail/${id}`);
 };
 
-const handleDelete = async (id: number, index: number) => {
-    await feedback.confirm("确定删除该知识库吗？");
-    try {
-        await knowledgeBaseDelete({
-            id,
-        });
-        pager.lists.splice(index, 1);
-        feedback.msgSuccess("删除成功");
-    } catch (error) {
-        feedback.msgError(error);
-    }
+const handleDelete = (id: number, index: number) => {
+    nuxtApp.$confirm({
+        message: "确定删除该知识库吗？",
+        onConfirm: async () => {
+            try {
+                await knowledgeBaseDelete({
+                    id,
+                });
+                pager.lists.splice(index, 1);
+                feedback.msgSuccess("删除成功");
+            } catch (error) {
+                feedback.msgError(error);
+            }
+        },
+    });
 };
 
 const load = () => {

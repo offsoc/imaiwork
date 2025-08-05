@@ -169,6 +169,17 @@ const modelChannel = computed(() => {
                 video: TokensSceneEnum.HUMAN_VIDEO_ELITE,
             },
         },
+        [DigitalHumanModelVersionEnum.CHANJING]: {
+            video_create_model: "蝉镜V1",
+            tone_clone: "蝉镜V1",
+            anchor_clone: "蝉镜V1",
+            tokens: {
+                voice: TokensSceneEnum.HUMAN_VOICE_CHANJING,
+                anchor: TokensSceneEnum.HUMAN_AVATAR_CHANJING,
+                audio: TokensSceneEnum.HUMAN_AUDIO_CHANJING,
+                video: TokensSceneEnum.HUMAN_VIDEO_CHANJING,
+            },
+        },
     };
 
     return channel.map((item: any) => {

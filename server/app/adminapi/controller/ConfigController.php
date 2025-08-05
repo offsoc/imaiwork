@@ -85,4 +85,16 @@ class ConfigController extends BaseAdminController
         $data = ConfigLogic::getDictByType($type);
         return $this->data($data);
     }
+
+
+    public function updateByname()
+    {
+        $postData = $this->request->post();
+        $data = ConfigLogic::updateByname($postData);
+        if ($data == 10000){
+            return $this->success('更新成功');
+        }
+
+        return $this->fail('更新失败');
+    }
 }

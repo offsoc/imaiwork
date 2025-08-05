@@ -154,11 +154,11 @@ const getUploadSuccess = (result: any) => {
             materialList.value.push(uri);
         }
     }
-    replaceMaterialIndex.value = -1;
     emit("update:materialList", materialList.value);
     emit("changeMaterial", {
-        type: MaterialActionType.ADD,
+        type: replaceMaterialIndex.value == -1 ? MaterialActionType.ADD : MaterialActionType.REPLACE,
     });
+    replaceMaterialIndex.value = -1;
 };
 
 const handleImportMaterial = () => {

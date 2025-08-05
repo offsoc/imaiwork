@@ -183,7 +183,7 @@ class BaseHandler
                 'FriendId' => $like->getFriendId(),
                 'PublishTime' => $like->getPublishTime(),
                 'NickName' => $like->getNickName(),
-                'CircleId' => $like->getCircleId(),
+                'CircleId' => (string)$like->getCircleId(),
                 'Read' => $like->getRead(),
             ];
         }
@@ -229,7 +229,7 @@ class BaseHandler
                 'PublishTime' => $comment->getPublishTime(),
                 'FromName' => $comment->getFromName(),
                 'ToName' => $comment->getToName(),
-                'CircleId' => $comment->getCircleId(),
+                'CircleId' => (string)$comment->getCircleId(),
                 'Read' => $comment->getRead(),
             ];
         }

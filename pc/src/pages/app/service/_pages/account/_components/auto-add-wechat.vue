@@ -108,9 +108,9 @@ const { lockFn: lockSubmit, isLock: isLockSubmit } = useLockFn(async () => {
     await formRef.value?.validate();
     try {
         await updateAutoAddWechat(formData);
-        feedback.notifySuccess("保存成功");
+        feedback.msgSuccess("保存成功");
     } catch (error) {
-        feedback.notifyError(error || "保存失败");
+        feedback.msgError(error || "保存失败");
     }
 });
 

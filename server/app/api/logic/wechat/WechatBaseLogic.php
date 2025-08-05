@@ -31,10 +31,12 @@ class WechatBaseLogic extends ApiLogic
      */
     protected static function wechatInfo(string $wechatId, bool $check = true): bool|AiWechat
     {
-        $wechat = AiWechat::where('wechat_id', $wechatId)->when($check, function ($query) {
+        $wechat = AiWechat::where('wechat_id', $wechatId)->when($check, function ($query)
+        {
             $query->where('user_id', self::$uid);
         })->findOrEmpty();
-        if ($wechat->isEmpty()) {
+        if ($wechat->isEmpty())
+        {
             self::setError('微信账号不存在');
             return false;
         }
@@ -51,7 +53,8 @@ class WechatBaseLogic extends ApiLogic
     protected static function friendInfo(string $wechatId, string $friendId): bool|AiWechatContact
     {
         $friend = AiWechatContact::where('wechat_id', $wechatId)->where('friend_id', $friendId)->findOrEmpty();
-        if ($friend->isEmpty()) {
+        if ($friend->isEmpty())
+        {
             self::setError('微信好友不存在');
             return false;
         }
@@ -65,11 +68,13 @@ class WechatBaseLogic extends ApiLogic
      */
     protected static function deviceInfo(string $deviceCode, bool $check = true): bool|AiWechatDevice
     {
-        $device = AiWechatDevice::where('device_code', $deviceCode)->when($check, function ($query) {
+        $device = AiWechatDevice::where('device_code', $deviceCode)->when($check, function ($query)
+        {
             $query->where('user_id', self::$uid);
         })->findOrEmpty();
 
-        if ($device->isEmpty()) {
+        if ($device->isEmpty())
+        {
             self::setError('设备不存在');
             return false;
         }
@@ -88,17 +93,23 @@ class WechatBaseLogic extends ApiLogic
 
         $match = false;
         // 获取微信机器人设置的正关键词
-        AiWechatRobotKeyword::where('robot_id', $robot->id)->select()->each(function ($item) use ($request, &$match) {
+        AiWechatRobotKeyword::where('robot_id', $robot->id)->select()->each(function ($item) use ($request, &$match)
+        {
 
             // 模糊匹配
-            if ($item->match_type == 0) {
-                if (str_contains($request['message'], $item->keyword)) {
+            if ($item->match_type == 0)
+            {
+                if (str_contains($request['message'], $item->keyword))
+                {
 
                     self::parseMessage($request, $item->reply);
                     $match = true;
                 }
-            } else {
-                if ((string)$item->keyword === $request['message']) {
+            }
+            else
+            {
+                if ((string)$item->keyword === $request['message'])
+                {
 
                     self::parseMessage($request, $item->reply);
                     $match = true;
@@ -125,7 +136,8 @@ class WechatBaseLogic extends ApiLogic
         //获取提示词
         $keyword = ChatPrompt::where('id', 12)->value('prompt_text') ?? '';
 
-        if (!$keyword) {
+        if (!$keyword)
+        {
 
             message("提示词不存在");
         }
@@ -185,11 +197,13 @@ class WechatBaseLogic extends ApiLogic
      */
     protected static function parseMessage(array $request, array $content)
     {
-        foreach ($content as $item) {
+        foreach ($content as $item)
+        {
 
             $send = true;
 
-            switch ((int)$item['type']) {
+            switch ((int)$item['type'])
+            {
 
                 case 0: //文本
 
@@ -209,7 +223,8 @@ class WechatBaseLogic extends ApiLogic
                     $send = false;
             }
 
-            if ($send) {
+            if ($send)
+            {
                 self::send($request);
             }
         }
@@ -229,9 +244,11 @@ class WechatBaseLogic extends ApiLogic
         $keywords = explode(';', $reply->stop_keywords);
 
         // 获取微信机器人设置的正关键词
-        foreach ($keywords as $keyword) {
+        foreach ($keywords as $keyword)
+        {
 
-            if ((string)$keyword === $request['message']) {
+            if ((string)$keyword === $request['message'])
+            {
 
                 $stop = true;
 
@@ -245,9 +262,9 @@ class WechatBaseLogic extends ApiLogic
     /**
      * @desc 发送消息
      * @param array $request
-     * @return bool
+     * @return void
      */
-    protected static function send(array $request)
+    protected static function send(array $request): void
     {
         sleep(5);
         //\app\common\service\ToolsService::Wechat()->push($request);

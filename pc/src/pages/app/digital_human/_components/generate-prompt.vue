@@ -16,8 +16,8 @@
                 },
             ],
         }"
-        popper-class="!rounded-xl !bg-app-bg-2 !shadow-none !border-none"
-        class="">
+        @hide="handleHide"
+        popper-class="!rounded-xl !bg-app-bg-2 !shadow-none !border-none">
         <template #reference>
             <ElButton
                 type="primary"
@@ -104,7 +104,6 @@
 </template>
 
 <script setup lang="ts">
-import { chatPrompt } from "@/api/chat";
 import { generatePrompt } from "@/api/digital_human";
 import { useUserStore } from "@/stores/user";
 import { CopywritingTypeEnum } from "@/pages/app/_enums/chatEnum";
@@ -144,10 +143,16 @@ const getPromptList = computed(() => {
     promptList.forEach((item) => {
         if (item.value > props.maxSize) {
             item.disabled = true;
+        } else {
+            item.disabled = false;
         }
     });
     return promptList;
 });
+
+const handleHide = () => {
+    currentPromptValue.value = promptList[0].value;
+};
 
 const handleGeneratePrompt = async () => {
     if (userTokens.value <= 0) {

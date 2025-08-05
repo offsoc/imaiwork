@@ -45,6 +45,15 @@ class TodoValidate extends BaseValidate
     }
 
     /**
+     * @notes 编辑待办
+     * @return WechatValidate
+     */
+    public function sceneUpdate()
+    {
+        return $this->only(['id','wechat_id', 'friend_id', 'todo_type', 'todo_content', 'todo_time']);
+    }
+
+    /**
      * @notes 删除
      * @return WechatValidate
      */

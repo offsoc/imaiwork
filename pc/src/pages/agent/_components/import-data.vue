@@ -75,7 +75,7 @@ const getFile = (result: any) => {
 
 const handleConfirm = async () => {
     if (!file.value) {
-        feedback.notifyError("请上传文件");
+        feedback.msgError("请上传文件");
         return;
     }
     try {
@@ -85,9 +85,9 @@ const handleConfirm = async () => {
         });
         emit("success");
         popupRef.value?.close();
-        feedback.notifySuccess("导入成功");
+        feedback.msgSuccess("导入成功");
     } catch (error) {
-        feedback.notifyError(error || "导入失败");
+        feedback.msgError(error || "导入失败");
     }
 };
 

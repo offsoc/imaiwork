@@ -58,6 +58,10 @@ class CrontabHandler extends BaseMessageHandler
             //$this->setLog('sql:'. Db::getLastSql(), 'cron');
             //$this->setLog('待发布的数据有:'. count($publishes) .' 条' , 'cron');
             foreach ($publishes as $publish){
+                $material_url = explode(',', $publish['material_url']);
+                if(count($material_url) > 12){
+                    $material_url = array_slice($material_url, 0, 12);
+                }
                 $payload = array(
                     'appType' => $this->connection->apptype ?? '',
                     'messageId' => $this->connection->messageid ?? '',
@@ -70,7 +74,7 @@ class CrontabHandler extends BaseMessageHandler
                     'reply' => [
                         'title' => $publish['material_title'],
                         'type' => $publish['material_type'] ?? 1,
-                        'list' => explode(',', $publish['material_url']),
+                        'list' => $material_url,
                         'isLocation' => !empty($publish['poi']) ? 1 : 0,
                         'location' => $publish['poi'],
                         'isScheduledTime' => true,

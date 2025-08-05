@@ -15,11 +15,13 @@
                 </ElRadioGroup>
             </ElFormItem>
             <ElFormItem label="匹配内容" prop="keyword">
-                <ElInput v-model="formData.keyword" placeholder="点击输入提问案例" />
+                <ElInput
+                    v-model="formData.keyword"
+                    placeholder="回复内容支持多词组匹配，以分号相隔; 例如：你好;你好啊;你好呀" />
             </ElFormItem>
             <ElFormItem label="回复内容" prop="reply">
                 <div class="h-[600px] w-full overflow-hidden">
-                    <AddContent ref="addContentRef" v-model="formData.reply" :show-preview="false" />
+                    <AddContent ref="addContentRef" :type="2" v-model="formData.reply" :show-preview="false" />
                 </div>
             </ElFormItem>
         </ElForm>
@@ -74,11 +76,11 @@ const handleConfirm = async () => {
                   ...formData,
                   robot_id: route.query.id,
               });
-        feedback.notifySuccess(`${mode.value === "add" ? "新增" : "编辑"}成功`);
+        feedback.msgSuccess(`${mode.value === "add" ? "新增" : "编辑"}成功`);
         popupRef.value?.close();
         emit("success");
     } catch (error) {
-        feedback.notifyError(error || `${mode.value === "add" ? "新增" : "编辑"}失败`);
+        feedback.msgError(error || `${mode.value === "add" ? "新增" : "编辑"}失败`);
     }
 };
 

@@ -38,8 +38,7 @@
             </div>
             <div class="mt-5 px-4">
                 <template v-if="optionsData.assembleLists.length > 0">
-                    <div
-                        class="bg-bg-app-bg-3 border border-app-border-2 rounded-lg px-4 py-2 min-h-[40px] relative mt-4">
+                    <div class="bg-app-bg-3 border border-app-border-2 rounded-lg px-4 py-2 min-h-[40px] relative mt-4">
                         <div class="text-white text-xs">
                             {{ `${getAssemblePrompt}` }}
                         </div>

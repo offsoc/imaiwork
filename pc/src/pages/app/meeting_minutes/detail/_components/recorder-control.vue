@@ -54,6 +54,7 @@ const emit = defineEmits<{
     (e: "change", value: string): void;
 }>();
 
+const nuxtApp = useNuxtApp();
 const { userTokens, tokensValue } = useHandleApi();
 
 // 把tokensValue 转为秒
@@ -186,7 +187,6 @@ const stopRecord = () => {
     if (recorder.value) {
         recorder.value.watchDogTimer = 0;
         recorder.value.stop(async (blob: any, duration: number) => {
-            var localUrl = (window.URL || webkitURL).createObjectURL(blob);
             recorder.value.close();
             window.onbeforeunload = null;
             const file = new File([blob], `${Date.now()}.mp3`, {
@@ -220,17 +220,21 @@ const toggleRecording = () => {
             resumeRecord();
         }
     } else {
-        feedback.notifyWarning("录音已结束");
+        feedback.msgWarning("录音已结束");
     }
 };
 
 const handleStopRecord = async () => {
     if (props.disabled) {
-        feedback.notifyWarning("录音已结束");
+        feedback.msgWarning("录音已结束");
         return;
     }
-    await feedback.confirm("确定要结束录音吗？");
-    stopRecord();
+    nuxtApp.$confirm({
+        message: "确定要结束录音吗？",
+        onConfirm: async () => {
+            stopRecord();
+        },
+    });
 };
 
 // 用户刷新页面拦截提醒

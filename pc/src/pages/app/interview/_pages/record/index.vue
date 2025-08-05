@@ -130,6 +130,7 @@ import { Refresh } from "@element-plus/icons-vue";
 import Detail from "./detail.vue";
 
 const route = useRoute();
+const nuxtApp = useNuxtApp();
 
 const detailRef = ref<InstanceType<typeof Detail>>();
 const showDetail = ref(false);
@@ -164,25 +165,33 @@ const handleDetail = async (id: number) => {
 };
 
 const handleDelete = async (id: number) => {
-    await feedback.confirm("确定要删除该面试记录吗？");
-    try {
-        await deleteInterviewRecord({ ids: [id] });
-        feedback.msgSuccess("删除成功");
-        getLists();
-    } catch (error) {
-        feedback.msgError(error || "删除失败");
-    }
+    nuxtApp.$confirm({
+        message: "确定要删除该面试记录吗？",
+        onConfirm: async () => {
+            try {
+                await deleteInterviewRecord({ ids: [id] });
+                feedback.msgSuccess("删除成功");
+                getLists();
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 const handleReanalyze = async (id: number) => {
-    await feedback.confirm("确定要重新分析该面试记录吗？");
-    try {
-        await reanalyzeInterviewRecord({ id });
-        feedback.msgSuccess("重新分析成功");
-        getLists();
-    } catch (error) {
-        feedback.msgError(error || "重新分析失败");
-    }
+    nuxtApp.$confirm({
+        message: "确定要重新分析该面试记录吗？",
+        onConfirm: async () => {
+            try {
+                await reanalyzeInterviewRecord({ id });
+                feedback.msgSuccess("重新分析成功");
+                getLists();
+            } catch (error) {
+                feedback.msgError(error || "重新分析失败");
+            }
+        },
+    });
 };
 onMounted(() => {
     queryParams.job_id = route.query.id as string;

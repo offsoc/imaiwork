@@ -39,7 +39,9 @@
                     @click="handleDelete(multipleSelection.map((item) => item.id))">
                     批量删除
                 </el-button>
-                <el-button type="primary" @click="handleEditPrompt">markdown内置提示词编辑 </el-button>
+                <el-button v-perms="['ai_application.mind_map/edit']" type="primary" @click="handleEditPrompt"
+                    >markdown内置提示词编辑
+                </el-button>
             </div>
             <el-table
                 ref="tableRef"

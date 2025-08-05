@@ -37,7 +37,9 @@
                         <div class="text-tx-regular">会员类型</div>
                         <div class="mt-2 flex items-center text-[20px]">
                             {{ formData.user_type == 0 ? "个人" : "企业" }}
-                            <el-button type="primary" link @click="handleUserType"> 调整 </el-button>
+                            <el-button type="primary" v-perms="['user.user/edit']" link @click="handleUserType">
+                                调整
+                            </el-button>
                         </div>
                     </div>
                 </div>

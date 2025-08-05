@@ -38,12 +38,17 @@ const menuList = [
 		path: "/app/person_wechat/circle",
 		icon: "wx_circle",
 	},
-
 	{
-		key: "knowledge",
-		name: "知识库",
-		path: "/app/person_wechat/knowledge",
-		icon: "wx_knowledge",
+		key: "robot",
+		name: "智能机器人",
+		path: "/app/person_wechat/robot",
+		icon: "wx_robot",
+	},
+	{
+		key: "marketing",
+		name: "营销工具",
+		path: "/app/person_wechat/marketing",
+		icon: "wx_marketing",
 	},
 	{
 		key: "setting",
@@ -53,16 +58,14 @@ const menuList = [
 	},
 ];
 
+const isConfirmRouter = ["chat", "sop"];
+
 const handleClickMenu = async (menu: any) => {
-	if (activeMenu.value.key == "chat") {
+	if (isConfirmRouter.includes(menu.key)) {
 		// await feedback.confirm("确定要离开吗？");
 	}
 	const currentMenu = menuList.find((item) => item.key === menu.key);
 
-	if (currentMenu.key == "circle") {
-		feedback.notifyError("暂未开放");
-		return;
-	}
 	activeMenu.value = menu;
 	router.push(menu.path);
 };
@@ -76,7 +79,7 @@ const initRouter = () => {
 		path = path.slice(0, -1);
 	}
 	activeMenu.value = menuList.find((menu) => menu.path === path);
-	if (activeMenu.value.key == "chat") {
+	if (isConfirmRouter.includes(activeMenu.value.key)) {
 		// setupBeforeUnload();
 	}
 };

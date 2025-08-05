@@ -1,42 +1,43 @@
 <template>
-    <div class="h-full flex flex-col">
-        <div class="flex items-center justify-end flex-shrink-0 p-4 bg-white rounded-lg">
+    <div class="h-full flex flex-col bg-white rounded-lg">
+        <!-- 顶部过滤区域 -->
+        <div class="flex items-center justify-end flex-shrink-0 p-4">
             <div class="flex items-center justify-end gap-2 grow">
-                <ElRadioGroup v-model="queryParams.takeover_mode" @change="resetPage()">
+                <ElRadioGroup v-model="queryParams.takeover_mode" @change="getLists">
                     <ElRadioButton label="全部" value=""></ElRadioButton>
                     <ElRadioButton label="人工介入" :value="0"></ElRadioButton>
                     <ElRadioButton label="AI接管" :value="1"></ElRadioButton>
                 </ElRadioGroup>
-                <ElButton @click="resetParams()">
-                    <Icon name="el-icon-Refresh" :size="18" color="var(--el-color-info)"></Icon>
-                </ElButton>
+                <ElButton :icon="Refresh" @click="getLists" />
             </div>
         </div>
-        <div class="grow min-h-0 flex flex-col mt-4 bg-white rounded-lg overflow-hidden">
-            <div class="grow min-h-0 pt-4">
+        <!-- 微信账号列表 -->
+        <div class="grow min-h-0 flex flex-col overflow-hidden">
+            <div class="grow min-h-0">
                 <ElTable
                     :data="pager.lists"
                     stripe
                     height="100%"
                     :row-style="{ height: '60px' }"
+                    :header-row-style="{ height: '62px' }"
                     v-loading="pager.loading">
                     <ElTableColumn label="账号信息" min-width="160">
                         <template #default="{ row }">
                             {{ row.wechat_nickname }}<template v-if="row.remark">({{ row.remark }})</template>
                         </template>
                     </ElTableColumn>
-                    <ElTableColumn label="接管模式" width="80">
+                    <ElTableColumn label="接管模式" width="100">
                         <template #default="{ row }">
-                            <span v-if="row.takeover_mode == 1">AI接管</span>
-                            <span v-if="row.takeover_mode == 0">人工介入</span>
+                            <span v-if="row.takeover_mode === 1">AI接管</span>
+                            <span v-else>人工介入</span>
                         </template>
                     </ElTableColumn>
                     <ElTableColumn prop="robot_name" label="关联机器人" min-width="160"></ElTableColumn>
                     <ElTableColumn label="接管类型" width="120">
                         <template #default="{ row }">
-                            <span v-if="row.takeover_type == 0">全部</span>
-                            <span v-else-if="row.takeover_type == 1">私聊</span>
-                            <span v-else-if="row.takeover_type == 2">群聊</span>
+                            <span v-if="row.takeover_type === 0">全部</span>
+                            <span v-else-if="row.takeover_type === 1">私聊</span>
+                            <span v-else-if="row.takeover_type === 2">群聊</span>
                         </template>
                     </ElTableColumn>
                     <ElTableColumn label="AI总功能开关" width="120">
@@ -45,17 +46,17 @@
                                 v-model="row.open_ai"
                                 :active-value="1"
                                 :inactive-value="0"
-                                @change="changeOpenAi(row)" />
+                                @change="handleToggleAiSwitch(row)" />
                         </template>
                     </ElTableColumn>
-                    <ElTableColumn prop="status" label="状态" width="120">
+                    <ElTableColumn label="状态" width="120">
                         <template #default="{ row }">
                             <div class="flex justify-center">
                                 <div v-if="row.wechat_status === 1" class="flex items-center gap-2">
                                     <div class="w-2 h-2 bg-success rounded-full"></div>
                                     在线
                                 </div>
-                                <div v-if="row.wechat_status === 0" class="flex items-center gap-2">
+                                <div v-else class="flex items-center gap-2">
                                     <div class="w-2 h-2 bg-danger rounded-full"></div>
                                     离线
                                 </div>
@@ -69,28 +70,26 @@
                                 :show-arrow="false"
                                 popper-class="!w-[120px] !min-w-[120px] !p-[6px] !rounded-xl">
                                 <template #reference>
-                                    <ElButton link>
-                                        <Icon name="el-icon-MoreFilled"></Icon>
-                                    </ElButton>
+                                    <ElButton link><Icon name="el-icon-MoreFilled" /></ElButton>
                                 </template>
                                 <div class="flex flex-col gap-2">
                                     <div
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleEdit(row)">
-                                        <Icon name="el-icon-EditPen"></Icon>
+                                        @click="openEditPopup(row)">
+                                        <Icon name="el-icon-EditPen" />
                                         <span>编辑</span>
                                     </div>
                                     <div
                                         v-if="row.wechat_status === 1"
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleOffline(row)">
-                                        <Icon name="el-icon-SwitchButton"></Icon>
+                                        <Icon name="el-icon-SwitchButton" />
                                         <span>下线</span>
                                     </div>
                                     <div
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleUpdateFriend(row)">
-                                        <Icon name="el-icon-Refresh"></Icon>
+                                        @click="handleUpdateFriends(row)">
+                                        <Icon name="el-icon-Refresh" />
                                         <span>更新好友</span>
                                     </div>
                                 </div>
@@ -107,123 +106,184 @@
             </div>
         </div>
     </div>
-    <edit-pop v-if="showEditPop" ref="editPopRef" @close="showEditPop = false" @success="getLists" />
+
+    <!-- 编辑弹窗 -->
+    <edit-pop v-if="showEditPopup" ref="editPopupRef" @close="showEditPopup = false" @success="getLists" />
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, onMounted, nextTick } from "vue";
+import { Refresh } from "@element-plus/icons-vue";
 import { getWeChatLists, saveWeChatAi, reportWeChatFriends } from "@/api/person_wechat";
 import EditPop from "./edit.vue";
 import useWeChatWs from "../../../_hooks/useWeChatWs";
-import { EnumMsgType, TriggerTaskParams } from "../../../_enums";
+import { MsgTypeEnum, type TriggerTaskParams } from "../../../_enums";
 
+// --- 1. 初始化 & 依赖注入 ---
+const nuxtApp = useNuxtApp();
+// --- 2. 状态定义 ---
+
+// 查询参数
 const queryParams = reactive({
-    takeover_mode: "",
+    takeover_mode: "" as "" | 0 | 1,
 });
 
+// 分页逻辑
 const { pager, getLists, resetPage, resetParams } = usePaging({
     fetchFun: getWeChatLists,
     params: queryParams,
 });
 
-const editPopRef = ref<InstanceType<typeof EditPop>>();
-const showEditPop = ref(false);
+// 编辑弹窗
+const showEditPopup = ref(false);
+const editPopupRef = ref<InstanceType<typeof EditPop>>();
 
-// 使用微信 WebSocket
+// WebSocket 通信
 const { on, send, actionType } = useWeChatWs();
 
-on("error", (data: any) => {
+// 当前操作的微信实例，用于更新好友等场景
+const currentWechat = ref<any>({});
+const friendList = ref<any[]>([]);
+
+// --- 3. 数据获取 ---
+
+// --- 4. WebSocket 通信处理 ---
+
+// 监听错误
+on("error", () => {
     feedback.closeLoading();
 });
 
+// 监听消息：处理认证成功和好友推送通知
 on("message", async (data: any) => {
     const { MsgType, Content } = data;
-    // @ts-ignore
-    const handlers: Record<EnumMsgType, Function> = {
-        [EnumMsgType.Auth]: () => {
-            actionType.value = null;
-            currentWechat.value.accessToken = Content.AccessToken;
-            feedback.loading("更新好友中...");
-            triggerTask(EnumMsgType.TriggerFriendPushTask);
-        },
-        [EnumMsgType.FriendPushNotice]: handleFriendPush,
-    };
-    if (handlers[MsgType]) {
-        await handlers[MsgType](Content);
+
+    // 认证成功后，自动触发后续任务（如更新好友）
+    if (MsgType === MsgTypeEnum.Auth) {
+        actionType.value = null; // 清除前置动作
+        currentWechat.value.accessToken = Content.AccessToken;
+        feedback.loading("更新好友中，请稍候...");
+        triggerTask(MsgTypeEnum.TriggerFriendPushTask);
+    }
+
+    // 处理好友分批推送
+    if (MsgType === MsgTypeEnum.FriendPushNotice) {
+        await handleFriendPush(Content);
     }
 });
 
+// 监听需要前置授权的动作回调
 on("action", async (data: any) => {
-    const { type, accessToken, deviceId, wechatId, content } = data;
-    // @ts-ignore
-    const actionHandlers: Record<EnumMsgType, Function> = {
-        [EnumMsgType.WechatLogoutTask]: () => {
-            triggerTask(EnumMsgType.WechatLogoutTask, {
-                deviceId,
-                accessToken,
-                wechatId,
-            });
-            actionType.value = undefined;
-        },
-        [EnumMsgType.FriendPushNotice]: handleFriendPush,
+    const { type, accessToken, deviceId, wechatId } = data;
+    // 收到授权成功的回调后，执行真正的下线任务
+    if (type === MsgTypeEnum.WechatLogoutTask) {
+        triggerTask(MsgTypeEnum.WechatLogoutTask, { deviceId, accessToken, wechatId });
+        actionType.value = undefined; // 重置动作
+    }
+});
+
+// 触发 WebSocket 任务
+function triggerTask(taskType: MsgTypeEnum, params: TriggerTaskParams = {}) {
+    const content: any = {
+        DeviceId: params.deviceId || currentWechat.value.device_code,
+        AccessToken: params.accessToken || currentWechat.value.accessToken,
+        WeChatId: params.wechatId || currentWechat.value.wechat_id,
+        TaskId: params.TaskId || Date.now(),
     };
-    await actionHandlers[type]?.();
-});
 
-const handleEdit = async (row: any) => {
-    showEditPop.value = true;
+    send({ MsgType: taskType, Content: content });
+}
+
+// --- 5. UI 事件处理 ---
+
+// 打开编辑弹窗
+const openEditPopup = async (row: any) => {
+    showEditPopup.value = true;
     await nextTick();
-    editPopRef.value?.open();
-    editPopRef.value?.getDetail(row.wechat_id);
+    editPopupRef.value?.open();
+    editPopupRef.value?.setFormData(row);
 };
 
+// 账号下线
 const handleOffline = async (row: any) => {
-    await feedback.confirm("确定要下线该账号吗？");
-    triggerTask(EnumMsgType.Auth, {
-        deviceId: row.device_code,
-    });
-    actionType.value = EnumMsgType.WechatLogoutTask;
-    row.wechat_status = 0;
-    feedback.notifySuccess("操作成功");
-};
-const friendPageParams = reactive({
-    Page: 0,
-});
-
-const currentWechat = ref<any>({});
-const friendList = ref<any[]>([]);
-const handleUpdateFriend = async (row: any) => {
-    await feedback.confirm("确定要更新好友吗？，如果好友数量较多，请耐心等待");
-    currentWechat.value = row;
-    triggerTask(EnumMsgType.Auth, {
-        deviceId: row.device_code,
+    nuxtApp.$confirm({
+        message: "确定要下线该账号吗？",
+        onConfirm: async () => {
+            // 下线操作需要先进行授权
+            actionType.value = MsgTypeEnum.WechatLogoutTask;
+            triggerTask(MsgTypeEnum.Auth, { deviceId: row.device_code });
+            // 乐观更新UI
+            row.wechat_status = 0;
+            feedback.msgSuccess("下线指令已发送");
+        },
     });
 };
 
-// 处理好友推送
+// 更新好友
+const handleUpdateFriends = async (row: any) => {
+    nuxtApp.$confirm({
+        message: "确定要更新好友吗？如果好友数量较多，请耐心等待。",
+        onConfirm: async () => {
+            currentWechat.value = row;
+            // 更新好友需要先进行授权
+            triggerTask(MsgTypeEnum.Auth, { deviceId: row.device_code });
+        },
+    });
+};
+
+// 切换AI总开关
+const handleToggleAiSwitch = async (row: any) => {
+    try {
+        await saveWeChatAi({
+            wechat_id: row.wechat_id,
+            open_ai: row.open_ai,
+            remark: row.remark,
+            takeover_mode: row.takeover_mode,
+            takeover_type: row.takeover_type,
+            robot_id: row.robot_id,
+            sort: row.sort,
+        });
+        feedback.msgSuccess("设置成功");
+        getLists();
+    } catch (error) {
+        feedback.msgError("设置失败");
+        // 失败时恢复原状
+        row.open_ai = row.open_ai === 1 ? 0 : 1;
+    }
+};
+
+// --- 6. 好友数据处理 ---
+
+// 处理好友分批推送
 async function handleFriendPush(Content: any) {
     const { Friends = [], Page, Size, Count } = Content;
-    if (Friends.length > 0) {
-        friendPageParams.Page = Page;
-        if (friendPageParams.Page == 0) {
-            friendList.value = Friends;
-        } else {
-            friendList.value = friendList.value.concat(Friends);
-        }
+    if (Friends.length === 0 && Count === 0) {
+        feedback.closeLoading();
+        return feedback.msgSuccess("该账号下没有好友");
+    }
 
-        // 批量上报微信好友信息
-        reportWeChatFriends({
+    if (Friends.length > 0) {
+        const isFirstPage = Page === 0;
+        friendList.value = isFirstPage ? Friends : [...friendList.value, ...Friends];
+
+        // 批量上报好友信息
+        await reportWeChatFriends({
             wechat_id: currentWechat.value.wechat_id,
-            friends: Friends.map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
+            friends: Friends.filter((item) => item.Type == 3).map((friend: any) =>
+                formatFriendForApi(currentWechat.value.wechat_id, friend)
+            ),
         });
+
+        // 检查是否所有好友都已接收完毕
         if (Size * Page + Friends.length >= Count) {
             feedback.closeLoading();
-            feedback.notifySuccess("更新好友成功");
+            feedback.msgSuccess("好友更新成功");
         }
     }
 }
 
-// 处理微信好友上报结果
-function handleFriendReportNotice(wechatId: string, friendInfo: any) {
+// 将WebSocket推送的好友数据格式化为API需要的格式
+function formatFriendForApi(wechatId: string, friendInfo: any) {
     const {
         FriendId,
         FriendNo,
@@ -243,13 +303,15 @@ function handleFriendReportNotice(wechatId: string, friendInfo: any) {
         Type,
     } = friendInfo;
     const source = parseInt(Source);
+    // 兼容旧数据，确保 source 值为7位数
     const finalSource = source < 1000000 ? source + 1000000 : source;
+
     return {
         wechat_id: wechatId,
         friend_id: FriendId,
         friend_no: FriendNo,
         nickname: FriendNick,
-        remark: Memo, //备注
+        remark: Memo,
         gender: Gender,
         country: Country,
         province: Province,
@@ -257,67 +319,34 @@ function handleFriendReportNotice(wechatId: string, friendInfo: any) {
         avatar: Avatar,
         type: Type,
         label_ids: [],
-        phone: Phone, //手机号
+        phone: Phone,
         desc: Desc,
         source: finalSource,
         source_ext: SourceExt,
         create_time: CreateTime,
         is_unusual: IsUnusual,
-        open_ai: 1,
-        takeover_mode: 1,
+        open_ai: 1, // 默认为1，可根据业务调整
+        takeover_mode: 1, // 默认为1，可根据业务调整
     };
 }
-
-// 触发任务
-function triggerTask(taskType: EnumMsgType, params?: TriggerTaskParams) {
-    let msgType;
-    let content: any = {
-        DeviceId: params?.deviceId || currentWechat.value.device_code,
-        AccessToken: params?.accessToken || currentWechat.value.accessToken,
-        WeChatId: params?.wechatId || currentWechat.value.wechat_id,
-        TaskId: params?.TaskId || Date.now(),
-    };
-    msgType = taskType;
-    switch (taskType) {
-        case EnumMsgType.Auth:
-        case EnumMsgType.WechatLogoutTask:
-            break;
-        // 处理好友推送
-        case EnumMsgType.TriggerFriendPushTask:
-            break;
-        default:
-            return;
-    }
-    send({
-        MsgType: msgType,
-        Content: content,
-    });
-}
-
-const changeOpenAi = async (row: any) => {
-    await saveWeChatAi({
-        wechat_id: row.wechat_id, //微信ID，微信提供的ID
-        open_ai: row.open_ai, //AI总功能开关 0：关闭 1：开启
-        remark: row.remark, //备注
-        takeover_mode: row.takeover_mode, //接管模式 0：人工接管 1：AI接管
-        takeover_type: row.takeover_type, //接管类型 0：全部 1：私聊 2：群聊
-        robot_id: row.robot_id, //AI接管机器人
-        sort: row.sort, //排序
-    });
+onMounted(() => {
     getLists();
-};
-
-getLists();
+});
 </script>
 
 <style scoped lang="scss">
 :deep(.el-radio-group) {
     .el-radio-button__inner {
-        padding: 9px 30px;
+        padding: 8.5px 30px;
     }
 }
 :deep(.el-input-group__append) {
     background-color: transparent;
     border: none;
+}
+:deep(.el-table) {
+    th.el-table__cell.is-leaf {
+        border-top: var(--el-table-border);
+    }
 }
 </style>

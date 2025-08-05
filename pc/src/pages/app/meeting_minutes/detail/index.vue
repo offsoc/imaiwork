@@ -2,62 +2,67 @@
     <div class="h-full flex min-w-[1200px] relative">
         <div class="h-full flex flex-col flex-1 min-w-[568px] bg-[#f7f8fc]">
             <div class="text-lg font-bold mx-6 mt-6">语音转文字</div>
-            <div class="grow min-h-0 flex flex-col" v-if="!loading">
-                <div class="grow min-h-0 my-8 relative">
-                    <ElScrollbar
-                        v-if="getContentList.length > 0"
-                        ref="scrollbarContentRef"
-                        @scroll="handleContentScroll">
-                        <div class="px-6 pb-6">
-                            <div class="flex flex-col gap-y-6">
-                                <div ref="contentItemRef" v-for="(item, index) in getContentList">
-                                    <div class="flex gap-4 items-center">
-                                        <img
-                                            class="w-6 h-6 rounded-full object-cover"
-                                            :src="avatarList[item.SpeakerId - 1]" />
-                                        <div class="flex gap-2 text-[#7F7F94] text-xs">
-                                            <span>发言人{{ item.SpeakerId }}</span>
-                                            <span>{{ getParagraphBeginTime(item.Words) }}</span>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="cursor-pointer py-4 px-6 bg-white rounded-lg mt-[10px] leading-[24px] text-[#585A73] hover:shadow-[0_0_0_2px_rgba(35,83,244,.4)]"
-                                        :class="item.class"
-                                        ref="paragraphRef"
-                                        @click="handleParagraphClick(item.Words)">
-                                        <span v-for="word in item.Words" :class="word.class">{{ word.Text }}</span>
-                                        <template v-if="detail.translation">
-                                            <ElDivider class="!border-t-[#f0f0f0] !my-3" />
-                                            <div class="break-all leading-[24px]">
-                                                <span v-for="word in getCurrentTranslationContent(index).Sentences">
-                                                    <span>{{ word.Text }}</span>
-                                                </span>
+            <div class="grow min-h-0 flex flex-col">
+                <template v-if="!loading">
+                    <div class="grow min-h-0 my-8 relative">
+                        <ElScrollbar
+                            v-if="getContentList.length > 0"
+                            ref="scrollbarContentRef"
+                            @scroll="handleContentScroll">
+                            <div class="px-6 pb-6">
+                                <div class="flex flex-col gap-y-6">
+                                    <div ref="contentItemRef" v-for="(item, index) in getContentList">
+                                        <div class="flex gap-4 items-center">
+                                            <img
+                                                class="w-6 h-6 rounded-full object-cover"
+                                                :src="avatarList[item.SpeakerId - 1]" />
+                                            <div class="flex gap-2 text-[#7F7F94] text-xs">
+                                                <span>发言人{{ item.SpeakerId }}</span>
+                                                <span>{{ getParagraphBeginTime(item.Words) }}</span>
                                             </div>
-                                        </template>
+                                        </div>
+                                        <div
+                                            class="cursor-pointer py-4 px-6 bg-white rounded-lg mt-[10px] leading-[24px] text-[#585A73] hover:shadow-[0_0_0_2px_rgba(35,83,244,.4)]"
+                                            :class="item.class"
+                                            ref="paragraphRef"
+                                            @click="handleParagraphClick(item.Words)">
+                                            <span v-for="word in item.Words" :class="word.class">{{ word.Text }}</span>
+                                            <template v-if="detail.translation">
+                                                <ElDivider class="!border-t-[#f0f0f0] !my-3" />
+                                                <div class="break-all leading-[24px]">
+                                                    <span v-for="word in getCurrentTranslationContent(index).Sentences">
+                                                        <span>{{ word.Text }}</span>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </ElScrollbar>
+                        <div v-else class="flex flex-col justify-center items-center h-full">
+                            <img src="../_assets/images/empty.png" class="w-[100px] h-[100px]" />
+                            <div class="text-[#27264da6] mt-4">这里空空如也~</div>
                         </div>
-                    </ElScrollbar>
-                    <div v-else class="flex flex-col justify-center items-center h-full">
-                        <img src="../_assets/images/empty.png" class="w-[100px] h-[100px]" />
-                        <div class="text-[#27264da6] mt-4">这里空空如也~</div>
+                        <div
+                            class="absolute bottom-0 right-3 p-2 bg-[rgba(44,44,54,.8)] rounded-lg z-[888]"
+                            v-if="disabledContentScroll && currentParagraphIndex > -1"
+                            @click="positionContentScroll">
+                            <Icon name="local-icon-crosshair" :size="20" color="#ffffff"></Icon>
+                        </div>
                     </div>
-                    <div
-                        class="absolute bottom-0 right-3 p-2 bg-[rgba(44,44,54,.8)] rounded-lg z-[888]"
-                        v-if="disabledContentScroll && currentParagraphIndex > -1"
-                        @click="positionContentScroll">
-                        <Icon name="local-icon-crosshair" :size="20" color="#ffffff"></Icon>
+                    <div class="h-[80px] flex-shrink-0">
+                        <RecorderControl v-if="state.from === 'real-time' && !state.id" />
+                        <AudioControl
+                            ref="audioControlRef"
+                            :music="detail.url"
+                            :content-list="getSections"
+                            @update-time="contentScroll"
+                            v-if="state.id" />
                     </div>
-                </div>
-                <div class="h-[80px] flex-shrink-0">
-                    <RecorderControl v-if="state.from === 'real-time' && !state.id" />
-                    <AudioControl
-                        ref="audioControlRef"
-                        :music="detail.url"
-                        :content-list="getSections"
-                        @update-time="contentScroll"
-                        v-if="state.id" />
+                </template>
+                <div class="grow min-h-0 flex flex-col justify-center items-center" v-else>
+                    <Loader />
                 </div>
             </div>
         </div>

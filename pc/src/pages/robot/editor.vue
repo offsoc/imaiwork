@@ -327,7 +327,7 @@
 import { robotDetail, robotAdd, robotEdit } from "@/api/robot";
 import { chatRobotSendTextStream } from "@/api/chat";
 import { knowledgeBaseLists } from "@/api/knowledge_base";
-import { FieldTypeEnum, FieldTypeMap } from "./_components/formEnums";
+import { FieldTypeMap } from "./_components/formEnums";
 import { useDebounceFn, useThrottleFn } from "@vueuse/core";
 import { setRangeText } from "@/utils/dom";
 import type { InputInstance } from "element-plus";
@@ -335,7 +335,7 @@ import { useUserStore } from "@/stores/user";
 
 const route = useRoute();
 const router = useRouter();
-
+const nuxtApp = useNuxtApp();
 const userStore = useUserStore();
 const { userInfo } = toRefs(userStore);
 
@@ -479,11 +479,15 @@ const handleFormEdit = useThrottleFn((value: any) => {
     formDesignerRef.value?.close();
 });
 
-const handleDeleteForm = async (index: number) => {
-    await feedback.confirm("确定要删除此字段吗？");
-    const currFiledValue = formData.template_info.form[index].props.field;
-    formData.form_info = replaceDynamicString(formData.form_info, currFiledValue);
-    formData.template_info.form.splice(index, 1);
+const handleDeleteForm = (index: number) => {
+    nuxtApp.$confirm({
+        message: "确定要删除此字段吗？",
+        onConfirm: async () => {
+            const currFiledValue = formData.template_info.form[index].props.field;
+            formData.form_info = replaceDynamicString(formData.form_info, currFiledValue);
+            formData.template_info.form.splice(index, 1);
+        },
+    });
 };
 
 const replaceDynamicString = (originalStr, dynamicStr) => {

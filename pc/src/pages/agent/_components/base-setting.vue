@@ -69,6 +69,15 @@
                                     :value="item.index_id" />
                             </ElSelect>
                         </ElFormItem>
+                        <ElFormItem label="AI模型" prop="model">
+                            <ElSelect v-model="formData.model" placeholder="请选择AI模型" filterable>
+                                <ElOption
+                                    v-for="item in aiModelChannel"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.name"></ElOption>
+                            </ElSelect>
+                        </ElFormItem>
                     </ElForm>
                 </div>
             </ElScrollbar>
@@ -84,7 +93,7 @@
 import { getAgentDetail, updateAgent, addAgent } from "@/api/agent";
 import { knowledgeBaseLists } from "@/api/knowledge_base";
 import { type FormInstance } from "element-plus";
-
+import { useAppStore } from "@/stores/app";
 const props = defineProps<{
     agentId: string | string[];
 }>();
@@ -93,6 +102,9 @@ const emit = defineEmits<{
     (event: "success", data: any): void;
     (event: "close"): void;
 }>();
+
+const appStore = useAppStore();
+const aiModelChannel = computed(() => appStore.getAiModelConfig.channel || []);
 
 const formRef = ref<FormInstance>();
 const formData = reactive({
@@ -103,6 +115,7 @@ const formData = reactive({
     description: "",
     company_background: "",
     index_id: "",
+    model: "",
 });
 
 const formRules = {

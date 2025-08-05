@@ -40,7 +40,7 @@ export default function useDeviceWs(options?: WebSocketOptions) {
     // 重新定义send事件，需要添加而外参数
     const send = (data: any) => {
         if (!isConnected.value) {
-            feedback.notifyError(DeviceWsMessage[DeviceCmdCodeEnum.CONNECT_ERROR]);
+            feedback.msgError(DeviceWsMessage[DeviceCmdCodeEnum.CONNECT_ERROR]);
             return;
         }
         const { appType } = data;

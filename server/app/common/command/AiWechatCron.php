@@ -3,6 +3,7 @@
 
 namespace app\common\command;
 
+use app\api\logic\wechat\CircleLogic;
 use app\api\logic\wechat\TodoLogic;
 use think\console\Command;
 use think\console\Input;
@@ -24,6 +25,7 @@ class AiWechatCron extends Command
     protected function execute(Input $input, Output $output)
     {
         TodoLogic::pushMessageCron();
+        CircleLogic::sendCircleCron();
         return true;
     }
 }

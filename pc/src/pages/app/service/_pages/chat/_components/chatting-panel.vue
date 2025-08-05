@@ -44,7 +44,7 @@
                 </div>
             </div>
             <div class="grow min-h-0">
-                <template v-if="inputContent.contentType == EnumContentType.Text">
+                <template v-if="inputContent.contentType == ContentTypeEnum.Text">
                     <ElInput
                         v-model="inputContent.content"
                         type="textarea"
@@ -53,10 +53,10 @@
                         @input="changeInputContent"
                         @keydown="handleInputEnter" />
                 </template>
-                <div class="flex justify-center h-full" v-else-if="inputContent.contentType == EnumContentType.Picture">
+                <div class="flex justify-center h-full" v-else-if="inputContent.contentType == ContentTypeEnum.Picture">
                     <img :src="inputContent.file.uri" class="h-full" />
                 </div>
-                <div class="flex justify-center h-full" v-else-if="inputContent.contentType == EnumContentType.Video">
+                <div class="flex justify-center h-full" v-else-if="inputContent.contentType == ContentTypeEnum.Video">
                     <video :src="inputContent.file.uri" controls class="h-full" />
                 </div>
                 <div class="flex justify-center h-full" v-else>
@@ -68,7 +68,7 @@
                     <span class="text-[#07C160] font-bold">发送（Enter）</span>
                 </ElButton>
             </div>
-            <div class="absolute top-[60px] right-2 z-[1000]" v-if="inputContent.contentType != EnumContentType.Text">
+            <div class="absolute top-[60px] right-2 z-[1000]" v-if="inputContent.contentType != ContentTypeEnum.Text">
                 <ElButton type="danger" @click="cleanInput">
                     <Icon name="el-icon-Delete" />
                 </ElButton>
@@ -81,7 +81,7 @@
 import { useUserStore } from "@/stores/user";
 import Chatting from "./chatting.vue";
 import EmojiContainer from "@/pages/app/person_wechat/_components/emoji.vue";
-import { EnumContentType } from "../../../_enums";
+import { ContentTypeEnum } from "../../../_enums";
 
 const emit = defineEmits(["contentPost", "top"]);
 
@@ -107,11 +107,11 @@ const getUploadFile = (result: any) => {
 
     // 根据fileType判断文件类型, 设置inputContent.contentType
     if (fileType.includes("image")) {
-        inputContent.contentType = EnumContentType.Picture;
+        inputContent.contentType = ContentTypeEnum.Picture;
     } else if (fileType.includes("video")) {
-        inputContent.contentType = EnumContentType.Video;
+        inputContent.contentType = ContentTypeEnum.Video;
     } else {
-        inputContent.contentType = EnumContentType.File;
+        inputContent.contentType = ContentTypeEnum.File;
     }
     inputContent.file.uri = data.uri;
     inputContent.file.name = data.name;
@@ -122,13 +122,13 @@ const handleChooseEmoji = ({ emoji, type }) => {
 };
 
 const inputContent = reactive<any>({
-    contentType: EnumContentType.Text,
+    contentType: ContentTypeEnum.Text,
     content: "",
     file: {},
 });
 
 const changeInputContent = (e: any) => {
-    inputContent.contentType = EnumContentType.Text;
+    inputContent.contentType = ContentTypeEnum.Text;
 };
 
 const handleInputEnter = (e: any) => {
@@ -149,7 +149,7 @@ const contentPost = () => {};
 
 const cleanInput = () => {
     inputContent.content = "";
-    inputContent.contentType = EnumContentType.Text;
+    inputContent.contentType = ContentTypeEnum.Text;
     inputContent.file = {};
 };
 </script>

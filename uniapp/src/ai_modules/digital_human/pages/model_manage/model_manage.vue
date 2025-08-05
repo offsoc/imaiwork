@@ -184,12 +184,12 @@ const handleDelete = (id?: number) => {
 };
 
 const handleCreate = (item: any) => {
-    const { pic, anchor_id, model_version, name, url } = item;
+    const { pic, anchor_id, model_version, name, url, width, height } = item;
     uni.$u.route({
         url: "/ai_modules/digital_human/pages/video_create/video_create",
         params: {
             type: ListenerType.UPLOAD_VIDEO,
-            data: JSON.stringify({ pic, anchor_id, model_version, name, url }),
+            data: JSON.stringify({ pic, anchor_id, model_version, name, url, width, height }),
         },
     });
 };

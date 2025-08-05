@@ -17,7 +17,9 @@
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
             <div class="mb-4">
-                <el-button v-perms="['draw_model.case/add']" type="primary" @click="handleAdd">新增</el-button>
+                <el-button v-perms="['ai_application.draw_model.case/add']" type="primary" @click="handleAdd"
+                    >新增</el-button
+                >
             </div>
             <div>
                 <el-tabs v-model="caseType" @tab-click="changeCaseType">
@@ -88,10 +90,18 @@
                 <el-table-column prop="create_time" label="创建时间" min-width="180" show-overflow-tooltip />
                 <el-table-column label="操作" width="140" fixed="right">
                     <template #default="{ row }">
-                        <el-button v-perms="['draw_goods.case/edit']" type="primary" link @click="handleEdit(row)"
+                        <el-button
+                            v-perms="['ai_application.draw_goods.case/edit']"
+                            type="primary"
+                            link
+                            @click="handleEdit(row)"
                             >编辑</el-button
                         >
-                        <el-button v-perms="['draw_goods.case/delete']" type="danger" link @click="handleDel(row.id)"
+                        <el-button
+                            v-perms="['ai_application.draw_goods.case/delete']"
+                            type="danger"
+                            link
+                            @click="handleDel(row.id)"
                             >删除</el-button
                         >
                     </template>

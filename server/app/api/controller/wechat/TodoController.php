@@ -45,6 +45,23 @@ class TodoController extends BaseApiController
     }
 
     /**
+     * @desc 添加待办
+     */
+    public function update()
+    {
+        try {
+            $params = (new TodoValidate())->post()->goCheck('update');
+            $result = TodoLogic::updateTodo($params);
+            if ($result) {
+                return $this->success(data: TodoLogic::getReturnData());
+            }
+            return $this->fail(TodoLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
+    /**
      * @desc 删除
      */
     public function delete()

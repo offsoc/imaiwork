@@ -263,6 +263,7 @@ const tokensValue = computed(() => {
         [DigitalHumanModelVersionEnum.SUPER]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_VOICE_PRO)?.score,
         [DigitalHumanModelVersionEnum.ADVANCED]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_VOICE_ADVANCED)?.score,
         [DigitalHumanModelVersionEnum.ELITE]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_VOICE_ELITE)?.score,
+        [DigitalHumanModelVersionEnum.CHANJING]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_VOICE_CHANJING)?.score,
     };
     return tokenMap[formData.model_version];
 });
@@ -345,24 +346,29 @@ const currCopywriterIndex = ref(0);
 
 const recordDurationTimer = ref<any>(null);
 const recordDuration = ref<number>(0);
-const { authorize, isRecording, start, stop, close } = useRecorder({
-    onstart: () => {
-        startCountTime();
+const { authorize, isRecording, start, stop, close } = useRecorder(
+    {
+        onstart: () => {
+            startCountTime();
+        },
+        onstop: async (result: any) => {
+            const { tempFilePath, fileSize } = result;
+            if (!validateAudioSize(fileSize)) {
+                return;
+            }
+            clearInterval(recordDurationTimer.value);
+            await uploadAudio(tempFilePath);
+            setUrl(tempFilePath);
+            step.value = 3;
+        },
+        onerror: (error) => {
+            resetRecordDuration();
+        },
     },
-    onstop: async (result: any) => {
-        const { tempFilePath, fileSize } = result;
-        if (!validateAudioSize(fileSize)) {
-            return;
-        }
-        clearInterval(recordDurationTimer.value);
-        await uploadAudio(tempFilePath);
-        setUrl(tempFilePath);
-        step.value = 3;
-    },
-    onerror: (error) => {
-        resetRecordDuration();
-    },
-});
+    {
+        duration: 1000 * 60,
+    }
+);
 
 const step = ref(1);
 const nextStep = async (index: number) => {

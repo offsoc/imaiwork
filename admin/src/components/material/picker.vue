@@ -7,8 +7,7 @@
             :title="`选择${tipsText}`"
             :destroy-on-close="true"
             @confirm="handleConfirm"
-            @close="handleClose"
-        >
+            @close="handleClose">
             <template v-if="!hiddenUpload" #trigger>
                 <div class="material-select__trigger clearfix" @click.stop>
                     <draggable class="draggable" v-model="fileList" animation="300" item-key="id">
@@ -17,16 +16,14 @@
                                 class="material-preview"
                                 :class="{
                                     'is-disabled': disabled,
-                                    'is-one': limit == 1
+                                    'is-one': limit == 1,
                                 }"
-                                @click="showPopup(index)"
-                            >
+                                @click="showPopup(index)">
                                 <del-wrap @close="deleteImg(index)">
                                     <file-item
                                         :uri="excludeDomain ? getImageUrl(element) : element"
                                         :file-size="size"
-                                        :type="type"
-                                    />
+                                        :type="type" />
                                 </del-wrap>
                                 <div class="operation-btns text-xs text-center">
                                     <span>修改</span>
@@ -43,17 +40,15 @@
                         :class="{
                             'is-disabled': disabled,
                             'is-one': limit == 1,
-                            [uploadClass]: true
-                        }"
-                    >
+                            [uploadClass]: true,
+                        }">
                         <slot name="upload">
                             <div
                                 class="upload-btn"
                                 :style="{
                                     width: size,
-                                    height: size
-                                }"
-                            >
+                                    height: size,
+                                }">
                                 <icon :size="25" name="el-icon-Plus" />
                                 <span>添加</span>
                             </div>
@@ -69,196 +64,195 @@
                         :file-size="fileSize"
                         :limit="meterialLimit"
                         :data="data"
-                        @change="selectChange"
-                    />
+                        @change="selectChange" />
                 </div>
             </el-scrollbar>
         </popup>
-        <preview v-model="showPreview" :url="previewUrl" :type="type" />
     </div>
+    <preview v-model="showPreview" :url="previewUrl" :type="type" />
 </template>
 
 <script lang="ts">
-import Draggable from 'vuedraggable'
-import Popup from '@/components/popup/index.vue'
-import FileItem from './file.vue'
-import Material from './index.vue'
-import Preview from './preview.vue'
-import useAppStore from '@/stores/modules/app'
-import { useThrottleFn } from '@vueuse/core'
+import Draggable from "vuedraggable";
+import Popup from "@/components/popup/index.vue";
+import FileItem from "./file.vue";
+import Material from "./index.vue";
+import Preview from "./preview.vue";
+import useAppStore from "@/stores/modules/app";
+import { useThrottleFn } from "@vueuse/core";
 export default defineComponent({
     components: {
         Popup,
         Draggable,
         FileItem,
         Material,
-        Preview
+        Preview,
     },
     props: {
         modelValue: {
             type: [String, Array],
-            default: () => []
+            default: () => [],
         },
         // 文件类型
         type: {
             type: String,
-            default: 'image'
+            default: "image",
         },
         // 选择器尺寸
         size: {
             type: String,
-            default: '100px'
+            default: "100px",
         },
         // 文件尺寸
         fileSize: {
             type: String,
-            default: '100px'
+            default: "100px",
         },
         // 选择数量限制
         limit: {
             type: Number,
-            default: 1
+            default: 1,
         },
         // 禁用选择
         disabled: {
             type: Boolean,
-            default: false
+            default: false,
         },
         // 隐藏上传框*(目前在富文本中使用到)
         hiddenUpload: {
             type: Boolean,
-            default: false
+            default: false,
         },
         uploadClass: {
             type: String,
-            default: ''
+            default: "",
         },
         //选择的url排出域名
         excludeDomain: {
             type: Boolean,
-            default: false
+            default: false,
         },
         withName: {
             type: Boolean,
-            default: false
+            default: false,
         },
         data: {
             type: Object,
-            default: () => ({})
-        }
+            default: () => ({}),
+        },
     },
 
-    emits: ['change', 'update:modelValue'],
+    emits: ["change", "update:modelValue"],
     setup(props, { emit }) {
-        const popupRef = ref<InstanceType<typeof Popup>>()
-        const materialRef = ref<InstanceType<typeof Material>>()
-        const previewUrl = ref('')
-        const showPreview = ref(false)
-        const fileList = ref<any[]>([])
-        const select = ref<any[]>([])
-        const isAdd = ref(true)
-        const currentIndex = ref(-1)
-        const { disabled, limit, modelValue } = toRefs(props)
-        const { getImageUrl } = useAppStore()
+        const popupRef = ref<InstanceType<typeof Popup>>();
+        const materialRef = ref<InstanceType<typeof Material>>();
+        const previewUrl = ref("");
+        const showPreview = ref(false);
+        const fileList = ref<any[]>([]);
+        const select = ref<any[]>([]);
+        const isAdd = ref(true);
+        const currentIndex = ref(-1);
+        const { disabled, limit, modelValue } = toRefs(props);
+        const { getImageUrl } = useAppStore();
         const tipsText = computed(() => {
             switch (props.type) {
-                case 'image':
-                    return '图片'
-                case 'video':
-                    return '视频'
-                case 'audio':
-                    return '音乐'
+                case "image":
+                    return "图片";
+                case "video":
+                    return "视频";
+                case "audio":
+                    return "音乐";
                 default:
-                    return ''
+                    return "";
             }
-        })
+        });
 
         const showUpload = computed(() => {
-            return props.limit - fileList.value.length > 0
-        })
+            return props.limit - fileList.value.length > 0;
+        });
         const meterialLimit: any = computed(() => {
             if (!isAdd.value) {
-                return 1
+                return 1;
             }
-            if (limit.value == -1) return null
-            return limit.value - fileList.value.length
-        })
+            if (limit.value == -1) return null;
+            return limit.value - fileList.value.length;
+        });
         //文件名称列表
-        const withNameList = ref<any[]>([])
+        const withNameList = ref<any[]>([]);
         const handleConfirm = useThrottleFn(
             () => {
                 const selectUri = select.value.map((item) => {
-                    return props.excludeDomain ? item.url : item.uri
-                })
+                    return props.excludeDomain ? item.url : item.uri;
+                });
                 withNameList.value = select.value.map((item) => {
-                    const uri = props.excludeDomain ? item.url : item.uri
-                    return { uri, name: item.name }
-                })
+                    const uri = props.excludeDomain ? item.url : item.uri;
+                    return { uri, name: item.name };
+                });
                 if (!isAdd.value) {
-                    fileList.value.splice(currentIndex.value, 1, selectUri.shift())
+                    fileList.value.splice(currentIndex.value, 1, selectUri.shift());
                 } else {
-                    fileList.value = [...fileList.value, ...selectUri]
+                    fileList.value = [...fileList.value, ...selectUri];
                 }
-                handleChange()
+                handleChange();
             },
             1000,
             false
-        )
+        );
         const showPopup = (index: number) => {
-            if (disabled.value) return
+            if (disabled.value) return;
             if (index >= 0) {
-                isAdd.value = false
-                currentIndex.value = index
+                isAdd.value = false;
+                currentIndex.value = index;
             } else {
-                isAdd.value = true
+                isAdd.value = true;
             }
-            popupRef.value?.open()
-        }
+            popupRef.value?.open();
+        };
 
         const selectChange = (val: any[]) => {
-            select.value = val
-        }
+            select.value = val;
+        };
         const handleChange = () => {
-            const valueImg = limit.value != 1 ? fileList.value : fileList.value[0] || ''
-            emit('update:modelValue', valueImg)
+            const valueImg = limit.value != 1 ? fileList.value : fileList.value[0] || "";
+            emit("update:modelValue", valueImg);
             if (props.withName) {
-                emit('change', withNameList.value)
+                emit("change", withNameList.value);
             } else {
-                emit('change', valueImg)
+                emit("change", valueImg);
             }
 
-            handleClose()
-        }
+            handleClose();
+        };
 
         const deleteImg = (index: number) => {
-            fileList.value.splice(index, 1)
-            withNameList.value.splice(index, 1)
-            handleChange()
-        }
+            fileList.value.splice(index, 1);
+            withNameList.value.splice(index, 1);
+            handleChange();
+        };
 
         const handlePreview = (url: string) => {
-            previewUrl.value = props.excludeDomain ? getImageUrl(url) : url
-            showPreview.value = true
-        }
+            previewUrl.value = props.excludeDomain ? getImageUrl(url) : url;
+            showPreview.value = true;
+        };
 
         const handleClose = () => {
             nextTick(() => {
-                if (props.hiddenUpload) fileList.value = []
-                materialRef.value?.clearSelect()
-            })
-        }
+                if (props.hiddenUpload) fileList.value = [];
+                materialRef.value?.clearSelect();
+            });
+        };
 
         watch(
             modelValue,
             (val: any[] | string) => {
-                fileList.value = Array.isArray(val) ? val : val == '' ? [] : [val]
+                fileList.value = Array.isArray(val) ? val : val == "" ? [] : [val];
             },
             {
-                immediate: true
+                immediate: true,
             }
-        )
-        provide('limit', props.limit)
-        provide('hiddenUpload', props.hiddenUpload)
+        );
+        provide("limit", props.limit);
+        provide("hiddenUpload", props.hiddenUpload);
         return {
             popupRef,
             materialRef,
@@ -274,10 +268,10 @@ export default defineComponent({
             showPreview,
             handlePreview,
             handleClose,
-            getImageUrl
-        }
-    }
-})
+            getImageUrl,
+        };
+    },
+});
 </script>
 
 <style scoped lang="scss">

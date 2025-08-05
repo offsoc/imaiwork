@@ -108,9 +108,9 @@ const changeOpenAi = async (row: any) => {
             account: row.account,
             open_ai: row.open_ai, //AI总功能开关 0：关闭 1：开启
         });
-        feedback.notifySuccess("操作成功");
+        feedback.msgSuccess("操作成功");
     } catch (error) {
-        feedback.notifyError("操作失败");
+        feedback.msgError("操作失败");
     }
     getAccountList();
 };

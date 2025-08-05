@@ -88,6 +88,9 @@ class AudioLists extends BaseAdminDataLists implements ListsSearchInterface
                     case 6:
                         $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT;
                         break;
+                    case 7:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_CHANJING;
+                        break;
                 }   
                 //扣费记录
                 UserTokensLog::where('user_id', $item['user_id'])

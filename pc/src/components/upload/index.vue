@@ -260,12 +260,10 @@ export default defineComponent({
                 emit("success", response);
             }
             if (response.code == RequestCodeEnum.FAIL && response.msg) {
-                // fileList.value.splice(
-                // 	fileList.value.findIndex(
-                // 		(item: any) => item.raw.uid == file.raw.uid
-                // 	),
-                // 	1
-                // );
+                fileList.value.splice(
+                    fileList.value.findIndex((item: any) => item.raw.uid == file.raw.uid),
+                    1
+                );
                 feedback.msgError(response.msg);
             }
         };
@@ -284,7 +282,7 @@ export default defineComponent({
                 uploadRefs.value!.handleStart(file);
                 uploadRefs.value.submit();
             } else {
-                feedback.msgError(`超出上传上限${props.limit}，请重新上传`);
+                feedback.msgError(`文件数量上限为${props.limit}个，请重新上传`);
             }
         };
 

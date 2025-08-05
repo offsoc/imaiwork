@@ -2,11 +2,14 @@
 
 namespace app\api\controller;
 
+
+use think\exception\HttpResponseException;
 use app\api\lists\hd\HdLists;
 use app\api\logic\HdCueLogic;
 use app\api\logic\HdLogic;
 use think\response\Json;
 use app\api\lists\hd\HdImageCaseLists;
+use app\api\validate\HdValidate;
 
 class HdController extends BaseApiController
 {
@@ -235,11 +238,31 @@ class HdController extends BaseApiController
     public function txt2volcimg()
     {
         $params = $this->request->post();
-        $result = HdLogic::txt2volcimg($params);
+
+        if (isset($params['model']) && (int)$params['model'] === 3) {
+            $result = HdLogic::text2img($params);
+        } else {
+            $result = HdLogic::txt2volcimg($params);
+            
+        }
         if ($result) {
             return $this->data(HdLogic::getReturnData());
         }
         return $this->data(HdLogic::getError());
     }
 
+
+    public function img2volcimg()
+    {
+        try {
+            $params = (new HdValidate())->post()->goCheck('img2img');
+            $result = HdLogic::img2volcimg($params);
+            if ($result) {
+                return $this->data(HdLogic::getReturnData());
+            }
+            return $this->data(HdLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->data($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
 }

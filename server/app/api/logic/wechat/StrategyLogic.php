@@ -5,6 +5,12 @@ namespace app\api\logic\wechat;
 use app\common\model\wechat\AiWechatReplyStrategy;
 use app\common\service\FileService;
 use app\common\model\wechat\AiWechatGreetStrategy;
+use app\common\model\wechat\AiWechatTagStrategy;
+use app\common\model\wechat\AiWechatAcceptFriendStrategy;
+use app\common\model\wechat\AiWechatCircleReplyStrategy;
+use app\common\model\wechat\AiWechatCircleLikeStrategy;
+use app\common\model\wechat\AiWechatTag;
+use think\facade\Db;
 
 /**
  * StrategyLogic
@@ -139,6 +145,397 @@ class StrategyLogic extends WechatBaseLogic
             self::$returnData = $strategy->toArray();
             return true;
         } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * @desc 标签策略
+     * @param array $params
+     * @return bool
+     */
+    public static function tagStrategy(array $params)
+    {
+        try
+        {
+
+            $params['match_keywords'] = explode(',', $params['match_keywords']);
+            $params['user_id'] = self::$uid;
+            $strategy = AiWechatTagStrategy::create($params);
+
+            // 检查标签是否存在
+            $tag = AiWechatTag::where('user_id', self::$uid)->where('tag_name', $params['tag_name'])->findOrEmpty();
+            if ($tag->isEmpty())
+            {
+                AiWechatTag::create([
+                    'tag_name' => $params['tag_name'],
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 标签策略信息
+     * @return bool
+     */
+    public static function tagInfo(int $id)
+    {
+        try
+        {
+
+            $strategy = AiWechatTagStrategy::where('user_id', self::$uid)->where('id', $id)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+                self::setError('标签策略不存在');
+                return false;
+            }
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 标签策略删除
+     * @return bool
+     */
+    public static function tagDelete(int $id)
+    {
+        try
+        {
+
+            $strategy = AiWechatTagStrategy::where('user_id', self::$uid)->where('id', $id)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+                self::setError('标签策略不存在');
+                return false;
+            }
+
+            $strategy->delete();
+            self::$returnData = [];
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 标签策略更新
+     * @return bool
+     */
+    public static function tagUpdate(array $params)
+    {
+        try
+        {
+
+            $strategy = AiWechatTagStrategy::where('user_id', self::$uid)->where('id', $params['id'])->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+                self::setError('标签策略不存在');
+                return false;
+            }
+
+            $params['match_keywords'] = explode(',', $params['match_keywords']);
+
+            // 检查标签是否存在
+            $tag = AiWechatTag::where('user_id', self::$uid)->where('tag_name', $params['tag_name'])->findOrEmpty();
+            if ($tag->isEmpty())
+            {
+                AiWechatTag::create([
+                    'tag_name' => $params['tag_name'],
+                    'user_id' => self::$uid,
+                ]);
+            }
+
+            $strategy->save($params);
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 标签策略导入
+     * @param array $params
+     * @return bool
+     */
+    public static function tagImport(array $params)
+    {
+        Db::startTrans();
+        try
+        {
+            $fileContent = file_get_contents($params['file']);
+
+            // 将csv文件内容转换为数组
+            $fileContent = explode("\r\n", $fileContent);
+
+            $content = [];
+
+            foreach ($fileContent as $key => $value)
+            {
+
+                if ($key == 0)
+                {
+                    continue;
+                }
+
+                if ($value)
+                {
+                    $content[] = explode(",", $value);
+                }
+            }
+
+            //插入数据
+            foreach ($content as $key => $value)
+            {
+
+                $match_type = $value[0] ?? '';
+                $match_mode = $value[1] ?? '';
+                $match_keywords = $value[2] ?? '';
+                $tag_name = $value[3] ?? '';
+
+                if (!$match_keywords || !($match_keywords = explode('、', $match_keywords)) || !$tag_name)
+                {
+
+                    continue;
+                }
+
+                $fields = [
+                    'match_type' => $match_type == '精确匹配' ? 1 : 0,
+                    'match_mode' => $match_mode == 'AI消息' ? 1 : 0,
+                    'match_keywords' => $match_keywords,
+                    'tag_name' => $tag_name,
+                    'user_id' => self::$uid,
+                ];
+
+                AiWechatTagStrategy::create($fields);
+                // 检查标签是否存在
+                $tag = AiWechatTag::where('user_id', self::$uid)->where('tag_name', $tag_name)->findOrEmpty();
+                if ($tag->isEmpty())
+                {
+                    AiWechatTag::create([
+                        'tag_name' => $tag_name,
+                        'user_id' => self::$uid,
+                    ]);
+                }
+                Db::commit();
+            }
+            self::$returnData = [];
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            Db::rollback();
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * @desc 自动通过好友策略
+     * @param array $params
+     * @return bool
+     */
+    public static function acceptFriendStrategy(array $params)
+    {
+        try
+        {
+            // 查询
+            $strategy = AiWechatAcceptFriendStrategy::where('user_id', self::$uid)->findOrEmpty();
+            $params['interval_time'] = $params['add_interval_time'] ?? 0;
+            if ($strategy->isEmpty())
+            {
+
+                $params['user_id'] = self::$uid;
+                $strategy = AiWechatAcceptFriendStrategy::create($params);
+            }
+            else
+            {
+                $strategy->save($params);
+            }
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 自动通过好友策略信息
+     * @return bool
+     */
+    public static function acceptFriendInfo()
+    {
+        try
+        {
+
+            $strategy = AiWechatAcceptFriendStrategy::where('user_id', self::$uid)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+                self::$returnData = [];
+                return true;
+            }
+            $strategy->add_interval_time = $strategy->interval_time;
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * @desc 朋友圈评论策略
+     * @param array $params
+     * @return bool
+     */
+    public static function circleReplyStrategy(array $params)
+    {
+        try
+        {
+            // 查询
+            $strategy = AiWechatCircleReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+
+                $params['user_id'] = self::$uid;
+                $strategy = AiWechatCircleReplyStrategy::create($params);
+            }
+            else
+            {
+                $strategy->save($params);
+            }
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 朋友圈评论策略信息
+     * @return bool
+     */
+    public static function circleReplyInfo()
+    {
+        try
+        {
+
+            $strategy = AiWechatCircleReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+                self::$returnData = [];
+                return true;
+            }
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * @desc 朋友圈点赞策略
+     * @param array $params
+     * @return bool
+     */
+    public static function circleLikeStrategy(array $params)
+    {
+        try
+        {
+
+            // 查询
+            $strategy = AiWechatCircleLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+
+                $params['user_id'] = self::$uid;
+                $strategy = AiWechatCircleLikeStrategy::create($params);
+            }
+            else
+            {
+                $strategy->save($params);
+            }
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @desc 朋友圈点赞策略信息
+     * @return bool
+     */
+    public static function circleLikeInfo()
+    {
+        try
+        {
+
+            $strategy = AiWechatCircleLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
+
+            if ($strategy->isEmpty())
+            {
+                self::$returnData = [];
+                return true;
+            }
+
+            self::$returnData = $strategy->toArray();
+            return true;
+        }
+        catch (\Exception $e)
+        {
             self::setError($e->getMessage());
             return false;
         }

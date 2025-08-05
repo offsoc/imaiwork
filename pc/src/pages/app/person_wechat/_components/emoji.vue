@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import useHandle from "../chat/_hooks/useHandle";
+import useHandle from "../_hooks/useHandle";
 
 const emit = defineEmits(["chooseEmoji"]);
 
@@ -40,7 +40,6 @@ const newEmojis = [
     "😃",
     "😀",
     "😊",
-    "☺️",
     "😉",
     "😍",
     "😘",

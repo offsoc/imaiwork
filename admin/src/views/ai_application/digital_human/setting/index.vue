@@ -22,7 +22,13 @@
                 </el-table-column>
                 <el-table-column label="操作" prop="action">
                     <template #default="{ $index }">
-                        <el-button type="primary" size="small" @click="editModelChannel($index)">编辑</el-button>
+                        <el-button
+                            v-perms="['ai_application.digital_human/edit']"
+                            type="primary"
+                            size="small"
+                            @click="editModelChannel($index)">
+                            编辑
+                        </el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -34,6 +40,7 @@
                     <el-table-column label="状态" prop="status">
                         <template #default="{ $index }">
                             <el-switch
+                                v-perms="['ai_application.digital_human/edit']"
                                 v-model="voiceLists[$index].status"
                                 active-value="1"
                                 inactive-value="0"
@@ -98,7 +105,13 @@
                 </el-form-item>
             </el-form>
             <div class="">
-                <el-button type="primary" @click="lockSavePromptConfig" :loading="isSavePromptConfig">保存</el-button>
+                <el-button
+                    v-perms="['ai_application.digital_human/edit']"
+                    type="primary"
+                    @click="lockSavePromptConfig"
+                    :loading="isSavePromptConfig"
+                    >保存</el-button
+                >
             </div>
         </el-card>
         <!-- 小程序隐私政策 -->
@@ -106,7 +119,13 @@
             <div class="text-xl font-medium mb-[20px]">小程序隐私协议</div>
             <editor class="mb-10" v-model="getPrivacy" height="500"></editor>
             <div class="">
-                <el-button type="primary" @click="lockSavePrivacy" :loading="isSavePrivacy">保存</el-button>
+                <el-button
+                    v-perms="['ai_application.digital_human/edit']"
+                    type="primary"
+                    @click="lockSavePrivacy"
+                    :loading="isSavePrivacy"
+                    >保存</el-button
+                >
             </div>
         </el-card>
     </div>
@@ -116,7 +135,6 @@
 <script setup lang="ts">
 import { saveConfig } from "@/api/app";
 import { getGptPrompt, saveGptPrompt } from "@/api/chat";
-import feedback from "@/utils/feedback";
 import { useLockFn } from "@/hooks/useLockFn";
 import useAppStore from "@/stores/modules/app";
 import ModelEdit from "./model-edit.vue";
@@ -142,7 +160,7 @@ const saveModelChannel = async (data: any) => {
     lockSaveModelList();
 };
 
-const { lockFn: lockSaveModelList, isLock: isSaveModelList } = useLockFn(async () => {
+const { lockFn: lockSaveModelList } = useLockFn(async () => {
     await saveConfig({
         data: {
             channel: modelChannel.value,

@@ -1,6 +1,6 @@
 <template>
     <div class="pagination">
-        <el-pagination
+        <ElPagination
             v-bind="props"
             size="small"
             :pager-count="5"
@@ -12,7 +12,7 @@
             :total="pager.count"
             :hide-on-single-page="hideOnSinglePage"
             @size-change="sizeChange"
-            @current-change="pageChange"></el-pagination>
+            @current-change="pageChange"></ElPagination>
     </div>
 </template>
 

@@ -20,7 +20,7 @@
                         </div>
                         <div class="text-[#ffffff80] mt-5">无需多人团队架构，四步开启全自动引流</div>
                     </div>
-                    <div class="bg-bg-app-bg-3 border border-[#ffffff1a] rounded-xl basis-1/2 px-[50px] py-6">
+                    <div class="bg-app-bg-3 border border-[#ffffff1a] rounded-xl basis-1/2 px-[50px] py-6">
                         <div class="text-white font-bold text-[20px] mt-[32px]">私域引流全自动作战台</div>
                         <div class="text-[#ffffff80] mt-[36px] flex flex-col gap-y-5">
                             <HeaderContentUseTemplate title="智能（AI）手机硬件级授权（免封号）" index="1" />
@@ -42,7 +42,7 @@
                         <div
                             v-for="(item, index) in middleMenu"
                             :key="item.title"
-                            class="flex items-center gap-x-[14px] bg-bg-app-bg-3 border rounded-xl p-5 h-[96px] relative"
+                            class="flex items-center gap-x-[14px] bg-app-bg-3 border rounded-xl p-5 h-[96px] relative"
                             :class="[index == 0 ? 'border-primary' : 'border-[#ffffff1a]']">
                             <div class="absolute left-0 top-[50%] translate-y-[-50%]">
                                 <svg
@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 <div class="flex gap-x-5 mt-8">
-                    <div class="flex-1 px-[30px] bg-bg-app-bg-3 rounded-xl border border-[#ffffff1a] bg-app-bg-2">
+                    <div class="flex-1 px-[30px] bg-app-bg-3 rounded-xl border border-[#ffffff1a] bg-app-bg-2">
                         <div class="mb-[40px] mt-[30px]">
                             <div class="text-white text-[20px]">矩阵运营的最佳实践</div>
                             <div class="text-[#ffffff80] mt-[6px]">
@@ -86,7 +86,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-white">批量批量发布视频</div>
+                                    <div class="text-white">批量发布视频</div>
                                     <div class="text-[#ffffff80] mt-[10px]">一次性发布多个视频到多个账号/一个账号</div>
                                 </div>
                                 <div>
@@ -188,7 +188,6 @@ const middleMenu = [
 ];
 
 const handleClickCourseUrl = () => {
-    console.log(getCourseUrl.value);
     window.open(getCourseUrl.value, "_blank");
 };
 

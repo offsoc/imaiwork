@@ -87,6 +87,9 @@ class AnchorLists extends BaseAdminDataLists implements ListsSearchInterface
                     case 6:
                         $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_YMT;
                         break;
+                    case 7:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_CHANJING;
+                        break;
                 }
                 // 消耗情况
                 $points1 = UserTokensLog::where('user_id', $item['user_id'])->where('action',1)

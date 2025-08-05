@@ -13,7 +13,12 @@
 
 <script setup lang="ts">
 import { dayjs, ElScrollbar } from "element-plus";
-import { drawingTextToImage, drawingImageToImage, drawingTextToImageVolc } from "@/api/drawing";
+import {
+    drawingTextToImage,
+    drawingImageToImage,
+    drawingTextToImageVolc,
+    drawingImageToImageVolc,
+} from "@/api/drawing";
 import { ModelEnum, drawTypeEnumMap, DrawTypeEnum } from "../../_enums";
 import useCreateForm from "../../_hooks/useCreateForm";
 import useDrawingTask, { ResultItem } from "../../_hooks/useDrawingTask";
@@ -36,6 +41,7 @@ onEvent("update:formData", async (data: any) => {
     }
     isAllTasksCompleted.value = true;
     const { type, type_name, model, resolution, model_name, params } = data;
+
     const resultData = reactive({
         date: dayjs().format("YYYY-MM-DD HH:mm"),
         prompt: params.prompt,
@@ -76,6 +82,33 @@ onEvent("update:formData", async (data: any) => {
                 status: 1,
                 error: false,
             }));
+        } else if (model == ModelEnum.SEEDREAM) {
+            resultData.images = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
+
+            if (type == FormTypeEnum.TXT2IMAGE) {
+                const { result } = await drawingTextToImageVolc(params);
+                resultData.images = [result.image_urls].map((item) => ({
+                    url: item,
+                    loading: false,
+                    progress: 100,
+                    status: 1,
+                    error: false,
+                }));
+            }
+            if (type == FormTypeEnum.IMAGE2IMAGE) {
+                const { result } = await drawingImageToImageVolc(params);
+                const { processDrawingTask } = useDrawingTask({
+                    type: 7,
+                    model,
+                    task_id: result.task_id,
+                    dataLists: resultData.images,
+                });
+                await processDrawingTask({
+                    callback: (data) => {
+                        resultData.images = data;
+                    },
+                });
+            }
         }
     } catch (error) {
         resultData.images = resultData.images.map((item) => ({

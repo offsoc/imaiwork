@@ -1,5 +1,5 @@
-import { getWeChatAi, saveWeChatAi, sopGreetInfo, messageGreet } from "@/api/person_wechat";
-import useHandle from "./useHandle";
+import { sopGreetInfo, messageGreet } from "@/api/person_wechat";
+import useHandle from "../../_hooks/useHandle";
 
 /**
  * 处理SOP任务
@@ -13,7 +13,7 @@ interface SopTaskParams {
     Memo: string;
 }
 
-const { wechatAiInfo, friendInfo, addFriend, getWeChatAiInfo } = useHandle();
+const { wechatAiInfo } = useHandle();
 
 export default function useSopTask() {
     // 打招呼信息

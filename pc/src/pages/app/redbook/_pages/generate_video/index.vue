@@ -31,7 +31,7 @@
         <div
             class="grow min-h-0 overflow-y-auto flex flex-col dynamic-scroller"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="h-full p-4" v-loading="pager.loading">
@@ -62,7 +62,7 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
+                    <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                 </div>
                 <div class="h-full flex items-center justify-center" v-else>
                     <ElEmpty />
@@ -90,7 +90,7 @@ const queryParams = reactive({
     // status: 3,
 });
 
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getDigitalHumanList,
     params: queryParams,
     isScroll: true,

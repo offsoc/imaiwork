@@ -140,19 +140,25 @@ button::after {
     }
 }
 
-.version-tag {
-    background: linear-gradient(
-        90deg,
-        rgba(193, 255, 221, 1) 0%,
-        rgba(189, 250, 227, 1) 45.05%,
-        rgba(177, 238, 252, 1) 75.33%,
-        rgba(198, 193, 255, 1) 100%
-    );
-
-    box-shadow: 0rpx 4rpx 8rpx rgba(0, 0, 0, 0.11);
-    @apply text-[20rpx] rounded-lg px-2 py-[3rpx];
+.digital-human-tag {
+    @apply rounded-full px-[36rpx] py-[8rpx] text-white  shadow-[0px_6px_12px_0px_rgba(0,0,0,0.24)] text-xs;
+    backdrop-filter: blur(6px);
+    &-1 {
+        background: linear-gradient(180deg, rgba(26, 247, 207, 0.5) 0%, rgba(0, 101, 251, 0.5) 100%);
+    }
+    &-2 {
+        background: linear-gradient(180deg, rgba(202, 255, 177, 0.5) 0%, rgba(59, 184, 64, 0.5) 100%);
+    }
+    &-4 {
+        background: linear-gradient(180deg, rgba(255, 252, 171, 0.5) 0%, rgba(255, 98, 216, 0.5) 100%);
+    }
+    &-6 {
+        background: linear-gradient(180deg, rgba(77, 246, 255, 0.5) 0%, rgba(136, 26, 187, 0.5) 100%);
+    }
+    &-7 {
+        background: linear-gradient(180deg, rgba(252, 98, 71, 0.5) 0%, rgba(252, 98, 71, 0.8) 100%);
+    }
 }
-
 .dh-version-name {
     @apply w-[136rpx] h-[48rpx] flex items-center justify-center text-white text-xs rounded-full;
     border: 1px solid rgba(255, 255, 255, 0.2);

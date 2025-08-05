@@ -64,6 +64,7 @@ import { accountKeywordList, deleteAccountKeyword } from "@/api/service";
 import MaterialEdit from "./material-edit.vue";
 
 const route = useRoute();
+const nuxtApp = useNuxtApp();
 const account = computed(() => route.query.account as string);
 const type = computed(() => route.query.app_type as string);
 
@@ -94,15 +95,19 @@ const handleEdit = async (row: any) => {
     materialEditRef.value?.getDetail(row.id);
 };
 
-const handleDelete = async (id: string) => {
-    await feedback.confirm("确定删除该名片回复规则吗？");
-    try {
-        await deleteAccountKeyword({ id });
-        feedback.notifySuccess("删除成功");
-        getLists();
-    } catch (error) {
-        feedback.notifyError(error || "删除失败");
-    }
+const handleDelete = (id: string) => {
+    nuxtApp.$confirm({
+        message: "确定删除该名片回复规则吗？",
+        onConfirm: async () => {
+            try {
+                await deleteAccountKeyword({ id });
+                feedback.msgSuccess("删除成功");
+                getLists();
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 watch(

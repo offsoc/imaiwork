@@ -85,6 +85,7 @@
 import { getAccountList, getAutoAddWechatRecord, deleteAutoAddWechat, retryAutoAddWechat } from "@/api/service";
 import { getWeChatLists } from "@/api/person_wechat";
 
+const nuxtApp = useNuxtApp();
 const queryParams = reactive({
     account: "",
     wechat_no: "",
@@ -117,26 +118,34 @@ const { optionsData } = useDictOptions<{
     },
 });
 
-const handleRetry = async (id: string) => {
-    await feedback.confirm("确定重试该记录吗？");
-    try {
-        await retryAutoAddWechat({ id });
-        getLists();
-        feedback.notifySuccess("重试成功");
-    } catch (error) {
-        feedback.notifyError(error || "重试失败");
-    }
+const handleRetry = (id: string) => {
+    nuxtApp.$confirm({
+        message: "确定重试该记录吗？",
+        onConfirm: async () => {
+            try {
+                await retryAutoAddWechat({ id });
+                getLists();
+                feedback.msgSuccess("重试成功");
+            } catch (error) {
+                feedback.msgError(error || "重试失败");
+            }
+        },
+    });
 };
 
-const handleDelete = async (id: string) => {
-    await feedback.confirm("确定删除该记录吗？");
-    try {
-        await deleteAutoAddWechat({ id });
-        getLists();
-        feedback.notifySuccess("删除成功");
-    } catch (error) {
-        feedback.notifyError(error || "删除失败");
-    }
+const handleDelete = (id: string) => {
+    nuxtApp.$confirm({
+        message: "确定删除该记录吗？",
+        onConfirm: async () => {
+            try {
+                await deleteAutoAddWechat({ id });
+                getLists();
+                feedback.msgSuccess("删除成功");
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 getLists();

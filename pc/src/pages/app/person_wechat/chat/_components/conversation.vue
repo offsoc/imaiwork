@@ -69,7 +69,7 @@ import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import { Picture } from "@element-plus/icons-vue";
 import dayjs from "dayjs";
-import useHandle from "../_hooks/useHandle";
+import useHandle from "../../_hooks/useHandle";
 
 const props = withDefaults(
     defineProps<{

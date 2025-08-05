@@ -9,7 +9,7 @@
         <div
             class="grow min-h-0 flex flex-col overflow-y-auto -mx-4"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="grid grid-cols-3 gap-6 mt-4 px-4">
@@ -71,7 +71,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="!isLoad" class="text-center mt-4 py-4 text-gray-500">暂无更多了</div>
+            <div v-if="!pager.isLoad" class="text-center mt-4 py-4 text-gray-500">暂无更多了</div>
         </div>
     </div>
 </template>
@@ -81,12 +81,12 @@ import { getAgentList, deleteAgent, addDefaultAgent } from "@/api/agent";
 import dayjs from "dayjs";
 
 const router = useRouter();
-
+const nuxtApp = useNuxtApp();
 const queryParams = reactive({
     page_no: 1,
 });
 
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getAgentList,
     params: queryParams,
     isScroll: true,
@@ -102,14 +102,18 @@ const visibleChange = (flag: boolean, id: number) => {
 };
 
 const handleDelete = async (id: number, index: number) => {
-    try {
-        await feedback.confirm("确定删除吗？");
-        await deleteAgent({ id });
-        pager.lists.splice(index, 1);
-        feedback.msgSuccess("删除成功");
-    } catch (error) {
-        feedback.msgError(error || "删除失败");
-    }
+    nuxtApp.$confirm({
+        message: "确定删除吗？",
+        onConfirm: async () => {
+            try {
+                await deleteAgent({ id });
+                pager.lists.splice(index, 1);
+                feedback.msgSuccess("删除成功");
+            } catch (error) {
+                feedback.msgError(error || "删除失败");
+            }
+        },
+    });
 };
 
 const handleAccountSetting = async (id?: number) => {

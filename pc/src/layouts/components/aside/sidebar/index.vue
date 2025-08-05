@@ -32,12 +32,12 @@
         <div
             class="h-full absolute z-20 w-[var(--aside-width)] transition-all duration-300 shadow-lg bg-white flex flex-col"
             :class="[hideSidebar ? '-translate-x-full' : '']">
-            <div class="relative mt-[76px] grow min-h-0">
-                <div class="is-border flex flex-col min-h-0 w-full">
+            <div class="relative mt-[76px] grow min-h-0 flex flex-col">
+                <div class="is-border h-full w-full flex-1 flex flex-col">
                     <menu-container />
                 </div>
             </div>
-            <div class="is-border relative">
+            <div class="is-border relative flex-shrink-0">
                 <menu-footer />
             </div>
         </div>

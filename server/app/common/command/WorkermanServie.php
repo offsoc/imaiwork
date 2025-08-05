@@ -66,7 +66,7 @@ class WorkermanServie extends Command
             $worker->onClose       = array($service, 'onClose');
             $worker->onError       = array($service, 'onError');
 
-            //设备socket
+            // //设备socket
             $tcpWorker = new Worker('tcp://0.0.0.0:6489');
             $tcpWorker->count = 4;
             $tcpWorker->name = 'ImaiworkWechatService';

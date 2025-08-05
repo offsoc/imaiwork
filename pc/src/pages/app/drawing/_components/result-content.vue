@@ -28,7 +28,7 @@
                     <div
                         v-for="(image, index) in item.images"
                         :key="index"
-                        class="container group"
+                        class="img-container group"
                         :class="{ 'pb-[80%] loading': image.loading }">
                         <div class="leading-[0]" v-if="!image.loading && image.status == 1">
                             <div
@@ -59,7 +59,7 @@
                 </template>
                 <template v-if="type == 'video'">
                     <div
-                        class="container h-[500px] group relative"
+                        class="video-container h-[500px] group relative"
                         :class="{ 'pb-[80%] loading': video.loading }"
                         v-for="video in item.video">
                         <template v-if="video.status == 1">
@@ -76,7 +76,7 @@
                             <video :src="video.url" class="w-full h-full object-cover"></video>
                             <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
                                 <div class="cursor-pointer" @click.stop="playVideo(video.url)">
-                                    <Icon name="local-icon-play" :size="48" color="#ffffff"></Icon>
+                                    <play-btn />
                                 </div>
                             </div>
                         </template>
@@ -162,7 +162,8 @@ const ErrorTemplate = (props) => {
     border-radius: 6px;
     padding: 6px 10px;
 }
-.container {
+.img-container,
+.video-container {
     @apply rounded-xl overflow-hidden bg-[#ffffff14] relative;
     &.loading {
         &::after {

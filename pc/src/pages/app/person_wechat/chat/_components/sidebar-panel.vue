@@ -15,7 +15,7 @@
                         :key="index"
                         class="w-full h-[66px] mx-auto flex items-center justify-center cursor-pointer rounded"
                         :class="{
-                            'bg-[#00C800]': currentWechat?.device_code === item.device_code,
+                            'bg-[#00C800]': currentWechat?.wechat_id === item.wechat_id,
                             'hover:bg-[#00C800]': !item.loading,
                         }"
                         @click="handleSelectWechat(item)">
@@ -40,7 +40,7 @@
                                     v-if="item.wechat_status != 1">
                                     <Icon name="local-icon-offline" :size="24"></Icon>
                                 </div>
-                                <div class="absolute top-0 left-0 w-full h-full bg-black/5 z-[888]" v-if="item.loading">
+                                <div class="absolute top-0 left-0 w-full h-full z-[888]" v-if="item.loading">
                                     <div class="w-full h-full rounded bg-gray-200 animate-pulse"></div>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                 </div>
             </ElScrollbar>
         </div>
-        <div class="flex justify-center mt-2 mx-2">
+        <div class="flex justify-center mt-2 mx-2" v-if="showAddWeChat">
             <ElButton color="#00C800" class="w-full" @click="handleAddWeChat"> 添加微信 </ElButton>
         </div>
     </div>
@@ -75,12 +75,14 @@ const props = withDefaults(
     defineProps<{
         currentWechat?: any;
         wechatList: any[];
-        loading: boolean;
+        loading?: boolean;
+        showAddWeChat?: boolean;
     }>(),
     {
         currentWechat: null,
         wechatList: () => [],
         loading: false,
+        showAddWeChat: true,
     }
 );
 
@@ -109,7 +111,7 @@ const handleAddWeChat = async () => {
 
 const confirmAddWeChat = async () => {
     if (!deviceId.value) {
-        feedback.notifyError("请输入您的设备授权码");
+        feedback.msgError("请输入您的设备授权码");
         return;
     }
     emit("addWechat", deviceId.value);
@@ -119,7 +121,7 @@ const handleSelectWechat = (item: any) => {
     if (item.loading) return;
     // 如果当前微信状态为离线，则不进行切换
     if (item.wechat_status != 1) {
-        feedback.notifyError("当前微信状态为离线，请先上线");
+        feedback.msgError("当前微信状态为离线，请先上线");
         return;
     }
     currentWechat.value = item;

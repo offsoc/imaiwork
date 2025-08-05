@@ -122,10 +122,11 @@ input:-webkit-autofill:active {
     font-size: 12px;
     clip-path: inset(0 3ch 0 0);
     animation: chatLoader 1s steps(4) infinite;
+    &:before {
+        content: "Loading...";
+    }
 }
-.chat-loader:before {
-    content: "Loading...";
-}
+
 @keyframes chatLoader {
     to {
         clip-path: inset(0 -1ch 0 0);
@@ -160,6 +161,9 @@ input:-webkit-autofill:active {
     }
     &-6 {
         background: linear-gradient(180deg, rgba(77, 246, 255, 0.5) 0%, rgba(136, 26, 187, 0.5) 100%);
+    }
+    &-7 {
+        background: linear-gradient(180deg, rgba(252, 98, 71, 0.5) 0%, rgba(252, 98, 71, 0.8) 100%);
     }
 }
 

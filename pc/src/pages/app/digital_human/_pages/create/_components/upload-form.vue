@@ -59,7 +59,7 @@
                     <template #reference>
                         <div
                             class="mt-[15px] border border-[var(--app-border-color-1)] bg-app-bg-1 rounded-lg h-[48px] flex items-center justify-between px-3 cursor-pointer"
-                            @click="modelVersionVisible = true">
+                            @click="modelVersionVisible = !modelVersionVisible">
                             <div class="text-[#ffffff80]">模型选择</div>
                             <div class="flex items-center gap-x-3">
                                 <div class="text-white">
@@ -214,6 +214,8 @@ const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 const formData = reactive<any>({
     model_version: DigitalHumanModelVersionEnum.STANDARD,
     anchor_name: dayjs().format("YYYYMMDDHHmm").substring(2),
+    width: "",
+    height: "",
     pic: "",
     url: "",
 });
@@ -263,6 +265,14 @@ const modelUploadRequirements: any = {
     },
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadRequirements,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadRequirements,
+    [DigitalHumanModelVersionEnum.CHANJING]: {
+        resolution: `${uploadLimit[DigitalHumanModelVersionEnum.CHANJING].minResolution}P-${
+            uploadLimit[DigitalHumanModelVersionEnum.CHANJING].maxResolution
+        }P`,
+        fileSize: uploadLimit[DigitalHumanModelVersionEnum.CHANJING].size,
+        videoMinDuration: uploadLimit[DigitalHumanModelVersionEnum.CHANJING].videoMinDuration,
+        videoMaxDuration: uploadLimit[DigitalHumanModelVersionEnum.CHANJING].videoMaxDuration,
+    },
 };
 
 // 上传格式
@@ -297,14 +307,6 @@ const uploadTemplateContentLists = computed(() => {
     ];
 });
 
-const getUploadVideoMinWidth = computed(() => {
-    return uploadLimit[formData.model_version].minResolution;
-});
-
-const getUploadVideoMaxWidth = computed(() => {
-    return uploadLimit[formData.model_version].maxResolution;
-});
-
 const modelVersionVisible = ref<boolean>(false);
 
 // 是否可用
@@ -321,20 +323,21 @@ const getVideo = (result: any) => {
 };
 
 const parseLoading = ref<boolean>(false);
-const parseVideo = (url: string) => {
+const parseVideo = async (url: string) => {
     parseLoading.value = true;
-    getVideoFirstFrame(url, (data) => {
-        if (data) {
-            uploadImage({
-                file: data,
-            }).then((res) => {
-                formData.pic = res.uri;
-                parseLoading.value = false;
-            });
-        } else {
+    const { file, width, height } = await getVideoFirstFrame(url);
+    formData.width = width;
+    formData.height = height;
+    if (file) {
+        uploadImage({
+            file,
+        }).then((res) => {
+            formData.pic = res.uri;
             parseLoading.value = false;
-        }
-    });
+        });
+    } else {
+        parseLoading.value = false;
+    }
 };
 
 const changeModel = (value?: number) => {
@@ -347,7 +350,7 @@ const changeModel = (value?: number) => {
 };
 
 const handleCreate = async () => {
-    const { model_version, gender, pic, url } = formData;
+    const { model_version, gender, pic, url, width, height } = formData;
     if (!url) {
         feedback.msgError("请上传视频");
         return;
@@ -365,6 +368,8 @@ const handleCreate = async () => {
                 gender,
                 url,
                 pic,
+                width,
+                height,
                 model_version,
             });
             userStore.getUser();

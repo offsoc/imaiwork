@@ -16,7 +16,9 @@
                             </div>
                         </div>
                         <template v-if="friendInfo.friend_id">
-                            <div class="flex gap-x-2 mt-4">
+                            <div
+                                class="flex gap-x-2 cursor-pointer py-2 px-1 rounded hover:bg-token-sidebar-surface-secondary"
+                                @click="openUserDetailPop">
                                 <div class="flex-shrink-0">
                                     <img
                                         v-if="friendInfo.avatar"
@@ -24,7 +26,6 @@
                                         class="w-[56px] h-[56px] rounded-[2px] object-cover" />
                                     <ElAvatar v-else :size="56" :icon="Avatar" />
                                 </div>
-
                                 <div>
                                     <div class="">
                                         {{ friendInfo.remark || friendInfo.nickname }}
@@ -37,11 +38,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <ElDivider border-style="dashed" class="!my-3" />
+                            <ElDivider border-style="dashed" class="!my-2" />
                             <div class="flex flex-col gap-y-1">
                                 <div class="text-xs flex">
                                     <span class="text-[#9E9E9E] flex-shrink-0">账号类型：</span>
-                                    <span class="text-[#07C160]">@{{ AccountTypeMap[EnumAccountType.Personal] }}</span>
+                                    <span class="text-[#07C160]">@{{ AccountTypeMap[AccountTypeEnum.Personal] }}</span>
                                 </div>
                                 <div class="text-xs flex">
                                     <span class="text-[#9E9E9E] flex-shrink-0">手机号码：</span>
@@ -65,7 +66,7 @@
                             <ElEmpty description="暂无数据" :image-size="100" />
                         </div>
                     </div>
-                    <div class="shadow-lighter rounded-lg p-2" v-if="false">
+                    <div class="shadow-lighter rounded-lg p-2">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-x-2">
                                 <span class="w-[4px] h-[14px] bg-primary"></span>
@@ -78,30 +79,18 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2 mt-2">
-                            <div class="">
-                                <ElInput
-                                    v-if="isAddTag"
-                                    class="!w-[64px]"
-                                    size="small"
-                                    v-model="tagInput"
-                                    placeholder="请输入"
-                                    @blur="isAddTag = false" />
-                                <div
-                                    class="h-[24px] w-[64px] el-tag el-tag--primary el-tag--light"
-                                    v-else
-                                    @click="addTag">
-                                    <span
-                                        class="w-[14px] h-[14px] bg-primary flex items-center justify-center rounded-[2px]">
-                                        <Icon name="el-icon-Plus" :size="10" color="#ffffff" />
-                                    </span>
-                                </div>
+                            <div class="h-[24px] w-[64px] el-tag el-tag--primary el-tag--light" @click="handleAddTag">
+                                <span
+                                    class="w-[14px] h-[14px] bg-primary flex items-center justify-center rounded-[2px]">
+                                    <Icon name="el-icon-Plus" :size="10" color="#ffffff" />
+                                </span>
                             </div>
-                            <div v-for="item in 10" :key="item" class="relative">
-                                <ElTag type="primary">标签{{ item }}</ElTag>
+                            <div v-for="item in friendTagLists" :key="item.tag_id" class="relative">
+                                <ElTag type="primary">{{ item.tag_name }}</ElTag>
                                 <div class="absolute -top-1 -right-1" v-if="isEditTag">
                                     <span
                                         class="bg-[#D43030] rounded-full w-[14px] h-[14px] flex items-center justify-center cursor-pointer"
-                                        @click="deleteTag(item)">
+                                        @click="deleteTag(item.tag_id)">
                                         <Icon name="el-icon-Close" :size="10" color="#ffffff" />
                                     </span>
                                 </div>
@@ -128,15 +117,9 @@
                                         <div>
                                             {{ dayjs(item.create_time).format("YYYY-MM-DD HH:mm") }}
                                         </div>
-                                        <div>
-                                            <ElButton
-                                                link
-                                                type="danger"
-                                                size="small"
-                                                @click="handleDeleteTodo(item.id, index)">
-                                                删除
-                                            </ElButton>
-                                        </div>
+                                        <ElButton link type="danger" size="small" @click="handleDeleteTodo(item.id)">
+                                            删除
+                                        </ElButton>
                                     </div>
                                     <div class="flex flex-col gap-y-1 mt-1">
                                         <div class="text-xs flex">
@@ -144,21 +127,12 @@
                                             <span>{{ item.todo_type == 0 ? "添加代办" : "自动跟进" }}</span>
                                         </div>
                                         <div class="text-xs flex">
-                                            <span class="text-[#9E9E9E] flex-shrink-0">定时日期：</span>
-                                            <span>{{ dayjs(item.todo_time).format("YYYY-MM-DD HH:mm") }}</span>
+                                            <span class="text-[#9E9E9E] flex-shrink-0">办理日期：</span>
+                                            <span>{{ item.todo_time }}</span>
                                         </div>
                                         <div class="text-xs flex">
-                                            <span class="text-[#9E9E9E] flex-shrink-0">发送内容：</span>
+                                            <span class="text-[#9E9E9E] flex-shrink-0">待办内容：</span>
                                             <span>{{ item.todo_content }}</span>
-                                        </div>
-                                        <div class="text-xs flex">
-                                            <span class="text-[#9E9E9E] flex-shrink-0">当前状态：</span>
-                                            <span>
-                                                <span class="text-[#07C160]" v-if="item.todo_status == 1">已发送</span>
-                                                <span class="text-[#FFC300]" v-else-if="item.todo_status == 0"
-                                                    >等待执行</span
-                                                >
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -219,47 +193,47 @@
             </ElFormItem>
         </ElForm>
     </popup>
-    <popup
-        ref="todoPopRef"
-        title="添加待办"
-        async
-        width="487px"
-        confirm-button-text="确认创建"
-        :confirm-loading="confirmTodoIsLocked"
-        @confirm="lockConfirmTodo"
-        @close="showTodoPop = false">
-        <ElForm ref="todoFormRef" :model="todoForm" label-position="top" :rules="todoFormRules">
-            <ElFormItem label="请输入需要记录的代办内容" prop="todo_content">
-                <ElInput
-                    v-model="todoForm.todo_content"
-                    type="textarea"
-                    :rows="5"
-                    placeholder="点击输入您需要记录的代办内容" />
-            </ElFormItem>
-            <ElFormItem label="日期时间" prop="todo_time">
-                <ElDatePicker
-                    class="!w-full"
-                    v-model="todoForm.todo_time"
-                    type="datetime"
-                    value-format="YYYY-MM-DD HH:mm"
-                    placeholder="点击选择时间" />
-            </ElFormItem>
-        </ElForm>
-    </popup>
+    <user-todo-edit
+        v-if="showTodoPop"
+        ref="userTodoEditRef"
+        :wechat-id="currentWechat.wechat_id"
+        :friend-id="currentFriend.UserName"
+        @change-tag="getFriendTagDetail"
+        @change-todo="resetTodoPage"
+        @close="showTodoPop = false"
+        @confirm="handleSuccessTodo" />
+    <friends-bind-tag v-if="showTagPop" ref="friendsBindTagRef" @close="showTagPop = false" />
+    <user-detail-panel v-if="showUserDetailPop" ref="userDetailPopRef" @close="showUserDetailPop = false" />
 </template>
 
 <script setup lang="ts">
-import { addTodo, todoLists, deleteTodo } from "@/api/person_wechat";
 import Popup from "@/components/popup/index.vue";
 import { Avatar } from "@element-plus/icons-vue";
-import { dayjs, type ElScrollbar, type FormInstance } from "element-plus";
-import { AccountSource, EnumAccountType, AccountTypeMap, EnumHandleEvent } from "~/pages/app/person_wechat/_enums";
-import useHandle from "../_hooks/useHandle";
+import { dayjs, type ElScrollbar } from "element-plus";
+import { AccountSource, AccountTypeEnum, AccountTypeMap, HandleEventEnum } from "~/pages/app/person_wechat/_enums";
+import FriendsBindTag from "./friends-bind-tag.vue";
+import useHandle from "../../_hooks/useHandle";
+import useTodo from "../../_hooks/useTodo";
+import UserDetailPanel from "../../_components/user-detail-panel.vue";
+import UserTodoEdit from "../../_components/user-todo-edit.vue";
 
-const { currentWechat, currentFriend, friendInfo, userInfoIsLocked, userInfoForm, updateUserInfo, triggerHandleEvent } =
-    useHandle();
+const nuxtApp = useNuxtApp();
 
-const isEditTag = ref<boolean>(false);
+const {
+    currentWechat,
+    currentFriend,
+    friendInfo,
+    userInfoIsLocked,
+    userInfoForm,
+    friendTagLists,
+    getFriendTagDetail,
+    deleteFriendTag,
+    updateUserInfo,
+    triggerHandleEvent,
+} = useHandle();
+
+const { todoPager, todoParams, getTodoLists, resetTodoPage, handleDeleteTodo } = useTodo();
+
 const userInfoPopRef = ref<InstanceType<typeof Popup> | null>(null);
 const showUserInfoPop = ref<boolean>(false);
 
@@ -267,106 +241,63 @@ const openUserInfoPop = async () => {
     showUserInfoPop.value = true;
     await nextTick();
     userInfoPopRef.value?.open();
-    setFormData(friendInfo.value);
-};
-
-const setFormData = async (data: Record<any, any>) => {
-    for (const key in userInfoForm) {
-        if (data[key] != null && data[key] != undefined) {
-            //@ts-ignore
-            userInfoForm[key] = data[key];
-        }
-    }
+    setFormData(friendInfo.value, userInfoForm);
 };
 
 const confirmUserInfo = async () => {
     await updateUserInfo(userInfoForm);
     triggerHandleEvent("action", {
-        type: EnumHandleEvent.UpdateUserInfo,
+        type: HandleEventEnum.UpdateUserInfo,
         ...userInfoForm,
     });
     showUserInfoPop.value = false;
 };
 
-const todoPopRef = ref<InstanceType<typeof Popup> | null>(null);
-const showTodoPop = ref<boolean>(false);
-const todoForm = reactive({
-    todo_type: 0,
-    todo_content: "",
-    todo_time: "",
-});
-const todoFormRef = ref<FormInstance>();
-const todoFormRules = {
-    todo_content: [{ required: true, message: "请输入待办内容" }],
-    todo_time: [{ required: true, message: "请选择时间" }],
+const showUserDetailPop = ref<boolean>(false);
+const userDetailPopRef = ref<InstanceType<typeof UserDetailPanel>>();
+
+const openUserDetailPop = async () => {
+    showUserDetailPop.value = true;
+    await nextTick();
+    userDetailPopRef.value?.open();
 };
 
-const todoParams = reactive({
-    page_size: 10,
-    page_no: 1,
-    wechat_id: "",
-    friend_id: "",
-});
-
-const todoLoading = ref<boolean>(false);
-const todoFinished = ref<boolean>(false);
-const {
-    pager: todoPager,
-    getLists: getTodoLists,
-    isLoad: todoIsLoad,
-    resetPage: resetTodoPage,
-} = usePaging({
-    fetchFun: todoLists,
-    params: todoParams,
-    isScroll: true,
-});
+const userTodoEditRef = ref<InstanceType<typeof UserTodoEdit>>();
+const showTodoPop = ref<boolean>(false);
 
 const openTodoPop = async (type: number) => {
     showTodoPop.value = true;
     await nextTick();
-    todoPopRef.value?.open();
-    todoForm.todo_type = type;
+    userTodoEditRef.value?.open(type);
 };
 
-const confirmTodo = async () => {
-    await todoFormRef.value?.validate();
-    try {
-        await addTodo({
-            ...todoForm,
-            wechat_id: todoParams.wechat_id,
-            friend_id: todoParams.friend_id,
-        });
-        todoPopRef.value?.close();
-        todoPager.lists = [];
-        resetTodoPage();
-        todoFinished.value;
-        feedback.notifySuccess("添加代办成功");
-    } catch (error) {
-        feedback.notifyError(error || "添加代办失败");
-    }
+const handleSuccessTodo = async () => {
+    todoPager.lists = [];
+    resetTodoPage();
 };
 
-const handleDeleteTodo = async (id: number, index: number) => {
-    await feedback.confirm("确定要删除该自动跟进吗？");
-    try {
-        await deleteTodo({ id });
-        todoPager.lists.splice(index, 1);
-        feedback.notifySuccess("删除代办成功");
-    } catch (error) {
-        feedback.notifyError(error || "删除代办失败");
-    }
+const friendsBindTagRef = ref<InstanceType<typeof FriendsBindTag>>();
+const showTagPop = ref<boolean>(false);
+const isEditTag = ref<boolean>(false);
+
+const handleAddTag = async () => {
+    showTagPop.value = true;
+    await nextTick();
+    friendsBindTagRef.value?.open();
 };
 
-const { lockFn: lockConfirmTodo, isLock: confirmTodoIsLocked } = useLockFn(confirmTodo);
-
-const tagInput = ref<string>("");
-const isAddTag = ref<boolean>(false);
-const addTag = () => {
-    isAddTag.value = true;
-};
-
-const deleteTag = (item: number) => {
-    console.log("deleteTag", item);
+const deleteTag = (id: number) => {
+    nuxtApp.$confirm({
+        message: "确定要删除该标签吗？",
+        onConfirm: async () => {
+            try {
+                await deleteFriendTag(id);
+                feedback.msgSuccess("删除标签成功");
+            } catch (error) {
+                feedback.msgError(error);
+            }
+        },
+    });
 };
 
 //滚动条ref
@@ -383,7 +314,7 @@ const isScrollToBottom = (scrollbarRef: Ref<InstanceType<typeof ElScrollbar> | n
 
 //对话框滚动
 const scroll = async () => {
-    if (isScrollToBottom(scrollbarRef) && !todoFinished.value && !todoLoading.value) {
+    if (isScrollToBottom(scrollbarRef) && !todoPager.isLoad) {
         todoParams.page_no++;
         await getTodoLists();
     }
@@ -394,7 +325,7 @@ const init = async () => {
     todoParams.page_no = 1;
     todoParams.wechat_id = currentWechat.value.wechat_id;
     todoParams.friend_id = currentFriend.value.UserName;
-    await getTodoLists();
+    await Promise.allSettled([getTodoLists(), getFriendTagDetail()]);
 };
 
 defineExpose({

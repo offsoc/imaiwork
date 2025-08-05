@@ -1,5 +1,5 @@
 import useWebSocket, { WebSocketOptions } from "@/composables/useWebSocket";
-import { EnumMsgType, EnumMsgErrorCode } from "../_enums";
+import { MsgTypeEnum, MsgErrorCodeEnum } from "../_enums";
 import { addDevice, addWeChat, updateDevice } from "@/api/person_wechat";
 
 // WebSocket 事件类型
@@ -11,7 +11,7 @@ interface WeChatWsMessage {
     Code: number;
     Message: string;
     Data: {
-        MsgType: EnumMsgType;
+        MsgType: MsgTypeEnum;
         Content: {
             DeviceModel: string;
             IsOnline: boolean;
@@ -46,7 +46,7 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
     const addDeviceLoading = ref(false);
 
     // 当前操作类型
-    const actionType = ref<EnumMsgType>();
+    const actionType = ref<MsgTypeEnum>();
 
     // 事件触发器
     const triggerEvent = <D = unknown>(event: WeChatWsEvent, data?: D) => {
@@ -62,7 +62,7 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
     // 处理 WebSocket 消息
     wssOn("message", async (data: WeChatWsMessage) => {
         const { Code, Message, Data } = data || {};
-        if (Code === EnumMsgErrorCode.Success) {
+        if (Code === MsgErrorCodeEnum.Success) {
             const { MsgType, Content } = Data || {};
             triggerEvent("message", Data);
             triggerEvent("action", {
@@ -73,20 +73,20 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
                 content: Data.Content,
             });
             // 处理添加设备逻辑
-            if (actionType.value === EnumMsgType.AddDevice) {
+            if (actionType.value === MsgTypeEnum.AddDevice) {
                 await handleAddDevice(Content);
                 return;
             }
 
             // 处理设备授权逻辑
-            if (MsgType === EnumMsgType.Auth && actionType.value === EnumMsgType.Auth) {
+            if (MsgType === MsgTypeEnum.Auth && actionType.value === MsgTypeEnum.Auth) {
                 await handleAuth(Content);
 
                 return;
             }
 
             // 处理微信信息逻辑
-            if (Content.WeChatId && actionType.value === EnumMsgType.WxInfo) {
+            if (Content.WeChatId && actionType.value === MsgTypeEnum.WxInfo) {
                 await handleWeChatInfo(Content);
                 return;
             }
@@ -97,8 +97,8 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
 
     // 处理心跳
     wssOn("heartbeat", () => {
-        actionType.value = EnumMsgType.Heartbeat;
-        send({ MsgType: EnumMsgType.Heartbeat, Content: {} });
+        actionType.value = MsgTypeEnum.Heartbeat;
+        send({ MsgType: MsgTypeEnum.Heartbeat, Content: {} });
         triggerEvent("heartbeat");
     });
 
@@ -112,14 +112,14 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
                 device_status: content.IsOnline ? 1 : 0,
             });
             send({
-                MsgType: EnumMsgType.Auth,
+                MsgType: MsgTypeEnum.Auth,
                 Content: {
                     DeviceId: content.DeviceId,
                 },
             });
-            actionType.value = EnumMsgType.Auth;
+            actionType.value = MsgTypeEnum.Auth;
         } catch (error) {
-            feedback.notifyError(`${error}，请联系站长`);
+            feedback.msgError(`${error}，请联系站长`);
             triggerEvent("error");
         } finally {
             addDeviceLoading.value = false;
@@ -129,14 +129,14 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
     // 设备授权逻辑
     const handleAuth = async (content: WeChatWsMessage["Data"]["Content"]) => {
         send({
-            MsgType: EnumMsgType.WxInfo,
+            MsgType: MsgTypeEnum.WxInfo,
             Content: {
                 DeviceId: content.DeviceId,
                 AccessToken: content.AccessToken,
                 WeChatId: content.WeChatId,
             },
         });
-        actionType.value = EnumMsgType.WxInfo;
+        actionType.value = MsgTypeEnum.WxInfo;
     };
 
     // 处理微信信息逻辑
@@ -154,11 +154,12 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
                 device_code: content.DeviceId,
                 is_used: true,
             });
-            feedback.notifySuccess("设备添加成功");
+            feedback.msgSuccess("设备添加成功");
             triggerEvent("success", { type: "add-device" });
             actionType.value = undefined;
         } catch (error) {
-            feedback.notifyError(`${error}，请联系站长`);
+            actionType.value = undefined;
+            feedback.msgError(`${error}，请联系站长`);
         }
     };
 
@@ -174,20 +175,20 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
         actionType.value = undefined;
         if (
             [
-                EnumMsgErrorCode.DataNotFound,
-                EnumMsgErrorCode.DeviceNotFound,
-                EnumMsgErrorCode.DeviceOffline,
-                EnumMsgErrorCode.DeviceExist,
-                EnumMsgErrorCode.DeviceWechatNotFound,
-                EnumMsgErrorCode.SystemError,
+                MsgErrorCodeEnum.DataNotFound,
+                MsgErrorCodeEnum.DeviceNotFound,
+                MsgErrorCodeEnum.DeviceOffline,
+                MsgErrorCodeEnum.DeviceExist,
+                MsgErrorCodeEnum.DeviceWechatNotFound,
+                MsgErrorCodeEnum.SystemError,
             ].includes(code)
         ) {
-            feedback.notifyError(message);
+            feedback.msgError(message);
         }
-        // if (code === EnumMsgErrorCode.DeviceOffline) {
-        // 	feedback.notifyError("设备离线，请重新登录");
+        // if (code === MsgErrorCodeEnum.DeviceOffline) {
+        // 	feedback.msgError("设备离线，请重新登录");
         // } else {
-        // 	feedback.notifyError(message);
+        // 	feedback.msgError(message);
         // }
     };
 

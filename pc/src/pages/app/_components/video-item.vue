@@ -95,8 +95,8 @@
                 </div>
             </div>
         </div>
-        <preview-video v-if="showVideo" ref="videoPlayerRef" @close="showVideo = false"></preview-video>
     </div>
+    <preview-video v-if="showVideo" ref="videoPlayerRef" @close="showVideo = false"></preview-video>
 </template>
 
 <script setup lang="ts">

@@ -30,6 +30,7 @@ export const useAppStore = defineStore({
         getCardCodeConfig: (state) => state.config.card_code || {},
         getRechargeConfig: (state) => state.config.recharge || {},
         getCopyRightConfig: (state) => state.config.copyright || [],
+        getByName: (state) => state.config.by_name || "",
     },
     actions: {
         getImageUrl(url: string) {

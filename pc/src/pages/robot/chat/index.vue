@@ -1,7 +1,7 @@
 <template>
     <div class="flex h-full w-full flex-col">
         <div class="grow flex min-h-0 gap-4">
-            <ElAside width="560px">
+            <ElAside width="220px">
                 <div class="h-full relative">
                     <SidebarConfig
                         ref="sidebarConfigRef"
@@ -17,7 +17,7 @@
                 </div>
             </ElAside>
             <div class="grow h-full relative rounded-xl py-4">
-                <div class="pt-20 h-full mr-4 px-4">
+                <div class="pt-5 h-full mr-4 px-4">
                     <Chatting
                         v-if="!loading"
                         ref="chattingRef"
@@ -63,6 +63,11 @@
                                 </div>
                             </div>
                         </template>
+                        <template #input>
+                            <div
+                                ref="chatAreaRef"
+                                class="min-h-[30px] max-h-[200px] overflow-y-auto dynamic-scroller"></div>
+                        </template>
                     </Chatting>
                 </div>
             </div>
@@ -71,18 +76,19 @@
 </template>
 
 <script setup lang="ts">
-import SidebarConfig from "./_components/sidebar.vue";
+import ChatArea from "chatarea";
+import "chatarea/lib/ChatArea.css";
 import { robotDetail } from "@/api/robot";
 import { chatRobotSendTextStream, getChatLog } from "@/api/chat";
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
-import { Request } from "@/utils/http/request";
+import SidebarConfig from "./_components/sidebar.vue";
+
 const userStore = useUserStore();
 const { userTokens, userInfo, isLogin } = toRefs(userStore);
 const getSceneTokens = userStore.getTokenByScene(TokensSceneEnum.SCENE_CHAT)?.score;
 
 const route = useRoute();
-const router = useRouter();
 
 const detail = reactive<Record<string, any>>({
     id: "",
@@ -97,16 +103,6 @@ const detail = reactive<Record<string, any>>({
 const sidebarConfigRef = shallowRef<InstanceType<typeof SidebarConfig>>();
 
 const loading = ref(false);
-
-const isDeep = ref(false);
-const isNetwork = ref(false);
-
-const handleDeep = (value: boolean) => {
-    isDeep.value = value;
-};
-const handleNetwork = (value: boolean) => {
-    isNetwork.value = value;
-};
 
 const handleConfirmKnb = (val: any) => {
     chatPostParams.indexid = val.index_id;
@@ -125,7 +121,6 @@ let streamReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 const isReceiving = ref(false);
 const chattingRef = ref(null);
 const isStopChat = ref(false);
-const newUserInput = ref<string>("");
 const fileLists = ref([]);
 const taskId = ref<any>("");
 
@@ -173,8 +168,134 @@ const getFileLists = (file: any[]) => {
     fileLists.value = file;
 };
 
-// 发送问题
+let chat;
+const chatAreaRef = ref(null);
+const initChat = () => {
+    const { template_info } = detail;
+    const selectList = template_info?.form
+        ?.filter((item) => item.name == "WidgetSelect")
+        .map((item) => ({
+            dialogTitle: item.props.title,
+            key: item.props.field,
+            options: item.props.options.map((option, index) => ({
+                id: index + 1,
+                name: option,
+            })),
+        }));
+    // 实例chat对象
+    chat = new ChatArea({
+        elm: chatAreaRef.value,
+        placeholder: `请输入你要的内容`,
+        needCallEvery: false,
+        selectList: selectList,
+    });
 
+    chat.addEventListener("enterSend", () => {
+        contentPost(chat.getText());
+    });
+    chat.addEventListener("operate", (e) => {
+        isReceiving.value = chat.isEmpty();
+        chattingRef.value.setInput(chat.getText());
+    });
+    if (template_info?.form && !taskId.value) {
+        processTextAndForm(
+            detail.form_info,
+            template_info.form,
+            (text) => chat.insertText(text),
+            (field, title, defaultValue) => chat.setInputTag(field, title, defaultValue)
+        );
+    }
+    chattingRef.value.setInput(chat.getText());
+};
+
+const processTextAndForm = (text, form, insertText, setInputTag) => {
+    // 获取按出现顺序切割后的结果
+    const segments = splitTextByVariables(text, form);
+
+    // 遍历所有片段并插入
+    segments.forEach((segment) => {
+        if (segment.type === "text") {
+            // 插入文本片段
+            chat.insertText(segment.content);
+        } else if (segment.type === "variable") {
+            // 插入变量输入框
+            const item = segment.content;
+            if (item.name == "WidgetSelect") {
+                const options = item.props.options.map((option, index) => ({ id: index + 1, name: option }));
+
+                if (options.length) {
+                    chat.setSelectTag({ id: options[0].id, name: options[0].name }, item.props.field);
+                }
+            } else {
+                chat.setInputTag(item.props.field, item.props.title, item.props.default);
+            }
+        }
+    });
+};
+
+const splitTextByVariables = (text, variables) => {
+    // 创建变量名到变量对象的映射
+    const variableMap = {};
+    variables.forEach((variable) => {
+        variableMap[variable.props.field] = variable;
+    });
+
+    // 找出所有变量占位符及其位置
+    const placeholders = [];
+    const variableRegex = /\$\{(\w+)\}/g;
+    let match;
+
+    while ((match = variableRegex.exec(text)) !== null) {
+        const variableName = match[1];
+        const variable = variableMap[variableName];
+
+        if (variable) {
+            placeholders.push({
+                name: variableName,
+                variable: variable,
+                start: match.index,
+                end: match.index + match[0].length,
+            });
+        }
+    }
+
+    // 按出现顺序排序
+    placeholders.sort((a, b) => a.start - b.start);
+
+    // 切割文本
+    const result = [];
+    let currentIndex = 0;
+
+    placeholders.forEach((placeholder) => {
+        // 添加当前位置到占位符之间的文本
+        if (currentIndex < placeholder.start) {
+            result.push({
+                type: "text",
+                content: text.substring(currentIndex, placeholder.start),
+            });
+        }
+
+        // 添加变量标记
+        result.push({
+            type: "variable",
+            content: placeholder.variable,
+        });
+
+        currentIndex = placeholder.end;
+    });
+
+    // 添加剩余文本
+    if (currentIndex < text.length) {
+        result.push({
+            type: "text",
+            content: text.substring(currentIndex),
+        });
+    }
+
+    return result;
+};
+
+// 发送问题
 const contentPost = async (userInput?: any, isNewChat: boolean = false, isSlider: boolean = false) => {
     if (!isLogin.value) {
         userStore.toggleShowLogin();
@@ -190,7 +311,7 @@ const contentPost = async (userInput?: any, isNewChat: boolean = false, isSlider
     if (!isNewChat && !isSlider) {
         chatContentList.value.push({
             type: 1,
-            message: userInput,
+            message: chat.getText() || userInput,
             from_avatar: userInfo.value.avatar,
             fileLists: fileLists.value,
         });
@@ -207,10 +328,15 @@ const contentPost = async (userInput?: any, isNewChat: boolean = false, isSlider
         consume_tokens: {},
     });
     chatContentList.value.push(result);
+
+    // 清空输入框
+    chat.clear();
+    chattingRef.value.setInput("");
+
     try {
         await chatRobotSendTextStream(
             {
-                message: userInput || "",
+                message: chat.getText() || userInput || "",
                 message_ext: JSON.stringify(sidebarConfigRef.value?.formData),
                 assistant_id: route.query.id,
                 task_id: taskId.value,
@@ -355,21 +481,8 @@ const init = async () => {
                 await nextTick();
                 chattingRef.value.scrollToBottom();
             }
-        }
-    } catch (error) {
-        loading.value = false;
-    }
-    try {
-        taskId.value = route.query.task_id;
-        if (!isReceiving.value) {
-            loading.value = true;
-            await getDetail();
-            loading.value = false;
-            if (taskId.value && taskId.value !== "undefined") {
-                await getChatList();
-                await nextTick();
-                chattingRef.value.scrollToBottom();
-            }
+            await nextTick();
+            initChat();
         }
     } catch (error) {
         loading.value = false;
@@ -389,6 +502,14 @@ onMounted(() => {
     init();
 });
 
+onBeforeUnmount(() => {
+    // 释放实例
+    if (chat) {
+        chat.dispose();
+        chat = null;
+    }
+});
+
 definePageMeta({
     layout: "base",
     title: "AI对话",
@@ -399,6 +520,29 @@ definePageMeta({
 :deep(.chat-message) {
     .message-contain--his {
         background-color: #f5f6f7;
+    }
+}
+:deep(.chat-area-pc) {
+    * {
+        font-size: var(--el-font-size-base);
+    }
+    svg {
+        display: inline;
+    }
+    .chat-rich-text {
+        font-size: var(--el-font-size-base);
+        padding: 8px 0;
+        .chat-grid-input {
+            font-size: var(--el-font-size-base);
+        }
+        .at-input {
+            line-height: 1;
+        }
+    }
+    .chat-placeholder-wrap {
+        padding: 8px 0;
+        font-size: var(--el-font-size-base);
+        font-style: inherit;
     }
 }
 </style>

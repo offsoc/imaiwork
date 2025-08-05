@@ -167,6 +167,14 @@ class PcLogic extends BaseLogic
         //模型
         $modelList =  HumanVoice::getModelList();
         $hdList = ConfigService::get('hd', 'list', []);
+        // 隐藏即梦
+        foreach ($hdList['channel'] as $val) {
+            if ($val['id'] == '2'){
+                continue;
+            }else{
+                $hdmodel['channel'][] = $val;
+            }
+        }
 
         //模型
         $indexConfig =  ConfigService::get('index', 'config', []);
@@ -216,10 +224,12 @@ class PcLogic extends BaseLogic
                 'is_ios_open'   => ConfigService::get('recharge','is_ios_open',0),
             ],
             'draw' => [
-                'channel' => $hdList['channel'] ?? [],
+                'channel' => $hdmodel['channel'] ?? [],
             ],
             'app_config' => ConfigService::get('app_config', 'redbook', []),
-            'ai_live' =>  ConfigService::get('ai_live', 'config', [])
+            'ai_live' =>  ConfigService::get('ai_live', 'config', []),
+            'by_name'=>  self::getByName(),
+            'ai_model' =>  ConfigService::get('chat', 'ai_model', []),
 
         ];
     }
@@ -399,5 +409,11 @@ class PcLogic extends BaseLogic
         }
 
         return $info;
+    }
+    public static function getByName()
+    {
+        $response =  \app\common\service\ToolsService::Auth()->checkby();;
+
+        return  $response['byname'] ?? '';
     }
 }

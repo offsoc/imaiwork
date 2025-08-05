@@ -2,7 +2,7 @@
     <div
         class="flex flex-col h-full bg-page overflow-y-auto robot-page"
         :infinite-scroll-immediate="false"
-        :infinite-scroll-disabled="!isLoad"
+        :infinite-scroll-disabled="!pager.isLoad"
         :infinite-scroll-distance="10"
         v-infinite-scroll="load">
         <div class="text-2xl font-bold p-6">{{ route.query.name }}</div>
@@ -51,7 +51,7 @@
                     <ElEmpty />
                 </div>
             </div>
-            <div v-if="!isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
+            <div v-if="!pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
         </div>
     </div>
 </template>
@@ -69,7 +69,7 @@ const queryParams = reactive({
     type: 3,
 });
 
-const { getLists, pager, isLoad } = usePaging({
+const { getLists, pager } = usePaging({
     fetchFun: robotLists,
     params: queryParams,
     isScroll: true,

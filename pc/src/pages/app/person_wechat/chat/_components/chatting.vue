@@ -13,9 +13,9 @@
                             class="px-4"
                             :class="{
                                 'min-h-[100px]': [
-                                    EnumContentType.File,
-                                    EnumContentType.Picture,
-                                    EnumContentType.Video,
+                                    ContentTypeEnum.File,
+                                    ContentTypeEnum.Picture,
+                                    ContentTypeEnum.Video,
                                 ].includes(item.contentType),
                             }">
                             <div class="text-center py-4" v-if="[1, 2].includes(item.type)">
@@ -82,10 +82,10 @@ import { ElScrollbar, dayjs } from "element-plus";
 import { useElementSize } from "@vueuse/core";
 import ChatMsgItem from "./chat-msg-item.vue";
 import ChatContent from "./chat-content.vue";
-import useHandle from "../_hooks/useHandle";
+import useHandle from "../../_hooks/useHandle";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
-import { EnumContentType } from "../../_enums";
+import { ContentTypeEnum } from "../../_enums";
 
 const props = withDefaults(
     defineProps<{
@@ -99,7 +99,7 @@ const props = withDefaults(
 const emit = defineEmits(["top"]);
 
 // 使用微信消息处理
-const { currentWechat, previewVideo, historyMsgList, disabledScroll, downloadFile, voiceToText } = useHandle();
+const { previewVideo, historyMsgList, disabledScroll, downloadFile, voiceToText } = useHandle();
 
 const previousScrollTop = ref(0);
 

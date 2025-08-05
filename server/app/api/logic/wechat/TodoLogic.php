@@ -46,6 +46,45 @@ class TodoLogic extends WechatBaseLogic
     }
 
     /**
+     * @desc 编辑待办
+     * @param array $params
+     * @return bool
+     */
+    public static function updateTodo(array $params)
+    {
+
+        try {
+            // 获取微信账号信息
+            $wechat = self::wechatInfo($params['wechat_id']);
+            if (is_bool($wechat)) {
+                self::setError('微信id不存在');
+                return false;
+            }
+
+            // 获取好友信息
+            $friend = self::friendInfo($wechat->wechat_id, $params['friend_id']);
+            if (is_bool($friend)) {
+                self::setError('好友id不存在');
+                return false;
+            }
+
+            $todo = AiWechatTodo::where('id', $params['id'])->findOrEmpty();
+            if ($todo->isEmpty()) {
+                self::setError('待办不存在');
+                return false;
+            }
+            // 编辑
+            AiWechatTodo::where('id',$params['id'])->update($params);
+
+            self::$returnData = $todo->refresh()->toArray();;
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * @desc 删除
      * @param array $params
      * @return bool
@@ -140,7 +179,7 @@ class TodoLogic extends WechatBaseLogic
 
                         if ($response['code'] == 10000) {
                             $item->todo_status = 1;
-                            $item->fail_reason = '';
+                            $item->fail_reason = '推送完成';
                             $item->save();
                         } else {
                             $item->retry_num++;

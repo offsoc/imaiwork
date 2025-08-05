@@ -19,7 +19,7 @@
                 <div
                     class="overflow-y-auto dynamic-scroller h-full"
                     :infinite-scroll-immediate="false"
-                    :infinite-scroll-disabled="!isLoad"
+                    :infinite-scroll-disabled="!pager.isLoad"
                     :infinite-scroll-distance="10"
                     v-infinite-scroll="load">
                     <div class="flex flex-col gap-4 mx-4 pb-10">
@@ -75,7 +75,7 @@ const queryParams = reactive({
 
 const activeKnb = ref<Record<string, any>>({});
 
-const { pager, getLists, resetPage, isLoad } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: knowledgeBaseLists,
     params: queryParams,
     isScroll: true,

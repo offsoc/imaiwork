@@ -32,7 +32,7 @@ class WechatLists extends BaseApiDataLists implements ListsSearchInterface
     {
         $this->searchWhere[] = ['w.user_id', '=', $this->userId];
         return AiWechat::alias('w')
-            ->field('w.id,w.device_code,w.wechat_id,w.wechat_nickname,w.wechat_avatar,w.wechat_status,w.create_time, s.takeover_mode,s.open_ai,s.sort,s.remark,s.takeover_range_mode, s.takeover_type, s.robot_id')
+            ->field('w.id,w.device_code,w.wechat_id,w.wechat_nickname,w.wechat_avatar,w.wechat_status,w.create_time, s.model, s.takeover_mode,s.open_ai,s.sort,s.remark,s.takeover_range_mode, s.takeover_type, s.robot_id')
             ->join('ai_wechat_setting s', 's.wechat_id = w.wechat_id')
             ->where($this->searchWhere)
             ->order(['s.sort' => 'desc', 'w.id' => 'desc'])

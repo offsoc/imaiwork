@@ -91,7 +91,7 @@ class CirclePushNoticeHandler extends BaseHandler
 
             $circles[] = [
                 'WeChatId' => $circle->getWeChatId(),
-                'CircleId' => $circle->getCircleId(),
+                'CircleId' => (string)$circle->getCircleId(),
                 'Content' => $content,
                 'Likes' => $likes,
                 'Comments' => $comments,
@@ -110,6 +110,7 @@ class CirclePushNoticeHandler extends BaseHandler
 
         $this->logInfo('Circle push notice', array_merge($content, [
             'Circles' => count($circles),
+            'CircleLists' => $circles,
         ]), FILE_APPEND);
 
         return $content;

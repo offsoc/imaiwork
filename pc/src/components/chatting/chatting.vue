@@ -65,7 +65,9 @@
                         <div
                             class="flex items-end cursor-pointer bg-white rounded-tl-[24px] rounded-tr-[24px] border border-b-0 border-[#F1F1F2] px-[18px] relative">
                             <div class="py-[12px] flex-1 mr-8">
+                                <slot name="input" v-if="$slots.input"></slot>
                                 <ElInput
+                                    v-else
                                     v-model="inputContent"
                                     type="textarea"
                                     class="content-ipt transition-all duration-300"

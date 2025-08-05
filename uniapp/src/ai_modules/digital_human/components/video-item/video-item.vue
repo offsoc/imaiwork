@@ -5,7 +5,10 @@
                 <view class="flex justify-center items-center h-[85%] w-[70%] relative z-10">
                     <image :src="item.pic" class="w-full mx-auto h-full rounded-lg" mode="aspectFill"></image>
                     <view v-if="showVersion" class="absolute top-2 left-2 z-[51]">
-                        <view class="version-tag text-[20rpx]" v-if="modelVersionMap[item.model_version]">
+                        <view
+                            class="digital-human-tag text-[20rpx]"
+                            :class="`digital-human-tag-${item.model_version}`"
+                            v-if="modelVersionMap[item.model_version]">
                             {{ modelVersionMap[item.model_version] }}
                         </view>
                     </view>
@@ -89,13 +92,16 @@ const props = withDefaults(
 const emit = defineEmits(["play", "delete", "retry", "download"]);
 
 const appStore = useAppStore();
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel || []);
 
 const modelVersionMap = computed(() => {
-    return modelChannel.value.reduce((acc: Record<string, string>, item: any) => {
-        acc[item.id] = item.name;
-        return acc;
-    }, {});
+    if (modelChannel.value.length > 0) {
+        return modelChannel.value.reduce((acc: Record<string, string>, item: any) => {
+            acc[item.id] = item.name;
+            return acc;
+        }, {});
+    }
+    return {};
 });
 
 const handlePlay = () => {

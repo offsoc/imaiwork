@@ -16,14 +16,14 @@
                     <div
                         class="grid grid-cols-4 gap-[10px] px-3"
                         v-infinite-scroll="load"
-                        :infinite-scroll-disabled="!isLoad"
+                        :infinite-scroll-disabled="!pager.isLoad"
                         :infinite-scroll-immediate="false"
                         :infinite-scroll-distance="10">
                         <div v-for="item in pager.lists" :key="item.id" class="cursor-pointer" @click="choose(item)">
                             <ElImage :src="item.result_image" class="w-full rounded-xl" lazy />
                         </div>
                     </div>
-                    <div v-if="!isLoad" class="text-white text-center text-xs w-full mt-4">暂无更多了~</div>
+                    <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full mt-4">暂无更多了~</div>
                 </div>
             </div>
         </div>
@@ -47,8 +47,7 @@ const queryParams = reactive({
     user_type: 1,
 });
 
-const loading = ref(true);
-const { pager, getLists, isLoad } = usePaging({
+const { pager, getLists } = usePaging({
     fetchFun: getCaseLists,
     params: queryParams,
     isScroll: true,

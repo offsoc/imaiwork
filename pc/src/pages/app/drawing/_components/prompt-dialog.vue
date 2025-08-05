@@ -1,6 +1,6 @@
 <template>
     <div
-        class="absolute w-[350px] h-full bg-bg-app-bg-3 rounded-tr-[20px] rounded-br-[20px] shadow-[0_0_0_1px_#333333] left-full flex flex-col py-[16px] z-20">
+        class="absolute w-[350px] h-full bg-app-bg-3 rounded-tr-[20px] rounded-br-[20px] shadow-[0_0_0_1px_#333333] left-full flex flex-col py-[16px] z-20">
         <div class="absolute w-6 h-6 top-4 right-4 cursor-pointer" @click="emit('close')">
             <close-btn />
         </div>
@@ -10,7 +10,7 @@
                     <div class="text-white">Deepseek- R1 灵感版</div>
                     <div v-for="(item, index) in prompts" :key="index" class="mt-4">
                         <div
-                            class="rounded-md border border-app-border-2 bg-bg-app-bg-3 mt-[11px] relative p-3"
+                            class="rounded-md border border-app-border-2 bg-app-bg-3 mt-[11px] relative p-3"
                             :key="index">
                             <div class="text-[#ffffff4d]">
                                 {{ item }}
@@ -39,7 +39,7 @@
             </ElScrollbar>
         </div>
         <div class="flex-shrink-0 px-[16px] mt-4">
-            <div class="relative rounded-md shadow-[0_0_0_1px_var(--app-border-color-2)] bg-bg-app-bg-3">
+            <div class="relative rounded-md shadow-[0_0_0_1px_var(--app-border-color-2)] bg-app-bg-3">
                 <ElInput
                     v-model="prompt"
                     placeholder="请输入创意描述"

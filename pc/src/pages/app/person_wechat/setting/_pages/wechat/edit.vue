@@ -67,14 +67,16 @@
 import { getWeChatAi, saveWeChatAi, robotLists } from "@/api/person_wechat";
 import type { FormInstance } from "element-plus";
 import Popup from "@/components/popup/index.vue";
-
+import { useAppStore } from "@/stores/app";
 const emit = defineEmits(["close", "success"]);
 
+const appStore = useAppStore();
+
 const formRef = shallowRef<FormInstance>();
-const formData = reactive({
+const formData = reactive<any>({
     wechat_id: "", //微信ID，微信提供的ID
     open_ai: 0, //AI总功能开关 0：关闭 1：开启
-    remark: "", //备注
+    remark: "wechat_ai", //备注
     takeover_mode: 1, //接管模式 0：人工接管 1：AI接管
     takeover_type: 1, //接管类型 0：全部 1：私聊 2：群聊
     robot_id: "", //AI接管机器人
@@ -97,7 +99,16 @@ const { optionsData } = useDictOptions<{
     robotLists: {
         api: robotLists,
         params: { page_size: 9999 },
-        transformData: (data: any) => data.lists,
+        transformData: (data: any) => {
+            if (data.lists.length > 0) {
+                if (formData.robot_id == 0) {
+                    formData.robot_id = data.lists[0].id;
+                }
+                return data.lists;
+            } else {
+                return [];
+            }
+        },
     },
 });
 
@@ -114,10 +125,10 @@ const handleConfirm = async () => {
     try {
         await saveWeChatAi(formData);
         popupRef.value?.close();
-        feedback.notifySuccess("保存成功");
+        feedback.msgSuccess("保存成功");
         emit("success");
     } catch (error) {
-        feedback.notifyError(error || "保存失败");
+        feedback.msgError(error || "保存失败");
     }
 };
 
@@ -134,9 +145,6 @@ const setFormData = async (data: Record<any, any>) => {
             //@ts-ignore
             formData[key] = data[key];
         }
-    }
-    if (data.robot_id == 0) {
-        formData.robot_id = "";
     }
 };
 defineExpose({

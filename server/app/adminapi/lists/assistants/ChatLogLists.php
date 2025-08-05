@@ -68,8 +68,8 @@ class ChatLogLists extends BaseAdminDataLists implements ListsSearchInterface
                     ->each(function ($item) use (&$points, &$tokens) {
                         $info = json_decode($item['extra'], true);
 
-                        $points += $info['实际消耗算力'] ?? 0;
-                        $tokens += $info['总消耗tokens数'] ?? 0;
+                        $points = $info['实际消耗算力'] ?? 0;
+                        $tokens = $info['总消耗tokens数'] ?? 0;
                     });
 
                 $item['points']          = $points;

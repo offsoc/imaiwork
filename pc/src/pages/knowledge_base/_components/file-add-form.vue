@@ -190,7 +190,7 @@ const handleUploadChange = (fileLists: any[]) => {
 const validateForm = () => {
     const isUploading = fileLists.value.some((item: any) => item.status == "uploading");
     if (isUploading) {
-        feedback.notifyError("文件上传中，请稍后再试");
+        feedback.msgError("文件上传中，请稍后再试");
         return;
     }
     return formRef.value?.validate();

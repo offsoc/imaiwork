@@ -242,7 +242,7 @@
             <div v-for="(item, index) in getCopyright" :key="index">
                 <a :href="item.value" target="_blank" class="hover:underline">{{ item.key }}</a>
             </div>
-            <div>Powered by IMAI.WORK</div>
+            <div>{{ getByName }}</div>
             <div>Version：{{ getVersionName }}</div>
         </div>
     </div>
@@ -257,7 +257,7 @@ import DownLoadAndImg from "@/assets/images/down_and_icon.png";
 import DownLoadMiniImg from "@/assets/images/down_mini_icon.png";
 
 const appStore = useAppStore();
-const { getCopyright, getVersion } = toRefs(appStore);
+const { getCopyright, getVersion, getByName } = toRefs(appStore);
 
 const getVersionName = computed(() => {
     const { version_number } = getVersion.value;

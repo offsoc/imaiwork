@@ -17,48 +17,49 @@
             </ElBreadcrumbItem>
         </ElBreadcrumb>
         <template v-if="!showChunk">
-            <div class="rounded-lg bg-white p-4 flex items-center justify-between gap-4">
-                <ElButton type="primary" @click="handleAddFile">添加文件</ElButton>
-                <div class="flex items-center gap-2">
-                    <ElSelect
-                        v-model="queryParams.takeover_mode"
-                        class="!w-[120px] !h-[32px]"
-                        placeholder="请选择"
-                        :empty-values="[null, undefined]"
-                        @change="resetPage()">
-                        <ElOption label="全部" value=""></ElOption>
-                        <ElOption label="解析中" :value="0"></ElOption>
-                        <ElOption label="解析完成" :value="1"></ElOption>
-                        <ElOption label="解析失败" :value="2"></ElOption>
-                    </ElSelect>
-                    <ElInput
-                        v-model="queryParams.name"
-                        class="h-[32px] !w-[240px]"
-                        clearable
-                        placeholder="请输入文件名称"
-                        @clear="
-                            queryParams.name = '';
-                            getLists();
-                        ">
-                        <template #append>
-                            <ElButton @click="getLists()">
-                                <Icon name="el-icon-Search"></Icon>
-                            </ElButton>
-                        </template>
-                    </ElInput>
-                    <ElButton @click="refreshLists()">
-                        <Icon name="el-icon-Refresh" :size="18" color="var(--el-color-info)"></Icon>
-                    </ElButton>
+            <div class="grow min-h-0 flex flex-col gap-x-4 bg-white rounded-lg">
+                <div class="p-4 flex items-center justify-between gap-4">
+                    <ElButton type="primary" @click="handleAddFile">添加文件</ElButton>
+                    <div class="flex items-center gap-2">
+                        <ElSelect
+                            v-model="queryParams.takeover_mode"
+                            class="!w-[120px] !h-[32px]"
+                            placeholder="请选择"
+                            :empty-values="[null, undefined]"
+                            @change="resetPage()">
+                            <ElOption label="全部" value=""></ElOption>
+                            <ElOption label="解析中" :value="0"></ElOption>
+                            <ElOption label="解析完成" :value="1"></ElOption>
+                            <ElOption label="解析失败" :value="2"></ElOption>
+                        </ElSelect>
+                        <ElInput
+                            v-model="queryParams.name"
+                            class="h-[32px] !w-[240px]"
+                            clearable
+                            placeholder="请输入文件名称"
+                            @clear="
+                                queryParams.name = '';
+                                getLists();
+                            ">
+                            <template #append>
+                                <ElButton @click="getLists()">
+                                    <Icon name="el-icon-Search"></Icon>
+                                </ElButton>
+                            </template>
+                        </ElInput>
+                        <ElButton @click="refreshLists()">
+                            <Icon name="el-icon-Refresh" :size="18" color="var(--el-color-info)"></Icon>
+                        </ElButton>
+                    </div>
                 </div>
-            </div>
-            <div class="grow min-h-0 flex flex-col gap-x-4 mt-4 bg-white rounded-lg">
-                <div class="grow min-h-0 pt-4 overflow-hidden">
+                <div class="grow min-h-0 overflow-hidden">
                     <ElTable
                         ref="tableRef"
                         :data="pager.lists"
                         v-loading="pager.loading"
                         stripe
                         height="100%"
+                        :header-row-style="{ height: '63px' }"
                         :row-style="{
                             height: '60px',
                         }">
@@ -131,7 +132,7 @@ import { formatFileSize } from "@/utils/util";
 import { ElTable } from "element-plus";
 import ChunkDetail from "../_components/chunk-detail.vue";
 const route = useRoute();
-
+const nuxtApp = useNuxtApp();
 const queryParams = reactive({
     takeover_mode: "",
     name: "",
@@ -196,18 +197,22 @@ const handleView = async (id: any) => {
     chunkDetailRef.value?.setFormData({ id });
 };
 
-const handleDelete = async (id: any) => {
-    await feedback.confirm("确定删除该文件吗？");
-    try {
-        feedback.loading("删除中", tableRef.value?.$el);
-        await knowledgeBaseFileDelete({ id });
-        feedback.msgSuccess("删除成功");
-        getLists();
-    } catch (error: any) {
-        feedback.msgError(error || "删除失败");
-    } finally {
-        feedback.closeLoading();
-    }
+const handleDelete = (id: any) => {
+    nuxtApp.$confirm({
+        message: "确定删除该文件吗？",
+        onConfirm: async () => {
+            try {
+                feedback.loading("删除中", tableRef.value?.$el);
+                await knowledgeBaseFileDelete({ id });
+                feedback.msgSuccess("删除成功");
+                getLists();
+            } catch (error: any) {
+                feedback.msgError(error || "删除失败");
+            } finally {
+                feedback.closeLoading();
+            }
+        },
+    });
 };
 const detail = ref<any>({});
 const getDetail = async () => {
@@ -229,5 +234,10 @@ onMounted(() => {
 <style scoped lang="scss">
 :deep(.el-select__wrapper) {
     min-height: 32px;
+}
+:deep(.el-table) {
+    th.el-table__cell.is-leaf {
+        border-top: var(--el-table-border);
+    }
 }
 </style>

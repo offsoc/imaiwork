@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from "vue";
-import { drawingHdImageStatus, drawingVolcVideoStatus } from "@/api/drawing";
+import { drawingImageStatus, drawingVolcVideoStatus, drawingDoubaoVideoStatus } from "@/api/drawing";
 import { cloneDeep } from "lodash-es";
-import { DrawTypeEnum, drawTypeEnumMap } from "../_enums";
+import { ModelEnum } from "../_enums";
 
 // --- 接口定义 ---
 
@@ -38,25 +38,6 @@ interface SubTaskResult {
     // 则需要添加 task_id 或其他唯一标识符。
 }
 
-/**
- * 绘图状态API响应的结构。
- */
-interface DrawingStatusResponse {
-    result: {
-        result: {
-            sub_task_results: SubTaskResult[]; // 子任务结果列表
-            // 如果API响应中还有其他属性，请在此处添加
-        };
-    };
-}
-/**
- * 绘制视频状态API响应的结构。
- */
-interface DrawingVideoStatusResponse {
-    status: number; // 1 表示成功，2 表示进行中
-    video_url: string;
-    msg?: string;
-}
 export interface ResultItem {
     id?: string;
     url: string;
@@ -72,12 +53,14 @@ export interface ResultItem {
  */
 export default function useDrawingTask({
     type,
+    model,
     task_id,
     dataLists,
     drawType = "image",
 }: {
     dataLists: ResultItem[];
     type: number;
+    model?: ModelEnum;
     task_id: string;
     drawType?: "image" | "video";
 }) {
@@ -106,9 +89,8 @@ export default function useDrawingTask({
             };
 
             if (drawType == "image") {
-                const res: DrawingStatusResponse = await drawingHdImageStatus(params);
+                const res = await drawingImageStatus(params);
                 const { result } = res.result; // 直接解构 result
-
                 if (!result || !result.sub_task_results || result.sub_task_results.length === 0) {
                     console.warn("API 响应缺少 'result' 或 'sub_task_results'。", res);
                     // 根据预期行为，你可能希望抛出错误或返回 false。
@@ -120,8 +102,8 @@ export default function useDrawingTask({
                     return {
                         url: item.image,
                         status: item.task_status,
-                        error: item.task_status == 4,
-                        loading: item.task_status != 1 && item.task_status != 4,
+                        error: [3, 4].includes(item.task_status),
+                        loading: item.task_status == 0 || item.task_status == 2,
                         progress: Math.round(parseFloat(item.task_completion) * 100),
                     };
                 });
@@ -131,13 +113,20 @@ export default function useDrawingTask({
                     (item) => item.image || [3, 4].includes(item.task_status)
                 );
             } else if (drawType == "video") {
-                const res: DrawingVideoStatusResponse = await drawingVolcVideoStatus(params);
+                function getVideoRequest(params: any) {
+                    return {
+                        [ModelEnum.GENERAL]: drawingVolcVideoStatus,
+                        [ModelEnum.SEEDANCE]: drawingDoubaoVideoStatus,
+                    }[model](params);
+                }
+
+                const res = await getVideoRequest(params);
                 taskResultList.value = [
                     {
                         url: res.video_url,
                         status: res.status || 0,
                         error: res.status == -1,
-                        loading: res.status != 1 && res.status != -1,
+                        loading: res.status == 2 || res.status == 0,
                         progress: res.status == 1 ? 100 : 0,
                         msg: res.msg || "",
                     },
@@ -162,12 +151,7 @@ export default function useDrawingTask({
      * @param reject Promise 的 reject 函数，用于传播错误。
      */
     const handlePollingError = (error: any, reject: (reason?: any) => void) => {
-        // 如果 feedback 工具可用，则使用它，否则记录到控制台。
-        if (typeof feedback !== "undefined" && feedback.msgError) {
-            feedback.msgError(error);
-        } else {
-            console.error("未找到或不可用 feedback 工具 (feedback.msgError)。", error);
-        }
+        feedback.msgError(error);
 
         // 将任何仍在加载的任务标记为错误
         taskResultList.value.forEach((item) => {

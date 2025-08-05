@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
 
+use app\api\logic\wechat\sop\StageLogic;
 use app\common\workerman\wechat\constants\SocketType;
 use app\common\workerman\wechat\handlers\client\TalkToFriendTaskHandler;
 use app\common\workerman\wechat\handlers\client\VoiceTransTextTaskHandler;
@@ -23,6 +24,8 @@ use app\common\model\user\User;
 use app\common\logic\AccountLogLogic;
 use Workerman\Connection\TcpConnection;
 use Workerman\Lib\Timer;
+use app\common\model\wechat\AiWechatTagStrategy;
+use app\common\model\wechat\AiWechatFriendTag;
 
 use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
 use Google\Protobuf\Any;
@@ -60,6 +63,11 @@ trait AichatTrait
             return;
         }
 
+        if($payload['ContentType'] === 1 &&  $payload['MsgSvrId'] == 0){
+            $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('好友申请招呼语')->withContext($payload)->log();
+            return;
+        }
+
 
         try {
             $device  = $this->_getDeviceInfo($deviceId);
@@ -67,6 +75,7 @@ trait AichatTrait
             $friend = $this->_getFriendInfo($payload['FriendId'], $payload['WeChatId']);
             $reply = $this->_getReplyStrategy($device['user_id']);
             $robot = $this->_getWechatRobot($wechat['robot_id']);
+            $payload['userId'] = $device['user_id'];
 
             if($wechat['open_ai'] === 0 || $wechat['takeover_mode'] === 0){
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('未开启ai')->withContext([
@@ -76,7 +85,7 @@ trait AichatTrait
                 return;
             }
 
-
+            $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('聊天模型gpt')->withContext(['data' => $wechat,'msg' => '聊天模型'])->log();
 
             $historyMsg = $this->getFriendHistoryMsg($payload, $reply);
             $isChatroom = strpos($payload['FriendId'], '@chatroom') !== false ? 1 : 0;
@@ -130,7 +139,8 @@ trait AichatTrait
                 'user_id' => $device['user_id'],
                 'reply_strategy' => $reply,
                 'user_message' => $promat,
-                'is_chatroom' => $isChatroom
+                'is_chatroom' => $isChatroom,
+                'model' => $robot['model'] ?? ''
             ];
 
             if(empty($request['message'])){
@@ -413,7 +423,8 @@ trait AichatTrait
             'knowledge' => $knowledge,
             'reply_strategy' => $request['reply_strategy'],
             'user_message' => $request['user_message'],
-            'is_chatroom' => $request['is_chatroom']
+            'is_chatroom' => $request['is_chatroom'],
+            'model' => $request['model']
         ];
 
         // 任务数据
@@ -427,7 +438,8 @@ trait AichatTrait
             'knowledge' => $knowledge,
             'reply_strategy' => $request['reply_strategy'],
             'user_message' => $request['user_message'],
-            'is_chatroom' => $request['is_chatroom']
+            'is_chatroom' => $request['is_chatroom'],
+            'model' => $request['model']
         ];
         $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('请求数据')->withContext($data)->log();
         $this->_beforeSend($data);
@@ -437,7 +449,7 @@ trait AichatTrait
     {
         // 检查AI 是否已有回复记录
         $log = ChatLog::where('task_id', $payload['task_id'])->findOrEmpty();
-        $reply = '未找到相关信息,请详细说明';
+        $reply = '请稍等，该问题我不太清楚，为您转接给对应的部门同事';
         if ($log->isEmpty()) {
             if (isset($payload['knowledge']) && !empty($payload['knowledge'])) {
                 [$chatStatus, $response] = \app\api\logic\KnowledgeLogic::socketChat([
@@ -487,7 +499,8 @@ trait AichatTrait
             'MsgSvrId' => $payload['request']['MsgSvrId'],
             'reply_strategy' => $payload['reply_strategy'],
             'user_message' => $payload['user_message'],
-            'is_chatroom' => $payload['is_chatroom']
+            'is_chatroom' => $payload['is_chatroom'],
+            'user_id' => $payload['user_id'],
         ]);
     }
 
@@ -551,10 +564,27 @@ trait AichatTrait
             'Remark' => $request['MsgSvrId'] ?? '',
             'MsgId' => time(),
             'Content' => $request['message'],
-            'Immediate' => true
+            'Immediate' => true,
+            'user_message' => $request['user_message'] ?? '',
         ])->log();
 
+        $this->setFriendTagStrategy($request);
         //$this->setFriendHistoryMsg($request, true);
+
+        //AI回复：sop判断流程阶段
+        StageLogic::sopStagetrigger([
+                                        'wechat_id' => $request['wechat_id'],
+                                        'friend_id' => $request['friend_id'],
+                                        'content' =>$request['message'],
+                                        'chat_object' => 1
+                                    ]);
+        //客户回复：sop判断流程阶段
+        StageLogic::sopStagetrigger([
+                                        'wechat_id' => $request['wechat_id'],
+                                        'friend_id' => $request['friend_id'],
+                                        'content' =>$request['user_message'],
+                                        'chat_object' => 2
+                                    ]);
 
         $this->sendChannelMessage(SocketType::SOCKET, $request['device_code'], $aiContent);
     }
@@ -610,8 +640,8 @@ trait AichatTrait
                     $match = true;
                 }
             } else {
-                if ((string)$item->keyword === $request['message']) {
-
+                $keywords = explode(';', $item->keyword);
+                if (in_array($request['message'], $keywords)) {
                     $this->_parseMessage($request, $item->reply);
                     $match = true;
                 }
@@ -619,6 +649,48 @@ trait AichatTrait
         });
 
         return $match;
+    }
+
+    private function setFriendTagStrategy(array $payload):void
+    {
+        AiWechatTagStrategy::alias('ts')
+        ->field('ts.*, at.id as tag_id')
+        ->join('ai_wechat_tag at', 'ts.tag_name = at.tag_name and ts.user_id = at.user_id')
+        ->where('ts.user_id', $payload['user_id'])->select()->each(function($item) use($payload){
+            if($item->match_type == 0){//模糊匹配
+                if($item->match_mode == 0){//客户
+                    if(strpos($item->match_keywords, $payload['message']) !== false || strpos($payload['message'], $item->match_keywords) !== false){
+                        $this->setFriendTag($item->tag_id, $payload);
+                    }
+                }else{
+                    if(strpos($item->match_keywords, $payload['user_message']) !== false || strpos($payload['user_message'], $item->match_keywords) !== false){
+                        $this->setFriendTag($item->tag_id, $payload);
+                    }
+                }
+            }else{
+                if($item->match_mode == 0){
+                    if ((string)$item->match_keywords === $payload['message']) {
+                        $this->setFriendTag($item->tag_id, $payload);
+                    }
+                }else{
+                    
+                    if ((string)$item->match_keywords === $payload['user_message']) {
+                        $this->setFriendTag($item->tag_id, $payload);
+                    }
+                }
+            }
+        });
+    }
+    private function setFriendTag(int $tag_id, array $payload): void
+    {
+        $find = AiWechatFriendTag::where('wechat_id', $payload['wechat_id'])->where('friend_id', $payload['friend_id'])->where('tag_id', $tag_id)->findOrEmpty();
+        if($find->isEmpty()){
+            AiWechatFriendTag::create([
+                'wechat_id' => $payload['wechat_id'],
+                'tag_id' => $tag_id,
+                'friend_id' => $payload['friend_id'],
+            ]);
+        }
     }
 
     private function getFriendHistoryMsg(array $payload, array $reply)
@@ -635,7 +707,7 @@ trait AichatTrait
     private function setFriendHistoryMsg(array $payload, bool $isSend = false)
     {
         $reply = $payload['reply_strategy'];
-        $number_chat_rounds = $reply['number_chat_rounds'];
+        $number_chat_rounds = $reply['number_chat_rounds'] == 0 ? 3 : $reply['number_chat_rounds'];
         $key = $this->getDeviceKey($payload['device_code'], 'friendHistory:' . $payload['friend_id']);
         $json = $this->redis()->get($key);
         $role = $isSend ? 'assistant' : 'user';

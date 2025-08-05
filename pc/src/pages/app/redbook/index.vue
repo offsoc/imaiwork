@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { AppKeyEnum, ThemeEnum } from "@/enums/appEnums";
 import Sidebar from "../_components/sidebar.vue";
-import { SidebarEnum } from "./_enums";
+import { SidebarTypeEnum } from "./_enums";
 import useSidebar from "../_hooks/useSidebar";
 import Home from "./_pages/home/index.vue";
 import VideoTask from "./_pages/video_task/index.vue";
@@ -26,63 +26,63 @@ import CopywritingLibrary from "./_pages/copywriting_library/index.vue";
 const { sidebar, sidebarIndex, getComponents, getSliderIndex, updateSliderIndex } = useSidebar();
 
 sidebar.value = [
-    { name: "快速开始", icon: "menu_create", components: markRaw(Home), type: SidebarEnum.QUICK_START },
+    { name: "快速开始", icon: "menu_create", components: markRaw(Home), type: SidebarTypeEnum.QUICK_START },
     {
         name: "发布视频任务",
         icon: "menu_video_task",
         components: markRaw(VideoTask),
-        type: SidebarEnum.PUBLISH_VIDEO_TASK,
+        type: SidebarTypeEnum.PUBLISH_VIDEO_TASK,
     },
     {
         name: "发布图文任务",
         icon: "menu_image_task",
         components: markRaw(ImageTask),
-        type: SidebarEnum.PUBLISH_IMAGE_TASK,
+        type: SidebarTypeEnum.PUBLISH_IMAGE_TASK,
     },
     {
         name: "发布混剪任务",
         icon: "menu_mix_task",
         components: "",
-        type: SidebarEnum.PUBLISH_MIX_TASK,
+        type: SidebarTypeEnum.PUBLISH_MIX_TASK,
         disabled: true,
     },
     {
         name: "数字人创作",
         icon: "menu_digital_human",
         components: markRaw(DhCreation),
-        type: SidebarEnum.DIGITAL_HUMAN_CREATION,
+        type: SidebarTypeEnum.DIGITAL_HUMAN_CREATION,
     },
     {
         name: "图文创作",
         icon: "menu_image_creation",
         components: "",
-        type: SidebarEnum.IMAGE_CREATION,
+        type: SidebarTypeEnum.IMAGE_CREATION,
         disabled: true,
     },
     {
         name: "混剪任务创作",
         icon: "menu_mix_creation",
         components: "",
-        type: SidebarEnum.MIX_TASK_CREATION,
+        type: SidebarTypeEnum.MIX_TASK_CREATION,
         disabled: true,
     },
     {
         name: "素材库",
         icon: "menu_material_library",
         components: markRaw(MaterialLibrary),
-        type: SidebarEnum.MATERIAL_LIBRARY,
+        type: SidebarTypeEnum.MATERIAL_LIBRARY,
     },
     {
         name: "生成视频",
         icon: "menu_generate_video",
         components: markRaw(GenerateVideo),
-        type: SidebarEnum.GENERATE_VIDEO,
+        type: SidebarTypeEnum.GENERATE_VIDEO,
     },
     {
         name: "文案库",
         icon: "menu_copywriting_library",
         components: markRaw(CopywritingLibrary),
-        type: SidebarEnum.COPYWRITING_LIBRARY,
+        type: SidebarTypeEnum.COPYWRITING_LIBRARY,
     },
 ];
 
@@ -99,15 +99,17 @@ const getSidebar = computed(() => {
     sidebar.value.forEach((item) => {
         let group;
 
-        if (item.type === SidebarEnum.QUICK_START) {
+        if (item.type === SidebarTypeEnum.QUICK_START) {
             group = groupedItems.find((g) => g.type === SidebarGroupEnum.QUICK_START) || {
                 ...item,
             };
             groupedItems.push(group);
         } else if (
-            [SidebarEnum.PUBLISH_VIDEO_TASK, SidebarEnum.PUBLISH_IMAGE_TASK, SidebarEnum.PUBLISH_MIX_TASK].includes(
-                item.type
-            )
+            [
+                SidebarTypeEnum.PUBLISH_VIDEO_TASK,
+                SidebarTypeEnum.PUBLISH_IMAGE_TASK,
+                SidebarTypeEnum.PUBLISH_MIX_TASK,
+            ].includes(item.type)
         ) {
             group = groupedItems.find((g) => g.title === SidebarGroupEnum.PUBLISH_TASK) || {
                 title: SidebarGroupEnum.PUBLISH_TASK,
@@ -118,9 +120,11 @@ const getSidebar = computed(() => {
                 groupedItems.push(group);
             }
         } else if (
-            [SidebarEnum.DIGITAL_HUMAN_CREATION, SidebarEnum.IMAGE_CREATION, SidebarEnum.MIX_TASK_CREATION].includes(
-                item.type
-            )
+            [
+                SidebarTypeEnum.DIGITAL_HUMAN_CREATION,
+                SidebarTypeEnum.IMAGE_CREATION,
+                SidebarTypeEnum.MIX_TASK_CREATION,
+            ].includes(item.type)
         ) {
             group = groupedItems.find((g) => g.title === SidebarGroupEnum.MATRIX_TASK) || {
                 title: SidebarGroupEnum.MATRIX_TASK,
@@ -131,9 +135,11 @@ const getSidebar = computed(() => {
                 groupedItems.push(group);
             }
         } else if (
-            [SidebarEnum.MATERIAL_LIBRARY, SidebarEnum.GENERATE_VIDEO, SidebarEnum.COPYWRITING_LIBRARY].includes(
-                item.type
-            )
+            [
+                SidebarTypeEnum.MATERIAL_LIBRARY,
+                SidebarTypeEnum.GENERATE_VIDEO,
+                SidebarTypeEnum.COPYWRITING_LIBRARY,
+            ].includes(item.type)
         ) {
             group = groupedItems.find((g) => g.title === SidebarGroupEnum.MATERIAL_LIBRARY) || {
                 title: SidebarGroupEnum.MATERIAL_LIBRARY,

@@ -70,7 +70,7 @@ return [
             'single'         => false,
             'time_format'    => 'Y-m-d H:i:s',
             'format'         => '[%s][%s] %s',
-            'apart_level'   =>  ['error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'card', 'cron', 'bind', 'init', 'note', 'post'],
+            'apart_level'   =>  ['error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'notice', 'cron', 'bind', 'init', 'note', 'post'],
         ],
         'sv' => [
             'type'           => 'File',
@@ -78,6 +78,12 @@ return [
             'json'           => false,
             'single'         => false,
             'time_format'    => 'Y-m-d H:i:s',
+            'format'         => '[%s][%s] %s',
+        ],
+        'jobs' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/jobs/',
+            'json'           => false,
             'format'         => '[%s][%s] %s',
         ],
         // 其它日志通道配置

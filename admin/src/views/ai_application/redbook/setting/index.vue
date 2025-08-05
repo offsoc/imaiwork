@@ -10,7 +10,9 @@
         </el-card>
     </div>
     <footer-btns>
-        <el-button type="primary" @click="lockSubmit" :loading="isLock"> 保存 </el-button>
+        <el-button v-perms="['ai_application.redbook/setConfig']" type="primary" @click="lockSubmit" :loading="isLock">
+            保存
+        </el-button>
     </footer-btns>
 </template>
 

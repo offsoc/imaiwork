@@ -624,8 +624,8 @@ class PublishLogic extends SvBaseLogic
 
             $mergedArray[] = [
                 'material_url' => isset($media_url[$i]['url']) ? $media_url[$i]['url'] :  $media_url[$i] ,
-                'material_title' => $media_title[$i % $titleCount]['content'] ?? ' ', // 循环匹配title
-                'material_subtitle' => $media_subtitle[$i % $subtitleCount]['content'] ?? ' ', // 循环匹配subtitle
+                'material_title' => $titleCount == 0 ? ' ' : ($media_title[$i % $titleCount]['content'] ?? ' '), // 循环匹配title
+                'material_subtitle' => $subtitleCount == 0 ? ' ' : ($media_subtitle[$i % $subtitleCount]['content'] ?? ' '), //
                 'topic' => $topic,
                 'material_type' => $account['media_type'],
                 'publish_time' => $publish_json[$i]['publish_time'] ?? '',

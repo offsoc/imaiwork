@@ -8,12 +8,12 @@
                             <image
                                 src="@/ai_modules/digital_human/static/icons/video_upload_tips_1.svg"
                                 class="w-[36rpx] h-[36rpx]"></image>
-                            <text class="opacity-80 text-[30rpx] font-bold">视频教程</text>
+                            <text class="text-[30rpx] font-bold text-[#000000cc]">视频教程</text>
                         </view>
                         <view class="mt-[36rpx]">
                             <view class="h-[384rpx] rounded-[40rpx] relative">
                                 <view class="absolute top-[40rpx] left-0 w-full px-[40rpx] z-[788]">
-                                    <view class="text-white opacity-80 text-[26rpx]"> 快速了解操作流程 </view>
+                                    <view class="text-white text-[26rpx]"> 快速了解操作流程 </view>
                                 </view>
                                 <video-player
                                     :play-icon-size="88"
@@ -27,7 +27,7 @@
                             <image
                                 src="@/ai_modules/digital_human/static/icons/video_upload_tips_2.svg"
                                 class="w-[36rpx] h-[36rpx]"></image>
-                            <text class="opacity-80 text-[30rpx] font-bold">视频要求</text>
+                            <text class="text-[30rpx] font-bold text-[#000000cc]">视频要求</text>
                         </view>
                         <view class="mt-[30rpx] flex items-center gap-x-4">
                             <image
@@ -38,13 +38,15 @@
                                 <view
                                     v-for="(item, index) in uploadTemplateContentLists"
                                     :key="index"
-                                    class="flex items-center gap-x-[6rpx] leading-6">
+                                    class="flex gap-x-[6rpx] leading-6">
                                     <text
-                                        class="flex-shrink-0 w-[36rpx] h-[36rpx] rounded-full flex items-center justify-center text-[22rpx] text-primary bg-primary-light-9">
+                                        class="mt-1 flex-shrink-0 w-[36rpx] h-[36rpx] rounded-full flex items-center justify-center text-[22rpx] text-primary bg-primary-light-9">
                                         {{ index + 1 }}
                                     </text>
-                                    <text class="text-[26rpx] opacity-80">{{ item.name }}</text>
-                                    <text class="text-[26rpx] opacity-30">{{ item.value }}</text>
+                                    <view>
+                                        <text class="text-[26rpx] text-[#000000cc] flex-shrink-0">{{ item.name }}</text>
+                                        <text class="text-[26rpx] text-[#0000004d] ml-1">{{ item.value }}</text>
+                                    </view>
                                 </view>
                             </view>
                         </view>
@@ -54,7 +56,7 @@
                             <image
                                 src="@/ai_modules/digital_human/static/icons/video_upload_tips_3.svg"
                                 class="w-[36rpx] h-[36rpx]"></image>
-                            <text class="opacity-80 text-[30rpx] font-bold">错误示例</text>
+                            <text class="text-[30rpx] font-bold text-[#000000cc]">错误示例</text>
                         </view>
                         <view class="mt-[30rpx]">
                             <image
@@ -93,9 +95,7 @@
 
 <script setup lang="ts">
 import config from "@/config";
-import request from "@/utils/request";
 import { createAnchor } from "@/api/digital_human";
-import { useAppStore } from "@/stores/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { ModeType, ListenerType, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
 import VideoPlayer from "@/ai_modules/digital_human/components/video-player/video-player.vue";
@@ -104,100 +104,162 @@ import { useUserStore } from "@/stores/user";
 import { useUpload, uploadLimit, commonUploadLimit } from "../../hooks/useUpload";
 import requestCancel from "@/utils/request/cancel";
 
-const appStore = useAppStore();
+// 定义表单数据类型
+interface FormData {
+    name: string;
+    url: string;
+    pic: string;
+    anchor_id: string;
+    model_version: number | string;
+    width: number;
+    height: number;
+}
+
+// 定义上传要求类型
+interface UploadRequirement {
+    resolution: string;
+    fileSize: number;
+}
+
+// 支持的上传格式
+const SUPPORTED_EXTENSIONS = ["mp4", "mov"];
+
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
 
-const modeType = ref<ModeType>();
+// 使用shallowRef优化性能，因为这些值不需要深层响应式
+const modeType = shallowRef<ModeType>();
 
-const formData = reactive<any>({
+// 使用类型定义提高代码可维护性
+const formData = reactive<FormData>({
     name: "",
     url: "",
     pic: "",
     anchor_id: "",
     model_version: "",
+    width: 0,
+    height: 0,
 });
 
 // 充值弹窗
 const showRechargePopup = ref(false);
 const rechargePopupRef = ref();
 
-// 上传格式
-const extension = ["mp4", "mov"];
+// 上传状态管理
 const showUploadProgress = ref(false);
 const uploadProgressNum = ref(0);
-const uploadProgressType = ref<"video" | "image">();
+const uploadProgressType = shallowRef<"video" | "image">();
 const isUploadSuccess = ref(false);
 const loadingText = ref("");
-const commonUploadRequirements = {
+
+// 通用上传要求
+const commonUploadRequirements: UploadRequirement = {
     resolution: `${commonUploadLimit.minResolution}P-${commonUploadLimit.maxResolution}P`,
     fileSize: commonUploadLimit.size,
 };
 
+/**
+ * 创建分辨率字符串
+ * @param modelVersion 模型版本
+ * @returns 格式化的分辨率字符串
+ */
+const createResolutionString = (modelVersion: number): string => {
+    return `${uploadLimit[modelVersion].minResolution}P-${uploadLimit[modelVersion].maxResolution}P`;
+};
+
 // 模型要求对应的上传要求描述
-const modelUploadRequirements: any = {
+const modelUploadRequirements: Record<number, UploadRequirement> = {
     [DigitalHumanModelVersionEnum.STANDARD]: {
-        resolution: `${uploadLimit[DigitalHumanModelVersionEnum.STANDARD].minResolution}P-${
-            uploadLimit[DigitalHumanModelVersionEnum.STANDARD].maxResolution
-        }P`,
+        resolution: createResolutionString(DigitalHumanModelVersionEnum.STANDARD),
         fileSize: uploadLimit[DigitalHumanModelVersionEnum.STANDARD].size,
     },
     [DigitalHumanModelVersionEnum.SUPER]: {
-        resolution: `${uploadLimit[DigitalHumanModelVersionEnum.SUPER].minResolution}P-${
-            uploadLimit[DigitalHumanModelVersionEnum.SUPER].maxResolution
-        }P`,
+        resolution: createResolutionString(DigitalHumanModelVersionEnum.SUPER),
         fileSize: uploadLimit[DigitalHumanModelVersionEnum.SUPER].size,
     },
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadRequirements,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadRequirements,
+    [DigitalHumanModelVersionEnum.CHANJING]: {
+        resolution: createResolutionString(DigitalHumanModelVersionEnum.CHANJING),
+        fileSize: uploadLimit[DigitalHumanModelVersionEnum.CHANJING].size,
+    },
 };
 
+// 上传模板内容列表
 const uploadTemplateContentLists = computed(() => {
+    // 确保model_version有效，否则使用默认值
+    const modelVersion = formData.model_version
+        ? typeof formData.model_version === "string"
+            ? parseInt(formData.model_version)
+            : formData.model_version
+        : DigitalHumanModelVersionEnum.STANDARD;
+
+    // 确保modelVersion是有效的枚举值
+    const validModelVersion = Object.values(DigitalHumanModelVersionEnum).includes(modelVersion)
+        ? modelVersion
+        : DigitalHumanModelVersionEnum.STANDARD;
+
+    const requirements = modelUploadRequirements[validModelVersion as number] || commonUploadRequirements;
+
     return [
         { name: "视频方向", value: "横向或纵向" },
-        { name: "文件格式", value: extension.join("、") },
-        { name: "视频时长", value: "10秒-300秒" },
-        { name: "分辨率", value: modelUploadRequirements[formData.model_version]?.resolution },
-        { name: "文件大小", value: `小于${modelUploadRequirements[formData.model_version]?.fileSize}MB` },
+        { name: "文件格式", value: SUPPORTED_EXTENSIONS.join("、") },
+        { name: "分辨率", value: requirements.resolution },
+        {
+            name: "声音要求",
+            value: "视频内音频需要清晰、响亮且无嘈杂背景音等干扰",
+        },
+        { name: "文件大小", value: `小于${requirements.fileSize}MB` },
     ];
 });
 
 // 上传参数
 const uploadParams = computed(() => {
-    return uploadLimit[formData.model_version];
+    // 确保model_version有效
+    return formData.model_version ? uploadLimit[formData.model_version] : null;
 });
 
 const getTokenByScene = (key: string) => userStore.getTokenByScene(key);
 
+/**
+ * 获取对应模型版本的场景键
+ * @param modelVersion 模型版本
+ * @returns 对应的场景键
+ */
+const getSceneKeysByModelVersion = (modelVersion: number): { avatar: string } => {
+    const sceneKeys = {
+        pro: { avatar: TokensSceneEnum.HUMAN_AVATAR_PRO },
+        normal: { avatar: TokensSceneEnum.HUMAN_AVATAR },
+        advanced: { avatar: TokensSceneEnum.HUMAN_AVATAR_ADVANCED },
+        elite: { avatar: TokensSceneEnum.HUMAN_AVATAR_ELITE },
+        chanjing: { avatar: TokensSceneEnum.HUMAN_AVATAR_CHANJING },
+    };
+
+    switch (modelVersion) {
+        case DigitalHumanModelVersionEnum.SUPER:
+            return sceneKeys.pro;
+        case DigitalHumanModelVersionEnum.ADVANCED:
+            return sceneKeys.advanced;
+        case DigitalHumanModelVersionEnum.ELITE:
+            return sceneKeys.elite;
+        case DigitalHumanModelVersionEnum.CHANJING:
+            return sceneKeys.chanjing;
+        default:
+            return sceneKeys.normal;
+    }
+};
+
+/**
+ * 开始上传视频
+ */
 const startUpload = async () => {
-    if (modeType.value == ModeType.ANCHOR) {
-        const sceneKeys = {
-            pro: {
-                avatar: TokensSceneEnum.HUMAN_AVATAR_PRO,
-            },
-            normal: {
-                avatar: TokensSceneEnum.HUMAN_AVATAR,
-            },
-            advanced: {
-                avatar: TokensSceneEnum.HUMAN_AVATAR_ADVANCED,
-            },
-            elite: {
-                avatar: TokensSceneEnum.HUMAN_AVATAR_ELITE,
-            },
-        };
-        const keys = (() => {
-            switch (parseInt(formData.model_version)) {
-                case DigitalHumanModelVersionEnum.SUPER:
-                    return sceneKeys.pro;
-                case DigitalHumanModelVersionEnum.ADVANCED:
-                    return sceneKeys.advanced;
-                case DigitalHumanModelVersionEnum.ELITE:
-                    return sceneKeys.elite;
-                default:
-                    return sceneKeys.normal;
-            }
-        })();
+    // 检查是否为形象模式，并验证积分
+    if (modeType.value === ModeType.ANCHOR) {
+        const modelVersion = parseInt(String(formData.model_version));
+        const keys = getSceneKeysByModelVersion(modelVersion);
         const { score } = getTokenByScene(keys.avatar);
+
+        // 积分不足，显示充值弹窗
         if (userTokens.value < score) {
             showRechargePopup.value = true;
             await nextTick();
@@ -205,22 +267,37 @@ const startUpload = async () => {
             return;
         }
     }
+    // 设置导航栏颜色（非H5环境）
     // #ifndef H5
     uni.setNavigationBarColor({
         frontColor: "#000000",
         backgroundColor: "#000000",
     });
     // #endif
+
+    // 检查上传参数是否有效
+    if (!uploadParams.value) {
+        uni.$u.toast("上传参数无效，请检查模型版本");
+        return;
+    }
+
+    // 开始上传
     const { upload } = useUpload({
-        size: uploadParams.value?.size,
-        resolution: [uploadParams.value?.minResolution, uploadParams.value?.maxResolution],
-        duration: [uploadParams.value?.videoMinDuration, uploadParams.value?.videoMaxDuration],
-        extension: extension,
+        size: uploadParams.value.size,
+        resolution: [uploadParams.value.minResolution, uploadParams.value.maxResolution],
+        duration: [uploadParams.value.videoMinDuration, uploadParams.value.videoMaxDuration],
+        extension: SUPPORTED_EXTENSIONS,
         async onSuccess(res) {
-            const { url, pic } = res;
+            const { url, pic, width, height } = res;
+            // 更新表单数据
             formData.url = url;
             formData.pic = pic;
+            formData.width = width;
+            formData.height = height;
+
             formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2);
+
+            // 开始形象克隆
             loadingText.value = "形象克隆中...";
             try {
                 const result = await createAnchor(formData);
@@ -228,20 +305,41 @@ const startUpload = async () => {
                 isUploadSuccess.value = true;
                 loadingText.value = "";
             } catch (error) {
+                // 错误处理
                 showUploadProgress.value = false;
                 uploadProgressNum.value = 0;
                 loadingText.value = "";
-                uni.$u.toast(error || "上传失败");
+
+                // 处理不同类型的错误
+                let errorMessage = "上传失败";
+                if (error) {
+                    if (typeof error === "string") {
+                        errorMessage = error;
+                    } else if (typeof error === "object") {
+                        // 使用类型断言处理可能的错误对象
+                        const errorObj = error as { message?: string };
+                        errorMessage = errorObj.message || "上传失败";
+                    }
+                }
+
+                uni.$u.toast(errorMessage);
                 resetNavigationBarColor();
             }
         },
         onProgress(res) {
+            // 更新进度
             uploadProgressType.value = res.type;
             uploadProgressNum.value = res.progress;
-            loadingText.value = uploadProgressType.value == "video" ? "视频正在上传中..." : "图片正在上传中...";
+            loadingText.value = uploadProgressType.value === "video" ? "视频正在上传中..." : "图片正在上传中...";
             showUploadProgress.value = true;
         },
         onError(err) {
+            // 错误处理
+            if (err.errMsg && err.errMsg === "chooseMedia:fail api scope is not declared in the privacy agreement") {
+                uni.$u.toast("请完善隐私协议，否则无法使用");
+            } else {
+                uni.$u.toast(err.errMsg || "上传失败");
+            }
             showUploadProgress.value = false;
             uploadProgressNum.value = 0;
             resetNavigationBarColor();
@@ -250,47 +348,113 @@ const startUpload = async () => {
     upload();
 };
 
+/**
+ * 处理上传取消
+ */
 const handleUploadCancel = () => {
+    // 取消请求
     requestCancel.remove("/upload/video");
     requestCancel.remove("/upload/image");
+
+    // 重置状态
     showUploadProgress.value = false;
     uploadProgressNum.value = 0;
+    loadingText.value = "";
     resetNavigationBarColor();
 };
 
+/**
+ * 处理上传确认
+ */
 const handelUploadConfirm = async () => {
-    uni.$u.route({
-        url: "/ai_modules/digital_human/pages/video_create/video_create",
-        type: "redirect",
-        params: {
-            type: ListenerType.UPLOAD_VIDEO,
-            data: JSON.stringify(formData),
-        },
-    });
+    try {
+        // 导航到视频创建页面，并传递数据
+        uni.$u.route({
+            url: "/ai_modules/digital_human/pages/video_create/video_create",
+            type: "redirect",
+            params: {
+                type: ListenerType.UPLOAD_VIDEO,
+                data: JSON.stringify(formData),
+            },
+        });
+    } catch (error) {
+        console.error("导航到视频创建页面失败:", error);
+        uni.$u.toast("页面跳转失败，请重试");
+    }
 };
 
+/**
+ * 返回首页
+ */
 const back = () => {
-    uni.$u.route({
-        url: "/ai_modules/digital_human/pages/index/index",
-        type: "redirect",
-    });
+    try {
+        uni.$u.route({
+            url: "/ai_modules/digital_human/pages/index/index",
+            type: "redirect",
+        });
+    } catch (error) {
+        console.error("返回首页失败:", error);
+        uni.$u.toast("页面跳转失败，请重试");
+    }
 };
 
+/**
+ * 重置导航栏颜色
+ */
 const resetNavigationBarColor = () => {
     // #ifndef H5
-    uni.setNavigationBarColor({
-        frontColor: "#000000",
-        backgroundColor: "#F9FAFB",
-    });
+    try {
+        uni.setNavigationBarColor({
+            frontColor: "#000000",
+            backgroundColor: "#F9FAFB",
+        });
+    } catch (error) {
+        console.error("重置导航栏颜色失败:", error);
+    }
     // #endif
 };
 
+/**
+ * 页面加载时处理
+ */
 onLoad((options: any) => {
-    modeType.value = options.type;
-    if (options.model_version) {
-        formData.model_version = parseInt(options.model_version);
+    try {
+        // 设置模式类型
+        if (options.type) {
+            modeType.value = options.type;
+        }
+
+        // 设置模型版本
+        if (options.model_version) {
+            const modelVersion = parseInt(options.model_version);
+            if (!isNaN(modelVersion)) {
+                formData.model_version = modelVersion;
+            } else {
+                console.warn("无效的模型版本:", options.model_version);
+            }
+        }
+    } catch (error) {
+        console.error("页面加载参数处理失败:", error);
     }
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+/* 滚动条样式优化 */
+:deep(.uni-scroll-view::-webkit-scrollbar) {
+    display: none;
+    width: 0;
+    height: 0;
+    background-color: transparent;
+}
+
+/* 按钮悬停效果 */
+:deep(.u-button) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:active {
+        transform: translateY(2rpx);
+        box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.08);
+    }
+}
+</style>

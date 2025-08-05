@@ -5,6 +5,7 @@ namespace app\common\model\human;
 
 use app\common\model\BaseModel;
 use app\common\service\ConfigService;
+use app\common\service\FileService;
 use think\model\concern\SoftDelete;
 
 /**
@@ -94,6 +95,18 @@ class HumanVoice extends BaseModel
                 '10007'=>'197971',//爱小杭(男)
                 '10008'=>'197978',//爱小辰(男)
                 '10009'=>'197982',//飞镜(男)
+            ],
+             '7' => [
+                '10000'=>'C-Audio-3327413b0693466c987b9db05a65e2f9',//智小敏(女)
+                '10001'=>'C-Audio-65d3f6047c964ef5a6d00a30765116b3',//智小柔(女)
+                '10002'=>'C-Audio-41a0d443dcd942c1aed649ca7a90d17c',//智小满(女)
+                '10003'=>'C-Audio-6db46e9d33cd4e58aca40b850560462b',//爱小芊(女)
+                '10004'=>'C-Audio-bcd472c1339349d095399e732635a6b8',//爱小静(女)
+                '10005'=>'C-Audio-05d14d65c16d4f06a7c3e0017a91fcdc',//千嶂(男)
+                '10006'=>'C-Audio-6c9d88135bdd41a9ac7365509b08b546',//智皓(男)
+                '10007'=>'C-Audio-752df747b1414fda8f52ace1fb624401',//爱小杭(男)
+                '10008'=>'C-Audio-804a07540fdf44429f4986e1172aedf7',//爱小辰(男)
+                '10009'=>'C-Audio-375e688a8af0446caad3f6e7bbad719a',//飞镜(男)
             ]
         ];
 
@@ -150,6 +163,18 @@ class HumanVoice extends BaseModel
                 '197971',//爱小杭(男)
                 '197978',//爱小辰(男)
                 '197982',//飞镜(男)
+            ],
+            '7' => [
+                'C-Audio-3327413b0693466c987b9db05a65e2f9',//智小敏(女)
+                'C-Audio-65d3f6047c964ef5a6d00a30765116b3',//智小柔(女)
+                'C-Audio-41a0d443dcd942c1aed649ca7a90d17c',//智小满(女)
+                'C-Audio-6db46e9d33cd4e58aca40b850560462b',//爱小芊(女)
+                'C-Audio-bcd472c1339349d095399e732635a6b8',//爱小静(女)
+                'C-Audio-05d14d65c16d4f06a7c3e0017a91fcdc',//千嶂(男)
+                'C-Audio-6c9d88135bdd41a9ac7365509b08b546',//智皓(男)
+                'C-Audio-752df747b1414fda8f52ace1fb624401',//爱小杭(男)
+                'C-Audio-804a07540fdf44429f4986e1172aedf7',//爱小辰(男)
+                'C-Audio-375e688a8af0446caad3f6e7bbad719a',//飞镜(男)
             ]
         ];
 
@@ -167,10 +192,14 @@ class HumanVoice extends BaseModel
         $info =  ConfigService::get('model', 'list', []);
         $channel = $info['channel'] ?? [];
         foreach ($channel as $key => $value) {
+            if (trim($value['icon']) != ''){
+                $channel[$key]['icon'] = FileService::getFileUrl($value['icon']);
+            }
             if ($value['status'] != 1) {
 
                 unset($channel[$key]);
             }
+
         }
         $info['channel'] = array_values($channel);
 

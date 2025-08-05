@@ -67,7 +67,7 @@
         <div
             class="grow min-h-0 overflow-y-auto px-4 dynamic-scroller"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="h-full" v-loading="pager.loading">
@@ -106,7 +106,7 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
+                    <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                 </div>
                 <div class="h-full flex items-center justify-center" v-else>
                     <Empty />
@@ -124,6 +124,8 @@ import VideoItem from "@/pages/app/_components/video-item.vue";
 
 const appStore = useAppStore();
 const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+
+const nuxtApp = useNuxtApp();
 
 const statusList = [
     {
@@ -150,12 +152,11 @@ const deleteIds = ref<number[]>([]);
 const queryParams = reactive({
     page_no: 1,
     page_size: 20,
-    type: 0,
     status: "",
     model_version: "",
 });
 
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getAnchorList,
     params: queryParams,
     isScroll: true,
@@ -198,18 +199,23 @@ const load = async () => {
 };
 
 const handleRetry = async (id: number) => {
-    await feedback.confirm("确定重试改形象吗？");
-    try {
-        await retryAnchor({ anchor_id: id });
-        resetPage();
-        feedback.msgSuccess("重试成功");
-    } catch (error) {
-        feedback.msgError(error || "重试失败");
-    }
+    nuxtApp.$confirm({
+        message: "确定重试改形象吗？",
+        theme: "dark",
+        onConfirm: async () => {
+            try {
+                await retryAnchor({ anchor_id: id });
+                resetPage();
+                feedback.msgSuccess("重试成功");
+            } catch (error) {
+                feedback.msgError(error || "重试失败");
+            }
+        },
+    });
 };
 
 const handleDelete = async (id: number | number[]) => {
-    useNuxtApp().$confirm({
+    nuxtApp.$confirm({
         title: "提示",
         message: "确定删除吗？",
         theme: "dark",

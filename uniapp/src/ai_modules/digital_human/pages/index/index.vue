@@ -181,7 +181,8 @@ const back = () => {
 const loopTimer = ref<any>();
 const loopLists = async () => {
     loopTimer.value = setTimeout(() => {
-        if (pager.lists.some((item: any) => item.status != 1)) {
+        const isLoading = pager.lists.some((item: any) => item.status != 1 && item.status != 2);
+        if (isLoading) {
             getLists();
             loopLists();
         } else {

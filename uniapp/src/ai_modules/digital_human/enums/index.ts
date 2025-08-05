@@ -1,17 +1,3 @@
-export interface CreateTaskParams {
-    video_url: string;
-    anchor_id: number;
-    name: string;
-    anchor_name: string;
-    model_version: number | string;
-    audio_type: number;
-    pic: string;
-    gender: string;
-    msg: string;
-    voice_id: string;
-    voice_url: string;
-}
-
 // 数字人模型版本
 export enum DigitalHumanModelVersionEnum {
     // 标准版
@@ -22,6 +8,8 @@ export enum DigitalHumanModelVersionEnum {
     ADVANCED = 4,
     // 尊享版
     ELITE = 6,
+    // 畅镜版
+    CHANJING = 7,
 }
 
 // 数字人模型版本枚举映射
@@ -30,6 +18,7 @@ export const DigitalHumanModelVersionEnumMap = {
     [DigitalHumanModelVersionEnum.SUPER]: "极速版",
     [DigitalHumanModelVersionEnum.ADVANCED]: "高级版",
     [DigitalHumanModelVersionEnum.ELITE]: "尊享版",
+    [DigitalHumanModelVersionEnum.CHANJING]: "蝉镜版",
 };
 
 // 模型类型

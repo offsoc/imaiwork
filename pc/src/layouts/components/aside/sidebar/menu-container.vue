@@ -1,5 +1,5 @@
 <template>
-    <div class="menu-container">
+    <div class="menu-container h-full">
         <ElScrollbar>
             <div class="p-[18px]">
                 <div class="h-full flex flex-col gap-2 mt-[18px]">

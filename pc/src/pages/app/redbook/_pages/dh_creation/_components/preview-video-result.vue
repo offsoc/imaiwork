@@ -26,7 +26,7 @@
             <div
                 class="h-[600px] overflow-y-auto relative dynamic-scroller"
                 :infinite-scroll-immediate="false"
-                :infinite-scroll-disabled="!isLoad"
+                :infinite-scroll-disabled="!pager.isLoad"
                 :infinite-scroll-distance="10"
                 v-infinite-scroll="load">
                 <div class="h-full p-4" v-loading="pager.loading">
@@ -71,7 +71,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
+                        <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                     </div>
 
                     <div v-else class="h-full flex items-center justify-center">
@@ -114,7 +114,7 @@ const queryParams = reactive<Record<string, any>>({
     video_setting_id: "",
 });
 
-const { pager, isLoad, getLists, resetPage } = usePaging({
+const { pager, getLists } = usePaging({
     fetchFun: getDigitalHumanVideo,
     params: queryParams,
     isScroll: true,

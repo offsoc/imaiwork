@@ -13,7 +13,13 @@
         <ConfigTable title="其他" :data="getOtherConfig" />
     </div>
     <footer-btns>
-        <el-button type="primary" :loading="isLock" @click="lockSaveConfig"> 保存 </el-button>
+        <el-button
+            v-perms="['finance.marketing.creditset/save']"
+            type="primary"
+            :loading="isLock"
+            @click="lockSaveConfig">
+            保存
+        </el-button>
     </footer-btns>
 </template>
 
@@ -24,10 +30,6 @@ import { debounce } from "lodash";
 import ConfigTable from "./config-table.vue";
 
 const formData = reactive<any>({});
-
-const setConfig = debounce(async (data: any) => {
-    await setCreditSet({ id: data.id, score: data.score });
-}, 500);
 
 const tableData = ref<any[]>([]);
 
@@ -55,6 +57,10 @@ const getAiPersonConfig = computed(() => {
             "human_avatar_ymt",
             "human_voice_ymt",
             "human_audio_ymt",
+            "human_avatar_chanjing",
+            "human_voice_chanjing",
+            "human_audio_chanjing",
+            "human_video_chanjing",
         ].includes(item.scene)
     );
 });
@@ -70,8 +76,13 @@ const getAiDrawConfig = computed(() => {
             "txt_to_posterimg",
             "volc_txt_to_img",
             "volc_txt_to_posterimg",
+            "volc_txt_to_posterimg_v2",
             "volc_text_to_video",
             "volc_image_to_video",
+            "volc_img_to_img_v2",
+            "volc_txt_to_img_v2",
+            "doubao_txt_to_video",
+            "doubao_img_to_video",
             "ai_draw_video_prompt",
         ].includes(item.scene)
     );

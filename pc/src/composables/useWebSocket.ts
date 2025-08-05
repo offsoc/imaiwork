@@ -83,7 +83,7 @@ export default function useWebSocket<T = unknown>(url: string, options: WebSocke
                 if (currentTarget) {
                     const { readyState } = currentTarget as WebSocket;
                     if (readyState === WebSocket.CLOSED) {
-                        // feedback.notifyError(DeviceWsMessage[DeviceCmdCodeEnum.CONNECT_ERROR]);
+                        // feedback.msgError(DeviceWsMessage[DeviceCmdCodeEnum.CONNECT_ERROR]);
                     }
                 }
                 triggerEvent("error", {

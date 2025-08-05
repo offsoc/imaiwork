@@ -48,7 +48,7 @@
         <el-card class="!border-none mt-4" shadow="never">
             <div class="mb-4 flex justify-between">
                 <el-button
-                    v-perms="['draw_sd.record/delete']"
+                    v-perms="['ai_application.draw_sd.record/delete']"
                     type="default"
                     :plain="true"
                     :disabled="!multipleSelection.length"
@@ -56,8 +56,18 @@
                     批量删除
                 </el-button>
                 <div>
-                    <el-button type="primary" @click="handlePromptConfig('image')">图片获取提示词配置</el-button>
-                    <el-button type="primary" @click="handlePromptConfig('text')">文字获取提示词配置</el-button>
+                    <el-button
+                        v-perms="['ai_application.draw_sd.record/edit']"
+                        type="primary"
+                        @click="handlePromptConfig('image')">
+                        图片获取提示词配置
+                    </el-button>
+                    <el-button
+                        v-perms="['ai_application.draw_sd.record/edit']"
+                        type="primary"
+                        @click="handlePromptConfig('text')">
+                        文字获取提示词配置
+                    </el-button>
                 </div>
             </div>
             <el-table
@@ -103,7 +113,11 @@
                 <el-table-column label="操作" width="120" fixed="right">
                     <template #default="{ row }">
                         <el-button type="primary" link @click="handleDetail(row)">详情</el-button>
-                        <el-button v-perms="['draw_sd.record/delete']" type="danger" link @click="handleDelete(row.id)">
+                        <el-button
+                            v-perms="['ai_application.draw_sd.record/delete']"
+                            type="danger"
+                            link
+                            @click="handleDelete(row.id)">
                             删除
                         </el-button>
                     </template>

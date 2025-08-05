@@ -37,7 +37,7 @@
         <div
             class="grow min-h-0 overflow-y-auto flex flex-col dynamic-scroller"
             :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!isLoad"
+            :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
             v-infinite-scroll="load">
             <div class="h-full p-4" v-loading="pager.loading">
@@ -97,7 +97,7 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="!isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
+                    <div v-if="!pager.isLoad" class="text-white text-center text-xs w-full py-4">暂无更多了~</div>
                 </div>
 
                 <div class="h-full flex items-center justify-center" v-else>
@@ -119,7 +119,7 @@
 <script setup lang="ts">
 import { getDigitalHumanList, deleteDigitalHuman } from "@/api/redbook";
 import Empty from "@/pages/app/redbook/_components/empty.vue";
-import { SidebarEnum } from "../../_enums";
+import { SidebarTypeEnum } from "../../_enums";
 import CreatePanel from "./_components/create-panel.vue";
 import PreviewVideoResult from "./_components/preview-video-result.vue";
 const route = useRoute();
@@ -130,7 +130,7 @@ const queryParams = reactive({
     page_size: 20,
 });
 
-const { pager, getLists, isLoad, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getDigitalHumanList,
     params: queryParams,
     isScroll: true,
@@ -147,7 +147,7 @@ const statusMap = {
 
 const back = () => {
     isCreate.value = false;
-    window.history.replaceState("", "", `?type=${SidebarEnum.DIGITAL_HUMAN_CREATION}`);
+    window.history.replaceState("", "", `?type=${SidebarTypeEnum.DIGITAL_HUMAN_CREATION}`);
     resetPage();
 };
 
@@ -194,7 +194,7 @@ const handleDeleteTask = async (id: string, index: number) => {
 
 const handlePublish = async (id: string) => {
     replaceState({
-        type: SidebarEnum.PUBLISH_VIDEO_TASK,
+        type: SidebarTypeEnum.PUBLISH_VIDEO_TASK,
         is_publish: 1,
         dh_create_id: id,
     });
@@ -212,6 +212,10 @@ const handlePreviewVideoResult = async (id: string) => {
 };
 
 getLists();
+
+onMounted(() => {
+    console.log(route.query);
+});
 </script>
 
 <style scoped></style>

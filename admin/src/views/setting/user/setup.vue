@@ -22,7 +22,13 @@
                     </el-input>
                 </el-form-item>
             </el-form>
-            <el-button type="primary" :loading="isBaseLock" @click="handleBaseSubmit">保存</el-button>
+            <el-button
+                v-perms="['setting.user.user/setConfig']"
+                type="primary"
+                :loading="isBaseLock"
+                @click="handleBaseSubmit"
+                >保存</el-button
+            >
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
             <div class="font-medium mb-7">问卷设置</div>
@@ -35,7 +41,13 @@
                         <el-input v-model="surveyFormData.remind_days" class="w-[120px]" type="number" :min="1" />
                     </el-form-item>
                 </el-form>
-                <el-button type="primary" :loading="isSurveyLock" @click="saveSurveyFormLock">保存</el-button>
+                <el-button
+                    v-perms="['setting.user.user/setConfig']"
+                    type="primary"
+                    :loading="isSurveyLock"
+                    @click="saveSurveyFormLock"
+                    >保存</el-button
+                >
             </div>
         </el-card>
     </div>

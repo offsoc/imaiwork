@@ -2,7 +2,7 @@
     <div
         class="flex flex-col h-full overflow-y-auto"
         :infinite-scroll-immediate="false"
-        :infinite-scroll-disabled="!isLoad"
+        :infinite-scroll-disabled="!pager.isLoad"
         :infinite-scroll-distance="10"
         v-infinite-scroll="load">
         <div class="text-[20px] font-bold p-4">思维导图</div>
@@ -78,7 +78,7 @@
                     </ElCard>
                 </div>
             </div>
-            <div v-if="!isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
+            <div v-if="!pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
         </div>
         <FixedBtns :show-add="queryParams.page_no > 1" @add="handleAdd" @back="handleBack" @refresh="handleRefresh" />
     </div>
@@ -97,6 +97,7 @@ import FixedBtns from "../_components/fixed-btns.vue";
 import KnbBind from "@/components/knb-bind/index.vue";
 
 const router = useRouter();
+const nuxtApp = useNuxtApp();
 
 const activeMindMap = ref<number | undefined>();
 
@@ -105,7 +106,7 @@ const queryParams = reactive({
     page_size: 15,
 });
 
-const { getLists, pager, isLoad } = usePaging({
+const { getLists, pager } = usePaging({
     fetchFun: mindMapLists,
     params: queryParams,
     isScroll: true,
@@ -149,10 +150,14 @@ const visibleChange = (flag: boolean, id: number) => {
 };
 
 const handleDelete = async (id: number | string, index: number) => {
-    await feedback.confirm("确定删除此思维导图吗？");
-    await mindMapDelete({ id });
-    feedback.msgSuccess("删除成功");
-    pager.lists.splice(index, 1);
+    await nuxtApp.$confirm({
+        message: "确定删除此思维导图吗？",
+        onConfirm: async () => {
+            await mindMapDelete({ id });
+            feedback.msgSuccess("删除成功");
+            pager.lists.splice(index, 1);
+        },
+    });
 };
 
 const mindMapContainer = shallowRef<SVGSVGElement[]>([]);

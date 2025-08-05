@@ -44,7 +44,6 @@
                     v-loading="pager.loading"
                     :header-row-style="{ height: '62px' }"
                     :row-style="{ height: '50px' }">
-                    <ElTableColumn prop="id" label="ID" width="60" fixed="left"></ElTableColumn>
                     <ElTableColumn prop="name" label="音频名称" min-width="200"></ElTableColumn>
                     <ElTableColumn label="创建时间" prop="create_time" min-width="200"></ElTableColumn>
                     <ElTableColumn label="使用模型" min-width="120">
@@ -100,8 +99,11 @@
 import { getAudioList, deleteAudio } from "@/api/digital_human";
 import AudioControl from "@/pages/app/derivative_work/_components/control.vue";
 import { useAppStore } from "@/stores/app";
+import { DigitalHumanModelVersionEnum } from "../../_enums";
 const appStore = useAppStore();
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+const modelChannel = computed(() =>
+    appStore.getDigitalHumanConfig?.channel.filter((item) => item.id != DigitalHumanModelVersionEnum.CHANJING)
+);
 
 const showAudio = ref<boolean>(false);
 const audioControlRef = shallowRef<InstanceType<typeof AudioControl>>();
@@ -133,6 +135,11 @@ const handlePlay = async (row: any, index: number) => {
     currentAudio.value = row;
     await nextTick();
     audioControlRef.value?.setAudio(currentAudio.value.url);
+    showAudio.value = true;
+    currentRowIndex.value = index;
+    currentAudio.value = row;
+    await nextTick();
+    audioControlRef.value?.setAudio(currentAudio.value.url);
 };
 
 const prevAudio = () => {
@@ -146,9 +153,27 @@ const prevAudio = () => {
     currentAudio.value = pager.lists[currentRowIndex.value];
     audioControlRef.value?.resetPlayer();
     audioControlRef.value?.setAudio(currentAudio.value.url);
+    if (currentRowIndex.value === 0) {
+        feedback.msgError("已经是第一首了");
+        return;
+    }
+    if (currentRowIndex.value > 0) {
+        currentRowIndex.value--;
+    }
+    currentAudio.value = pager.lists[currentRowIndex.value];
+    audioControlRef.value?.resetPlayer();
+    audioControlRef.value?.setAudio(currentAudio.value.url);
 };
 
 const nextAudio = () => {
+    if (currentRowIndex.value === pager.lists.length - 1) {
+        feedback.msgError("已经是最后一首了");
+        return;
+    }
+    currentRowIndex.value++;
+    currentAudio.value = pager.lists[currentRowIndex.value];
+    audioControlRef.value?.resetPlayer();
+    audioControlRef.value?.setAudio(currentAudio.value.url);
     if (currentRowIndex.value === pager.lists.length - 1) {
         feedback.msgError("已经是最后一首了");
         return;

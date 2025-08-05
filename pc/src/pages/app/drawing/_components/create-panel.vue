@@ -77,48 +77,64 @@ const getTokensCount = computed(() => {
 });
 // 获取消耗tokens
 const getConsumeTokens = () => {
-    const { type } = props;
+    // 初始化tokens和单位
     let tokens = 0;
     consumeTokensUnit.value = "";
-    switch (type) {
-        case SidebarEnum.IMAGE_GENERATION:
-            if (formData.type == drawTypeEnumMap[DrawTypeEnum.TXT2IMAGE]) {
-                if (formData.model == ModelEnum.HIDREAMAI) {
-                    tokens = userStore.getTokenByScene(TokensSceneEnum.TEXT_TO_IMAGE)?.score;
-                } else if (formData.model == ModelEnum.GENERAL) {
-                    tokens = userStore.getTokenByScene(TokensSceneEnum.VOLC_TEXT_TO_IMAGE)?.score;
-                }
+
+    // 定义token获取映射
+    const tokenMappings = {
+        [SidebarEnum.IMAGE_GENERATION]: {
+            [drawTypeEnumMap[DrawTypeEnum.TXT2IMAGE]]: {
+                [ModelEnum.HIDREAMAI]: TokensSceneEnum.TEXT_TO_IMAGE,
+                [ModelEnum.GENERAL]: TokensSceneEnum.VOLC_TEXT_TO_IMAGE,
+                [ModelEnum.SEEDREAM]: TokensSceneEnum.VOLC_TEXT_TO_IMAGE_V2,
+            },
+            [drawTypeEnumMap[DrawTypeEnum.IMAGE2IMAGE]]: {
+                [ModelEnum.HIDREAMAI]: TokensSceneEnum.IMAGE_TO_IMAGE,
+                [ModelEnum.SEEDREAM]: TokensSceneEnum.VOLC_IMAGE_TO_IMAGE_V2,
+            },
+        },
+        [SidebarEnum.POSTER_IMAGE]: {
+            [ModelEnum.HIDREAMAI]: TokensSceneEnum.TEXT_TO_IMAGE,
+            [ModelEnum.GENERAL]: TokensSceneEnum.VOLC_TEXT_TO_POSTERIMG,
+            [ModelEnum.SEEDREAM]: TokensSceneEnum.VOLC_TEXT_TO_POSTERIMG_V2,
+        },
+        [SidebarEnum.VIDEO_GENERATION]: {
+            [GenerateVideoTypeEnum.TXT2VIDEO]: {
+                [ModelEnum.GENERAL]: TokensSceneEnum.VOLC_TEXT_TO_VIDEO,
+                [ModelEnum.SEEDANCE]: TokensSceneEnum.DOUBAO_TEXT_TO_VIDEO,
+            },
+            [GenerateVideoTypeEnum.IMG2VIDEO]: {
+                [ModelEnum.GENERAL]: TokensSceneEnum.VOLC_IMAGE_TO_VIDEO,
+                [ModelEnum.SEEDANCE]: TokensSceneEnum.DOUBAO_IMAGE_TO_VIDEO,
+            },
+        },
+    };
+
+    // 特殊场景直接映射
+    const directMappings = {
+        [SidebarEnum.GOODS_IMAGE]: TokensSceneEnum.GOODS_IMAGE,
+        [SidebarEnum.FASHION_IMAGE]: TokensSceneEnum.MODEL_IMAGE,
+    };
+
+    // 处理直接映射场景
+    if (directMappings[props.type]) {
+        tokens = userStore.getTokenByScene(directMappings[props.type])?.score;
+    } else if (props.type == SidebarEnum.POSTER_IMAGE) {
+        const typeMapping = tokenMappings[props.type];
+        tokens = userStore.getTokenByScene(typeMapping[formData.model])?.score;
+    } else if (tokenMappings[props.type]) {
+        const typeMapping = tokenMappings[props.type];
+        const modelMapping = typeMapping[formData.type];
+
+        if (modelMapping) {
+            const scene = modelMapping[formData.model];
+            if (scene) {
+                tokens = userStore.getTokenByScene(scene)?.score;
             }
-            if (formData.type == drawTypeEnumMap[DrawTypeEnum.IMAGE2IMAGE]) {
-                tokens = userStore.getTokenByScene(TokensSceneEnum.IMAGE_TO_IMAGE)?.score;
-            }
-            break;
-        case SidebarEnum.GOODS_IMAGE:
-            tokens = userStore.getTokenByScene(TokensSceneEnum.GOODS_IMAGE)?.score;
-            break;
-        case SidebarEnum.FASHION_IMAGE:
-            tokens = userStore.getTokenByScene(TokensSceneEnum.MODEL_IMAGE)?.score;
-            break;
-        case SidebarEnum.POSTER_IMAGE:
-            if (formData.model == ModelEnum.HIDREAMAI) {
-                tokens = userStore.getTokenByScene(TokensSceneEnum.TEXT_TO_POSTERIMG)?.score;
-            } else if (formData.model == ModelEnum.GENERAL) {
-                tokens = userStore.getTokenByScene(TokensSceneEnum.VOLC_TEXT_TO_POSTERIMG)?.score;
-            }
-            break;
-        case SidebarEnum.VIDEO_GENERATION:
-            if (formData.type == GenerateVideoTypeEnum.TXT2VIDEO) {
-                const { score, unit } = userStore.getTokenByScene(TokensSceneEnum.VOLC_TEXT_TO_VIDEO);
-                tokens = score;
-                consumeTokensUnit.value = unit;
-            }
-            if (formData.type == GenerateVideoTypeEnum.IMG2VIDEO) {
-                const { score, unit } = userStore.getTokenByScene(TokensSceneEnum.VOLC_IMAGE_TO_VIDEO);
-                tokens = score;
-                consumeTokensUnit.value = unit;
-            }
-            break;
+        }
     }
+
     consumeTokens.value = tokens;
 };
 

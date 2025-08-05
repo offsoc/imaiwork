@@ -13,7 +13,7 @@ import DeviceLists from "./_pages/device/lists.vue";
 import WechatLists from "./_pages/wechat/lists.vue";
 import useSidebar from "../../_hooks/useSidebar";
 
-const { sidebar, sidebarIndex, routerParams, getComponents, getSliderIndex } = useSidebar();
+const { sidebar, sidebarIndex, getComponents, getSliderIndex } = useSidebar();
 
 sidebar.value = [
     { name: "设备管理", icon: "device", components: markRaw(DeviceLists), type: 1 },

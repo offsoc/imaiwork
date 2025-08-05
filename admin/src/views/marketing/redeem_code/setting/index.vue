@@ -13,14 +13,15 @@
             </el-card>
         </el-form>
         <footer-btns>
-            <el-button type="primary" :loading="isLock" @click="lockFn">保存</el-button>
+            <el-button v-perms="['cardcode.cardCode/setConfig']" type="primary" :loading="isLock" @click="lockFn"
+                >保存</el-button
+            >
         </footer-btns>
     </div>
 </template>
 
 <script lang="ts" setup name="redeemCodeSetup">
 import { cardcodeConfigGet, cardcodeConfigSet } from "@/api/marketing/redeem_code";
-import feedback from "@/utils/feedback";
 import { useLockFn } from "@/hooks/useLockFn";
 const formData = reactive({
     is_open: 0,

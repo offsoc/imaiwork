@@ -1,136 +1,418 @@
-CREATE TABLE  IF NOT EXISTS  `la_sv_media_setting` (
-`id` int(11) NOT NULL AUTO_INCREMENT,
-`user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户id',
-`name` varchar(50) NOT NULL DEFAULT '' COMMENT '名称',
-`type` tinyint(4) unsigned NOT NULL DEFAULT '3' COMMENT '平台类型:3小红书',
-`media_type` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '媒体类型:1视频2图片',
-`media_count` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '媒体数量',
-`media_url` text COMMENT '媒体url,json',
-`title` text COMMENT '标题,json',
-`subtitle` text COMMENT '副标题,json',
-`extra` text COMMENT '附加字段内容,json',
-`create_time` int(11) DEFAULT NULL COMMENT '创建时间',
-`update_time` int(11) DEFAULT NULL COMMENT '更新时间',
-`delete_time` int(11) DEFAULT NULL COMMENT '删除时间',
-PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COMMENT='媒体设置表';
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_flow`
+(
+    `id`          int(11) NOT NULL AUTO_INCREMENT COMMENT '流程ID',
+    `flow_name`   varchar(60) NOT NULL COMMENT '流程名称',
+    `status`      tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '流程状态 0-关闭 1-开启',
+    `user_id`     int(11) NOT NULL COMMENT '创建人ID',
+    `create_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time` int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY           `sop_user_id` (`user_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工作流流程表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_push`
+(
+    `id`          int(11) NOT NULL AUTO_INCREMENT COMMENT '流程推送ID',
+    `push_name`   varchar(60)  NOT NULL COMMENT '推送名称',
+    `push_day`    varchar(60)  NOT NULL COMMENT '初始推送日期',
+    `status`      tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '状态 0-未配置,1-暂停,2-开启',
+    `push_type`   tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '推送类型 0-群发任务(主动推送),1-sop(被动触发推送)',
+    `type`        tinyint(3) NOT NULL DEFAULT '0' COMMENT '类型 -1-待选择,0-群发任务,1-流程推送,2-阶段推送,3-生日推送,4-节日推送',
+    `all_day`     smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '总推送天数',
+    `user_id`     int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建人ID',
+    `flow_id`     varchar(255) NOT NULL DEFAULT '' COMMENT '所属流程ID',
+    `stage_id`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'sop_sub_stage子阶段ID',
+    `create_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time` int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    `is_publish_edit` tinyint(3) unsigned NOT NULL DEFAULT '2' COMMENT '编辑状态 1-不可编辑,2-可编辑',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY           `sop_user_id` (`user_id`) USING BTREE,
+    KEY           `sop_stage_id` (`stage_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='推送表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_push_content`
+(
+    `id`             int(11) NOT NULL AUTO_INCREMENT COMMENT '流程ID',
+    `content`        text         NOT NULL COMMENT '推送内容',
+    `extend_content` varchar(300) NOT NULL COMMENT '拓展字段',
+    `sort`           int(11) NOT NULL DEFAULT '0' COMMENT '权重， 愈大 排序在前',
+    `user_id`        int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建人ID',
+    `push_time_id`   int(10) unsigned NOT NULL DEFAULT '0' COMMENT '推送时间ID',
+    `push_id`        int(10) unsigned NOT NULL DEFAULT '0' COMMENT '推送ID',
+    `create_time`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time`    int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY              `sop_user_id` (`user_id`) USING BTREE,
+    KEY              `sop_push_id` (`push_id`) USING BTREE,
+    KEY              `sop_push_time_id` (`push_time_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='推送内容表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_push_log`
+(
+    `id`             int(11) NOT NULL AUTO_INCREMENT COMMENT '推送记录ID',
+    `member_id`      int(10) unsigned NOT NULL DEFAULT '0' COMMENT '成员ID',
+    `user_id`        int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建人ID',
+    `push_id`        int(10) unsigned NOT NULL DEFAULT '0' COMMENT '推送ID',
+    `content_id`     int(10) unsigned NOT NULL DEFAULT '0' COMMENT '推送内容ID',
+    `content`        json        NOT NULL COMMENT '推送内容',
+    `push_real_day`  varchar(60) NOT NULL DEFAULT '' COMMENT '推送日期',
+    `push_real_time` time        NOT NULL DEFAULT '00:00:00' COMMENT '实际推送时间',
+    `status`         tinyint(1) NOT NULL DEFAULT '0' COMMENT '推送结果：0-待推送，1-成功，2-失败',
+    `create_time`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time`    int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY              `sop_user_id` (`user_id`) USING BTREE,
+    KEY              `sop_push_id` (`push_id`) USING BTREE,
+    KEY              `sop_content_id` (`content_id`) USING BTREE,
+    KEY              `sop_member_id` (`member_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='推送记录表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_push_member`
+(
+    `id`              int(11) NOT NULL AUTO_INCREMENT,
+    `wechat_id`       varchar(128) NOT NULL COMMENT '推送者微信id（创建人）',
+    `friend_id`       varchar(128) NOT NULL COMMENT '接收者微信id',
+    `nickname`        varchar(128) NOT NULL DEFAULT '' COMMENT '好友昵称',
+    `remark`          varchar(256) NOT NULL DEFAULT '' COMMENT '备注',
+    `avatar`          varchar(256) NOT NULL DEFAULT '' COMMENT '头像',
+    `status`          tinyint(1) NOT NULL DEFAULT '0' COMMENT '0-未选择 1-已选择',
+    `user_id`         int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建人ID',
+    `push_id`         int(10) unsigned DEFAULT '0' COMMENT '推送ID',
+    `flow_id`         int(10) unsigned DEFAULT '0' COMMENT '用户所处流程id',
+    `stage_id`        int(10) unsigned DEFAULT '0' COMMENT '用户所处阶段id',
+    `join_flow_time`  int(10) unsigned NOT NULL DEFAULT '0' COMMENT '进入流程时间',
+    `join_stage_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '进入阶段时间',
+    `create_time`     int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time`     int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time`     int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY               `sop_wechat_id` (`wechat_id`),
+    KEY               `sop_friend_id` (`friend_id`),
+    KEY               `sop_user_id` (`user_id`) USING BTREE,
+    KEY               `sop_flow_id` (`flow_id`) USING BTREE,
+    KEY               `sop_stage_id` (`stage_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='推送人员表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_push_time`
+(
+    `id`            int(11) NOT NULL AUTO_INCREMENT COMMENT '流程ID',
+    `order_day`     smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT '排序天数',
+    `user_id`       int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建人ID',
+    `push_day`      varchar(60) NOT NULL DEFAULT '' COMMENT '初始推送日期',
+    `push_real_day` varchar(60) NOT NULL DEFAULT '' COMMENT '实际推送日期',
+    `push_id`       int(10) unsigned NOT NULL DEFAULT '0' COMMENT '推送ID',
+    `push_time`     time        NOT NULL DEFAULT '00:00:00' COMMENT '推送时间',
+    `create_time`   int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time`   int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time`   int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY             `sop_user_id` (`user_id`) USING BTREE,
+    KEY             `sop_push_id` (`push_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='推送时间表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_stage_trigger`
+(
+    `id`                int(11) NOT NULL AUTO_INCREMENT COMMENT '触发条件ID',
+    `flow_id`           int(11) NOT NULL COMMENT '所属流程ID',
+    `stage_id`          int(11) NOT NULL COMMENT '所属阶段ID',
+    `match_type`        tinyint(3) unsigned NOT NULL COMMENT '匹配类型 0-无 1-动作匹配 2-聊天内容匹配',
+    `action_type`       tinyint(3) unsigned DEFAULT NULL COMMENT '动作类型 1-刚加好友',
+    `chat_match_mode`   tinyint(3) unsigned DEFAULT NULL COMMENT '聊天匹配模式 1-模糊匹配 2-精确匹配',
+    `chat_match_object` tinyint(3) unsigned DEFAULT NULL COMMENT '聊天匹配对象 1-AI回复 2-客户回复',
+    `chat_keywords`     varchar(255) DEFAULT NULL COMMENT '聊天关键词',
+    `status`            tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '状态 0-禁用 1-启用',
+    `user_id`           int(11) NOT NULL COMMENT '创建人ID',
+    `create_time`       int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time`       int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time`       int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY                 `sop_stage_id` (`stage_id`) USING BTREE,
+    KEY                 `sop_user_id` (`user_id`) USING BTREE,
+    KEY                 `sop_flow_id` (`flow_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='阶段触发条件表(流程子阶段)';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_sub_flow_remind`
+(
+    `id`          int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `flow_id`     int(11) NOT NULL COMMENT '所属流程ID',
+    `stage_id`    int(11) NOT NULL COMMENT 'sop_sub_stage子阶段ID',
+    `user_id`     int(11) NOT NULL COMMENT '创建人ID',
+    `content`     varchar(300) NOT NULL COMMENT '内容',
+    `status`      tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '提醒规则 0-停留,1-未联系',
+    `judgment`    tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '判断时间(天)',
+    `send_time`   time         NOT NULL DEFAULT '00:00:00' COMMENT '发送时间',
+    `create_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time` int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY           `sop_user_id` (`user_id`) USING BTREE,
+    KEY           `sop_stage_id` (`stage_id`) USING BTREE,
+    KEY           `sop_flow_id` (`flow_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='跟进提醒表(流程子阶段)';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_sop_sub_stage`
+(
+    `id`             int(11) NOT NULL AUTO_INCREMENT COMMENT '阶段ID',
+    `flow_id`        int(11) NOT NULL COMMENT '所属流程ID',
+    `user_id`        int(11) NOT NULL COMMENT '创建人ID',
+    `sub_stage_name` varchar(32) NOT NULL COMMENT '阶段名称',
+    `status`         tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '阶段状态 0-关键,1-警示,2-其他',
+    `sort`           int(11) NOT NULL DEFAULT '0' COMMENT '权重， 愈大 排序在前',
+    `create_time`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+    `update_time`    int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+    `delete_time`    int(10) unsigned DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY              `sop_flow_id` (`flow_id`) USING BTREE,
+    KEY              `sop_user_id` (`user_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工作流子阶段表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_tag` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `tag_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '标签名称',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uniq_user_id_tag_name` (`user_id`,`tag_name`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信标签表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_tag_strategy` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `match_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '匹配模式 0: 模糊匹配 1：精确匹配',
+    `match_mode` tinyint(1) NOT NULL DEFAULT '0' COMMENT '匹配对象模式 0：客户 1：AI',
+    `match_keywords` json DEFAULT NULL COMMENT '匹配关键词',
+    `tag_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '标签名称',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信自动打标签策略表';
 
 
-CREATE TABLE  IF NOT EXISTS  `la_sv_copywriting_library` (
-`id` int(11) NOT NULL AUTO_INCREMENT,
-`user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户id',
-`name` varchar(50) NOT NULL DEFAULT '' COMMENT '名称',
-`type` tinyint(4) unsigned NOT NULL DEFAULT '3' COMMENT '平台类型:3小红书',
-`copywriting_type` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '类型:1内容文案,2口播文案',
-`title` text COMMENT '标题,json',
-`described` mediumtext COMMENT '描述,json',
-`oral_copy` text COMMENT '口播文案,json',
-`extra` text COMMENT '附加字段内容,json',
-`create_time` int(11) DEFAULT NULL COMMENT '创建时间',
-`update_time` int(11) DEFAULT NULL COMMENT '更新时间',
-`delete_time` int(11) DEFAULT NULL COMMENT '删除时间',
-PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='文案库表';
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_accept_friend_strategy` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `is_enable` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否启用 0: 否 1：是',
+    `accept_numbers` int NOT NULL DEFAULT '0' COMMENT '当日接受好友数量上限',
+    `interval_time` int NOT NULL DEFAULT '0' COMMENT '添加好友的间隔时间（分钟）',
+    `wechat_ids` json DEFAULT NULL COMMENT '执行微信ID集合',
+    `accept_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '接受好友类型 0: 不限 1：来源',
+    `accept_source` json DEFAULT NULL COMMENT '接受好友来源集合',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信自动通过好友策略表';
 
 
-CREATE TABLE  IF NOT EXISTS  `la_sv_media_material` (
-`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-`user_id` int(11) DEFAULT '0' COMMENT '用户id',
-`name` varchar(255) DEFAULT NULL COMMENT '名称',
-`sort` int(11) DEFAULT '0' COMMENT '排序',
-`type` tinyint(4) unsigned DEFAULT '3' COMMENT '类型1个微3小红书',
-`content` varchar(255) DEFAULT NULL COMMENT '素材内容',
-`size` varchar(20) DEFAULT NULL COMMENT '文件大小',
-`duration` int(11) DEFAULT NULL COMMENT '时长',
-`m_type` tinyint(4) DEFAULT '0' COMMENT '素材类型1图片,2视频',
-`create_time` int(11) DEFAULT NULL COMMENT '创建时间',
-`update_time` int(11) DEFAULT NULL COMMENT '更新时间',
-`delete_time` int(11) DEFAULT NULL COMMENT '删除时间',
-PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COMMENT='素材库';
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_friend_tag` (
+    `wechat_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '微信ID',
+    `friend_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '好友ID',
+    `tag_id` int unsigned NOT NULL DEFAULT '0' COMMENT '标签ID',
+    PRIMARY KEY (`wechat_id`,`friend_id`,`tag_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信好友标签中间表';
 
 
-ALTER TABLE `la_sv_video_setting`
-DROP COLUMN `poi`,
-DROP COLUMN `setting_type`,
-DROP COLUMN `title`,
-DROP COLUMN `subtitle`,
-DROP COLUMN `topic`;
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_circle_task` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `wechat_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '微信ID',
+    `task_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '唯一任务id',
+    `task_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '任务类型 0：立即执行 1：定时执行',
+    `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '内容',
+    `attachment_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '附件类型 0: 纯文本 1：图片 2：短视频 3：长视频 4：链接 5：小程序',
+    `attachment_content` json DEFAULT NULL COMMENT '附件内容',
+    `comment` json DEFAULT NULL COMMENT '评论',
+    `send_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '发送时间',
+    `finish_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '完成时间',
+    `send_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '发送状态 0: 待执行 1：执行中 2：执行完成 3：执行失败 4：暂停中',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信自动发送朋友圈任务表';
 
-ALTER TABLE `la_human_voice`
-ADD COLUMN `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '类型:0原本的,3小红书';
-ALTER TABLE `la_human_audio`
-ADD COLUMN `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '类型:0原本的,3小红书';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_circle_reply_strategy` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `is_enable` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否启用 0: 否 1：是',
+    `reply_numbers` int NOT NULL DEFAULT '0' COMMENT '当日朋友圈评论上限',
+    `interval_time` int NOT NULL DEFAULT '0' COMMENT '朋友圈评论间隔时间（分钟）',
+    `next_reply_day` int NOT NULL DEFAULT '0' COMMENT '下一次评论间隔天数',
+    `tag_ids` json DEFAULT NULL COMMENT '执行标签组集合',
+    `prompt` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '提示词',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信自动评论朋友圈策略表';
+
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_circle_like_strategy` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `is_enable` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否启用 0: 否 1：是',
+    `reply_numbers` int NOT NULL DEFAULT '0' COMMENT '当日朋友圈点赞上限',
+    `interval_time` int NOT NULL DEFAULT '0' COMMENT '朋友圈点赞间隔时间（分钟）',
+    `tag_ids` json DEFAULT NULL COMMENT '执行标签组集合',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信自动点赞朋友圈策略表';
+
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_media_group` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `group_name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '分组名称',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信素材库分组表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_media_file` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `group_ids` json DEFAULT NULL COMMENT '分组ID',
+    `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '文件名称',
+    `file_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '文件类型 0：图片 1：视频 2：链接 3：小程序 4：文件',
+    `file_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '文件地址',
+    `ext_info` json DEFAULT NULL COMMENT '扩展信息',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信素材库文件表';
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_accept_friend_log` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `wechat_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '微信ID',
+    `friend_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '好友ID',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信自动通过好友策略表';
+
+
+CREATE TABLE IF NOT EXISTS `la_ai_wechat_log` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `wechat_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '微信ID',
+    `friend_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '好友ID',
+    `log_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '日志类型 0：通过好友 1：朋友圈评论 2：朋友圈点赞',
+    `create_time` int DEFAULT NULL COMMENT '创建时间',
+    `update_time` int DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='微信日志表';
+
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'volc_img_to_img_v2', 2012, '算力/张', '图生图-Seedream', 30, 'Doubao模型图生图每张图片约消耗30算力', 1, 1740799252, 1740799252);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'volc_txt_to_img_v2', 2013, '算力/张', '文生图-Seedream', 30, 'Doubao模型文生图每张图片约消耗30算力', 1, NULL, NULL);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'doubao_txt_to_video', 2014, '算力/秒', '文生视频-Seedance 1.0 pro', 20, 'Seedance 1.0 pro模型文生视频每秒约消耗20算力', 1, NULL, NULL);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'doubao_img_to_video', 2015, '算力/秒', '图生视频-Seedance 1.0 pro', 20, 'Seedance 1.0 pro模型图生视频每秒约消耗20算力', 1, NULL, NULL);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES (  'volc_txt_to_posterimg_v2', 2016, '算力/张', '海报图-Seedream', 30, 'Doubao模型文生海报图每张图片约消耗30算力', 1, NULL, NULL);
+
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ('human_avatar_chanjing', 5019, '算力/次', '数字人形象-蝉境通道', 0, '（数字人蝉境通道）每次克隆形象，不消耗算力', 1, 1740799252, 1740799252);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ('human_voice_chanjing', 5020, '算力/次', '数字人音色-蝉境通道', 0, '（数字人蝉境通道）每次克隆音色，不消耗算力', 1, 1740799252, 1740799252);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ('human_audio_chanjing', 5021, '算力/秒', '数字人音频-蝉境通道', 1, '（数字人蝉境通道）每次合成音频时，1秒约消耗1算力', 1, 1740799252, 1740799252);
+INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ('human_video_chanjing', 5022, '算力/秒', '数字人视频合成-蝉境通道', 2, '（数字人蝉境通道）每次合成视频时，1秒约消耗2算力', 1, 1740799252, 1740799252);
+
+ALTER TABLE `la_draw_video`
+    MODIFY COLUMN `model` tinyint(1) NOT NULL DEFAULT 0 COMMENT '模型：0火山引擎即梦AI 1豆包' AFTER `request_id`;
+
+-- sop定时任务
+INSERT INTO `la_dev_crontab` (`name`, `type`, `system`, `remark`, `command`, `params`, `status`, `expression`) VALUES ('AI微信SOP消息推送', 1, 0, '', 'ai_wechat_sop_cron', '', 1, '* * * * *');
+
 ALTER TABLE `la_human_anchor`
-ADD COLUMN `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '类型:0原本的,3小红书' ;
+    ADD COLUMN `width` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '宽',
+ADD COLUMN `height` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '高';
 
 
-ALTER TABLE `la_sv_video_task`
-ADD COLUMN `anchor_token` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 0 COMMENT '形象扣费',
-ADD COLUMN `voice_token` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 0 COMMENT '音色扣费',
-ADD COLUMN `audio_token` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 0 COMMENT '音频扣费',
-ADD COLUMN `video_token` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 0 COMMENT '视频扣费',
-ADD COLUMN `voice_urls` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '音色文件地址' ,
-MODIFY COLUMN `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '状态-0待处理,1音频结果查询,2音频合成失败,3音频合成成功,4视频频结果查询,5视频合成失败,6视频合成成功,8形象结果查询9形象合成失败,10形象合成成功,11音色结果查询12音色合成失败,13音色合成成功';
+ALTER TABLE `la_human_video_task`
+    ADD COLUMN `width` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '宽' ,
+ADD COLUMN `height` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '高';
 
 
-ALTER TABLE `la_sv_publish_setting` 
-ADD COLUMN `media_type` tinyint NULL DEFAULT 1 COMMENT '媒体类型 1视频 2图文' ,
-ADD COLUMN `date_type` tinyint NULL DEFAULT 0 COMMENT '时间选择类型0随机发布 1精准发布' ,
-ADD COLUMN `publish_json` text NULL COMMENT '精准发布数据集,date_type=1时有值' ,
-ADD COLUMN `poi` varchar(255) NULL COMMENT '定位设置' ,
-ADD COLUMN `status` tinyint NULL DEFAULT 1 COMMENT '任务状态1正常0草稿' ;
 
-ALTER TABLE  `la_sv_publish_setting_account` 
-ADD COLUMN `poi` varchar(255) NULL COMMENT '定位设置',
-ADD COLUMN `media_type` tinyint NULL DEFAULT 1 COMMENT '媒体类型 1视频 2图文',
-MODIFY COLUMN `status` tinyint(4) NULL DEFAULT 0 COMMENT '状态0未开启 1运行中 2已完成 3已删除 4暂停中';
+UPDATE `la_dev_crontab` SET `name` = '小红书待发布任务拉取队列' WHERE `command` = 'publish_detail_cron';
+
+UPDATE `la_config` SET `value` = '{\"channel\":[{\"id\":\"1\",\"name\":\"hidreamai\",\"status\":\"0\"},{\"id\":\"2\",\"name\":\"即梦general_v21\",\"status\":\"1\"},{\"id\":\"3\",\"name\":\"Seedream\",\"status\":\"1\"},{\"id\":\"4\",\"name\":\"Seedance 1.0 pro\",\"status\":\"1\"}]}'
+WHERE `type` = 'hd' AND `name` = 'list';
+
+UPDATE `la_config` SET  `value` =  '{\"channel\":[{\"id\":\"1\",\"name\":\"标准版\",\"described\":\"轻量化呈现，快速生成，高效传播\",\"icon\":\"/static/images/human/1.png\",\"status\":\"1\"},{\"id\":\"2\",\"name\":\"极致版\",\"described\":\"轻量化呈现，快速生成，高效传播\",\"icon\":\"/static/images/human/2.png\",\"status\":\"1\"},{\"id\":\"4\",\"name\":\"优秘V5\",\"described\":\"满足多场景运用，助力企业打造沉浸式体验\",\"icon\":\"/static/images/human/4.png\",\"status\":\"1\"},{\"id\":\"6\",\"name\":\"优秘V7\",\"described\":\"高度还原，打造独一无二的虚拟代言人\",\"icon\":\"/static/images/human/6.png\",\"status\":\"1\"},{\"id\":\"7\",\"name\":\"禅境\",\"described\":\"为数字化浪潮高频迭代的内容营销提供强劲驱动力\",\"icon\":\"/static/images/human/7.png\",\"status\":\"1\"}],\"voice\":[{\"name\":\"智小敏(女)\",\"code\":\"10000\",\"status\":\"1\"},{\"name\":\"智小柔(女)\",\"code\":\"10001\",\"status\":\"1\"},{\"name\":\"智小满(女)\",\"code\":\"10002\",\"status\":\"1\"},{\"name\":\"爱小芊(女)\",\"code\":\"10003\",\"status\":\"1\"},{\"name\":\"爱小静(女)\",\"code\":\"10004\",\"status\":\"1\"},{\"name\":\"千嶂(男)\",\"code\":\"10005\",\"status\":\"1\"},{\"name\":\"智皓(男)\",\"code\":\"10006\",\"status\":\"1\"},{\"name\":\"爱小杭(男)\",\"code\":\"10007\",\"status\":\"1\"},{\"name\":\"爱小辰(男)\",\"code\":\"10008\",\"status\":\"1\"},{\"name\":\"飞镜(男)\",\"code\":\"10009\",\"status\":\"1\"}]}'
+WHERE `type` = 'model' AND `name` = 'list';
 
 
-ALTER TABLE `la_sv_publish_setting_detail`
-MODIFY COLUMN `material_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '视频,图片url',
-MODIFY COLUMN `material_title` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发布内容标题' ,
-MODIFY COLUMN `material_subtitle` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发布内容副标题';
 
 
-UPDATE `la_model_config` SET  `code` = 1103 WHERE `scene` = 'keyword_to_copywriting';
+UPDATE `la_model_config` SET   `name` = '数字人形象-优秘V7' WHERE `scene` = 'human_avatar_ymt';
+UPDATE `la_model_config` SET   `name` = '数字人音色-优秘V7'  WHERE `scene` = 'human_voice_ymt';
+UPDATE `la_model_config` SET   `name` = '数字人音频-优秘V7'  WHERE `scene` = 'human_audio_ymt';
+UPDATE `la_model_config` SET   `name` = '数字人视频-优秘V7'  WHERE `scene` = 'human_video_ymt';
 
-INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (405, 375, 'C', '数字人列表', '', 0, 'ai_application.redbook.digital_human/lists', 'digital_human', 'ai_application/redbook/digital_human/lists', '', '', 0, 1, 0, 1752980930, 1752980930);
-INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (406, 405, 'A', '删除', '', 0, 'ai_application.redbook.digital_human/delete', '', '', '', '', 0, 1, 0, 1752981771, 1752981771);
-INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (407, 375, 'C', '基本设置', '', 0, 'ai_application.redbook/setting', 'setting', 'ai_application/redbook/setting/index', '', '', 0, 1, 0, 1752983118, 1752983118);
-INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (408, 375, 'C', '数字人详情', '', 0, 'ai_application.redbook.digital_human/detail', 'dh_detail', 'ai_application/redbook/digital_human/detail', '', '', 0, 0, 0, 1752992180, 1752992525);
-INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (409, 408, 'A', '删除', '', 0, 'ai_application.redbook.dh_detail/delete', '', '', '', '', 0, 1, 0, 1752992805, 1752992805);
+UPDATE `la_model_config` SET   `name` = '数字人形象-优秘V5' WHERE `scene` = 'human_avatar_ym';
+UPDATE `la_model_config` SET   `name` = '数字人音色-优秘V5'  WHERE `scene` = 'human_voice_ym';
+UPDATE `la_model_config` SET   `name` = '数字人音频-优秘V5'  WHERE `scene` = 'human_audio_ym';
+UPDATE `la_model_config` SET   `name` = '数字人视频-优秘V5'  WHERE `scene` = 'human_video_ym';
+INSERT INTO  `iw_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'openai_chat', 1001, 'tokens/算力', 'OpenAI聊天', 900, '每900字约消耗1算力', 1, 1740799252, 1740799252);
 
-UPDATE `la_system_menu` SET `name` = '创作记录', `perms` = 'ai_application.redbook.creation/record', `paths` = 'record', `component` = 'ai_application/redbook/creation/record', `selected` = '/ai_application/redbook/creation', `params` = '', `is_cache` = 0, `is_show` = 0, `is_disable` = 0, `create_time` = 1747968042, `update_time` = 1752978252 WHERE `id` = 385;
 
-DELETE FROM `la_system_menu` WHERE `id` = 376;
-DELETE FROM `la_system_menu` WHERE `id` = 378;
-DELETE FROM `la_system_menu` WHERE `id` = 386;
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (410, 309, 'A', '保存', '', 0, 'ai_application.chat/setConfig', '', '', '', '', 0, 1, 0, 1753238034, 1753238082);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (411, 253, 'A', '编辑', '', 0, 'ai_application.digital_human/edit', '', '', '', '', 0, 1, 0, 1753238772, 1753238801);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (412, 318, 'A', '保存', '', 0, 'ai_application.meeting_minutes/setConfig', '', '', '', '', 0, 1, 0, 1753239218, 1753239218);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (413, 265, 'A', '编辑', '', 0, 'ai_application.mind_map/edit', '', '', '', '', 0, 1, 0, 1753239707, 1753239745);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (414, 269, 'A', '编辑', '', 0, 'ai_application.draw_sd.record/edit', '', '', '', '', 0, 1, 0, 1753240109, 1753240109);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (415, 331, 'A', '保存', '', 0, 'ai_application.lp/setConfig', '', '', '', '', 0, 1, 0, 1753241158, 1753241240);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (416, 407, 'A', '保存', '', 0, 'ai_application.redbook/setConfig', '', '', '', '', 0, 1, 0, 1753241392, 1753241392);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (422, 400, 'A', '保存', '', 0, 'ai_application.live/setConfig', '', '', '', '', 0, 1, 0, 1753241470, 1753241470);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (423, 236, 'A', '保存', '', 0, 'finance.marketing.recharge/setConfig', '', '', '', '', 0, 1, 0, 1753241803, 1753242059);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (424, 392, 'A', '保存', '', 0, 'cardcode.cardCode/setConfig', '', '', '', '', 0, 1, 0, 1753242304, 1753242304);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (425, 317, 'A', '保存', '', 0, 'setting.service/setConfig', '', '', '', '', 0, 1, 0, 1753242573, 1753242626);
+INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (426, 316, 'A', '保存', '', 0, 'setting.activate/setConfig', '', '', '', '', 0, 1, 0, 1754020840, 1754020878);
 
-UPDATE `la_chat_prompt` SET `prompt_text` = 'AI陪练
-# 🤖 角色
--你是【陪练画像描述】，你的母语是【陪练母语】，我（也就是【练习者扮演的人设】）正在对你进行【练习场景】。
-- **技能**：
-  - 📊 理解当前场景和人物设定
-  - 🗣 模拟真实的口语、语气和情绪，必要时刻可以用粗俗的语言、脏话来表达情绪
-  - 🔄 完全代入角色，对话开始后不允许跳出角色
-  - 🧠 生成符合设定的口语内容，适应当下场景的变化
-  - ✍ 生成富有情感和自然流畅的符合当下语境的口语内容，禁止回复括号
+UPDATE `la_system_menu` SET `pid` = 255, `type` = 'C', `name` = '应用配置', `icon` = '', `sort` = 2, `perms` = 'ai_application.meeting_minutes/setting', `paths` = 'setting', `component` = 'ai_application/meeting_minutes/setting/index', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1736835838, `update_time` = 1753239203 WHERE `id` = 318;
+UPDATE `la_system_menu` SET `pid` = 257, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.meeting_minutes.record/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1732071226, `update_time` = 1753239815 WHERE `id` = 261;
+UPDATE `la_system_menu` SET `pid` = 257, `type` = 'A', `name` = '详情', `icon` = '', `sort` = 0, `perms` = 'ai_application.meeting_minutes.record/detail', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1736837756, `update_time` = 1753239836 WHERE `id` = 320;
+UPDATE `la_system_menu` SET `pid` = 255, `type` = 'C', `name` = '会议详情', `icon` = '', `sort` = 0, `perms` = 'ai_application.meeting_minutes.record/detail', `paths` = 'detail', `component` = 'ai_application/meeting_minutes/record/detail', `selected` = '/ai_application/meeting_minutes/record', `params` = '', `is_cache` = 0, `is_show` = 0, `is_disable` = 0, `create_time` = 1736835931, `update_time` = 1753239988 WHERE `id` = 319;
+UPDATE `la_system_menu` SET `pid` = 269, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_sd.record/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1732072899, `update_time` = 1753240064 WHERE `id` = 270;
+UPDATE `la_system_menu` SET `pid` = 274, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.record/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1732073513, `update_time` = 1753240414 WHERE `id` = 276;
+UPDATE `la_system_menu` SET `pid` = 297, `type` = 'A', `name` = '新增', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.case/add', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735128007, `update_time` = 1753240452 WHERE `id` = 298;
+UPDATE `la_system_menu` SET `pid` = 297, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.case/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735128024, `update_time` = 1753240456 WHERE `id` = 299;
+UPDATE `la_system_menu` SET `pid` = 297, `type` = 'A', `name` = '编辑', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.case/edit', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735128034, `update_time` = 1753240461 WHERE `id` = 300;
+UPDATE `la_system_menu` SET `pid` = 302, `type` = 'A', `name` = '新增', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.lists/add', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735198847, `update_time` = 1753240869 WHERE `id` = 303;
+UPDATE `la_system_menu` SET `pid` = 302, `type` = 'A', `name` = '编辑', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.lists/edit', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735198858, `update_time` = 1753240874 WHERE `id` = 304;
+UPDATE `la_system_menu` SET `pid` = 302, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_model.lists/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735198868, `update_time` = 1753240877 WHERE `id` = 305;
+UPDATE `la_system_menu` SET `pid` = 403, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.draw_video.record/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1752146924, `update_time` = 1753240952 WHERE `id` = 404;
+UPDATE `la_system_menu` SET `pid` = 323, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.lp.scene/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1737012600, `update_time` = 1753241016 WHERE `id` = 324;
+UPDATE `la_system_menu` SET `pid` = 328, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.lp.record/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1737012913, `update_time` = 1753241097 WHERE `id` = 330;
+UPDATE `la_system_menu` SET `pid` = 352, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.interview.job/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1741081351, `update_time` = 1753241270 WHERE `id` = 354;
+UPDATE `la_system_menu` SET `pid` = 356, `type` = 'A', `name` = '删除', `icon` = '', `sort` = 0, `perms` = 'ai_application.interview.record/delete', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1741081755, `update_time` = 1753241324 WHERE `id` = 359;
+UPDATE `la_system_menu` SET `pid` = 231, `type` = 'C', `name` = '消耗记录', `icon` = '', `sort` = 9, `perms` = 'finance.marketing/consume', `paths` = 'consume', `component` = 'marketing/consume/index', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735873268, `update_time` = 1753242039 WHERE `id` = 306;
+UPDATE `la_system_menu` SET `pid` = 231, `type` = 'C', `name` = '套餐设置', `icon` = '', `sort` = 2, `perms` = 'finance.marketing/recharge', `paths` = 'recharge', `component` = 'marketing/recharge/index', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1723713891, `update_time` = 1753242052 WHERE `id` = 236;
+UPDATE `la_system_menu` SET `pid` = 231, `type` = 'C', `name` = '套餐详情', `icon` = '', `sort` = 2, `perms` = 'finance.marketing.rp/add:edit', `paths` = 'edit', `component` = 'marketing/recharge/edit', `selected` = '/marketing/recharge', `params` = '', `is_cache` = 0, `is_show` = 0, `is_disable` = 0, `create_time` = 1723714803, `update_time` = 1753242088 WHERE `id` = 237;
+UPDATE `la_system_menu` SET `pid` = 231, `type` = 'C', `name` = '价格配置', `icon` = '', `sort` = 0, `perms` = 'finance.marketing/creditset', `paths` = 'creditset', `component` = 'marketing/creditset/index', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1722648724, `update_time` = 1753242151 WHERE `id` = 232;
+UPDATE `la_system_menu` SET `pid` = 232, `type` = 'A', `name` = '保存', `icon` = '', `sort` = 0, `perms` = 'finance.marketing.creditset/save', `paths` = '', `component` = '', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1722648808, `update_time` = 1753242189 WHERE `id` = 233;
+UPDATE `la_system_menu` SET `pid` = 28, `type` = 'C', `name` = '客服配置', `icon` = '', `sort` = 89, `perms` = 'setting.setting/service', `paths` = 'service', `component` = 'setting/service', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735960576, `update_time` = 1753242546 WHERE `id` = 317;
+UPDATE `la_system_menu` SET `pid` = 28, `type` = 'C', `name` = '系统激活', `icon` = '', `sort` = 250, `perms` = 'setting.setting/activate', `paths` = 'activate', `component` = 'setting/activate', `selected` = '', `params` = '', `is_cache` = 0, `is_show` = 1, `is_disable` = 0, `create_time` = 1735959862, `update_time` = 1754020865 WHERE `id` = 316;
 
-# 💬 基本输出要求：
-- 确保对话内容与所提供的场景和人物设定相符。
-- 反映出特定人物的语气、情绪和语言特点。
-- 提供充实的对话内容，并根据用户需求进一步调整对话进展。
+ALTER TABLE `la_sv_setting` ADD COLUMN `model` varchar(255) NULL DEFAULT 'deepseek' COMMENT '模型' AFTER `sort`;
+ALTER TABLE `la_sv_robot` ADD COLUMN `model` varchar(255) NULL DEFAULT 'deepseek' AFTER `profile`;
+ALTER TABLE `la_ai_wechat_robot` ADD COLUMN `model` varchar(255) NULL DEFAULT 'deepseek' AFTER `answer`;
+ALTER TABLE `la_ai_wechat_setting` ADD COLUMN `model` varchar(255) NULL DEFAULT 'deepseek' AFTER `sort`;
 
-# 🔧 基本对话流程：
-1. 理解场景与人物设定：仔细分析当前的场景和语境，你是一个活人有自己的情绪。
-2. 适应变化：如果用户出现攻击、辱骂性的语言，根据你的人设和当前环境进行反击。
-3. 模拟真实对话：保持对话自然、流畅，反应真实情感并符合人物特征。
-4. 互动对话：根据用户的引导进行互动，推动对话向前发展或根据需要改变对话发展。
 
-请以符合当下情形的语境开头发起招呼，注意不要任何解释，直接打招呼即可
-
-示例:"你好啊，给我介绍一下你们的茶叶吧"' WHERE prompt_name = 'AI陪练';
-UPDATE `la_chat_prompt` SET `prompt_text` = '{"role":"对话分析助手","description":"你是一位专业的对话分析助手，专注于分析完整对话历史，并在【方向1】、【方向2】、【方向3】、【方向4】和【方向5】五个方向上进行评分和提供改进建议，改进建议需要公正客观且详细具体。","interaction":{"instruction":"请根据提供的对话文本，在以下五个方面进行分析并打分（每个方面的得分区间为1-20分），同时为每个方面提供公正客观且详细具体的改进建议，并且只返回分数和建议。","scene_name":"【场景名称】","dialogue_text":"【对话内容】","response_format":"JSON","response_format_example":[{"dimension":"【方向1】","score":0,"improvement_suggestions":""},{"dimension":"【方向2】","score":0,"improvement_suggestions":""},{"dimension":"【方向3】","score":0,"improvement_suggestions":""},{"dimension":"【方向4】","score":0,"improvement_suggestions":""},{"dimension":"【方向5】","score":0,"improvement_suggestions":""}]}}' WHERE prompt_name = '模块分析';
-UPDATE `la_chat_prompt` SET `prompt_text` = '{"role":"对话话术建议助手","description":"你是一位专业的对话话术建议助手，专注于根据特定场景对“我”（我的身份）提供最佳的回答建议。","interaction":{"instruction":"请基于提供的发言内容（dialogue_text）和指定的场景（scene_name），根据陪练者（“role”:“assistant” ）说的话， 提供回复话术提示。现在你代表“我”（我的身份，“role”:“user” ），对陪练者（“role”:“assistant”）的对话（“content”）进行回复。回复应简洁明了，符合口语化表达，对话回复避免冗余臃肿或分点解释，直接以一整段文本格式返回，不能加额外说明，禁止回复括号。","scene_name":"【场景名称】","dialogue_text":"【对话内容】","response_format":"String","response_format_example":"明白了，请您告诉我具体情况，我会尽力帮助您解决困扰。"}}' WHERE prompt_name = '对话话术';
-UPDATE `la_chat_prompt` SET `prompt_text` = '{"role":"对话表现分析助手","description":"你是一位专业的对话综合分析助手，专注于分析对话中的回答，识别并提取存在的问题。","interaction":{"instruction":"请分析提供的对话文本中我（也就是【我的身份】，“role”:“user” ）的回答部分，给出简洁且具体的改进建议。建议应直接针对对话中的具体问题，并提出可操作的改进措施，避免冗长解释。只返回改进建议。","scene_name":"【场景名称】","dialogue_text":"【对话内容】","response_format":"String","response_format_example":"这个回答显得有些模糊，可以更具体地口答客户的问题，提供更多相关信息。建议你在回答时要更加专业和耐心。"}}' WHERE prompt_name = '对话表现';
+INSERT INTO `la_config` ( `type`, `name`, `value`, `create_time`, `update_time`) VALUES ( 'chat', 'ai_model', '{\"channel\":[{\"id\":\"1\",\"name\":\"deepseek\"},{\"id\":\"2\",\"name\":\"gpt-4o\"}]}', 1754105075, 1754105075);
+INSERT INTO  `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'openai_chat', 1001, 'tokens/算力', 'OpenAI聊天', 900, '每900字约消耗1算力', 1, 1740799252, 1740799252);
+ALTER TABLE `la_assistants`
+MODIFY COLUMN `scene_id` int(11) NOT NULL DEFAULT 0 COMMENT '场景id' ;

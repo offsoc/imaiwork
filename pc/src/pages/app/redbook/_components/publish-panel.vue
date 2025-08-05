@@ -1,6 +1,4 @@
 <template>
-    <!-- The template seems mostly fine. The main complexity is in the script. -->
-    <!-- I will make minor adjustments to use new computed properties for clarity. -->
     <div class="h-full bg-app-bg-2 rounded-[20px] overflow-x-auto dynamic-scroller">
         <div class="h-full flex flex-col min-w-[1000px]">
             <!-- 头部导航 -->
@@ -318,6 +316,7 @@
                                                     v-model="item.publish_time"
                                                     type="datetime"
                                                     placeholder="请选择"
+                                                    value-format="YYYY-MM-DD HH:mm:ss"
                                                     popper-class="custom-date-picker-popper" />
                                                 <div
                                                     class="mt-3 w-[143px] h-[190px] rounded-md mx-auto border border-app-border-2 relative">
@@ -462,6 +461,8 @@ const publishTimeGapMin = 15;
 // State
 // =================================================================================================
 
+const router = useRouter();
+
 const { type } = toRefs(props);
 const query = queryToObject();
 const materialId = computed(() => query.material_id);
@@ -582,8 +583,6 @@ const submitStep1 = async () => {
         try {
             const material = await addCopywritingMaterial(materialFormData);
             materialFormData.id = material.id;
-            replaceState({ material_id: material.id });
-
             if (isImageMode.value) handleAddImageGroup();
 
             const task = await addPublishTask({
@@ -593,7 +592,7 @@ const submitStep1 = async () => {
             });
             formData.id = task.id;
             formData.video_setting_id = material.id;
-            replaceState({ publish_id: task.id });
+            router.replace({ query: { ...query, publish_id: task.id, material_id: material.id } });
         } catch (error) {
             feedback.msgError(error);
             return false;
@@ -710,11 +709,11 @@ const handleChooseCopywriting = (data: { titleList: any[]; contentList: any[] })
 };
 
 // --- 标题与描述 ---
-const addTitleAndDesc = () => {
+const addTitleAndDesc = (isUpdate = true) => {
     materialFormData.title.push({ content: "" });
     // 使用setTimeout确保在不同更新周期中执行，避免冲突
     setTimeout(() => materialFormData.subtitle.push({ content: "", topic: [] }), 100);
-    updateCopywritingMaterial(materialFormData);
+    if (isUpdate) updateCopywritingMaterial(materialFormData);
 };
 
 // =================================================================================================
@@ -869,9 +868,14 @@ const init = async () => {
     try {
         const { dh_create_id } = queryToObject();
         if (dh_create_id) {
-            const { lists } = await getDigitalHumanVideo({ id: dh_create_id, page_size: 5 });
-            materialFormData.media_url = lists.map((item) => item.video_result_url);
-            lists.forEach(addTitleAndDesc);
+            const { lists } = await getDigitalHumanVideo({ video_setting_id: dh_create_id, page_size: maxVideoCount });
+            const videoLists = lists.filter((item) => item.video_result_url).map((item) => item.video_result_url) || [];
+            if (videoLists.length > 0) {
+                materialFormData.media_url = videoLists;
+                videoLists.forEach((item) => {
+                    addTitleAndDesc(false);
+                });
+            }
             replaceState({ dh_create_id: "" });
         }
 

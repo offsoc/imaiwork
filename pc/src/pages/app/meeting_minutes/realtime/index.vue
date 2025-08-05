@@ -1,10 +1,12 @@
 <template>
     <div class="real-time-page">
-        <div class="absolute top-4 left-6 z-30">
-            <ElButton circle @click="back">
-                <Icon name="el-icon-Back" />
-            </ElButton>
-        </div>
+        <ElTooltip content="返回">
+            <div class="absolute top-4 left-6 z-30">
+                <ElButton circle @click="back">
+                    <Icon name="el-icon-Back" />
+                </ElButton>
+            </div>
+        </ElTooltip>
         <div class="w-[852px] mx-auto">
             <div>
                 <div class="text-[32px] font-bold">会议实时记录转写</div>
@@ -210,8 +212,7 @@ import useHandleApi from "../_hooks/useHandleApi";
 import KnbBind from "@/components/knb-bind/index.vue";
 
 const router = useRouter();
-const appStore = useAppStore();
-
+const nuxtApp = useNuxtApp();
 const {
     pager,
     userTokens,
@@ -259,16 +260,20 @@ const handleStartRecord = async () => {
             nextStep.value = 2;
         },
         (msg: string, isUserNotAllow: any) => {
-            feedback.notifyWarning((isUserNotAllow ? "UserNotAllow，" : "") + "无法录音:" + msg);
+            feedback.msgWarning((isUserNotAllow ? "UserNotAllow，" : "") + "无法录音:" + msg);
         }
     );
 };
 
 const reloadRecord = async () => {
-    await feedback.confirm("确定要重新录音吗？");
-    isCreateError.value = false;
-    recorderControlRef.value?.resetRecord();
-    recorderControlRef.value?.openRecorder();
+    await nuxtApp.$confirm({
+        message: "确定要重新录音吗？",
+        onConfirm: async () => {
+            isCreateError.value = false;
+            recorderControlRef.value?.resetRecord();
+            recorderControlRef.value?.openRecorder();
+        },
+    });
 };
 
 const isRecorderDisabled = computed(() => {
@@ -320,9 +325,12 @@ const { lockFn: lockCreateTask, isLock } = useLockFn(createTask);
 
 const back = () => {
     if (nextStep.value == 2 && !isCreateError.value) {
-        feedback.confirm("确定结束录音吗？结束后无法在本记录继续录音").then(() => {
-            feedback.loading("结束录音中...");
-            recorderControlRef.value?.stopRecord();
+        nuxtApp.$confirm({
+            message: "确定结束录音吗？结束后无法在本记录继续录音",
+            onConfirm: async () => {
+                feedback.loading("结束录音中...");
+                recorderControlRef.value?.stopRecord();
+            },
         });
     } else {
         router.back();

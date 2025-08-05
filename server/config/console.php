@@ -19,6 +19,8 @@ return [
         'lianlian_analysis_cron'        => 'app\common\command\LianlianAnalysisCron',
         // AI微信消息推送
         'ai_wechat_cron'        => 'app\common\command\AiWechatCron',
+        // AI微信sop消息推送
+        'ai_wechat_sop_cron'        => 'app\common\command\AiWechatSopCron',
         'ws'                            => 'app\common\command\Ws',
         //知识库文档状态更新
         'file_status_cron'        => 'app\common\command\FileStatusCron',

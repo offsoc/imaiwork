@@ -43,7 +43,7 @@
             <div
                 class="h-[600px] overflow-y-auto relative dynamic-scroller"
                 :infinite-scroll-immediate="false"
-                :infinite-scroll-disabled="!isLoad"
+                :infinite-scroll-disabled="!pager.isLoad"
                 :infinite-scroll-distance="10"
                 v-infinite-scroll="load">
                 <div class="grid grid-cols-3 gap-2 p-2" v-if="pager.lists.length > 0">
@@ -92,7 +92,7 @@ const queryParams = reactive({
     page_no: 1,
 });
 
-const { pager, isLoad, getLists, resetPage } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getAnchorList,
     params: queryParams,
     isScroll: true,

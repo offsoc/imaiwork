@@ -46,13 +46,10 @@
                             <div class="flex-1">
                                 {{ item.name }}
                             </div>
-                            <div class="flex items-center gap-x-2">
-                                <div class="text-[#00000080]">{{ item.unit }}</div>
-                                <div
-                                    class="flex items-center rounded-full p-[2px] border border-[#23db941a] bg-[#23db941a]">
-                                    <Icon name="local-icon-tokens" color="#23DB94" :size="16"></Icon>
-                                    <span class="text-[#23DB94] mx-1">{{ item.score }}</span>
-                                </div>
+                            <div
+                                class="flex items-center rounded-full p-[2px] border border-[#23db941a] bg-[#23db941a]">
+                                <Icon name="local-icon-tokens" color="#23DB94" :size="16"></Icon>
+                                <span class="mx-1 text-[#23DB94]"> {{ item.score }}{{ item.unit }} </span>
                             </div>
                         </div>
                     </div>
@@ -93,21 +90,26 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <img src="@/assets/images/service_text.png" class="h-[45px]"></img>
+                        <img src="@/assets/images/service_text.png" class="h-[45px]" />
                     </div>
                     <div class="mt-[6px] text-[#00000080]">实时响应、技术专家协同</div>
                     <div class="mt-[36px] border border-token-primary rounded-xl p-[10px]">
                         <img :src="getCustomerService.wx_image" class="w-[180px] h-[180px]" />
                     </div>
                     <div class="mt-[20px]">
-                        <ElButton type="primary" class="!h-[50px] !rounded-full !w-[200px]" @click="downloadFile(getCustomerService.wx_image)">添加客服</ElButton>
+                        <ElButton
+                            type="primary"
+                            class="!h-[50px] !rounded-full !w-[200px]"
+                            @click="downloadFile(getCustomerService.wx_image)"
+                            >添加客服</ElButton
+                        >
                     </div>
                     <div class="flex items-center mt-[36px] gap-x-2">
                         <div style="width: 40px; height: 2px; background-color: #00000008"></div>
                         <div class="text-[#00000080]">我们的专属客服服务时间为：</div>
                         <div style="width: 40px; height: 2px; background-color: #00000008"></div>
                     </div>
-                    <div class="font-bold  mt-4">
+                    <div class="font-bold mt-4">
                         <text
                             >服务时间：<text class="text-primary">工作日{{ getCustomerService.time }}</text
                             >（GMT+8）</text
@@ -179,12 +181,11 @@ const handleRecharge = () => {
 const handleService = () => {
     servicePopupRef.value?.open();
 };
-
 </script>
 
 <style scoped lang="scss">
 .tokens-panel {
-    @apply h-10 rounded-full px-3 cursor-pointer flex items-center gap-x-2  ;
+    @apply h-10 rounded-full px-3 cursor-pointer flex items-center gap-x-2;
     background: linear-gradient(225deg, #ffe5c0 -174.4%, #1f1f1f 50.08%);
     .text {
         background: linear-gradient(270deg, #fff 0%, #ffe8c7 100%);

@@ -7,7 +7,7 @@ import { cloneDeep } from "lodash";
  * @param {String} unit 单位 px em rem
  */
 export const addUnit = (value: string | number, unit = "px") => {
-	return !Object.is(Number(value), NaN) ? `${value}${unit}` : value;
+    return !Object.is(Number(value), NaN) ? `${value}${unit}` : value;
 };
 
 /**
@@ -16,7 +16,7 @@ export const addUnit = (value: string | number, unit = "px") => {
  * @return {Boolean}
  */
 export const isEmpty = (value: unknown) => {
-	return value == null && typeof value == "undefined";
+    return value == null && typeof value == "undefined";
 };
 
 /**
@@ -26,20 +26,20 @@ export const isEmpty = (value: unknown) => {
  */
 
 export const treeToArray = (data: any[], props = { children: "children" }) => {
-	data = cloneDeep(data);
-	const { children } = props;
-	const newData = [];
-	const queue: any[] = [];
-	data.forEach((child: any) => queue.push(child));
-	while (queue.length) {
-		const item: any = queue.shift();
-		if (item[children]) {
-			item[children].forEach((child: any) => queue.push(child));
-			delete item[children];
-		}
-		newData.push(item);
-	}
-	return newData;
+    data = cloneDeep(data);
+    const { children } = props;
+    const newData = [];
+    const queue: any[] = [];
+    data.forEach((child: any) => queue.push(child));
+    while (queue.length) {
+        const item: any = queue.shift();
+        if (item[children]) {
+            item[children].forEach((child: any) => queue.push(child));
+            delete item[children];
+        }
+        newData.push(item);
+    }
+    return newData;
 };
 
 /**
@@ -48,25 +48,22 @@ export const treeToArray = (data: any[], props = { children: "children" }) => {
  * @param {Object} props `{ parent: 'pid', children: 'children' }`
  */
 
-export const arrayToTree = (
-	data: any[],
-	props = { id: "id", parentId: "pid", children: "children" }
-) => {
-	data = cloneDeep(data);
-	const { id, parentId, children } = props;
-	const result: any[] = [];
-	const map = new Map();
-	data.forEach((item) => {
-		map.set(item[id], item);
-		const parent = map.get(item[parentId]);
-		if (parent) {
-			parent[children] = parent[children] ?? [];
-			parent[children].push(item);
-		} else {
-			result.push(item);
-		}
-	});
-	return result;
+export const arrayToTree = (data: any[], props = { id: "id", parentId: "pid", children: "children" }) => {
+    data = cloneDeep(data);
+    const { id, parentId, children } = props;
+    const result: any[] = [];
+    const map = new Map();
+    data.forEach((item) => {
+        map.set(item[id], item);
+        const parent = map.get(item[parentId]);
+        if (parent) {
+            parent[children] = parent[children] ?? [];
+            parent[children].push(item);
+        } else {
+            result.push(item);
+        }
+    });
+    return result;
 };
 
 /**
@@ -74,15 +71,15 @@ export const arrayToTree = (
  * @param {String} path  数据
  */
 export function getNormalPath(path: string) {
-	if (path.length === 0 || !path || path == "undefined") {
-		return path;
-	}
-	const newPath = path.replace("//", "/");
-	const length = newPath.length;
-	if (newPath[length - 1] === "/") {
-		return newPath.slice(0, length - 1);
-	}
-	return newPath;
+    if (path.length === 0 || !path || path == "undefined") {
+        return path;
+    }
+    const newPath = path.replace("//", "/");
+    const length = newPath.length;
+    if (newPath[length - 1] === "/") {
+        return newPath.slice(0, length - 1);
+    }
+    return newPath;
 }
 
 /**
@@ -91,25 +88,25 @@ export function getNormalPath(path: string) {
  * @return {string} Query语法
  */
 export function objectToQuery(params: Record<string, any>): string {
-	let query = "";
-	for (const props of Object.keys(params)) {
-		const value = params[props];
-		const part = encodeURIComponent(props) + "=";
-		if (!isEmpty(value)) {
-			if (isObject(value)) {
-				for (const key of Object.keys(value)) {
-					if (!isEmpty(value[key])) {
-						const params = props + "[" + key + "]";
-						const subPart = encodeURIComponent(params) + "=";
-						query += subPart + encodeURIComponent(value[key]) + "&";
-					}
-				}
-			} else {
-				query += part + encodeURIComponent(value) + "&";
-			}
-		}
-	}
-	return query.slice(0, -1);
+    let query = "";
+    for (const props of Object.keys(params)) {
+        const value = params[props];
+        const part = encodeURIComponent(props) + "=";
+        if (!isEmpty(value)) {
+            if (isObject(value)) {
+                for (const key of Object.keys(value)) {
+                    if (!isEmpty(value[key])) {
+                        const params = props + "[" + key + "]";
+                        const subPart = encodeURIComponent(params) + "=";
+                        query += subPart + encodeURIComponent(value[key]) + "&";
+                    }
+                }
+            } else {
+                query += part + encodeURIComponent(value) + "&";
+            }
+        }
+    }
+    return query.slice(0, -1);
 }
 
 /**
@@ -120,36 +117,31 @@ export function objectToQuery(params: Record<string, any>): string {
  */
 // yyyy:mm:dd|yyyy:mm|yyyy年mm月dd日|yyyy年mm月dd日 hh时MM分等,可自定义组合
 export const timeFormat = (dateTime: number, fmt = "yyyy-mm-dd") => {
-	// 如果为null,则格式化当前时间
-	if (!dateTime) {
-		dateTime = Number(new Date());
-	}
-	// 如果dateTime长度为10或者13，则为秒和毫秒的时间戳，如果超过13位，则为其他的时间格式
-	if (dateTime.toString().length == 10) {
-		dateTime *= 1000;
-	}
-	const date = new Date(dateTime);
-	let ret;
-	const opt: any = {
-		"y+": date.getFullYear().toString(), // 年
-		"m+": (date.getMonth() + 1).toString(), // 月
-		"d+": date.getDate().toString(), // 日
-		"h+": date.getHours().toString(), // 时
-		"M+": date.getMinutes().toString(), // 分
-		"s+": date.getSeconds().toString(), // 秒
-	};
-	for (const k in opt) {
-		ret = new RegExp("(" + k + ")").exec(fmt);
-		if (ret) {
-			fmt = fmt.replace(
-				ret[1],
-				ret[1].length == 1
-					? opt[k]
-					: opt[k].padStart(ret[1].length, "0")
-			);
-		}
-	}
-	return fmt;
+    // 如果为null,则格式化当前时间
+    if (!dateTime) {
+        dateTime = Number(new Date());
+    }
+    // 如果dateTime长度为10或者13，则为秒和毫秒的时间戳，如果超过13位，则为其他的时间格式
+    if (dateTime.toString().length == 10) {
+        dateTime *= 1000;
+    }
+    const date = new Date(dateTime);
+    let ret;
+    const opt: any = {
+        "y+": date.getFullYear().toString(), // 年
+        "m+": (date.getMonth() + 1).toString(), // 月
+        "d+": date.getDate().toString(), // 日
+        "h+": date.getHours().toString(), // 时
+        "M+": date.getMinutes().toString(), // 分
+        "s+": date.getSeconds().toString(), // 秒
+    };
+    for (const k in opt) {
+        ret = new RegExp("(" + k + ")").exec(fmt);
+        if (ret) {
+            fmt = fmt.replace(ret[1], ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, "0"));
+        }
+    }
+    return fmt;
 };
 
 /**
@@ -158,9 +150,9 @@ export const timeFormat = (dateTime: number, fmt = "yyyy-mm-dd") => {
  * @return { String } id
  */
 export const getNonDuplicateID = (length = 8) => {
-	let idStr = Date.now().toString(36);
-	idStr += Math.random().toString(36).substring(3, length);
-	return idStr;
+    let idStr = Date.now().toString(36);
+    idStr += Math.random().toString(36).substring(3, length);
+    return idStr;
 };
 
 /**
@@ -173,18 +165,13 @@ export const getNonDuplicateID = (length = 8) => {
  * @return {string}
  * 222222 => 2****2
  */
-export function replaceSeparatorInStr(
-	str: string,
-	frontLen: number,
-	endLen: number,
-	separator: string
-) {
-	const len = endLen - frontLen;
-	let separators = "";
-	for (let i = 0; i < len; i++) {
-		separators += separator;
-	}
-	return str.substring(0, frontLen) + separators + str.substring(endLen);
+export function replaceSeparatorInStr(str: string, frontLen: number, endLen: number, separator: string) {
+    const len = endLen - frontLen;
+    let separators = "";
+    for (let i = 0; i < len; i++) {
+        separators += separator;
+    }
+    return str.substring(0, frontLen) + separators + str.substring(endLen);
 }
 
 /**
@@ -195,29 +182,34 @@ export function replaceSeparatorInStr(
  * @returns 格式化后的文件大小字符串，包含适当的单位
  */
 export const formatFileSize = (sizeInBytes: any, precision = 2): string => {
-	const units = ["B", "KB", "MB", "GB"];
-	let unitIndex = 0;
+    const units = ["B", "KB", "MB", "GB"];
+    let unitIndex = 0;
 
-	while (sizeInBytes >= 1024 && unitIndex < units.length - 1) {
-		sizeInBytes /= 1024;
-		unitIndex++;
-	}
-	return unitIndex === 0
-		? `${sizeInBytes.toFixed(precision)}B`
-		: `${sizeInBytes.toFixed(precision)}${units[unitIndex]}`;
+    while (sizeInBytes >= 1024 && unitIndex < units.length - 1) {
+        sizeInBytes /= 1024;
+        unitIndex++;
+    }
+    return unitIndex === 0
+        ? `${sizeInBytes.toFixed(precision)}B`
+        : `${sizeInBytes.toFixed(precision)}${units[unitIndex]}`;
 };
 
 /**
- * 将秒数格式化为 MM:SS 的时间字符串
+ * 将秒数格式化为 HH:MM:SS 的时间字符串
  *
  * @param seconds - 要格式化的时间（以秒为单位）
- * @returns 格式化后的时间字符串（格式为 MM:SS）
+ * @returns 格式化后的时间字符串（格式为 HH:MM:SS）
  */
-export function formatAudioTime(seconds: number): string {
-	if (!seconds) return "00:00";
-	const minutes = Math.floor(seconds / 60);
-	const secs = Math.floor(seconds % 60);
-	return `${minutes < 10 ? "0" : ""}${minutes}:${
-		secs < 10 ? "0" : ""
-	}${secs}`;
+export function formatAudioTime(seconds: number, isShowHours = false): string {
+    if (!seconds) return isShowHours ? "00:00:00" : "00:00";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    // 判断seconds 是不是大于3600
+    if (seconds > 3600) {
+        return isShowHours
+            ? `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`
+            : `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    }
+    return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }

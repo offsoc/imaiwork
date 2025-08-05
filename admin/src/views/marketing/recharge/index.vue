@@ -11,12 +11,18 @@
                 </el-form-item>
             </el-form>
             <div>
-                <el-button type="primary" :loading="isLock" @click="lockSubmit">保存</el-button>
+                <el-button
+                    v-perms="['finance.marketing.recharge/setConfig']"
+                    type="primary"
+                    :loading="isLock"
+                    @click="lockSubmit"
+                    >保存</el-button
+                >
             </div>
         </el-card>
         <el-card shadow="never" class="!border-none mt-4">
-            <div v-perms="['recharge.package/add', 'recharge.package/add:edit']">
-                <router-link :to="getRoutePath('recharge.package/add:edit')">
+            <div v-perms="['finance.marketing.rp/add:edit']">
+                <router-link :to="getRoutePath('finance.marketing.rp/add:edit')">
                     <el-button type="primary">
                         <template #icon>
                             <icon name="el-icon-Plus" />
@@ -36,9 +42,9 @@
                     <template #default="{ row }">
                         <el-button type="primary" link>
                             <router-link
-                                v-perms="['recharge.package/edit', 'recharge.package/add:edit']"
+                                v-perms="['finance.marketing.rp/add:edit']"
                                 :to="{
-                                    path: getRoutePath('recharge.package/add:edit'),
+                                    path: getRoutePath('finance.marketing.rp/add:edit'),
                                     query: {
                                         id: row.id,
                                         mode: 'edit',

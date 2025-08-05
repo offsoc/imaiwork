@@ -9,6 +9,8 @@ export enum SidebarEnum {
 export enum ModelEnum {
     HIDREAMAI = 1,
     GENERAL = 2,
+    SEEDREAM = 3,
+    SEEDANCE = 4,
 }
 
 export enum DrawTypeEnum {
@@ -55,6 +57,17 @@ export const resolutionOptions = [
     { label: "2:3", value: "341*512" },
     { label: "16:9", value: "512*288" },
     { label: "9:16", value: "288*512" },
+];
+
+//  SEEDREAM 分辨率
+export const seedreamResolutionOptions = [
+    { label: "1:1", value: "1328*1328" },
+    { label: "4:3", value: "1472*1104" },
+    { label: "3:2", value: "1584*1056" },
+    { label: "2:3", value: "1104*1472" },
+    { label: "16:9", value: "1664*936" },
+    { label: "9:16", value: "936*1664" },
+    { label: "21:9", value: "2016*864" },
 ];
 
 // 视频分辨率

@@ -20,6 +20,7 @@ export function usePaging(options: Options) {
         page,
         size,
         loading: firstLoading,
+        isLoad: false,
         count: 0,
         lists: [] as any[],
         extend: {} as Record<string, any>,
@@ -38,9 +39,7 @@ export function usePaging(options: Options) {
                 const lists = res?.lists || res?.list || res || [];
                 if (isScroll) {
                     pager.lists = isConcat ? pager.lists.concat(lists) : lists;
-                    if (lists.length < (params.page_size || size)) {
-                        isLoad.value = false;
-                    }
+                    pager.isLoad = !(lists.length < (params.page_size || size));
                 } else {
                     pager.lists = lists;
                 }
@@ -61,7 +60,7 @@ export function usePaging(options: Options) {
         if (isScroll) {
             pager.lists = [];
         }
-        isLoad.value = true;
+        pager.isLoad = true;
         return getLists(data);
     };
     // 重置参数
@@ -69,12 +68,11 @@ export function usePaging(options: Options) {
         Object.keys(paramsInit).forEach((item) => {
             params[item] = paramsInit[item];
         });
-        isLoad.value = true;
+        pager.isLoad = true;
         return getLists(data);
     };
     return {
         pager,
-        isLoad,
         getLists,
         resetParams,
         resetPage,

@@ -13,6 +13,8 @@ export interface CreateTaskParams {
     voice_name: string;
     audio_url: string;
     voice_type: number;
+    width: number;
+    height: number;
 }
 
 // 数字人模型版本
@@ -25,6 +27,8 @@ export enum DigitalHumanModelVersionEnum {
     ADVANCED = 4,
     // 尊享版
     ELITE = 6,
+    // 蝉镜
+    CHANJING = 7,
 }
 
 // 数字人模型版本枚举映射
@@ -33,6 +37,7 @@ export const DigitalHumanModelVersionEnumMap = {
     [DigitalHumanModelVersionEnum.SUPER]: "极速版",
     [DigitalHumanModelVersionEnum.ADVANCED]: "高级版",
     [DigitalHumanModelVersionEnum.ELITE]: "尊享版",
+    [DigitalHumanModelVersionEnum.CHANJING]: "蝉镜",
 };
 
 // 模型类型
@@ -93,4 +98,11 @@ export const uploadLimit = {
     },
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadLimit,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadLimit,
+    [DigitalHumanModelVersionEnum.CHANJING]: {
+        size: 2000,
+        minResolution: 360,
+        maxResolution: 2048,
+        videoMinDuration: 30,
+        videoMaxDuration: 300,
+    },
 };

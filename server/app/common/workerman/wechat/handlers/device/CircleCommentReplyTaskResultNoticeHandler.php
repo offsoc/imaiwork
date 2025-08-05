@@ -79,7 +79,7 @@ class CircleCommentReplyTaskResultNoticeHandler extends BaseHandler
             'Success' => $request->getSuccess(),
             'Code' => $request->getCode(),
             'ErrMsg' => $request->getErrMsg(),
-            'CircleId' => $request->getCircleId(),
+            'CircleId' => (string)$request->getCircleId(),
             'CommentId' => $request->getCommentId(),
             'ReplyCommentId' => $request->getReplyCommentId(),
             'TaskId' => $request->getTaskId(),

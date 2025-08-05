@@ -1,4 +1,4 @@
-export enum SidebarEnum {
+export enum SidebarTypeEnum {
     // 快速开始
     QUICK_START = 1,
     // 发布视频任务

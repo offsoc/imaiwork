@@ -29,6 +29,7 @@ class KnowledgeLogic extends ApiLogic
     const KNOELEDGE_RETRIEVE = 'knowledge_retrieve'; //知识库检索
     const KNOELEDGE_CHAT = 'knowledge_chat'; //知识库聊天
     const RERANK_MIN_SCORE = 0.2; //知识库检索最小分数
+    const OPENAI_CHAT = 'openai_chat'; //openai聊天
     /**
      * 知识库列表
      *
@@ -1075,6 +1076,7 @@ class KnowledgeLogic extends ApiLogic
             self::KNOELEDGE_CREATE => ['knowledge_create', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CREATE],
             self::KNOELEDGE_RETRIEVE => ['knowledge_retrieve', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_RETRIEVE],
             self::KNOELEDGE_CHAT => ['knowledge_chat', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT],
+            self::OPENAI_CHAT => ['openai_chat', AccountLogEnum::TOKENS_DEC_OPENAI_CHAT],
         };
 
         //计费
@@ -1089,6 +1091,9 @@ class KnowledgeLogic extends ApiLogic
                 break;
             case self::KNOELEDGE_CHAT:
                 $response = $requestService->promptChat($request);
+                break;
+            case self::OPENAI_CHAT:
+                $response = $requestService->openaiChat($request);
                 break;
             default:
         }
@@ -1418,7 +1423,8 @@ class KnowledgeLogic extends ApiLogic
                 'stream' =>  (bool)$params['stream'] ?? true,
                 'task_id' => $params['task_id'] ?? generate_unique_task_id(),
                 'scene' => $params['scene'] ?? '未知聊天',
-                'assistant_id' => $params['assistant_id'] ?? 0
+                'assistant_id' => $params['assistant_id'] ?? 0,
+                'model' => $params['model'] ?? 'deepseek',
             ];
 
             self::__getRequestData($request, $params);
@@ -1461,6 +1467,12 @@ class KnowledgeLogic extends ApiLogic
                     );
                 }
 
+                if(empty($messages)){
+                    $messages = [
+                        ['role' => 'user', 'content' => $message],
+                    ];
+                    //return [false, '知识库检索为空'];
+                }
 
                 $request['user_id'] = $uid; // 替换为实际的用户ID
                 $request['prompt'] = $prompt;
@@ -1470,8 +1482,10 @@ class KnowledgeLogic extends ApiLogic
                 $request['knowledge_record'] = $record;
                 $request['messages'] = $messages;
 
+                $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
 
-                $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record, true);
+                $result = self::requestUrl($request, $scene, $uid, $record, true);
+
                 if(isset($result['code']) && (int)$result['code'] !== 10000){
                     return [false, $result['message'] ?? '知识库检索失败'];
                 }

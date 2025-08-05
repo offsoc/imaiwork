@@ -32,25 +32,29 @@
 </template>
 
 <script setup lang="ts">
+// 导入组件
 import SidebarPanel from "./_components/sidebar-panel.vue";
 import FriendsPanel from "./_components/friends-panel.vue";
 import ChattingPanel from "./_components/chatting-panel.vue";
 import UserPanel from "./_components/user-panel.vue";
 import PreviewVideo from "@/components/preview-video/index.vue";
+// 导入工具函数
 import { isJson } from "@/utils/validate";
 import { getWeChatLists, reportWeChatFriends } from "@/api/person_wechat";
+// 导入枚举类型
 import {
-    EnumMsgType,
-    EnumFriendPanel,
-    EnumContentType,
-    EnumMsgErrorCode,
-    EnumContentTypeMap,
-    EnumTalkActionType,
-    EnumHandleEvent,
-    EnumTalkType,
+    MsgTypeEnum, // 消息类型枚举
+    FriendPanelEnum, // 好友面板类型枚举
+    ContentTypeEnum, // 内容类型枚举
+    MsgErrorCodeEnum, // 消息错误码枚举
+    ContentTypeEnumMap, // 内容类型映射枚举
+    TalkActionTypeEnum, // 对话动作类型枚举
+    HandleEventEnum, // 处理事件枚举
+    EnumTalkType, // 对话类型枚举
 } from "../_enums";
+// 导入自定义钩子
 import useWeChatWs from "../_hooks/useWeChatWs";
-import useHandle from "./_hooks/useHandle";
+import useHandle from "../_hooks/useHandle";
 import useSopTask from "./_hooks/useSopTask";
 import useTalkReplyTask from "./_hooks/useTalkReplyTask";
 import { convertStringToObject } from "@/utils/util";
@@ -63,7 +67,7 @@ const videoPlayerRef = ref<InstanceType<typeof PreviewVideo>>();
 const showPreviewVideo = ref(false);
 
 // 当前面板
-const currentPanel = ref<EnumFriendPanel>(EnumFriendPanel.Dialogue);
+const currentPanel = ref<FriendPanelEnum>(FriendPanelEnum.Dialogue);
 
 // 使用微信 WebSocket
 const { on, send, addDeviceLoading, actionType, isConnected } = useWeChatWs();
@@ -137,9 +141,9 @@ on("open", () => {
 // 监听错误事件
 on("error", (error?: any) => {
     const { Code, MsgType, Content } = error;
-    if (Code == EnumMsgErrorCode.InternalError && MsgType == EnumMsgType.TalkToFriendTaskResultNotice) {
+    if (Code == MsgErrorCodeEnum.InternalError && MsgType == MsgTypeEnum.TalkToFriendTaskResultNotice) {
         historyMsgList.value = historyMsgList.value.filter((item) => !item.loading);
-    } else if (Code == EnumMsgErrorCode.DeviceOffline) {
+    } else if (Code == MsgErrorCodeEnum.DeviceOffline) {
         wechatLists.value.forEach((item) => {
             if (item.device_code == Content.DeviceId) {
                 item.wechat_status = 0;
@@ -155,11 +159,11 @@ on("error", (error?: any) => {
 on("message", async (data: any) => {
     const { MsgType, Content } = data;
     // @ts-ignore
-    const handlers: Record<EnumMsgType, Function> = {
-        [EnumMsgType.Auth]: () => {
+    const handlers: Record<MsgTypeEnum, Function> = {
+        [MsgTypeEnum.Auth]: () => {
             if (!addDeviceCode.value) {
                 const { DeviceId, AccessToken, WeChatId } = Content;
-                triggerTask(EnumMsgType.TriggerConversationPushTask, {
+                triggerTask(MsgTypeEnum.TriggerConversationPushTask, {
                     deviceId: DeviceId,
                     wechatId: WeChatId,
                     accessToken: AccessToken,
@@ -171,23 +175,23 @@ on("message", async (data: any) => {
                 });
             }
         },
-        [EnumMsgType.WxInfo]: getWechatListsFn,
-        [EnumMsgType.ConversationPushNotice]: handleConversationPush,
-        [EnumMsgType.FriendPushNotice]: handleFriendPush,
-        [EnumMsgType.HistoryMsgPushNotice]: handleHistoryMsgPush,
-        [EnumMsgType.FriendChangeNotice]: handleFriendChange,
-        [EnumMsgType.FriendTalkNotice]: handleFriendTalk,
-        [EnumMsgType.PostMessageReadNotice]: handlePostMessageRead,
-        [EnumMsgType.WeChatTalkToFriendNotice]: handleWeChatTalkToFriendNotice,
-        [EnumMsgType.TalkToFriendTaskResultNotice]: handleTalkToFriendTaskResultNotice,
-        [EnumMsgType.ChatRoomAddNotice]: handleChatRoomAddNotice,
-        [EnumMsgType.ChatRoomMembersNotice]: handleChatRoomMembersNotice,
-        [EnumMsgType.WeChatOfflineNotice]: handleWeChatStatusNotice,
-        [EnumMsgType.WeChatOnlineNotice]: handleWeChatStatusNotice,
-        [EnumMsgType.FriendAddNotice]: handleFriendAddNotice,
-        [EnumMsgType.FriendDelNotice]: handleFriendDelNotice,
-        [EnumMsgType.RequestTalkDetailTaskResultNotice]: handleRequestTalkDetailTaskResultNotice,
-        [EnumMsgType.VoiceTransTextTask]: handleVoiceTransTextTask,
+        [MsgTypeEnum.WxInfo]: getWechatListsFn,
+        [MsgTypeEnum.ConversationPushNotice]: handleConversationPush,
+        [MsgTypeEnum.FriendPushNotice]: handleFriendPush,
+        [MsgTypeEnum.HistoryMsgPushNotice]: handleHistoryMsgPush,
+        [MsgTypeEnum.FriendChangeNotice]: handleFriendChange,
+        [MsgTypeEnum.FriendTalkNotice]: handleFriendTalk,
+        [MsgTypeEnum.PostMessageReadNotice]: handlePostMessageRead,
+        [MsgTypeEnum.WeChatTalkToFriendNotice]: handleWeChatTalkToFriendNotice,
+        [MsgTypeEnum.TalkToFriendTaskResultNotice]: handleTalkToFriendTaskResultNotice,
+        [MsgTypeEnum.ChatRoomAddNotice]: handleChatRoomAddNotice,
+        [MsgTypeEnum.ChatRoomMembersNotice]: handleChatRoomMembersNotice,
+        [MsgTypeEnum.WeChatOfflineNotice]: handleWeChatStatusNotice,
+        [MsgTypeEnum.WeChatOnlineNotice]: handleWeChatStatusNotice,
+        [MsgTypeEnum.FriendAddNotice]: handleFriendAddNotice,
+        [MsgTypeEnum.FriendDelNotice]: handleFriendDelNotice,
+        [MsgTypeEnum.RequestTalkDetailTaskResultNotice]: handleRequestTalkDetailTaskResultNotice,
+        [MsgTypeEnum.VoiceTransTextTask]: handleVoiceTransTextTask,
     };
     if (handlers[MsgType]) {
         await handlers[MsgType](Content);
@@ -206,38 +210,38 @@ on("success", (data: any) => {
 onHandleEvent("action", async (data: any) => {
     const { type } = data;
     switch (type) {
-        case EnumHandleEvent.ChooseEmoji:
+        case HandleEventEnum.ChooseEmoji:
             chattingPanelRef.value?.setInputContent(data.emoji, true);
             break;
-        case EnumHandleEvent.UpdateUserInfo:
-            triggerTask(EnumMsgType.ModifyFriendMemoTask, {
+        case HandleEventEnum.UpdateUserInfo:
+            triggerTask(MsgTypeEnum.ModifyFriendMemoTask, {
                 Memo: data.remark,
             });
-            triggerTask(EnumMsgType.ModifyFriendMemoTask, {
+            triggerTask(MsgTypeEnum.ModifyFriendMemoTask, {
                 Phone: data.phone,
             });
             break;
-        case EnumHandleEvent.DownloadFile:
-        case EnumHandleEvent.PreviewVideo:
+        case HandleEventEnum.DownloadFile:
+        case HandleEventEnum.PreviewVideo:
             const currMsg = historyMsgList.value.find((conv: any) => conv.msgId === data.msgId && conv.fileUrl);
             if (currMsg) {
-                if (type === EnumHandleEvent.DownloadFile) {
+                if (type === HandleEventEnum.DownloadFile) {
                     downloadFile(currMsg.fileUrl);
-                } else if (type === EnumHandleEvent.PreviewVideo) {
+                } else if (type === HandleEventEnum.PreviewVideo) {
                     previewVideo(currMsg.fileUrl);
                 }
                 return;
             }
 
-            feedback.loading(type === EnumHandleEvent.DownloadFile ? "文件下载中..." : "视频预览中...");
+            feedback.loading(type === HandleEventEnum.DownloadFile ? "文件下载中..." : "视频预览中...");
 
-            triggerTask(EnumMsgType.RequestTalkDetailTask, {
+            triggerTask(MsgTypeEnum.RequestTalkDetailTask, {
                 msgId: data.msgId,
                 msgSvrId: data.msgSvrId,
             });
             break;
-        case EnumHandleEvent.VoiceToText:
-            triggerTask(EnumMsgType.VoiceTransTextTask, {
+        case HandleEventEnum.VoiceToText:
+            triggerTask(MsgTypeEnum.VoiceTransTextTask, {
                 messageId: data.messageId,
                 taskId: data.taskId,
             });
@@ -248,23 +252,23 @@ onHandleEvent("action", async (data: any) => {
 onTalkEvent("post", (data: any) => {
     const { type, ...params } = data;
     switch (type) {
-        case EnumTalkActionType.PostHistory:
-            triggerTask(EnumMsgType.TriggerHistoryMsgPushTask, {
+        case TalkActionTypeEnum.PostHistory:
+            triggerTask(MsgTypeEnum.TriggerHistoryMsgPushTask, {
                 ...params,
             });
             break;
-        case EnumTalkActionType.VoiceToText:
-            triggerTask(EnumMsgType.VoiceTransTextTask, {
+        case TalkActionTypeEnum.VoiceToText:
+            triggerTask(MsgTypeEnum.VoiceTransTextTask, {
                 ...params,
             });
             break;
-        case EnumTalkActionType.PostPicture:
-            triggerTask(EnumMsgType.TalkToFriendTask, {
+        case TalkActionTypeEnum.PostPicture:
+            triggerTask(MsgTypeEnum.TalkToFriendTask, {
                 DeviceId: params.deviceId,
                 AccessToken: params.accessToken,
                 WeChatId: params.wechatId,
                 FriendId: params.friendId,
-                ContentType: EnumContentType.Text,
+                ContentType: ContentTypeEnum.Text,
                 Content: params.content,
                 MsgId: Date.now(),
             });
@@ -316,7 +320,9 @@ function handleFriendPush(Content: any) {
         // 批量上报微信好友信息
         reportWeChatFriends({
             wechat_id: currentWechat.value.wechat_id,
-            friends: friendList.value.map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
+            friends: friendList.value
+                .filter((item) => item.Type == 3)
+                .map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
         });
     }
 }
@@ -329,10 +335,10 @@ async function handleHistoryMsgPush(Content: any) {
     if (talkReplyTaskData[TaskId]) {
         // 排除不是文字、语音、引用消息的消息 && 排除第一条消息, 因为第一条消息是当前消息, 不需要发送
         talkReplyTaskData[TaskId].historyMsgLists = Messages.filter((item: any, index: number) =>
-            [EnumContentType.Voice, EnumContentType.Text, EnumContentType.QuoteMsg].includes(item.ContentType)
+            [ContentTypeEnum.Voice, ContentTypeEnum.Text, ContentTypeEnum.QuoteMsg].includes(item.ContentType)
         );
         triggerTalkEvent("get", {
-            type: EnumTalkActionType.GetHistory,
+            type: TalkActionTypeEnum.GetHistory,
             taskId: TaskId,
             wechatId: WeChatId,
         });
@@ -404,8 +410,10 @@ function handleWeChatTalkToFriendNotice(result: any) {
         // 先判断消息是不是在历史消息存在，通过MsgId 来判断
         const isExistIndex = historyMsgList.value.findIndex((item) => item.is_active);
         if (isExistIndex > -1 && isExistIndex < historyMsgList.value.length) {
+            // @ts-ignore
             historyMsgList.value[isExistIndex] = msg;
         } else {
+            // @ts-ignore
             historyMsgList.value.push(msg);
         }
         nextTick(() => chattingRef.value?.scrollToBottom());
@@ -432,16 +440,16 @@ function handleFriendTalk(result: any) {
     const msgData = handleMessage(result);
 
     const contentMap = {
-        [EnumContentType.System]: result.Content,
-        [EnumContentType.RoomSystem]: msgData.message,
-        default: `[${EnumContentTypeMap[ContentType]}]`,
+        [ContentTypeEnum.System]: result.Content,
+        [ContentTypeEnum.RoomSystem]: msgData.message,
+        default: `[${ContentTypeEnumMap[ContentType]}]`,
     };
 
     const content =
-        ContentType === EnumContentType.Text ? result.Content : contentMap[ContentType] || contentMap.default;
+        ContentType === ContentTypeEnum.Text ? result.Content : contentMap[ContentType] || contentMap.default;
 
     const currWechat = wechatLists.value.find((item) => item.wechat_id === WeChatId);
-    const Digest = ContentType === EnumContentType.RoomSystem ? msgData.message : content;
+    const Digest = ContentType === ContentTypeEnum.RoomSystem ? msgData.message : content;
 
     function createConversation() {
         return {
@@ -461,11 +469,11 @@ function handleFriendTalk(result: any) {
     };
 
     if (isRoom) {
-        const isTextMessage = ContentType === EnumContentType.Text;
+        const isTextMessage = ContentType === ContentTypeEnum.Text;
         if (!hasConversation && isTextMessage) {
             pushConversation();
         }
-    } else if ((ContentType === EnumContentType.System && Content.includes("打招呼")) || !hasConversation) {
+    } else if ((ContentType === ContentTypeEnum.System && Content.includes("打招呼")) || !hasConversation) {
         pushConversation();
     } else {
         if (MsgSvrId != "0" && !isCompany) {
@@ -490,6 +498,7 @@ function handleFriendTalk(result: any) {
     });
 
     if (currentFriend.value?.UserName === FriendId) {
+        // @ts-ignore
         historyMsgList.value.push(msgData);
         newMsg.value += 1;
         nextTick(() => chattingRef.value?.scrollToBottom());
@@ -515,13 +524,13 @@ function handlePostMessageRead(Content: any) {
 // 处理添加微信
 function handleAddWeChat(DeviceId: string) {
     if (!isConnected.value) {
-        feedback.notifyError("网络连接失败，请检查网络");
+        feedback.msgError("网络连接失败，请检查网络");
         return;
     }
-    actionType.value = EnumMsgType.AddDevice;
+    actionType.value = MsgTypeEnum.AddDevice;
     addDeviceCode.value = DeviceId;
     addDeviceLoading.value = true;
-    triggerTask(EnumMsgType.AddDevice, {
+    triggerTask(MsgTypeEnum.AddDevice, {
         deviceId: DeviceId,
     });
 }
@@ -539,22 +548,22 @@ async function handleSelectWeChat(data: any) {
 }
 
 // 处理面板变更
-const handleChangePanel = async (key: EnumFriendPanel) => {
+const handleChangePanel = async (key: FriendPanelEnum) => {
     currentPanel.value = key;
     await handleIsError();
     if (currentWechat.value) {
         switch (key) {
-            case EnumFriendPanel.Dialogue:
+            case FriendPanelEnum.Dialogue:
                 if (!conversationLock.value) {
-                    triggerTask(EnumMsgType.TriggerConversationPushTask);
+                    triggerTask(MsgTypeEnum.TriggerConversationPushTask);
                 }
                 break;
-            case EnumFriendPanel.Friend:
+            case FriendPanelEnum.Friend:
                 if (!friendLock.value) {
-                    triggerTask(EnumMsgType.TriggerFriendPushTask);
+                    triggerTask(MsgTypeEnum.TriggerFriendPushTask);
                 }
                 break;
-            case EnumFriendPanel.Group:
+            case FriendPanelEnum.Group:
                 break;
         }
     }
@@ -575,14 +584,14 @@ async function handleChangeFriend(friend: any) {
     currentFriend.value.isRoom = isChatroom(currentFriend.value?.UserName);
 
     if (currentFriend.value.isRoom) {
-        triggerTask(EnumMsgType.RequestChatRoomInfoTaskMessage);
+        triggerTask(MsgTypeEnum.RequestChatRoomInfoTaskMessage);
     } else {
         friendInfoLoading.value = true;
-        triggerTask(EnumMsgType.RequestContactsInfoTask);
+        triggerTask(MsgTypeEnum.RequestContactsInfoTask);
         getFriendInfo();
     }
-    triggerTask(EnumMsgType.TriggerHistoryMsgPushTask);
-    triggerTask(EnumMsgType.TriggerMessageReadTask);
+    triggerTask(MsgTypeEnum.TriggerHistoryMsgPushTask);
+    triggerTask(MsgTypeEnum.TriggerMessageReadTask);
 
     wechatLists.value.forEach((data: any) => {
         if (data.device_code === currentWechat.value?.device_code) {
@@ -618,6 +627,7 @@ function handleContentPost(data: any) {
         feedback.msgError("请先选择好友");
         return;
     }
+    // @ts-ignore
     const msgId = (historyMsgList.value[historyMsgList.value.length - 1]?.msgId || 0) + 1;
     const params = {
         DeviceId: currentWechat.value?.device_code,
@@ -628,7 +638,7 @@ function handleContentPost(data: any) {
         MsgId: msgId,
         Content: "",
     };
-    if (data.contentType == EnumContentType.Text) {
+    if (data.contentType == ContentTypeEnum.Text) {
         params.Content = data.content;
     } else {
         params.Content = data.file?.uri;
@@ -646,7 +656,7 @@ function handleContentPost(data: any) {
         createTime: Date.now(),
         avatar: currentWechat.value?.wechat_avatar,
     });
-    triggerTask(EnumMsgType.TalkToFriendTask, params);
+    triggerTask(MsgTypeEnum.TalkToFriendTask, params);
 
     // 清空输入框
     chattingPanelRef.value?.cleanInput();
@@ -730,7 +740,7 @@ function handleWeChatStatusNotice(Content: any) {
     });
     if (currentWechat.value?.device_code && Status == "offline") {
         resetBaseData();
-        feedback.notifyError("设备离线，请重新登录");
+        feedback.msgError("设备离线，请重新登录");
     }
 }
 
@@ -740,7 +750,7 @@ function handleVoiceTransTextTask(Content: any) {
     if (Success) {
         // 触发语音转文字结果事件
         triggerTalkEvent("get", {
-            type: EnumTalkActionType.VoiceToTextResult,
+            type: TalkActionTypeEnum.VoiceToTextResult,
             taskId: TaskId.length === 14 ? TaskId.slice(0, -1) : TaskId,
             data: Content,
         });
@@ -764,10 +774,10 @@ async function handleRequestTalkDetailTaskResultNotice(Content: any) {
             conv.fileUrl = content;
         }
     });
-    if (handleActionType.value === EnumHandleEvent.PreviewVideo) {
+    if (handleActionType.value === HandleEventEnum.PreviewVideo) {
         previewVideo(content);
     }
-    if (handleActionType.value === EnumHandleEvent.DownloadFile) {
+    if (handleActionType.value === HandleEventEnum.DownloadFile) {
         downloadFile(content);
     }
     feedback.closeLoading();
@@ -775,7 +785,7 @@ async function handleRequestTalkDetailTaskResultNotice(Content: any) {
 }
 
 // 触发任务
-const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
+const triggerTask = (taskType: MsgTypeEnum, params?: Record<string, any>) => {
     let content: any = {
         DeviceId: params?.deviceId || currentWechat.value?.device_code,
         AccessToken: params?.accessToken || currentWechat.value?.accessToken,
@@ -791,13 +801,13 @@ const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
     // 判断是否是单聊
     const isSingle = (talkType || talkType >= 0) && talkType == EnumTalkType.Single;
     switch (taskType) {
-        case EnumMsgType.AddDevice:
-        case EnumMsgType.Auth:
-        case EnumMsgType.WxInfo:
-        case EnumMsgType.TriggerMessageReadTask:
+        case MsgTypeEnum.AddDevice:
+        case MsgTypeEnum.Auth:
+        case MsgTypeEnum.WxInfo:
+        case MsgTypeEnum.TriggerMessageReadTask:
             break;
         // 处理历史消息推送
-        case EnumMsgType.TriggerHistoryMsgPushTask:
+        case MsgTypeEnum.TriggerHistoryMsgPushTask:
             if (isSingle) {
                 content = {
                     ...content,
@@ -812,7 +822,7 @@ const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
             }
             break;
         // 处理联系人信息
-        case EnumMsgType.RequestContactsInfoTask:
+        case MsgTypeEnum.RequestContactsInfoTask:
             content = {
                 ...content,
                 Contact: currentFriend.value?.UserName,
@@ -820,7 +830,7 @@ const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
             };
             break;
         // 处理会话推送
-        case EnumMsgType.TriggerConversationPushTask:
+        case MsgTypeEnum.TriggerConversationPushTask:
             content = {
                 ...content,
                 ...conversationPageParams,
@@ -830,12 +840,12 @@ const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
             };
             break;
         // 处理好友推送
-        case EnumMsgType.TriggerFriendPushTask:
+        case MsgTypeEnum.TriggerFriendPushTask:
             if (!currentWechat.value?.wechat_id) return;
             friendListLoading.value = true;
             break;
         // 处理群聊信息
-        case EnumMsgType.RequestChatRoomInfoTaskMessage:
+        case MsgTypeEnum.RequestChatRoomInfoTaskMessage:
             if (!currentWechat.value?.wechat_id) return;
             content = {
                 ...content,
@@ -844,7 +854,7 @@ const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
             };
             break;
         // 处理视频预览通知
-        case EnumMsgType.RequestTalkDetailTask:
+        case MsgTypeEnum.RequestTalkDetailTask:
             content = {
                 ...content,
                 Md5: params?.Md5,
@@ -854,16 +864,16 @@ const triggerTask = (taskType: EnumMsgType, params?: Record<string, any>) => {
             };
             break;
         // 处理内容发布
-        case EnumMsgType.TalkToFriendTask:
+        case MsgTypeEnum.TalkToFriendTask:
         // 处理微信好友信息修改
-        case EnumMsgType.ModifyFriendMemoTask:
+        case MsgTypeEnum.ModifyFriendMemoTask:
             content = {
                 ...content,
                 ...params,
             };
             break;
         // 处理语音转文字
-        case EnumMsgType.VoiceTransTextTask:
+        case MsgTypeEnum.VoiceTransTextTask:
             content = {
                 ...content,
                 MsgSvrId: params?.messageId,
@@ -930,12 +940,12 @@ interface MessageItem {
 const parseFileContent = (content: string, contentType: number) => {
     if (isJson(content)) return JSON.parse(content);
 
-    if (contentType === EnumContentType.Voice) {
+    if (contentType === ContentTypeEnum.Voice) {
         const [uri, params] = content.split("?");
         return { uri, ...convertStringToObject(params) };
     }
 
-    if (contentType === EnumContentType.Picture) {
+    if (contentType === ContentTypeEnum.Picture) {
         return { uri: isJson(content) ? JSON.parse(content) : "" };
     }
 
@@ -1006,7 +1016,7 @@ const handleIsError = (isMsgError: boolean = false): Promise<boolean> => {
         if (currentWechat.value.is_online == false) {
             reject(false);
             if (isMsgError) {
-                feedback.notifyError("设备离线，请重新登录");
+                feedback.msgError("设备离线，请重新登录");
             }
         }
         resolve(true);
@@ -1014,7 +1024,7 @@ const handleIsError = (isMsgError: boolean = false): Promise<boolean> => {
 };
 
 const handleMessage = (item: MessageItem) => {
-    const isText = item.ContentType === EnumContentType.Text;
+    const isText = item.ContentType === ContentTypeEnum.Text;
     const isRoom = isChatroom(item.FriendId);
 
     const data: MessageData = {
@@ -1025,15 +1035,15 @@ const handleMessage = (item: MessageItem) => {
         msgSvrId: item.MsgSvrId,
         msgId: item.MsgId,
         id: item.MsgId,
-        digest: item.ContentType !== EnumContentType.Text ? `[${EnumContentTypeMap[item.ContentType]}]` : item.Content,
+        digest: item.ContentType !== ContentTypeEnum.Text ? `[${ContentTypeEnumMap[item.ContentType]}]` : item.Content,
         friendId: item.FriendId,
         wechatId: "",
         is_room: isRoom,
     };
 
     function getMessageType(item: MessageItem, isRoom: boolean) {
-        if ([EnumContentType.System, EnumContentType.RoomSystem].includes(item.ContentType)) {
-            const isRoomSystem = item.ContentType === EnumContentType.RoomSystem;
+        if ([ContentTypeEnum.System, ContentTypeEnum.RoomSystem].includes(item.ContentType)) {
+            const isRoomSystem = item.ContentType === ContentTypeEnum.RoomSystem;
             const messageContent = isRoomSystem && isJson(item.Content) ? JSON.parse(item.Content).title : item.Content;
 
             return {
@@ -1047,8 +1057,8 @@ const handleMessage = (item: MessageItem) => {
             : { type: 2, avatar: !isRoom ? currentFriend.value?.Avatar : "" };
     }
 
-    if (item.ContentType !== EnumContentType.System) {
-        if (isRoom && item.ContentType !== EnumContentType.RoomSystem) {
+    if (item.ContentType !== ContentTypeEnum.System) {
+        if (isRoom && item.ContentType !== ContentTypeEnum.RoomSystem) {
             const delimiter = isText ? "\n" : ":";
             const [wechatId, content] = splitByFirstChar(item.Content, delimiter);
 
@@ -1084,7 +1094,7 @@ const scrollConversationBottom = () => {
     if (conversationPageLoad.value || conversationPageLoadEnd.value) return;
     conversationPageLoad.value = true;
     conversationPageParams.Offset += conversationPageParams.Limit;
-    triggerTask(EnumMsgType.TriggerConversationPushTask);
+    triggerTask(MsgTypeEnum.TriggerConversationPushTask);
 };
 
 // 聊天界面滚动到顶部
@@ -1092,7 +1102,7 @@ const scrollChattingTop = () => {
     if (historyPageLoad.value || historyPageLoadEnd.value) return;
     historyPageLoad.value = true;
     historyPageParams.EndTime = historyMsgList?.value[0]?.createTime;
-    triggerTask(EnumMsgType.TriggerHistoryMsgPushTask);
+    triggerTask(MsgTypeEnum.TriggerHistoryMsgPushTask);
 };
 
 // 预览视频
@@ -1106,7 +1116,9 @@ const previewVideo = async (url: string) => {
 // 重置基础数据
 const resetBaseData = () => {
     conversationLock.value = false;
+    // @ts-ignore
     currentWechat.value = {};
+    // @ts-ignore
     currentFriend.value = {};
     friendInfo.value = {};
     friendList.value = [];
@@ -1149,10 +1161,10 @@ const getWechatListsFn = async () => {
     if (lists && lists.length > 0) {
         for (const [index, item] of wechatLists.value.entries()) {
             item.loading = true;
-            triggerTask(EnumMsgType.Auth, {
+            triggerTask(MsgTypeEnum.Auth, {
                 deviceId: item.device_code,
             });
-            actionType.value = EnumMsgType.TriggerConversationPushTask;
+            actionType.value = MsgTypeEnum.TriggerConversationPushTask;
             getWeChatAiInfo(item.wechat_id);
         }
     }
@@ -1162,12 +1174,14 @@ getSopGreetInfo();
 getReplyStrategyInfo();
 
 onMounted(() => {
+    // @ts-ignore
     currentWechat.value = {};
 });
 
 onUnmounted(() => {
     deleteAllStopTask();
     resetBaseData();
+    // @ts-ignore
     currentWechat.value = {};
 });
 

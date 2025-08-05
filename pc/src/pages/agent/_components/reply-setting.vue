@@ -127,11 +127,11 @@ const formData = reactive({
 
 const handleConfirm = async () => {
     if (formData.image_enable == 1 && !formData.image_reply) {
-        feedback.notifyError("请输入图片消息回复内容");
+        feedback.msgError("请输入图片消息回复内容");
         return;
     }
     if (formData.stop_enable == 1 && !formData.stop_keywords) {
-        feedback.notifyError("请输入停止回复关键词");
+        feedback.msgError("请输入停止回复关键词");
         return;
     }
     try {
@@ -139,9 +139,9 @@ const handleConfirm = async () => {
             ...formData,
             robot_id: props.agentId,
         });
-        feedback.notifySuccess("保存成功");
+        feedback.msgSuccess("保存成功");
     } catch (error) {
-        feedback.notifyError(error || "保存失败");
+        feedback.msgError(error || "保存失败");
     }
 };
 const { lockFn: lockConfirm, isLock } = useLockFn(handleConfirm);

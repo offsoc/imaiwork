@@ -199,14 +199,14 @@ const aiList = [
     {
         id: 6,
         key: "ladder_player",
-        title: "智能陪练",
+        title: "AI员工陪练",
         desc: "量身定制训练方案",
         desc2: "量身定制训练方案，智能纠错、即时反馈，让你的每一次练习都更高效。",
     },
     {
         id: 2,
         key: "interview",
-        title: "自动面试",
+        title: "AI面试",
         desc: "轻松筛选优质人才",
         desc2: "自动化面试系统，轻松筛选优质人才，标准化评估每一位候选人。",
     },
@@ -230,7 +230,7 @@ const aiList = [
 const aiCustomerList = [
     {
         key: "broaden",
-        title: "智能拓客",
+        title: "AI视频号获客手",
         desc: "精准洞察客户需求，自动跟进潜在商机，提升转化效率。帮你打造更贴心、更高效的客户体验。",
     },
 ];
@@ -257,7 +257,7 @@ const aiContentList = [
 const aiCustomerManagementList = [
     {
         key: "person_wechat",
-        title: "AI微信",
+        title: "个微操盘手",
         desc: "轻松实现自动化管理",
         desc2: "高效回复、智能提醒、自动归类，助你轻松管理微信消息，告别漏消息与重复操作。",
     },
@@ -276,7 +276,7 @@ const aiCustomerManagementList = [
     },
     {
         key: "live",
-        title: "AI直播",
+        title: "AI无人直播",
         desc: "无需人工值守",
         desc2: "无需人工值守，大幅降低运营成本，轻松实现高效、可持续的内容传播。",
     },
@@ -286,11 +286,11 @@ const aiCustomerManagementList = [
 const aiIngList = [
     {
         key: "tax",
-        title: "智能税务",
+        title: "自动报税",
     },
     {
         key: "law",
-        title: "智能法务",
+        title: "法律咨询",
     },
     {
         key: "word",
@@ -306,7 +306,7 @@ const aiIngList = [
     },
     {
         key: "statement",
-        title: "智能报表",
+        title: "AI-BI报表",
     },
     {
         key: "poster",

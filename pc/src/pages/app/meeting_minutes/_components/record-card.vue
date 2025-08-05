@@ -170,7 +170,7 @@ const onTrain = (item: any) => {
 
 <style scoped lang="scss">
 .content-box {
-    @apply w-full h-full pt-[45.25%] relative;
+    @apply w-full h-full pt-[50%] relative;
 }
 .success-box {
     @apply w-full h-full relative bg-cover bg-no-repeat rounded-xl;

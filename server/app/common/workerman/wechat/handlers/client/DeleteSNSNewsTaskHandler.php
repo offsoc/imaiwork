@@ -47,13 +47,12 @@ class DeleteSNSNewsTaskHandler extends BaseHandler
         $request = new DeleteSNSNewsTaskMessage();
 
         $request->setWeChatId($data['WeChatId']);
-        
         if (isset($data['CircleId'])) {
-            $request->setCircleId($data['CircleId']);
+            $request->setCircleId((int)$data['CircleId']);
         }
         
         if (isset($data['TaskId'])) {
-            $request->setTaskId($data['TaskId']);
+            $request->setTaskId((int)$data['TaskId']);
         }
 
         return $request;

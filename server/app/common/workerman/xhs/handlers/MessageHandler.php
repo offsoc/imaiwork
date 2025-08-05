@@ -307,6 +307,7 @@ class MessageHandler extends BaseMessageHandler
                     'message' => array_values(array_filter($content['replyContent'])),
                     'message_id' => $this->payload['messageId'],
                     'message_type' => $content['message_type'] ?? 1,
+                    'model' => $account['model'] ?? 'deepseek',
                 ];
                 $keys = $this->checkCradKeyword($account, $request);
                 $request['message'] = empty($keys) ? $content['replyContent'] : $keys;
@@ -914,6 +915,7 @@ class MessageHandler extends BaseMessageHandler
                 'now'       => time(),
                 'messages' => array_merge([['role' => 'system', 'content' => $keyword]], $logs),
                 'knowledge' => $knowledge,
+                'model' => $request['model']
             ];
 
             // 任务数据
@@ -952,10 +954,10 @@ class MessageHandler extends BaseMessageHandler
             $this->userId = $data['user_id'];
             $this->request = $data['request'];
             $this->taskId = $data['task_id'];
-
+            
             // 检查AI 是否已有回复记录
             $log = ChatLog::where('task_id', $this->taskId)->findOrEmpty();
-            $reply = '对不起,未找到相关内容,请详细说明';
+            $reply = '请稍等，该问题我不太清楚，为您转接给对应的部门同事';
             if ($log->isEmpty()) {
                 //clogger((json_encode($this->request['knowledge'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), 'wechat');
                 if (isset($this->request['knowledge']) && !empty($this->request['knowledge'])) {
@@ -966,7 +968,8 @@ class MessageHandler extends BaseMessageHandler
                         'rerank_min_score' => $this->request['knowledge']['rerank_min_score'] ?? 0.2,
                         'stream' => false,
                         'user_id' => $this->userId,
-                        'scene' => '小红书'
+                        'scene' => '小红书',
+                        'model' => $this->request['model']
                     ]);
 
                     if ($chatStatus === false) {
@@ -981,8 +984,14 @@ class MessageHandler extends BaseMessageHandler
                         }
                     }
                 } else {
+
                     // 执行微信AI消息处理
-                    $response = \app\common\service\ToolsService::Sv()->chat($this->request);
+                    if($this->request['model'] == 'deepseek'){
+                        $response = \app\common\service\ToolsService::Sv()->chat($this->request);
+                    }else{
+                        $this->request['stream'] = false;
+                        $response = \app\common\service\ToolsService::Sv()->openaiChat($this->request);
+                    }
 
                     $response['msg'] = 'chat ai消息回复结果';
                     $this->setLog($response, 'msg');
@@ -1004,7 +1013,7 @@ class MessageHandler extends BaseMessageHandler
                 'account' => $this->account,
                 'content' => $this->request['content'],
                 'user' => $this->request['user'],
-                'message_list' => $reply,
+                'message_list' => formatMarkdown($reply),
                 'message_type' => 1,
                 'friend_id' => $this->friendId,
                 'payload' => $this->request['payload']
@@ -1159,8 +1168,8 @@ class MessageHandler extends BaseMessageHandler
                         $match = true;
                     }
                 } else {
-                    if ((string)$item['keyword'] === $request['message']) {
-
+                    $keywords = explode(';', $item['keyword']);
+                    if (in_array($request['message'], $keywords)) {
                         $this->parseMessage($request, $item['reply']);
                         $match = true;
                     }
@@ -1199,8 +1208,8 @@ class MessageHandler extends BaseMessageHandler
                         $match = true;
                     }
                 } else {
-                    if ((string)$item->keyword === $request['message']) {
-
+                    $keywords = explode(';', $item->keyword);
+                    if (in_array($request['message'], $keywords)) {
                         $this->parseMessage($request, $item->reply);
                         $match = true;
                     }

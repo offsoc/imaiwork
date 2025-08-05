@@ -44,7 +44,7 @@
         <el-card class="!border-none mt-4" shadow="never">
             <div class="mb-4 flex gap-4">
                 <el-button
-                    v-perms="['ai_application.lp.scene/del']"
+                    v-perms="['ai_application.lp.scene/delete']"
                     type="default"
                     :plain="true"
                     :disabled="!multipleSelection.length"
@@ -103,7 +103,7 @@
                             </router-link>
                         </el-button>
                         <el-button
-                            v-perms="['ai_application.lp.scene/del']"
+                            v-perms="['ai_application.lp.scene/delete']"
                             type="danger"
                             link
                             @click="handleDelete([row.id])">

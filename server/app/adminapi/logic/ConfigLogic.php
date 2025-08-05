@@ -76,7 +76,9 @@ class ConfigLogic
                 'channel' => $hdList['channel'] ?? [],
             ],
             'app_config' => ConfigService::get('app_config', 'redbook', []),
-            'ai_live' =>  ConfigService::get('ai_live', 'config', [])
+            'ai_live' =>  ConfigService::get('ai_live', 'config', []),
+            'by_name'=>  self::getByName(),
+            'ai_model' =>  ConfigService::get('chat', 'ai_model', []),
         ];
         return $config;
     }
@@ -201,6 +203,7 @@ class ConfigLogic
 
                         $item['cast_price'] = $value['cast_price'];
                         $item['cast_unit']  = $value['cast_unit'];
+                        $item['description']= $value['description'];
                     }
                 }
             })
@@ -332,4 +335,19 @@ class ConfigLogic
 
         return $info;
     }
+
+    public static function updateByname($params)
+    {
+        $response =  \app\common\service\ToolsService::Auth()->updateByname($params);;
+
+        return  $response['code'] ?? '';
+    }
+
+    public static function getByName()
+    {
+           $response =  \app\common\service\ToolsService::Auth()->checkby();;
+
+          return  $response['byname'] ?? '';
+     }
+
 }
