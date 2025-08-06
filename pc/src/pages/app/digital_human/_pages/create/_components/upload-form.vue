@@ -63,7 +63,7 @@
                             <div class="text-[#ffffff80]">模型选择</div>
                             <div class="flex items-center gap-x-3">
                                 <div class="text-white">
-                                    {{ DigitalHumanModelVersionEnumMap[formData.model_version] || "请选择" }}
+                                    {{ getModelName }}
                                 </div>
                                 <Icon name="local-icon-up_down" :size="20" color="#ffffff0d"></Icon>
                             </div>
@@ -196,6 +196,7 @@ import {
     uploadLimit,
 } from "../../../_enums";
 import ExampleVideo from "../../../_assets/video/example.mp4";
+import { get } from "sortablejs";
 enum ModeType {
     VIDEO = 1,
     FIGURE = 2,
