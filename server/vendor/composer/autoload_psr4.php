@@ -74,6 +74,7 @@ return array(
     'GPBMetadata\\Google\\Protobuf\\' => array($vendorDir . '/google/protobuf/src/GPBMetadata/Google/Protobuf'),
     'GPBMetadata\\' => array($baseDir . '/extend/lib/protobuf/GPBMetadata'),
     'EasyWeChat\\' => array($vendorDir . '/w7corp/easywechat/src'),
+    'DfaFilter\\' => array($vendorDir . '/lustre/php-dfa-sensitive/src/DfaFilter'),
     'Cron\\' => array($vendorDir . '/dragonmantank/cron-expression/src/Cron'),
     'Composer\\Pcre\\' => array($vendorDir . '/composer/pcre/src'),
     'Complex\\' => array($vendorDir . '/markbaker/complex/classes/src'),

@@ -331,10 +331,10 @@ class AccountLogEnum
             self::TOKENS_DEC_HUMAN_VOICE_PRO        => '数字人音色 - 极致版减少算力',
             self::TOKENS_DEC_HUMAN_VIDEO_PRO        => '数字人视频 - 极致版减少算力',
 
-            self::TOKENS_DEC_HUMAN_AVATAR_YM       => '数字人形象 - 高级版减少算力',
-            self::TOKENS_DEC_HUMAN_AUDIO_YM        => '数字人音频 - 高级版减少算力',
-            self::TOKENS_DEC_HUMAN_VOICE_YM        => '数字人音色 - 高级版减少算力',
-            self::TOKENS_DEC_HUMAN_VIDEO_YM        => '数字人视频 - 高级版减少算力',
+            self::TOKENS_DEC_HUMAN_AVATAR_YM       => '数字人形象 - 优秘V5减少算力',
+            self::TOKENS_DEC_HUMAN_AUDIO_YM        => '数字人音频 - 优秘V5减少算力',
+            self::TOKENS_DEC_HUMAN_VOICE_YM        => '数字人音色 - 优秘V5减少算力',
+            self::TOKENS_DEC_HUMAN_VIDEO_YM        => '数字人视频 - 优秘V5减少算力',
             self::TOKENS_DEC_HUMAN_PROMPT           => '数字人口播文案提示词减少算力',
             self::TOKENS_DEC_HUMAN_COPYWRITING      => '数字人口播文案减少算力',
 
@@ -346,10 +346,10 @@ class AccountLogEnum
             self::TOKENS_DEC_AI_RESUME              => 'AI简历分析减少算力',
             self::TOKENS_DEC_AI_MARK                => 'AI面试评分减少算力',
             self::TOKENS_DEC_AI_INTERVIEW_CHAT      => 'AI面试聊天减少算力',
-            self::TOKENS_DEC_HUMAN_AVATAR_YMT       => '数字人形象 - 通道六-减少算力',
-            self::TOKENS_DEC_HUMAN_AUDIO_YMT        => '数字人音频 - 通道六-减少算力',
-            self::TOKENS_DEC_HUMAN_VOICE_YMT        => '数字人音色 - 通道六-减少算力',
-            self::TOKENS_DEC_HUMAN_VIDEO_YMT        => '数字人视频 - 通道六-减少算力',
+            self::TOKENS_DEC_HUMAN_AVATAR_YMT       => '数字人形象 - 优秘V7-减少算力',
+            self::TOKENS_DEC_HUMAN_AUDIO_YMT        => '数字人音频 - 优秘V7-减少算力',
+            self::TOKENS_DEC_HUMAN_VOICE_YMT        => '数字人音色 - 优秘V7-减少算力',
+            self::TOKENS_DEC_HUMAN_VIDEO_YMT        => '数字人视频 - 优秘V7-减少算力',
 
             self::TOKENS_DEC_KNOWLEDGE_RETRIEVE     => '知识库检索减少算力',
             self::TOKENS_DEC_KNOWLEDGE_CREATE       => '知识库创建减少算力',
@@ -368,10 +368,10 @@ class AccountLogEnum
             self::TOKENS_DEC_DOUBAO_IMAGE_TO_VIDEO  => 'Seedance 1.0 pro模型图生视频减少算力',
             self::TOKENS_DEC_DOUBAO_TEXT_TO_POSTERIMAGE => 'Doubao模型文生海报图减少算力',
 
-            self::TOKENS_DEC_HUMAN_AVATAR_CHANJING      => '数字人形象 - 通道七-减少算力',
-            self::TOKENS_DEC_HUMAN_VOICE_CHANJING       => '数字人音色 - 通道七-减少算力',
-            self::TOKENS_DEC_HUMAN_AUDIO_CHANJING       => '数字人音频 - 通道七-减少算力',
-            self::TOKENS_DEC_HUMAN_VIDEO_CHANJING       => '数字人视频 - 通道七-减少算力',
+            self::TOKENS_DEC_HUMAN_AVATAR_CHANJING      => '数字人形象 - 蝉镜-减少算力',
+            self::TOKENS_DEC_HUMAN_VOICE_CHANJING       => '数字人音色 - 蝉镜-减少算力',
+            self::TOKENS_DEC_HUMAN_AUDIO_CHANJING       => '数字人音频 - 蝉镜-减少算力',
+            self::TOKENS_DEC_HUMAN_VIDEO_CHANJING       => '数字人视频 - 蝉镜-减少算力',
         ];
         if ($flag) {
             return $desc;

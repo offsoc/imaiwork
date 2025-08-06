@@ -113,8 +113,8 @@ class HumanLogic extends ApiLogic
                                     'voice_id' => $data['audio_man_id']
                                 ]);
                             }
-
-
+                            $item->width = $data['width'] ?? '';
+                            $item->height = $data['height'] ?? '';
                         }
                     } else {
                         $item->status = 0;
@@ -1713,6 +1713,8 @@ class HumanLogic extends ApiLogic
                         $anchor = HumanAnchor::create([
                             'task_id' => $item->task_id,
                             'model_version' => $item->model_version,
+                            'height' => $item->height,
+                            'width' => $item->width,
                             'name' => $item->anchor_name,
                             'gender' => $item->gender,
                             'status' => 0,
@@ -1838,7 +1840,9 @@ class HumanLogic extends ApiLogic
 
                             $voice->voice_id = $response['id'];
                             $voice->save();
-
+                            
+                            $item->voice_id = $response['id'];
+                            $item->save();
                             if(in_array($item->model_version,[4,6])){
                                 $humantask = HumanTask::where([
                                     'user_id'=> $item['user_id'],

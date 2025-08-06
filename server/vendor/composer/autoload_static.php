@@ -149,6 +149,10 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         array (
             'EasyWeChat\\' => 11,
         ),
+        'D' => 
+        array (
+            'DfaFilter\\' => 10,
+        ),
         'C' => 
         array (
             'Cron\\' => 5,
@@ -448,6 +452,10 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'EasyWeChat\\' => 
         array (
             0 => __DIR__ . '/..' . '/w7corp/easywechat/src',
+        ),
+        'DfaFilter\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/lustre/php-dfa-sensitive/src/DfaFilter',
         ),
         'Cron\\' => 
         array (

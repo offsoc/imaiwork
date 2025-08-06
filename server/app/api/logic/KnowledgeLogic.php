@@ -16,6 +16,7 @@ use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
 use app\common\logic\AccountLogLogic;
 use app\common\model\user\User;
+use app\common\service\WordsService;
 use Exception;
 
 /**
@@ -29,7 +30,7 @@ class KnowledgeLogic extends ApiLogic
     const KNOELEDGE_RETRIEVE = 'knowledge_retrieve'; //知识库检索
     const KNOELEDGE_CHAT = 'knowledge_chat'; //知识库聊天
     const RERANK_MIN_SCORE = 0.2; //知识库检索最小分数
-    const OPENAI_CHAT = 'openai_chat'; //openai聊天
+    const OPENAI_CHAT = 'common_chat'; //openai聊天
     /**
      * 知识库列表
      *
@@ -1076,7 +1077,7 @@ class KnowledgeLogic extends ApiLogic
             self::KNOELEDGE_CREATE => ['knowledge_create', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CREATE],
             self::KNOELEDGE_RETRIEVE => ['knowledge_retrieve', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_RETRIEVE],
             self::KNOELEDGE_CHAT => ['knowledge_chat', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT],
-            self::OPENAI_CHAT => ['openai_chat', AccountLogEnum::TOKENS_DEC_OPENAI_CHAT],
+            self::OPENAI_CHAT => ['common_chat', AccountLogEnum::TOKENS_DEC_COMMON_CHAT],
         };
 
         //计费
@@ -1302,7 +1303,9 @@ class KnowledgeLogic extends ApiLogic
         if(!isset($params['message']) || empty($params['message'])){
             message('提示词 不能为空');
         }
-        
+        WordsService::sensitive($params['message']);
+        // 问题审核(百度)
+        WordsService::askCensor($params['message']);
         $uid = $params['user_id'] ?? self::$uid;
         $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
         if(empty($knowlwdge)){
@@ -1506,7 +1509,10 @@ class KnowledgeLogic extends ApiLogic
         if (empty($params['message']) && empty($params['message_ext'])) {
             message('提示词 不能为空');
         }
-        
+        WordsService::sensitive($params['message']);
+        // 问题审核(百度)
+        WordsService::askCensor($params['message']);
+
         $assistant = \app\common\model\chat\Assistants::where('id', $params['assistant_id'])->findOrEmpty();
         if ($assistant->isEmpty()) {
             message('助手不存在');

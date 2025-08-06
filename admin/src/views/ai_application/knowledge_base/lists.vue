@@ -111,7 +111,6 @@
 import { knowKnowledgeList, knowKnowledgeDelete } from "@/api/ai_application/knowledge_base/lists";
 import { usePaging } from "@/hooks/usePaging";
 import feedback from "@/utils/feedback";
-import chunkData from "./chunk-data.vue";
 import { getRoutePath } from "@/router";
 
 const queryParams = reactive({

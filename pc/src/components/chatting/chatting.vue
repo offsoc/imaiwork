@@ -13,7 +13,7 @@
                                     :stopping="!!item.reply"
                                     :consume-tokens="item.consume_tokens"
                                     :record-id="item.id"
-                                    @copy-content="copyContent(item.reply)"
+                                    @copy-content="copyContent(item.reply || item.error)"
                                     @close="emit('close', index)">
                                     <template #rob>
                                         <chat-content
@@ -27,7 +27,7 @@
                                             :is-prompt="item.is_prompt"
                                             :error="item.error"
                                             :show-copy-btn="!item.loading"
-                                            @copy="copyContent(item.reply)" />
+                                            @copy="copyContent(item.reply || item.error)" />
                                     </template>
                                 </ChatMsgItem>
                             </div>

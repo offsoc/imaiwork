@@ -1,6 +1,6 @@
 {
     "name": "imai.work",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "scripts": {
         "init": "node initialize.js",
         "dev": "node scripts/develop.js",

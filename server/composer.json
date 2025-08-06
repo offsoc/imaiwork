@@ -50,7 +50,8 @@
         "workerman/channel": "1.0.6",
         "predis/predis": "^3.0",
         "google/protobuf": "^4.31",
-        "guzzlehttp/guzzle": "^7.9"
+        "guzzlehttp/guzzle": "^7.9",
+        "lustre/php-dfa-sensitive": "^1.4"
     },
     "require-dev": {
         "symfony/var-dumper": ">=4.2",

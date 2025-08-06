@@ -365,7 +365,6 @@ UPDATE `la_model_config` SET   `name` = '数字人形象-优秘V5' WHERE `scene`
 UPDATE `la_model_config` SET   `name` = '数字人音色-优秘V5'  WHERE `scene` = 'human_voice_ym';
 UPDATE `la_model_config` SET   `name` = '数字人音频-优秘V5'  WHERE `scene` = 'human_audio_ym';
 UPDATE `la_model_config` SET   `name` = '数字人视频-优秘V5'  WHERE `scene` = 'human_video_ym';
-INSERT INTO  `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'openai_chat', 1003, 'tokens/算力', 'OpenAI聊天', 900, '每900字约消耗1算力', 1, 1740799252, 1740799252);
 
 
 INSERT INTO `la_system_menu` (`id`, `pid`, `type`, `name`, `icon`, `sort`, `perms`, `paths`, `component`, `selected`, `params`, `is_cache`, `is_show`, `is_disable`, `create_time`, `update_time`) VALUES (410, 309, 'A', '保存', '', 0, 'ai_application.chat/setConfig', '', '', '', '', 0, 1, 0, 1753238034, 1753238082);
@@ -413,6 +412,8 @@ ALTER TABLE `la_ai_wechat_setting` ADD COLUMN `model` varchar(255) NULL DEFAULT 
 
 
 INSERT INTO `la_config` ( `type`, `name`, `value`, `create_time`, `update_time`) VALUES ( 'chat', 'ai_model', '{\"channel\":[{\"id\":\"1\",\"name\":\"deepseek\"},{\"id\":\"2\",\"name\":\"gpt-4o\"}]}', 1754105075, 1754105075);
-INSERT INTO  `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'openai_chat', 1001, 'tokens/算力', 'OpenAI聊天', 900, '每900字约消耗1算力', 1, 1740799252, 1740799252);
+INSERT INTO  `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'openai_chat', 1003, 'tokens/算力', 'OpenAI聊天', 900, '每900字约消耗1算力', 1, 1740799252, 1740799252);
 ALTER TABLE `la_assistants`
 MODIFY COLUMN `scene_id` int(11) NOT NULL DEFAULT 0 COMMENT '场景id' ;
+
+UPDATE `la_model_config` SET `code` = 1003 WHERE `scene` = 'openai_chat';

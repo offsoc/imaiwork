@@ -456,6 +456,7 @@ const confirmCreate = async () => {
             title: "正在生成",
             mask: true,
         });
+        const voice_id = formData.voice_id == "-1" ? undefined : formData.voice_id;
         await createTask({
             name: uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2),
             msg: formData.msg,
@@ -463,7 +464,7 @@ const confirmCreate = async () => {
             video_url: formData.video_url,
             anchor_id: formData.anchor_id,
             anchor_name: formData.anchor_name,
-            voice_id: formData.voice_id == "-1" ? undefined : formData.voice_id,
+            voice_id,
             voice_name: formData.voice_name,
             voice_type: formData.voice_type,
             audio_type: formData.audio_type,
@@ -475,7 +476,7 @@ const confirmCreate = async () => {
         userStore.getUser();
         uni.showToast({
             title: "创作成功，请在我的作品中查看",
-            icon: "success",
+            icon: "none",
             duration: 3000,
         });
         setTimeout(() => {

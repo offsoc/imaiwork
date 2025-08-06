@@ -12,6 +12,7 @@ use app\common\model\ChatPrompt;
 use app\common\service\FileService;
 use app\common\model\file\File;
 use app\common\model\mindMap\MindMap;
+use app\common\service\WordsService;
 
 class ChatLogic extends ApiLogic
 {
@@ -31,7 +32,9 @@ class ChatLogic extends ApiLogic
         if (empty($params['message'])) {
             message('参数错误');
         }
-
+        WordsService::sensitive($params['message']);
+        // 问题审核(百度)
+        WordsService::askCensor($params['message']);
         $request['message'] = $params['message'];
         $request['open_reasoning'] = $params['open_reasoning'] ?? 0;
         $request['stream'] = true;
@@ -56,7 +59,6 @@ class ChatLogic extends ApiLogic
 
             $request['task_id'] = generate_unique_task_id();
         }
-
         $messages = array_merge($logs, [
             [
                 'role' => 'user',
@@ -157,6 +159,9 @@ class ChatLogic extends ApiLogic
         if (empty($params['message']) && empty($params['message_ext'])) {
             message('参数错误');
         }
+        WordsService::sensitive($params['message']);
+        // 问题审核(百度)
+        WordsService::askCensor($params['message']);
 
         // 获取 场景聊天 - 助理信息
         $assistant = Assistants::where('id', $params['assistant_id'])->findOrEmpty();

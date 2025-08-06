@@ -7,7 +7,7 @@ namespace app\common\http\middleware;
 
 /**
  * 基础中间件
- * Class LikeShopMiddleware
+ * Class Middleware
  * @package app\common\http\middleware
  */
 class BaseMiddleware
