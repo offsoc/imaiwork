@@ -1786,7 +1786,6 @@ class HumanLogic extends ApiLogic
                                     'model_version' => $item->model_version,
                                     'name' => $item->voice_name ? $item->voice_name : $item->name,
                                     'gender' => $item->gender,
-                                    'status' => 1,
                                     'voice_urls' => $item->upload_video_url,
                                     'user_id' => $item['user_id']
                                 ]);
@@ -1840,7 +1839,7 @@ class HumanLogic extends ApiLogic
 
                             $voice->voice_id = $response['id'];
                             $voice->save();
-                            
+
                             $item->voice_id = $response['id'];
                             $item->save();
                             if(in_array($item->model_version,[4,6])){

@@ -143,7 +143,13 @@ const handleChangeStatus = async (row: any) => {
         message: `是否${row.status == 1 ? "开启" : "关闭"}该任务？`,
         onConfirm: async () => {
             try {
-                await sopPushUpdate({ id: row.id, status: row.status == 1 ? 2 : 1, type: row.type });
+                await sopPushUpdate({
+                    id: row.id,
+                    status: row.status == 1 ? 2 : 1,
+                    type: row.type,
+                    stage_id: row.stage_id,
+                    flow_id: row.flow_id,
+                });
                 getLists();
                 feedback.msgSuccess("操作成功");
             } catch (error) {

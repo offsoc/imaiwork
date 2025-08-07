@@ -596,6 +596,9 @@ class MessageHandler extends BaseMessageHandler
                         $isInWechat = true;
                         foreach($matchs as $match){
                             $this->setLog($match , 'msg');
+                            if(empty($match)){
+                                continue;
+                            }
                             $userWechatNo = $match[0];
                             $this->setLog($userWechatNo , 'msg');
                             

@@ -269,9 +269,7 @@ async function handleFriendPush(Content: any) {
         // 批量上报好友信息
         await reportWeChatFriends({
             wechat_id: currentWechat.value.wechat_id,
-            friends: Friends.filter((item) => item.Type == 3).map((friend: any) =>
-                formatFriendForApi(currentWechat.value.wechat_id, friend)
-            ),
+            friends: Friends.map((friend: any) => formatFriendForApi(currentWechat.value.wechat_id, friend)),
         });
 
         // 检查是否所有好友都已接收完毕

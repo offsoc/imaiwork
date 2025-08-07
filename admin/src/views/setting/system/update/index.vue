@@ -58,6 +58,9 @@
                                         一键更新
                                     </el-button>
                                 </div>
+                                <el-button type="primary" link @click="downloadUpdate(row.version)">
+                                    下载更新包
+                                </el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -149,6 +152,11 @@ const onOuterVisible = (version: any) => {
     state.outerVisible = true;
     state.version = version;
 };
+
+const downloadUpdate = (version: any) => {
+    window.open(`https://update.imai.work/update/version/${version}.zip`, "_blank");
+};
+
 const confirmUpdate = () => {
     state.innerVisible = false;
     state.threeVisible = true;

@@ -594,7 +594,7 @@ const getPromptContent = (content: string) => {
 const handleCreateSuccess = () => {
     setTimeout(() => {
         window.location.reload();
-    }, 600);
+    }, 2000);
 };
 
 // 创建失败

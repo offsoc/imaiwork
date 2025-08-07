@@ -474,6 +474,7 @@ const confirmCreate = async () => {
         });
         createPanelRef.value?.close();
         userStore.getUser();
+        uni.hideLoading();
         uni.showToast({
             title: "创作成功，请在我的作品中查看",
             icon: "none",
@@ -483,13 +484,12 @@ const confirmCreate = async () => {
             goHome();
         }, 3000);
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error?.message || error || "生成失败",
             icon: "error",
             duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

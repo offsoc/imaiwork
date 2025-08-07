@@ -613,11 +613,7 @@ class UploadService
             $StorageDriver->setUploadFile('file');
             $fileName = $StorageDriver->getFileName();
             $fileInfo = $StorageDriver->getFileInfo();
-
-            // 校验上传文件后缀
-            if (!in_array(strtolower($fileInfo['ext']), config('project.file_file'))) {
-                throw new Exception("上传文件不允许上传" . $fileInfo['ext'] . "文件");
-            }
+            
 
             // 上传文件
             $saveDir = self::getUploadUrl($saveDir);

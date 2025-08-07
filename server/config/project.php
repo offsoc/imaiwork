@@ -1,7 +1,7 @@
 <?php
 return [
     // 系统版本号
-    'version'               => '1.0.0',
+    'version'               => '2.1.2',
 
     // 官网
     'website'               => [
@@ -137,7 +137,10 @@ return [
         'flac',
         'webm',
         'rmvb',
-        'wmv'
+        'wmv',
+        'excel',
+        'xml',
+        'html'
 
     ],
     //上传文件的格式 (音频)

@@ -320,9 +320,7 @@ function handleFriendPush(Content: any) {
         // 批量上报微信好友信息
         reportWeChatFriends({
             wechat_id: currentWechat.value.wechat_id,
-            friends: friendList.value
-                .filter((item) => item.Type == 3)
-                .map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
+            friends: friendList.value.map((item) => handleFriendReportNotice(currentWechat.value.wechat_id, item)),
         });
     }
 }
