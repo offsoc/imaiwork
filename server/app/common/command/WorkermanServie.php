@@ -46,15 +46,15 @@ class WorkermanServie extends Command
             // 初始化Channel服务（用于跨进程通信）
             $channel_server = new \Channel\Server('0.0.0.0', 2206);
             // 在这里放心的实例化worker,
-            $xhsWorker = new Worker('websocket://0.0.0.0:2345');
-            $xhsWorker->count = 1;
-            $xhsWorker->name = 'ImaiworkXhsService';
-            $service = new \app\common\workerman\xhs\XhsSocketService($xhsWorker);
-            $xhsWorker->onWorkerStart = array($service, 'onWorkerStart');
-            $xhsWorker->onConnect     = array($service, 'onConnect');
-            $xhsWorker->onMessage     = array($service, 'onMessage');
-            $xhsWorker->onClose       = array($service, 'onClose');
-            $xhsWorker->onError       = array($service, 'onError');
+            $rpaWorker = new Worker('websocket://0.0.0.0:2345');
+            $rpaWorker->count = 1;
+            $rpaWorker->name = 'ImaiworkRpaService';
+            $service = new \app\common\workerman\rpa\RpaSocketService($rpaWorker);
+            $rpaWorker->onWorkerStart = array($service, 'onWorkerStart');
+            $rpaWorker->onConnect     = array($service, 'onConnect');
+            $rpaWorker->onMessage     = array($service, 'onMessage');
+            $rpaWorker->onClose       = array($service, 'onClose');
+            $rpaWorker->onError       = array($service, 'onError');
 
             $worker = new Worker('websocket://0.0.0.0:2347');
             $worker->count = 4;

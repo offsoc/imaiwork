@@ -61,12 +61,12 @@
                                 <text class="text-xl font-bold">使用模型</text>
                                 <text class="text-[#E33C64] text-xl font-bold">*</text>
                             </view>
-                            <view>
+                            <!-- <view>
                                 <data-select
                                     v-model="formData.model_version"
                                     placeholder="请选择模型"
-                                    :localdata="getModelList"></data-select>
-                            </view>
+                                    :localdata="modelChannel"></data-select>
+                            </view> -->
                             <view v-if="is_transcribe">
                                 <template v-if="step == 1">
                                     <view class="font-bold text-xl"> 参考音频文案 </view>
@@ -248,13 +248,17 @@ const { userTokens } = toRefs(userStore);
 
 const rechargePopupRef = ref();
 
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel || []);
-
-const getModelList = computed(() => {
-    return modelChannel.value.map((item: any) => ({
-        text: item.name,
-        value: item.id,
-    }));
+const modelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        return channel
+            .filter((item: any) => item.status == 1 && item.id == DigitalHumanModelVersionEnum.CHANJING)
+            .map((item: any) => ({
+                text: item.name,
+                value: item.id,
+            }));
+    }
+    return [];
 });
 
 const tokensValue = computed(() => {
@@ -458,9 +462,6 @@ const startClone = async () => {
     if (!formData.name) {
         uni.$u.toast("请输入音色名称");
         return;
-    } else if (!formData.model_version) {
-        uni.$u.toast("请选择模型");
-        return;
     } else if (!formData.url) {
         uni.$u.toast("请先上传音频");
         return;
@@ -475,7 +476,10 @@ const startClone = async () => {
             title: "克隆中",
             mask: true,
         });
-        await voiceClone(formData);
+        await voiceClone({
+            ...formData,
+            model_version: DigitalHumanModelVersionEnum.CHANJING,
+        });
         userStore.getUser();
         setTimeout(() => {
             uni.$u.toast("克隆成功，请在我的音色中查看");

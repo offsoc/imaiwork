@@ -22,8 +22,20 @@ input:-webkit-autofill:active {
     -webkit-transition-delay: 99999s;
     -webkit-transition: color 99999s ease-out, background-color 99999s ease-out;
 }
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background-color: #ffffff0d;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
 .form-tips {
-    @apply text-tx-secondary text-sm leading-6 mt-1;
+    @apply text-tx-secondary text-xs leading-6 mt-1;
 }
 
 .el-button {
@@ -133,20 +145,6 @@ input:-webkit-autofill:active {
     }
 }
 
-.dynamic-scroller {
-    // 美化滚动条
-    &::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-    &::-webkit-scrollbar-thumb {
-        background-color: var(--color-primary);
-        border-radius: 3px;
-        cursor: pointer;
-    }
-}
-
 .digital-human-tag {
     @apply rounded-full px-[18px] py-[4px] text-white  shadow-[0px_6px_12px_0px_rgba(0,0,0,0.24)];
     backdrop-filter: blur(6px);
@@ -194,7 +192,7 @@ input:-webkit-autofill:active {
     font-family: "digital-number";
 }
 
-.custom-select-popper {
+.dark-select-popper {
     background-color: var(--app-bg-color-2) !important;
     border-color: var(--app-border-color-1) !important;
     .el-select__wrapper {
@@ -207,6 +205,11 @@ input:-webkit-autofill:active {
     .el-select__selected-item {
         color: #ffffff;
         font-size: 13px;
+        .el-tag {
+            background-color: var(--app-bg-color-1);
+            border-color: var(--app-border-color-1);
+            color: #ffffff;
+        }
     }
     &.el-popper {
         background-color: var(--app-bg-color-2);
@@ -235,10 +238,15 @@ input:-webkit-autofill:active {
             }
         }
     }
+    .el-popper__arrow {
+        &::before {
+            display: none;
+        }
+    }
 }
 
-.custom-daterange-picker-popper,
-.custom-date-picker-popper {
+.dark-daterange-picker-popper,
+.dark-date-picker-popper {
     --el-bg-color-overlay: var(--app-bg-color-3);
     --el-text-color-regular: var(--color-white);
     --el-datepicker-border-color: var(--app-border-color-1) !important;
@@ -256,4 +264,83 @@ input:-webkit-autofill:active {
         --el-datepicker-inrange-hover-bg-color: var(--app-bg-color-1);
         --el-datepicker-border-color: var(--app-border-color-1) !important;
     }
+}
+
+.choose-type-popover {
+    .type-menu-item {
+        @apply h-11 w-full rounded-md p-4 flex items-center gap-x-2 hover:bg-app-bg-1 hover:shadow-[0_0_0_1px_var(--app-border-color-2)] cursor-pointer;
+    }
+}
+
+/* 3) 分割线（水平 & 垂直共用） */
+.splitpanes__splitter {
+    background-color: #d9e1ec;
+    position: relative;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+/* 垂直分割线（左右拖拽） */
+.splitpanes--vertical > .splitpanes__splitter {
+    width: 3px;
+    margin-left: -1px;
+    margin-right: -1px;
+    cursor: col-resize;
+}
+
+/* 水平分割线（上下拖拽） */
+.splitpanes--horizontal > .splitpanes__splitter {
+    height: 3px;
+    margin-top: -1px;
+    margin-bottom: -1px;
+    cursor: row-resize;
+}
+
+/* 4) 拖拽时的悬停/激活状态 */
+.splitpanes__splitter:hover,
+.splitpanes__splitter:active {
+    background-color: #0099ff;
+}
+
+/* 5) 拖拽把手（小圆点） */
+.splitpanes__splitter::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* 垂直分割线把手排成 3 点列 */
+.splitpanes--vertical .splitpanes__splitter::before {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 8px 0 0 #fff, 0 8px 0 1px rgba(0, 0, 0, 0.15), 0 -8px 0 0 #fff,
+        0 -8px 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* 水平分割线把手排成 3 点行 */
+.splitpanes--horizontal .splitpanes__splitter::before {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 8px 0 0 0 #fff, 8px 0 0 1px rgba(0, 0, 0, 0.15), -8px 0 0 0 #fff,
+        -8px 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* 鼠标悬停时显示把手 */
+.splitpanes__splitter:hover::before {
+    opacity: 1;
+}
+
+/* 6) 拖拽时的额外动效（可选） */
+.splitpanes--dragging .splitpanes__splitter {
+    background-color: #0099ff;
+    box-shadow: 0 0 10px rgba(0, 153, 255, 0.4);
+}
+
+.splitpanes--dragging .splitpanes__pane {
+    pointer-events: none;
 }

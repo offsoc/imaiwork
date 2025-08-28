@@ -40,7 +40,7 @@ class ExportCache extends BaseCache
     {
         $src = $this->getSrc();
         $key = md5($src . $fileName) . time();
-        $this->set($key, ['src' => $src, 'name' => $fileName], 300);
+        $this->store('redis')->set($key, ['src' => $src, 'name' => $fileName], 300);
         return $key;
     }
 
@@ -53,6 +53,6 @@ class ExportCache extends BaseCache
      */
     public function getFile($key)
     {
-        return $this->get($key);
+        return $this->store('redis')->get($key);
     }
 }

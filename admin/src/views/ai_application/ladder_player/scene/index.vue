@@ -24,7 +24,8 @@
                         v-model="queryParams.status"
                         placeholder="请选择状态"
                         clearable
-                        :empty-values="[null, undefined]">
+                        :empty-values="[null, undefined]"
+                        @change="getLists()">
                         <el-option label="全部" value="" />
                         <el-option label="启用" value="1" />
                         <el-option label="禁用" value="0" />

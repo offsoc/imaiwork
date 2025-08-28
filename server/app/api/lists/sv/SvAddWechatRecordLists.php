@@ -7,6 +7,7 @@ use app\api\lists\BaseApiDataLists;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\sv\SvAddWechatRecord;
 use app\common\model\sv\SvAccount;
+use app\common\model\sv\SvDevice;
 /**
  * 列表
  * Class SvAccountLists
@@ -18,7 +19,7 @@ class SvAddWechatRecordLists extends BaseApiDataLists implements ListsSearchInte
     public function setSearch(): array
     {
         return [
-            '=' => ['account', 'wechat_no', 'action', 'status'],
+            '=' => ['account', 'wechat_no', 'action', 'status', 'device_code', 'channel', 'exec_type'],
         ];
     }
 
@@ -40,6 +41,7 @@ class SvAddWechatRecordLists extends BaseApiDataLists implements ListsSearchInte
                     ->where('device_code', $item['device_code'])
                     ->limit(1)
                     ->find();
+                $item['device_model'] = SvDevice::where('device_code', $item['device_code'])->value('device_model');
             })
             ->toArray();
     }

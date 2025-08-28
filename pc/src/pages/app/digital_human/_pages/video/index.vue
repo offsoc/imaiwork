@@ -2,20 +2,12 @@
     <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
         <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[88px]">
-                    <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
-                        <ElTabPane label="全部" name=""></ElTabPane>
-                        <ElTabPane
-                            v-for="item in modelChannel"
-                            :label="item.name"
-                            :name="item.id"
-                            :key="item.id"></ElTabPane>
-                    </ElTabs>
+                <div class="flex items-center justify-end h-[88px]">
                     <div class="flex items-center gap-[14px]">
                         <ElSelect
                             v-model="queryParams.status"
                             class="!w-[260px] status-select"
-                            popper-class="custom-select-popper"
+                            popper-class="dark-select-popper"
                             clearable
                             :show-arrow="false"
                             :empty-values="[null, undefined]"
@@ -86,9 +78,12 @@
                                     pic: item.pic,
                                     status: item.status,
                                     video_url: item.result_url,
+                                    clip_video_url: item.clip_result_url,
                                     model_version: item.model_version,
                                     remark: item.remark,
                                     create_time: item.create_time,
+                                    automatic_clip: item.automatic_clip,
+                                    clip_status: item.clip_status,
                                 }"
                                 @retry="handleRetry"
                                 @delete="handleDelete" />
@@ -120,10 +115,6 @@
 import { getVideoList, deleteDigitalHuman, retryVideo } from "@/api/digital_human";
 import VideoItem from "@/pages/app/_components/video-item.vue";
 import Empty from "@/pages/app/digital_human/_components/empty.vue";
-import { useAppStore } from "@/stores/app";
-
-const appStore = useAppStore();
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const statusList = [
     {
@@ -152,6 +143,7 @@ const queryParams = reactive({
     page_size: 20,
     status: "",
     model_version: "",
+    type: 0,
 });
 
 const { pager, getLists, resetPage } = usePaging({

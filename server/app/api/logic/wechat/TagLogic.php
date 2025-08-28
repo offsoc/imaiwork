@@ -299,10 +299,21 @@ class TagLogic extends WechatBaseLogic
             if (!isset($params['wechat_id']) || !isset($params['friend_id'])) {
                 throw new \Exception('缺少必要参数: wechat_id或friend_id');
             }
-            AiWechatFriendTag::where('wechat_id', $params['wechat_id'])
-                ->where('friend_id', $params['friend_id'])
-                ->where('tag_id', $params['tag_id'])
-                ->delete();
+
+           $sql = AiWechatFriendTag::where('wechat_id', $params['wechat_id']);
+            if(is_array($params['friend_id'])){
+                $sql =  $sql->whereIn('friend_id', $params['friend_id']);
+            }else{
+                $sql =  $sql->whereIn('friend_id', $params['friend_id']);
+            };
+
+            if(is_array($params['tag_id'])){
+                $sql =  $sql->whereIn('tag_id', $params['tag_id']);
+            }else{
+                $sql =  $sql ->where('tag_id', $params['tag_id']);
+            };
+
+            $sql->delete();
             self::$returnData = [];
             return true;
         } catch (\Exception $e) {

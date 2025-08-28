@@ -7,10 +7,13 @@ use app\common\service\FileService;
 use app\common\model\wechat\AiWechatGreetStrategy;
 use app\common\model\wechat\AiWechatTagStrategy;
 use app\common\model\wechat\AiWechatAcceptFriendStrategy;
-use app\common\model\wechat\AiWechatCircleReplyStrategy;
-use app\common\model\wechat\AiWechatCircleLikeStrategy;
+use app\common\model\wechat\AiWechatCircleReplyLikeStrategy;
+use app\common\model\wechat\AiWechatContact;
+use app\common\model\wechat\AiWechatFriendTag;
 use app\common\model\wechat\AiWechatTag;
 use think\facade\Db;
+
+use Channel\Client as ChannelClient;
 
 /**
  * StrategyLogic
@@ -158,8 +161,7 @@ class StrategyLogic extends WechatBaseLogic
      */
     public static function tagStrategy(array $params)
     {
-        try
-        {
+        try {
 
             $params['match_keywords'] = explode(',', $params['match_keywords']);
             $params['user_id'] = self::$uid;
@@ -167,8 +169,7 @@ class StrategyLogic extends WechatBaseLogic
 
             // 检查标签是否存在
             $tag = AiWechatTag::where('user_id', self::$uid)->where('tag_name', $params['tag_name'])->findOrEmpty();
-            if ($tag->isEmpty())
-            {
+            if ($tag->isEmpty()) {
                 AiWechatTag::create([
                     'tag_name' => $params['tag_name'],
                     'user_id' => self::$uid,
@@ -177,9 +178,7 @@ class StrategyLogic extends WechatBaseLogic
 
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -191,22 +190,18 @@ class StrategyLogic extends WechatBaseLogic
      */
     public static function tagInfo(int $id)
     {
-        try
-        {
+        try {
 
             $strategy = AiWechatTagStrategy::where('user_id', self::$uid)->where('id', $id)->findOrEmpty();
 
-            if ($strategy->isEmpty())
-            {
+            if ($strategy->isEmpty()) {
                 self::setError('标签策略不存在');
                 return false;
             }
 
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -218,13 +213,11 @@ class StrategyLogic extends WechatBaseLogic
      */
     public static function tagDelete(int $id)
     {
-        try
-        {
+        try {
 
             $strategy = AiWechatTagStrategy::where('user_id', self::$uid)->where('id', $id)->findOrEmpty();
 
-            if ($strategy->isEmpty())
-            {
+            if ($strategy->isEmpty()) {
                 self::setError('标签策略不存在');
                 return false;
             }
@@ -232,9 +225,7 @@ class StrategyLogic extends WechatBaseLogic
             $strategy->delete();
             self::$returnData = [];
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -246,13 +237,11 @@ class StrategyLogic extends WechatBaseLogic
      */
     public static function tagUpdate(array $params)
     {
-        try
-        {
+        try {
 
             $strategy = AiWechatTagStrategy::where('user_id', self::$uid)->where('id', $params['id'])->findOrEmpty();
 
-            if ($strategy->isEmpty())
-            {
+            if ($strategy->isEmpty()) {
                 self::setError('标签策略不存在');
                 return false;
             }
@@ -261,8 +250,7 @@ class StrategyLogic extends WechatBaseLogic
 
             // 检查标签是否存在
             $tag = AiWechatTag::where('user_id', self::$uid)->where('tag_name', $params['tag_name'])->findOrEmpty();
-            if ($tag->isEmpty())
-            {
+            if ($tag->isEmpty()) {
                 AiWechatTag::create([
                     'tag_name' => $params['tag_name'],
                     'user_id' => self::$uid,
@@ -273,9 +261,7 @@ class StrategyLogic extends WechatBaseLogic
 
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -289,8 +275,7 @@ class StrategyLogic extends WechatBaseLogic
     public static function tagImport(array $params)
     {
         Db::startTrans();
-        try
-        {
+        try {
             $fileContent = file_get_contents($params['file']);
 
             // 将csv文件内容转换为数组
@@ -298,31 +283,26 @@ class StrategyLogic extends WechatBaseLogic
 
             $content = [];
 
-            foreach ($fileContent as $key => $value)
-            {
+            foreach ($fileContent as $key => $value) {
 
-                if ($key == 0)
-                {
+                if ($key == 0) {
                     continue;
                 }
 
-                if ($value)
-                {
+                if ($value) {
                     $content[] = explode(",", $value);
                 }
             }
 
             //插入数据
-            foreach ($content as $key => $value)
-            {
+            foreach ($content as $key => $value) {
 
                 $match_type = $value[0] ?? '';
                 $match_mode = $value[1] ?? '';
                 $match_keywords = $value[2] ?? '';
                 $tag_name = $value[3] ?? '';
 
-                if (!$match_keywords || !($match_keywords = explode('、', $match_keywords)) || !$tag_name)
-                {
+                if (!$match_keywords || !($match_keywords = explode('、', $match_keywords)) || !$tag_name) {
 
                     continue;
                 }
@@ -338,8 +318,7 @@ class StrategyLogic extends WechatBaseLogic
                 AiWechatTagStrategy::create($fields);
                 // 检查标签是否存在
                 $tag = AiWechatTag::where('user_id', self::$uid)->where('tag_name', $tag_name)->findOrEmpty();
-                if ($tag->isEmpty())
-                {
+                if ($tag->isEmpty()) {
                     AiWechatTag::create([
                         'tag_name' => $tag_name,
                         'user_id' => self::$uid,
@@ -349,9 +328,7 @@ class StrategyLogic extends WechatBaseLogic
             }
             self::$returnData = [];
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             Db::rollback();
             self::setError($e->getMessage());
             return false;
@@ -366,26 +343,20 @@ class StrategyLogic extends WechatBaseLogic
      */
     public static function acceptFriendStrategy(array $params)
     {
-        try
-        {
+        try {
             // 查询
             $strategy = AiWechatAcceptFriendStrategy::where('user_id', self::$uid)->findOrEmpty();
             $params['interval_time'] = $params['add_interval_time'] ?? 0;
-            if ($strategy->isEmpty())
-            {
+            if ($strategy->isEmpty()) {
 
                 $params['user_id'] = self::$uid;
                 $strategy = AiWechatAcceptFriendStrategy::create($params);
-            }
-            else
-            {
+            } else {
                 $strategy->save($params);
             }
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -397,118 +368,45 @@ class StrategyLogic extends WechatBaseLogic
      */
     public static function acceptFriendInfo()
     {
-        try
-        {
+        try {
 
             $strategy = AiWechatAcceptFriendStrategy::where('user_id', self::$uid)->findOrEmpty();
 
-            if ($strategy->isEmpty())
-            {
+            if ($strategy->isEmpty()) {
                 self::$returnData = [];
                 return true;
             }
             $strategy->add_interval_time = $strategy->interval_time;
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
     }
-
-
-    /**
-     * @desc 朋友圈评论策略
-     * @param array $params
-     * @return bool
-     */
-    public static function circleReplyStrategy(array $params)
-    {
-        try
-        {
-            // 查询
-            $strategy = AiWechatCircleReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
-
-            if ($strategy->isEmpty())
-            {
-
-                $params['user_id'] = self::$uid;
-                $strategy = AiWechatCircleReplyStrategy::create($params);
-            }
-            else
-            {
-                $strategy->save($params);
-            }
-
-            self::$returnData = $strategy->toArray();
-            return true;
-        }
-        catch (\Exception $e)
-        {
-            self::setError($e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * @desc 朋友圈评论策略信息
-     * @return bool
-     */
-    public static function circleReplyInfo()
-    {
-        try
-        {
-
-            $strategy = AiWechatCircleReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
-
-            if ($strategy->isEmpty())
-            {
-                self::$returnData = [];
-                return true;
-            }
-
-            self::$returnData = $strategy->toArray();
-            return true;
-        }
-        catch (\Exception $e)
-        {
-            self::setError($e->getMessage());
-            return false;
-        }
-    }
-
+    
 
     /**
      * @desc 朋友圈点赞策略
      * @param array $params
      * @return bool
      */
-    public static function circleLikeStrategy(array $params)
+    public static function circleReplyLikeStrategy(array $params)
     {
-        try
-        {
+        try {
 
             // 查询
-            $strategy = AiWechatCircleLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
-
-            if ($strategy->isEmpty())
-            {
-
+            $strategy = AiWechatCircleReplyLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($strategy->isEmpty()) {
                 $params['user_id'] = self::$uid;
-                $strategy = AiWechatCircleLikeStrategy::create($params);
-            }
-            else
-            {
+                $strategy = AiWechatCircleReplyLikeStrategy::create($params);
+            } else {
                 $strategy->save($params);
             }
 
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
@@ -518,26 +416,87 @@ class StrategyLogic extends WechatBaseLogic
      * @desc 朋友圈点赞策略信息
      * @return bool
      */
-    public static function circleLikeInfo()
+    public static function circleReplyLikeInfo()
     {
-        try
-        {
-
-            $strategy = AiWechatCircleLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
-
-            if ($strategy->isEmpty())
-            {
-                self::$returnData = [];
+        try {
+            $strategy = AiWechatCircleReplyLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
+            if ($strategy->isEmpty()) {
+                self::$returnData = [
+                    "is_enable_reply" => 0,
+                    "reply_interval_time" => 0,
+                    "reply_numbers" => 0,
+                    "reply_prompt" => "",
+                    "reply_tag_ids" => [],
+                    'reply_robot_id' => '',
+                    "is_enable_like" => 0,
+                    "like_interval_time" => 0,
+                    "like_numbers" => 0,
+                    "like_tab_ids" => []
+                ];
                 return true;
             }
-
+            $strategy->reply_robot_id = $strategy->reply_robot_id == 0 ? '' : $strategy->reply_robot_id;
             self::$returnData = $strategy->toArray();
             return true;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             self::setError($e->getMessage());
             return false;
         }
     }
+
+
+    public static function execCircleReplyLikeStrategy()
+    {
+        echo '自动微信朋友圈点赞评论';
+        $strategys = AiWechatCircleReplyLikeStrategy::select()->toArray();
+        if (empty($strategys)) {
+            return true;
+        }
+
+        foreach ($strategys as $key => $strategy) {
+            
+            $tagids = array_values(array_unique(array_merge($strategy['reply_tag_ids'], $strategy['like_tag_ids'])));
+            $friend_tagids = AiWechatFriendTag::where('tag_id', 'in', $tagids)->group('friend_id')->column('friend_id');
+
+            $where = [];
+            if(!empty($friend_tagids)){
+                $where[] = ['c.friend_id', 'in', $friend_tagids];
+            }
+            $friends = AiWechatContact::alias('c')
+                ->join('ai_wechat w', 'w.wechat_id = c.wechat_id', 'left')
+                ->where('w.user_id', $strategy['user_id'])
+                ->where($where)
+                ->select()->toArray();
+
+            foreach ($friends as $key => $friend) {
+
+                $deviceId = $friend['device_code'];
+                // 3. 构建消息发送请求
+                $content = \app\common\workerman\wechat\handlers\client\PullFriendCircleTaskHandler::handle([
+                    'WeChatId' => $friend['wechat_id'],
+                    'FriendId' => $friend['friend_id'],
+                    'RefSnsId' => 0,
+                    'TaskId' => time(),
+                ]);
+
+                // 4. 构建protobuf消息
+                $message = new \Jubo\JuLiao\IM\Wx\Proto\TransportMessage();
+                $message->setMsgType($content['MsgType']);
+                $any = new \Google\Protobuf\Any();
+                $any->pack($content['Content']);
+                $message->setContent($any);
+                $data = $message->serializeToString();
+
+                // 5. 发送到设备端
+                $channel = "socket.{$deviceId}.message";
+                ChannelClient::connect('127.0.0.1', 2206);
+                ChannelClient::publish($channel, [
+                    'data' => $data
+                ]);
+            }
+
+        }
+        return false;
+    }
+
 }

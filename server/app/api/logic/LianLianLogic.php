@@ -118,8 +118,8 @@ class LianLianLogic extends ApiLogic
     public static function analysisAddDraft(array $data): bool
     {
         try {
-            LlAnalysis::update(['is_draft' => 1],['id' => $data['analysis_id']]);
-            self::$returnData = ['message'=>'操作成功'];
+            LlAnalysis::update(['is_draft' => 1], ['id' => $data['analysis_id']]);
+            self::$returnData = ['message' => '操作成功'];
             return true;
         } catch (\Exception $exception) {
             self::setError($exception->getMessage());
@@ -287,22 +287,22 @@ class LianLianLogic extends ApiLogic
                 throw new \Exception("查无此信息");
             }
             $analysis = LlAnalysis::where([
-                                              'scene_id'=>$id,
-                                              'user_id'=>self::$uid,
-                                              'status'=>0,
-                                              'is_draft'=>1
-                                          ])->findOrEmpty();
+                'scene_id' => $id,
+                'user_id' => self::$uid,
+                'status' => 0,
+                'is_draft' => 1
+            ])->findOrEmpty();
             $info['is_draft']       = $analysis->isEmpty() ? 0 : 1;
             $info['analysis_id']    = $analysis->id ?? 0;
 
             $info['index_id'] = \app\common\model\knowledge\KnowledgeBind::where('data_id', $info->id)->where('type', 2)->value('index_id');
             $info['knowledge'] = \app\common\model\knowledge\KnowledgeBind::alias('b')
-                                ->field('k.index_id, k.name, k.category_id, k.description, k.rerank_min_score, b.data_id, b.type')
-                                ->where('b.data_id', $id)
-                                ->join('knowledge k', 'k.index_id = b.index_id', 'LEFT')
-                                ->where('b.type', 2)
-                                ->limit(1)
-                                ->find();
+                ->field('k.index_id, k.name, k.category_id, k.description, k.rerank_min_score, b.data_id, b.type')
+                ->where('b.data_id', $id)
+                ->join('knowledge k', 'k.index_id = b.index_id', 'LEFT')
+                ->where('b.type', 2)
+                ->limit(1)
+                ->find();
             if ($info->user_id != 0 && $info->user_id != self::$uid) {
                 throw new \Exception("查无此信息");
             }
@@ -359,19 +359,21 @@ class LianLianLogic extends ApiLogic
 
             // 获取话术提炼关键词
             $keyWords = ChatPrompt::where('id', 9)->value('prompt_text') ?? '';
-        
+
             if (!$keyWords) {
 
                 throw new \Exception("关键词丢失");
             }
 
             //替换数据
-            $keyWords = str_replace(['我的身份','场景名称', '对话内容'], [$sceneInfo->practitioner_persona , $sceneInfo->name, $logs], $keyWords);
+            $keyWords = str_replace(['我的身份', '场景名称', '对话内容'], [$sceneInfo->practitioner_persona, $sceneInfo->name, $logs], $keyWords);
             // 检查是否挂载知识库
             $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
             if (!empty($bind)) {
                 $response = self::knowledgeChat($bind, $keyWords, $sceneInfo);
-            }else{
+            } else if (isset($data['kb_id']) && (int)$data['kb_id'] > 0) {
+                $response = self::vectorKnowledgeChat($data, $keyWords, $sceneInfo);
+            } else {
                 //发送聊天
                 $response = \app\common\service\ToolsService::Ll()->chat([
                     'action'    => 'speechcraft',
@@ -379,7 +381,7 @@ class LianLianLogic extends ApiLogic
                 ]);
             }
 
-            
+
             //聊天
             $chatInfo->speechcraft = $response['data']['message'];
             $chatInfo->save();
@@ -455,20 +457,15 @@ class LianLianLogic extends ApiLogic
             $keyWords = str_replace(['方向1', '方向2', '方向3', '方向4', '方向5'], $sceneInfo->analysis_report_config, $keyWords);
 
             //替换数据
-            $keyWords = str_replace(['我的身份', '场景名称', '对话内容'], [$sceneInfo->practitioner_persona ,$sceneInfo->name, $logs], $keyWords);
-            // 检查是否挂载知识库
-//            $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
-//            if (!empty($bind)) {
-//                $response = self::knowledgeChat($bind, $keyWords, $sceneInfo);
-//            }else{
-                //发送聊天
-                $response = \app\common\service\ToolsService::Ll()->chat([
-                    'action'    => 'performance',
-                    'messages'  => $keyWords
-                ]);
-//            }
+            $keyWords = str_replace(['我的身份', '场景名称', '对话内容'], [$sceneInfo->practitioner_persona, $sceneInfo->name, $logs], $keyWords);
 
-            
+            //发送聊天
+            $response = \app\common\service\ToolsService::Ll()->chat([
+                'action'    => 'performance',
+                'messages'  => $keyWords
+            ]);
+
+
             //聊天
             $chatInfo->performance = $response['data']['message'];
             $chatInfo->save();
@@ -494,7 +491,7 @@ class LianLianLogic extends ApiLogic
     {
         Db::startTrans();
         //计费，改为结算的时候扣费
-//        $unit = TokenLogService::checkToken(self::$uid, 'lianlian');
+        //        $unit = TokenLogService::checkToken(self::$uid, 'lianlian');
         try {
             // 场景ID
             if (!isset($data['scene_id'])) {
@@ -513,16 +510,16 @@ class LianLianLogic extends ApiLogic
 
             //场景重练或发起新对话时，删除无效的旧对话数据
             $drafts = LlAnalysis::where([
-                                            'scene_id' => $data['scene_id'],
-                                            'user_id'  => self::$uid,
-                                            'is_draft' => 1,
-                                            'status'   => 0
-                                        ])->select()->toArray();
-            if ($drafts){
-                foreach ($drafts as $draft){
-                    LlChat::destroy(['analysis_id'=>$draft['id']]);
+                'scene_id' => $data['scene_id'],
+                'user_id'  => self::$uid,
+                'is_draft' => 1,
+                'status'   => 0
+            ])->select()->toArray();
+            if ($drafts) {
+                foreach ($drafts as $draft) {
+                    LlChat::destroy(['analysis_id' => $draft['id']]);
                     LlAnalysis::destroy($draft['id']);
-//                    Log::write('场景ID：'.$data['scene_id'].'对话ID：'.$draft['id'].'删除成功');
+                    //                    Log::write('场景ID：'.$data['scene_id'].'对话ID：'.$draft['id'].'删除成功');
                 }
             }
 
@@ -546,13 +543,15 @@ class LianLianLogic extends ApiLogic
             //替换数据
             $keyWords = str_replace(['陪练画像描述', '陪练母语', '练习者扮演的人设', '练习场景'], [$info->coach_persona, $info->coach_language, $info->practitioner_persona, $info->description], $keyWords);
 
-            
+
             // 检查是否挂载知识库
             $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
             if (!empty($bind)) {
                 $response = self::knowledgeChat($bind, $keyWords, $info);
-            }else{
-                 // 发起聊天
+            } else if (isset($data['kb_id']) && (int)$data['kb_id'] > 0) {
+                $response = self::vectorKnowledgeChat($data, $keyWords, $info);
+            } else {
+                // 发起聊天
                 $response = \app\common\service\ToolsService::Ll()->chat([
                     'action'    => 'start',
                     'voice'     => $info->coach_voice,
@@ -567,7 +566,7 @@ class LianLianLogic extends ApiLogic
                 ]);
             }
 
-            
+
 
             if (!isset($response['data'])) {
 
@@ -585,10 +584,10 @@ class LianLianLogic extends ApiLogic
             ]);
 
             //token扣除，改为结算时扣费
-//            User::userTokensChange($analysisInfo->user_id, $unit);
+            //            User::userTokensChange($analysisInfo->user_id, $unit);
 
             //记录日志，改为结算时扣费
-//            AccountLogLogic::recordUserTokensLog(true, $analysisInfo->user_id, AccountLogEnum::TOKENS_DEC_AI_LIANLIAN, $unit, $analysisInfo->task_id);
+            //            AccountLogLogic::recordUserTokensLog(true, $analysisInfo->user_id, AccountLogEnum::TOKENS_DEC_AI_LIANLIAN, $unit, $analysisInfo->task_id);
 
             self::$returnData = $chatInfo->toArray();
             Db::commit();
@@ -599,8 +598,9 @@ class LianLianLogic extends ApiLogic
             return false;
         }
     }
-    
-    private static function flattenArray($array) {
+
+    private static function flattenArray($array)
+    {
         $result = [];
         foreach ($array as $value) {
             if (is_array($value)) {
@@ -612,7 +612,8 @@ class LianLianLogic extends ApiLogic
         return $result;
     }
 
-    private static function knowledgeChat($bind, $keyWords, $info){
+    private static function knowledgeChat($bind, $keyWords, $info)
+    {
         $knowledge = \app\common\model\knowledge\Knowledge::where('id', $bind['kid'])->limit(1)->find();
         if (empty($knowledge)) {
             throw new \Exception("挂载的知识库不存在");
@@ -630,7 +631,29 @@ class LianLianLogic extends ApiLogic
             'intensity' => $info->coach_intensity,
         ]);
         $response['data'] = array(
-            'message' => $knResponse['choices'][0]['message']['content']?? '',
+            'message' => $knResponse['choices'][0]['message']['content'] ?? '',
+            'audio_url' => $knResponse['audio_url'] ?? '',
+            'audio_duration' => $knResponse['duration'] ?? 0,
+        );
+        return $response;
+    }
+
+    private static function vectorKnowledgeChat($payload, $keyWords, $info)
+    {
+
+        //clogger($keyWords, 'll');
+        $knResponse = \app\api\logic\KnowledgeLogic::ladderPlayerVecTorChat([
+            'message' => $keyWords,
+            'stream' => false,
+            'user_id' => self::$uid,
+            'scene' => '向量知识库陪练聊天',
+            'voice'     => $info->coach_voice,
+            'emotion'   => $info->coach_emotion,
+            'intensity' => $info->coach_intensity,
+            'kb_id' => $payload['kb_id'],
+        ]);
+        $response['data'] = array(
+            'message' => $knResponse['choices'][0]['message']['content'] ?? '',
             'audio_url' => $knResponse['audio_url'] ?? '',
             'audio_duration' => $knResponse['duration'] ?? 0,
         );
@@ -654,7 +677,7 @@ class LianLianLogic extends ApiLogic
                 ->where('id', $data['analysis_id'])
                 ->where('user_id', self::$uid)
                 ->where('scene_id', $data['scene_id'])
-                ->order('id','DESC')
+                ->order('id', 'DESC')
                 ->findOrEmpty();
 
             if ($info->isEmpty()) {
@@ -701,7 +724,9 @@ class LianLianLogic extends ApiLogic
             $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $data['scene_id'])->where('type', 2)->limit(1)->find();
             if (!empty($bind)) {
                 $response = self::knowledgeChat($bind, $keyWords, $sceneInfo);
-            }else{
+            } else if (isset($data['kb_id']) && (int)$data['kb_id'] > 0) {
+                $response = self::vectorKnowledgeChat($data, $keyWords, $sceneInfo);
+            } else {
                 // 发起聊天
                 $response = \app\common\service\ToolsService::Ll()->chat([
                     'action'    => 'continue',
@@ -716,7 +741,7 @@ class LianLianLogic extends ApiLogic
                     ],
                 ]);
             }
-            
+
 
             if (!isset($response['data'])) {
 
@@ -858,8 +883,8 @@ class LianLianLogic extends ApiLogic
 
             //陪练结束，中台扣费
             $response = \app\common\service\ToolsService::Ll()->chat([
-                                                                         'action'    => 'end',
-                                                                     ]);
+                'action'    => 'end',
+            ]);
             if (!isset($response['data'])) {
 
                 throw new \Exception("陪练结束失败");

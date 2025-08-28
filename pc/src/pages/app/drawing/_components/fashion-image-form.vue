@@ -22,7 +22,7 @@
                         </div>
                     </template>
                     <template v-else>
-                        <Icon name="local-icon-draw_upload" :size="28" color="#ffffff"></Icon>
+                        <Icon name="local-icon-file_add" :size="28" color="#ffffff"></Icon>
                         <div class="text-xs text-white mt-3">点此上传图片 支持拖拽上传</div>
                         <div class="text-xs text-[#ffffff4d] mt-3 mx-[50px]">
                             单个文件不超过{{ maxSize }}MB，宽高比小于{{ ratioSize[0] }}/{{
@@ -84,7 +84,7 @@
                                             @success="getUploadModelImage">
                                             <div
                                                 class="h-[127px] w-full flex-col rounded-md flex items-center justify-center bg-app-bg-3">
-                                                <Icon name="local-icon-draw_upload" :size="28" color="#ffffff"></Icon>
+                                                <Icon name="local-icon-file_add" :size="28" color="#ffffff"></Icon>
                                                 <span class="mt-2 text-[11px] text-[#ffffff80]">点击添加模特</span>
                                             </div>
                                         </upload>

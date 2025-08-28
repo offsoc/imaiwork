@@ -247,9 +247,4 @@ onMounted(() => {
     background-color: transparent;
     border: none;
 }
-:deep(.el-table) {
-    th.el-table__cell.is-leaf {
-        border-top: var(--el-table-border);
-    }
-}
 </style>

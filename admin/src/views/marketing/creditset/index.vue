@@ -6,9 +6,10 @@
         <ConfigTable title="思维导图" :data="getMindMapConfig" />
         <ConfigTable title="会议纪要" :data="getMeetingConfig" />
         <ConfigTable title="AI陪练" :data="getAiTrainConfig" />
-        <ConfigTable title="AI微信" :data="getWechatConfig" />
+        <ConfigTable title="AI客服" :data="getServiceConfig" />
         <ConfigTable title="AI面试" :data="getInterviewConfig" />
         <ConfigTable title="知识库" :data="getKnbConfig" />
+        <ConfigTable title="AI视频获客" :data="getSphConfig" />
         <ConfigTable title="小红书" :data="getRedbookConfig" />
         <ConfigTable title="其他" :data="getOtherConfig" />
     </div>
@@ -26,7 +27,6 @@
 <script setup lang="ts">
 import { getCreditSet, setCreditSet } from "@/api/marketing/creditset";
 import { useLockFn } from "@/hooks/useLockFn";
-import { debounce } from "lodash";
 import ConfigTable from "./config-table.vue";
 
 const formData = reactive<any>({});
@@ -59,7 +59,6 @@ const getAiPersonConfig = computed(() => {
             "human_audio_ymt",
             "human_avatar_chanjing",
             "human_voice_chanjing",
-            "human_audio_chanjing",
             "human_video_chanjing",
         ].includes(item.scene)
     );
@@ -104,22 +103,32 @@ const getInterviewConfig = computed(() => {
     return tableData.value.filter((item) => ["interview_chat"].includes(item.scene));
 });
 
-const getWechatConfig = computed(() => {
-    return tableData.value.filter((item) => ["ai_wechat"].includes(item.scene));
+const getServiceConfig = computed(() => {
+    return tableData.value.filter((item) =>
+        ["ai_wechat", "ai_xhs", "openai_chat", "ai_reply_like"].includes(item.scene)
+    );
 });
 
 const getKnbConfig = computed(() => {
-    return tableData.value.filter((item) => ["knowledge_create", "knowledge_chat"].includes(item.scene));
+    return tableData.value.filter((item) =>
+        ["knowledge_create", "knowledge_chat", "create_vector_knowledge", "text_to_vector"].includes(item.scene)
+    );
 });
 
 const getRedbookConfig = computed(() => {
     return tableData.value.filter((item) =>
-        ["keyword_to_title", "keyword_to_subtitle", "keyword_to_copywriting", "ai_xhs"].includes(item.scene)
+        ["keyword_to_title", "keyword_to_subtitle", "keyword_to_copywriting"].includes(item.scene)
+    );
+});
+
+const getSphConfig = computed(() => {
+    return tableData.value.filter((item) =>
+        ["sph_add_friends", "sph_private_chat", "sph_search_terms"].includes(item.scene)
     );
 });
 
 const getOtherConfig = computed(() => {
-    return [];
+    return tableData.value.filter((item) => ["video_clip"].includes(item.scene));
 });
 
 const getConfig = async () => {

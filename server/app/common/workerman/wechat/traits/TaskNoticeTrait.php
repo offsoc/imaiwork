@@ -10,13 +10,15 @@ use app\common\model\sv\SvAddWechatStrategy;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatLog;
 use app\common\model\wechat\AiWechatAcceptFriendStrategy;
+
 /**
  * 通用通知特殊处理
  * 
  * @author my
  * @package app\traits
  */
-trait TaskNoticeTrait{
+trait TaskNoticeTrait
+{
     use CacheTrait;
 
 
@@ -27,17 +29,17 @@ trait TaskNoticeTrait{
      * @param array $response
      * @return void
      */
-    public function voiceToTextOpt(string $deviceId, array $response):void
+    public function voiceToTextOpt(string $deviceId, array $response): void
     {
         $statusKey = "device:{$deviceId}:voiceToText";
         $isVoiceToText = $this->redis()->get($statusKey);
-        if($isVoiceToText == 1 && $response['Data']['MsgType'] == 'VoiceTransTextTask'){
+        if ($isVoiceToText == 1 && $response['Data']['MsgType'] == 'VoiceTransTextTask') {
             $_content = $response['Data']['Content'];
             $key = "device:{$deviceId}:voice:{$_content['WeChatId']}:taskid:{$_content['TaskId']}";
             $this->redis()->setex($key, 30, $_content['ErrMsg']);
         }
     }
-    
+
     public function AcceptFriendAddRequestTaskOpt(string $deviceId, array $response): void
     {
         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('AcceptFriendAddRequestTaskOpt')->withContext([
@@ -47,18 +49,16 @@ trait TaskNoticeTrait{
         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Data')->withContext([
             'response' => $response
         ])->log();
-        if($data['MsgType'] == 'FriendAddReqeustNotice'){
+        if ($data['MsgType'] == 'FriendAddReqeustNotice') {
             $payload = $response['Data']['Content'];
             $payload['FriendInfo']['Source'] = 1000000 + (int)$payload['FriendInfo']['Source'];
             $friend_id = $payload['FriendInfo']['FriendId'];
 
             $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('payload')->withContext($payload)->log();
-            try
-            {
+            try {
                 // 获取微信账号信息
                 $wechat = AiWechat::where('wechat_id', $payload['WeChatId'])->findOrEmpty();
-                if ($wechat->isEmpty())
-                {
+                if ($wechat->isEmpty()) {
                     $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                         'msg' => '设备账号信息不存在'
                     ])->log();
@@ -66,31 +66,27 @@ trait TaskNoticeTrait{
                 }
                 // 获取自动通过好友策略
                 $strategy = AiWechatAcceptFriendStrategy::where('user_id', $wechat->user_id)->findOrEmpty();
-                if ($strategy->isEmpty())
-                {
+                if ($strategy->isEmpty()) {
                     $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                         'msg' => '请先设置自动通过好友策略'
                     ])->log();
                     return;
                 }
-                if ($strategy->is_enable == 0)
-                {
+                if ($strategy->is_enable == 0) {
                     $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                         'msg' => '自动通过好友策略已禁用'
                     ])->log();
                     return;
                 }
                 // 检查微信号是否存在执行集合中
-                if (!in_array($wechat->wechat_id, $strategy->wechat_ids))
-                {
+                if (!in_array($wechat->wechat_id, $strategy->wechat_ids)) {
                     $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                         'msg' => '此微信号未在自动通过好友策略中'
                     ])->log();
                     return;
                 }
                 // 检查好友来源是否符合
-                if (!empty($strategy->accept_source) && !in_array($payload['FriendInfo']['Source'], $strategy->accept_source))
-                {
+                if (!empty($strategy->accept_source) && !in_array($payload['FriendInfo']['Source'], $strategy->accept_source)) {
                     $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                         'msg' => '此好友来源未在自动通过好友策略中'
                     ])->log();
@@ -104,8 +100,7 @@ trait TaskNoticeTrait{
                     ->whereBetween('create_time', [$todayStart, $todayEnd])
                     ->count();
                 // 超出添加上限
-                if ($todayAcceptCount >= $strategy->accept_numbers)
-                {
+                if ($todayAcceptCount >= $strategy->accept_numbers) {
                     $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                         'msg' => '今日已达到自动通过好友数量上限'
                     ])->log();
@@ -119,12 +114,11 @@ trait TaskNoticeTrait{
                     ->value('create_time', 0);
                 // 计算当前时间 与 上一条接受时间 间隔 单位分钟
                 $interval = 0;
-                if ($lastAcceptTime)
-                {
+                if ($lastAcceptTime) {
                     $interval = (time() - $lastAcceptTime) / 60;
                 }
                 $taskId = generate_unique_task_id();
-    
+
                 // 任务数据
                 $data = [
                     'device_code'   => $wechat->device_code,
@@ -136,7 +130,7 @@ trait TaskNoticeTrait{
                 $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Send AcceptFriendAddRequestTask')->withContext($data)->log();
                 // 推送到队列
                 $this->acceptFriendJob($data);
-                
+
                 AiWechatLog::create([
                     'user_id'   => $data['user_id'],
                     'wechat_id' => $data['wechat_id'],
@@ -146,12 +140,10 @@ trait TaskNoticeTrait{
                 ]);
 
                 StageLogic::sopActionStagetrigger([
-                    'friend_id'=>$data['friend_id'],
-                    'wechat_id'=>$data['wechat_id']
-                                                  ]);
-            }
-            catch (\Exception $e)
-            {
+                    'friend_id' => $data['friend_id'],
+                    'wechat_id' => $data['wechat_id']
+                ]);
+            } catch (\Exception $e) {
                 $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Error')->withContext([
                     'msg' => $e->getMessage()
                 ])->log();
@@ -160,33 +152,32 @@ trait TaskNoticeTrait{
         }
     }
 
-
     public function AddFriendsTaskOpt(string $deviceId, array $response): void
     {
         $data = $response['Data'];
-        if($data['MsgType'] == 'AddFriendsTask'){
-            $record = SvAddWechatRecord::where('task_id' , $data['Content']['TaskId'])->limit(1)->findOrEmpty();
+        if ($data['MsgType'] == 'AddFriendsTask') {
+            $record = SvAddWechatRecord::where('task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
             $errMsg = $data['Content']['ErrMsg'];
-            if(!$record->isEmpty()){
+            if (!$record->isEmpty()) {
                 $record->status = (int)$data['Content']['Success'] === 1 ? 1 : 0;
                 $record->result = $record->status === 1 ? '添加请求成功!' : $data['Content']['ErrMsg'];
-                
+
                 $errorHandlers = [
                     'already_friend' => [
-                        'keyword' => '已经是好友', 
-                        'handler' => function() use ($record) {
+                        'keyword' => '已经是好友',
+                        'handler' => function () use ($record) {
                             $record->status = 1;
                         }
                     ],
                     'account_not_found' => [
-                        'keyword' => ['找不到相关账号', '用户不存在', '被搜账号状态异常'], 
-                        'handler' => function() use ($record) {
+                        'keyword' => ['找不到相关账号', '用户不存在', '被搜账号状态异常'],
+                        'handler' => function () use ($record) {
                             $record->status = 0;
                         }
                     ],
                     'security_risk' => [
-                        'keyword' => '当前账号存在安全风险', 
-                        'handler' => function() use ($record) {
+                        'keyword' => '当前账号存在安全风险',
+                        'handler' => function () use ($record) {
                             $this->_setColingWechat($record);
                             $this->_resetAddFriendWechat($record);
                         }
@@ -203,41 +194,38 @@ trait TaskNoticeTrait{
                         }
                     }
                 }
-                
-                
+
                 $record->update = time();
                 $record->save();
-                
+
                 $wechat = AiWechat::where('wechat_id', '=', $record->wechat_no)->limit(1)->find();
-                if(!$wechat->isEmpty()){
+                if (!$wechat->isEmpty()) {
                     $wechat->update_time = time();
                     $wechat->save();
                 }
             }
-            
-            
         }
     }
 
-    private function _resetAddFriendWechat(SvAddWechatRecord &$record){
+    private function _resetAddFriendWechat(SvAddWechatRecord &$record)
+    {
         $strategy = SvAddWechatStrategy::where('device_code', $record['deviceId'])->where('account', $record['account'])->limit(1)->findOrEmpty();
-        if($strategy->isEmpty()){
+        if ($strategy->isEmpty()) {
             return;
         }
-        
 
         $currentTime = time(); // 获取当前时间戳
         $coolingThreshold = $currentTime - 7200; // 2小时前的时间戳（7200秒）
         $wechat = AiWechat::field('*')
             ->where('user_id', $record['user_id'])
             ->where('wechat_id', 'in', explode(',', $strategy['wechat_id']))
-            ->where(function($query) use ($coolingThreshold) {
+            ->where(function ($query) use ($coolingThreshold) {
                 $query->where('is_cooling', 0)
                     ->whereOr('cooling_time', '<', $coolingThreshold);
             })
             ->order('update_time asc')->limit(1)->findOrEmpty();
-            
-        if($wechat->isEmpty()){
+
+        if ($wechat->isEmpty()) {
             $record->status = 3;
             $record->result = '微信账号冷却中,稍后手动重试';
             return;
@@ -265,8 +253,8 @@ trait TaskNoticeTrait{
         $pushMessage = $message->serializeToString();
 
         $channel = "socket.{$wechat['device_code']}.message";
-        $this->setLog('channel: ' .$channel, 'msg');
-        
+        $this->setLog('channel: ' . $channel, 'msg');
+
         \Channel\Client::connect('127.0.0.1', 2206);
         \Channel\Client::publish($channel, [
             'data' => is_array($pushMessage) ? json_encode($pushMessage) : $pushMessage
@@ -276,24 +264,22 @@ trait TaskNoticeTrait{
         $wechat->cooling_time = 0;
         $wechat->update_time = time();
         $wechat->save();
-
-
     }
 
-    private function _setColingWechat(SvAddWechatRecord $record){
+    private function _setColingWechat(SvAddWechatRecord $record)
+    {
         $wechat = AiWechat::where('wechat_id', '=', $record->wechat_no)->limit(1)->find();
-        if(!$wechat->isEmpty()){
+        if (!$wechat->isEmpty()) {
             $wechat->is_cooling = 1;
             $wechat->cooling_time = time();
             $wechat->update_time = time();
             $wechat->save();
         }
     }
-    
 
-    private function acceptFriendJob(array $payload){
+    private function acceptFriendJob(array $payload)
+    {
         $deviceId = $payload['device_code'];
-
         // 3. 构建消息发送请求
         $content = \app\common\workerman\wechat\handlers\client\AcceptFriendAddRequestTaskHandler::handle([
             'WeChatId' => $payload['wechat_id'],
@@ -316,12 +302,5 @@ trait TaskNoticeTrait{
         \Channel\Client::publish($channel, [
             'data' => $data
         ]);
-            
     }
-    
-    
-    
-    
-    
-    
 }

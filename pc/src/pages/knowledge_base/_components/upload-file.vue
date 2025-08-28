@@ -45,14 +45,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, ref, shallowRef } from "vue";
 import { useUserStore } from "@/stores/user";
 import { getApiPrefix, getApiUrl, getVersion } from "~/utils/env";
 import feedback from "@/utils/feedback";
 import type { ElUpload, UploadProps, UploadRawFile } from "element-plus";
 import { genFileId } from "element-plus";
 import { RequestCodeEnum } from "@/enums/requestEnums";
-import { useAppStore } from "@/stores/app";
 const props = defineProps({
     type: {
         type: String,

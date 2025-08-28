@@ -62,3 +62,18 @@ export function submitSurvey(params: any) {
 export function getMnpQrcode(params: any) {
     return $request.get({ url: "/wechat/getMnpCodeUrl", params });
 }
+
+// 获取场景提示词
+export function getScenePrompt() {
+    return $request.post({ url: "/tools/getPrompt" });
+}
+
+// 检查站点是否是oem
+export function checkOem() {
+    return $request.get({ url: "/oem.oem/check" });
+}
+
+// 获取剪辑配置
+export function getClipConfig() {
+    return $request.get({ url: "/tools/clip" });
+}

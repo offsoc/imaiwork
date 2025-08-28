@@ -7,6 +7,7 @@
     </div>
 </template>
 <script setup lang="ts">
+import { AppKeyEnum, appKeyNameMap } from "@/enums/appEnums";
 import Sidebar from "../_components/sidebar.vue";
 import Chat from "./_pages/chat/index.vue";
 import Account from "./_pages/account/index.vue";
@@ -23,7 +24,8 @@ sidebar.value = [
 
 definePageMeta({
     layout: "base",
-    title: "自动服务",
+    title: appKeyNameMap[AppKeyEnum.SERVICE],
+    key: AppKeyEnum.SERVICE,
 });
 </script>
 

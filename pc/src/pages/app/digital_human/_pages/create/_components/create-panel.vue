@@ -14,7 +14,7 @@ import { createTask } from "@/api/digital_human";
 import { useUserStore } from "@/stores/user";
 import { useAppStore } from "@/stores/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
-import { CreateType, DigitalHumanModelVersionEnum, CreateTaskParams } from "../../../_enums";
+import { CreateTypeEnum, DigitalHumanModelVersionEnum } from "../../../_enums";
 
 interface CostTokens {
     video_cost: number;
@@ -42,7 +42,7 @@ const showNext = ref(false);
 const costTokens = ref<Partial<CostTokens>>({});
 const audioDuration = ref(0);
 
-const createTaskParams = ref<CreateTaskParams>();
+const createTaskParams = ref<any>({});
 
 const getTokenByScene = (key: string) => userStore.getTokenByScene(key);
 
@@ -74,7 +74,9 @@ const getCostRules = async () => {
         _costTokens.video_cost = getTokenByScene(videoKey).score;
         _costTokens.video_unit = getTokenByScene(videoKey).unit;
         _costTokens.voice_cost =
-            CreateType.AUDIO == audio_type || (voice_type == 1 && voice_id == -1) ? getTokenByScene(voiceKey).score : 0;
+            CreateTypeEnum.AUDIO == audio_type || (voice_type == 1 && voice_id == -1)
+                ? getTokenByScene(voiceKey).score
+                : 0;
 
         _costTokens.voice_unit = getTokenByScene(voiceKey).unit;
         _costTokens.audio_cost = getTokenByScene(audioKey).score;
@@ -142,14 +144,14 @@ const getAudioDuration = (msg: string, duration: number) => {
 };
 
 const validateFormData = (formData: any) => {
-    const { url, audio_type, msg, voice_id, audio_url } = formData;
+    const { url, audio_type, msg, voice_id, audio_url, automatic_clip, clip_type, music_url } = formData;
 
     if (!url) {
         feedback.msgError("请选择一位数字人");
         return false;
     }
     switch (audio_type) {
-        case CreateType.TEXT:
+        case CreateTypeEnum.TEXT:
             if (!msg) {
                 feedback.msgError("请输入视频文案");
                 return false;
@@ -158,13 +160,24 @@ const validateFormData = (formData: any) => {
                 return false;
             }
             break;
-        case CreateType.AUDIO:
+        case CreateTypeEnum.AUDIO:
             if (!audio_url) {
                 feedback.msgError("请上传音频文件");
                 return false;
             }
             break;
     }
+
+    // if (automatic_clip == 1) {
+    //     if (!clip_type) {
+    //         feedback.msgError("请选择剪辑风格");
+    //         return false;
+    //     }
+    //     if (!music_url) {
+    //         feedback.msgError("请上传背景音乐");
+    //         return false;
+    //     }
+    // }
 
     return true;
 };
@@ -187,6 +200,9 @@ const handleNext = () => {
         audio_duration,
         width,
         height,
+        music_url,
+        clip_type,
+        automatic_clip,
     } = props.formData;
 
     createTaskParams.value = {
@@ -203,6 +219,9 @@ const handleNext = () => {
         audio_url,
         width,
         height,
+        music_url,
+        clip_type,
+        automatic_clip,
     };
 
     const setAudioDetails = (message: string, duration: number, voice_id?: number) => {
@@ -215,10 +234,10 @@ const handleNext = () => {
     };
 
     switch (audio_type) {
-        case CreateType.TEXT:
+        case CreateTypeEnum.TEXT:
             setAudioDetails(msg, audioDuration.value, voice_id);
             break;
-        case CreateType.AUDIO:
+        case CreateTypeEnum.AUDIO:
             setAudioDetails("", audio_duration);
             break;
     }

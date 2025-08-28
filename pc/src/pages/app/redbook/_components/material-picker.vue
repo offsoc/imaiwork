@@ -1,7 +1,7 @@
 <template>
     <DefineMaterialMenuTemplate>
         <div class="flex flex-col gap-y-2">
-            <div class="material-menu-item" @click="handleImportMaterial">
+            <div class="type-menu-item" @click="handleImportMaterial">
                 <span class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
                     <Icon name="local-icon-import" color="#ffffff"></Icon>
                 </span>
@@ -13,7 +13,7 @@
                 v-bind="getUploadProps"
                 :show-file-list="false"
                 @success="getUploadSuccess">
-                <div class="material-menu-item">
+                <div class="type-menu-item">
                     <span class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
                         <Icon name="local-icon-upload" color="#ffffff"></Icon>
                     </span>
@@ -27,7 +27,7 @@
             v-if="materialList.length < getUploadProps.limit"
             trigger="click"
             width="212"
-            popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-material-popover"
+            popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-type-popover"
             :show-arrow="false">
             <template #reference>
                 <div
@@ -48,10 +48,10 @@
             <video
                 :src="item"
                 class="w-full h-full object-cover rounded-md"
-                v-if="type == PublishTaskType.VIDEO"
+                v-if="type == PublishTaskTypeEnum.VIDEO"
                 @click="handlePreviewVideo(item)"></video>
             <ElImage
-                v-else-if="type == PublishTaskType.IMAGE"
+                v-else-if="type == PublishTaskTypeEnum.IMAGE"
                 :src="item"
                 class="w-full h-full rounded-md"
                 fit="cover"
@@ -63,7 +63,7 @@
             <ElPopover
                 trigger="click"
                 width="212"
-                popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-material-popover"
+                popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-type-popover"
                 :show-arrow="false">
                 <template #reference>
                     <div class="absolute bottom-2 w-full z-[33] px-2">
@@ -82,11 +82,11 @@
 </template>
 
 <script setup lang="ts">
-import { PublishTaskType, MaterialActionType } from "../_enums";
+import { PublishTaskTypeEnum, MaterialActionType } from "../_enums";
 
 const props = withDefaults(
     defineProps<{
-        type: PublishTaskType;
+        type: PublishTaskTypeEnum;
         materialList: any[];
         maxVideoCount?: number;
         maxImageCount?: number;
@@ -97,7 +97,7 @@ const props = withDefaults(
         videoMaxDuration?: number;
     }>(),
     {
-        type: PublishTaskType.VIDEO,
+        type: PublishTaskTypeEnum.VIDEO,
         materialList: () => [],
         maxVideoCount: 30,
         maxImageCount: 18,
@@ -126,7 +126,7 @@ const materialList = defineModel<any[]>("materialList");
 const replaceMaterialIndex = ref();
 
 const getUploadProps = computed(() => {
-    return type.value == PublishTaskType.VIDEO
+    return type.value == PublishTaskTypeEnum.VIDEO
         ? {
               type: "video",
               limit: maxVideoCount.value,
@@ -141,7 +141,7 @@ const getUploadProps = computed(() => {
 
 const getUploadSuccess = (result: any) => {
     const { uri } = result.data;
-    if (type.value == PublishTaskType.VIDEO) {
+    if (type.value == PublishTaskTypeEnum.VIDEO) {
         if (replaceMaterialIndex.value > -1) {
             materialList.value[replaceMaterialIndex.value] = uri;
         } else {
@@ -177,9 +177,9 @@ const handleDeleteMaterial = (index: number) => {
         message: "确定要删除该素材吗？",
         theme: "dark",
         onConfirm: () => {
-            if (type.value == PublishTaskType.VIDEO) {
+            if (type.value == PublishTaskTypeEnum.VIDEO) {
                 materialList.value.splice(index, 1);
-            } else if (type.value == PublishTaskType.IMAGE) {
+            } else if (type.value == PublishTaskTypeEnum.IMAGE) {
                 materialList.value.splice(index, 1);
             }
             emit("update:materialList", materialList.value);
@@ -205,10 +205,4 @@ const { DefineTemplate: DefineMaterialMenuTemplate, UseTemplate: MaterialTemplat
     @apply text-white text-[11px] mt-8 border border-[rgba(255,255,255,0.1)] shadow-[0_0_0_1px_rgba(0,0,0,0.24)] rounded-md w-full h-[26px] flex items-center justify-center;
 }
 </style>
-<style lang="scss">
-.choose-material-popover {
-    .material-menu-item {
-        @apply h-11 w-full rounded-md p-4 flex items-center gap-x-2 hover:bg-app-bg-1 hover:shadow-[0_0_0_1px_var(--app-border-color-2)] cursor-pointer;
-    }
-}
-</style>
+<style lang="scss"></style>

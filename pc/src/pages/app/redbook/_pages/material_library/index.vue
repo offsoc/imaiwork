@@ -7,7 +7,7 @@
                         <ElSelect
                             v-model="queryParams.m_type"
                             class="!w-[100px]"
-                            popper-class="custom-select-popper"
+                            popper-class="dark-select-popper"
                             clearable
                             :show-arrow="false"
                             :empty-values="[null, undefined]"
@@ -16,11 +16,12 @@
                             <ElOption label="全部" value=""></ElOption>
                             <ElOption label="视频" :value="MaterialTypeEnum.VIDEO"></ElOption>
                             <ElOption label="图片" :value="MaterialTypeEnum.IMAGE"></ElOption>
+                            <ElOption label="音频" :value="MaterialTypeEnum.MUSIC"></ElOption>
                         </ElSelect>
                         <ElSelect
                             v-model="fieldValue"
                             class="!w-[140px]"
-                            popper-class="custom-select-popper"
+                            popper-class="dark-select-popper"
                             clearable
                             :show-arrow="false"
                             :empty-values="[null, undefined]"
@@ -46,7 +47,7 @@
                         </ElInput>
                         <upload
                             type="file"
-                            accept="video/*,image/*"
+                            accept="video/*,image/*,.mp3,.wav,.m4a"
                             show-progress
                             :show-file-list="false"
                             @change="handleUploadSuccess">
@@ -94,17 +95,26 @@
                                 preview-teleported
                                 :src="item.content"
                                 :preview-src-list="[item.content]"></ElImage>
-                            <template v-if="MaterialTypeEnum.VIDEO == item.m_type">
-                                <video :src="item.content" class="w-full h-full object-cover"></video>
+                            <template
+                                v-if="MaterialTypeEnum.VIDEO == item.m_type || MaterialTypeEnum.MUSIC == item.m_type">
+                                <video
+                                    :src="item.content"
+                                    class="w-full h-full object-cover"
+                                    v-if="MaterialTypeEnum.VIDEO == item.m_type"></video>
+                                <img
+                                    src="@/assets/images/audio_bg.png"
+                                    class="w-full h-full object-cover"
+                                    v-if="MaterialTypeEnum.MUSIC == item.m_type" />
                                 <div
                                     class="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] z-[1000]">
                                     <div class="w-12 h-12" @click="handlePlay(item.content)">
-                                        <play-btn></play-btn>
+                                        <play-btn />
                                     </div>
                                 </div>
                             </template>
+
                             <div class="absolute right-2 top-2 z-[1000] w-9 h-9 invisible group-hover:visible">
-                                <utils-menu :item="item" :menu-list="utilsMenuList"></utils-menu>
+                                <handle-menu :theme="ThemeEnum.DARK" :data="item" :menu-list="utilsMenuList" />
                             </div>
                         </div>
                     </div>
@@ -128,11 +138,10 @@
 </template>
 
 <script setup lang="ts">
-import { AppTypeEnum } from "@/enums/appEnums";
-import { UtilsMenuType } from "@/pages/app/_typings/type";
+import { AppTypeEnum, ThemeEnum } from "@/enums/appEnums";
+import { HandleMenuType } from "@/components/handle-menu/typings";
 import { getMaterialLibraryList, deleteMaterialLibrary, addMaterialLibrary } from "@/api/redbook";
 import Empty from "@/pages/app/redbook/_components/empty.vue";
-import UtilsMenu from "@/pages/app/_components/utils-menu.vue";
 import EditPopup from "./_components/edit.vue";
 import { MaterialTypeEnum } from "../../_enums";
 
@@ -185,12 +194,13 @@ const handleUploadSuccess = async (result: any) => {
         // 根据名字判断是视频还是图片
         const isVideo = name.endsWith(".mp4");
         const isImage = name.endsWith(".jpg") || name.endsWith(".png");
+        const isAudio = name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".m4a");
         const params = {
             name: name.split(".")[0],
             size,
             type: AppTypeEnum.REDBOOK,
             sort: 0,
-            m_type: isImage ? MaterialTypeEnum.IMAGE : MaterialTypeEnum.VIDEO,
+            m_type: isImage ? MaterialTypeEnum.IMAGE : isAudio ? MaterialTypeEnum.MUSIC : MaterialTypeEnum.VIDEO,
             content: uri,
             duration: 0,
         };
@@ -226,7 +236,7 @@ const handleUploadSuccess = async (result: any) => {
 const showEditPopup = ref(false);
 const editPopupRef = ref<InstanceType<typeof EditPopup>>();
 
-const utilsMenuList: UtilsMenuType[] = [
+const utilsMenuList: HandleMenuType[] = [
     {
         label: "重命名",
         icon: "local-icon-edit3",

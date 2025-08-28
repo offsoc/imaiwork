@@ -14,22 +14,24 @@
             <ElFormItem label="账号备注" prop="remark">
                 <ElInput v-model="formData.remark" placeholder="点击输入账号备注" />
             </ElFormItem>
-            <ElFormItem label="AI接管机器人" prop="robot_id">
-                <ElSelect v-model="formData.robot_id" placeholder="请选择机器人" filterable>
-                    <ElOption
-                        v-for="item in optionsData.robotLists"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id"></ElOption>
-                </ElSelect>
-            </ElFormItem>
             <ElFormItem label="接管模式" prop="takeover_mode">
                 <ElRadioGroup v-model="formData.takeover_mode">
                     <ElRadio label="AI接管" :value="1"></ElRadio>
                     <ElRadio label="人工介入" :value="0"></ElRadio>
                 </ElRadioGroup>
             </ElFormItem>
-
+            <ElFormItem label="AI接管机器人" prop="robot_id" v-if="formData.takeover_mode === 1">
+                <ElSelect
+                    v-model="formData.robot_id"
+                    filterable
+                    clearable
+                    remote
+                    placeholder="请选择接管机器人AI"
+                    :loading="agentLoading"
+                    :remote-method="getAgentFn">
+                    <ElOption v-for="item in agentLists" :key="item.id" :label="item.name" :value="item.id"></ElOption>
+                </ElSelect>
+            </ElFormItem>
             <!-- 接管类型 -->
             <ElFormItem label="接管类型" prop="takeover_type">
                 <ElRadioGroup v-model="formData.takeover_type">
@@ -64,13 +66,11 @@
 </template>
 
 <script setup lang="ts">
-import { getWeChatAi, saveWeChatAi, robotLists } from "@/api/person_wechat";
+import { getWeChatAi, saveWeChatAi } from "@/api/person_wechat";
+import { getAgentList } from "@/api/agent";
 import type { FormInstance } from "element-plus";
 import Popup from "@/components/popup/index.vue";
-import { useAppStore } from "@/stores/app";
 const emit = defineEmits(["close", "success"]);
-
-const appStore = useAppStore();
 
 const formRef = shallowRef<FormInstance>();
 const formData = reactive<any>({
@@ -93,27 +93,18 @@ const formRules = {
 
 const popupRef = ref<InstanceType<typeof Popup>>();
 
-const { optionsData } = useDictOptions<{
-    robotLists: any[];
-}>({
-    robotLists: {
-        api: robotLists,
-        params: { page_size: 9999 },
-        transformData: (data: any) => {
-            if (data.lists.length > 0) {
-                if (formData.robot_id == 0) {
-                    formData.robot_id = data.lists[0].id;
-                }
-                return data.lists;
-            } else {
-                return [];
-            }
-        },
-    },
-});
+const agentLists = ref<any[]>([]);
+const agentLoading = ref(false);
+const getAgentFn = async (query?: string) => {
+    agentLoading.value = true;
+    const data = await getAgentList({ keyword: query });
+    agentLists.value = data.lists;
+    agentLoading.value = false;
+};
 
 const open = () => {
     popupRef.value?.open();
+    getAgentFn();
 };
 
 const close = () => {

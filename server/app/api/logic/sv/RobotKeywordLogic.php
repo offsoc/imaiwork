@@ -4,6 +4,7 @@ namespace app\api\logic\sv;
 
 use app\common\model\sv\SvRobotKeyword;
 use app\common\model\sv\SvRobot;
+use app\common\model\kb\KbRobot;
 use app\common\service\FileService;
 
 /**
@@ -25,7 +26,7 @@ class RobotKeywordLogic extends SvBaseLogic
             $params['user_id'] = self::$uid;
 
             // 检查机器人是否存在
-            $robot = SvRobot::where('id', $params['robot_id'])->where('user_id', self::$uid)->findOrEmpty();
+            $robot = KbRobot::where('id', $params['robot_id'])->where('user_id', self::$uid)->findOrEmpty();
             if ($robot->isEmpty()) {
                 self::setError('机器人不存在');
                 return false;

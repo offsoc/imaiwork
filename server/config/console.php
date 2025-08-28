@@ -40,5 +40,10 @@ return [
         'oss_migration_cron' => 'app\common\command\OssMigrationCron',
         //即梦视频队列
         'draw_video_task' => 'app\common\command\DrawVideoTaskCron',
+        //自动微信朋友圈点赞评论
+        'ai_circle_reply_like' => 'app\common\command\AiCircleReplyLike',
+        'device_rpa_cron' => 'app\common\command\DeviceRpaCron',
+        'start_channel' => 'app\common\command\StartChannel',
+
     ],
 ];

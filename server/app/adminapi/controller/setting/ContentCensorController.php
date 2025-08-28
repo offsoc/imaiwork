@@ -15,7 +15,7 @@ class ContentCensorController extends BaseAdminController
     /**
      * @notes 内容审核配置详情
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function detail(): Json
     {
@@ -26,7 +26,7 @@ class ContentCensorController extends BaseAdminController
     /**
      * @notes 内容审核配置保存
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function save(): Json
     {

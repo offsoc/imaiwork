@@ -3,33 +3,33 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-import { addUnit } from '@/utils/util'
-import { imageProps } from 'element-plus'
+import { computed } from "vue";
+import type { CSSProperties } from "vue";
+import { addUnit } from "@/utils/util";
+import { imageProps } from "element-plus";
 const props = defineProps({
     width: {
         type: [String, Number],
-        default: 'auto'
+        default: "auto",
     },
     height: {
         type: [String, Number],
-        default: 'auto'
+        default: "auto",
     },
     radius: {
         type: [String, Number],
-        default: 0
+        default: 0,
     },
-    ...imageProps
-})
+    ...imageProps,
+});
 
 const styles = computed<CSSProperties>(() => {
     return {
         width: addUnit(props.width),
         height: addUnit(props.height),
-        borderRadius: addUnit(props.radius)
-    }
-})
+        borderRadius: addUnit(props.radius),
+    };
+});
 </script>
 
 <style lang="scss" scoped>

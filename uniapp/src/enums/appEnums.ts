@@ -104,3 +104,8 @@ export enum TokensSceneEnum {
     HUMAN_VOICE_CHANJING = "human_voice_chanjing",
     AI_LADDER_PLAYER = "lianlian",
 }
+
+export enum KnbTypeEnum {
+    VECTOR = "vector",
+    RAG = "rag",
+}

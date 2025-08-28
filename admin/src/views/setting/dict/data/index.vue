@@ -16,7 +16,11 @@
                     <el-input class="w-[280px]" v-model="queryParams.name" clearable @keyup.enter="resetPage" />
                 </el-form-item>
                 <el-form-item label="数据状态">
-                    <el-select class="w-[280px]" v-model="queryParams.status" :empty-values="[null, undefined]">
+                    <el-select
+                        class="w-[280px]"
+                        v-model="queryParams.status"
+                        :empty-values="[null, undefined]"
+                        @change="getLists()">
                         <el-option label="全部" value />
                         <el-option label="正常" :value="1" />
                         <el-option label="停用" :value="0" />

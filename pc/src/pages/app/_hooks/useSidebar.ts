@@ -3,13 +3,22 @@ export interface UpdateSliderIndexParams {
     [key: string]: any;
 }
 
+export interface SidebarItem {
+    type: number;
+    components: any;
+    icon?: string;
+    name: string;
+    disabled?: boolean;
+}
+
 export default function useSidebar() {
     const router = useRouter();
     const route = useRoute();
 
     const routerParams = ref<Record<string, any>>({});
+    const residentParams = ref<Record<string, any>>({});
 
-    const sidebar = ref<Array<{ type: number; components: any; icon?: string; name: string; disabled?: boolean }>>([]);
+    const sidebar = ref<Array<SidebarItem>>([]);
     const sidebarIndex = ref<number>(0);
 
     const getComponents = computed(() => {
@@ -37,6 +46,7 @@ export default function useSidebar() {
         router.replace({
             query: {
                 ...routerParams.value,
+                ...residentParams.value,
                 type: sidebarIndex.value,
             },
         });
@@ -61,6 +71,7 @@ export default function useSidebar() {
         sidebarIndex,
         getComponents,
         routerParams,
+        residentParams,
         init,
         setSlider,
         getSliderIndex,

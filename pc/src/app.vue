@@ -22,6 +22,7 @@ const config = {
 
 // 网站配置
 const { pc_title, pc_ico, pc_keywords, pc_desc } = appStore.getWebsiteConfig;
+const { is_oem, logo_url } = appStore.getOemConfig;
 
 // 设置网站头部信息
 useHead({
@@ -34,7 +35,7 @@ useHead({
         {
             rel: "icon",
             type: "image/x-icon",
-            href: pc_ico,
+            href: is_oem == 1 ? logo_url : pc_ico,
         },
     ],
 });

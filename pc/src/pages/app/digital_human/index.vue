@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { AppKeyEnum, ThemeEnum } from "@/enums/appEnums";
+import { AppKeyEnum, appKeyNameMap, ThemeEnum } from "@/enums/appEnums";
 import Sidebar from "../_components/sidebar.vue";
 import Create from "./_pages/create/index.vue";
 import Model from "./_pages/model/index.vue";
@@ -33,7 +33,7 @@ sidebar.value = [
 
 definePageMeta({
     layout: "base",
-    title: "AI数字人视频",
+    title: appKeyNameMap[AppKeyEnum.DIGITAL_HUMAN],
     key: AppKeyEnum.DIGITAL_HUMAN,
 });
 </script>

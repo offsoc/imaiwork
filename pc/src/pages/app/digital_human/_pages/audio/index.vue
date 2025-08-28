@@ -2,15 +2,7 @@
     <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
         <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[88px]">
-                    <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
-                        <ElTabPane label="全部" name=""></ElTabPane>
-                        <ElTabPane
-                            v-for="item in modelChannel"
-                            :label="item.name"
-                            :name="item.id"
-                            :key="item.id"></ElTabPane>
-                    </ElTabs>
+                <div class="flex items-center justify-end h-[88px]">
                     <div class="flex items-center gap-[14px]">
                         <ElInput
                             v-model="queryParams.name"
@@ -66,7 +58,7 @@
                                     <span class="text-success">成功</span>
                                 </template>
                                 <template v-if="row.status === 2">
-                                    <Icon name="local-icon-fail_fill" :size="16"></Icon>
+                                    <Icon name="local-icon-error_fill" :size="16"></Icon>
                                     <span class="text-danger">失败</span>
                                 </template>
                             </div>
@@ -101,9 +93,19 @@ import AudioControl from "@/pages/app/derivative_work/_components/control.vue";
 import { useAppStore } from "@/stores/app";
 import { DigitalHumanModelVersionEnum } from "../../_enums";
 const appStore = useAppStore();
-const modelChannel = computed(() =>
-    appStore.getDigitalHumanConfig?.channel.filter((item) => item.id != DigitalHumanModelVersionEnum.CHANJING)
-);
+
+const modelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        return channel.filter((item) => {
+            item.id = parseInt(item.id);
+            if (item.status == 1 && ![DigitalHumanModelVersionEnum.CHANJING].includes(item.id)) {
+                return item;
+            }
+        });
+    }
+    return [];
+});
 
 const showAudio = ref<boolean>(false);
 const audioControlRef = shallowRef<InstanceType<typeof AudioControl>>();
@@ -117,11 +119,6 @@ const { pager, getLists, resetPage } = usePaging({
     params: queryParams,
 });
 
-const handleTabClick = (tab: any) => {
-    queryParams.model_version = tab.paneName;
-    resetPage();
-};
-
 const getModelType = (type: number) => {
     const data = modelChannel.value.find((item) => item.id == type);
     return data?.name || "";
@@ -134,53 +131,6 @@ const handlePlay = async (row: any, index: number) => {
     currentRowIndex.value = index;
     currentAudio.value = row;
     await nextTick();
-    audioControlRef.value?.setAudio(currentAudio.value.url);
-    showAudio.value = true;
-    currentRowIndex.value = index;
-    currentAudio.value = row;
-    await nextTick();
-    audioControlRef.value?.setAudio(currentAudio.value.url);
-};
-
-const prevAudio = () => {
-    if (currentRowIndex.value === 0) {
-        feedback.msgError("已经是第一首了");
-        return;
-    }
-    if (currentRowIndex.value > 0) {
-        currentRowIndex.value--;
-    }
-    currentAudio.value = pager.lists[currentRowIndex.value];
-    audioControlRef.value?.resetPlayer();
-    audioControlRef.value?.setAudio(currentAudio.value.url);
-    if (currentRowIndex.value === 0) {
-        feedback.msgError("已经是第一首了");
-        return;
-    }
-    if (currentRowIndex.value > 0) {
-        currentRowIndex.value--;
-    }
-    currentAudio.value = pager.lists[currentRowIndex.value];
-    audioControlRef.value?.resetPlayer();
-    audioControlRef.value?.setAudio(currentAudio.value.url);
-};
-
-const nextAudio = () => {
-    if (currentRowIndex.value === pager.lists.length - 1) {
-        feedback.msgError("已经是最后一首了");
-        return;
-    }
-    currentRowIndex.value++;
-    currentAudio.value = pager.lists[currentRowIndex.value];
-    audioControlRef.value?.resetPlayer();
-    audioControlRef.value?.setAudio(currentAudio.value.url);
-    if (currentRowIndex.value === pager.lists.length - 1) {
-        feedback.msgError("已经是最后一首了");
-        return;
-    }
-    currentRowIndex.value++;
-    currentAudio.value = pager.lists[currentRowIndex.value];
-    audioControlRef.value?.resetPlayer();
     audioControlRef.value?.setAudio(currentAudio.value.url);
 };
 

@@ -39,7 +39,7 @@
                                     <div
                                         v-if="item.Content.Images?.length && !hasLink(item.Content.Link)"
                                         :class="[
-                                            item.Content.Images.length > 1 ? 'grid grid-cols-3 gap-2' : ' max-w-[50%]',
+                                            item.Content.Images.length > 1 ? 'grid grid-cols-3 gap-1' : ' max-w-[50%]',
                                         ]">
                                         <div
                                             v-for="(image, imageIdx) in item.Content.Images"

@@ -6,13 +6,14 @@
                 background: `linear-gradient(180deg, rgba(0,0,0,0.00) 50%, #000 100%), url(${item.pic}) no-repeat `,
                 backgroundSize: 'cover',
             }">
-            <div class="w-full px-3 mt-1">
-                <div class="line-clamp-1 text-white">
+            <div class="w-full px-3 mt-1 break-all">
+                <div class="text-white line-clamp-1">
                     {{ item.name }}
                 </div>
+                <div class="text-[10px] text-white" v-if="item.automatic_clip == 1">AI剪辑</div>
             </div>
             <div
-                class="absolute right-2 top-2 z-[1000] w-9 h-9 flex items-center justify-center bg-[rgba(255,255,255,0.2)] rounded-full invisible group-hover:visible"
+                class="absolute right-2 top-2 z-[1000] w-9 h-9 flex items-center justify-center bg-[#ffffff33] rounded-full invisible group-hover:visible"
                 :class="[activeVideo == item.id ? '!visible' : '']"
                 style="backdrop-filter: blur(5px)">
                 <ElPopover
@@ -32,16 +33,23 @@
                         <DefineTemplate v-slot="{ label, icon }">
                             <div
                                 class="h-11 px-3 rounded-lg cursor-pointer flex items-center gap-3 hover:shadow-[0_0_0_1px_rgba(42,42,42,1)] hover:bg-app-bg-1">
-                                <span
-                                    class="flex w-5 h-5 rounded bg-[rgba(255,255,255,0.05)] items-center justify-center">
+                                <span class="flex w-5 h-5 rounded bg-[#ffffff0d] items-center justify-center">
                                     <Icon :name="icon" color="#ffffff"></Icon>
                                 </span>
-                                <span class="text-[rgba(255,255,255,0.8)]">{{ label }}</span>
+                                <span class="text-[#ffffffcc]">{{ label }}</span>
                             </div>
                         </DefineTemplate>
                         <div v-if="item.status == 1" @click="handleDownLoad(item.video_url)">
                             <SelectItemTemplate label="下载视频" icon="local-icon-download" />
                         </div>
+                        <template v-if="item.automatic_clip == 1 && item.clip_status == 3">
+                            <div @click="handleDownLoad(item.clip_video_url)">
+                                <SelectItemTemplate label="下载剪辑视频" icon="local-icon-download" />
+                            </div>
+                            <div @click="handlePlay(item.clip_video_url)">
+                                <SelectItemTemplate label="播放剪辑视频" icon="local-icon-play" />
+                            </div>
+                        </template>
                         <div v-if="[2, 5].includes(item.status)" @click="handleRetry(item.id)">
                             <SelectItemTemplate label="重试视频" icon="el-icon-Refresh" />
                         </div>
@@ -59,6 +67,13 @@
                         <play-btn></play-btn>
                     </div>
                 </div>
+                <div
+                    v-if="item.automatic_clip == 1"
+                    class="absolute bottom-[80px] left-0 w-full z-[51] text-[#ffffff80] text-center">
+                    <template v-if="item.clip_status == 1 || item.clip_status == 2"> AI智能剪辑中... </template>
+                    <template v-if="item.clip_status == 3">AI智能剪辑完成</template>
+                    <template v-if="item.clip_status == 4">AI智能剪辑失败</template>
+                </div>
             </template>
             <template v-else>
                 <div
@@ -70,14 +85,14 @@
                                 <Icon name="local-icon-video2" color="#fff"></Icon>
                             </span>
                             <span class="text-white text-center">{{ item.remark || "生成失败" }}</span>
-                            <span class="text-[rgba(255,255,255,0.5)]"> （请检查训练的视频文件） </span>
+                            <span class="text-[#ffffff80] text-center"> （请检查训练的视频文件） </span>
                         </template>
                         <template v-else>
                             <span class="w-6 h-6 flex items-center justify-center rounded-full bg-primary">
                                 <Icon name="local-icon-pic2" color="#fff"></Icon>
                             </span>
                             <span class="text-white">正在生成中</span>
-                            <span class="text-[rgba(255,255,255,0.5)]">几分钟即可生成视频</span>
+                            <span class="text-[#ffffff80] text-center">几分钟即可生成视频</span>
                         </template>
                     </div>
                 </div>
@@ -89,7 +104,7 @@
                     </div>
                 </div>
                 <div class="py-1 w-full flex justify-center z-50">
-                    <div class="text-base text-[rgba(255,255,255,0.5)]">
+                    <div class="text-base text-[#ffffff80]">
                         {{ item.create_time }}
                     </div>
                 </div>
@@ -118,6 +133,9 @@ const props = withDefaults(
             model_version: "",
             remark: "",
             create_time: "",
+            automatic_clip: 0,
+            clip_status: 0,
+            clip_video_url: "",
         }),
         showVersion: true,
         isCreate: true,

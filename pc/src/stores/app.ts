@@ -1,14 +1,19 @@
 import { defineStore } from "pinia";
 import { robotCategory } from "@/api/robot";
-import { getConfig } from "@/api/app";
+import { getConfig, getScenePrompt, checkSurvey, checkOem } from "@/api/app";
 import { getChatConfig } from "@/api/chat";
-import { checkSurvey } from "@/api/app";
 interface AppSate {
     config: Record<string, any>;
     menuList: any[];
     hideSidebar: boolean;
     chatConfig: Record<string, any>;
     showSurvey: boolean;
+    scenePrompt: Array<{
+        id: number;
+        prompt_name: string;
+        prompt_text: string;
+    }>;
+    oem: Record<string, any>;
 }
 export const useAppStore = defineStore("appStore", {
     state: (): AppSate => ({
@@ -18,6 +23,8 @@ export const useAppStore = defineStore("appStore", {
         // 通用聊天配置
         chatConfig: {},
         showSurvey: false,
+        scenePrompt: [],
+        oem: {},
     }),
     getters: {
         getWebsiteConfig: (state) => state.config.website || {},
@@ -33,6 +40,7 @@ export const useAppStore = defineStore("appStore", {
         getAppConfig: (state) => state.config.app_config || {},
         getByName: (state) => state.config.by_name || "",
         getAiModelConfig: (state) => state.config.ai_model || {},
+        getOemConfig: (state) => state.oem || {},
     },
     actions: {
         async getConfig() {
@@ -54,6 +62,14 @@ export const useAppStore = defineStore("appStore", {
         },
         toggleSidebar(toggle?: boolean) {
             this.hideSidebar = toggle ?? !this.hideSidebar;
+        },
+        async getScenePrompt() {
+            const data = await getScenePrompt();
+            this.scenePrompt = data;
+        },
+        async getOem() {
+            const data = await checkOem();
+            this.oem = data;
         },
     },
 });

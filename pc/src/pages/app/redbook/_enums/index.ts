@@ -21,7 +21,7 @@ export enum SidebarTypeEnum {
     COPYWRITING_LIBRARY = 10,
 }
 
-export enum PublishTaskType {
+export enum PublishTaskTypeEnum {
     VIDEO = 1,
     IMAGE = 2,
 }
@@ -29,6 +29,7 @@ export enum PublishTaskType {
 export enum MaterialTypeEnum {
     VIDEO = 2,
     IMAGE = 1,
+    MUSIC = 6,
 }
 
 export enum CopywritingTypeEnum {
@@ -36,12 +37,12 @@ export enum CopywritingTypeEnum {
     CONTENT = 2,
 }
 
-export enum ContentGenMode {
+export enum ContentGenModeEnum {
     NEW = "new",
     OLD = "old",
 }
 
-export enum ContentType {
+export enum ContentTypeEnum {
     ALL = 0,
     TITLE = 1,
     SUBTITLE = 2,
@@ -51,9 +52,9 @@ export enum ContentType {
 
 // 文案类型文本映射
 export const ContentTypeMap = {
-    [ContentType.TITLE]: "标题",
-    [ContentType.SUBTITLE]: "副标题",
-    [ContentType.CONTENT]: "口播文案",
+    [ContentTypeEnum.TITLE]: "标题",
+    [ContentTypeEnum.SUBTITLE]: "副标题",
+    [ContentTypeEnum.CONTENT]: "口播文案",
 };
 
 export enum MaterialActionType {

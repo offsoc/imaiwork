@@ -19,7 +19,7 @@ class WordsService
      * @param string $content
      * @throws @\DfaFilter\Exceptions\PdsBusinessException
      * @throws @\DfaFilter\Exceptions\PdsSystemException
-     * @author fzr
+     * @author kb
      */
     public static function sensitive(string $content): void
     {
@@ -77,7 +77,7 @@ class WordsService
      * @notes 问题审核 (百度)
      * @param string $content
      * @throws Exception
-     * @author fzr
+     * @author kb
      */
     public static function askCensor(string $content):void
     {

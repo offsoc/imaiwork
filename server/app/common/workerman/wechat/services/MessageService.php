@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\common\workerman\wechat\services;
 
-use app\common\workerman\wechat\traits\{LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait, TaskNoticeTrait};
+use app\common\workerman\wechat\traits\{LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait, TaskNoticeTrait, AiCircleTrait};
 use app\common\workerman\wechat\validators\MessageValidator;
 use app\common\workerman\wechat\exceptions\ResponseException;
 use Workerman\Connection\TcpConnection;
@@ -32,7 +32,7 @@ use app\common\workerman\wechat\services\Service;
  */
 class MessageService
 {
-    use LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait, TaskNoticeTrait;
+    use LoggerTrait, ResponseTrait, CacheTrait, AichatTrait, OperationTrait, TaskNoticeTrait, AiCircleTrait;
 
     private MessageValidator $validator;
     protected Service $service;
@@ -114,6 +114,11 @@ class MessageService
             if($msgType == 1027){
                 $this->AcceptFriendAddRequestTaskOpt($deviceId, $response);
             }
+
+            if($msgType == 2029){
+                $this->circleReplyLikeTask($deviceId, $response);
+            }
+
             // 根据消息类型处理响应
             match ($msgType) {
                 // Socket设备消息响应

@@ -125,50 +125,50 @@ const modelChannel = computed(() => {
     if (!channel?.length) return [];
 
     const modelConfigs = {
-        [DigitalHumanModelVersionEnum.STANDARD]: {
-            video_create_model: "微聚V3",
-            tone_clone: "Fish Audio",
-            anchor_clone: "微聚V3",
-            tokens: {
-                voice: TokensSceneEnum.HUMAN_VOICE,
-                anchor: TokensSceneEnum.HUMAN_AVATAR,
-                audio: TokensSceneEnum.HUMAN_AUDIO,
-                video: TokensSceneEnum.HUMAN_VIDEO,
-            },
-        },
-        [DigitalHumanModelVersionEnum.SUPER]: {
-            video_create_model: "阿里云",
-            tone_clone: "Fish Audio",
-            anchor_clone: "阿里云",
-            tokens: {
-                voice: TokensSceneEnum.HUMAN_VOICE_PRO,
-                anchor: TokensSceneEnum.HUMAN_AVATAR_PRO,
-                audio: TokensSceneEnum.HUMAN_AUDIO_PRO,
-                video: TokensSceneEnum.HUMAN_VIDEO_PRO,
-            },
-        },
-        [DigitalHumanModelVersionEnum.ADVANCED]: {
-            video_create_model: "优秘V5",
-            tone_clone: "优秘V5",
-            anchor_clone: "优秘V5",
-            tokens: {
-                voice: TokensSceneEnum.HUMAN_VOICE_ADVANCED,
-                anchor: TokensSceneEnum.HUMAN_AVATAR_ADVANCED,
-                audio: TokensSceneEnum.HUMAN_AUDIO_ADVANCED,
-                video: TokensSceneEnum.HUMAN_VIDEO_ADVANCED,
-            },
-        },
-        [DigitalHumanModelVersionEnum.ELITE]: {
-            video_create_model: "优秘V7",
-            tone_clone: "优秘V7",
-            anchor_clone: "优秘V7",
-            tokens: {
-                voice: TokensSceneEnum.HUMAN_VOICE_ELITE,
-                anchor: TokensSceneEnum.HUMAN_AVATAR_ELITE,
-                audio: TokensSceneEnum.HUMAN_AUDIO_ELITE,
-                video: TokensSceneEnum.HUMAN_VIDEO_ELITE,
-            },
-        },
+        // [DigitalHumanModelVersionEnum.STANDARD]: {
+        //     video_create_model: "微聚V3",
+        //     tone_clone: "Fish Audio",
+        //     anchor_clone: "微聚V3",
+        //     tokens: {
+        //         voice: TokensSceneEnum.HUMAN_VOICE,
+        //         anchor: TokensSceneEnum.HUMAN_AVATAR,
+        //         audio: TokensSceneEnum.HUMAN_AUDIO,
+        //         video: TokensSceneEnum.HUMAN_VIDEO,
+        //     },
+        // },
+        // [DigitalHumanModelVersionEnum.SUPER]: {
+        //     video_create_model: "阿里云",
+        //     tone_clone: "Fish Audio",
+        //     anchor_clone: "阿里云",
+        //     tokens: {
+        //         voice: TokensSceneEnum.HUMAN_VOICE_PRO,
+        //         anchor: TokensSceneEnum.HUMAN_AVATAR_PRO,
+        //         audio: TokensSceneEnum.HUMAN_AUDIO_PRO,
+        //         video: TokensSceneEnum.HUMAN_VIDEO_PRO,
+        //     },
+        // },
+        // [DigitalHumanModelVersionEnum.ADVANCED]: {
+        //     video_create_model: "优秘V5",
+        //     tone_clone: "优秘V5",
+        //     anchor_clone: "优秘V5",
+        //     tokens: {
+        //         voice: TokensSceneEnum.HUMAN_VOICE_ADVANCED,
+        //         anchor: TokensSceneEnum.HUMAN_AVATAR_ADVANCED,
+        //         audio: TokensSceneEnum.HUMAN_AUDIO_ADVANCED,
+        //         video: TokensSceneEnum.HUMAN_VIDEO_ADVANCED,
+        //     },
+        // },
+        // [DigitalHumanModelVersionEnum.ELITE]: {
+        //     video_create_model: "优秘V7",
+        //     tone_clone: "优秘V7",
+        //     anchor_clone: "优秘V7",
+        //     tokens: {
+        //         voice: TokensSceneEnum.HUMAN_VOICE_ELITE,
+        //         anchor: TokensSceneEnum.HUMAN_AVATAR_ELITE,
+        //         audio: TokensSceneEnum.HUMAN_AUDIO_ELITE,
+        //         video: TokensSceneEnum.HUMAN_VIDEO_ELITE,
+        //     },
+        // },
         [DigitalHumanModelVersionEnum.CHANJING]: {
             video_create_model: "蝉镜V1",
             tone_clone: "蝉镜V1",
@@ -182,25 +182,27 @@ const modelChannel = computed(() => {
         },
     };
 
-    return channel.map((item: any) => {
-        // @ts-ignore
-        const config = modelConfigs[item.id];
-        if (!config) return item;
+    return channel
+        .filter((item: any) => item.status == 1 && DigitalHumanModelVersionEnum.CHANJING == item.id)
+        .map((item: any) => {
+            // @ts-ignore
+            const config = modelConfigs[item.id];
+            if (!config) return item;
 
-        const formatToken = (scene: string) => {
-            const value = getTokenByScene(scene);
-            return value.score ? `${value.score}${value.unit}` : 0;
-        };
+            const formatToken = (scene: string) => {
+                const value = getTokenByScene(scene);
+                return value.score ? `${value.score}${value.unit}` : 0;
+            };
 
-        return {
-            ...item,
-            ...config,
-            voice_token: formatToken(config.tokens.voice),
-            anchor_token: formatToken(config.tokens.anchor),
-            audio_token: formatToken(config.tokens.audio),
-            video_token: formatToken(config.tokens.video),
-        };
-    });
+            return {
+                ...item,
+                ...config,
+                voice_token: formatToken(config.tokens.voice),
+                anchor_token: formatToken(config.tokens.anchor),
+                audio_token: formatToken(config.tokens.audio),
+                video_token: formatToken(config.tokens.video),
+            };
+        });
 });
 </script>
 

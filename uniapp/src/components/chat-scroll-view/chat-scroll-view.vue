@@ -87,11 +87,10 @@
                             v-if="isDeep"
                             class="flex items-center justify-center gap-x-1 w-[208rpx] h-[76rpx] rounded-full text-[#323232]"
                             :class="{
-                                '!bg-primary-light-9 !text-primary': selectedDeep,
+                                '!bg-[#1ba7991a] !text-[#1ba799]': selectedDeep,
                             }"
                             @click="handleDeep">
-                            <u-icon v-if="!selectedDeep" name="/static/images/icons/deep.svg" :size="28"></u-icon>
-                            <u-icon v-else name="/static/images/icons/deep_s.svg" :size="28"></u-icon>
+                            <u-icon name="/static/images/icons/deep.svg" :size="28"></u-icon>
                             <text class="text-xs">深度思考</text>
                         </view>
                         <view class="h-[28rpx]">
@@ -100,14 +99,10 @@
                         <view
                             class="flex items-center justify-center gap-x-1 w-[208rpx] h-[76rpx] rounded-full text-[#323232]"
                             :class="{
-                                '!bg-primary-light-9 !text-primary': selectedKnowledgeBase || activeKnb.id,
+                                '!bg-[#FF79191a] !text-[#FF7919]': selectedKnowledgeBase && activeKnb.id,
                             }"
                             @click="handleKnb">
-                            <u-icon
-                                v-if="!selectedKnowledgeBase && !activeKnb.id"
-                                name="/static/images/icons/note_book.svg"
-                                :size="28"></u-icon>
-                            <u-icon v-else name="/static/images/icons/note_book_s.svg" :size="28"></u-icon>
+                            <u-icon name="/static/images/icons/note_book.svg" :size="28"></u-icon>
                             <text class="text-xs">关联知识库</text>
                         </view>
                     </view>
@@ -188,7 +183,7 @@ const handleKnb = () => {
 };
 
 const getSelectKnb = (val: any) => {
-    activeKnb.value = val;
+    activeKnb.value = val.data;
     emit("confirmKnb", val);
 };
 

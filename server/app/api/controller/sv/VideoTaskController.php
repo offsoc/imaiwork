@@ -6,6 +6,7 @@ use app\api\controller\BaseApiController;
 use app\api\logic\sv\SvVideoTaskLogic;
 use app\api\validate\sv\SvVideoTaskValidate;
 use app\api\lists\sv\SvVideoTaskLists;
+use think\exception\HttpResponseException;
 use think\facade\Log;
 use think\response\Json;
 /**
@@ -14,7 +15,7 @@ use think\response\Json;
 class VideoTaskController extends BaseApiController
 {
 
-    public array $notNeedLogin = ['notify'];
+    public array $notNeedLogin = ['notify','clipnotify'];
 
     public function lists()
     {
@@ -44,6 +45,12 @@ class VideoTaskController extends BaseApiController
 
 
             switch ($type) {
+                case 'avatar':
+                    SvVideoTaskLogic::updateAnchor($data, $modelVersion);
+                    break;
+                case 'voice':
+                    SvVideoTaskLogic::updateVoice($data, $modelVersion);
+                    break;
                 case 'video':
                     SvVideoTaskLogic::updateVideo($data, $modelVersion);
                     break;
@@ -104,6 +111,22 @@ class VideoTaskController extends BaseApiController
             return $this->fail(SvVideoTaskLogic::getError());
         } catch (HttpResponseException $e) {
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
+    public function clipnotify(): Json
+    {
+        $data = $this->request->all();
+        try {
+            $result = SvVideoTaskLogic::updateClipVideo($data);
+            if (!$result){
+                return   $this->fail(SvVideoTaskLogic::getError());
+            }
+            Log::channel('clip')->write('剪辑回调接收数字人参数'.json_encode($data));
+            return $this->success('ok');
+        } catch (\Exception $e) {
+            Log::channel('clip')->write('剪辑回调接收数字人参数'.json_encode($data).'数字人回调失败'.$e->getMessage());
+            return $this->fail('fail');
         }
     }
 }

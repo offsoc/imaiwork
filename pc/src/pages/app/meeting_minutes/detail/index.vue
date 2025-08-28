@@ -1,6 +1,6 @@
 <template>
     <div class="h-full flex min-w-[1200px] relative">
-        <div class="h-full flex flex-col flex-1 min-w-[568px] bg-[#f7f8fc]">
+        <div class="h-full flex flex-col basis-[42%] min-w-[468px] bg-[#f7f8fc]">
             <div class="text-lg font-bold mx-6 mt-6">语音转文字</div>
             <div class="grow min-h-0 flex flex-col">
                 <template v-if="!loading">
@@ -74,7 +74,7 @@
                     <ElTabPane label="笔记" name="3"></ElTabPane>
                 </ElTabs>
             </div>
-            <div class="grow min-h-0 px-8">
+            <div class="grow min-h-0 px-8 overflow-hidden">
                 <Lead v-if="activeTypeTab === '1'" :detail="detail" />
                 <MindMap v-if="activeTypeTab === '2'" :detail="detail" />
                 <Note v-if="activeTypeTab === '3'" v-model="detail.text" @update:model-value="handleNoteUpdate" />
@@ -91,15 +91,16 @@
 import { meetingMinutesDetail, meetingMinutesEditText } from "@/api/meeting_minutes";
 import { ElScrollbar } from "element-plus";
 import { formatAudioTime } from "@/utils/util";
+import { useAppStore } from "@/stores/app";
 import { debounce } from "lodash-es";
+import KnbBind from "@/components/knb-bind/index.vue";
+import useHandleApi from "../_hooks/useHandleApi";
 import Lead from "./_components/lead.vue";
 import MindMap from "./_components/mind-map.vue";
 import Note from "./_components/note.vue";
 import AudioControl from "./_components/audio-control.vue";
 import RecorderControl from "./_components/recorder-control.vue";
-import { useAppStore } from "@/stores/app";
-import KnbBind from "@/components/knb-bind/index.vue";
-import useHandleApi from "../_hooks/useHandleApi";
+
 const route = useRoute();
 const appStore = useAppStore();
 

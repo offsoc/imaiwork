@@ -299,10 +299,11 @@ onLoad((options: any) => {
     getDetail();
 });
 
-onMounted(() => {
+onShow(() => {
     uni.$on("update-resume", async (data: any) => {
         resumeStatus.value = 1;
         setFormData(data.formData);
+        uni.$off("update-resume");
     });
 });
 </script>

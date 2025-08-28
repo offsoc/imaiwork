@@ -2,8 +2,8 @@
     <div class="h-full flex flex-col bg-white rounded-lg overflow-hidden">
         <div class="grow min-h-0">
             <ElScrollbar>
-                <div class="flex flex-wrap gap-x-[60px] w-full px-4">
-                    <div class="w-[32%]">
+                <div class="flex flex-wrap gap-[30px] w-full px-4">
+                    <div class="basis-[48%]">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="w-[4px] h-[14px] bg-primary"></span>
@@ -19,7 +19,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-[28%]">
+                    <div class="basis-[48%]">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="w-[4px] h-[14px] bg-primary"></span>
@@ -36,7 +36,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-[28%]" v-if="false">
+                    <div class="basis-[48%]" v-if="false">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="w-[4px] h-[14px] bg-primary"></span>
@@ -48,7 +48,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-[32%] mt-8">
+                    <div class="basis-[48%]">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="w-[4px] h-[14px] bg-primary"></span>
@@ -70,7 +70,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-[36%] mt-8">
+                    <div class="basis-[48%]">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-2">
                                 <span class="w-[4px] h-[14px] bg-primary"></span>

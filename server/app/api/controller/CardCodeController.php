@@ -14,7 +14,7 @@ class CardCodeController extends BaseApiController
     /**
      * @notes 验证卡密
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 16:30
      */
     public function checkCard()
@@ -31,7 +31,7 @@ class CardCodeController extends BaseApiController
     /**
      * @notes 使用卡密
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 16:50
      */
     public function useCard()

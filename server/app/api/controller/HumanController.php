@@ -18,7 +18,7 @@ use think\response\Json;
 class HumanController extends BaseApiController
 {
 
-    public array $notNeedLogin = ['test', 'list', 'add', 'dyToText', 'notify'];
+    public array $notNeedLogin = ['test', 'list', 'add', 'dyToText', 'notify','clipnotify'];
 
     public function test() {
 
@@ -319,5 +319,26 @@ class HumanController extends BaseApiController
     {
         $params = $this->request->post();
         return HumanLogic::copywriting($params) ? $this->data(HumanLogic::getReturnData()) : $this->fail(HumanLogic::getError());
+    }
+
+    /**
+     * 异步接收数字人回掉回调
+     */
+    public function clipnotify(): Json
+    {
+
+        try {
+            $data = $this->request->all();
+            Log::channel('clip')->write('剪辑视频接收数字人参数'.json_encode($data));
+            $result = HumanLogic::updateClipVideo($data);
+            if (!$result){
+                return   $this->fail(HumanLogic::getError());
+            }
+
+            return $this->success('ok');
+        } catch (\Exception $e) {
+            Log::channel('clip')->write('剪辑视频接收数字人参数'.json_encode($data).'数字人回调失败'.$e->getMessage());
+            return $this->fail('fail');
+        }
     }
 }

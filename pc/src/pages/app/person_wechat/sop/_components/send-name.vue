@@ -33,6 +33,8 @@ const formData = reactive({
     type: "",
     push_name: "",
     push_type: props.type,
+    stage_id: "",
+    flow_id: "",
 });
 
 const rules = {

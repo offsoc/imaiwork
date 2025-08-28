@@ -1,243 +1,67 @@
 <template>
-    <div class="h-full flex flex-col p-4">
-        <ElBreadcrumb class="mb-4">
-            <ElBreadcrumbItem>
-                <NuxtLink to="/knowledge_base">知识库</NuxtLink>
-            </ElBreadcrumbItem>
-            <ElBreadcrumbItem>
-                <span v-if="!showChunk">
-                    {{ detail.name }}
-                </span>
-                <NuxtLink v-else @click="showChunk = false">
-                    {{ detail.name }}
-                </NuxtLink>
-            </ElBreadcrumbItem>
-            <ElBreadcrumbItem v-if="showChunk">
-                <span>切片详情</span>
-            </ElBreadcrumbItem>
-        </ElBreadcrumb>
-        <template v-if="!showChunk">
-            <div class="grow min-h-0 flex flex-col gap-x-4 bg-white rounded-lg">
-                <div class="p-4 flex items-center justify-between gap-4">
-                    <ElButton type="primary" @click="handleAddFile">添加文件</ElButton>
-                    <div class="flex items-center gap-2">
-                        <ElSelect
-                            v-model="queryParams.takeover_mode"
-                            class="!w-[120px] !h-[32px]"
-                            placeholder="请选择"
-                            :empty-values="[null, undefined]"
-                            @change="resetPage()">
-                            <ElOption label="全部" value=""></ElOption>
-                            <ElOption label="解析中" :value="0"></ElOption>
-                            <ElOption label="解析完成" :value="1"></ElOption>
-                            <ElOption label="解析失败" :value="2"></ElOption>
-                        </ElSelect>
-                        <ElInput
-                            v-model="queryParams.name"
-                            class="h-[32px] !w-[240px]"
-                            clearable
-                            placeholder="请输入文件名称"
-                            @clear="
-                                queryParams.name = '';
-                                getLists();
-                            ">
-                            <template #append>
-                                <ElButton @click="getLists()">
-                                    <Icon name="el-icon-Search"></Icon>
-                                </ElButton>
-                            </template>
-                        </ElInput>
-                        <ElButton @click="refreshLists()">
-                            <Icon name="el-icon-Refresh" :size="18" color="var(--el-color-info)"></Icon>
-                        </ElButton>
-                    </div>
-                </div>
-                <div class="grow min-h-0 overflow-hidden">
-                    <ElTable
-                        ref="tableRef"
-                        :data="pager.lists"
-                        v-loading="pager.loading"
-                        stripe
-                        height="100%"
-                        :header-row-style="{ height: '63px' }"
-                        :row-style="{
-                            height: '60px',
-                        }">
-                        <ElTableColumn prop="name" label="文件名称" show-overflow-tooltip min-width="200px">
-                            <template #default="{ row }">
-                                <ElButton
-                                    type="primary"
-                                    link
-                                    :disabled="row.status != 'PARSE_SUCCESS'"
-                                    @click="handleView(row.id)">
-                                    {{ row.name }}
-                                </ElButton>
-                            </template>
-                        </ElTableColumn>
-                        <ElTableColumn prop="type" label="文件格式" min-width="100px">
-                            <template #default="{ row }">
-                                <div class="flex justify-center items-center gap-x-2">
-                                    <img :src="getFileType(row.type)" v-if="row.type" class="w-5 h-5" />
-                                    <span>{{ row.type }}</span>
-                                </div>
-                            </template>
-                        </ElTableColumn>
-                        <ElTableColumn prop="size" label="文件大小" min-width="100px">
-                            <template #default="{ row }">
-                                {{ formatFileSize(row.size) }}
-                            </template>
-                        </ElTableColumn>
-                        <ElTableColumn prop="status" label="解析状态" width="120px">
-                            <template #default="{ row }">
-                                <ElTag v-if="row.status == 'INIT'" type="info">待解析</ElTag>
-                                <ElTag v-else-if="row.status == 'PARSING'" type="warning">解析中</ElTag>
-                                <ElTag v-else-if="row.status == 'PARSE_SUCCESS'" type="success">解析完成</ElTag>
-                                <ElTag v-else-if="row.status == 'PARSE_FAILED'" type="danger">解析失败</ElTag>
-                            </template>
-                        </ElTableColumn>
-                        <ElTableColumn prop="create_time" label="导入时间" width="180px" />
-                        <ElTableColumn prop="update_time" label="操作" width="140px" fixed="right">
-                            <template #default="{ row }">
-                                <ElButton
-                                    v-if="row.status == 'PARSE_SUCCESS'"
-                                    type="primary"
-                                    link
-                                    @click="handleView(row.id)"
-                                    >查看切片</ElButton
-                                >
-                                <ElButton type="danger" link @click="handleDelete(row.id)">删除</ElButton>
-                            </template>
-                        </ElTableColumn>
-                        <template #empty>
-                            <ElEmpty description="暂无数据" />
-                        </template>
-                    </ElTable>
-                </div>
-                <div class="flex justify-end p-4">
-                    <pagination v-model="pager" @change="getLists"></pagination>
-                </div>
-            </div>
-        </template>
-        <div v-else class="grow min-h-0">
-            <chunk-detail ref="chunkDetailRef" />
+    <div class="p-4 flex gap-[10px] h-full">
+        <Sidebar
+            :sidebar="sidebar"
+            :sidebarIndex="sidebarIndex"
+            :theme="ThemeEnum.LIGHT"
+            @update:sidebarIndex="getSliderIndex" />
+        <div class="grow overflow-hidden">
+            <component :is="getComponents"></component>
         </div>
     </div>
-    <file-add v-if="showFileAdd" ref="fileAddRef" @success="resetPage" @close="showFileAdd = false" />
 </template>
 
 <script setup lang="ts">
-import { knowledgeBaseDetail, knowledgeBaseFileLists, knowledgeBaseFileDelete } from "@/api/knowledge_base";
-import FileAdd from "../_components/file-add.vue";
-import { formatFileSize } from "@/utils/util";
-import { ElTable } from "element-plus";
-import ChunkDetail from "../_components/chunk-detail.vue";
+import { ThemeEnum } from "@/enums/appEnums";
+import Sidebar from "@/pages/app/_components/sidebar.vue";
+import useSidebar from "@/pages/app/_hooks/useSidebar";
+import { SidebarTypeEnum } from "../_enums";
+import Content from "./_pages/content/index.vue";
+import HitTest from "./_pages/hit_test/index.vue";
+import Setting from "./_pages/setting/index.vue";
+
 const route = useRoute();
-const nuxtApp = useNuxtApp();
-const queryParams = reactive({
-    takeover_mode: "",
-    name: "",
-    category_id: "",
-});
+const query = searchQueryToObject();
 
-const tableRef = ref<InstanceType<typeof ElTable>>();
+const { sidebar, sidebarIndex, getComponents, residentParams, getSliderIndex } = useSidebar();
 
-const { pager, getLists, resetPage, resetParams } = usePaging({
-    fetchFun: knowledgeBaseFileLists,
-    params: queryParams,
-});
+sidebar.value = [
+    {
+        name: "文档内容",
+        type: SidebarTypeEnum.CONTENT,
+        components: markRaw(Content),
+        icon: "menu_content",
+    },
+    {
+        name: "搜索测试",
+        type: SidebarTypeEnum.HIT_TEST,
+        components: markRaw(HitTest),
+        icon: "menu_search",
+    },
+    {
+        name: "设置",
+        type: SidebarTypeEnum.SETTING,
+        components: markRaw(Setting),
+        icon: "menu_setting",
+    },
+];
 
-// 写一个动态导入assets 图片的函数
-const importImage = (path: string) => {
-    if (!path) return "";
-    return new URL(`../../../assets/images/${path}.png`, import.meta.url).href;
-};
+watch(
+    () => route.query,
+    () => {
+        residentParams.value = {
+            kn_type: query.kn_type,
+            kn_name: query.kn_name,
+            index_id: query.index_id || undefined,
+            category_id: query.category_id || undefined,
+        };
+    },
+    { immediate: true }
+);
 
-// 映射文件格式
-const getFileType = (type: string) => {
-    switch (type) {
-        case "docx":
-        case "doc":
-            return importImage("docx");
-        case "ppt":
-        case "pptx":
-            return importImage("ppt");
-        case "xls":
-        case "xlsx":
-            return importImage("excel");
-        case "jpg":
-        case "jpeg":
-            return importImage("jpg");
-        default:
-            return importImage(type);
-    }
-};
-
-const refreshLists = () => {
-    queryParams.category_id = detail.value.category_id;
-    queryParams.takeover_mode = "";
-    queryParams.name = "";
-    resetPage();
-};
-
-const showFileAdd = ref<boolean>(false);
-const fileAddRef = ref<InstanceType<typeof FileAdd>>();
-
-const handleAddFile = async () => {
-    showFileAdd.value = true;
-    await nextTick();
-    fileAddRef.value?.open();
-    fileAddRef.value?.getDetail(detail.value);
-};
-
-const showChunk = ref<boolean>(false);
-const chunkDetailRef = ref<InstanceType<typeof ChunkDetail>>();
-const handleView = async (id: any) => {
-    showChunk.value = true;
-    await nextTick();
-    chunkDetailRef.value?.setFormData({ id });
-};
-
-const handleDelete = (id: any) => {
-    nuxtApp.$confirm({
-        message: "确定删除该文件吗？",
-        onConfirm: async () => {
-            try {
-                feedback.loading("删除中", tableRef.value?.$el);
-                await knowledgeBaseFileDelete({ id });
-                feedback.msgSuccess("删除成功");
-                getLists();
-            } catch (error: any) {
-                feedback.msgError(error || "删除失败");
-            } finally {
-                feedback.closeLoading();
-            }
-        },
-    });
-};
-const detail = ref<any>({});
-const getDetail = async () => {
-    const data = await knowledgeBaseDetail({ id: route.params.id });
-    detail.value = data;
-    queryParams.category_id = data.category_id;
-};
-
-const init = async () => {
-    await getDetail();
-    getLists();
-};
-
-onMounted(() => {
-    init();
+definePageMeta({
+    layout: "base",
 });
 </script>
 
-<style scoped lang="scss">
-:deep(.el-select__wrapper) {
-    min-height: 32px;
-}
-:deep(.el-table) {
-    th.el-table__cell.is-leaf {
-        border-top: var(--el-table-border);
-    }
-}
-</style>
+<style scoped></style>

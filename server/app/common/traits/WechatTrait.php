@@ -269,13 +269,14 @@ trait WechatTrait
                         'Content' => [json_encode([
                             "Title" => $params['attachment_content']['title'] ?? '',
                             "Url" => "https://mp.weixin.qq.com/mp/waerrpage?appid={$params['attachment_content']['appid']}&type=upgrade&upgradetype=3#wechat_redirect",
-                            "PagePath" => $params['attachment_content']['link'] ?? '',
+                            "PagePath" => $params['attachment_content']['link'] ?? 'pages/index/index.html',
                             "Source" => $params['attachment_content']['source'] ?? '',
-                            "SourceName" => $params['attachment_content']['title'] ?? '',
+                            "SourceName" => $params['attachment_content']['SourceName'] ?? '',
                             "Thumb" => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
                             "AppId" => $params['attachment_content']['appid'] ?? '',
                             "Icon" => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
-                        ])]
+                            'version' => 48,
+                        ], JSON_UNESCAPED_UNICODE)]
                     ];      
                     break;
                 

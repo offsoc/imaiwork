@@ -10,7 +10,7 @@ class SvMediaMaterialValidate extends BaseValidate
         'sort' => 'number',
         'type' => 'in:1,3',
         'content' => 'require',
-        'm_type' => 'in:1,2',
+        'm_type' => 'in:1,2,6',
     ];
 
     protected $message = [

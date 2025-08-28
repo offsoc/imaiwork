@@ -89,7 +89,7 @@ class DevelopClientScript {
 (async () => {
     const develop = DevelopClientScript.getInstance();
     try {
-        await develop.run("16.16.0");
+        await develop.run("18.20.6");
     } catch (error) {
         console.error(error.message);
     }

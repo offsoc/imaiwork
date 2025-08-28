@@ -17,7 +17,7 @@ class CardCodeRecordLists extends BaseAdminDataLists implements ListsExcelInterf
     /**
      * @notes 设置搜索条件
      * @return array
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 18:28
      */
     public function setSearch()

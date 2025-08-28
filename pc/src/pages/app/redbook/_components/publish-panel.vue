@@ -32,10 +32,10 @@
                         <div class="flex flex-col items-center gap-2">
                             <div
                                 class="w-6 h-6 rounded-full flex items-center justify-center text-white"
-                                :class="[step >= item.step ? 'bg-primary' : 'bg-[rgba(255,255,255,0.05)]']">
+                                :class="[step >= item.step ? 'bg-primary' : 'bg-[#ffffff0d]']">
                                 {{ index + 1 }}
                             </div>
-                            <div :class="[step >= item.step ? 'text-white' : 'text-[rgba(255,255,255,0.5)]']">
+                            <div :class="[step >= item.step ? 'text-white' : 'text-[#ffffff80]']">
                                 {{ item.title }}
                             </div>
                             <div
@@ -178,7 +178,7 @@
                                     v-model="formData.accounts"
                                     placeholder="请选择发布的账号"
                                     class="!w-full !h-11 account-select"
-                                    popper-class="custom-select-popper"
+                                    popper-class="dark-select-popper"
                                     multiple
                                     :show-arrow="false">
                                     <ElOption
@@ -226,7 +226,7 @@
                                                 <daterange-picker
                                                     v-model:start-time="formData.publish_start"
                                                     v-model:end-time="formData.publish_end"
-                                                    popper-class="custom-daterange-picker-popper"
+                                                    popper-class="dark-daterange-picker-popper"
                                                     range-separator="至"
                                                     value-format="YYYY-MM-DD"
                                                     :disabled-date="getDisabledDate"
@@ -260,7 +260,7 @@
                                                             <ElTimeSelect
                                                                 v-model="item.start_time"
                                                                 prefix-icon=""
-                                                                popper-class="custom-select-popper"
+                                                                popper-class="dark-select-popper"
                                                                 start="00:00"
                                                                 step="00:15"
                                                                 end="23:59"
@@ -270,7 +270,7 @@
                                                             <ElTimeSelect
                                                                 v-model="item.end_time"
                                                                 prefix-icon=""
-                                                                popper-class="custom-select-popper"
+                                                                popper-class="dark-select-popper"
                                                                 start="00:00"
                                                                 step="00:15"
                                                                 end="23:59"
@@ -317,7 +317,7 @@
                                                     type="datetime"
                                                     placeholder="请选择"
                                                     value-format="YYYY-MM-DD HH:mm:ss"
-                                                    popper-class="custom-date-picker-popper" />
+                                                    popper-class="dark-date-picker-popper" />
                                                 <div
                                                     class="mt-3 w-[143px] h-[190px] rounded-md mx-auto border border-app-border-2 relative">
                                                     <video
@@ -349,7 +349,7 @@
                                                             type="datetime"
                                                             placeholder="请选择"
                                                             value-format="YYYY-MM-DD HH:mm:ss"
-                                                            popper-class="custom-date-picker-popper" />
+                                                            popper-class="dark-date-picker-popper" />
                                                     </div>
                                                 </div>
                                                 <div class="grid grid-cols-4 gap-2 mt-2">
@@ -399,8 +399,8 @@ import { ElScrollbar } from "element-plus";
 import { getAccountList } from "@/api/service";
 import { getPublishTaskDetail, addPublishTask, updatePublishTask, getDigitalHumanVideo } from "@/api/redbook";
 import { AppTypeEnum } from "@/enums/appEnums";
-import { commonUploadLimit } from "@/pages/app/digital_human/_enums";
-import { PublishTaskType, MaterialActionType, MaterialTypeEnum } from "../_enums";
+import { commonUploadLimit } from "@/pages/app/digital_human/_config";
+import { PublishTaskTypeEnum, MaterialActionType, MaterialTypeEnum } from "../_enums";
 import ContentCopywritingMaterial from "./content-copywriting-material.vue";
 import CopywritingCard from "./copywriting-card.vue";
 import MaterialPicker from "./material-picker.vue";
@@ -412,8 +412,8 @@ import { validateSchedule, checkMinGap } from "./utils";
 // Props & Emits
 // =================================================================================================
 
-const props = withDefaults(defineProps<{ type: PublishTaskType }>(), {
-    type: PublishTaskType.VIDEO,
+const props = withDefaults(defineProps<{ type: PublishTaskTypeEnum }>(), {
+    type: PublishTaskTypeEnum.VIDEO,
 });
 
 const emit = defineEmits<{ (e: "back"): void }>();
@@ -436,13 +436,13 @@ enum PublishDateType {
 }
 
 const publishTypeMap = {
-    [PublishTaskType.VIDEO]: "视频",
-    [PublishTaskType.IMAGE]: "图文",
+    [PublishTaskTypeEnum.VIDEO]: "视频",
+    [PublishTaskTypeEnum.IMAGE]: "图文",
 };
 
 const materialTypeMap = {
-    [PublishTaskType.VIDEO]: MaterialTypeEnum.VIDEO,
-    [PublishTaskType.IMAGE]: MaterialTypeEnum.IMAGE,
+    [PublishTaskTypeEnum.VIDEO]: MaterialTypeEnum.VIDEO,
+    [PublishTaskTypeEnum.IMAGE]: MaterialTypeEnum.IMAGE,
 };
 
 const steps = [
@@ -464,7 +464,7 @@ const publishTimeGapMin = 15;
 const router = useRouter();
 
 const { type } = toRefs(props);
-const query = queryToObject();
+const query = searchQueryToObject();
 const materialId = computed(() => query.material_id);
 const publishId = computed(() => query.publish_id);
 
@@ -519,8 +519,8 @@ const publishTimeErrorIndex = ref([]);
 // =================================================================================================
 
 const isLastStep = computed(() => step.value === steps.length);
-const isVideoMode = computed(() => type.value === PublishTaskType.VIDEO);
-const isImageMode = computed(() => type.value === PublishTaskType.IMAGE);
+const isVideoMode = computed(() => type.value === PublishTaskTypeEnum.VIDEO);
+const isImageMode = computed(() => type.value === PublishTaskTypeEnum.IMAGE);
 const isRandomPublish = computed(() => formData.date_type === PublishDateType.RANDOM);
 const isAccuratePublish = computed(() => formData.date_type === PublishDateType.ACCURATE);
 const remainingImageGroups = computed(() => maxImageGroupCount - materialFormData.media_url.length);
@@ -866,7 +866,7 @@ const handlePreviewVideo = async (url: string) => {
 const init = async () => {
     loading.value = true;
     try {
-        const { dh_create_id } = queryToObject();
+        const { dh_create_id } = searchQueryToObject();
         if (dh_create_id) {
             const { lists } = await getDigitalHumanVideo({ video_setting_id: dh_create_id, page_size: maxVideoCount });
             const videoLists = lists.filter((item) => item.video_result_url).map((item) => item.video_result_url) || [];

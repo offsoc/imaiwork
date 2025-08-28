@@ -11,8 +11,7 @@ use app\common\model\wechat\AiWechatCircleTask;
 use app\common\model\wechat\AiWechatFriendTag;
 use app\common\model\wechat\AiWechatLog;
 use app\common\model\wechat\AiWechatAcceptFriendStrategy;
-use app\common\model\wechat\AiWechatCircleReplyStrategy;
-use app\common\model\wechat\AiWechatCircleLikeStrategy;
+use app\common\model\wechat\AiWechatCircleReplyLikeStrategy;
 use app\common\model\wechat\sop\AiWechatSopPushLog;
 use app\common\model\wechat\sop\AiWechatSopPushMember;
 use think\facade\Db;
@@ -128,10 +127,9 @@ class DeviceLogic extends WechatBaseLogic
                 AiWechatFriendTag::where('wechat_id', $wechatId)->delete();
                 // 清空日志
                 AiWechatLog::where('wechat_id', $wechatId)->delete();
-                // 朋友圈点赞策略
-                AiWechatCircleLikeStrategy::where('user_id', $wechat->user_id)->delete();
-                // 朋友圈回复策略
-                AiWechatCircleReplyStrategy::where('user_id', $wechat->user_id)->delete();
+
+                // 清空朋友圈评论点赞策略
+                AiWechatCircleReplyLikeStrategy::where('user_id', $wechat->user_id)->delete();
 
                 // 接受好友策略
                 AiWechatAcceptFriendStrategy::where('user_id', $wechat->user_id)->select()->each(function ($item) use ($wechatId)

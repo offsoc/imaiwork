@@ -17,7 +17,7 @@ class SensitiveWordLists extends BaseAdminDataLists
      * @throws @\think\db\exception\DataNotFoundException
      * @throws @\think\db\exception\DbException
      * @throws @\think\db\exception\ModelNotFoundException
-     * @author fzr
+     * @author kb
      */
     public function lists(): array
     {
@@ -34,7 +34,7 @@ class SensitiveWordLists extends BaseAdminDataLists
      * @notes 统计
      * @return int
      * @throws @\think\db\exception\DbException
-     * @author fzr
+     * @author kb
      */
     public function count(): int
     {
@@ -44,7 +44,7 @@ class SensitiveWordLists extends BaseAdminDataLists
     /**
      * @notes 条件
      * @return array
-     * @author fzr
+     * @author kb
      */
     public function setSearch(): array
     {

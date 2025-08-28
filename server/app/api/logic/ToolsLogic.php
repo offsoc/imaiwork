@@ -4,13 +4,20 @@
 namespace app\api\logic;
 
 
-use app\common\{
-    enum\notice\NoticeEnum,
+use app\api\logic\service\TokenLogService;
+use app\common\{enum\notice\NoticeEnum,
+    enum\user\AccountLogEnum,
+    logic\AccountLogLogic,
     logic\BaseLogic,
+    model\ChatPrompt,
+    model\human\HumanVideoTask,
+    model\sv\SvVideoTask,
     model\tools\ToolsLog,
-    service\tools\Stability
-};
+    model\user\User,
+    service\FileService,
+    service\tools\Stability};
 use think\facade\Config;
+use think\facade\Db;
 
 /**
  * 会员逻辑层
@@ -91,6 +98,68 @@ class ToolsLogic extends BaseLogic
             $log->status = 3;
             $log->save();
             self::setError($exception->getMessage());
+            return false;
+        }
+    }
+
+
+    public static function getSearchTerms($params){
+        try {
+            // 验证必要参数
+            if (!isset($params['targetCount']) || !isset($params['keyword'])) {
+                throw new \Exception('缺少必要参数:生成数量或生成内容');
+            }
+            $targetCount = (int)$params['targetCount'];
+            if ($targetCount % 10 !== 0){
+                throw new \Exception('生成数量错误');
+            }
+            $num = $targetCount / 10;
+            $unit = TokenLogService::checkToken($params['user_id'], 'sph_add_friends');
+            $tokenCode = AccountLogEnum::TOKENS_DEC_SPH_SEARCH_TERMS;
+            $res = \app\common\service\ToolsService::Sv()->getSearchTerms($params);
+            if ($res['code'] == 10000) {
+                $points = $num * $unit;
+                if ($points > 0){
+                    //token扣除
+                    User::userTokensChange($params['user_id'], $points);
+                    $task_id = generate_unique_task_id();
+                    //记录日志
+                    AccountLogLogic::recordUserTokensLog(true, $params['user_id'], $tokenCode, $points, $task_id);
+                }
+                self::$returnData = $res['data']['content'];
+            }
+            return true;
+        } catch (\Exception $e) {
+
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
+    public static function getPrompt($request){
+        //查询是否存在
+        $ChatPrompt =  $prompt = ChatPrompt::select();
+        if ($prompt->isEmpty()) {
+            self::setError('提示词不存在');
+            return false;
+        }
+        try {
+            self::$returnData = $ChatPrompt->toArray();
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function clip(){
+        try {
+            $response = \app\common\service\ToolsService::Auth()->clipNotice();
+            self::$returnData = $response;
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
             return false;
         }
     }

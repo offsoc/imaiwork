@@ -166,22 +166,22 @@ const getCourseUrl = computed(() => {
 
 const middleMenu = [
     {
-        title: "绑定社媒账号池",
+        title: "第一步：绑定社媒账号池",
         desc: "通过绑定AI手机添加您的的所有抖音账号",
         icon: BindAccount,
     },
     {
-        title: "选择发布内容",
+        title: "第二步：选择发布内容",
         desc: "选择发布内容或进行内容创作",
         icon: PhonePublish,
     },
     {
-        title: "矩阵自动发布",
+        title: "第三步：矩阵自动发布",
         desc: "内容自定义时间自动批量发布至",
         icon: MixAuto,
     },
     {
-        title: "24小时自动私信引流",
+        title: "第四步：24小时自动私信引流",
         desc: "自动回复预设「加微话术」，识别微信后自动触达",
         icon: AutoMsg,
     },

@@ -4,6 +4,12 @@
             <div class="text-lg font-bold text-black">关联知识库</div>
         </template>
         <div class="flex flex-col gap-2 h-full">
+            <div class="px-4">
+                <ElTabs v-model="activeTabKn" @tab-click="handleKnChange">
+                    <ElTabPane label="向量知识库" :name="KnTypeEnum.VECTOR"></ElTabPane>
+                    <ElTabPane label="RAG知识库" :name="KnTypeEnum.RAG"></ElTabPane>
+                </ElTabs>
+            </div>
             <div class="px-4 flex items-center justify-between">
                 <div>
                     <ElInput v-model="queryParams.name" placeholder="请输入搜索内容" clearable @clear="resetPage()">
@@ -15,7 +21,8 @@
                     </ElInput>
                 </div>
             </div>
-            <div class="grow min-h-0 mt-4">
+
+            <div class="grow min-h-0 mt-4" v-loading="pager.loading">
                 <div
                     class="overflow-y-auto dynamic-scroller h-full"
                     :infinite-scroll-immediate="false"
@@ -27,7 +34,7 @@
                             v-for="(item, index) in pager.lists"
                             :class="[
                                 'flex items-center gap-4 justify-between  p-4 rounded-lg',
-                                activeKnb.id == item.id ? 'bg-primary-light-8' : 'bg-[#F5F5F5]',
+                                isChoose(item) ? 'bg-primary-light-8' : 'bg-[#F5F5F5]',
                             ]"
                             :key="index"
                             @click="handleSelect(item)">
@@ -35,11 +42,13 @@
                                 <img src="@/assets/images/kn_logo.png" class="w-8 h-8" />
                                 <div>
                                     <div class="font-bold">{{ item.name }}</div>
-                                    <div class="text-[10px] text-[#AAA6B9]">知识数：{{ item.file_count }}</div>
+                                    <div class="text-[10px] text-[#AAA6B9]">
+                                        知识数：{{ item.file_count || item.file_counts }}
+                                    </div>
                                 </div>
                             </div>
                             <div>
-                                <Checkbox :is-checked="activeKnb.id == item.id" />
+                                <Checkbox :is-checked="isChoose(item)" />
                             </div>
                         </div>
                     </div>
@@ -54,7 +63,8 @@
 </template>
 
 <script setup lang="ts">
-import { knowledgeBaseLists } from "@/api/knowledge_base";
+import { knowledgeBaseLists, vectorKnowledgeBaseLists } from "@/api/knowledge_base";
+import { KnTypeEnum } from "@/pages/knowledge_base/_enums";
 
 const props = defineProps({
     activeKnb: {
@@ -62,7 +72,6 @@ const props = defineProps({
         default: () => {},
     },
 });
-
 const emit = defineEmits(["close", "confirm"]);
 
 const visible = ref(false);
@@ -72,14 +81,29 @@ const queryParams = reactive({
     name: "",
     page_no: 1,
 });
+const activeTabKn = ref<KnTypeEnum>(KnTypeEnum.VECTOR);
 
 const activeKnb = ref<Record<string, any>>({});
 
 const { pager, getLists, resetPage } = usePaging({
-    fetchFun: knowledgeBaseLists,
+    fetchFun: (params: any) =>
+        activeTabKn.value == KnTypeEnum.VECTOR ? vectorKnowledgeBaseLists(params) : knowledgeBaseLists(params),
     params: queryParams,
     isScroll: true,
 });
+
+const isChoose = (item: any) => {
+    if (activeTabKn.value == KnTypeEnum.VECTOR) {
+        return activeKnb.value.id == item.id;
+    } else {
+        return activeKnb.value.index_id == item.index_id;
+    }
+};
+
+const handleKnChange = (tab: any) => {
+    activeTabKn.value = tab.paneName;
+    resetPage();
+};
 
 const load = async () => {
     queryParams.page_no++;
@@ -87,15 +111,26 @@ const load = async () => {
 };
 
 const handleSelect = (item: any) => {
-    if (activeKnb.value.id == item.id) {
-        activeKnb.value = {};
+    if (activeTabKn.value == KnTypeEnum.VECTOR) {
+        if (activeKnb.value.id == item.id) {
+            activeKnb.value = {};
+        } else {
+            activeKnb.value = item;
+        }
     } else {
-        activeKnb.value = item;
+        if (activeKnb.value.index_id == item.index_id) {
+            activeKnb.value = {};
+        } else {
+            activeKnb.value = item;
+        }
     }
 };
 
 const handleConfirm = () => {
-    emit("confirm", activeKnb.value);
+    emit("confirm", {
+        data: activeKnb.value,
+        type: activeTabKn.value,
+    });
 
     visible.value = false;
 };

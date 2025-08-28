@@ -62,6 +62,11 @@
                 <el-table-column label="昵称" prop="nickname" min-width="140" show-overflow-tooltip />
                 <el-table-column label="视频名称" prop="name" min-width="180" show-overflow-tooltip />
                 <el-table-column label="形象名称" prop="anchor_name" min-width="180" show-overflow-tooltip />
+                <el-table-column label="智能剪辑类型" width="120">
+                    <template #default="{ row }">
+                        {{ row.automatic_clip == 1 ? ClipStyleMap[row.clip_type] : "-" }}
+                    </template>
+                </el-table-column>
                 <el-table-column label="使用模型" width="120">
                     <template #default="{ row }">
                         {{ getModelName(row.model_version) }}
@@ -93,6 +98,22 @@
                         </template>
                     </template>
                 </el-table-column>
+                <el-table-column label="剪辑状态" min-width="120">
+                    <template #default="{ row }">
+                        <template v-if="row.automatic_clip == 1">
+                            <template v-if="row.clip_status == 3">
+                                <el-tag type="success">剪辑成功</el-tag>
+                            </template>
+                            <template v-else-if="[0, 1, 2].includes(row.clip_status)">
+                                <el-tag type="warning">剪辑中</el-tag>
+                            </template>
+                            <template v-else-if="row.clip_status == 4">
+                                <el-tag type="danger">剪辑失败</el-tag>
+                            </template>
+                        </template>
+                        <template v-else> - </template>
+                    </template>
+                </el-table-column>
                 <el-table-column label="创作时间" prop="create_time" min-width="180" show-overflow-tooltip />
                 <el-table-column label="操作" width="120" fixed="right">
                     <template #default="{ row }">
@@ -118,6 +139,7 @@ import { usePaging } from "@/hooks/usePaging";
 import useAppStore from "@/stores/modules/app";
 import feedback from "@/utils/feedback";
 import { ElTable } from "element-plus";
+import { ClipStyleMap } from "@/enums/appEnums";
 
 const appStore = useAppStore();
 const { config } = toRefs(appStore);

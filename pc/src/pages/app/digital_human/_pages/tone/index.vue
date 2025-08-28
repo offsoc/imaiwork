@@ -2,15 +2,7 @@
     <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
         <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[88px]">
-                    <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
-                        <ElTabPane label="全部" name=""></ElTabPane>
-                        <ElTabPane
-                            v-for="item in modelChannel"
-                            :label="item.name"
-                            :name="item.id"
-                            :key="item.id"></ElTabPane>
-                    </ElTabs>
+                <div class="flex items-center justify-end h-[88px]">
                     <div class="flex items-center gap-[14px]">
                         <ElInput
                             v-model="queryParams.name"
@@ -72,7 +64,7 @@
                                     <span class="text-success">成功</span>
                                 </template>
                                 <template v-if="row.status === 2">
-                                    <Icon name="local-icon-fail_fill" :size="16"></Icon>
+                                    <Icon name="local-icon-error_fill" :size="16"></Icon>
                                     <span class="text-danger">失败</span>
                                 </template>
                             </div>
@@ -100,13 +92,21 @@
 
 <script setup lang="ts">
 import { getVoiceList, deleteVoice } from "@/api/digital_human";
-import AddPop from "./_components/add-pop.vue";
 import { useAppStore } from "@/stores/app";
-import Empty from "@/pages/app/digital_human/_components/empty.vue";
 import { ToneType } from "@/pages/app/digital_human/_enums";
+import Empty from "@/pages/app/digital_human/_components/empty.vue";
+import { ToneTypeEnum, DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
+import AddPop from "./_components/add-pop.vue";
+
 const appStore = useAppStore();
 
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+const modelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        return channel.filter((item) => item.status == 1 && DigitalHumanModelVersionEnum.CHANJING == item.id);
+    }
+    return [];
+});
 
 const showAddPopup = ref<boolean>(false);
 const addPopRef = shallowRef<InstanceType<typeof AddPop>>();
@@ -114,18 +114,13 @@ const addPopRef = shallowRef<InstanceType<typeof AddPop>>();
 const queryParams = reactive({
     name: "",
     model_version: "",
-    builtin: ToneType.USER,
+    builtin: ToneTypeEnum.USER,
 });
 
-const { pager, getLists, resetPage } = usePaging({
+const { pager, getLists } = usePaging({
     fetchFun: getVoiceList,
     params: queryParams,
 });
-
-const handleTabClick = (tab: any) => {
-    queryParams.model_version = tab.paneName;
-    resetPage();
-};
 
 const getModelType = (type: number) => {
     const data = modelChannel.value.find((item) => item.id == type);

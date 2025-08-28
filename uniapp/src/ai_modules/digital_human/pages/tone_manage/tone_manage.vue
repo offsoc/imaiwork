@@ -41,7 +41,6 @@
                     <view :index="index" v-for="(item, index) in dataLists" :key="index" @click="clickItem(item.id)">
                         <view class="h-[96rpx] flex items-center bg-white rounded-full px-4 justify-between">
                             <view class="flex items-center gap-4">
-                                <view class="w-[12rpx] h-[12rpx] bg-primary rounded-full"> </view>
                                 <view
                                     class="digital-human-tag !px-[18rpx] !py-[8rpx]"
                                     :class="`digital-human-tag-${item.model_version}`"

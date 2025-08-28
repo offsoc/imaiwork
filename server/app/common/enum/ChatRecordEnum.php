@@ -30,7 +30,7 @@ class ChatRecordEnum
      * @notes 获取语音播报的保存路径
      * @param $type
      * @return string
-     * @author cjhao
+     * @author kb
      * @date 2023/10/10 11:13
      */
     public static function getChatVoiceDir($type): string

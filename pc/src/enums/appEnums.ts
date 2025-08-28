@@ -131,15 +131,13 @@ export enum TokensSceneEnum {
     HUMAN_VOICE_CHANJING = "human_voice_chanjing",
     HUMAN_AVATAR_CHANJING = "human_avatar_chanjing",
     KNOWLEDGE_CREATE = "knowledge_create",
-    KEYWORD_TO_TITLE = "keyword_to_title",
-    KEYWORD_TO_SUBTITLE = "keyword_to_subtitle",
-    KEYWORD_TO_COPYWRITING = "keyword_to_copywriting",
     AI_XHS = "ai_xhs",
 }
 
 // 应用类型
 export enum AppTypeEnum {
     REDBOOK = 3,
+    SPH = 4,
 }
 
 // 设备指令类型
@@ -239,39 +237,26 @@ export enum AppKeyEnum {
 }
 
 export const appKeyNameMap: Record<AppKeyEnum, string> = {
-    [AppKeyEnum.LADDER_PLAYER]: "智能陪练",
-    [AppKeyEnum.INTERVIEW]: "AI 人事",
-    [AppKeyEnum.MEETING_MINUTES]: "会议文书",
+    [AppKeyEnum.LADDER_PLAYER]: "AI员工陪练",
+    [AppKeyEnum.INTERVIEW]: "AI面试",
+    [AppKeyEnum.MEETING_MINUTES]: "会议助手",
     [AppKeyEnum.MIND_MAP]: "头脑风暴",
     [AppKeyEnum.DOUBYIN]: "智能抖音",
     [AppKeyEnum.KUAISHOU]: "智能快手",
-    [AppKeyEnum.SPH]: "视频号",
+    [AppKeyEnum.SPH]: "AI视频号获客手",
     [AppKeyEnum.REDBOOK]: "小红书",
-    [AppKeyEnum.PERSON_WECHAT]: "微信助手",
-    [AppKeyEnum.TELEMARKETING]: "电销获客",
-    [AppKeyEnum.SERVICE]: "智能客服",
-    [AppKeyEnum.DIGITAL_HUMAN]: "智能数字人",
-    [AppKeyEnum.DRAWING]: "智能设计",
-    [AppKeyEnum.TAX]: "智能税务",
-    [AppKeyEnum.LAW]: "智能法务",
-    [AppKeyEnum.WORD]: "AI WORD",
-    [AppKeyEnum.PPT]: "AI PPT",
+    [AppKeyEnum.PERSON_WECHAT]: "个微操盘手",
+    [AppKeyEnum.TELEMARKETING]: "AI电销",
+    [AppKeyEnum.SERVICE]: "AI客服",
+    [AppKeyEnum.DIGITAL_HUMAN]: "AI数字人",
+    [AppKeyEnum.DRAWING]: "AI美工",
+    [AppKeyEnum.TAX]: "自动报税",
+    [AppKeyEnum.LAW]: "法律咨询",
+    [AppKeyEnum.WORD]: "AI-WORD",
+    [AppKeyEnum.PPT]: "AI-PPT",
     [AppKeyEnum.COMPANY_WECHAT]: "智能企微",
-    [AppKeyEnum.STATEMENT]: "智能报表",
+    [AppKeyEnum.STATEMENT]: "AI-BI报表",
     [AppKeyEnum.POSTER]: "智能海报",
     [AppKeyEnum.CONTRACT]: "合同审查",
-    [AppKeyEnum.LIVE]: "无人直播",
+    [AppKeyEnum.LIVE]: "AI无人直播",
 };
-
-export enum FollowTypeEnum {
-    // 内务
-    INTERNAL = 1,
-    // 智能拓客
-    SMART_MARKETING = 2,
-    // 客户管理
-    CUSTOMER_MANAGEMENT = 3,
-    // 内容营销
-    CONTENT_MARKETING = 4,
-    // 其他
-    OTHER = 5,
-}

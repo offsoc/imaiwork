@@ -82,6 +82,7 @@ import { robotDetail } from "@/api/robot";
 import { chatRobotSendTextStream, getChatLog } from "@/api/chat";
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
+import { KnTypeEnum } from "@/pages/knowledge_base/_enums";
 import SidebarConfig from "./_components/sidebar.vue";
 
 const userStore = useUserStore();
@@ -103,11 +104,6 @@ const detail = reactive<Record<string, any>>({
 const sidebarConfigRef = shallowRef<InstanceType<typeof SidebarConfig>>();
 
 const loading = ref(false);
-
-const handleConfirmKnb = (val: any) => {
-    chatPostParams.indexid = val.index_id;
-    chatPostParams.rerank_min_score = val.rerank_min_score;
-};
 
 const changeScene = () => {
     chatContentList.value = [];
@@ -132,7 +128,21 @@ const chatLogParams = reactive<any>({
 const chatPostParams = reactive<any>({
     indexid: "",
     rerank_min_score: "",
+    kb_id: "",
 });
+
+const handleConfirmKnb = (val: any) => {
+    const { type, data } = val;
+    if (type == KnTypeEnum.RAG) {
+        chatPostParams.indexid = data.index_id;
+        chatPostParams.rerank_min_score = data.rerank_min_score;
+        chatPostParams.kb_id = undefined;
+    } else if (type == KnTypeEnum.VECTOR) {
+        chatPostParams.kb_id = data.id;
+        chatPostParams.indexid = undefined;
+        chatPostParams.rerank_min_score = undefined;
+    }
+};
 
 //
 const getSliderParams = (data: any) => {

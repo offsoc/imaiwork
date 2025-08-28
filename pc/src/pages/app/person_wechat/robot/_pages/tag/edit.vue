@@ -54,6 +54,7 @@ const formData = reactive<Record<string, any>>({
     match_mode: 0,
     match_keywords: "",
     tag_name: "",
+    wechat_id: "",
 });
 const rules = {
     match_keywords: [{ required: true, message: "请输入匹配关键词" }],
@@ -83,18 +84,9 @@ const close = () => {
     emit("close");
 };
 
-const setFormData = async (data: Record<any, any>) => {
-    for (const key in formData) {
-        if (data[key] != null && data[key] != undefined) {
-            //@ts-ignore
-            formData[key] = data[key];
-        }
-    }
-};
-
 defineExpose({
     open,
-    setFormData,
+    setFormData: (data) => setFormData(data, formData),
 });
 </script>
 

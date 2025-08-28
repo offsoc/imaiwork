@@ -25,13 +25,7 @@
                 </ElTabs>
             </div>
             <div class="grow min-h-0 mt-4">
-                <BaseSetting
-                    v-if="currentTab === 'base'"
-                    :agent-id="route.query.id"
-                    @close="emit('back')"
-                    @success="handleBaseSettingSuccess" />
-                <ReplySetting v-else-if="currentTab === 'reply'" :agent-id="route.query.id" @close="emit('back')" />
-                <KeywordsSetting v-else-if="currentTab === 'keywords'" :agent-id="route.query.id" />
+                <component :is="currentComponent" :agent-id="route.query.id" @close="emit('back')" />
             </div>
         </div>
     </div>
@@ -39,9 +33,9 @@
 
 <script setup lang="ts">
 import BaseSetting from "../_components/base-setting.vue";
+import SearchSetting from "../_components/search-setting.vue";
 import ReplySetting from "../_components/reply-setting.vue";
 import KeywordsSetting from "../_components/keywords-setting.vue";
-
 const emit = defineEmits<{
     (e: "back"): void;
 }>();
@@ -57,18 +51,29 @@ const tabs = ref([
         label: "基础设置",
         name: "base",
         icon: "local-icon-setting",
+        component: markRaw(BaseSetting),
+    },
+    {
+        label: "AI模型/搜索配置",
+        name: "search",
+        icon: "local-icon-setting",
+        component: markRaw(SearchSetting),
     },
     {
         label: "回复策略设置",
         name: "reply",
         icon: "local-icon-message",
+        component: markRaw(ReplySetting),
     },
     {
         label: "固定话术设置",
         name: "keywords",
         icon: "local-icon-book",
+        component: markRaw(KeywordsSetting),
     },
 ]);
+
+const currentComponent = computed(() => tabs.value.find((tab) => tab.name === currentTab.value)?.component);
 
 const beforeLeave = (e: any) => {
     if (isAdd.value) {

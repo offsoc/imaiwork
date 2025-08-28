@@ -293,3 +293,16 @@ export const formatFileSize = (sizeInBytes: any, precision = 2): string => {
         ? `${sizeInBytes.toFixed(precision)}B`
         : `${sizeInBytes.toFixed(precision)}${units[unitIndex]}`;
 };
+
+/**
+ * 设置表单数据
+ * @param data 数据
+ * @param sourceData 数据源
+ */
+export const setFormData = (data: Record<any, any>, sourceData: Record<any, any>) => {
+    for (const key in sourceData) {
+        if (data[key] != null && data[key] != undefined) {
+            sourceData[key] = data[key];
+        }
+    }
+};

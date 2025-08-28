@@ -48,7 +48,22 @@ class UploadController extends BaseAdminController
             return $this->fail($e->getMessage());
         }
     }
-
+    /**
+     * @notes 上传视频
+     * @return Json
+     * @author 段誉
+     * @date 2021/12/29 16:27
+     */
+    public function audio()
+    {
+        try {
+            $cid = $this->request->post('cid', 0);
+            $result = UploadService::audio($cid);
+            return $this->success('上传成功', $result);
+        } catch (Exception $e) {
+            return $this->fail($e->getMessage());
+        }
+    }
     /**
      * @notes 上传文件
      * @return Json

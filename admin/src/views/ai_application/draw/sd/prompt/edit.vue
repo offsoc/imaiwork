@@ -44,7 +44,7 @@
                         <div class="form-tips">默认为0，数据越大越排前面</div>
                     </div>
                 </el-form-item>
-                <el-form-item label="状态" prop="sort">
+                <el-form-item label="状态" prop="status">
                     <el-switch v-model="formData.status" :active-value="1" :inactive-value="0" />
                 </el-form-item>
             </el-form>

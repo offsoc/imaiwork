@@ -6,6 +6,7 @@
             :previewTheme="state.theme"
             :toolbars="toolbars"
             :toolbarsExclude="['github']"
+            :preview="isPreview"
             @onUploadImg="onUploadImg">
             <template #defToolbars>
                 <Emoji />
@@ -20,9 +21,16 @@ import { MdEditor, ToolbarNames } from "md-editor-v3";
 import { ExportPDF, Emoji } from "@vavt/v3-extension";
 import { uploadImage } from "@/api/app";
 
-const props = defineProps<{
-    modelValue: string | undefined | null;
-}>();
+const props = withDefaults(
+    defineProps<{
+        modelValue: string | undefined | null;
+        toolbars?: ToolbarNames[];
+        isPreview?: boolean;
+    }>(),
+    {
+        isPreview: true,
+    }
+);
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: string): void;
@@ -41,44 +49,48 @@ const state = reactive({
     theme: "mk-cute",
 });
 
-const toolbars = ref<ToolbarNames[]>([
-    "revoke",
-    "next",
-    "-",
-    "bold",
-    "underline",
-    "italic",
-    "strikeThrough",
-    "-",
-    "title",
-    "sub",
-    "sup",
-    "quote",
-    "unorderedList",
-    "orderedList",
-    "task",
-    "codeRow",
-    "code",
-    "-",
-    "link",
-    "image",
-    "table",
-    "mermaid",
-    "katex",
-    "-",
-    0,
-    1,
-    2,
-    "=",
-    "save",
-    "prettier",
-    "pageFullscreen",
-    "catalog",
-    "preview",
-    "previewOnly",
-    "htmlPreview",
-    "github",
-]);
+const toolbars = computed((): ToolbarNames[] => {
+    return (
+        props.toolbars || [
+            "revoke",
+            "next",
+            "-",
+            "bold",
+            "underline",
+            "italic",
+            "strikeThrough",
+            "-",
+            "title",
+            "sub",
+            "sup",
+            "quote",
+            "unorderedList",
+            "orderedList",
+            "task",
+            "codeRow",
+            "code",
+            "-",
+            "link",
+            "image",
+            "table",
+            "mermaid",
+            "katex",
+            "-",
+            0,
+            1,
+            2,
+            "=",
+            "save",
+            "prettier",
+            "pageFullscreen",
+            "catalog",
+            "preview",
+            "previewOnly",
+            "htmlPreview",
+            "github",
+        ]
+    );
+});
 
 const onUploadImg = async (file: File[], callback: (url: string) => void) => {
     const result = await Promise.all(
@@ -102,10 +114,5 @@ const onSuccess = (url: string) => {
 
 .md-editor {
     height: 100%;
-}
-
-svg.md-editor-icon {
-    width: 26px;
-    height: 26px;
 }
 </style>

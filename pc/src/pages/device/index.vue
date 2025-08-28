@@ -1,7 +1,21 @@
 <template>
-    <div class="h-full p-4">
-        <div class="h-full bg-white rounded-lg flex flex-col">
-            <div class="h-[71px] px-5 flex items-center justify-between border-b border-b-[#E8E8E8]">
+    <div class="h-full p-4 flex flex-col">
+        <div
+            class="rounded-[20px] flex items-center gap-3 px-[30px]"
+            style="
+                background: linear-gradient(152deg, rgba(0, 101, 251, 0.88) -42.44%, rgba(255, 255, 255, 0) 12.19%)
+                    rgb(255, 255, 255);
+            ">
+            <img src="@/assets/images/device.svg" class="w-11 mt-7" />
+            <div>
+                <div class="text-[#000000cc]">{{ ToolEnumMap[ToolEnum.DEVICE] }}</div>
+                <div class="text-[#00000080]">
+                    键绑定跨平台设备，激活智能流程引擎，全链路接管部门任务，让团队拥有数字化中枢管家。
+                </div>
+            </div>
+        </div>
+        <div class="grow min-h-0 bg-white rounded-[20px] mt-4 flex flex-col">
+            <div class="h-[88px] px-5 flex items-center justify-between">
                 <div class="flex items-center gap-x-2">
                     <span class="text-lg font-bold">设备总数量：{{ pager.count }}台</span>
                     <ElButton text @click="getLists()">
@@ -10,19 +24,20 @@
                     </ElButton>
                 </div>
                 <div>
-                    <ElButton type="primary" @click="handleAddDevice">
-                        <Icon name="el-icon-Plus"></Icon>
-                        <span>添加设备</span>
+                    <ElButton type="primary" class="!rounded-full !h-10" @click="handleAddDevice">
+                        <Icon name="local-icon-add_circle" />
+                        <span class="ml-2">添加设备</span>
                     </ElButton>
                 </div>
             </div>
-            <div class="grow min-h-0 mt-4">
+            <div class="grow min-h-0">
                 <ElTable
                     v-loading="pager.loading"
                     :data="pager.lists"
                     height="100%"
                     stripe
-                    :row-style="{ height: '60px' }">
+                    :row-style="{ height: '60px' }"
+                    :header-cell-style="{ height: '63px' }">
                     <ElTableColumn prop="device_model" label="设备型号" show-overflow-tooltip>
                         <template #default="{ row }">
                             <ElButton type="primary" link @click="handleAccountDetail(row)">{{
@@ -64,12 +79,12 @@
                                         </span>
                                         <span>更新数据</span>
                                     </div>
-                                    <!-- <div
+                                    <div
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleConfigRPA(row.id)">
+                                        @click="handleConfigRPA(row.device_code)">
                                         <Icon name="el-icon-Setting"></Icon>
                                         <span>配置RPA</span>
-                                    </div> -->
+                                    </div>
                                     <div
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleDelete(row)">
@@ -109,7 +124,7 @@
 
 <script setup lang="ts">
 import { getDeviceList, deleteDevice } from "@/api/device";
-import { AppTypeEnum, DeviceCmdCodeEnum, DeviceCmdEnum } from "@/enums/appEnums";
+import { AppTypeEnum, DeviceCmdCodeEnum, DeviceCmdEnum, ToolEnumMap, ToolEnum } from "@/enums/appEnums";
 import RpaSetting from "./_components/rpa-setting.vue";
 import DeviceAdd from "./_components/device-add.vue";
 import DeviceProgress from "./_components/device-progress.vue";
@@ -142,8 +157,7 @@ const {
         const { msg, type } = res;
         if (msg) feedback.msgSuccess(msg);
         switch (type) {
-            case DeviceCmdEnum.GET_USER_INFO:
-                showProgress.value = false;
+            case DeviceCmdEnum.ADD_DEVICE:
                 getLists();
                 break;
             default:
@@ -168,7 +182,6 @@ const addDeviceId = ref("");
 const retryAddDevice = () => {
     progressError.value = false;
     if (eventAction.value == EventAction.UpdateAccount) {
-        console.log(currDevice.value);
         handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
     } else {
         handleAddDeviceConfirm(addDeviceId.value);
@@ -177,7 +190,6 @@ const retryAddDevice = () => {
 
 const confirmAddDevice = (deviceId: string) => {
     addDeviceId.value = deviceId;
-    showProgress.value = true;
     showAddDevice.value = false;
     handleAddDeviceConfirm(deviceId);
 };
@@ -218,10 +230,10 @@ const handleAccountDetail = (row: any) => {
 
 const rpaSettingRef = ref<InstanceType<typeof RpaSetting>>();
 const showRpaSetting = ref(false);
-const handleConfigRPA = async (id: number) => {
+const handleConfigRPA = async (device_code: string) => {
     showRpaSetting.value = true;
     await nextTick();
-    rpaSettingRef.value?.open();
+    rpaSettingRef.value?.open(device_code);
 };
 
 const addDeviceRef = ref<InstanceType<typeof DeviceAdd>>();

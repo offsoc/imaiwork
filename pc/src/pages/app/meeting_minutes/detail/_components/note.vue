@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full">
+    <div class="h-full w-full">
         <Editor v-model="value" />
     </div>
 </template>

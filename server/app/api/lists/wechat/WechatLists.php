@@ -8,6 +8,7 @@ use app\common\lists\ListsSearchInterface;
 use app\common\model\wechat\AiWechat;
 use app\api\logic\wechat\MessageLogic;
 use app\common\model\wechat\AiWechatRobot;
+use app\common\model\kb\KbRobot;
 
 /**
  * 微信列表
@@ -47,7 +48,7 @@ class WechatLists extends BaseApiDataLists implements ListsSearchInterface
                     $item['robot_id'] = 0;
                 }
 
-                $item['robot_name'] = AiWechatRobot::where('id', $item['robot_id'])->where('user_id', $this->userId)->value('name', '');
+                $item['robot_name'] = KbRobot::where('id', $item['robot_id'])->where('user_id', $this->userId)->value('name', '');
 
                 $item['wechat_status'] = 0;
 

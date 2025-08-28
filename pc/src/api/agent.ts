@@ -1,31 +1,31 @@
 // 获取智能体列表
 export function getAgentList(params: any) {
-    return $request.get({ url: "/sv.robot/lists", params });
+    return $request.get({ url: "/kb.robot/lists", params });
 }
 
 // 添加智能体
 export function addAgent(params: any) {
-    return $request.post({ url: "/sv.robot/add", params });
+    return $request.post({ url: "/kb.robot/add", params });
 }
 
 // 添加默认智能体
 export function addDefaultAgent() {
-    return $request.post({ url: "/sv.robot/defaultAdd" });
+    return $request.post({ url: "/kb.robot/defaultAdd" });
 }
 
 // 更新智能体
 export function updateAgent(params: any) {
-    return $request.post({ url: "/sv.robot/update", params });
+    return $request.post({ url: "/kb.robot/edit", params });
 }
 
 // 删除智能体
 export function deleteAgent(params: any) {
-    return $request.post({ url: "/sv.robot/remove", params });
+    return $request.post({ url: "/kb.robot/del", params });
 }
 
 // 获取智能体详情
 export function getAgentDetail(params: any) {
-    return $request.get({ url: "/sv.robot/detail", params });
+    return $request.get({ url: "/kb.robot/detail", params });
 }
 
 // 获取回复策略

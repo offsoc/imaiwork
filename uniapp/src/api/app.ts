@@ -76,3 +76,13 @@ export function getStaffLists() {
 export function getStaffDetail(data: any) {
     return request.get({ url: "/staff/detail", data });
 }
+
+// 获取场景提示词
+export function getScenePrompt() {
+    return request.post({ url: "/tools/getPrompt" });
+}
+
+// 获取剪辑配置
+export function getClipConfig() {
+    return request.get({ url: "/tools/clip" });
+}

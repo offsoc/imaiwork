@@ -5,6 +5,7 @@ page {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: theme("fontFamily.sans");
+    --color-primary: #0065fb;
 }
 
 uni-modal {
@@ -141,7 +142,7 @@ button::after {
 }
 
 .digital-human-tag {
-    @apply rounded-full px-[36rpx] py-[8rpx] text-white  shadow-[0px_6px_12px_0px_rgba(0,0,0,0.24)] text-xs;
+    @apply rounded-full px-[28rpx] py-[8rpx] text-white  shadow-[0px_6px_12px_0px_rgba(0,0,0,0.24)] text-xs;
     backdrop-filter: blur(6px);
     &-1 {
         background: linear-gradient(180deg, rgba(26, 247, 207, 0.5) 0%, rgba(0, 101, 251, 0.5) 100%);
@@ -183,4 +184,47 @@ button::after {
 
 .font-digital-number {
     font-family: "digital-number";
+}
+
+.progress-loader {
+    height: 2px;
+    width: 300px;
+    background: rgb(44, 44, 44);
+    position: relative;
+    overflow: hidden;
+}
+.progress-loader .black_overlay {
+    background: linear-gradient(
+        87deg,
+        rgb(0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.14) 30%,
+        rgba(0, 0, 0, 0.14) 70%,
+        rgb(0, 0, 0) 100%
+    );
+    position: absolute;
+    inset: 0px;
+}
+.progress-loader .light {
+    width: 70px;
+    height: 100%;
+    position: absolute;
+    left: -20%;
+    top: 0px;
+    background: linear-gradient(
+        87deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgb(0, 204, 255) 40%,
+        rgb(0, 204, 255) 60%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    animation: light 2s infinite ease-in-out;
+}
+
+@keyframes light {
+    from {
+        left: -30%;
+    }
+    to {
+        left: 100%;
+    }
 }

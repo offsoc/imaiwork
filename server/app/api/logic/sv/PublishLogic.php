@@ -688,5 +688,115 @@ class PublishLogic extends SvBaseLogic
 
         }
     }
+
+
+
+
+    public static function aiNotePushCron(int $dataType = 0){
+
+        try {
+            $deviceids = SvDevice::where('status', 1)->column('device_code');
+            if(empty($deviceids)){
+                return;
+            }
+
+            
+
+            $publishes = SvPublishSettingDetail::alias('ps')
+                ->field('ps.*')
+                // ->join('sv_video_task v', 'v.id = ps.video_task_id')
+                ->join('sv_publish_setting_account s', 's.id = ps.publish_account_id')
+                ->where('ps.device_code', 'in', $deviceids)
+                ->where('ps.status', 'in', [0, 5])
+                ->where('s.status', 'in', [1])
+                ->where('ps.data_type', $dataType)
+                ->where('ps.publish_time', '<', date('Y-m-d H:i:s', time()))
+                ->order('ps.publish_time asc')
+                ->limit(1)
+                ->select()->toArray(); 
+            foreach ($publishes as $publish){               
+                $material_url = explode(',', $publish['material_url']);
+                if(count($material_url) > 12){
+                    $material_url = array_slice($material_url, 0, 12);
+                }
+                $payload = array(
+                    'appType' => 3,
+                    'messageId' => 0,
+                    'type' => 5,
+                    'deviceId' => $publish['device_code'],
+                    'appVersion' => '2.1.1',
+                    'worker' => array(
+                        'id' => $publish['task_id'],
+                    ),
+                    'reply' => [
+                        'title' => $publish['material_title'],
+                        'type' => $publish['material_type'] ?? 1,
+                        'list' => $material_url,
+                        'isLocation' => !empty($publish['poi']) ? 1 : 0,
+                        'location' => $publish['poi'],
+                        'isScheduledTime' => true,
+                        'scheduledTime' => $publish['publish_time'],
+                        'taskId' => $publish['task_id'],
+                        'body' => $publish['material_subtitle'],
+                        'tag' => $publish['material_tag'] ?? '',
+                        'material_id' => $publish['id']
+                    ]
+                );
+                $payload['code'] = 200;
+
+                $channel = "device.{$publish['device_code']}.message";
+                \Channel\Client::connect('127.0.0.1', 2206);
+                \Channel\Client::publish($channel, [
+                    'data' => json_encode($payload)
+                ]);
+
+                self::_setPublishStatus($publish);
+                
+            }
+
+        }catch (\Exception $e) {
+            print_r($e->__toString());
+        }
+    }
+    private static function _setPublishStatus($publish){
+
+        try {
+            
+            $detail = SvPublishSettingDetail::where('id', $publish['id'])->findOrEmpty();
+            if(!$detail->isEmpty()){
+                $detail->save([
+                    'status' => 3,
+                    'update_time' => time(),
+                    'exec_time' => time()
+                ]);
+            }else{
+                $publish['message'] = '待发布数据丢失:';
+            }
+            
+            
+            $account = SvPublishSettingAccount::where('id', $publish['publish_account_id'])->findOrEmpty();
+            if(!$account->isEmpty()){
+                $account->save([
+                    'update_time' => time(),
+                    'published_count' => Db::raw('published_count+1'),
+                ]);
+            }else{
+
+                $account['message'] = '待发布账号数据丢失:';
+            }
+
+        }catch (\Exception $e) {
+            print_r($e->__toString());
+        }
+        
+        
+    }
+
+
+
+
+
+
+
     
 }

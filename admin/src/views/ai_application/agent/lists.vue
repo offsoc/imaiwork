@@ -42,15 +42,36 @@
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" fixed="left" />
                 <el-table-column label="ID" prop="id" min-width="80" />
-                <el-table-column label="头像" min-width="100">
+                <el-table-column label="图标" min-width="100">
                     <template #default="{ row }">
-                        <el-avatar :src="row.logo" :size="50" />
+                        <div class="flex items-center">
+                            <image-contain
+                                radius="50%"
+                                class="flex-none"
+                                v-if="row.image"
+                                :src="row.image"
+                                :width="48"
+                                :height="48"
+                                :preview-src-list="[row.image]"
+                                preview-teleported
+                                fit="contain" />
+                        </div>
                     </template>
                 </el-table-column>
                 <el-table-column label="名称" prop="name" min-width="140" show-overflow-tooltip />
-                <el-table-column label="创作用户" prop="nickname" min-width="140" />
-                <el-table-column label="关联知识库" prop="kname" min-width="140" />
-                <el-table-column label="调用次数" prop="use_count" min-width="100" />
+                <el-table-column label="创作用户" prop="user.nickname" min-width="140" />
+                <el-table-column label="关联知识库" min-width="140">
+                    <template #default="{ row }">
+                        <div class="flex flex-wrap mx-[-5px]">
+                            <div v-for="item in row.knows" :key="item.id">
+                                <div
+                                    class="bg-primary-light-9 text-primary px-[10px] py-[2px] rounded mx-[5px] my-[5px]">
+                                    {{ item.name }}
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </el-table-column>
                 <el-table-column label="创建时间" prop="create_time" min-width="180" />
                 <el-table-column label="操作" width="100" fixed="right">
                     <template #default="{ row }">

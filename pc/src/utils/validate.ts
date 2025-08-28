@@ -1,26 +1,16 @@
-export {
-	isArray,
-	isBoolean,
-	isDate,
-	isObject,
-	isFunction,
-	isString,
-	isNumber,
-	isNull,
-} from "lodash-es";
+export { isArray, isBoolean, isDate, isObject, isFunction, isString, isNumber, isNull } from "lodash-es";
 import { isObject } from "lodash-es";
 /**
  * @description 是否是http，邮件，电话号码
  */
 export function isExternal(path: string) {
-	return /^(https?:|mailto:|tel:)/.test(path);
+    return /^(https?:|mailto:|tel:)/.test(path);
 }
 
 /**
  * @description 是否是http
  */
-export const isLinkHttp = (link: string): boolean =>
-	/^(https?:)?\/\//.test(link);
+export const isLinkHttp = (link: string): boolean => /^(https?:)?\/\//.test(link);
 
 /**
  * @description 是否是电话号码
@@ -38,7 +28,7 @@ export const isLinkMailto = (link: string): boolean => /^mailto:/.test(link);
  * @return {Boolean}
  */
 export const isEmpty = (value: unknown) => {
-	return value !== null && value !== "" && typeof value !== "undefined";
+    return value === null || value === "" || typeof value === "undefined";
 };
 /**
  * @description 是否为空对象
@@ -46,7 +36,7 @@ export const isEmpty = (value: unknown) => {
  * @return {Boolean}
  */
 export const isEmptyObject = (target: object) => {
-	return isObject(target) && !Object.keys(target).length;
+    return isObject(target) && !Object.keys(target).length;
 };
 
 /**
@@ -55,10 +45,10 @@ export const isEmptyObject = (target: object) => {
  * @return {Boolean}
  */
 export const isJson = (value: string) => {
-	try {
-		JSON.parse(value);
-		return true;
-	} catch (error) {
-		return false;
-	}
+    try {
+        JSON.parse(value);
+        return true;
+    } catch (error) {
+        return false;
+    }
 };

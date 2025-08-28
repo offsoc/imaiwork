@@ -31,7 +31,7 @@ class SensitiveWordLogic extends BaseLogic
      * @notes 敏感词新增
      * @param array $post
      * @return bool
-     * @author fzr
+     * @author kb
      */
     public static function add(array $post): bool
     {
@@ -54,7 +54,7 @@ class SensitiveWordLogic extends BaseLogic
      * @notes 敏感词编辑
      * @param array $post
      * @return bool
-     * @author fzr
+     * @author kb
      */
     public static function edit(array $post): bool
     {
@@ -76,7 +76,7 @@ class SensitiveWordLogic extends BaseLogic
      * @notes 敏感词删除
      * @param int $id
      * @return bool
-     * @author fzr
+     * @author kb
      */
     public static function del(int $id): bool
     {
@@ -93,7 +93,7 @@ class SensitiveWordLogic extends BaseLogic
      * @notes 敏感词状态
      * @param int $id
      * @return bool
-     * @author fzr
+     * @author kb
      */
     public static function status(int $id): bool
     {
@@ -114,7 +114,7 @@ class SensitiveWordLogic extends BaseLogic
     /**
      * @notes 获取配置
      * @return array|int
-     * @author fzr
+     * @author kb
      */
     public static function getConfig(): array|int
     {
@@ -126,7 +126,7 @@ class SensitiveWordLogic extends BaseLogic
     /**
      * @notes 设置配置
      * @param array $params
-     * @author fzr
+     * @author kb
      */
     public static function setConfig(array $params)
     {

@@ -31,7 +31,9 @@
                             v-model="formData.name"
                             placeholder="请输入任务名称"
                             clearable
-                            class="!h-11"
+                            class="!h-11 !w-[240px]"
+                            maxlength="30"
+                            show-word-limit
                             @blur="handleUpdateCreateTask()" />
                     </div>
                     <div>
@@ -70,11 +72,11 @@
                                         v-model:material-list="formData.anchor"
                                         :type="1"
                                         :max-video-count="30"
-                                        :video-size="commonUploadLimit.size"
-                                        :video-min-duration="commonUploadLimit.videoMinDuration"
-                                        :video-max-duration="commonUploadLimit.videoMaxDuration"
-                                        :video-min-resolution="commonUploadLimit.minResolution"
-                                        :video-max-resolution="commonUploadLimit.maxResolution"
+                                        :video-size="videoUploadParams.size"
+                                        :video-min-duration="videoUploadParams.videoMinDuration"
+                                        :video-max-duration="videoUploadParams.videoMaxDuration"
+                                        :video-min-resolution="videoUploadParams.minResolution"
+                                        :video-max-resolution="videoUploadParams.maxResolution"
                                         @preview-video="handlePreviewVideo"
                                         @update:material-list="handleUpdateCreateTask()"
                                         @import-material="handleImportMaterial"
@@ -166,118 +168,153 @@
                         </div>
                     </div>
                     <div class="content-item">
-                        <div class="px-[14px]">
+                        <div class="flex-shrink-0 flex items-center justify-between px-[14px]">
                             <div class="text-white font-bold">视频设置</div>
-                            <div class="mt-5">
-                                <div class="text-white text-[11px]">音色设置</div>
-                                <div class="flex items-center gap-x-[30px] mt-[18px]">
-                                    <div
-                                        v-for="item in voiceType"
-                                        :key="item.value"
-                                        class="flex items-center gap-x-2 cursor-pointer"
-                                        @click="handleVoiceType(item.value)">
-                                        <div
-                                            class="w-4 h-4 rounded-full shadow-[0_0_0_1px_rgba(255,255,255,0.1)] p-[4px]">
-                                            <div
-                                                v-if="item.value == formData.extra.currentVoiceType"
-                                                class="w-full h-full rounded-full bg-primary"></div>
-                                        </div>
-                                        <div class="text-white text-[11px]">{{ item.label }}</div>
-                                        <ElTooltip
-                                            placement="top"
-                                            popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2"
-                                            :show-arrow="false">
-                                            <div
-                                                class="w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_0_1px_rgba(255,255,255,0.2)] cursor-pointer">
-                                                <Icon name="local-icon-tips2" color="#ffffff" :size="16"></Icon>
-                                            </div>
-                                            <template #content>
-                                                <div
-                                                    class="text-[#ffffff80] text-[11px] leading-6 w-[212px]"
-                                                    v-html="item.tips"></div>
-                                            </template>
-                                        </ElTooltip>
+                            <ElButton
+                                link
+                                type="primary"
+                                @click="handleOpenAdvancedSetting()"
+                                v-if="clipConfig.is_open">
+                                高级设置
+                            </ElButton>
+                        </div>
+                        <div class="grow min-h-0 flex flex-col">
+                            <div class="px-[14px]">
+                                <div class="mt-5">
+                                    <div class="text-white text-xs">通道选择</div>
+                                    <div class="mt-[18px]">
+                                        <ElSelect
+                                            :model-value="formData.model_version"
+                                            class="!h-11"
+                                            placeholder="请选择通道"
+                                            popper-class="dark-select-popper"
+                                            :show-arrow="false"
+                                            @change="handleChangeModelVersion">
+                                            <ElOption
+                                                v-for="item in getModelChannel"
+                                                :key="item.id"
+                                                :label="item.name"
+                                                :value="item.id"></ElOption>
+                                        </ElSelect>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div
-                            class="grow min-h-0 mt-[18px] flex flex-col gap-y-2"
-                            v-if="formData.extra.currentVoiceType == VoiceType.Custom">
-                            <VoiceDefineTemplate>
-                                <div class="flex flex-col gap-y-2">
-                                    <div class="material-menu-item" @click="handleSelectVoice">
-                                        <span class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
-                                            <Icon name="local-icon-windows" color="#ffffff"></Icon>
-                                        </span>
-                                        <span class="text-[#ffffffcc]"> 选择已有音色 </span>
-                                    </div>
-                                    <upload
-                                        class="w-full"
-                                        show-progress
-                                        type="audio"
-                                        accept=".mp3,.m4a,.wav"
-                                        :limit="1"
-                                        :show-file-list="false"
-                                        @success="getUploadVoiceSuccess">
-                                        <div class="material-menu-item">
-                                            <span class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
-                                                <Icon name="local-icon-upload" color="#ffffff"></Icon>
-                                            </span>
-                                            <span class="text-[#ffffffcc]"> 本地上传 </span>
-                                        </div>
-                                    </upload>
-                                </div>
-                            </VoiceDefineTemplate>
-                            <div class="flex-shrink-1 min-h-0">
-                                <ElScrollbar>
-                                    <div class="px-3 flex flex-col gap-y-[14px]">
-                                        <div v-for="(item, index) in formData.voice" :key="index">
-                                            <ElPopover
-                                                trigger="click"
-                                                width="212"
-                                                popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-material-popover"
+                            <div class="px-[14px]">
+                                <div class="mt-5">
+                                    <div class="text-white text-xs">音色设置</div>
+                                    <div class="flex items-center gap-x-[30px] mt-[18px]">
+                                        <div
+                                            v-for="item in voiceType"
+                                            :key="item.value"
+                                            class="flex items-center gap-x-2 cursor-pointer"
+                                            @click="handleVoiceType(item.value)">
+                                            <div
+                                                class="w-4 h-4 rounded-full shadow-[0_0_0_1px_rgba(255,255,255,0.1)] p-[4px]">
+                                                <div
+                                                    v-if="item.value == formData.extra.currentVoiceType"
+                                                    class="w-full h-full rounded-full bg-primary"></div>
+                                            </div>
+                                            <div class="text-white text-[11px]">{{ item.label }}</div>
+                                            <ElTooltip
+                                                placement="top"
+                                                popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2"
                                                 :show-arrow="false">
-                                                <template #reference>
+                                                <div
+                                                    class="w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_0_1px_rgba(255,255,255,0.2)] cursor-pointer">
+                                                    <Icon name="local-icon-tips2" color="#ffffff" :size="16"></Icon>
+                                                </div>
+                                                <template #content>
                                                     <div
-                                                        class="h-11 px-[15px] rounded-md flex items-center justify-between gap-x-2 cursor-pointer hover:bg-app-bg-1 border border-app-border-2"
-                                                        @click="handleClickVoice(index)">
+                                                        class="text-[#ffffff80] text-[11px] leading-6 w-[212px]"
+                                                        v-html="item.tips"></div>
+                                                </template>
+                                            </ElTooltip>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                class="grow min-h-0 mt-[18px] flex flex-col gap-y-2"
+                                v-if="formData.extra.currentVoiceType == VoiceType.Custom">
+                                <VoiceDefineTemplate>
+                                    <div class="flex flex-col gap-y-2">
+                                        <div class="type-menu-item" @click="handleSelectVoice">
+                                            <span class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
+                                                <Icon name="local-icon-windows" color="#ffffff"></Icon>
+                                            </span>
+                                            <span class="text-[#ffffffcc]"> 选择已有音色 </span>
+                                        </div>
+                                        <upload
+                                            class="w-full"
+                                            show-progress
+                                            type="audio"
+                                            accept=".mp3,.wav"
+                                            :limit="1"
+                                            :show-file-list="false"
+                                            @success="getUploadVoiceSuccess">
+                                            <div class="type-menu-item">
+                                                <span
+                                                    class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
+                                                    <Icon name="local-icon-upload" color="#ffffff"></Icon>
+                                                </span>
+                                                <span class="text-[#ffffffcc]"> 本地上传 </span>
+                                            </div>
+                                        </upload>
+                                    </div>
+                                </VoiceDefineTemplate>
+                                <div class="flex-shrink-1 min-h-0">
+                                    <ElScrollbar>
+                                        <div class="px-3 flex flex-col gap-y-[14px]">
+                                            <div v-for="(item, index) in formData.voice" :key="index">
+                                                <ElPopover
+                                                    trigger="click"
+                                                    width="212"
+                                                    popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-type-popover"
+                                                    :show-arrow="false">
+                                                    <template #reference>
                                                         <div
-                                                            class="text-white text-[11px] flex-1 line-clamp-1 break-all">
-                                                            {{ item.name }}
-                                                        </div>
-                                                        <div class="text-[#ffffff80] text-[11px]">
-                                                            {{ item.voice_id ? "已训练" : "未训练" }}
-                                                        </div>
-                                                        <div class="flex-shrink-0 items-center flex gap-x-2">
-                                                            <div class="w-[1px] h-[12px] bg-[#ffffff1a]"></div>
-                                                            <div class="w-4 h-4" @click.stop="handleDeleteVoice(index)">
-                                                                <close-btn :icon-size="10"></close-btn>
+                                                            class="h-11 px-[15px] rounded-md flex items-center justify-between gap-x-2 cursor-pointer hover:bg-app-bg-1 border border-app-border-2"
+                                                            @click="handleClickVoice(index)">
+                                                            <div
+                                                                class="text-white text-[11px] flex-1 line-clamp-1 break-all">
+                                                                {{ item.name }}
+                                                            </div>
+                                                            <div class="text-[#ffffff80] text-[11px]">
+                                                                {{ item.voice_id ? "已训练" : "未训练" }}
+                                                            </div>
+                                                            <div class="flex-shrink-0 items-center flex gap-x-2">
+                                                                <div class="w-[1px] h-[12px] bg-[#ffffff1a]"></div>
+                                                                <div
+                                                                    class="w-4 h-4"
+                                                                    @click.stop="handleDeleteVoice(index)">
+                                                                    <close-btn :icon-size="10"></close-btn>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </template>
-                                                <VoiceUseTemplate />
-                                            </ElPopover>
+                                                    </template>
+                                                    <VoiceUseTemplate />
+                                                </ElPopover>
+                                            </div>
                                         </div>
-                                    </div>
-                                </ElScrollbar>
-                            </div>
-                            <div class="flex-shrink-0 px-3">
-                                <ElPopover
-                                    trigger="click"
-                                    width="212"
-                                    popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-material-popover"
-                                    :show-arrow="false">
-                                    <template #reference>
-                                        <div
-                                            class="h-11 rounded-md flex justify-center items-center text-[#ffffff4d] text-[11px] border border-dashed border-app-border-2 cursor-pointer hover:bg-app-bg-1"
-                                            @click="handleAddVoice">
-                                            添加音色
-                                        </div>
-                                    </template>
-                                    <VoiceUseTemplate />
-                                </ElPopover>
+                                    </ElScrollbar>
+                                </div>
+                                <div class="flex-shrink-0 px-3">
+                                    <ElPopover
+                                        trigger="click"
+                                        width="212"
+                                        popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-type-popover"
+                                        :show-arrow="false">
+                                        <template #reference>
+                                            <div
+                                                class="w-full h-11 rounded-md shadow-[0_0_0_1px_var(--app-border-color-1)] flex items-center justify-center gap-x-2 text-white hover:bg-[#ffffff0d] cursor-pointer"
+                                                @click="handleAddVoice">
+                                                <Icon name="local-icon-upload3"></Icon>
+                                                <div class="text-xs">添加音色</div>
+                                            </div>
+                                        </template>
+                                        <VoiceUseTemplate />
+                                    </ElPopover>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -285,6 +322,11 @@
             </div>
         </div>
     </div>
+    <advanced-setting
+        v-if="showAdvancedSetting"
+        ref="advancedSettingRef"
+        @close="showAdvancedSetting = false"
+        @success="handleAdvancedSettingSuccess" />
     <kb-copywriting-material
         v-if="showKbCopywritingMaterial"
         ref="kbCopywritingMaterialRef"
@@ -309,22 +351,25 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { uploadImage } from "@/api/app";
+import { uploadImage, getClipConfig } from "@/api/app";
 import { AppTypeEnum } from "@/enums/appEnums";
-import { queryToObject } from "@/utils/util";
+import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import { getDigitalHumanDetail, addDigitalHuman, updateDigitalHuman } from "@/api/redbook";
-import { commonUploadLimit, DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
-import VoiceMaterial from "@/pages/app/digital_human/_pages/create/_components/choose-tone.vue";
+import { DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
+import { uploadLimit } from "@/pages/app/digital_human/_config";
+import VoiceMaterial from "@/pages/app/_components/choose-tone.vue";
 import MaterialPicker from "../../../_components/material-picker.vue";
 import KbCopywritingMaterial from "../../../_components/kb-copywriting-material.vue";
 import MaterialPopup from "../../../_components/material-popup.vue";
+import AdvancedSetting from "./advanced-setting.vue";
 import { MaterialTypeEnum, MaterialActionType, SidebarTypeEnum } from "../../../_enums";
 
 const emit = defineEmits(["back"]);
 
 const route = useRoute();
 
+const appStore = useAppStore();
 const userStore = useUserStore();
 
 const { userTokens } = toRefs(userStore);
@@ -340,12 +385,43 @@ interface RedbookCreationFormData {
     copywriting: any[];
     pic: string;
     extra: Record<string, any>;
+    automatic_clip: number | string;
+    music: Array<{
+        url: string;
+        name: string;
+    }>;
+    clip: Array<{
+        type: number | string;
+    }>;
+    model_version: number | string;
 }
 
 enum VoiceType {
     Custom = "custom",
     Original = "original",
 }
+
+// 获取模型通道
+const getModelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        const modelChannel = channel.filter((item) => {
+            item.id = parseInt(item.id);
+            if (
+                item.status == 1 &&
+                [DigitalHumanModelVersionEnum.CHANJING, DigitalHumanModelVersionEnum.ADVANCED].includes(item.id)
+            ) {
+                return item;
+            }
+        });
+        if (modelChannel.length > 0) {
+            formData.model_version = modelChannel[0].id;
+            return modelChannel;
+        }
+        return [];
+    }
+    return [];
+});
 
 const formData = reactive<RedbookCreationFormData>({
     id: "",
@@ -360,6 +436,10 @@ const formData = reactive<RedbookCreationFormData>({
     extra: {
         currentVoiceType: VoiceType.Custom,
     },
+    automatic_clip: 0,
+    music: [],
+    clip: [],
+    model_version: "",
 });
 
 const handleBack = () => {
@@ -385,6 +465,13 @@ enum CreateType {
 
 const showPreviewVideo = ref(false);
 const previewVideoRef = shallowRef();
+
+const videoUploadParams = computed(() => {
+    if (formData.model_version) {
+        return uploadLimit[formData.model_version];
+    }
+    return {};
+});
 
 const handlePreviewVideo = async (uri: string) => {
     showPreviewVideo.value = true;
@@ -425,7 +512,7 @@ const getChooseVideo = async (lists: any[]) => {
             video.crossOrigin = "anonymous";
             video.addEventListener("loadedmetadata", () => {
                 const { videoWidth, duration } = video;
-                const { minResolution, maxResolution, videoMinDuration, videoMaxDuration } = commonUploadLimit;
+                const { minResolution, maxResolution, videoMinDuration, videoMaxDuration } = videoUploadParams.value;
                 const isResolutionValid = videoWidth >= minResolution && videoWidth <= maxResolution;
                 const isDurationValid = duration >= videoMinDuration && duration <= videoMaxDuration;
                 if (!isResolutionValid) {
@@ -509,22 +596,48 @@ const handleChooseCopywriting = (data: any) => {
 
 // 视频设置 Start
 
-const voiceType = [
-    {
-        label: "自选音色",
-        value: VoiceType.Custom,
-        tips: `1.若所选音色为系统内已克隆音色，则无需额外扣费。 <br />2.若上传新的音色以进行克隆，则将根据所选音色数量扣除相应费用。`,
-    },
-    {
-        label: "原视频音色",
-        value: VoiceType.Original,
-        tips: `1.当选择原视频音色时，系统将对当前视频中的音色进行克隆并进行扣费，且在合成视频时保持原有音色的一致性。`,
-    },
-];
+const voiceType = computed(() => {
+    const types = [
+        {
+            label: "自选音色",
+            value: VoiceType.Custom,
+            tips: `1.若所选音色为系统内已克隆音色，则无需额外扣费。 <br />2.若上传新的音色以进行克隆，则将根据所选音色数量扣除相应费用。`,
+        },
+    ];
+    if (formData.model_version != DigitalHumanModelVersionEnum.ADVANCED) {
+        types.push({
+            label: "原视频音色",
+            value: VoiceType.Original,
+            tips: `1.当选择原视频音色时，系统将对当前视频中的音色进行克隆并进行扣费，且在合成视频时保持原有音色的一致性。`,
+        });
+    }
+    return types;
+});
 const currentVoiceIndex = ref();
 const showVoiceMaterial = ref(false);
 const voiceMaterialRef = shallowRef<InstanceType<typeof VoiceMaterial>>();
 const toneIsMultiple = ref(true);
+
+const clipConfig = reactive({
+    is_open: false,
+});
+
+const getClipConfigData = async () => {
+    const { code } = await getClipConfig();
+    clipConfig.is_open = code == 10000;
+};
+
+const handleChangeModelVersion = (value: number) => {
+    useNuxtApp().$confirm({
+        message: "切换模型将会清空形象数据，是否继续？",
+        theme: "dark",
+        onConfirm: () => {
+            formData.model_version = value;
+            formData.anchor.length = 0;
+            handleUpdateCreateTask();
+        },
+    });
+};
 
 const handleVoiceType = (value: VoiceType) => {
     formData.extra.currentVoiceType = value;
@@ -604,6 +717,24 @@ const handleDeleteVoice = (index: number) => {
             handleUpdateCreateTask();
         },
     });
+};
+
+const showAdvancedSetting = ref(false);
+const advancedSettingRef = shallowRef<InstanceType<typeof AdvancedSetting>>();
+
+const handleOpenAdvancedSetting = async () => {
+    showAdvancedSetting.value = true;
+    await nextTick();
+    advancedSettingRef.value?.open();
+    advancedSettingRef.value.setFormData(formData);
+};
+
+const handleAdvancedSettingSuccess = (result: any) => {
+    showAdvancedSetting.value = false;
+    formData.music = result.music;
+    formData.clip = result.clip;
+    formData.automatic_clip = result.automatic_clip;
+    handleUpdateCreateTask();
 };
 
 const handleUpdateCreateTask = async () => {
@@ -739,7 +870,8 @@ const getTaskDetail = async (id: string) => {
 };
 
 onMounted(async () => {
-    const query = queryToObject();
+    getClipConfigData();
+    const query = searchQueryToObject();
     await getTaskDetail(query.create_id as string);
 });
 
@@ -752,9 +884,9 @@ defineExpose({
 <style scoped lang="scss">
 .content-item {
     @apply rounded-xl bg-app-bg-3 py-[14px] border border-app-border-1 flex flex-col grow min-h-0 flex-1;
-    :deep(.el-select__wrapper) {
-        background-color: var(--app-bg-color-1) !important;
-    }
+    // :deep(.el-select__wrapper) {
+    //     background-color: var(--app-bg-color-1) !important;
+    // }
     :deep(.el-input) {
         .el-input__wrapper {
             background-color: transparent !important;

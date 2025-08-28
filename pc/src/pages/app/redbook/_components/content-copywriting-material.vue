@@ -16,7 +16,7 @@
                     v-model="selectCopywriting"
                     class="!w-[314px] !h-11"
                     placeholder="请选择"
-                    popper-class="custom-select-popper"
+                    popper-class="dark-select-popper"
                     clearable
                     filterable
                     :show-arrow="false"

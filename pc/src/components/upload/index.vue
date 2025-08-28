@@ -50,14 +50,17 @@
 <script lang="ts">
 import { computed, defineComponent, ref, shallowRef } from "vue";
 import { useUserStore } from "@/stores/user";
-import { getApiPrefix, getApiUrl, getVersion } from "~/utils/env";
+import { getApiPrefix, getApiUrl, getVersion } from "@/utils/env";
 import feedback from "@/utils/feedback";
 import { genFileId, type ElUpload, type UploadRawFile, type UploadProps } from "element-plus";
 import { RequestCodeEnum } from "@/enums/requestEnums";
-import { el } from "element-plus/es/locale";
 export default defineComponent({
     components: {},
     props: {
+        action: {
+            type: String,
+            default: "",
+        },
         // 上传文件类型
         type: {
             type: String,
@@ -136,10 +139,10 @@ export default defineComponent({
         },
     },
     emits: ["change", "error", "remove", "success", "on-progress"],
-    setup(props, { emit }) {
+    setup(props, { emit, expose }) {
         const userStore = useUserStore();
         const uploadRefs = shallowRef<InstanceType<typeof ElUpload>>();
-        const action = ref(`${getApiUrl()}${getApiPrefix()}/upload/${props.type}`);
+        const action = ref(props.action || `${getApiUrl()}${getApiPrefix()}/upload/${props.type}`);
         const headers = computed(() => ({
             token: userStore.token,
             version: getVersion(),
@@ -256,15 +259,15 @@ export default defineComponent({
             }
             emit("change", file);
             if (response.code == RequestCodeEnum.SUCCESS) {
-                feedback.msgSuccess(response.msg);
+                feedback.msgSuccess(response.msg || "上传成功");
                 emit("success", response);
             }
-            if (response.code == RequestCodeEnum.FAIL && response.msg) {
+            if (response.code == RequestCodeEnum.FAIL) {
                 fileList.value.splice(
                     fileList.value.findIndex((item: any) => item.raw.uid == file.raw.uid),
                     1
                 );
-                feedback.msgError(response.msg);
+                feedback.msgError(response.msg || "上传失败");
             }
         };
         const handleError = (event: any, file: any) => {
@@ -325,6 +328,11 @@ export default defineComponent({
                 action.value = `${getApiUrl()}${getApiPrefix()}/upload/${newVal}`;
             }
         );
+        expose({
+            setFileList: (data: any[]) => {
+                fileList.value = data;
+            },
+        });
 
         return {
             uploadRefs,

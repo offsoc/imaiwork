@@ -301,4 +301,10 @@ class BaseModel extends Model
     {
         return $value ? FileService::setFileUrl($value) : '';
     }
+
+    public function getClipResultUrlAttr($value)
+    {
+
+        return $value ? FileService::getFileUrl($value) : '';
+    }
 }

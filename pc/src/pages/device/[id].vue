@@ -58,7 +58,7 @@
                 <div class="w-[178px] bg-white border-r border-r-[#E8E8E8] flex-shrink-0">
                     <div class="flex flex-col gap-y-4 p-4">
                         <div
-                            v-for="(item, index) in socialPlatformList"
+                            v-for="(item, index) in getSocialPlatformList"
                             :key="index"
                             class="flex items-center gap-x-3 px-4 hover:bg-primary-light-9 py-1.5 rounded-lg cursor-pointer"
                             :class="{
@@ -95,6 +95,7 @@
                             height="100%"
                             stripe
                             :row-style="{ height: '60px', cursor: 'pointer' }"
+                            :header-cell-style="{ height: '63px' }"
                             @row-click="handleRowClick">
                             <ElTableColumn label="头像" width="80">
                                 <template #default="{ row }">
@@ -199,6 +200,10 @@ const progressError = ref(false);
 // 获取当前设备信息
 const getCurrentDevice = computed(() => {
     return deviceLists.value.find((item) => item.device_code === queryParams.device_code);
+});
+
+const getSocialPlatformList = computed(() => {
+    return socialPlatformList.filter((item) => item.show);
 });
 
 const { onEvent, send } = useDeviceWs();

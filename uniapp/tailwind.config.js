@@ -53,7 +53,7 @@ module.exports = {
                 "dark-2": "var(--color-warning-dark-2, rgb(204, 122, 0))",
             },
             error: {
-                DEFAULT: "var(--color-error, #FB0000)",
+                DEFAULT: "var(--color-error, #f56c6c)",
                 "light-3": "var(--color-error-light-3, rgb(255, 107, 119))",
                 "light-5": "var(--color-error-light-5, rgb(255, 150, 158))",
                 "light-7": "var(--color-error-light-7, rgb(255, 192, 197))",

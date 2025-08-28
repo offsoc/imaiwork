@@ -8,7 +8,7 @@ use app\common\lists\ListsSearchInterface;
 use app\common\model\sv\SvAccount;
 use app\api\logic\sv\MessageLogic;
 use app\common\model\sv\SvMaterial;
-use app\common\model\sv\SvRobot;
+use app\common\model\kb\KbRobot;
 
 /**
  * 列表
@@ -49,7 +49,7 @@ class SvAccountLists extends BaseApiDataLists implements ListsSearchInterface
                     $item['robot_id'] = 0;
                 }
 
-                $item['robot_name'] = SvRobot::where('id', $item['robot_id'])->where('user_id', $this->userId)->value('name', '');
+                $item['robot_name'] = KbRobot::where('id', $item['robot_id'])->where('user_id', $this->userId)->value('name', '');
                 // 检查 extra 是否为 JSON，如果是，则转换为数组
                 if (!empty($item['extra'])) {
                     $extraArray = json_decode($item['extra'], true);

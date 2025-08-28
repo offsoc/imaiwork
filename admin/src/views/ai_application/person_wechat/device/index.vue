@@ -24,7 +24,8 @@
                         placeholder="请选择"
                         clearable
                         class="!w-[140px]"
-                        :empty-values="[null, undefined]">
+                        :empty-values="[null, undefined]"
+                        @change="getLists()">
                         <el-option label="全部" value />
                         <el-option label="在线" value="1" />
                         <el-option label="离线" value="0" />

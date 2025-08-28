@@ -8,6 +8,7 @@ use think\response\Json;
 use app\api\lists\chat\SceneLists;
 use app\api\lists\chat\SceneAssistantLists;
 use app\api\logic\KnowledgeLogic;
+use app\api\logic\kb\KbKnowLogic;
 
 class ChatController extends BaseApiController
 {
@@ -47,15 +48,17 @@ class ChatController extends BaseApiController
     public function commonChat(): Json
     {
         $params = $this->request->post();
-
+        $params['scene'] = '通用聊天';
+        $params['stream'] = true;
         if (isset($params['indexid']) && !empty($params['indexid'])) {
-            $params['scene'] = '通用聊天';
-            $params['stream'] = true;
+            $params['scene'] = 'RAG知识库聊天';
             return KnowledgeLogic::chat($params) ? $this->data(KnowledgeLogic::getReturnData()) : $this->fail(KnowledgeLogic::getError());
+        } else if(isset($params['kb_id']) && !empty($params['kb_id'])){
+            $params['scene'] = '向量知识库聊天';
+            return KnowledgeLogic::commonVectorChat($params) ? $this->data(KnowledgeLogic::getReturnData()) : $this->fail(KnowledgeLogic::getError());
         }else{
             return ChatLogic::commonChat($params) ? $this->data(ChatLogic::getReturnData()) : $this->fail(ChatLogic::getError());
         }
-       
     }
 
     /**
@@ -65,10 +68,14 @@ class ChatController extends BaseApiController
     public function sceneChat(): Json
     {
         $params = $this->request->post();
+        $params['scene'] = '通用聊天';
+        $params['stream'] = true;
         if (isset($params['indexid']) && !empty($params['indexid'])) {
-            $params['scene'] = '助理聊天';
-            $params['stream'] = true;
+            $params['scene'] = 'RAG知识库聊天';
             return KnowledgeLogic::sceneChat($params) ? $this->data(KnowledgeLogic::getReturnData()) : $this->fail(KnowledgeLogic::getError());
+        }else if(isset($params['kb_id']) && !empty($params['kb_id'])){
+            $params['scene'] = '向量知识库聊天';
+            return KnowledgeLogic::sceneVectorChat($params) ? $this->data(KnowledgeLogic::getReturnData()) : $this->fail(KnowledgeLogic::getError());
         }else{
             return ChatLogic::sceneChat($params) ? $this->data(ChatLogic::getReturnData()) : $this->fail(ChatLogic::getError());
         }

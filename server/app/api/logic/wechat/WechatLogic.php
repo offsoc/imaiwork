@@ -7,8 +7,8 @@ use app\common\model\wechat\AiWechatSetting;
 use app\common\model\wechat\AiWechatReplyStrategy;
 use app\common\model\wechat\AiWechatGreetStrategy;
 use app\common\model\wechat\AiWechatAcceptFriendStrategy;
-use app\common\model\wechat\AiWechatCircleReplyStrategy;
-use app\common\model\wechat\AiWechatCircleLikeStrategy;
+use app\common\model\wechat\AiWechatCircleReplyLikeStrategy;
+
 use think\facade\Db;
 
 /**
@@ -87,23 +87,15 @@ class WechatLogic extends WechatBaseLogic
                 ]);
             }
 
-            // 自动朋友圈评论策略
-            $accept = AiWechatCircleReplyStrategy::where('user_id', self::$uid)->findOrEmpty();
+            // 自动朋友圈评论点赞策略
+            $accept = AiWechatCircleReplyLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
             if ($accept->isEmpty())
             {
-                AiWechatCircleReplyStrategy::create([
+                AiWechatCircleReplyLikeStrategy::create([
                     'user_id' => self::$uid,
                 ]);
             }
 
-            // 自动朋友圈点赞策略
-            $accept = AiWechatCircleLikeStrategy::where('user_id', self::$uid)->findOrEmpty();
-            if ($accept->isEmpty())
-            {
-                AiWechatCircleLikeStrategy::create([
-                    'user_id' => self::$uid,
-                ]);
-            }
 
             Db::commit();
             // 返回设备信息

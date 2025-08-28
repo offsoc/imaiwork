@@ -7,7 +7,7 @@
                         <ElSelect
                             v-model="queryParams.copywriting_type"
                             class="!w-[100px]"
-                            popper-class="custom-select-popper"
+                            popper-class="dark-select-popper"
                             clearable
                             :show-arrow="false"
                             :empty-values="[null, undefined]"
@@ -88,7 +88,7 @@
                                 </div>
                             </div>
                             <div class="absolute right-2 top-2 z-[1000] w-9 h-9 invisible group-hover:visible">
-                                <utils-menu :item="item" :menu-list="utilsMenuList"></utils-menu>
+                                <handle-menu :theme="ThemeEnum.DARK" :data="item" :menu-list="utilsMenuList" />
                             </div>
                             <img src="../../../_assets/images/copywriting_bg.png" class="w-full h-full object-cover" />
                         </div>
@@ -109,12 +109,11 @@
 </template>
 
 <script setup lang="ts">
-import { AppTypeEnum } from "@/enums/appEnums";
+import { ThemeEnum, AppTypeEnum } from "@/enums/appEnums";
 import { getCopywritingLibraryList, deleteCopywritingLibrary } from "@/api/redbook";
-import { UtilsMenuType } from "@/pages/app/_typings/type";
+import { HandleMenuType } from "@/components/handle-menu/typings";
 import { CopywritingTypeEnum } from "@/pages/app/redbook/_enums";
 import Empty from "@/pages/app/redbook/_components/empty.vue";
-import UtilsMenu from "@/pages/app/_components/utils-menu.vue";
 import CreatePanel from "./_components/create-panel.vue";
 import EditPopup from "./_components/edit.vue";
 const route = useRoute();
@@ -145,7 +144,7 @@ const load = () => {
 
 const showEditPopup = ref(false);
 const editPopupRef = ref<InstanceType<typeof EditPopup>>();
-const utilsMenuList: UtilsMenuType[] = [
+const utilsMenuList: HandleMenuType[] = [
     {
         label: "重命名",
         icon: "local-icon-edit3",

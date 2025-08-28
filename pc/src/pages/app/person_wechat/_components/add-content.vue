@@ -5,6 +5,7 @@
                 <ElTabs v-model="activeName" @tab-click="handleTabClick">
                     <ElTabPane v-for="item in typeLists" :key="item.id" :label="item.name" :name="item.id"></ElTabPane>
                 </ElTabs>
+                <ElAlert title="请注意：视频、小程序、链接、文件支持个微使用" type="warning" class="mt-2"></ElAlert>
                 <div class="mt-2">
                     <div v-if="activeName === MaterialTypeEnum.TEXT" class="relative">
                         <ElInput
@@ -237,7 +238,7 @@
                             <div class="w-[120px] h-[120px] relative" v-if="item.type == MaterialTypeEnum.VIDEO">
                                 <video :src="item.content" fit="cover" class="w-full h-full" />
                                 <div
-                                    class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[rgba(0,0,0,0.5)] cursor-pointer"
+                                    class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[#00000080] cursor-pointer"
                                     @click="handlePreviewVideo(item.content)">
                                     <Icon name="local-icon-play" :size="50" color="#ffffff"></Icon>
                                 </div>
@@ -404,99 +405,99 @@ const materialLists = computed<MaterialItem[]>({
 const activeName = ref<MaterialTypeEnum>(MaterialTypeEnum.TEXT);
 
 // 素材类型列表
-// const typeLists: TypeListItem[] = [
-//     {
-//         id: MaterialTypeEnum.TEXT,
-//         key: "text",
-//         name: "文本",
-//         error_tips: "请输入文本内容",
-//     },
-//     {
-//         id: MaterialTypeEnum.IMAGE,
-//         key: "image",
-//         name: "图片",
-//         error_tips: "请上传图片",
-//     },
-//     {
-//         id: MaterialTypeEnum.VIDEO,
-//         key: "video",
-//         name: "视频",
-//         error_tips: "请上传视频",
-//     },
-//     {
-//         id: MaterialTypeEnum.MINI_PROGRAM,
-//         key: "miniProgram",
-//         name: "小程序",
-//         error_tips: "请选择小程序",
-//     },
-//     {
-//         id: MaterialTypeEnum.LINK,
-//         key: "link",
-//         name: "链接",
-//         error_tips: "请选择链接",
-//     },
-//     {
-//         id: MaterialTypeEnum.FILE,
-//         key: "file",
-//         name: "文件",
-//         error_tips: "请选择文件",
-//     },
-// ];
-const typeLists = computed(() => {
-    return props.type == 2
-        ? [
-              {
-                  id: MaterialTypeEnum.TEXT,
-                  key: "text",
-                  name: "文本",
-                  error_tips: "请输入文本内容",
-              },
-              {
-                  id: MaterialTypeEnum.IMAGE,
-                  key: "image",
-                  name: "图片",
-                  error_tips: "请上传图片",
-              },
-          ]
-        : [
-              {
-                  id: MaterialTypeEnum.TEXT,
-                  key: "text",
-                  name: "文本",
-                  error_tips: "请输入文本内容",
-              },
-              {
-                  id: MaterialTypeEnum.IMAGE,
-                  key: "image",
-                  name: "图片",
-                  error_tips: "请上传图片",
-              },
-              {
-                  id: MaterialTypeEnum.VIDEO,
-                  key: "video",
-                  name: "视频",
-                  error_tips: "请上传视频",
-              },
-              {
-                  id: MaterialTypeEnum.MINI_PROGRAM,
-                  key: "miniProgram",
-                  name: "小程序",
-                  error_tips: "请选择小程序",
-              },
-              {
-                  id: MaterialTypeEnum.LINK,
-                  key: "link",
-                  name: "链接",
-                  error_tips: "请选择链接",
-              },
-              {
-                  id: MaterialTypeEnum.FILE,
-                  key: "file",
-                  name: "文件",
-                  error_tips: "请选择文件",
-              },
-          ];
-});
+const typeLists: TypeListItem[] = [
+    {
+        id: MaterialTypeEnum.TEXT,
+        key: "text",
+        name: "文本",
+        error_tips: "请输入文本内容",
+    },
+    {
+        id: MaterialTypeEnum.IMAGE,
+        key: "image",
+        name: "图片",
+        error_tips: "请上传图片",
+    },
+    {
+        id: MaterialTypeEnum.VIDEO,
+        key: "video",
+        name: "视频",
+        error_tips: "请上传视频",
+    },
+    {
+        id: MaterialTypeEnum.MINI_PROGRAM,
+        key: "miniProgram",
+        name: "小程序",
+        error_tips: "请选择小程序",
+    },
+    {
+        id: MaterialTypeEnum.LINK,
+        key: "link",
+        name: "链接",
+        error_tips: "请选择链接",
+    },
+    {
+        id: MaterialTypeEnum.FILE,
+        key: "file",
+        name: "文件",
+        error_tips: "请选择文件",
+    },
+];
+// const typeLists = computed(() => {
+//     return props.type == 2
+//         ? [
+//               {
+//                   id: MaterialTypeEnum.TEXT,
+//                   key: "text",
+//                   name: "文本",
+//                   error_tips: "请输入文本内容",
+//               },
+//               {
+//                   id: MaterialTypeEnum.IMAGE,
+//                   key: "image",
+//                   name: "图片",
+//                   error_tips: "请上传图片",
+//               },
+//           ]
+//         : [
+//               {
+//                   id: MaterialTypeEnum.TEXT,
+//                   key: "text",
+//                   name: "文本",
+//                   error_tips: "请输入文本内容",
+//               },
+//               {
+//                   id: MaterialTypeEnum.IMAGE,
+//                   key: "image",
+//                   name: "图片",
+//                   error_tips: "请上传图片",
+//               },
+//               {
+//                   id: MaterialTypeEnum.VIDEO,
+//                   key: "video",
+//                   name: "视频",
+//                   error_tips: "请上传视频",
+//               },
+//               {
+//                   id: MaterialTypeEnum.MINI_PROGRAM,
+//                   key: "miniProgram",
+//                   name: "小程序",
+//                   error_tips: "请选择小程序",
+//               },
+//               {
+//                   id: MaterialTypeEnum.LINK,
+//                   key: "link",
+//                   name: "链接",
+//                   error_tips: "请选择链接",
+//               },
+//               {
+//                   id: MaterialTypeEnum.FILE,
+//                   key: "file",
+//                   name: "文件",
+//                   error_tips: "请选择文件",
+//               },
+//           ];
+// });
 
 // 当前编辑的素材数据
 const fileData = reactive<FileDataType>({
@@ -565,7 +566,7 @@ const handleTabClick = () => {
  * @returns 格式化后的类型名称
  */
 const getTypeName = (type: MaterialTypeEnum): string => {
-    return typeLists.value.find((item) => item.id == type)?.name + "消息" || "未知类型";
+    return typeLists.find((item) => item.id == type)?.name + "消息" || "未知类型";
 };
 
 /**
@@ -706,7 +707,7 @@ const handleAddInfo = (): void => {
     }
 
     // 获取当前选中的素材类型信息
-    const currData = typeLists.value.find((item) => item.id === activeName.value);
+    const currData = typeLists.find((item) => item.id === activeName.value);
     if (!currData) return;
 
     // 检查必填内容

@@ -32,7 +32,7 @@ class UserTerminalEnum
      * @notes 获取终端
      * @param bool $from
      * @return array|mixed|string
-     * @author cjhao
+     * @author kb
      * @date 2021/7/30 18:09
      */
     public static function getTermInalDesc($from = true)

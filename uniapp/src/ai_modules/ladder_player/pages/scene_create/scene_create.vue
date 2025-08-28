@@ -224,17 +224,15 @@
 
 <script setup lang="ts">
 import { lpSceneAdd, lpSceneEdit, lpSceneDetail, lpSceneDelete } from "@/api/ladder_player";
-import { useAudio } from "@/hooks/useAudio";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import { useAppStore } from "@/stores/app";
 import KnbSelect from "@/components/knb-select/knb-select.vue";
-
+import { KnbTypeEnum } from "@/enums/appEnums";
 const appStore = useAppStore();
-const { getLadderConfig } = appStore;
 
 const { dynamicHeight } = useKeyboardHeight();
 
-const formData = reactive({
+const formData = reactive<Record<string, any>>({
     id: "",
     name: "",
     description: "",
@@ -244,7 +242,9 @@ const formData = reactive({
     practitioner_persona: "",
     coach_emotion: "",
     coach_intensity: "",
-    index_id: "",
+    index_id: undefined,
+    kb_id: undefined,
+    kb_type: "",
 });
 
 const detail = ref<any>(null);
@@ -295,8 +295,16 @@ const openKnb = async () => {
 };
 
 const getSelectKnb = (val: any) => {
-    activeKnb.value = val;
-    formData.index_id = val.index_id;
+    const { type, data } = val;
+    activeKnb.value = data;
+    if (type == KnbTypeEnum.RAG) {
+        formData.index_id = data.index_id;
+        formData.kb_id = undefined;
+    } else {
+        formData.kb_id = data.id;
+        formData.index_id = undefined;
+    }
+    formData.kb_type = type == KnbTypeEnum.RAG ? 1 : 2;
 };
 
 const showPopup = ref(false);
@@ -325,6 +333,7 @@ const handleCreateScene = async () => {
     const title = formData.id ? "编辑" : "创建";
     try {
         const result = formData.id ? await lpSceneEdit(formData) : await lpSceneAdd(formData);
+        uni.hideLoading();
         uni.showToast({
             title: `${title}成功`,
             icon: "none",
@@ -344,13 +353,12 @@ const handleCreateScene = async () => {
             uni.navigateBack();
         }, 2000);
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || `${title}失败`,
             icon: "none",
             duration: 2000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

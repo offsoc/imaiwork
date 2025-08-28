@@ -53,7 +53,7 @@
                             :src="content"
                             :preview-src-list="[content]"
                             preview-teleported
-                            class="w-[50%] rounded-xl"
+                            class="max-w-[128px] rounded-xl"
                             lazy />
                     </div>
                     <div v-if="type == MaterialTypeEnum.VIDEO" class="content-wrapper">

@@ -139,7 +139,7 @@
             <div class="mt-4">
                 <ElDatePicker
                     class="!w-full !h-[50px]"
-                    popper-class="custom-date-picker-popper"
+                    popper-class="dark-date-picker-popper"
                     v-model="changeDate.retry_time"
                     value-format="YYYY-MM-DD HH:mm:ss"
                     type="datetime"
@@ -158,13 +158,13 @@
 <script setup lang="ts">
 import { getPublishRecordList, deletePublishRecord, retryPublishRecord } from "@/api/redbook";
 import dayjs from "dayjs";
-import { PublishTaskType } from "@/pages/app/redbook/_enums";
+import { PublishTaskTypeEnum } from "@/pages/app/redbook/_enums";
 const props = withDefaults(
     defineProps<{
-        type?: PublishTaskType;
+        type?: PublishTaskTypeEnum;
     }>(),
     {
-        type: PublishTaskType.VIDEO,
+        type: PublishTaskTypeEnum.VIDEO,
     }
 );
 
@@ -174,7 +174,7 @@ const emit = defineEmits<{
 }>();
 
 const nuxtApp = useNuxtApp();
-const query = queryToObject();
+const query = searchQueryToObject();
 const queryParams = reactive({
     id: query.publish_id,
     material_title: "",

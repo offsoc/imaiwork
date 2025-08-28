@@ -201,7 +201,8 @@ class WorkbenchLogic extends BaseLogic
         $now = time();
         $thirtyMinutesAgo = strtotime('-30 minutes'); // 30分钟前
 
-        $active_members = UserActiveLog::whereBetween('create_time', [$thirtyMinutesAgo, $now])->count();
+        $active_members = UserActiveLog::whereBetween('create_time', [strtotime(date('Y-m-d 00:00:00', time())), strtotime(date('Y-m-d 23:59:59', time()))])
+            ->whereBetween('update_time', [$thirtyMinutesAgo, $now])->count();
 
         //充值用户数
         $recharge_members = GiftPackageOrder::where('pay_status', 1)->count('DISTINCT user_id');

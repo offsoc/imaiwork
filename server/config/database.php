@@ -59,7 +59,30 @@ return [
                 PDO::ATTR_PERSISTENT => true,
             ],
         ],
-
+        'pgsql' =>   [
+            // 数据库类型
+            'type'        => 'pgsql',
+            // 服务器地址
+            'hostname'    => env('pgsql.hostname', 'postgres'),
+            // 数据库名
+            'database'    => env('pgsql.database', 'postgres'),
+            // 数据库用户名
+            'username'    => env('pgsql.username', 'postgres'),
+            // 数据库密码
+            'password'    => env('pgsql.password', 'postgres'),
+            // 数据库连接端口
+            'hostport'    => env('pgsql.hostport', '5432'),
+            // 数据库连接参数
+            'params' => [
+                // 添加以下参数以启用pgVector扩展
+                PDO::ATTR_EMULATE_PREPARES => true,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+            ],
+            // 数据库编码默认采用utf8
+            'charset'     => env('pgsql.charset', 'utf8'),
+            // 数据库表前缀
+            'prefix'      => env('pgsql.prefix', 'la_')
+        ]
         // 更多的数据库配置信息
     ],
 ];

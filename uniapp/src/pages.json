@@ -315,6 +315,15 @@
 					}
 				},
 				{
+					"path": "pages/audio_choose/audio_choose",
+					"style": {
+						"navigationBarTitleText": "选择音乐"
+					},
+					"meta": {
+						"share": true
+					}
+				},
+				{
 					"path": "pages/model_manage/model_manage",
 					"style": {
 						"navigationBarTitleText": "我的模特",
@@ -331,6 +340,15 @@
 					"style": {
 						"navigationBarTitleText": "输入文案",
 						"navigationBarBackgroundColor": "#F9FAFB"
+					},
+					"meta": {
+						"share": true
+					}
+				},
+				{
+					"path": "pages/styles_choose/styles_choose",
+					"style": {
+						"navigationBarTitleText": "剪辑风格选择"
 					},
 					"meta": {
 						"share": true
@@ -530,6 +548,85 @@
 							"backgroundColor": "rgba(0,0,0,0)",
 							"popGesture": "none"
 						}
+					}
+				}
+			]
+		},
+		{
+			"root": "ai_modules/sph",
+			"pages": [
+				{
+					"path": "pages/index/index",
+					"style": {
+						"navigationBarTitleText": "AI自动获客",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false
+					},
+					"meta": {
+						"auth": true,
+						"share": true
+					}
+				},
+				{
+					"path": "pages/task_list/task_list",
+					"style": {
+						"navigationBarTitleText": "任务列表",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/task_detail/task_detail",
+					"style": {
+						"navigationBarTitleText": "任务详情",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/keywords/keywords",
+					"style": {
+						"navigationBarTitleText": "检索关键词设置",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/create_task/create_task",
+					"style": {
+						"navigationBarTitleText": "创建获客任务",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/create_task_set/create_task_set",
+					"style": {
+						"navigationBarTitleText": "高级设置",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/clue_list/clue_list",
+					"style": {
+						"navigationBarTitleText": "线索词",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false
+					}
+				},
+				{
+					"path": "pages/clue_detail/clue_detail",
+					"style": {
+						"navigationBarTitleText": "查看线索词",
+						"navigationStyle": "custom",
+						"enablePullDownRefresh": false,
+						"disableScroll": true
 					}
 				}
 			]

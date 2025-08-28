@@ -14,7 +14,7 @@ class CardCodeRecordController extends BaseAdminController
     /**
      * @notes 列表类
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 12:09
      */
     public function lists()

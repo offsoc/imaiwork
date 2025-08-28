@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
-use GuzzleHttp\Client;
 
 /**
  * 设备能力
@@ -45,15 +44,13 @@ trait DeviceTrait
     protected function getDeviceInfo(string $deviceId): array
     {
         try {
-            
             $result = \app\common\service\ToolsService::Auth()->checkDevice($deviceId);
-            if((int)$result['code'] === 10000){
+            if ((int)$result['code'] === 10000) {
                 return $result['data'];
-            }else{
+            } else {
                 return [];
             }
         } catch (\Throwable $e) {
-            //throw $th;
             $this->withChannel('wechat_socket')->withLevel('error')->withTitle('updateDevices')->withContext([
                 'deviceId' => $deviceId,
                 'trace' => $e->getTraceAsString(),
@@ -71,16 +68,11 @@ trait DeviceTrait
     protected function updateDevices(array $device): void
     {
         try {
-            
             $body = \app\common\service\ToolsService::Auth()->deviceUpdate($device);
-
             $this->withChannel('wechat_socket')->withLevel('info')->withTitle('updateDevices')->withContext([
                 'deviceInfo' => $body
             ])->log();
-            
         } catch (\Throwable $e) {
-            //throw $th;
-
             $this->withChannel('wechat_socket')->withLevel('error')->withTitle('updateDevices')->withContext([
                 'deviceInfo' => $device,
                 'trace' => $e->getTraceAsString(),
@@ -98,7 +90,6 @@ trait DeviceTrait
     {
         $statusKey = $this->getDeviceKey($deviceId, 'status');
         $status = $this->redis()->get($statusKey);
-
         return $status === 'online';
     }
 
@@ -115,7 +106,6 @@ trait DeviceTrait
             $this->getDeviceKey($deviceId, 'status'),
             $online ? 'online' : 'offline'
         );
-
         if ($online) {
             $this->updateDeviceHeartbeat($deviceId);
         }
@@ -145,7 +135,6 @@ trait DeviceTrait
      */
     protected function verifyToken(string $deviceId, string $token, string $type = 'device'): bool
     {
-        
         if ($type === 'device') {
             $tokenKey = $this->getDeviceKey($deviceId, 'token');
             $tokenValue = $this->redis()->get($tokenKey);
@@ -153,7 +142,6 @@ trait DeviceTrait
             $tokenKey = $this->getClientKey($deviceId, 'token');
             $tokenValue = $this->redis()->get(trim($tokenKey));
         }
-        
 
         $this->withChannel('wechat_socket')->withLevel('info')->withTitle('verifyToken')->withContext([
             'type' => $type,
@@ -186,7 +174,7 @@ trait DeviceTrait
         // 生成并缓存Token
         $token = hash('sha256', $deviceId . $type . time() . uniqid());
         $this->redis()->setex($tokenKey, $type === 'device' ? self::$DEVICE_TOKEN_TTL : self::$CLIENT_TOKEN_TTL, $token);
-       
+
         return $token;
     }
 }

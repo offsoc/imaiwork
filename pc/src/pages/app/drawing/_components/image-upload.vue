@@ -13,7 +13,7 @@
                 @success="getUploadImage">
                 <div class="flex flex-col items-center justify-center gap-2 h-[112px] w-full">
                     <template v-if="!formData[imgKey]">
-                        <Icon name="local-icon-draw_upload" :size="28" color="#ffffff"></Icon>
+                        <Icon name="local-icon-file_add" :size="28" color="#ffffff"></Icon>
                         <span class="text-white text-[11px]">{{ content }}</span>
                     </template>
                     <div class="border border-primary rounded-md w-full h-full overflow-hidden relative" v-else>

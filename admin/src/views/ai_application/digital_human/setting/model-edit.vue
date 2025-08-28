@@ -2,7 +2,7 @@
     <popup ref="popupRef" title="编辑驱动模型" width="500px" @close="close" @confirm="save">
         <el-form :model="formData">
             <el-form-item label="名称">
-                <el-input v-model="formData.name" maxlength="10" show-word-limit />
+                <el-input v-model="formData.name" maxlength="4" show-word-limit />
             </el-form-item>
             <el-form-item label="描述">
                 <el-input v-model="formData.described" type="textarea" :rows="4" maxlength="50" show-word-limit />

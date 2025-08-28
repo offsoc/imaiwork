@@ -1,22 +1,22 @@
 <template>
-	<div>
-		<el-card class="!border-none" shadow="never">
-			<div class="text-xl font-medium mb-[20px]">提示词配置</div>
-			<el-form :model="promptConfig">
-				<el-form-item label="提示词">
-					<div>
-						<el-input
-							v-model="promptConfig.prompt_text"
-							type="textarea"
-							placeholder="请输入提示词"
-							class="w-[500px]"
-							:rows="20" />
-						<div class="mt-2">
-							<el-button
-								type="primary"
-								link
-								v-copy="
-									`
+    <div>
+        <el-card class="!border-none" shadow="never">
+            <div class="text-xl font-medium mb-[20px]">提示词配置</div>
+            <el-form :model="promptConfig">
+                <el-form-item label="提示词">
+                    <div>
+                        <el-input
+                            v-model="promptConfig.prompt_text"
+                            type="textarea"
+                            placeholder="请输入提示词"
+                            class="w-[500px]"
+                            :rows="20" />
+                        <div class="mt-2">
+                            <el-button
+                                type="primary"
+                                link
+                                v-copy="
+                                    `
 							角色(Role):
 							你是一位思维导图设计专家,擅长将长篇文章、讲座内容、会议录音等不同形式的长文本,转化为结构清晰、层次分明的思维导图。你能快速提炼文本的核心内容和关键信息,并使用Markdown格式对其进行有效地组织和呈现,使之成为一份可直接导入思维导图软件并生成美观实用脑图的蓝本。
 
@@ -67,50 +67,44 @@
 
 							【用户原始需求描述】= < {{input}} >;
 							根据上面的用户原始需求描述，按上面的提示词原则，必须用规定<输出格式>来输出；不要输出其它任何无关内容；`
-								">
-								复制示例指令
-							</el-button>
-							如果示例指令效果不明显，或者效果不好，可自行调整提示词，<el-tag
-								type="danger"
-								v-html="`{{input}}`"></el-tag
-							>为用户输入的原始需求描述，切记保留
-						</div>
-					</div>
-				</el-form-item>
-			</el-form>
-			<div class="">
-				<el-button
-					type="primary"
-					@click="lockSavePromptConfig"
-					:loading="isSavePromptConfig"
-					>保存</el-button
-				>
-			</div>
-		</el-card>
-	</div>
+                                ">
+                                复制示例指令
+                            </el-button>
+                            如果示例指令效果不明显，或者效果不好，可自行调整提示词，<el-tag
+                                type="danger"
+                                v-html="`{{input}}`"></el-tag
+                            >为用户输入的原始需求描述，切记保留
+                        </div>
+                    </div>
+                </el-form-item>
+            </el-form>
+            <div class="">
+                <el-button type="primary" @click="lockSavePromptConfig" :loading="isSavePromptConfig">保存</el-button>
+            </div>
+        </el-card>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { getCreditSet, setCreditSet } from "@/api/marketing/creditset";
-import { getGptPrompt, saveGptPrompt } from "@/api/chat";
+import { getChatPrompt, saveChatPrompt } from "@/api/chat";
 import feedback from "@/utils/feedback";
 import { useLockFn } from "@/hooks/useLockFn";
 
 const promptConfig = ref<any>({});
 
-const getGptPromptConfig = async () => {
-	const data = await getGptPrompt();
-	promptConfig.value = data.find((item: any) => item.id === 2);
+const getChatPromptConfig = async () => {
+    const data = await getChatPrompt();
+    promptConfig.value = data.find((item: any) => item.id === 2);
 };
 
 const savePromptConfig = async () => {
-	await saveGptPrompt(promptConfig.value);
+    await saveChatPrompt(promptConfig.value);
 };
 
-const { lockFn: lockSavePromptConfig, isLock: isSavePromptConfig } =
-	useLockFn(savePromptConfig);
+const { lockFn: lockSavePromptConfig, isLock: isSavePromptConfig } = useLockFn(savePromptConfig);
 
-getGptPromptConfig();
+getChatPromptConfig();
 </script>
 
 <style scoped></style>

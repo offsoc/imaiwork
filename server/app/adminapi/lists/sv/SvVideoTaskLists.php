@@ -48,7 +48,7 @@ class SvVideoTaskLists extends BaseAdminDataLists implements ListsSearchInterfac
             $item['upload_audio_url']     = trim($item['upload_audio_url']) ? FileService::getFileUrl($item['upload_audio_url']): "";
             $item['upload_video_url']         = trim($item['upload_video_url']) ? FileService::getFileUrl($item['upload_video_url']): "";
             $item['video_result_url']         = trim($item['video_result_url']) ? FileService::getFileUrl($item['video_result_url']): "";
-
+            $item['clip_result_url']         = trim($item['clip_result_url']) ? FileService::getFileUrl($item['clip_result_url']): "";
             if(in_array($item['status'],[4,5,6])){
                 switch ($item['model_version']) {
                     case 1:
@@ -62,7 +62,9 @@ class SvVideoTaskLists extends BaseAdminDataLists implements ListsSearchInterfac
                         break;
                     case 6:
                         $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT;
-
+                        break;
+                    case 7:
+                        $change_type = AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_CHANJING;
                         break;
                 }
 

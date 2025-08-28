@@ -77,7 +77,7 @@ class AdminAuthCache extends BaseCache
     /**
      * @notes 获取全部权限uri
      * @return array|mixed
-     * @author cjhao
+     * @author kb
      * @date 2021/9/13 11:41
      */
     public function getAllUri()
@@ -98,7 +98,7 @@ class AdminAuthCache extends BaseCache
     /**
      * @notes 清理管理员缓存
      * @return bool
-     * @author cjhao
+     * @author kb
      * @date 2021/10/13 18:47
      */
     public function clearAuthCache()

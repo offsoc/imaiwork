@@ -5,6 +5,7 @@ namespace app\api\logic\sv;
 use app\common\model\sv\SvAddWechatRecord;
 use app\common\model\sv\SvAddWechatStrategy;
 use app\common\model\wechat\AiWechat;
+use app\common\model\sv\SvAccount;
 use think\facade\Cache;
 /**
  * StrategyLogic
@@ -26,7 +27,12 @@ class SvAddWechatRecordLogic extends SvBaseLogic
                 throw new \Exception('请勿重复执行', 400);
             }
 
-            $strategy = SvAddWechatStrategy::where('device_code', $record['device_code'])->where('account', $record['account'])->limit(1)->findOrEmpty();
+            $account = SvAccount::where('device_code', $record['device_code'])->where('user_id', self::$uid)->findOrEmpty();
+            if($account->isEmpty()){
+                throw new \Exception('设备账号信息不存在,请先更新设备账号信息', 400);
+            }
+
+            $strategy = SvAddWechatStrategy::where('device_code', $record['device_code'])->where('account', $account['account'])->limit(1)->findOrEmpty();
             if($strategy->isEmpty()){
                 throw new \Exception('请先配置加微策略', 400);
             }

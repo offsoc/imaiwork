@@ -4,7 +4,7 @@
             <div class="w-[178px] bg-white border-r border-r-[#E8E8E8] flex-shrink-0">
                 <div class="flex flex-col gap-y-4 p-4">
                     <div
-                        v-for="(item, index) in socialPlatformList"
+                        v-for="(item, index) in getSocialPlatformList"
                         :key="index"
                         class="flex items-center gap-x-3 px-4 hover:bg-primary-light-9 py-1.5 rounded-lg cursor-pointer"
                         :class="{ 'bg-primary-light-9': currentSocialPlatform === item.type }"
@@ -31,7 +31,13 @@
                     </div>
                 </div>
                 <div class="grow min-h-0 mt-4">
-                    <ElTable :data="accountPager.lists" v-loading="accountPager.loading" height="100%" stripe>
+                    <ElTable
+                        :data="accountPager.lists"
+                        v-loading="accountPager.loading"
+                        height="100%"
+                        stripe
+                        :row-style="{ height: '60px' }"
+                        :header-cell-style="{ height: '63px' }">
                         <ElTableColumn label="头像">
                             <template #default="{ row }">
                                 <ElAvatar :src="row.avatar"></ElAvatar>
@@ -92,6 +98,10 @@ const route = useRoute();
 const { socialPlatformList, currentSocialPlatform } = useSocialPlatform();
 const { accountPager, queryParams, getAccountList, resetAccountPage, resetAccountParams } = useAccount({
     type: currentSocialPlatform.value,
+});
+
+const getSocialPlatformList = computed(() => {
+    return socialPlatformList.filter((item) => item.show);
 });
 
 const handleChangeSocialPlatform = (type: AppTypeEnum) => {

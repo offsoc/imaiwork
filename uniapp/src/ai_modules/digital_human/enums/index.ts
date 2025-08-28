@@ -22,19 +22,19 @@ export const DigitalHumanModelVersionEnumMap = {
 };
 
 // 模型类型
-export enum ModeType {
+export enum ModeTypeEnum {
     VIDEO = 1, // 视频
     ANCHOR = 2, // 形象
 }
 
 // 创建类型
-export enum CreateType {
+export enum CreateTypeEnum {
     TEXT = 1, // 文本
     AUDIO = 2, // 音频
 }
 
 // 监听类型
-export enum ListenerType {
+export enum ListenerTypeEnum {
     // AI文案
     AI_COPYWRITER = "ai-copywriter",
     // 音色
@@ -43,4 +43,28 @@ export enum ListenerType {
     UPLOAD_ANCHOR = "upload-anchor",
     // 上传视频
     UPLOAD_VIDEO = "upload-video",
+    // 选择剪辑风格
+    CHOOSE_STYLES = "choose-styles",
+    // 选择背景音乐
+    CHOOSE_MUSIC = "choose-music",
 }
+
+// 剪辑风格
+export enum ClipStyleEnum {
+    AI_RECOMMEND = 1,
+    TECHNOLOGY = 2,
+    LIFE = 3,
+    MARKETING = 4,
+    KNOWLEDGE = 5,
+    VARIETY = 6,
+}
+
+// 剪辑风格枚举映射
+export const ClipStyleMap = {
+    [ClipStyleEnum.AI_RECOMMEND]: "Ai智能推荐",
+    [ClipStyleEnum.TECHNOLOGY]: "科技风格",
+    [ClipStyleEnum.LIFE]: "生活风格",
+    [ClipStyleEnum.MARKETING]: "营销风格",
+    [ClipStyleEnum.KNOWLEDGE]: "知识科普风格",
+    [ClipStyleEnum.VARIETY]: "综艺风格",
+};

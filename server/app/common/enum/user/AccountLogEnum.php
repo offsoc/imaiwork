@@ -115,6 +115,10 @@ class AccountLogEnum
     const TOKENS_DEC_DOUBAO_IMAGE_TO_VIDEO = 2015;
     const TOKENS_DEC_DOUBAO_TEXT_TO_POSTERIMAGE = 2016;
 
+    const TOKENS_DEC_SPH_ADD_WECHAT = 2017;
+    const TOKENS_DEC_AI_REPLY_LIKE = 2018;
+
+
     //会议纪要
     const TOKENS_DEC_MEETING = 3001;
 
@@ -156,6 +160,11 @@ class AccountLogEnum
     const TOKENS_DEC_HUMAN_AUDIO_CHANJING = 5021;
     const TOKENS_DEC_HUMAN_VIDEO_CHANJING = 5022;
 
+
+
+    const TOKENS_DEC_VIDEO_CLIP = 5101;
+
+
     //AI陪练
     const TOKENS_DEC_AI_LIANLIAN = 6001;
 
@@ -186,6 +195,23 @@ class AccountLogEnum
     const TOKENS_INC_CARDCODE_GIVE  = 9105;  //卡密兑换赠送算力值
 
     const TOKENS_DEC_AI_XHS = 9104;
+
+
+     /**
+     * 短视频
+     */
+    const TOKENS_DEC_SPH_ADD_FRIENDS = 10001;
+    const TOKENS_DEC_SPH_PRIVATE_CHAT = 10002;  
+    const TOKENS_DEC_SPH_SEARCH_TERMS = 10003;
+
+    /**
+     * 向量知识库
+     */
+    const TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE = 11001;
+    const TOKENS_DEC_TEXT_TO_VECTOR = 11002;
+
+
+
 
     /**
      * 用户算力（减少类型汇总）
@@ -248,7 +274,16 @@ class AccountLogEnum
         self::TOKENS_DEC_HUMAN_VOICE_CHANJING,
         self::TOKENS_DEC_HUMAN_AUDIO_CHANJING,
         self::TOKENS_DEC_HUMAN_VIDEO_CHANJING,
-        self::TOKENS_DEC_DOUBAO_TEXT_TO_POSTERIMAGE
+        self::TOKENS_DEC_DOUBAO_TEXT_TO_POSTERIMAGE,
+        self::TOKENS_DEC_SPH_ADD_WECHAT,
+        self::TOKENS_DEC_SPH_ADD_FRIENDS,
+        self::TOKENS_DEC_SPH_PRIVATE_CHAT,
+        self::TOKENS_DEC_SPH_SEARCH_TERMS,
+        self::TOKENS_DEC_AI_REPLY_LIKE,
+        self::TOKENS_DEC_VIDEO_CLIP,
+        self::TOKENS_DEC_TEXT_TO_VECTOR,
+        self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE
+
     ];
 
 
@@ -372,6 +407,16 @@ class AccountLogEnum
             self::TOKENS_DEC_HUMAN_VOICE_CHANJING       => '数字人音色 - 蝉镜-减少算力',
             self::TOKENS_DEC_HUMAN_AUDIO_CHANJING       => '数字人音频 - 蝉镜-减少算力',
             self::TOKENS_DEC_HUMAN_VIDEO_CHANJING       => '数字人视频 - 蝉镜-减少算力',
+
+            self::TOKENS_DEC_SPH_ADD_WECHAT            => '视频号获客减少算力',
+            self::TOKENS_DEC_SPH_ADD_FRIENDS           => '视频号获客加好友话术自动去重减少算力',
+            self::TOKENS_DEC_SPH_PRIVATE_CHAT          => '视频号获客主动私聊话术去重减少算力',
+            self::TOKENS_DEC_SPH_SEARCH_TERMS          => '视频号获客检索关键词减少算力',
+            
+            self::TOKENS_DEC_AI_REPLY_LIKE            => 'AI朋友圈评论点赞减少算力',
+            self::TOKENS_DEC_VIDEO_CLIP               => '视频剪辑减少算力',
+            self::TOKENS_DEC_TEXT_TO_VECTOR           => '文本转向量减少算力',
+            self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE  => '创建向量知识库减少算力',
         ];
         if ($flag) {
             return $desc;

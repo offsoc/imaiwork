@@ -18,7 +18,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 获取列表
      * @return array
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 18:33
      */
     public function getOtherList()
@@ -31,7 +31,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 列表类
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 12:09
      */
     public function lists()
@@ -43,7 +43,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 添加卡密
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 15:34
      */
     public function add()
@@ -60,7 +60,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 获取卡密详情
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 16:27
      */
     public function detail()
@@ -74,7 +74,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 删除卡吗
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 17:32
      */
     public function del()
@@ -88,7 +88,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 获取卡密设置
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 11:50
      */
     public function getConfig()
@@ -101,7 +101,7 @@ class CardCodeController extends BaseAdminController
     /**
      * @notes 卡密设置
      * @return mixed
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 11:56
      */
     public function setConfig()

@@ -26,13 +26,18 @@
                             {{ row.wechat_nickname }}<template v-if="row.remark">({{ row.remark }})</template>
                         </template>
                     </ElTableColumn>
+                    <ElTableColumn prop="wechat_id" label="微信ID" width="180"></ElTableColumn>
                     <ElTableColumn label="接管模式" width="100">
                         <template #default="{ row }">
                             <span v-if="row.takeover_mode === 1">AI接管</span>
                             <span v-else>人工介入</span>
                         </template>
                     </ElTableColumn>
-                    <ElTableColumn prop="robot_name" label="关联机器人" min-width="160"></ElTableColumn>
+                    <ElTableColumn prop="robot_name" label="关联机器人" min-width="160">
+                        <template #default="{ row }">
+                            <span>{{ row.robot_name || "-" }}</span>
+                        </template>
+                    </ElTableColumn>
                     <ElTableColumn label="接管类型" width="120">
                         <template #default="{ row }">
                             <span v-if="row.takeover_type === 0">全部</span>
@@ -341,10 +346,5 @@ onMounted(() => {
 :deep(.el-input-group__append) {
     background-color: transparent;
     border: none;
-}
-:deep(.el-table) {
-    th.el-table__cell.is-leaf {
-        border-top: var(--el-table-border);
-    }
 }
 </style>

@@ -81,15 +81,17 @@ const getPhoneNumber = async (e: any) => {
         const res = await getMobileNumber({
             code,
         });
+        uni.hideLoading();
+
         emit("login", res);
     } catch (error: any) {
+        uni.hideLoading();
+
         uni.showToast({
             title: error || "获取手机号失败",
             icon: "none",
             duration: 5000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

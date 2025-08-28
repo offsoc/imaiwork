@@ -119,10 +119,14 @@ const getConsumeTokens = () => {
 
     // 处理直接映射场景
     if (directMappings[props.type]) {
-        tokens = userStore.getTokenByScene(directMappings[props.type])?.score;
+        const { score, unit } = userStore.getTokenByScene(directMappings[props.type]);
+        tokens = score;
+        consumeTokensUnit.value = unit;
     } else if (props.type == SidebarEnum.POSTER_IMAGE) {
         const typeMapping = tokenMappings[props.type];
-        tokens = userStore.getTokenByScene(typeMapping[formData.model])?.score;
+        const { score, unit } = userStore.getTokenByScene(typeMapping[formData.model]);
+        tokens = score;
+        consumeTokensUnit.value = unit;
     } else if (tokenMappings[props.type]) {
         const typeMapping = tokenMappings[props.type];
         const modelMapping = typeMapping[formData.type];
@@ -130,7 +134,9 @@ const getConsumeTokens = () => {
         if (modelMapping) {
             const scene = modelMapping[formData.model];
             if (scene) {
-                tokens = userStore.getTokenByScene(scene)?.score;
+                const { score, unit } = userStore.getTokenByScene(scene);
+                tokens = score;
+                consumeTokensUnit.value = unit;
             }
         }
     }

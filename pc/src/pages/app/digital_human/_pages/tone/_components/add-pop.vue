@@ -40,7 +40,7 @@
                         v-model="formData.gender"
                         class="!h-11"
                         placeholder="请选择性别"
-                        popper-class="custom-select-popper"
+                        popper-class="dark-select-popper"
                         :show-arrow="false">
                         <ElOption value="male" label="男"></ElOption>
                         <ElOption value="female" label="女"></ElOption>
@@ -50,7 +50,7 @@
                     <ElSelect
                         v-model="formData.model_version"
                         class="!h-11"
-                        popper-class="custom-select-popper"
+                        popper-class="dark-select-popper"
                         :show-arrow="false"
                         placeholder="请选择模型">
                         <ElOption
@@ -111,7 +111,19 @@ const emit = defineEmits<{
 const appStore = useAppStore();
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+const modelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        const modelChannel = channel.filter((item) => {
+            item.id = parseInt(item.id);
+            if (item.status == 1 && DigitalHumanModelVersionEnum.CHANJING == item.id) {
+                return item;
+            }
+        });
+        return modelChannel;
+    }
+    return [];
+});
 
 const tokensValue = computed(() => {
     return {

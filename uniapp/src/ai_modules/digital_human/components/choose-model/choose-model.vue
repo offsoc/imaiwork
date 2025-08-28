@@ -26,6 +26,7 @@
 
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
+import { DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
 const props = defineProps({
     show: {
         type: Boolean,
@@ -43,7 +44,13 @@ const showPopup = computed({
     },
 });
 const appStore = useAppStore();
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+const modelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        return channel.filter((item: any) => item.status == 1 && DigitalHumanModelVersionEnum.CHANJING == item.id);
+    }
+    return [];
+});
 
 const currModel = ref();
 

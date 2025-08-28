@@ -1,5 +1,3 @@
-import { AppKeyEnum, appKeyNameMap, FollowTypeEnum } from "@/enums/appEnums";
-
 /** 知识库标点符号 Start */
 
 export const punctuationOptions = [

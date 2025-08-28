@@ -27,7 +27,7 @@ class CardCodeLogic extends BaseLogic
      * @param string $sn
      * @param string $userId
      * @return array|string
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 16:29
      */
     public function checkCard(string $sn,int $userId)
@@ -61,7 +61,7 @@ class CardCodeLogic extends BaseLogic
     /**
      * @notes 卡密兑换
      * @param $sn
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 17:11
      */
     public function useCard($sn,$userId)
@@ -122,7 +122,7 @@ class CardCodeLogic extends BaseLogic
      * @notes 验证卡密
      * @param $sn
      * @return array
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 17:03
      */
     public function checkSn($sn)

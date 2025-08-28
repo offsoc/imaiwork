@@ -127,15 +127,15 @@
             </div>
         </div>
     </div>
-    <PublishPanel :type="PublishTaskType.VIDEO" @back="publishBack" v-else-if="isPublish" />
-    <PublishRecord :type="PublishTaskType.VIDEO" @back="publishBack" v-else-if="isRecord" />
+    <PublishPanel :type="PublishTaskTypeEnum.VIDEO" @back="publishBack" v-else-if="isPublish" />
+    <PublishRecord :type="PublishTaskTypeEnum.VIDEO" @back="publishBack" v-else-if="isRecord" />
 </template>
 
 <script setup lang="ts">
 import dayjs from "dayjs";
 import { getPublishTaskList, deletePublishTask, changePublishTaskStatus } from "@/api/redbook";
 import Empty from "@/pages/app/redbook/_components/empty.vue";
-import { PublishTaskType, SidebarTypeEnum } from "@/pages/app/redbook/_enums";
+import { PublishTaskTypeEnum, SidebarTypeEnum } from "@/pages/app/redbook/_enums";
 import PublishPanel from "@/pages/app/redbook/_components/publish-panel.vue";
 import PublishRecord from "@/pages/app/redbook/_components/publish-record.vue";
 
@@ -144,7 +144,7 @@ const { query } = useRoute();
 const queryParams = reactive({
     name: "",
     page_size: 20,
-    media_type: PublishTaskType.VIDEO,
+    media_type: PublishTaskTypeEnum.VIDEO,
 });
 
 const { pager, getLists, resetPage } = usePaging({

@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full flex flex-col gap-8 pt-4">
+    <div class="h-full flex flex-col gap-4 pt-4">
         <div class="">
             <div class="font-bold">关键词</div>
             <div class="mt-3">

@@ -189,10 +189,4 @@ const getAttachmentType = (type: number) => {
 getLists();
 </script>
 
-<style scoped lang="scss">
-:deep(.el-table) {
-    th.el-table__cell.is-leaf {
-        border-top: var(--el-table-border);
-    }
-}
-</style>
+<style scoped lang="scss"></style>

@@ -419,3 +419,18 @@ function card_sn($table, $field, $prefix = 'K', $randSuffixLength = 6, $ruleType
     }
     return $string;
 }
+
+/***
+ * @notes 格式化金额去除右边多余的0
+ * @param $value
+ * @return string
+ */
+function format_amount_zero($value): string
+{
+    $value = strval($value);
+    if (str_contains($value, '.')) {
+        $value = rtrim($value, '0');
+        return rtrim($value, '.');
+    }
+    return $value;
+}

@@ -12,9 +12,16 @@
                 <!-- 接管Ai -->
                 <ElFormItem label="接管机器人AI" prop="robot_id" v-if="formData.takeover_mode === 1">
                     <div class="w-full">
-                        <ElSelect v-model="formData.robot_id" placeholder="请选择接管机器人AI" filterable clearable>
+                        <ElSelect
+                            v-model="formData.robot_id"
+                            filterable
+                            clearable
+                            remote
+                            placeholder="请选择接管机器人AI"
+                            :loading="agentLoading"
+                            :remote-method="getAgentFn">
                             <ElOption
-                                v-for="item in optionsData.agentLists"
+                                v-for="item in agentLists"
                                 :key="item.id"
                                 :label="item.name"
                                 :value="item.id"></ElOption>
@@ -62,15 +69,14 @@ const rules = {
     robot_id: [{ required: true, message: "请选择接管机器人AI", trigger: "blur" }],
 };
 
-const { optionsData } = useDictOptions<{
-    agentLists: any[];
-}>({
-    agentLists: {
-        api: getAgentList,
-        params: { page_size: 999 },
-        transformData: (data) => data.lists,
-    },
-});
+const agentLists = ref<any[]>([]);
+const agentLoading = ref(false);
+const getAgentFn = async (query?: string) => {
+    agentLoading.value = true;
+    const data = await getAgentList({ keyword: query });
+    agentLists.value = data.lists;
+    agentLoading.value = false;
+};
 
 const handleSubmit = async () => {
     await formRef.value.validate();
@@ -95,6 +101,7 @@ watch(
         if (val) {
             formData.account = val;
             getDetail();
+            getAgentFn();
         }
     },
     {

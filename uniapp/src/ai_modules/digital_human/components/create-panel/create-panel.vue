@@ -127,7 +127,7 @@
 import { useUserStore } from "@/stores/user";
 import { formatAudioTime } from "@/utils/util";
 import { TokensSceneEnum } from "@/enums/appEnums";
-import { CreateType, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
+import { CreateTypeEnum, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
 
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
@@ -241,10 +241,10 @@ const handleConfirm = () => {
 const initData = () => {
     const { msg, audio_duration, audio_type } = props.formData;
     switch (audio_type) {
-        case CreateType.TEXT:
+        case CreateTypeEnum.TEXT:
             getAudioDuration(msg, audio_duration);
             break;
-        case CreateType.AUDIO:
+        case CreateTypeEnum.AUDIO:
             audioDuration.value = audio_duration;
             break;
     }

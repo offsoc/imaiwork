@@ -100,10 +100,6 @@ export default defineComponent({
             type: Boolean,
             default: true,
         },
-        appendDomClass: {
-            type: String,
-            default: "",
-        },
         showClose: {
             type: Boolean,
             default: true,

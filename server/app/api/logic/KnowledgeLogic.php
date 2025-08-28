@@ -3,6 +3,7 @@
 
 namespace app\api\logic;
 
+use app\common\model\kb\KbKnow;
 use app\common\model\knowledge\Knowledge;
 use app\common\model\knowledge\KnowledgeFile;
 use app\common\enum\FileEnum;
@@ -11,6 +12,7 @@ use app\common\model\knowledge\KnowledgeRetrieve;
 use app\common\model\knowledge\KnowledgeRetrieveSlice;
 use app\common\model\knowledge\KnowledgeUseSceneRecord;
 use app\common\model\knowledge\KnowledgeBind;
+use app\common\service\FileService;
 use app\common\service\UploadService;
 use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
@@ -25,37 +27,41 @@ use Exception;
  * @package app\api\logic
  */
 class KnowledgeLogic extends ApiLogic
-{   
+{
     const KNOELEDGE_CREATE = 'knowledge_create'; //知识库创建
     const KNOELEDGE_RETRIEVE = 'knowledge_retrieve'; //知识库检索
     const KNOELEDGE_CHAT = 'knowledge_chat'; //知识库聊天
     const RERANK_MIN_SCORE = 0.2; //知识库检索最小分数
-    const OPENAI_CHAT = 'common_chat'; //openai聊天
+    const OPENAI_CHAT = 'openai_chat'; //openai聊天
     /**
      * 知识库列表
      *
      * @param array $data
      * @return void
      */
-    public static function getListData(array $params){
+    public static function getListData(array $params)
+    {
 
         $params['name'] = $params['name'] ?? '';
         $result = Knowledge::where(['user_id' => self::$uid])
-            ->when($params['name'], function ($query) use($params) {
-                $query->where('name', 'like', '%'. $params['name']. '%');
+            ->when($params['name'], function ($query) use ($params) {
+                $query->where('name', 'like', '%' . $params['name'] . '%');
             })
             ->select()
             ->each(function ($item) {
-                $item->file_count = KnowledgeFile::where(['index_id' => $item['index_id']])->count(); 
+                $item->file_count = KnowledgeFile::where(['index_id' => $item['index_id']])->count();
+                $item->file_counts = $item->file_count;
+                $item->token_counts = KnowledgeUseSceneRecord::where(['index_id' => $item['index_id']])->sum('tokens');
+                $item->request_counts = KnowledgeUseSceneRecord::where(['index_id' => $item['index_id']])->count();
             })
             ->toArray();
 
         $data = [
             'lists' => $result,
             'count' => Knowledge::where(['user_id' => self::$uid])
-                        ->when($params['name'], function ($query) use($params) {
-                            $query->where('name', 'like', '%'. $params['name']. '%');
-                        })->count(),
+                ->when($params['name'], function ($query) use ($params) {
+                    $query->where('name', 'like', '%' . $params['name'] . '%');
+                })->count(),
             'page_no' => $params['page_no'] ?? 1,
             'page_size' => $params['page_size'] ?? 10,
         ];
@@ -70,59 +76,59 @@ class KnowledgeLogic extends ApiLogic
      * @param array $data
      * @return void
      */
-    public static function add(array $params){
+    public static function add(array $params)
+    {
 
-        if(!isset($params['name']) || empty($params['name'])){
+        if (!isset($params['name']) || empty($params['name'])) {
             throw new \Exception('知识库名称不能为空');
         }
 
-        if(mb_strlen($params['name'], "UTF-8") > 12){
+        if (mb_strlen($params['name'], "UTF-8") > 12) {
             throw new \Exception('知识名称不能超过12个字符');
         }
-          
-        if(mb_strlen($params['description'], "UTF-8") > 1000){
+
+        if (mb_strlen($params['description'], "UTF-8") > 1000) {
             throw new \Exception('知识库描述不能超过1000个字符');
         }
-        
+
         $find = Knowledge::where('name', $params['name'])->where('user_id', self::$uid)->limit(1)->find();
-        if (!empty($find)){
+        if (!empty($find)) {
             message('知识库名称已存在');
         }
 
-        if(strpos($params['description'], $_SERVER['HTTP_HOST']) === false){
+        if (strpos($params['description'], $_SERVER['HTTP_HOST']) === false) {
             $params['description'] =  $params['description'];
         }
 
-        
+
         $params['site'] = $_SERVER['HTTP_HOST'];
-        
+
         # 检查创建知识库的算力是否足够,不够则提示
-         //计费
+        //计费
         $unit = TokenLogService::checkToken(self::$uid, self::KNOELEDGE_CREATE);
         # 1 创建分类
-        $knowledgeNmae = $params['name'].bin2hex(random_bytes(4));
+        $knowledgeNmae = $params['name'] . bin2hex(random_bytes(4));
         $cateRes = \app\common\service\ToolsService::Knowledge()->createCategory([
             'name' => $knowledgeNmae
         ]);
-        
-        if((int)$cateRes['code'] === 10000){
-            if(isset($cateRes['data']['status']) && (int)$cateRes['data']['status'] === 1){
+
+        if ((int)$cateRes['code'] === 10000) {
+            if (isset($cateRes['data']['status']) && (int)$cateRes['data']['status'] === 1) {
                 message($cateRes['data']['msg']);
                 return false;
-                
             }
-            
+
             # 2 创建同名分类知识库
             $params['category_id'] = $cateRes['data']['CategoryId'];
-            
+
             $params['task_id'] = generate_unique_task_id();
             $request = $params;
             $request['name'] = $knowledgeNmae;
-            $request['description'] = $params['site'] . ' '.$params['description'];
+            $request['description'] = $params['site'] . ' ' . $params['description'];
             $indexRes = self::requestUrl($request, self::KNOELEDGE_CREATE, self::$uid);
-            if($indexRes){
+            if ($indexRes) {
                 unset($params['task_id']);
-                
+
                 $addData = $params;
                 $addData['user_id'] =  self::$uid;
                 $addData['index_id'] = $indexRes['Id'];
@@ -131,9 +137,12 @@ class KnowledgeLogic extends ApiLogic
                 $addData['status'] = 1;
                 $addData['is_bind'] = 0;
                 $addData['rerank_min_score'] = $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE;
+                if (isset($params['image'])) {
+                    $addData['image'] = FileService::setFileUrl($params['image']);
+                }
                 $detial =  new Knowledge();
-                if($detial->save($addData)){
-                    if(!empty($params['documents'])){
+                if ($detial->save($addData)) {
+                    if (!empty($params['documents'])) {
 
                         $file_ids = array_column($params['documents'], 'file_id');
                         $addDocRes =  \app\common\service\ToolsService::Knowledge()->addDocJobIndex([
@@ -141,8 +150,8 @@ class KnowledgeLogic extends ApiLogic
                             'documentIds' => $file_ids,
                         ]);
 
-                        if((int)$addDocRes['code'] === 10000){
-                            $docs =  array_map(function($doc) use ($detial, $params, $indexRes){
+                        if ((int)$addDocRes['code'] === 10000) {
+                            $docs =  array_map(function ($doc) use ($detial, $params, $indexRes) {
                                 $_tmp = array();
                                 $_tmp['file_id'] = $doc['file_id'];
                                 $_tmp['category_id'] = $doc['category_id'] ?? '';
@@ -157,100 +166,100 @@ class KnowledgeLogic extends ApiLogic
                                 $_tmp['file_url'] =  $doc['uri'] ?? ($doc['file_url'] ?? '');
                                 $_tmp['create_time'] = time();
                                 return $_tmp;
-                                
                             }, $params['documents']);
-        
-                            if(!empty($docs)){
+
+                            if (!empty($docs)) {
                                 $detialFile = new KnowledgeFile();
                                 $detialFile->saveAll($docs);
                             }
-                        }else{
+                        } else {
                             message($addDocRes['message']);
                         }
                     }
                     self::$returnData = $detial->toArray();
                     return true;
-                }    
-            }else{
+                }
+            } else {
                 message('知识库创建失败');
             }
-        }else{
+        } else {
             message($cateRes['message']);
         }
-    
     }
 
-    public static function edit(array $params){
+    public static function edit(array $params)
+    {
         $find = Knowledge::where('id', $params['id'])->where('user_id', self::$uid)->findOrEmpty();
-        if ($find->isEmpty()){
+        if ($find->isEmpty()) {
             message('知识库不存在');
         }
-        if(mb_strlen($params['name'], "UTF-8") > 12){
+        if (mb_strlen($params['name'], "UTF-8") > 12) {
             throw new \Exception('知识名称不能超过12个字符');
         }
 
-        if(mb_strlen($params['description'], "UTF-8") > 1000){
+        if (mb_strlen($params['description'], "UTF-8") > 1000) {
             message('知识库描述不能超过1000个字符');
         }
 
         $row = Knowledge::where('name', $params['name'])->where('id', '<>', $params['id'])->where('user_id', self::$uid)->limit(1)->find();
-        if (!empty($row)){
+        if (!empty($row)) {
             message('知识库名称重复');
         }
 
         // if($params['overlap_size'] > $params['chunk_size']){
         //     message('分段预估长度必须大于分段重叠长度');
         // }
-
+        if (isset($params['image'])) {
+            $addData['image'] = FileService::setFileUrl($params['image']);
+        }
         $addData = $params;
         $addData['update_time'] = time();
         unset($addData['create_time']);
 
-        if($find->save($addData)){
-            
+        if ($find->save($addData)) {
         }
-        
+
         self::$returnData = $find->toArray();
         return true;
-        
     }
 
-    public static function edit1(array $params){
+    public static function edit1(array $params)
+    {
         $find = Knowledge::where('id', $params['id'])->where('user_id', self::$uid)->findOrEmpty();
-        if ($find->isEmpty()){
+        if ($find->isEmpty()) {
             message('知识库不存在');
         }
-        if(strlen($params['description']) > 1000){
+        if (strlen($params['description']) > 1000) {
             message('知识库描述不能超过1000个字符');
         }
 
-        
+
 
 
         $addData = $params;
         $addData['update_time'] = time();
         unset($addData['create_time']);
 
-        if($find->save($addData)){
+        if ($find->save($addData)) {
             KnowledgeFile::where('user_id', '=', self::$uid)->where('kid', '=', $params['id'])->select()->delete();
-            
-            if(!empty($params['documents'])){
+
+            if (!empty($params['documents'])) {
                 $file_ids = array_column($params['documents'], 'file_id');
                 //先删除在添加
                 $delDocRes =  \app\common\service\ToolsService::Knowledge()->deleteDocIndex([
                     'indexid' => $find['index_id'],
                     'documentids' => $file_ids,
                 ]);
-                if((int)$delDocRes['code'] === 10000){
+                if ((int)$delDocRes['code'] === 10000) {
                     $addDocRes =  \app\common\service\ToolsService::Knowledge()->addDocJobIndex([
                         'indexid' => $find['index_id'],
                         'documentIds' => $file_ids,
                     ]);
-                    if((int)$addDocRes['code'] !== 10000){
+                    if ((int)$addDocRes['code'] !== 10000) {
                         message($addDocRes['message']);
                     }
-                    $docs =  array_map(function($doc) use ($find, $params){
-    
+                    $docs =  array_map(function ($doc) use ($find, $params) {
+
                         $_tmp['file_id'] = $doc['file_id'];
                         $_tmp['category_id'] = $doc['category_id'] ?? '';
                         $_tmp['status'] = $doc['status'] ?? 'PARSE_SUCCESS';
@@ -263,36 +272,35 @@ class KnowledgeLogic extends ApiLogic
                         $_tmp['kid'] = $find->id;
                         $_tmp['file_url'] = $doc['uri'] ?? ($doc['file_url'] ?? '');
                         $_tmp['create_time'] = time();
-    
+
                         return $_tmp;
-                        
                     }, $params['documents']);
-                    
-                    if(!empty($docs)){
+
+                    if (!empty($docs)) {
                         $detialFile = new KnowledgeFile();
                         $detialFile->saveAll($docs);
                     }
-                }else{
+                } else {
                     message($delDocRes['message']);
                 }
             }
         }
-        
+
         self::$returnData = $find->toArray();
         return true;
-        
     }
 
-    public static function detail(array $param){
+    public static function detail(array $param)
+    {
         $find = Knowledge::where('id', $param['id'])->limit(1)->find();
-        if(empty($find)){
-            message('知识库不存在');   
+        if (empty($find)) {
+            message('知识库不存在');
         }
 
         $files = KnowledgeFile::field('*')->where(['user_id' => self::$uid])->where('kid', $find['id'])->select()
             ->toArray();
-            
-        if(!empty($files)){
+
+        if (!empty($files)) {
 
 
             $find->is_bind = 1;
@@ -311,26 +319,27 @@ class KnowledgeLogic extends ApiLogic
      * @param array $params
      * @return void
      */
-    public static function delete(array $params){
+    public static function delete(array $params)
+    {
 
         $find = Knowledge::where('id', $params['id'])->where('user_id', self::$uid)->fetchSql(false)->limit(1)->find();
-        if (empty($find)){
+        if (empty($find)) {
             message('知识库不存在');
         }
-        
+
         try {
-        
+
             // 请求查询接口
             $response = \app\common\service\ToolsService::Knowledge()->deleteIndex([
                 'id' => $find['index_id'],
             ]);
-            
+
             $cateRes = \app\common\service\ToolsService::Knowledge()->deleteCategory([
                 'categoryid' => $find['category_id'],
             ]);
-            
-            
-            if((int)$response['code'] !== 10000){
+
+
+            if ((int)$response['code'] !== 10000) {
                 message($response['message']);
             }
 
@@ -338,7 +347,6 @@ class KnowledgeLogic extends ApiLogic
             KnowledgeFile::destroy(['kid' => $params['id'], 'user_id' => self::$uid]);
 
             return true;
-
         } catch (\Throwable $e) {
             return false;
         }
@@ -351,33 +359,33 @@ class KnowledgeLogic extends ApiLogic
      * @param array $params
      * @return void
      */
-    public static function retrieve(array $params){
+    public static function retrieve(array $params)
+    {
 
-        if(!isset($params['prompt']) || empty($params['prompt'])){
+        if (!isset($params['prompt']) || empty($params['prompt'])) {
             message('提示词 不能为空');
         }
         try {
             // 请求查询接口
             $response = \app\common\service\ToolsService::Knowledge()->retrieveIndex($params);
-            
-            if((int)$response['code'] !== 10000){
+
+            if ((int)$response['code'] !== 10000) {
                 message($response['message']);
             }
-            
-            return self::__insertRetrieveData($params, $response['data']);
-            
 
+            return self::__insertRetrieveData($params, $response['data']);
         } catch (\Throwable $e) {
-            
+
             message($e->getMessage());
         }
     }
 
-    private static function __insertRetrieveData(array $params, array $data){
+    private static function __insertRetrieveData(array $params, array $data)
+    {
         $knowledge = Knowledge::where('index_id', $params['indexid'])->where('user_id', self::$uid)->fetchSql(false)->limit(1)->find();
-    
-        
-        if(empty($knowledge)){
+
+
+        if (empty($knowledge)) {
             message('知识库不存在');
         }
         try {
@@ -389,11 +397,11 @@ class KnowledgeLogic extends ApiLogic
                 'prompt' => $params['prompt'],
                 'create_time' => time(),
             ];
-            
+
             $_retrieve = new KnowledgeRetrieve();
-            if($_retrieve->save($retrieveData)){
-                if(isset($data['Nodes']) && !empty($data['Nodes'])){
-                    $items = array_map(function($item) use ($_retrieve, $params){
+            if ($_retrieve->save($retrieveData)) {
+                if (isset($data['Nodes']) && !empty($data['Nodes'])) {
+                    $items = array_map(function ($item) use ($_retrieve, $params) {
                         $hash = hash_hmac('sha256', $item['Text'], 'knowledge');
                         $_row = KnowledgeRetrieveSlice::field('content, hash')
                             ->where('index_id', $params['indexid'])
@@ -402,7 +410,7 @@ class KnowledgeLogic extends ApiLogic
                             ->where('hash', $hash)
                             ->limit(1)->find();
 
-                        if(empty($_row)){
+                        if (empty($_row)) {
                             $filename = KnowledgeFile::field('name')
                                 ->where('file_id', $item['Metadata']['doc_id'])
                                 ->where('index_id', $params['indexid'])
@@ -421,10 +429,9 @@ class KnowledgeLogic extends ApiLogic
                             ];
                             return $tmp;
                         }
-                        
                     }, $data['Nodes']);
                     $items = array_filter($items);
-                    if(!empty($items)){
+                    if (!empty($items)) {
                         $_slice = new KnowledgeRetrieveSlice();
                         $_slice->saveAll($items);
                     }
@@ -432,88 +439,89 @@ class KnowledgeLogic extends ApiLogic
 
                     return $items;
                 }
-                
             }
             return [];
         } catch (\Exception $e) {
-            
+
             message($e->getMessage());
         }
-
     }
 
 
-    public static function historyTest(array $params){
+    public static function historyTest(array $params)
+    {
         $params['page_no'] = $params['page_no'] ?? 1;
         $params['page_size'] =  $params['page_size'] ?? 15;
         $pageSize = $params['page_size'];
         $pageNo = ($params['page_no'] - 1) * $params['page_size'];
-        $keywords = $params['keywords']?? '';
+        $keywords = $params['keywords'] ?? '';
 
-        if(!isset($params['indexid']) || empty($params['indexid'])){
+        if (!isset($params['indexid']) || empty($params['indexid'])) {
             message('知识库ID 不能为空');
         }
 
         $list = KnowledgeRetrieve::where('user_id', self::$uid)
-                    ->where('index_id', $params['indexid'])
-                    ->when($keywords, function ($query) use ($keywords) {
-                        $query->where('prompt', 'like', '%' . $keywords . '%');
-                    })
-                    ->limit($pageNo, $pageSize)
-                    ->order('create_time', 'desc')
-                    ->select()
-                    ->toArray();
+            ->where('index_id', $params['indexid'])
+            ->when($keywords, function ($query) use ($keywords) {
+                $query->where('prompt', 'like', '%' . $keywords . '%');
+            })
+            ->limit($pageNo, $pageSize)
+            ->order('create_time', 'desc')
+            ->select()
+            ->toArray();
         $data = [
             'lists' => $list,
             'count' =>  KnowledgeRetrieve::where('user_id', self::$uid)
-                        ->where('index_id', $params['indexid'])
-                        ->when($keywords, function ($query) use ($keywords) {
-                            $query->where('prompt', 'like', '%' . $keywords . '%');
-                        })->count(),
+                ->where('index_id', $params['indexid'])
+                ->when($keywords, function ($query) use ($keywords) {
+                    $query->where('prompt', 'like', '%' . $keywords . '%');
+                })->count(),
             'page_no' => $params['page_no'],
             'page_size' => $params['page_size'],
         ];
         return $data;
     }
 
-    public static function testDetail(array $params){
+    public static function testDetail(array $params)
+    {
         $params['page_no'] = $params['page_no'] ?? 1;
         $params['page_size'] =  $params['page_size'] ?? 15;
         $pageSize = $params['page_size'];
         $pageNo = ($params['page_no'] - 1) * $params['page_size'];
 
-        if(!isset($params['id']) || empty($params['id'])){
+        if (!isset($params['id']) || empty($params['id'])) {
             message('检索ID 不能为空');
         }
-        
+
         $list = KnowledgeRetrieveSlice::where('user_id', self::$uid)
-                    ->where('rid', $params['id'])
-                    ->order('create_time', 'desc')
-                    ->limit($pageNo, $pageSize)
-                    ->select()
-                    ->toArray();
-        
+            ->where('rid', $params['id'])
+            ->order('create_time', 'desc')
+            ->limit($pageNo, $pageSize)
+            ->select()
+            ->toArray();
+
         $data = [
             'lists' => $list,
-            'count' =>  KnowledgeRetrieveSlice::where('user_id', self::$uid) ->where('rid', $params['id'])->count(),
+            'count' =>  KnowledgeRetrieveSlice::where('user_id', self::$uid)->where('rid', $params['id'])->count(),
             'page_no' => $params['page_no'],
             'page_size' => $params['page_size'],
         ];
         return $data;
     }
 
-        /**
+    /**
      * 知识库详情-文档列表
      *
      * @param array $params
      * @return void
      */
-    public static function indexFileList(array $param){
-        
+    public static function indexFileList(array $param)
+    {
+
         $find = Knowledge::where('id', $param['id'])->limit(1)->find();
-        
-        if(empty($find)){
-            message('知识库不存在');   
+
+        if (empty($find)) {
+            message('知识库不存在');
         }
 
         $result = KnowledgeFile::where(['user_id' => self::$uid])->where('index_id', $find['index_id'])->select()
@@ -526,9 +534,7 @@ class KnowledgeLogic extends ApiLogic
             'page_size' => $params['page_size'] ?? 10,
         ];
 
-        return $data; 
-        
-        
+        return $data;
     }
     /**
      * 知识库分片
@@ -536,20 +542,20 @@ class KnowledgeLogic extends ApiLogic
      * @param array $params
      * @return void
      */
-    public static function chunkLists(array $params){
+    public static function chunkLists(array $params)
+    {
         try {
-            
+
             // 请求查询接口
             $response = \app\common\service\ToolsService::Knowledge()->chunkIndex($params);
-        
-            if((int)$response['code'] !== 10000){
+
+            if ((int)$response['code'] !== 10000) {
                 message($response['message']);
             }
 
 
-            
-            return $response['data'];
 
+            return $response['data'];
         } catch (\Throwable $e) {
             message($e->getMessage());
         }
@@ -557,43 +563,72 @@ class KnowledgeLogic extends ApiLogic
 
 
 
-    public static function fileUpload(array $params){
-        
-        if(!isset($params['indexid']) || empty($params['indexid'])){
+    public static function fileUpload(array $params)
+    {
+
+        if (!isset($params['indexid']) || empty($params['indexid'])) {
             message('请选择知识库');
         }
         $index = Knowledge::where('index_id', $params['indexid'])->limit(1)->find();
-        if(empty($index)){
+        if (empty($index)) {
             message('知识库不存在');
         }
 
         $file = request()->file('file');
         $exts = [
-            'doc', 'docx', 'wps', 'ppt', 'pptx', 'xls', 'xlsx', 'md', 'txt', 'pdf', 'png', 
-            'jpg', 'jpeg', 'bmp', 'gif','aac', 'amr', 'flac', 'flv', 'm4a', 'mp3', 'mpeg', 
-            'ogg', 'opus', 'wav', 'webm', 'wma','mp4', 'mkv', 'avi', 'mov', 'wmv'    
+            'doc',
+            'docx',
+            'wps',
+            'ppt',
+            'pptx',
+            'xls',
+            'xlsx',
+            'md',
+            'txt',
+            'pdf',
+            'png',
+            'jpg',
+            'jpeg',
+            'bmp',
+            'gif',
+            'aac',
+            'amr',
+            'flac',
+            'flv',
+            'm4a',
+            'mp3',
+            'mpeg',
+            'ogg',
+            'opus',
+            'wav',
+            'webm',
+            'wma',
+            'mp4',
+            'mkv',
+            'avi',
+            'mov',
+            'wmv'
         ];
-        if($file){
+        if ($file) {
             $ext = $file->getOriginalExtension();
-            if(!in_array($ext, $exts)){
+            if (!in_array($ext, $exts)) {
                 message('知识库暂时不支持csv文件');
             }
         }
-        
-        try
-        {
+
+        try {
             $result = UploadService::file(0, self::$uid, FileEnum::SOURCE_USER, 'uploads/file/knowledge');
-            if(!empty($result)){
-                
+            if (!empty($result)) {
+
                 $response = \app\common\service\ToolsService::Knowledge()->createFile([
                     'file_url' => $result['uri'],
                     'category_id' => $index['category_id']
                 ]);
-                if((int)$response['code'] === 10000){
+                if ((int)$response['code'] === 10000) {
                     $fileinfo = \app\common\service\ToolsService::Knowledge()->infoFile([
                         'id' => $response['data']['FileId']
                     ]);
-                    if((int)$fileinfo['code'] === 10000){
+                    if ((int)$fileinfo['code'] === 10000) {
                         $result['category_id'] = $fileinfo['data']['CategoryId'];
                         $result['status'] = $fileinfo['data']['Status'];
                         $result['type'] = $fileinfo['data']['FileType'];
@@ -601,35 +636,29 @@ class KnowledgeLogic extends ApiLogic
                         $result['size'] = $fileinfo['data']['SizeInBytes'];
                         $result['parser'] = $fileinfo['data']['Parser'];
                     }
-                    
+
                     $result['file_id'] = $response['data']['FileId'];
                     $result['parser'] = $response['data']['Parser'];
                     return $result;
-
-                    
-                }else{
+                } else {
                     message($response['message']);
                 }
-
-            }else{
+            } else {
                 message('文件上传失败');
             }
-        
-        }
-        catch (\Exception $e)
-        {  
+        } catch (\Exception $e) {
             message($e->getMessage());
         }
-        
     }
 
-    public static function fileLists(array $params){
+    public static function fileLists(array $params)
+    {
 
         $pageNo = ($params['page_no'] - 1) * $params['page_size'];
         $pageSize = $params['page_size'];
 
-        $name = $params['name']?? '';
-        $takeover_mode = $params['takeover_mode']?? '';
+        $name = $params['name'] ?? '';
+        $takeover_mode = $params['takeover_mode'] ?? '';
         $modes = array(
             0 => 'PARSING',
             1 => 'PARSE_SUCCESS',
@@ -639,12 +668,10 @@ class KnowledgeLogic extends ApiLogic
 
         $result = KnowledgeFile::where(['user_id' => self::$uid])
             ->where('category_id', $params['category_id'])
-            ->when($name, function ($query) use ($name)
-            {
+            ->when($name, function ($query) use ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             })
-            ->when($status, function ($query) use ($status)
-            {
+            ->when($status, function ($query) use ($status) {
                 $query->where('status', '=', $status);
             })
             ->limit($pageNo, $pageSize)
@@ -653,31 +680,29 @@ class KnowledgeLogic extends ApiLogic
         $data = [
             'lists' => $result,
             'count' => KnowledgeFile::where(['user_id' => self::$uid])
-                        ->when($name, function ($query) use ($name)
-                        {
-                            $query->where('name', 'like', '%' . $name . '%');
-                        })
-                        ->when($status, function ($query) use ($status)
-                        {
-                            $query->where('status', '=', $status);
-                        })
-                        ->where('category_id', $params['category_id'])->count(),
+                ->when($name, function ($query) use ($name) {
+                    $query->where('name', 'like', '%' . $name . '%');
+                })
+                ->when($status, function ($query) use ($status) {
+                    $query->where('status', '=', $status);
+                })
+                ->where('category_id', $params['category_id'])->count(),
             'page_no' => $params['page_no'],
             'page_size' => $params['page_size'],
         ];
 
         return $data;
-        
     }
 
 
-    public static function fileAdd(array $params){
+    public static function fileAdd(array $params)
+    {
         $find = Knowledge::where('category_id', $params['category_id'])->limit(1)->find();
-        if(empty($find)){
+        if (empty($find)) {
             message('知识库不存在');
         }
-        
-        
+
+
         $addData = array(
             'description' => $params['description'] ?? $find['description'],
             'rerank_min_score' => $params['rerank_min_score'] ?? ($find['rerank_min_score'] ?? self::RERANK_MIN_SCORE), // 默认为0
@@ -688,29 +713,29 @@ class KnowledgeLogic extends ApiLogic
             'source_type' => $params['source_type'] ?? $find['source_type'],
             'sink_type' => $params['sink_type'] ?? $find['sink_type'],
             'strategy' => $params['strategy'] ?? $find['strategy'],
-            'is_bind' => !empty($params['documents']) ? 1: 0,
+            'is_bind' => !empty($params['documents']) ? 1 : 0,
             'site' => $params['site'] ?? $_SERVER['HTTP_HOST'],
             'update_time' => time(),
         );
-        
+
         // if($addData['overlap_size'] > $addData['chunk_size']){
         //     message('分段预估长度必须大于分段重叠长度');
         // }
-        
-        if(!$find->save($addData)){
+
+        if (!$find->save($addData)) {
             message('知识库信息更新失败');
         }
-        
 
-        if(!empty($params['documents'])){
-            foreach($params['documents'] as $key => $val){
+
+        if (!empty($params['documents'])) {
+            foreach ($params['documents'] as $key => $val) {
                 $file = KnowledgeFile::where('file_id', $val['file_id'])->where('user_id', self::$uid)->limit(1)->find();
-                if(!empty($file)){
+                if (!empty($file)) {
                     unset($params['documents'][$key]);
                 }
             }
 
-            if(empty($params['documents'])){
+            if (empty($params['documents'])) {
                 message('请上传文件');
             }
 
@@ -719,16 +744,16 @@ class KnowledgeLogic extends ApiLogic
                 'indexid' => $find['index_id'],
                 'documentIds' => $fileids
             ]);
-            
-            
 
-            if((int)$addDocRes['code'] === 10000){
-                if(isset($addDocRes['data']['status']) && (int)$addDocRes['data']['status'] === 400){
+
+
+            if ((int)$addDocRes['code'] === 10000) {
+                if (isset($addDocRes['data']['status']) && (int)$addDocRes['data']['status'] === 400) {
                     $find->delete();
                     message('知识库数据异常:' . $addDocRes['data']['msg']);
                 }
-                
-                $docs =  array_map(function($doc) use ($find, $params){
+
+                $docs =  array_map(function ($doc) use ($find, $params) {
                     $_tmp = array();
                     $_tmp['file_id'] = $doc['file_id'];
                     $_tmp['category_id'] = $params['category_id'];
@@ -743,15 +768,14 @@ class KnowledgeLogic extends ApiLogic
                     $_tmp['file_url'] =  $doc['uri'] ?? ($doc['file_url'] ?? '');
                     $_tmp['create_time'] = time();
                     return $_tmp;
-                    
                 }, $params['documents']);
 
-                if(!empty($docs)){
+                if (!empty($docs)) {
                     $detialFile = new KnowledgeFile();
                     $detialFile->saveAll($docs);
                 }
                 return true;
-            }else{
+            } else {
                 message($addDocRes['message']);
             }
         }
@@ -760,19 +784,20 @@ class KnowledgeLogic extends ApiLogic
     }
 
 
-    public static function fileDetial(array $params){
+    public static function fileDetial(array $params)
+    {
 
         $find = KnowledgeFile::where(['user_id' => self::$uid])->where('file_id', $params['file_id'])->limit(1)->find();
 
-        if(empty($find)){
+        if (empty($find)) {
             message('文件不存在');
         }
-        if($find['status'] !== 'PARSE_SUCCESS'){
+        if ($find['status'] !== 'PARSE_SUCCESS') {
             $fileinfo = \app\common\service\ToolsService::Knowledge()->infoFile([
                 'id' => $find['file_id']
             ]);
-            if((int)$fileinfo['code'] === 10000){
-            
+            if ((int)$fileinfo['code'] === 10000) {
+
                 $find['status'] = $fileinfo['data']['Status'];
                 $find['update_time'] = time();
                 $find['type'] = $fileinfo['data']['FileType'];
@@ -784,14 +809,15 @@ class KnowledgeLogic extends ApiLogic
             }
         }
 
-        
+
 
         return $find->toArray();
     }
 
-    public static function fileDelete(array $params){
+    public static function fileDelete(array $params)
+    {
         $find = KnowledgeFile::where('id', $params['id'])->where('user_id', self::$uid)->fetchSql(false)->limit(1)->find();
-        if (empty($find)){
+        if (empty($find)) {
             message('文档不存在');
         }
         KnowledgeFile::destroy(['id' => $params['id'], 'user_id' => self::$uid]);
@@ -813,9 +839,10 @@ class KnowledgeLogic extends ApiLogic
      * @param array $params
      * @return void
      */
-    public static function fileChunkLists(array $params){
+    public static function fileChunkLists(array $params)
+    {
         $find = KnowledgeFile::where('id', $params['id'])->where('user_id', self::$uid)->fetchSql(false)->limit(1)->find();
-        if (empty($find)){
+        if (empty($find)) {
             message('文档不存在');
         }
         $params['page_no'] = $params['page_no'] ?? 1;
@@ -823,7 +850,7 @@ class KnowledgeLogic extends ApiLogic
         $pageSize = $params['page_size'];
 
         $pageNo = ($params['page_no'] - 1) * $params['page_size'];
-        $keywords = $params['keywords']?? '';
+        $keywords = $params['keywords'] ?? '';
 
         $result = KnowledgeFileSlice::where('file_id', $find['file_id'])
             ->where('index_id', $find['index_id'])
@@ -833,21 +860,21 @@ class KnowledgeLogic extends ApiLogic
             })
             ->limit($pageNo, $pageSize)
             ->select()->toArray();
-        if(empty($result)){
-             // 请求查询接口
+        if (empty($result)) {
+            // 请求查询接口
             $response = \app\common\service\ToolsService::Knowledge()->chunkIndex([
                 'indexid' => $find['index_id'],
                 'fileid' => $find['file_id'],
                 'pageNum' => 1,
                 'pageSize' => 100,
             ]);
-            if((int)$response['code'] === 10000){
-                if(!isset($response['data']['Nodes'])){
+            if ((int)$response['code'] === 10000) {
+                if (!isset($response['data']['Nodes'])) {
                     message('查询失败');
                 }
                 $nodes = $response['data']['Nodes'];
-                if(!empty($nodes)){
-                    $items = array_map(function($item) use ($find, $params){
+                if (!empty($nodes)) {
+                    $items = array_map(function ($item) use ($find, $params) {
                         $hash = hash_hmac('sha256', $item['Text'], 'knowledge');
                         $_row = KnowledgeFileSlice::field('content, hash')
                             ->where('file_id', $find['file_id'])
@@ -855,7 +882,7 @@ class KnowledgeLogic extends ApiLogic
                             ->where('user_id', self::$uid)
                             ->where('hash', $hash)
                             ->limit(1)->find();
-                        if(empty($_row)){
+                        if (empty($_row)) {
                             $tmp = [
                                 'user_id' => self::$uid,
                                 'rid' => $find->id,
@@ -872,7 +899,7 @@ class KnowledgeLogic extends ApiLogic
                         }
                     }, $nodes);
                     $items = array_filter($items);
-                    if(!empty($items)){
+                    if (!empty($items)) {
                         $_slice = new KnowledgeFileSlice();
                         $_slice->saveAll($items);
                     }
@@ -880,43 +907,43 @@ class KnowledgeLogic extends ApiLogic
             }
 
             $result = KnowledgeFileSlice::where('user_id', self::$uid)
-                    ->where('index_id', $find['index_id'])
-                    ->where('file_id', $find['file_id'])
-                    ->when($keywords, function ($query) use ($keywords){
-                        $query->where('content', 'like', '%' . $keywords . '%');
-                    })
-                    ->limit($pageNo, $pageSize)
-                    ->select()
-                    ->each(function ($item) {
-                        $item['metadata'] = json_decode($item['metadata'], true); // 假设metadata是一个JSON字符串
-                        return $item;
-                    })
-                    ->toArray();
+                ->where('index_id', $find['index_id'])
+                ->where('file_id', $find['file_id'])
+                ->when($keywords, function ($query) use ($keywords) {
+                    $query->where('content', 'like', '%' . $keywords . '%');
+                })
+                ->limit($pageNo, $pageSize)
+                ->select()
+                ->each(function ($item) {
+                    $item['metadata'] = json_decode($item['metadata'], true); // 假设metadata是一个JSON字符串
+                    return $item;
+                })
+                ->toArray();
         }
 
         $data = [
             'lists' => $result,
             'count' => KnowledgeFileSlice::where('user_id', self::$uid)
-                            ->where('index_id', $find['index_id'])
-                            ->where('file_id', $find['file_id'])
-                            ->when($keywords, function ($query) use ($keywords){
-                                $query->where('content', 'like', '%' . $keywords . '%');
-                            })->count(),
+                ->where('index_id', $find['index_id'])
+                ->where('file_id', $find['file_id'])
+                ->when($keywords, function ($query) use ($keywords) {
+                    $query->where('content', 'like', '%' . $keywords . '%');
+                })->count(),
             'page_no' => $params['page_no'],
             'page_size' => $params['page_size'],
         ];
         return $data;
     }
 
-    public static function updateTagFile(array $params){
+    public static function updateTagFile(array $params)
+    {
         try {
             // 请求查询接口
             $response = \app\common\service\ToolsService::Knowledge()->updateTagFile($params);
-            if((int)$response['code'] !== 10000){
+            if ((int)$response['code'] !== 10000) {
                 throw new \Exception($response['message']);
             }
             return $response['data'];
-
         } catch (\Throwable $e) {
             throw new \Exception($e->getMessage());
         }
@@ -929,21 +956,22 @@ class KnowledgeLogic extends ApiLogic
      * @param [type] $data
      * @return void
      */
-    public static function bind(array $params, $data){
+    public static function bind(array $params, $data)
+    {
         //删除原来的绑定 添加新的绑定信息
         KnowledgeBind::where('data_id', $data['id'])
             ->where('user_id', self::$uid)
             ->where('type', $params['type'])
             ->select()
             ->delete();
-                
-        if(isset($params['index_id']) && !empty($params['index_id'])){
+
+        if (isset($params['index_id']) && !empty($params['index_id'])) {
             $knowledge = Knowledge::where('index_id', $params['index_id'])->limit(1)->find();
-            if(empty($knowledge)){
+            if (empty($knowledge)) {
                 throw new \Exception('知识库不存在');
                 return false;
             }
-                
+
             //挂载知识库
             KnowledgeBind::create([
                 'user_id' => self::$uid,
@@ -958,22 +986,66 @@ class KnowledgeLogic extends ApiLogic
     }
 
     /**
+     * 新绑定知识库
+     *
+     * @param array $params
+     * @param [type] $data
+     * @param $kbType
+     * @return void
+     * @throws Exception
+     */
+    public static function newBind(array $params, $data, $kbType)
+    {
+        //删除原来的绑定 添加新的绑定信息
+        KnowledgeBind::where('data_id', $data['id'])
+            ->where('user_id', self::$uid)
+            ->where('type', $params['type'])
+            //->where('kb_type', $kbType)
+            ->select()
+            ->delete();
+            
+        if (isset($params['index_id']) && !empty($params['index_id']) && $kbType == 1) {
+            $knowledge = Knowledge::where('index_id', $params['index_id'])->findOrEmpty();
+        } else {
+            $knowledge = KbKnow::where('id', $params['id'])->findOrEmpty();
+        }
+        
+
+        if ($knowledge->isEmpty()) {
+            throw new \Exception('知识库不存在');
+            return false;
+        }
+        //挂载知识库
+        KnowledgeBind::create([
+            'user_id' => self::$uid,
+            'kid' => $knowledge['id'],
+            'data_id' => $data['id'],
+            'type' =>  $params['type'],
+            'kb_type' =>  $kbType,
+            'index_id' => $params['index_id'] ?? '',
+            'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE,
+            'create_time' => time(),
+        ]);
+    }
+
+    /**
      * 将训练内容上传到知识库
      *
      * @param array $params
      * @return void
      */
-    public static function ladderPlayerUpload(array $params){
+    public static function ladderPlayerUpload(array $params)
+    {
         # 1 根据已经选择的数据生成文本文件
         # 2 上传文件到分类
         # 3 文档追加到指定的知识库
         # 4 获取文件的信息
 
-        if(!isset($params['ids']) || empty($params['ids'])){
+        if (!isset($params['ids']) || empty($params['ids'])) {
             message('请选择需要上传的记录');
         }
         $knowledge = Knowledge::where('index_id', $params['indexid'])->where('user_id', self::$uid)->limit(1)->find();
-        if(empty($knowledge)){
+        if (empty($knowledge)) {
             message('知识库不存在');
         }
         # 提取文本信息
@@ -982,43 +1054,43 @@ class KnowledgeLogic extends ApiLogic
             ->join('ll_analysis l', 'l.id = c.analysis_id', 'left')
             ->where('l.id', 'in', $params['ids'])
             ->select()->toArray();
-            
+
 
         try {
 
             $content = array();
-            foreach($data as $item){
+            foreach ($data as $item) {
                 $content[] = $item['ask'] . "\n" . $item['reply'] . "\n" . $item['performance'] . "\n" . $item['speechcraft'];
             }
             $content = implode("\n", $content);
-            
-            $uri = 'uploads/file/knowledge/'.date('Ymd').'/话术1.txt';
-            $filepath = root_path(). '/public/' . $uri;
-            
+
+            $uri = 'uploads/file/knowledge/' . date('Ymd') . '/话术1.txt';
+            $filepath = root_path() . '/public/' . $uri;
+
             !is_dir(dirname($filepath)) && mkdir(dirname($filepath), 0777, true);
             $size = file_put_contents($filepath, $content);
-            if($size === false){
+            if ($size === false) {
                 message('文件写入失败');
             }
             $uri =  config('app.app_host') . '/' . $uri;
-            
+
             $fileRes = \app\common\service\ToolsService::Knowledge()->createFile([
                 'file_url' => $uri,
                 'category_id' => $knowledge['category_id']
             ]);
-            
-            if((int)$fileRes['code'] === 10000){
+
+            if ((int)$fileRes['code'] === 10000) {
                 $fileinfo = \app\common\service\ToolsService::Knowledge()->infoFile([
                     'id' => $fileRes['data']['FileId']
                 ]);
-                
-                if((int)$fileinfo['code'] === 10000){
+
+                if ((int)$fileinfo['code'] === 10000) {
 
                     $addDocRes =  \app\common\service\ToolsService::Knowledge()->addDocJobIndex([
                         'indexid' => $knowledge['index_id'],
                         'documentIds' => [$fileRes['data']['FileId']]
                     ]);
-                    if((int)$addDocRes['code'] === 10000){
+                    if ((int)$addDocRes['code'] === 10000) {
                         $result = array();
                         $result['file_id'] =  $fileRes['data']['FileId'];
                         $result['category_id'] = $knowledge['category_id'];
@@ -1035,30 +1107,29 @@ class KnowledgeLogic extends ApiLogic
 
                         $detialFile = new KnowledgeFile();
                         $detialFile->save($result);
-                        
+
                         self::$returnData = $result;
                         return true;
-                    }else{
+                    } else {
                         message('文件追加到知识库失败');
                     }
-                }else{
+                } else {
                     message('获取文件信息失败');
                 }
-            }else{
+            } else {
                 message('上传文件失败');
             }
-            
         } catch (\Throwable $th) {
-            
+
             message($th->getMessage());
         }
         return false;
-    }   
+    }
 
 
     /******************请求接口以及扣费************************ */
 
-        /**
+    /**
      * 请求上游接口与计费
      * @param array $request
      * @param string $scene
@@ -1072,17 +1143,17 @@ class KnowledgeLogic extends ApiLogic
     {
 
         $requestService = \app\common\service\ToolsService::Knowledge();
-        
+
         [$tokenScene, $tokenCode] = match ($scene) {
             self::KNOELEDGE_CREATE => ['knowledge_create', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CREATE],
             self::KNOELEDGE_RETRIEVE => ['knowledge_retrieve', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_RETRIEVE],
             self::KNOELEDGE_CHAT => ['knowledge_chat', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT],
-            self::OPENAI_CHAT => ['common_chat', AccountLogEnum::TOKENS_DEC_COMMON_CHAT],
+            self::OPENAI_CHAT => ['openai_chat', AccountLogEnum::TOKENS_DEC_OPENAI_CHAT],
         };
 
         //计费
         $unit = TokenLogService::checkToken($userId, $tokenScene);
-        
+
         switch ($scene) {
             case self::KNOELEDGE_CREATE:
                 $response = $requestService->createIndex($request);
@@ -1100,26 +1171,26 @@ class KnowledgeLogic extends ApiLogic
         }
         //print_r($response);die;
 
-        if($scene == self::KNOELEDGE_CHAT && $request['stream'] == true){
+        if ($scene == self::KNOELEDGE_CHAT && $request['stream'] == true) {
             exit;
         }
-        
+
         //clogger('response: '. json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         //成功响应，需要扣费
         if (isset($response['code']) && $response['code'] == 10000) {
-            
-            if($scene === self::KNOELEDGE_CREATE){
+
+            if ($scene === self::KNOELEDGE_CREATE) {
                 $tokens = $unit;
                 $points = $unit;
                 $knowlwdge_tokens = $points;
-            }else{
+            } else {
                 $usage = $response['data']['usage'];
                 $tokens = $usage['total_tokens'] + $request['knowledge_tokens'];
-                 //计算消耗tokens
+                //计算消耗tokens
                 $points = $unit > 0 ? ceil($tokens / $unit) : 0;
                 $knowlwdge_tokens = $request['knowledge_tokens'];
             }
-            
+
             //clogger($points.'|'.$userId);
 
             if ($points > 0) {
@@ -1135,21 +1206,22 @@ class KnowledgeLogic extends ApiLogic
             }
         }
 
-        if((int)$response['code'] === 10005){
-            if($isReturn){
+        if ((int)$response['code'] === 10005) {
+            if ($isReturn) {
                 return $response;
-            }else{
+            } else {
                 message($response['message']);
             }
         }
 
         return $response['data'] ?? [];
     }
-    
-    public static function saveKnowledgeRecord(array $request, array $response){
+
+    public static function saveKnowledgeRecord(array $request, array $response)
+    {
         try {
             $record = $request['knowledge_record'];
-            $record['content'] = $response['content'] ?? ( $response['choices'][0]['message']['content']?? '');
+            $record['content'] = $response['content'] ?? ($response['choices'][0]['message']['content'] ?? '');
             $record['prompt_tokens'] =  $response['usage']['prompt_tokens'];
             $record['completion_tokens'] = $response['usage']['completion_tokens'];
             $record['total_tokens'] = $response['usage']['total_tokens'];
@@ -1165,31 +1237,30 @@ class KnowledgeLogic extends ApiLogic
             //clogger($th);
 
         }
-        
-
     }
 
 
     /******************定时任务-文件状态************************ */
-    public static function setFileStatus(){
+    public static function setFileStatus()
+    {
         try {
-           // clogger('setFileStatus ' . date('Y-m-d H:i:s', time()), 'cron');
-            $files = KnowledgeFile::where('status', 'not in',['PARSE_SUCCESS', 'PARSE_FAILED'])->order('id asc')->limit(10)->select();
-            
+            // clogger('setFileStatus ' . date('Y-m-d H:i:s', time()), 'cron');
+            $files = KnowledgeFile::where('status', 'not in', ['PARSE_SUCCESS', 'PARSE_FAILED'])->order('id asc')->limit(10)->select();
+
             foreach ($files as $key => $file) {
                 //clogger('开始处理文件：' . $file['file_id'], 'cron');
                 $fileinfo = \app\common\service\ToolsService::Knowledge()->infoFile([
                     'id' => $file['file_id']
                 ]);
-                if((int)$fileinfo['code'] === 10000){
-                    if(isset($fileinfo['data']['no_exist']) && (int)$fileinfo['data']['no_exist'] === 1){
+                if ((int)$fileinfo['code'] === 10000) {
+                    if (isset($fileinfo['data']['no_exist']) && (int)$fileinfo['data']['no_exist'] === 1) {
                         $file['status'] = 'PARSE_FAILED';
                         $file['remark'] = $fileinfo['data']['msg'];
                         //clogger('文件不存在：'. $file['file_id'], 'cron');
-                    }else{
+                    } else {
                         $file['status'] = $fileinfo['data']['Status'];
                     }
-                
+
                     $file['update_time'] = time();
                     $file->save();
                 }
@@ -1203,13 +1274,14 @@ class KnowledgeLogic extends ApiLogic
     }
 
 
-    public static function fileChunksPull(){
+    public static function fileChunksPull()
+    {
         try {
             //clogger('fileChunksPull:' . date('Y-m-d H:i:s', time()), 'cron');
             $files = KnowledgeFile::where('status', 'PARSE_SUCCESS')
-            ->where('is_completed', 0)
-            ->order('update_time asc')->limit(5)->select();
-            
+                ->where('is_completed', 0)
+                ->order('update_time asc')->limit(5)->select();
+
             foreach ($files as $key => $file) {
                 //clogger('开始处理文件：'. $file['file_id'], 'cron');
                 # 首次拉取 
@@ -1221,9 +1293,9 @@ class KnowledgeLogic extends ApiLogic
                     'pageNum' => 1,
                     'pageSize' => 1,
                 ]);
-                
-                if((int)$totalRes['code'] === 10000){
-                    if(isset($totalRes['data']['no_exist']) && (int)$totalRes['data']['no_exist'] === 1){
+
+                if ((int)$totalRes['code'] === 10000) {
+                    if (isset($totalRes['data']['no_exist']) && (int)$totalRes['data']['no_exist'] === 1) {
                         $file['status'] = 'PARSE_FAILED';
                         //clogger('文件或知识库不存在：'. $file['file_id'].'||'. $file['index_id'], 'cron');
                         //删除本地文件
@@ -1233,21 +1305,21 @@ class KnowledgeLogic extends ApiLogic
                         $file['update_time'] = time();
                         $file['delete_time'] = time();
                         $file->save();
-                    }else{
+                    } else {
                         $total = $totalRes['data']['Total'];
 
                         $totalPage = ceil($total / 100);
-                        for($page = 1; $page <= $totalPage; $page++){
+                        for ($page = 1; $page <= $totalPage; $page++) {
                             $response = \app\common\service\ToolsService::Knowledge()->chunkIndex([
                                 'indexid' => $file['index_id'],
                                 'fileid' => $file['file_id'],
                                 'pageNum' => $page,
                                 'pageSize' => 100,
                             ]);
-                            if((int)$response['code'] === 10000){
+                            if ((int)$response['code'] === 10000) {
                                 $nodes = $response['data']['Nodes'];
-                                if(!empty($nodes)){
-                                    $items = array_map(function($item) use ($file){
+                                if (!empty($nodes)) {
+                                    $items = array_map(function ($item) use ($file) {
                                         $hash = hash_hmac('sha256', $item['Text'], 'knowledge');
                                         $_row = KnowledgeFileSlice::field('content, hash')
                                             ->where('file_id', $file['file_id'])
@@ -1255,7 +1327,7 @@ class KnowledgeLogic extends ApiLogic
                                             ->where('user_id', $file['user_id'])
                                             ->where('hash', $hash)
                                             ->limit(1)->find();
-                                        if(empty($_row)){
+                                        if (empty($_row)) {
                                             $tmp = [
                                                 'user_id' => $file['user_id'],
                                                 'rid' => $file->id,
@@ -1272,7 +1344,7 @@ class KnowledgeLogic extends ApiLogic
                                         }
                                     }, $nodes);
                                     $items = array_filter($items);
-                                    if(!empty($items)){
+                                    if (!empty($items)) {
                                         $_slice = new KnowledgeFileSlice();
                                         $_slice->saveAll($items);
                                     }
@@ -1285,10 +1357,9 @@ class KnowledgeLogic extends ApiLogic
                         $file['update_time'] = time();
                         $file->save();
                     }
-                    
                 }
                 sleep(2);
-            } 
+            }
             return true;
         } catch (\Throwable $th) {
             //clogger('文件处理失败：'. $th->getMessage(), 'cron');
@@ -1298,9 +1369,10 @@ class KnowledgeLogic extends ApiLogic
 
 
     /******************chat************************ */
-    public static function chat($params){
+    public static function chat($params)
+    {
         set_time_limit(0);
-        if(!isset($params['message']) || empty($params['message'])){
+        if (!isset($params['message']) || empty($params['message'])) {
             message('提示词 不能为空');
         }
         WordsService::sensitive($params['message']);
@@ -1308,8 +1380,8 @@ class KnowledgeLogic extends ApiLogic
         WordsService::askCensor($params['message']);
         $uid = $params['user_id'] ?? self::$uid;
         $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
-        if(empty($knowlwdge)){
-            message('知识库不存在'); 
+        if (empty($knowlwdge)) {
+            message('知识库不存在');
         }
 
         $message = $params['message'];
@@ -1332,12 +1404,12 @@ class KnowledgeLogic extends ApiLogic
             'assistant_id' => $params['assistant_id'] ?? 0
         ];
 
-        if($params['scene'] == '陪练聊天'){
-            $request['voice'] = $params['voice']?? '';
-            $request['emotion'] =  $params['emotion']?? '';
-            $request['intensity'] =  $params['intensity']?? '';
+        if ($params['scene'] == '陪练聊天') {
+            $request['voice'] = $params['voice'] ?? '';
+            $request['emotion'] =  $params['emotion'] ?? '';
+            $request['intensity'] =  $params['intensity'] ?? '';
         }
-        
+
         self::__getRequestData($request, $params);
         try {
             $record = array(
@@ -1347,20 +1419,20 @@ class KnowledgeLogic extends ApiLogic
                 'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE, // 默认为0
                 'scene' => $params['scene'] ?? '未知聊天',
             );
-            
+
             // 根据用户提示词检索
             $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
-            
+
             // 拼接切片内容
-            if((int)$response['code'] === 10000){
-                if(isset($response['data']['Nodes'])){
+            if ((int)$response['code'] === 10000) {
+                if (isset($response['data']['Nodes'])) {
                     $texts = implode("\n", array_column($response['data']['Nodes'], 'Text'));
-                }else{
+                } else {
                     $texts = '';
                 }
-                
+
                 $textLength = mb_strlen($texts, 'utf-8');
-                
+
                 $record['retrieve_content'] = $texts;
                 $record['retrieve_length'] = $textLength;
                 $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
@@ -1379,34 +1451,92 @@ class KnowledgeLogic extends ApiLogic
                 $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
                 self::$returnData = $result;
                 return $result;
-
             }
             return true;
-
         } catch (\Throwable $e) {
-//            clogger($e);
-            if($params['scene'] !== 'socket'){
+            //            clogger($e);
+            if ($params['scene'] !== 'socket') {
                 message($e->getMessage());
-            }else{
-                self::$returnData = []; 
+            } else {
+                self::$returnData = [];
                 return false;
             }
-        
         }
-
     }
-    
-    public static function socketChat($params){
+
+    public static function commonVectorChat($params)
+    {
+        set_time_limit(0);
+        if (!isset($params['message']) || empty($params['message'])) {
+            message('提示词 不能为空');
+        }
+        WordsService::sensitive($params['message']);
+        // 问题审核(百度)
+        WordsService::askCensor($params['message']);
+        
+        try {
+            
+            $texts =  \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'], $params['message']);
+            $textLength = mb_strlen($texts, 'utf-8');
+
+            $record = array(
+                'user_id' => self::$uid,
+                'index_id' => $params['kb_id'] ?? '',
+                'prompt' => $params['message'],
+                'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE, // 默认为0
+                'scene' => $params['scene'] ?? '未知聊天',
+            );
+            $record['retrieve_content'] = $texts;
+            $record['retrieve_length'] = $textLength;
+            $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
+
+            $prompt = "请根据以下知识库内容回答问题：
+                    {$texts}
+                    问题：{$params['message']}";
+
+            $request = [
+                'prompt' => $prompt,
+                'stream' =>  (bool)$params['stream'] ?? true,
+                'task_id' => $params['task_id'] ?? generate_unique_task_id(),
+                'scene' => $params['scene'] ?? '未知聊天',
+                'user_id' => self::$uid,
+                'knowledge_tokens' => ceil($textLength / 4),
+                'chat_type' => 9006,
+                'now' => time(),
+                'knowledge_record' => $record,
+            ];
+
+            
+
+            $result = self::requestUrl($request, self::KNOELEDGE_CHAT, self::$uid, $record);
+            self::$returnData = $result;
+            return $result;
+        } catch (\Throwable $e) {
+            //            clogger($e);
+            if ($params['scene'] !== 'socket') {
+                message($e->getMessage());
+            } else {
+                self::$returnData = [];
+                return false;
+            }
+        }
+    }
+
+    public static function socketChat($params)
+    {
         set_time_limit(0);
         try {
-            if(!isset($params['message']) || empty($params['message'])){
+            if (!isset($params['message']) || empty($params['message'])) {
                 return [false, '提示词 不能为空'];
             }
-        
+
+
             $uid = $params['user_id'] ?? self::$uid;
-            $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
-            if(empty($knowlwdge)){
-                return [false, '知识库不存在'];
+            if ($params['indexid'] != '') {
+                $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
+                if (empty($knowlwdge)) {
+                    return [false, '知识库不存在'];
+                }
             }
 
             $message = $params['message'];
@@ -1418,9 +1548,8 @@ class KnowledgeLogic extends ApiLogic
                 $message = $message_ext_text . $message;
             }
 
-
             $request = [
-                'indexid' => $params['indexid'],
+                'indexid' => $params['indexid'] ?? '',
                 'prompt' => $message,
                 'rerank_min_score' => $params['rerank_min_score'] ?? ($knowledge['rerank_min_score'] ?? self::RERANK_MIN_SCORE), // 默认为0
                 'stream' =>  (bool)$params['stream'] ?? true,
@@ -1431,28 +1560,39 @@ class KnowledgeLogic extends ApiLogic
             ];
 
             self::__getRequestData($request, $params);
-        
-            $record = array(
-                'user_id' => $uid,
-                'index_id' => $params['indexid'],
-                'prompt' => $message,
-                'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE, // 默认为0
-                'scene' => $params['scene'] ?? '未知聊天',
-            );
-            
-            // 根据用户提示词检索
-            $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
-            
+
+            $robot = $params['robot'] ?? null;
+            $vector = '';
+            $response = [];
+            if ($robot != null && $robot['kb_type'] == 2) {
+                $vector = \app\api\logic\kb\KbKnowLogic::embContentSearch($robot['id'], $message);
+            } else {
+                $record = array(
+                    'user_id' => $uid,
+                    'index_id' => $params['indexid'] ?? '',
+                    'prompt' => $message,
+                    'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE, // 默认为0
+                    'scene' => $params['scene'] ?? '未知聊天',
+                );
+                // 根据用户提示词检索
+                $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
+            }
+            //clogger($vector);
+
             // 拼接切片内容
-            if((int)$response['code'] === 10000){
-                if(isset($response['data']['Nodes'])){
+            if ((isset($response['code']) && (int)$response['code'] === 10000) || $vector != '') {
+
+                if (isset($response['data']['Nodes'])) {
                     $texts = implode("\n", array_column($response['data']['Nodes'], 'Text'));
-                }else{
+                } else {
                     $texts = '';
                 }
-                
+                if ($vector != '') {
+                    $texts = $vector;
+                }
+
                 $textLength = mb_strlen($texts, 'utf-8');
-                
+
                 $record['retrieve_content'] = $texts;
                 $record['retrieve_length'] = $textLength;
                 $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
@@ -1462,7 +1602,7 @@ class KnowledgeLogic extends ApiLogic
                         问题：{$message}";
 
                 $messages = $params['messages'] ?? [];
-                if(isset($messages[0]['content'])){
+                if (isset($messages[0]['content'])) {
                     $messages[0]['content'] = str_replace(
                         ['相关知识库检索结果'],
                         [$texts],
@@ -1470,7 +1610,7 @@ class KnowledgeLogic extends ApiLogic
                     );
                 }
 
-                if(empty($messages)){
+                if (empty($messages)) {
                     $messages = [
                         ['role' => 'user', 'content' => $message],
                     ];
@@ -1486,25 +1626,24 @@ class KnowledgeLogic extends ApiLogic
                 $request['messages'] = $messages;
 
                 $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
-
+                //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
                 $result = self::requestUrl($request, $scene, $uid, $record, true);
 
-                if(isset($result['code']) && (int)$result['code'] !== 10000){
+                if (isset($result['code']) && (int)$result['code'] !== 10000) {
                     return [false, $result['message'] ?? '知识库检索失败'];
                 }
 
                 return [true, $result];
-            }else{
+            } else {
                 return [false, $response['message'] ?? '知识库检索失败'];
             }
-
         } catch (\Throwable $e) {
             return [false, $e->getMessage()];
         }
-
     }
-    
-    public static function sceneChat($params){
+
+    public static function sceneChat($params)
+    {
         set_time_limit(0);
         if (empty($params['message']) && empty($params['message_ext'])) {
             message('提示词 不能为空');
@@ -1517,15 +1656,15 @@ class KnowledgeLogic extends ApiLogic
         if ($assistant->isEmpty()) {
             message('助手不存在');
         }
-        
+
         $uid = $params['user_id'] ?? self::$uid;
         $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
-        if(empty($knowlwdge)){
-            message('知识库不存在'); 
+        if (empty($knowlwdge)) {
+            message('知识库不存在');
         }
 
         $message = $params['message'];
-        
+
         $request = [
             'indexid' => $params['indexid'],
             'prompt' => $message,
@@ -1536,16 +1675,16 @@ class KnowledgeLogic extends ApiLogic
             'assistant_id' => $params['assistant_id'] ?? 0
         ];
         //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-        if(mb_strlen(mb_trim($message), 'utf-8') == 0){
-            message('提示词 不能为空'); 
+        if (mb_strlen(mb_trim($message), 'utf-8') == 0) {
+            message('提示词 不能为空');
         }
 
-        if($params['scene'] == '陪练聊天'){
-            $request['voice'] = $params['voice']?? '';
-            $request['emotion'] =  $params['emotion']?? '';
-            $request['intensity'] =  $params['intensity']?? '';
+        if ($params['scene'] == '陪练聊天') {
+            $request['voice'] = $params['voice'] ?? '';
+            $request['emotion'] =  $params['emotion'] ?? '';
+            $request['intensity'] =  $params['intensity'] ?? '';
         }
-        
+
         self::__getRequestData($request, $params);
 
         try {
@@ -1556,26 +1695,26 @@ class KnowledgeLogic extends ApiLogic
                 'rerank_min_score' => $request['rerank_min_score'], // 默认为0
                 'scene' => $params['scene'] ?? '未知聊天',
             );
-            
+
             // 根据用户提示词检索
             $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
-            
+
             // 拼接切片内容
-            if((int)$response['code'] === 10000){
-                if(isset($response['data']['Nodes'])){
+            if ((int)$response['code'] === 10000) {
+                if (isset($response['data']['Nodes'])) {
                     $texts = implode("\n", array_column($response['data']['Nodes'], 'Text'));
-                }else{
+                } else {
                     $texts = '';
                 }
                 //clogger($texts);
                 // 表单变量替换
                 $message_ext = $params['message_ext'] ?? '';
                 if ($message_ext) {
-                    $message_ext_text = self::parseMsg($message_ext, $assistant['form_info']);// $assistant['form_info']
+                    $message_ext_text = self::parseMsg($message_ext, $assistant['form_info']); // $assistant['form_info']
                     $texts = $message_ext_text . $texts;
                 }
                 $textLength = mb_strlen($texts, 'utf-8');
-                
+
                 $record['retrieve_content'] = $texts;
                 $record['retrieve_length'] = $textLength;
                 $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
@@ -1590,40 +1729,115 @@ class KnowledgeLogic extends ApiLogic
                 $request['chat_type'] = 9006;
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;
-                
+
                 //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-                
+
                 $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
                 self::$returnData = $result;
                 return $result;
-
             }
             return true;
-
         } catch (\Throwable $e) {
-            
+
             message($e->getMessage());
         }
-
     }
 
-
-
-    public static function ladderPlayerChat($params){
+    public static function sceneVectorChat($params)
+    {
         set_time_limit(0);
         if (empty($params['message']) && empty($params['message_ext'])) {
             message('提示词 不能为空');
         }
+        WordsService::sensitive($params['message']);
+        // 问题审核(百度)
+        WordsService::askCensor($params['message']);
+
+        $assistant = \app\common\model\chat\Assistants::where('id', $params['assistant_id'])->findOrEmpty();
+        if ($assistant->isEmpty()) {
+            message('助手不存在');
+        }
+
+        $uid = $params['user_id'] ?? self::$uid;
         
+
+        $message = $params['message'];
+
         
+        //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        if (mb_strlen(mb_trim($message), 'utf-8') == 0) {
+            message('提示词 不能为空');
+        }
+        
+        try {
+            $record = array(
+                'user_id' => $uid,
+                'index_id' => $params['kb_id'] ?? '',
+                'prompt' => $message,
+                'rerank_min_score' => 0, // 默认为0
+                'scene' => $params['scene'] ?? '未知聊天',
+            );
+            $request = [
+                'prompt' => $message,
+                'stream' =>  (bool)$params['stream'] ?? true,
+                'task_id' => $params['task_id'] ?? generate_unique_task_id(),
+                'scene' => $params['scene'] ?? '未知聊天',
+                'assistant_id' => $params['assistant_id'] ?? 0
+            ];
+            $texts =  \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'], $params['message']);
+            //clogger($texts);
+            // 表单变量替换
+            $message_ext = $params['message_ext'] ?? '';
+            if ($message_ext) {
+                $message_ext_text = self::parseMsg($message_ext, $assistant['form_info']); // $assistant['form_info']
+                $texts = $message_ext_text . $texts;
+            }
+            $textLength = mb_strlen($texts, 'utf-8');
+
+            $record['retrieve_content'] = $texts;
+            $record['retrieve_length'] = $textLength;
+            $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
+
+            $prompt = "请根据以下知识库内容回答问题：
+                    {$texts}
+                    问题：{$message}";
+
+            $request['user_id'] = $uid; // 替换为实际的用户ID
+            $request['prompt'] = $prompt;
+            $request['knowledge_tokens'] = ceil($textLength / 4);
+            $request['chat_type'] = 9006;
+            $request['now'] = time();
+            $request['knowledge_record'] = $record;
+
+            $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
+            self::$returnData = $result;
+            return $result;
+
+            return true;
+        } catch (\Throwable $e) {
+
+            message($e->getMessage());
+        }
+    }
+
+
+
+    public static function ladderPlayerChat($params)
+    {
+        set_time_limit(0);
+        if (empty($params['message']) && empty($params['message_ext'])) {
+            message('提示词 不能为空');
+        }
+
+
         $uid = $params['user_id'] ?? self::$uid;
         $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
-        if(empty($knowlwdge)){
-            message('知识库不存在'); 
+        if (empty($knowlwdge)) {
+            message('知识库不存在');
         }
 
         $message = $params['message'];
-        
+
         $request = [
             'indexid' => $params['indexid'],
             'prompt' => $message,
@@ -1635,10 +1849,10 @@ class KnowledgeLogic extends ApiLogic
         ];
         $request['rerank_min_score'] = self::RERANK_MIN_SCORE;
 
-        $request['voice'] = $params['voice']?? '';
-        $request['emotion'] =  $params['emotion']?? '';
-        $request['intensity'] =  $params['intensity']?? '';
-        
+        $request['voice'] = $params['voice'] ?? '';
+        $request['emotion'] =  $params['emotion'] ?? '';
+        $request['intensity'] =  $params['intensity'] ?? '';
+
         self::__getRequestData($request, $params);
 
         try {
@@ -1654,15 +1868,15 @@ class KnowledgeLogic extends ApiLogic
             $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
             //clogger(json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'll');
             // 拼接切片内容
-            if((int)$response['code'] === 10000){
-                if(isset($response['data']['Nodes'])){
+            if ((int)$response['code'] === 10000) {
+                if (isset($response['data']['Nodes'])) {
                     $texts = implode("\n", array_column($response['data']['Nodes'], 'Text'));
-                }else{
+                } else {
                     $texts = '';
                 }
-                
+
                 $textLength = mb_strlen($texts, 'utf-8');
-                
+
                 $record['retrieve_content'] = $texts;
                 $record['retrieve_length'] = $textLength;
                 $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
@@ -1681,18 +1895,76 @@ class KnowledgeLogic extends ApiLogic
                 $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
                 self::$returnData = $result;
                 return $result;
-
             }
             return true;
-
         } catch (\Throwable $e) {
-            
+
             message($e->getMessage());
         }
-
     }
 
-    private static function parseMsg($message_ext, $form_info){
+    public static function ladderPlayerVecTorChat($params)
+    {
+        set_time_limit(0);
+        if (empty($params['message']) && empty($params['message_ext'])) {
+            message('提示词 不能为空');
+        }
+
+        $uid = $params['user_id'] ?? self::$uid;
+        
+        $message = $params['message'];
+
+        $request = [
+            'prompt' => $message,
+            'stream' =>  (bool)$params['stream'] ?? true,
+            'task_id' => $params['task_id'] ?? generate_unique_task_id(),
+            'scene' => $params['scene'] ?? '未知聊天',
+            'assistant_id' => $params['assistant_id'] ?? 0
+        ];
+        $request['rerank_min_score'] = self::RERANK_MIN_SCORE;
+
+        $request['voice'] = $params['voice'] ?? '';
+        $request['emotion'] =  $params['emotion'] ?? '';
+        $request['intensity'] =  $params['intensity'] ?? '';
+
+        
+        try {
+            $texts =  \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'], $params['message']);
+            $record = array(
+                'user_id' => $uid,
+                'index_id' => $params['kb_id'],
+                'prompt' => $message,
+                'rerank_min_score' => 0, // 默认为0
+                'scene' => $params['scene'] ?? '未知聊天',
+            );
+            $textLength = mb_strlen($texts, 'utf-8');
+
+            $record['retrieve_content'] = $texts;
+            $record['retrieve_length'] = $textLength;
+            $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
+
+            $prompt = "请根据以下知识库内容回答问题：
+                    {$texts}
+                    问题：{$message}";
+
+            $request['user_id'] = $uid; // 替换为实际的用户ID
+            $request['prompt'] = $prompt;
+            $request['knowledge_tokens'] = ceil($textLength / 4);
+            $request['chat_type'] = 9006;
+            $request['now'] = time();
+            $request['knowledge_record'] = $record;
+
+            $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
+            self::$returnData = $result;
+            return $result;
+        } catch (\Throwable $e) {
+
+            message($e->getMessage());
+        }
+    }
+
+    private static function parseMsg($message_ext, $form_info)
+    {
         $message_ext = json_decode($message_ext, true);
         if (empty($message_ext)) {
             return '';
@@ -1714,31 +1986,30 @@ class KnowledgeLogic extends ApiLogic
         }
         return $form_info;
     }
-   
 
-    private static function __getRequestData(array &$request, array $params){
-        if(isset($params['rerankTopN']) && !empty($params['rerankTopN'])){
+
+    private static function __getRequestData(array &$request, array $params)
+    {
+        if (isset($params['rerankTopN']) && !empty($params['rerankTopN'])) {
             $request['rerankTopN'] = $params['rerankTopN'];
         }
 
-        if(isset($params['denseSimilarityTopK']) && !empty($params['denseSimilarityTopK'])){
+        if (isset($params['denseSimilarityTopK']) && !empty($params['denseSimilarityTopK'])) {
             $request['denseSimilarityTopK'] = $params['denseSimilarityTopK'];
         }
 
-        if(isset($params['enableReranking']) && !empty($params['enableReranking'])){
+        if (isset($params['enableReranking']) && !empty($params['enableReranking'])) {
             $request['enableReranking'] = $params['enableReranking'];
         }
-        if(isset($params['enableRewrite']) && !empty($params['enableRewrite'])){
+        if (isset($params['enableRewrite']) && !empty($params['enableRewrite'])) {
             $request['enableRewrite'] = $params['enableRewrite'];
         }
 
-        if(isset($params['sparseSimilarityTopK']) && !empty($params['sparseSimilarityTopK'])){
+        if (isset($params['sparseSimilarityTopK']) && !empty($params['sparseSimilarityTopK'])) {
             $request['sparseSimilarityTopK'] = $params['sparseSimilarityTopK'];
         }
-        if(isset($params['saveRetrieverHistory']) && !empty($params['saveRetrieverHistory'])){
+        if (isset($params['saveRetrieverHistory']) && !empty($params['saveRetrieverHistory'])) {
             $request['saveRetrieverHistory'] = $params['saveRetrieverHistory'];
         }
-        
     }
-
 }

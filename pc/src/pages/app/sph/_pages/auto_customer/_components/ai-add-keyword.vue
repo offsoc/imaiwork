@@ -1,0 +1,103 @@
+<template>
+	<popup
+		ref="popupRef"
+		async
+		width="500px"
+		confirm-button-text=""
+		cancel-button-text=""
+		style="
+			padding: 18px;
+			border-radius: 20px;
+			background-color: var(--app-bg-color-3);
+			box-shadow: 0 0 0 1px #2a2a2a;
+		"
+		:append-to-body="false"
+		:show-close="false">
+		<div class="-my-4">
+			<div
+				class="absolute w-6 h-6 top-[18px] right-[18px] z-[22]"
+				@click="close">
+				<close-btn />
+			</div>
+			<div class="text-[15px] text-white font-bold">AI添加检索关键词</div>
+			<div class="mt-4">
+				<ElInput
+					v-model="formData.targetCount"
+					v-number-input="{ min: 1, max: 100 }"
+					type="number" />
+			</div>
+			<div class="mt-4">
+				<div class="text-white mb-3">生成相关内容</div>
+				<ElInput
+					v-model="formData.keyword"
+					type="textarea"
+					placeholder="请输入需要检索的相关方向，AI将自动为您生成相关检索词"
+					resize="none"
+					:rows="10" />
+			</div>
+			<div class="mt-4">
+				<ElButton
+					type="primary"
+					class="!rounded-full w-full !h-[50px]"
+					:loading="isLock"
+					@click="lockFn"
+					>立即生成</ElButton
+				>
+			</div>
+		</div>
+	</popup>
+</template>
+
+<script setup lang="ts">
+import { getAiKeywords } from "@/api/sph";
+import { CreateTypeEnum } from "@/pages/app/sph/_enums";
+
+const props = defineProps({
+	type: {
+		type: Number,
+		default: CreateTypeEnum.VIDEO,
+	},
+});
+
+const emit = defineEmits(["close", "success"]);
+
+const popupRef = ref();
+
+const formData = reactive({
+	targetCount: 30,
+	keyword: "",
+	channelVersion: props.type,
+});
+
+const open = () => {
+	popupRef.value.open();
+	formData.channelVersion = props.type;
+};
+
+const close = () => {
+	emit("close");
+};
+
+const { lockFn, isLock } = useLockFn(async () => {
+	if (!formData.keyword) {
+		feedback.msgWarning("请输入您想获取的线索方向");
+		return;
+	}
+	try {
+		let data = await getAiKeywords(formData);
+		if (data && data.length > 0) {
+			data = data
+				.filter((item: any) => item.indexOf("=") == -1)
+				.map((item: any) => item.trim());
+		}
+		emit("success", data);
+		close();
+	} catch (error) {
+		feedback.msgError(error || "操作失败");
+	}
+});
+
+defineExpose({
+	open,
+});
+</script>

@@ -1,7 +1,7 @@
 <template>
-    <div class="flex flex-col h-full">
-        <ElCard class="!border-none !rounded-[20px] p-4" shadow="never">
-            <ElForm :model="queryParams" inline class="w-full -mb-4">
+    <div class="flex flex-col h-full bg-white rounded-[20px]">
+        <div class="p-4">
+            <ElForm :model="queryParams" inline class="w-full">
                 <ElFormItem label="来源账号">
                     <ElSelect v-model="queryParams.account" class="!w-[200px]" placeholder="请选择来源账号">
                         <ElOption
@@ -45,39 +45,37 @@
                     <ElButton @click="resetParams"> 重置 </ElButton>
                 </ElFormItem>
             </ElForm>
-        </ElCard>
-        <ElCard class="!border-none mt-4 !rounded-[20px] grow min-h-0" shadow="never">
-            <div class="grow min-h-0 pt-4">
-                <ElTable :data="pager.lists" height="100%" :row-style="{ height: '60px' }">
-                    <ElTableColumn prop="device_code" label="设备码" width="180"></ElTableColumn>
-                    <ElTableColumn prop="account" label="来源账号" width="150"></ElTableColumn>
-                    <ElTableColumn prop="user_account" label="小红书用户信息" min-width="180"></ElTableColumn>
-                    <ElTableColumn prop="original_message" label="私信内容" min-width="180"></ElTableColumn>
-                    <ElTableColumn prop="reg_wechat" label="匹配微信号" min-width="180"></ElTableColumn>
-                    <ElTableColumn prop="wechat_name" label="执行微信" min-width="160"></ElTableColumn>
-                    <ElTableColumn label="执行动作" width="120">
-                        <template #default="{ row }">
-                            <div>自动添加</div>
-                        </template>
-                    </ElTableColumn>
-                    <ElTableColumn prop="result" label="加微结果" min-width="180"></ElTableColumn>
-                    <ElTableColumn label="操作" fixed="right" width="100">
-                        <template #default="{ row }">
-                            <ElButton v-if="row.status == 0" type="primary" link @click="handleRetry(row.id)"
-                                >重试</ElButton
-                            >
-                            <ElButton type="danger" link @click="handleDelete(row.id)">删除</ElButton>
-                        </template>
-                    </ElTableColumn>
-                    <template #empty>
-                        <ElEmpty description="暂无数据" />
+        </div>
+        <div class="grow min-h-0">
+            <ElTable :data="pager.lists" height="100%" :row-style="{ height: '60px' }">
+                <ElTableColumn prop="device_code" label="设备码" width="180"></ElTableColumn>
+                <ElTableColumn prop="account" label="来源账号" width="150"></ElTableColumn>
+                <ElTableColumn prop="user_account" label="小红书用户信息" min-width="180"></ElTableColumn>
+                <ElTableColumn prop="original_message" label="私信内容" min-width="180"></ElTableColumn>
+                <ElTableColumn prop="reg_wechat" label="匹配微信号" min-width="180"></ElTableColumn>
+                <ElTableColumn prop="wechat_name" label="执行微信" min-width="160"></ElTableColumn>
+                <ElTableColumn label="执行动作" width="120">
+                    <template #default="{ row }">
+                        <div>自动添加</div>
                     </template>
-                </ElTable>
-            </div>
-            <div class="flex justify-end p-4">
-                <pagination v-model="pager" @change="getLists"></pagination>
-            </div>
-        </ElCard>
+                </ElTableColumn>
+                <ElTableColumn prop="result" label="加微结果" min-width="180"></ElTableColumn>
+                <ElTableColumn label="操作" fixed="right" width="100">
+                    <template #default="{ row }">
+                        <ElButton v-if="row.status == 0" type="primary" link @click="handleRetry(row.id)"
+                            >重试</ElButton
+                        >
+                        <ElButton type="danger" link @click="handleDelete(row.id)">删除</ElButton>
+                    </template>
+                </ElTableColumn>
+                <template #empty>
+                    <ElEmpty description="暂无数据" />
+                </template>
+            </ElTable>
+        </div>
+        <div class="flex justify-end p-4">
+            <pagination v-model="pager" @change="getLists"></pagination>
+        </div>
     </div>
 </template>
 

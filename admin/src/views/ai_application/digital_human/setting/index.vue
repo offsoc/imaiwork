@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import { saveConfig } from "@/api/app";
-import { getGptPrompt, saveGptPrompt } from "@/api/chat";
+import { getChatPrompt, saveChatPrompt } from "@/api/chat";
 import { useLockFn } from "@/hooks/useLockFn";
 import useAppStore from "@/stores/modules/app";
 import ModelEdit from "./model-edit.vue";
@@ -174,13 +174,13 @@ const { lockFn: lockSaveModelList } = useLockFn(async () => {
 
 const promptConfig = ref<any>({});
 
-const getGptPromptConfig = async () => {
-    const data = await getGptPrompt();
+const getChatPromptConfig = async () => {
+    const data = await getChatPrompt();
     promptConfig.value = data.find((item: any) => item.id === 1);
 };
 
 const savePromptConfig = async () => {
-    await saveGptPrompt(promptConfig.value);
+    await saveChatPrompt(promptConfig.value);
 };
 
 const { lockFn: lockSavePromptConfig, isLock: isSavePromptConfig } = useLockFn(savePromptConfig);
@@ -202,7 +202,7 @@ const { lockFn: lockSavePrivacy, isLock: isSavePrivacy } = useLockFn(async () =>
     });
 });
 
-getGptPromptConfig();
+getChatPromptConfig();
 </script>
 
 <style scoped></style>

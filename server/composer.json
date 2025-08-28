@@ -51,7 +51,11 @@
         "predis/predis": "^3.0",
         "google/protobuf": "^4.31",
         "guzzlehttp/guzzle": "^7.9",
-        "lustre/php-dfa-sensitive": "^1.4"
+        "lustre/php-dfa-sensitive": "^1.4",
+        "ramsey/uuid": "*",
+        "symfony/browser-kit": "*",
+        "symfony/css-selector": "*",
+        "fukuball/jieba-php": "*"
     },
     "require-dev": {
         "symfony/var-dumper": ">=4.2",

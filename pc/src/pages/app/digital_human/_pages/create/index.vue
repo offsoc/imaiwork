@@ -14,7 +14,7 @@
                     <ElButton
                         type="primary"
                         class="mt-5 !h-[50px] !w-[208px] !rounded-full"
-                        @click="handleOpenUpload(ModeType.VIDEO)">
+                        @click="handleOpenUpload(ModeTypeEnum.VIDEO)">
                         定制形象
                     </ElButton>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="grow min-h-0 flex px-5 gap-[14px]">
                     <div
                         class="w-[116px] h-[154px] flex flex-col gap-4 items-center justify-evenly flex-shrink-0 my-6 border border-[#ffffff1a] rounded-xl cursor-pointer hover:border-[#ffffff33]"
-                        @click="handleOpenUpload(ModeType.FIGURE)">
+                        @click="handleOpenUpload(ModeTypeEnum.FIGURE)">
                         <div class="mt-5">
                             <AddTemplate />
                         </div>
@@ -137,129 +137,238 @@
                 </div>
             </div>
             <div class="grow min-h-0 bg-[#1A1A1A] rounded-lg flex flex-col">
-                <div class="flex items-center justify-center create-tabs my-2">
+                <div class="create-tabs">
                     <ElTabs v-model="createType" @tab-click="handleCreateTypeTab">
                         <ElTabPane v-for="item in createTypeMap" :name="item.value" :label="item.label"> </ElTabPane>
                     </ElTabs>
                 </div>
                 <div class="grow min-h-0 mt-4">
-                    <div
-                        class="rounded-md border border-[var(--app-border-color-1)]"
-                        v-if="createType == CreateType.TEXT">
-                        <div
-                            class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--app-border-color-1)]">
-                            <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
-                                <Icon name="local-icon-txt2" :size="14"></Icon>
-                            </div>
-                            <div class="text-[#ffffffcc]">文字设置</div>
-                        </div>
-                        <div class="px-4">
+                    <ElScrollbar>
+                        <div class="rounded-md border border-app-border-1" v-if="createType == CreateTypeEnum.TEXT">
                             <div
-                                v-if="formData.model_version"
-                                class="w-[116px] h-[154px] rounded-xl bg-cover bg-no-repeat mt-4 relative shadow-[0_0_0_1px_var(--color-primary)] cursor-pointer overflow-hidden group hover:shadow-[0_0_0_1px_rgba(255,255,255,0.2)]"
-                                :style="{ backgroundImage: `url(${formData.pic})` }">
-                                <div class="absolute top-2 right-2">
-                                    <Icon name="local-icon-success_fill" :size="20" color="var(--color-primary)"></Icon>
+                                class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--app-border-color-1)]">
+                                <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
+                                    <Icon name="local-icon-txt2" :size="14"></Icon>
                                 </div>
+                                <div class="text-[#ffffffcc]">文字设置</div>
+                            </div>
+                            <div class="px-4">
                                 <div
-                                    class="absolute left-0 bottom-4 w-full flex justify-center"
-                                    v-if="modelVersionMap[formData.model_version]">
+                                    v-if="formData.model_version"
+                                    class="w-[116px] h-[154px] rounded-xl bg-cover bg-no-repeat mt-4 relative shadow-[0_0_0_1px_var(--color-primary)] cursor-pointer overflow-hidden group hover:shadow-[0_0_0_1px_rgba(255,255,255,0.2)]"
+                                    :style="{ backgroundImage: `url(${formData.pic})` }">
+                                    <div class="absolute top-2 right-2">
+                                        <Icon
+                                            name="local-icon-success_fill"
+                                            :size="20"
+                                            color="var(--color-primary)"></Icon>
+                                    </div>
                                     <div
-                                        class="digital-human-tag"
-                                        :class="`digital-human-tag-${formData.model_version}`">
-                                        {{ modelVersionMap[formData.model_version] }}
+                                        class="absolute left-0 bottom-4 w-full flex justify-center"
+                                        v-if="modelVersionMap[formData.model_version]">
+                                        <div
+                                            class="digital-human-tag"
+                                            :class="`digital-human-tag-${formData.model_version}`">
+                                            {{ modelVersionMap[formData.model_version] }}
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="absolute left-0 bottom-0 w-full h-full flex items-center justify-center invisible group-hover:visible bg-[#000000cc]">
+                                        <ElButton color="#FF3C26" class="!h-[26px]" round @click="resetFormData"
+                                            >删除</ElButton
+                                        >
                                     </div>
                                 </div>
-                                <div
-                                    class="absolute left-0 bottom-0 w-full h-full flex items-center justify-center invisible group-hover:visible bg-[#000000cc]">
-                                    <ElButton color="#FF3C26" class="!h-[26px]" round @click="resetFormData"
-                                        >删除</ElButton
+                                <div class="flex flex-col items-center justify-center pt-[50px]" v-else>
+                                    <AddTemplate />
+                                    <ElButton
+                                        type="primary"
+                                        class="mt-3 !h-[28px] !w-[68px] !text-[11px]"
+                                        @click="openAnchor">
+                                        选择形象
+                                    </ElButton>
+                                    <div class="flex items-center gap-x-1 rounded-full bg-[#ffffff08] p-1 mt-5">
+                                        <Icon name="local-icon-tips" :size="16"></Icon>
+                                        <div class="text-[#ffffff4d] text-xs">
+                                            注意：重新选择形象，文案会重置与输入。
+                                        </div>
+                                    </div>
+                                </div>
+                                <svg
+                                    class="my-3"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="266"
+                                    height="2"
+                                    viewBox="0 0 266 2"
+                                    fill="none">
+                                    <path opacity="0.1" d="M0 1H266" stroke="white" stroke-width="0.5" />
+                                </svg>
+                                <div>
+                                    <ElInput
+                                        class="msg-input"
+                                        v-model="formData.msg"
+                                        type="textarea"
+                                        placeholder="请输入您的配音文案内容"
+                                        resize="none"
+                                        input-style="color:#ffffff;font-size:12px;"
+                                        :maxlength="textLimit"
+                                        :rows="8"></ElInput>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <div>
+                                            <generate-prompt
+                                                :prompt-type="CopywritingTypeEnum.AI_DIGITAL_HUMAN_COPYWRITING"
+                                                :max-size="textLimit"
+                                                :disabled="!formData.model_version"
+                                                @use-content="getPromptContent" />
+                                        </div>
+                                        <div class="text-[#ffffff4d] text-xs">
+                                            {{ formData.msg.length }}/{{ textLimit }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-3">
+                                    <ElButton
+                                        class="w-full !h-[44px] !rounded-md"
+                                        color="#262626"
+                                        @click="openChooseTone">
+                                        {{ formData.voice_name || "从音色库选择" }}</ElButton
                                     >
                                 </div>
                             </div>
-                            <div class="flex flex-col items-center justify-center pt-[50px]" v-else>
-                                <AddTemplate />
-                                <ElButton
-                                    type="primary"
-                                    class="mt-3 !h-[28px] !w-[68px] !text-[11px]"
-                                    @click="openAnchor">
-                                    选择形象
-                                </ElButton>
-                                <div class="flex items-center gap-x-1 rounded-full bg-[#ffffff08] p-1 mt-5">
-                                    <Icon name="local-icon-tips" :size="16"></Icon>
-                                    <div class="text-[#ffffff4d] text-xs">注意：重新选择形象，文案会重置与输入。</div>
+                        </div>
+                        <div class="rounded-md border border-app-border-1" v-if="createType == CreateTypeEnum.AUDIO">
+                            <div
+                                class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-app-border-1">
+                                <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
+                                    <Icon name="local-icon-audio" :size="14"></Icon>
                                 </div>
+                                <div class="text-[#ffffffcc]">语音设置</div>
                             </div>
-                            <svg
-                                class="my-3"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="266"
-                                height="2"
-                                viewBox="0 0 266 2"
-                                fill="none">
-                                <path opacity="0.1" d="M0 1H266" stroke="white" stroke-width="0.5" />
-                            </svg>
-                            <div>
-                                <ElInput
-                                    class="msg-input"
-                                    v-model="formData.msg"
-                                    type="textarea"
-                                    placeholder="请输入您的配音文案内容"
-                                    resize="none"
-                                    input-style="color:#ffffff;font-size:12px;"
-                                    :maxlength="textLimit"
-                                    :rows="8"></ElInput>
-                                <div class="flex items-center justify-between mt-2">
-                                    <div>
-                                        <generate-prompt
-                                            :prompt-type="CopywritingTypeEnum.AI_DIGITAL_HUMAN_COPYWRITING"
-                                            :max-size="textLimit"
-                                            :disabled="!formData.model_version"
-                                            @use-content="getPromptContent" />
+                            <div class="p-2">
+                                <upload
+                                    ref="audioUploadRef"
+                                    type="audio"
+                                    drag
+                                    list-type="text"
+                                    :multiple="false"
+                                    :limit="1"
+                                    :max-size="getAudioDurationLimits.size"
+                                    :min-duration="getAudioDurationLimits.min"
+                                    :max-duration="getAudioDurationLimits.max"
+                                    @remove="formData.audio_url = ''"
+                                    @change="getAudio">
+                                    <div
+                                        class="w-full h-[246px] flex flex-col items-center justify-center cursor-pointer">
+                                        <AddTemplate />
+                                        <div class="mt-4 text-center">
+                                            <div class="text-xs text-white">点击此上传音频,支持拖拽上传</div>
+                                            <div class="text-[#ffffff4d] text-xs mt-1">只支持mp3、wav格式</div>
+                                        </div>
                                     </div>
-                                    <div class="text-[#ffffff4d] text-xs">
-                                        {{ formData.msg.length }}/{{ textLimit }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="my-3">
-                                <ElButton class="w-full !h-[44px] !rounded-md" color="#262626" @click="openChooseTone">
-                                    {{ formData.voice_name || "从音色库选择" }}</ElButton
-                                >
+                                </upload>
                             </div>
                         </div>
-                    </div>
-                    <div
-                        class="rounded-md border border-[var(--app-border-color-1)]"
-                        v-if="createType == CreateType.AUDIO">
-                        <div
-                            class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-[var(--app-border-color-1)]">
-                            <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
-                                <Icon name="local-icon-audio" :size="14"></Icon>
-                            </div>
-                            <div class="text-[#ffffffcc]">语音设置</div>
-                        </div>
-                        <upload
-                            ref="audioUploadRef"
-                            type="audio"
-                            drag
-                            list-type="text"
-                            :multiple="false"
-                            :limit="1"
-                            :max-size="getAudioDurationLimits.size"
-                            :min-duration="getAudioDurationLimits.min"
-                            :max-duration="getAudioDurationLimits.max"
-                            @remove="formData.audio_url = ''"
-                            @change="getAudio">
-                            <div class="w-full h-[246px] flex flex-col items-center justify-center cursor-pointer">
-                                <AddTemplate />
-                                <div class="mt-4 text-center">
-                                    <div class="text-xs text-white">点击此上传音频,支持拖拽上传</div>
-                                    <div class="text-[#ffffff4d] text-xs mt-1">只支持mp3、wav格式</div>
+                        <div class="rounded-md border border-app-border-1 mt-4" v-if="clipConfig.is_open">
+                            <div
+                                class="h-11 flex items-center gap-x-3 px-3 border-0 border-b-[1px] border-app-border-1">
+                                <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
+                                    <Icon name="local-icon-audio" :size="14"></Icon>
                                 </div>
+                                <div class="text-[#ffffffcc]">高级设置</div>
                             </div>
-                        </upload>
-                    </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <div class="text-xs text-white">AI智能剪辑</div>
+                                    <ElSwitch
+                                        v-model="formData.automatic_clip"
+                                        style="--el-switch-off-color: #333333"
+                                        active-value="1"
+                                        inactive-value="0"
+                                        @change="handleAutomaticClipChange" />
+                                </div>
+                                <template v-if="formData.automatic_clip == 1 && false">
+                                    <div class="mt-3">
+                                        <div class="text-xs text-white mb-3">剪辑风格选择：</div>
+                                        <div>
+                                            <ElSelect
+                                                v-model="formData.clip_type"
+                                                class="!h-11"
+                                                popper-class="dark-select-popper"
+                                                placeholder="请选择剪辑风格"
+                                                :show-arrow="false">
+                                                <ElOption
+                                                    :value="key"
+                                                    :label="value"
+                                                    v-for="(value, key) in ClipStyleMap">
+                                                </ElOption>
+                                            </ElSelect>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="text-xs text-white mb-3">背景音乐上传：</div>
+                                        <ElPopover
+                                            width="264"
+                                            popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2 choose-type-popover"
+                                            :show-arrow="false">
+                                            <template #reference>
+                                                <div
+                                                    class="w-full h-11 rounded-md shadow-[0_0_0_1px_var(--app-border-color-1)] flex items-center justify-center gap-x-2 text-white hover:bg-[#ffffff0d] cursor-pointer">
+                                                    <Icon name="local-icon-upload3"></Icon>
+                                                    <div class="text-xs">添加音乐</div>
+                                                </div>
+                                            </template>
+                                            <div class="flex flex-col gap-y-2">
+                                                <div class="type-menu-item" @click="openChooseMusic">
+                                                    <span
+                                                        class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
+                                                        <Icon name="local-icon-import" color="#ffffff"></Icon>
+                                                    </span>
+                                                    <span class="text-[#ffffffcc]"> 从素材库选择 </span>
+                                                </div>
+                                                <upload
+                                                    class="w-full"
+                                                    type="audio"
+                                                    accept=".mp3,.wav"
+                                                    show-progress
+                                                    :limit="1"
+                                                    :max-size="20"
+                                                    :show-file-list="false"
+                                                    @success="getUploadBgMusic">
+                                                    <div class="type-menu-item">
+                                                        <span
+                                                            class="flex items-center justify-center rounded p-1 bg-[#ffffff0d]">
+                                                            <Icon name="local-icon-upload" color="#ffffff"></Icon>
+                                                        </span>
+                                                        <span class="text-[#ffffffcc]"> 从本地上传</span>
+                                                    </div>
+                                                </upload>
+                                            </div>
+                                        </ElPopover>
+                                        <div class="h-[1px] w-full border-t border-app-border-1 my-3"></div>
+                                        <div
+                                            v-if="formData.music_url"
+                                            class="rounded-md !h-11 px-3 border border-app-border-1 bg-app-bg-2 flex items-center justify-between gap-x-2 cursor-pointer hover:bg-[#ffffff0d]">
+                                            <div class="flex-1 flex items-center gap-x-2">
+                                                <div
+                                                    class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
+                                                    <Icon name="local-icon-music" :size="14" color="#ffffff"></Icon>
+                                                </div>
+                                                <div class="text-white text-base line-clamp-1">
+                                                    {{ formData.music_name }}
+                                                </div>
+                                            </div>
+                                            <div class="w-[1px] h-[12px] bg-[#ffffff1a]"></div>
+                                            <div>
+                                                <div class="w-4 h-4" @click="handleDeleteMusic()">
+                                                    <close-btn :icon-size="10"></close-btn>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </ElScrollbar>
                 </div>
                 <div class="mt-4">
                     <CreatePanel
@@ -291,22 +400,32 @@
     <choose-tone
         v-if="showChooseTone"
         ref="chooseToneRef"
+        :is_show_original="isShowOriginalTone"
         @close="showChooseTone = false"
         @confirm="getChooseTone"></choose-tone>
+    <choose-music
+        v-if="showChooseMusic"
+        ref="chooseMusicRef"
+        @close="showChooseMusic = false"
+        @confirm="getChooseMusic"></choose-music>
 </template>
 
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
 import { dayjs, ElInput } from "element-plus";
 import { getAnchorList } from "@/api/digital_human";
-import { ModeType, CreateType, DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
+import { addMaterialMusic, getMaterialMusicList } from "@/api/material";
+import { getClipConfig } from "@/api/app";
+import { ModeTypeEnum, CreateTypeEnum, DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
+import { ClipStyleMap, ClipStyleEnum } from "@/pages/app/_enums/indexEnum";
 import { CopywritingTypeEnum } from "@/pages/app/_enums/chatEnum";
 import GeneratePrompt from "@/pages/app/digital_human/_components/generate-prompt.vue";
 import Upload from "@/components/upload/index.vue";
+import ChooseTone from "@/pages/app/_components/choose-tone.vue";
+import ChooseMusic from "@/pages/app/_components/choose-audio.vue";
 import UploadForm from "./_components/upload-form.vue";
 import CreatePanel from "./_components/create-panel.vue";
 import ChooseAnchor from "./_components/choose-anchor.vue";
-import ChooseTone from "./_components/choose-tone.vue";
 
 const appStore = useAppStore();
 const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel || {});
@@ -326,7 +445,7 @@ const formData = reactive<Record<string, any>>({
     anchor_id: "",
     pic: "",
     model_version: "",
-    audio_type: CreateType.TEXT,
+    audio_type: CreateTypeEnum.TEXT,
     audio_src: "",
     voice_id: "",
     voice_url: "",
@@ -335,6 +454,10 @@ const formData = reactive<Record<string, any>>({
     audio_duration: 0,
     audio_url: "",
     voice_type: 1,
+    music_url: "",
+    music_name: "",
+    clip_type: `${ClipStyleEnum.AI_RECOMMEND}`,
+    automatic_clip: 0,
 });
 
 const audioUploadRef = shallowRef<InstanceType<typeof Upload>>();
@@ -362,7 +485,7 @@ const openVideo = async (url: string) => {
 };
 
 // 打开上传弹窗
-const handleOpenUpload = async (type: ModeType) => {
+const handleOpenUpload = async (type: ModeTypeEnum) => {
     showUpload.value = true;
     await nextTick();
     uploadFormRef.value?.open(type);
@@ -379,6 +502,9 @@ const {
     resetPage: resetAnchorPage,
 } = usePaging({
     fetchFun: getAnchorList,
+    params: {
+        type: 0,
+    },
 });
 
 // 获取当前形象
@@ -460,13 +586,13 @@ const handleSelectAnchor = (data: any, index?: number) => {
 const localAnchorLists = ref<any[]>([]);
 const handleAnchorCreate = async (data?: any) => {
     const { modelType } = data;
-    if (modelType === ModeType.VIDEO) {
+    if (modelType === ModeTypeEnum.VIDEO) {
         const anchorData = { ...data.formData, is_vanish: true };
         localAnchorLists.value.unshift(anchorData);
         anchorPager.lists.unshift(anchorData);
         currentAnchorIndex.value = 0;
         setFormData(anchorData, formData);
-    } else if (modelType === ModeType.FIGURE) {
+    } else if (modelType === ModeTypeEnum.FIGURE) {
         await resetAnchorPage();
         anchorPager.lists.unshift(...localAnchorLists.value);
     }
@@ -478,6 +604,11 @@ const handleAnchorCreate = async (data?: any) => {
 
 const chooseToneRef = shallowRef<InstanceType<typeof ChooseTone>>();
 const showChooseTone = ref<boolean>(false);
+
+const isShowOriginalTone = computed(() => {
+    return formData.model_version == DigitalHumanModelVersionEnum.CHANJING;
+});
+
 const openChooseTone = async () => {
     if (!formData.model_version) {
         feedback.msgWarning("请先选择形象~");
@@ -502,6 +633,55 @@ const getChooseTone = (data: any) => {
 };
 
 /** 音色操作 End  */
+
+/** 剪辑操作 Start */
+
+const chooseMusicRef = shallowRef<InstanceType<typeof ChooseMusic>>();
+const showChooseMusic = ref<boolean>(false);
+
+const openChooseMusic = async () => {
+    showChooseMusic.value = true;
+    await nextTick();
+    chooseMusicRef.value?.open();
+};
+
+const getChooseMusic = (data: any) => {
+    showChooseMusic.value = false;
+    formData.music_url = data.url;
+    formData.music_name = data.name;
+};
+
+const getUploadBgMusic = (result: any) => {
+    const { uri, name } = result.data;
+    formData.music_name = name;
+    formData.music_url = uri;
+    addMaterialMusic({
+        url: uri,
+        name,
+        type: "0",
+    });
+};
+
+const handleDeleteMusic = () => {
+    formData.music_name = "";
+    formData.music_url = "";
+};
+
+const randomBgMusicUrl = ref<string>();
+const getBgMusicLists = async () => {
+    const { lists } = await getMaterialMusicList({ type: 0, page_size: 9999 });
+    randomBgMusicUrl.value = lists[Math.floor(Math.random() * lists.length)].uri;
+};
+
+const handleAutomaticClipChange = (value: number) => {
+    if (value == 1) {
+        formData.music_url = randomBgMusicUrl.value;
+    } else {
+        formData.music_url = "";
+    }
+};
+
+/** 剪辑操作 End */
 
 const uploadFormRef = shallowRef<InstanceType<typeof UploadForm>>();
 const showUpload = ref<boolean>(false);
@@ -530,22 +710,22 @@ const getAudioDurationLimits = computed(() => {
     return formData.model_version ? limits[formData.model_version] : {};
 });
 
-const createType = ref<CreateType>(CreateType.TEXT);
+const createType = ref<CreateTypeEnum>(CreateTypeEnum.TEXT);
 const createTypeMap = ref<
     {
         label: string;
-        value: CreateType;
+        value: CreateTypeEnum;
         icon: string;
     }[]
 >([
     {
         label: "文字驱动",
-        value: CreateType.TEXT,
+        value: CreateTypeEnum.TEXT,
         icon: "txt",
     },
     {
         label: "语音驱动",
-        value: CreateType.AUDIO,
+        value: CreateTypeEnum.AUDIO,
         icon: "mic",
     },
 ]);
@@ -554,7 +734,7 @@ const createTypeMap = ref<
 const handleCreateTypeTab = (tab: any) => {
     // 重置通用字段
     formData.voice_id = "";
-    formData.audio_type = tab.index === "0" ? CreateType.TEXT : CreateType.AUDIO;
+    formData.audio_type = tab.index === "0" ? CreateTypeEnum.TEXT : CreateTypeEnum.AUDIO;
     // 根据类型重置相关字段
     if (tab.index === 0) {
         formData.audio_url = "";
@@ -592,6 +772,7 @@ const getPromptContent = (content: string) => {
 
 // 创建成功
 const handleCreateSuccess = () => {
+    resetFormData();
     setTimeout(() => {
         window.location.reload();
     }, 2000);
@@ -607,20 +788,19 @@ const handleCreateError = (error: any) => {
     }
 };
 
-let render;
-const DefineTemplate = {
-    setup(_, { slots }) {
-        return () => {
-            render = slots.default;
-        };
-    },
+const clipConfig = reactive({
+    is_open: false,
+});
+const getClipConfigData = async () => {
+    const { code } = await getClipConfig();
+    clipConfig.is_open = code == 10000;
 };
 
-const AddTemplate = (props) => {
-    return render(props);
-};
+const { DefineTemplate, UseTemplate: AddTemplate } = useTemplate();
 
 getAnchorLists();
+getBgMusicLists();
+getClipConfigData();
 </script>
 
 <style scoped lang="scss">
@@ -687,6 +867,7 @@ getAnchorLists();
     }
 }
 .create-tabs {
+    @apply flex items-center justify-center my-2;
     :deep() {
         .el-tabs {
             @apply w-full;

@@ -95,7 +95,7 @@
 import { useUserStore } from "@/stores/user";
 import { useAppStore } from "@/stores/app";
 import { chatSendTextStream, getChatLog, getCreativeRecord } from "@/api/chat";
-import { TokensSceneEnum } from "@/enums/appEnums";
+import { TokensSceneEnum, KnbTypeEnum } from "@/enums/appEnums";
 import { isImageUrl } from "@/utils/util";
 
 const safeAreaTop = ref<number>(50);
@@ -136,18 +136,11 @@ const updateNetwork = (value: boolean) => {
 
 const recordLists = ref<any[]>([]);
 const pagingRef = shallowRef();
-const openHistory = () => {
-    showHistory.value = true;
-};
+
 const handleRecord = async (task_id: any) => {
     taskId.value = task_id;
     await getChatList();
     showHistory.value = false;
-};
-
-const confirmKnb = (val: any) => {
-    chatPostParams.indexid = val.index_id;
-    chatPostParams.rerank_min_score = val.rerank_min_score;
 };
 
 const queryRecordList = async (page_no: number, page_size: number) => {
@@ -192,7 +185,20 @@ const chatLogParams = reactive<any>({
 const chatPostParams = reactive<any>({
     indexid: "",
     rerank_min_score: "",
+    kb_id: "",
 });
+
+const confirmKnb = (val: any) => {
+    const { data, type } = val;
+    if (type == KnbTypeEnum.RAG) {
+        chatPostParams.indexid = data.index_id;
+        chatPostParams.rerank_min_score = data.rerank_min_score;
+    } else if (type == KnbTypeEnum.VECTOR) {
+        chatPostParams.kb_id = data.id;
+        chatPostParams.indexid = undefined;
+        chatPostParams.rerank_min_score = undefined;
+    }
+};
 
 // 获取聊天记录
 const getChatList = async () => {
@@ -370,6 +376,7 @@ const watchFile = () => {
     uni.$on("chooseFile", (data: any) => {
         fileLists.value = data;
         contentPost();
+        uni.$off("chooseFile");
     });
 };
 

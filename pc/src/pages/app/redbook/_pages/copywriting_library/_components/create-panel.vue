@@ -101,7 +101,7 @@ const emit = defineEmits(["back"]);
 const isSaving = ref(false);
 const isAiGenerating = ref(false);
 
-const query = queryToObject();
+const query = searchQueryToObject();
 
 const formData = reactive({
     id: (query.id as string) || "",

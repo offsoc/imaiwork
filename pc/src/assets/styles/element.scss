@@ -59,6 +59,13 @@
                 font-weight: 400;
                 &.el-table__cell {
                     background-color: transparent;
+
+                    &.el-table-fixed-column--right {
+                        background-color: var(--color-white);
+                    }
+                    &.is-leaf {
+                        border-top: var(--el-table-border);
+                    }
                 }
             }
         }
@@ -78,6 +85,7 @@
 
     .el-dialog {
         --el-dialog-border-radius: var(--el-border-radius-xl);
+        --el-dialog-content-font-size: var(--el-font-size-base);
     }
     .el-button:focus-visible {
         outline: none;

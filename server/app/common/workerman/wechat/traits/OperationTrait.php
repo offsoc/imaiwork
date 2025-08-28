@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
+
 use app\api\logic\wechat\sop\StageLogic;
 use app\common\workerman\wechat\constants\SocketType;
 use app\common\model\wechat\AiWechatDevice;
@@ -11,6 +12,7 @@ use app\common\model\wechat\AiWechatContact;
 use app\common\model\wechat\AiWechatGreetStrategy;
 use app\common\service\FileService;
 use Workerman\Connection\TcpConnection;
+
 /**
  * 微信相关操作
  * @package app\traits
@@ -19,26 +21,27 @@ trait OperationTrait
 {
     use CacheTrait;
 
-    public function sendFriendAddNotice(string $targetProcess, string $deviceId, array $data, TcpConnection $connection){
+    public function sendFriendAddNotice(string $targetProcess, string $deviceId, array $data, TcpConnection $connection)
+    {
         $this->sendChannelMessage(SocketType::WEBSOCKET, $deviceId, $data);
-        //print_r($data);
+
         try {
             $payload = $data['Data']['Content'] ?? [];
-            if(empty($payload)){
-                return; 
+            if (empty($payload)) {
+                return;
             }
-            //print_r($payload);
+
             $device = AiWechatDevice::where('device_code', $deviceId)->find();
-            if(empty($device)){
+            if (empty($device)) {
                 throw new \Exception('device not found');
             }
 
             $wechat = AiWechat::alias('w')
-                    ->join('ai_wechat_setting s', 's.wechat_id = w.wechat_id')
-                    ->where('w.wechat_id', $payload['WeChatId'])
-                    ->where('w.device_code', $device['device_code'])
-                    ->where('w.user_id', $device['user_id'])->find();
-            if(empty($wechat)){
+                ->join('ai_wechat_setting s', 's.wechat_id = w.wechat_id')
+                ->where('w.wechat_id', $payload['WeChatId'])
+                ->where('w.device_code', $device['device_code'])
+                ->where('w.user_id', $device['user_id'])->find();
+            if (empty($wechat)) {
                 throw new \Exception('wechat not found');
             }
 
@@ -67,26 +70,25 @@ trait OperationTrait
                 'open_ai' => 1,
                 'takeover_mode' => 1,
             );
-            //print_r($params);
+
             $find = AiWechatContact::where('wechat_id', $payload['WeChatId'])->where('friend_id', $payload['FriendInfo']['FriendId'])->limit(1)->findOrEmpty();
-            if($find->isEmpty()){
+            if ($find->isEmpty()) {
                 $find = AiWechatContact::create($params);
-            }else{
+            } else {
                 AiWechatContact::where('id', $find->id)->update($params);
             }
 
             StageLogic::sopActionStagetrigger([
-                                                  'friend_id'=>$payload['FriendInfo']['FriendId'],
-                                                  'wechat_id'=>$payload['WeChatId'],
-                                                  'avatar' => $payload['FriendInfo']['Avatar'],
-                                                  'nickname' => $payload['FriendInfo']['FriendNick'],
-                                                  'remark' => $payload['FriendInfo']['Memo'],
-                                              ]);
-           
-            $this->greetMessage($wechat, $find);
+                'friend_id' => $payload['FriendInfo']['FriendId'],
+                'wechat_id' => $payload['WeChatId'],
+                'avatar' => $payload['FriendInfo']['Avatar'],
+                'nickname' => $payload['FriendInfo']['FriendNick'],
+                'remark' => $payload['FriendInfo']['Memo'],
+            ]);
 
+            $this->greetMessage($wechat, $find);
         } catch (\Throwable $e) {
-            //print_r($e);
+
             $this->withChannel('wechat_socket')->withLevel('error')->withTitle('sendFriendAddNotice Error')->withContext([
                 'data' => $data,
                 'e' => $e->getMessage(),
@@ -100,16 +102,20 @@ trait OperationTrait
         }
     }
 
-    private function greetMessage(AiWechat $wechat, AiWechatContact $friend){
+    private function greetMessage(AiWechat $wechat, AiWechatContact $friend)
+    {
         // 获取用户设置
         $greet = AiWechatGreetStrategy::where('user_id', $wechat['user_id'])->findOrEmpty();
-
         if ($greet->isEmpty()) {
-            throw new \Exception("请先设置打招呼的配置", 400);   
+            throw new \Exception("请先设置打招呼的配置", 400);
         }
 
         if ($greet->is_enable == 0) {
             throw new \Exception("未开启打招呼配置", 400);
+        }
+
+        if ($greet->greet_after_ai_enable == 0) {
+            throw new \Exception("打招呼非AI接管", 400);
         }
 
         // 给好友发消息
@@ -178,7 +184,7 @@ trait OperationTrait
 
                 default:
             }
-            
+
             $payload = [
                 'WeChatId' => $wechat->wechat_id,
                 'FriendId' => $friend->friend_id,
@@ -187,7 +193,7 @@ trait OperationTrait
                 'Remark' => $message['remark'] ??  '',
                 'MsgId' => time(),
                 'Immediate' => true,
-                'OptType' => $message['opt_type'] 
+                'OptType' => $message['opt_type']
             ];
 
             $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('greetMessage')->withContext($payload)->log();

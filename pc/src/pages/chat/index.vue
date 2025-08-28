@@ -36,6 +36,7 @@ import { useUserStore } from "@/stores/user";
 import feedback from "@/utils/feedback";
 import { useAppStore } from "@/stores/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
+import { KnTypeEnum } from "@/pages/knowledge_base/_enums";
 
 // 路由相关
 const router = useRouter();
@@ -69,6 +70,7 @@ const chatLogParams = reactive({
 const chatPostParams = reactive({
     indexid: "",
     rerank_min_score: "",
+    kb_id: "",
 });
 
 // 处理函数
@@ -81,8 +83,16 @@ const handleNetwork = (value: boolean) => {
 };
 
 const handleConfirmKnb = (val: any) => {
-    chatPostParams.indexid = val.index_id;
-    chatPostParams.rerank_min_score = val.rerank_min_score;
+    const { type, data } = val;
+    if (type == KnTypeEnum.RAG) {
+        chatPostParams.indexid = data.index_id;
+        chatPostParams.rerank_min_score = data.rerank_min_score;
+        chatPostParams.kb_id = undefined;
+    } else if (type == KnTypeEnum.VECTOR) {
+        chatPostParams.kb_id = data.id;
+        chatPostParams.indexid = undefined;
+        chatPostParams.rerank_min_score = undefined;
+    }
 };
 
 const handleFileListsUpdate = (files: any[]) => {

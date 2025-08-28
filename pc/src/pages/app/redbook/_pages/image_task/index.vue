@@ -130,15 +130,15 @@
             </div>
         </div>
     </div>
-    <PublishPanel :type="PublishTaskType.IMAGE" @back="publishBack" v-else-if="isPublish" />
-    <PublishRecord :type="PublishTaskType.IMAGE" @back="publishBack" v-else-if="isRecord" />
+    <PublishPanel :type="PublishTaskTypeEnum.IMAGE" @back="publishBack" v-else-if="isPublish" />
+    <PublishRecord :type="PublishTaskTypeEnum.IMAGE" @back="publishBack" v-else-if="isRecord" />
 </template>
 
 <script setup lang="ts">
 import { getPublishTaskList, deletePublishTask, changePublishTaskStatus } from "@/api/redbook";
 import Empty from "@/pages/app/redbook/_components/empty.vue";
 import dayjs from "dayjs";
-import { PublishTaskType, SidebarTypeEnum } from "@/pages/app/redbook/_enums";
+import { PublishTaskTypeEnum, SidebarTypeEnum } from "@/pages/app/redbook/_enums";
 import PublishPanel from "@/pages/app/redbook/_components/publish-panel.vue";
 import PublishRecord from "@/pages/app/redbook/_components/publish-record.vue";
 
@@ -148,7 +148,7 @@ const queryParams = reactive({
     name: "",
     page_no: 1,
     page_size: 20,
-    media_type: PublishTaskType.IMAGE,
+    media_type: PublishTaskTypeEnum.IMAGE,
 });
 
 const { pager, getLists, resetPage } = usePaging({

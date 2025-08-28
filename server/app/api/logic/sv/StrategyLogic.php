@@ -4,6 +4,7 @@ namespace app\api\logic\sv;
 
 use app\common\model\sv\SvReplyStrategy;
 use app\common\model\sv\SvRobot;
+use app\common\model\kb\KbRobot;
 use app\common\service\FileService;
 use app\common\model\sv\SvGreetStrategy;
 
@@ -24,7 +25,7 @@ class StrategyLogic extends SvBaseLogic
     {
         try {
 
-            $bot = SvRobot::where("id",$params['robot_id'])->where('user_id', self::$uid)->findOrEmpty();
+            $bot = KbRobot::where("id",$params['robot_id'])->where('user_id', self::$uid)->findOrEmpty();
             if ( $bot->isEmpty()) {
                 self::setError('机器人不存在');
                 return false;

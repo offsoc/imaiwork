@@ -2,20 +2,12 @@
     <div class="h-full flex flex-col bg-app-bg-2 rounded-[20px]">
         <div class="flex-shrink-0 px-[14px]">
             <ElScrollbar>
-                <div class="flex items-center justify-between h-[88px]">
-                    <ElTabs v-model="queryParams.model_version" @tab-click="handleTabClick">
-                        <ElTabPane label="全部" name=""></ElTabPane>
-                        <ElTabPane
-                            v-for="item in modelChannel"
-                            :label="item.name"
-                            :name="item.id"
-                            :key="item.id"></ElTabPane>
-                    </ElTabs>
+                <div class="flex items-center justify-end h-[88px]">
                     <div class="flex items-center gap-[14px]">
                         <ElSelect
                             v-model="queryParams.status"
                             class="!w-[260px] status-select"
-                            popper-class="custom-select-popper"
+                            popper-class="dark-select-popper"
                             clearable
                             :show-arrow="false"
                             :empty-values="[null, undefined]"
@@ -118,12 +110,8 @@
 
 <script setup lang="ts">
 import { getAnchorList, deleteAnchor, retryAnchor } from "@/api/digital_human";
-import { useAppStore } from "@/stores/app";
 import Empty from "@/pages/app/digital_human/_components/empty.vue";
 import VideoItem from "@/pages/app/_components/video-item.vue";
-
-const appStore = useAppStore();
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
 
 const nuxtApp = useNuxtApp();
 
@@ -154,6 +142,7 @@ const queryParams = reactive({
     page_size: 20,
     status: "",
     model_version: "",
+    type: 0,
 });
 
 const { pager, getLists, resetPage } = usePaging({

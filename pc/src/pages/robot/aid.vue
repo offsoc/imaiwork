@@ -1,9 +1,17 @@
 <template>
     <div class="flex flex-col h-full p-4">
-        <div class="flex items-center gap-2">
-            <div class="text-[20px] font-bold">AI助理</div>
-            <div class="text-xs text-[#7F7F7F]">
-                智能多面手，凭先进算法与丰富数据，精准解疑答惑，流畅交互，高效助力各类事务处理
+        <div
+            class="rounded-[20px] flex items-center gap-3 px-[30px]"
+            style="
+                background: linear-gradient(152deg, rgba(0, 101, 251, 0.88) -42.44%, rgba(255, 255, 255, 0) 12.19%)
+                    rgb(255, 255, 255);
+            ">
+            <img src="@/assets/images/aid.svg" class="w-11 mt-7" />
+            <div>
+                <div class="text-[#000000cc]">{{ ToolEnumMap[ToolEnum.AID] }}</div>
+                <div class="text-[#00000080]">
+                    智能中枢，深研部门流程，精准解析需求，高效协同执行，驱动业务高效运转。
+                </div>
             </div>
         </div>
         <div class="mt-4">
@@ -32,7 +40,7 @@
                     :name="index"></ElTabPane>
             </ElTabs>
         </div>
-        <div class="grow min-h-0 overflow-y-auto -mx-4">
+        <div class="grow min-h-0 overflow-y-auto -mx-4 dynamic-scroller">
             <div
                 v-loading="pager.loading"
                 class=""
@@ -69,13 +77,11 @@
 </template>
 
 <script setup lang="ts">
-import { Search } from "@element-plus/icons-vue";
 import { useAppStore } from "@/stores/app";
 import { robotLists } from "@/api/robot";
-
+import { ToolEnumMap, ToolEnum } from "@/enums/appEnums";
 const appStore = useAppStore();
 
-const searchValue = ref<string>("");
 const sceneIndex = ref<number>(0);
 
 const sceneSubList = ref<any[]>([]);

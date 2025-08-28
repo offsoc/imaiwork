@@ -41,7 +41,6 @@ trait CacheTrait
             'persistent' => true,   // 启用持久连接
             'read_write_timeout' => 0, // 读写超时（0为无限）
         ]);
-        
     }
 
     /**

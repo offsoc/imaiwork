@@ -1,6 +1,6 @@
 <template>
     <div class="w-full flex gap-2">
-        <ElSelect v-model="currResolution" popper-class="custom-select-popper" class="!w-[120px]" :show-arrow="false">
+        <ElSelect v-model="currResolution" popper-class="dark-select-popper" class="!w-[120px]" :show-arrow="false">
             <ElOption
                 v-for="(item, index) in getResolutionOptions"
                 :key="index"

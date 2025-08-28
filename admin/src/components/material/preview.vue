@@ -14,7 +14,6 @@
                 width="740px"
                 :title="`${type == 'video' ? '视频预览' : '音频预览'}`"
                 :before-close="handleClose">
-                >
                 <video-player ref="playerRef" :src="url" width="100%" height="450px" />
             </el-dialog>
         </div>

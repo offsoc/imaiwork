@@ -2,26 +2,10 @@
     <view class="h-screen flex flex-col">
         <view class="grow min-h-0">
             <scroll-view class="h-full" scroll-y>
-                <view class="px-[32rpx] pb-[32rpx] h-full flex flex-col">
-                    <view>
-                        <u-tabs
-                            :list="tabsList"
-                            bg-color=""
-                            bold
-                            height="100"
-                            font-size="30"
-                            active-color="#000000"
-                            inactive-color="#00000080"
-                            :bar-style="{
-                                backgroundColor: '#0065FB',
-                                height: '4rpx',
-                            }"
-                            :is-scroll="false"
-                            @change="changeTabs"></u-tabs>
-                    </view>
+                <view class="pb-[32rpx] h-full flex flex-col">
                     <!-- 形象选择区域 -->
                     <view
-                        class="rounded-[40rpx] bg-white px-[44rpx]"
+                        class="bg-white px-[44rpx]"
                         :class="{
                             'grow min-h-0 flex flex-col': !isModelVersion,
                         }">
@@ -43,10 +27,12 @@
                         </view>
                         <!-- 形象列表区域 -->
                         <view
-                            class="border-[0rpx] border-t-[1rpx] border-solid border-[#E5E5E5] py-4"
-                            :class="{
-                                'grow min-h-0 flex flex-col items-center justify-center': !isModelVersion,
-                            }">
+                            class="py-4"
+                            :class="[
+                                !isModelVersion
+                                    ? 'grow min-h-0 flex flex-col items-center justify-center'
+                                    : 'border-[0rpx] border-t-[1rpx] border-b-[1rpx] border-solid border-[#E5E5E5]',
+                            ]">
                             <view v-if="anchorLists.length" class="anchor-list">
                                 <scroll-view scroll-x show-scrollbar="false">
                                     <view class="flex gap-x-2 whitespace-nowrap">
@@ -98,43 +84,81 @@
                             </view>
                         </view>
                         <!-- 音色选择区域 -->
-                        <view
-                            class="flex items-center justify-between h-[100rpx] gap-x-2 border-[0rpx] border-t-[1rpx] border-solid border-[#E5E5E5]"
-                            v-if="isModelVersion">
-                            <text class="text-[#333333] text-[26rpx] flex-shrink-0">选择声音</text>
+                        <view class="flex items-center justify-between h-[80rpx] gap-x-2" v-if="isModelVersion">
+                            <text class="text-[#333333] flex-shrink-0">选择声音</text>
                             <view class="flex items-center gap-x-1" @click="openChooseTone()">
-                                <text class="text-primary text-[26rpx]">{{
-                                    formData.voice_name || "去定制你的第一个声音"
-                                }}</text>
-                                <u-icon name="arrow-right" color="#0065FB"></u-icon>
+                                <text class="text-primary line-clamp-1">{{ formData.voice_name || "选择声音" }}</text>
+                                <u-icon name="arrow-right" color="rgba(0, 0, 0, 0.2)" size="22"></u-icon>
+                            </view>
+                        </view>
+                        <!-- 背景音乐选择区域 -->
+                        <view v-if="isModelVersion && clipConfig.is_open">
+                            <view class="flex items-center justify-between h-[80rpx] gap-x-2">
+                                <text class="text-[#333333] flex-shrink-0">自动剪辑</text>
+                                <view class="flex items-center gap-x-1">
+                                    <u-switch
+                                        v-model="formData.automatic_clip"
+                                        size="30"
+                                        active-value="1"
+                                        inactive-value="0"
+                                        @change="handleAutomaticClipChange"></u-switch>
+                                </view>
+                            </view>
+                            <view class="flex items-center justify-between h-[80rpx] gap-x-2" v-if="false">
+                                <text class="text-[#333333] flex-shrink-0">背景音乐</text>
+                                <navigator
+                                    class="flex items-center gap-x-1"
+                                    url="/ai_modules/digital_human/pages/audio_choose/audio_choose"
+                                    hover-class="none">
+                                    <text class="text-[#00000080] line-clamp-1">{{
+                                        formData.voice_name || "选择背景音乐"
+                                    }}</text>
+                                    <u-icon name="arrow-right" color="rgba(0, 0, 0, 0.2)" size="22"></u-icon>
+                                </navigator>
+                            </view>
+                            <view class="flex items-center justify-between h-[80rpx] gap-x-2" v-if="false">
+                                <text class="text-[#333333] flex-shrink-0">剪辑风格选择</text>
+                                <navigator
+                                    class="flex items-center gap-x-1"
+                                    url="/ai_modules/digital_human/pages/styles_choose/styles_choose"
+                                    hover-class="none">
+                                    <text class="text-[#00000080] line-clamp-1">{{
+                                        formData.voice_name || "选择剪辑风格"
+                                    }}</text>
+                                    <u-icon name="arrow-right" color="rgba(0, 0, 0, 0.2)" size="22"></u-icon>
+                                </navigator>
                             </view>
                         </view>
                     </view>
                     <!-- 文案编辑区域 -->
-                    <view class="rounded-[40rpx] bg-white px-[44rpx] mt-[16rpx]" v-if="isModelVersion">
-                        <view class="h-[100rpx] flex items-center -mx-[24rpx] gap-x-2 py-[12rpx]">
+                    <view class="bg-white px-[44rpx] mt-[16rpx]" v-if="isModelVersion">
+                        <view class="flex items-center -mx-[24rpx] gap-x-2 py-[16rpx]">
                             <view
-                                class="flex items-center gap-x-2 h-full px-[24rpx] rounded-full transition-all duration-300"
+                                class="util-item"
                                 :class="[isRandomCopywriter ? 'bg-primary-light-9 text-primary' : ' text-[#333333]']"
                                 @click="randomCopywriter()">
-                                <image
-                                    v-if="isRandomCopywriter"
-                                    src="@/ai_modules/digital_human/static/icons/random_primary.svg"
-                                    class="w-[28rpx] h-[28rpx]"></image>
-                                <image
-                                    v-else
-                                    src="@/ai_modules/digital_human/static/icons/random.svg"
-                                    class="w-[28rpx] h-[28rpx]"></image>
-                                <text class="text-[26rpx]">随机文案</text>
+                                <view class="w-[38rpx] h-[38rpx]">
+                                    <image
+                                        v-if="isRandomCopywriter"
+                                        src="@/ai_modules/digital_human/static/icons/random_primary.svg"
+                                        class="w-full h-full"></image>
+                                    <image
+                                        v-else
+                                        src="@/ai_modules/digital_human/static/icons/random.svg"
+                                        class="w-full h-full"></image>
+                                </view>
+                                <text class="text-[20rpx]">随机文案</text>
                             </view>
-                            <view class="h-[28rpx] w-[2rpx] bg-[#e5e5e5]"> </view>
                             <navigator
-                                class="flex items-center justify-center gap-x-2 h-full px-[24rpx]"
                                 :url="`/ai_modules/digital_human/pages/ai_copywriter/ai_copywriter?limit=${textLimit}`">
-                                <image
-                                    src="@/ai_modules/digital_human/static/icons/copywriter.svg"
-                                    class="w-[28rpx] h-[28rpx]"></image>
-                                <text class="text-[#000000cc] text-[26rpx]">智能文案</text>
+                                <view class="util-item">
+                                    <view class="w-[38rpx] h-[38rpx]">
+                                        <image
+                                            src="@/ai_modules/digital_human/static/icons/copywriter.svg"
+                                            class="w-full h-full"></image>
+                                    </view>
+                                    <text class="text-[20rpx]">智能文案</text>
+                                </view>
                             </navigator>
                         </view>
                         <view
@@ -188,6 +212,7 @@
         v-model:show="showChooseTone"
         :model-version="formData.model_version"
         :active-tone="formData.voice_id"
+        :show-original-tone="showOriginalTone"
         @confirm="handleChooseTone" />
     <choose-model v-model:show="showChooseModel" @confirm="handleChooseModel" />
     <model-rule v-model:show="showModelRule" />
@@ -199,11 +224,13 @@
 
 <script setup lang="ts">
 import { createTask } from "@/api/digital_human";
+import { getClipConfig } from "@/api/app";
+import { getMaterialMusicList } from "@/api/material";
 import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
-import { ModeType, CreateType, ListenerType } from "@/ai_modules/digital_human/enums";
 import Cache from "@/utils/cache";
-import { DigitalHumanModelVersionEnum } from "../../enums";
+import { ModeTypeEnum, CreateTypeEnum, ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
+import { DigitalHumanModelVersionEnum, ClipStyleEnum } from "../../enums";
 import { createVideoCopywriter } from "../../config/copywriter";
 import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 import SelectAnchor from "@/ai_modules/digital_human/components/choose-anchor/choose-anchor.vue";
@@ -213,24 +240,6 @@ import ModelRule from "@/ai_modules/digital_human/components/model-rule/model-ru
 import ContentInput from "@/ai_modules/digital_human/components/content-input/content-input.vue";
 import Agreement from "@/ai_modules/digital_human/components/agreement/agreement.vue";
 import CreatePanel from "@/ai_modules/digital_human/components/create-panel/create-panel.vue";
-
-// 定义表单数据接口
-interface FormData {
-    name: string;
-    pic: string;
-    width: number;
-    height: number;
-    anchor_id: string;
-    anchor_name: string;
-    gender: "male" | "female";
-    model_version: DigitalHumanModelVersionEnum;
-    audio_type: CreateType;
-    voice_id: string;
-    voice_type: number;
-    voice_name: string;
-    msg: string;
-    video_url: string;
-}
 
 // 定义锚点数据接口
 interface AnchorItem {
@@ -248,10 +257,9 @@ const userStore = useUserStore();
 
 // 常量定义
 const DH_CREATE_AGREEMENT_KEY = "create_agreement";
-const tabsList = [{ name: "真人数字人" }, { name: "图片数字人" }];
 
 // 表单数据初始化
-const formData = reactive<FormData>({
+const formData = reactive<any>({
     name: "",
     pic: "",
     width: 0,
@@ -260,12 +268,16 @@ const formData = reactive<FormData>({
     anchor_name: "",
     gender: "male",
     model_version: "" as unknown as DigitalHumanModelVersionEnum,
-    audio_type: CreateType.TEXT,
+    audio_type: CreateTypeEnum.TEXT,
     voice_id: "",
     voice_type: 0,
     voice_name: "",
     msg: "",
     video_url: "",
+    automatic_clip: 0,
+    clip_type: ClipStyleEnum.AI_RECOMMEND,
+    music_url: "",
+    music_name: "",
 });
 
 // 状态变量
@@ -292,6 +304,7 @@ const textLimit = computed(() => {
         [DigitalHumanModelVersionEnum.ELITE]: 1000,
         [DigitalHumanModelVersionEnum.CHANJING]: 4000,
     };
+    //@ts-ignore
     return limits[formData.model_version] || 150;
 });
 
@@ -317,11 +330,17 @@ const canCreate = computed(() => {
     return isModelVersion.value && !!formData.voice_id && !!formData.msg;
 });
 
-// 方法定义
-const changeTabs = () => {
-    uni.$u.toast("敬请期待~");
-};
+const showOriginalTone = computed(() => {
+    return formData.model_version == DigitalHumanModelVersionEnum.CHANJING;
+});
 
+const clipConfig = reactive({
+    is_open: false,
+});
+const getClipConfigData = async () => {
+    const { code } = await getClipConfig();
+    clipConfig.is_open = code == 10000;
+};
 // 形象相关方法
 const chooseAnchor = (item: AnchorItem) => {
     const { name, model_version, anchor_id, url, pic, width, height } = item;
@@ -341,7 +360,6 @@ const chooseAnchor = (item: AnchorItem) => {
     formData.pic = pic;
     formData.width = width;
     formData.height = height;
-    console.log("formData", formData);
 };
 
 const openChooseAnchor = () => {
@@ -366,8 +384,22 @@ const openModel = () => {
 const handleChooseModel = (id: string) => {
     showChooseModel.value = false;
     uni.$u.route({
-        url: `/ai_modules/digital_human/pages/video_upload/video_upload?model_version=${id}&type=${ModeType.ANCHOR}`,
+        url: `/ai_modules/digital_human/pages/video_upload/video_upload?model_version=${id}&type=${ModeTypeEnum.ANCHOR}`,
     });
+};
+
+const randomBgMusicUrl = ref<string>();
+const getBgMusicLists = async () => {
+    const { lists } = await getMaterialMusicList({ page_size: 9999 });
+    randomBgMusicUrl.value = lists[Math.floor(Math.random() * lists.length)].uri;
+};
+
+const handleAutomaticClipChange = (value: number) => {
+    if (value == 1) {
+        formData.music_url = randomBgMusicUrl.value;
+    } else {
+        formData.music_url = "";
+    }
 };
 
 // 视频预览相关方法
@@ -439,6 +471,10 @@ const startCreate = () => {
             uni.$u.toast("请先输入视频文案");
             openContentInput();
         }
+        // else if (formData.automatic_clip == 1 && !formData.music_url) {
+        //     uni.$u.toast("请先选择音乐");
+        //     return;
+        // }
         return;
     }
     createPanelRef.value?.confirm();
@@ -471,6 +507,9 @@ const confirmCreate = async () => {
             model_version: formData.model_version,
             width: formData.width,
             height: formData.height,
+            automatic_clip: formData.automatic_clip,
+            clip_type: formData.clip_type,
+            music_url: formData.music_url,
         });
         createPanelRef.value?.close();
         userStore.getUser();
@@ -504,19 +543,28 @@ const goHome = () => {
 onShow(() => {
     uni.$on("confirm", (result: any) => {
         const { type, data } = result;
-        if (type === ListenerType.AI_COPYWRITER) {
+        if (type === ListenerTypeEnum.AI_COPYWRITER) {
             formData.msg = data.content;
             if (formData.msg.length > textLimit.value) {
                 formData.msg = formData.msg.slice(0, textLimit.value);
             }
         }
+        if (type === ListenerTypeEnum.CHOOSE_STYLES) {
+            // formData.styles = data;
+        }
+        if (type === ListenerTypeEnum.CHOOSE_MUSIC) {
+            formData.music_url = data.url;
+            formData.music_name = data.name;
+        }
         uni.$off("confirm");
     });
+    getClipConfigData();
+    getBgMusicLists();
 });
 
 onLoad((options: any) => {
     const { type, data } = options;
-    if (type === ListenerType.UPLOAD_VIDEO) {
+    if (type === ListenerTypeEnum.UPLOAD_VIDEO) {
         try {
             const parsedData = JSON.parse(decodeURIComponent(data));
             const { name, url, model_version, anchor_id, pic, width, height } = parsedData;
@@ -561,5 +609,9 @@ onLoad((options: any) => {
         background: linear-gradient(to right, transparent, #ffffff);
         pointer-events: none;
     }
+}
+
+.util-item {
+    @apply flex flex-col items-center h-full bg-[#F7F9FC] py-1 px-2 rounded transition-all duration-300 h-[80rpx];
 }
 </style>

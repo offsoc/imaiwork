@@ -135,7 +135,7 @@ const historyPageParams = reactive<Record<string, any>>({
 });
 
 on("open", () => {
-    getWechatListsFn();
+    getWeChatListsFn();
 });
 
 // 监听错误事件
@@ -175,7 +175,7 @@ on("message", async (data: any) => {
                 });
             }
         },
-        [MsgTypeEnum.WxInfo]: getWechatListsFn,
+        [MsgTypeEnum.WxInfo]: getWeChatListsFn,
         [MsgTypeEnum.ConversationPushNotice]: handleConversationPush,
         [MsgTypeEnum.FriendPushNotice]: handleFriendPush,
         [MsgTypeEnum.HistoryMsgPushNotice]: handleHistoryMsgPush,
@@ -203,7 +203,7 @@ on("success", (data: any) => {
     if (type == "add-device") {
         sidebarPanelRef.value?.closeAddWeChatPop();
         addDeviceCode.value = "";
-        getWechatListsFn();
+        getWeChatListsFn();
     }
 });
 
@@ -1153,7 +1153,7 @@ const isChatCompany = (friendId: string) => {
     return friendId ? friendId.indexOf("@@qy_g") > -1 : false;
 };
 
-const getWechatListsFn = async () => {
+const getWeChatListsFn = async () => {
     const { lists } = await getWeChatLists({ page_size: 999 });
     wechatLists.value = lists;
     if (lists && lists.length > 0) {

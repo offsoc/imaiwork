@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { AppKeyEnum, ThemeEnum } from "@/enums/appEnums";
+import { AppKeyEnum, appKeyNameMap, ThemeEnum } from "@/enums/appEnums";
 import { SidebarEnum } from "./_enums";
 import Sidebar from "../_components/sidebar.vue";
 import CreatePanel from "./_components/create-panel.vue";
@@ -102,7 +102,7 @@ const getSidebar = computed(() => {
 definePageMeta({
     layout: "base",
     key: AppKeyEnum.DRAWING,
-    title: "智能设计",
+    title: appKeyNameMap[AppKeyEnum.DRAWING],
 });
 </script>
 
@@ -120,4 +120,20 @@ definePageMeta({
 
 <style scoped lang="scss">
 @import "@/pages/app/_assets/styles/index.scss";
+:deep(.el-tabs) {
+    padding: 0 0;
+    .el-tabs__nav {
+        width: 100%;
+    }
+    .el-tabs__item {
+        flex: 1;
+    }
+    .el-tabs__nav-wrap {
+        &::after {
+            height: 1px;
+            background-color: var(--app-border-color-2);
+            display: block;
+        }
+    }
+}
 </style>

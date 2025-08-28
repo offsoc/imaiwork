@@ -11,7 +11,7 @@ class ContentCensorLogic extends BaseLogic
     /**
      * @notes 审核配置详情
      * @return array
-     * @author fzr
+     * @author kb
      */
     public static function detail(): array
     {
@@ -31,7 +31,7 @@ class ContentCensorLogic extends BaseLogic
     /**
      * @notes 审核配置保存
      * @param array $params
-     * @author fzr
+     * @author kb
      */
     public static function save(array $params)
     {

@@ -138,10 +138,12 @@ const domain = computed(() => appStore.config.domain);
 const webSiteConfig = computed(() => appStore.getWebsiteConfig);
 
 enum AgentType {
+    // AI视频号
+    AI_SPH = "sph",
     // AI数字人
     AI_DIGITAL_HUMAN = "digital_human",
     // AI人事
-    AI_PERSONNEL = "personnel",
+    AI_INTERVIEW = "interview",
     // AI会议纪要
     AI_MEETING_SUMMARY = "meeting_minutes",
     // 音乐二创
@@ -166,6 +168,14 @@ enum AgentType {
 
 const hotAgentList = ref([
     {
+        key: AgentType.AI_SPH,
+        name: "AI自动获客",
+        title: "自动生成获客方向，提升转化效率。",
+        desc: "您无需人工操作，即可实现线索自动化获取。系统将自动在视频号中刷选目标内容、提取主页联系方式，若未识别到微信号还能主动私信引导添加，实现从“曝光”到“加微信”的全流程自动化。助您节省人力、提升转化效率，实现低成本、高频次、高质量的精准获客。",
+        image: `${config.baseUrl}static/images/staff_sph.png`,
+        active_image: `${config.baseUrl}static/images/staff_sph_active.png`,
+    },
+    {
         key: AgentType.AI_DIGITAL_HUMAN,
         name: "智能数字人",
         title: "打造品牌数字形象，AI真人级体验。",
@@ -182,7 +192,7 @@ const hotAgentList = ref([
         active_image: `${config.baseUrl}static/images/staff_meeting_minutes_active.png`,
     },
     {
-        key: AgentType.AI_PERSONNEL,
+        key: AgentType.AI_INTERVIEW,
         name: "智能人事",
         title: "让管理更智慧，让企业更轻盈。",
         desc: "自动化（AI）人事系统，高效处理招聘等相关事务，节省时间、提高效率。轻松应对复杂流程，提升团队效率！",
@@ -246,13 +256,10 @@ const handleAgent = (key: AgentType) => {
         case AgentType.AI_DIGITAL_HUMAN:
         case AgentType.AI_MEETING_SUMMARY:
         case AgentType.AI_LADDER_PLAYER:
+        case AgentType.AI_INTERVIEW:
+        case AgentType.AI_SPH:
             uni.$u.route({
                 url: `/ai_modules/${key}/pages/index/index`,
-            });
-            return;
-        case AgentType.AI_PERSONNEL:
-            uni.$u.route({
-                url: `/ai_modules/interview/pages/index/index`,
             });
             return;
         default:

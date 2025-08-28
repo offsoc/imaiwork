@@ -63,7 +63,9 @@
                                 </ElImage>
                             </div>
                             <div class="flex-1 flex flex-col gap-y-[10px]">
-                                <div class="text-white">{{ item.name }}</div>
+                                <div class="text-white break-all line-clamp-1 mr-4">
+                                    {{ item.name }}<template v-if="item.automatic_clip == 1">（AI剪辑）</template>
+                                </div>
                                 <div class="flex items-center gap-x-1">
                                     <span class="text-white"
                                         >生成状态：{{ item.success_num || 0 }}/{{ item.video_count || 1 }}</span
@@ -212,10 +214,6 @@ const handlePreviewVideoResult = async (id: string) => {
 };
 
 getLists();
-
-onMounted(() => {
-    console.log(route.query);
-});
 </script>
 
 <style scoped></style>

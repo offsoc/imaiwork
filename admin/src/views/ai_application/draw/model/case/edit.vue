@@ -46,7 +46,7 @@
                         rows="5"
                         placeholder="请输入案例描述" />
                 </el-form-item>
-                <el-form-item label="状态" prop="sort">
+                <el-form-item label="状态" prop="status">
                     <el-switch v-model="formData.status" :active-value="1" :inactive-value="0" />
                 </el-form-item>
             </el-form>

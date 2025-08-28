@@ -77,7 +77,7 @@ class TokenLogService
         } else if (in_array($scene, ['human_video'])) {
 
             $need_token = 50;
-        } else if(in_array($scene, ['knowledge_create'])) {
+        } else if(in_array($scene, ['knowledge_create','create_vector_knowledge'])) {
             $need_token = 20;
         } else if(in_array($scene, ['knowledge_retrieve'])) {
             $need_token = 100;

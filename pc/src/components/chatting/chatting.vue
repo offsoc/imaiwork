@@ -243,22 +243,9 @@ const handleKnowledgeBase = () => {
     knbSelectRef.value?.open();
 };
 
-const getSelectKnb = (val) => {
-    activeKnb.value = val;
+const getSelectKnb = (val: any) => {
+    activeKnb.value = val.data;
     emit("confirmKnb", val);
-};
-
-const handleHistoryChat = () => {
-    router.push("/creation");
-};
-
-const handleNewChat = () => {
-    // 清空输入框
-    cleanInput();
-    // 设置滚动到顶部
-    scrollbarRef.value?.setScrollTop(0);
-    disabledScroll.value = false;
-    emit("newChat");
 };
 
 //计算滚动到底部高度

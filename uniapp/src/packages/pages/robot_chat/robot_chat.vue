@@ -86,7 +86,7 @@ import { robotDetail } from "@/api/robot";
 import { useUserStore } from "@/stores/user";
 import { chatRobotSendTextStream, getChatLog } from "@/api/chat";
 import Sidebar from "./components/sidebar.vue";
-import { TokensSceneEnum } from "@/enums/appEnums";
+import { TokensSceneEnum, KnbTypeEnum } from "@/enums/appEnums";
 
 const sidebarRef = shallowRef<InstanceType<typeof Sidebar>>();
 
@@ -112,8 +112,15 @@ const handleBack = () => {
 };
 
 const confirmKnb = (val: any) => {
-    chatPostParams.indexid = val.index_id;
-    chatPostParams.rerank_min_score = val.rerank_min_score;
+    const { type, data } = val;
+    if (type == KnbTypeEnum.RAG) {
+        chatPostParams.indexid = data.index_id;
+        chatPostParams.rerank_min_score = data.rerank_min_score;
+    } else if (type == KnbTypeEnum.VECTOR) {
+        chatPostParams.kb_id = data.id;
+        chatPostParams.indexid = undefined;
+        chatPostParams.rerank_min_score = undefined;
+    }
 };
 
 const chattingRef = shallowRef();

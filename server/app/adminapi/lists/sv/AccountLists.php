@@ -3,10 +3,8 @@ namespace app\adminapi\lists\sv;
 use app\adminapi\lists\BaseAdminDataLists;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\sv\SvAccount;
-use app\api\logic\sv\MessageLogic;
-use app\common\model\sv\SvRobot;
 /**
- * 用户列表
+ * 账号列表
  * Class AccountLists
  * @package app\adminapi\lists\sv
  * @author Lee

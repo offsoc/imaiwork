@@ -77,10 +77,23 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                     device_model: content.deviceModel,
                     sdk_version: content.sdkVersion,
                 };
-                if (socialPlatformList.length > 0) {
-                    sendGetUserInfo(content.deviceId, socialPlatformList[0].type);
+                try {
+                    feedback.loading("添加中...");
+                    await addDeviceApi(addDeviceParams.value);
+                    options.onSuccess?.({ msg: "添加成功", type, data });
+                } catch (error) {
+                    options.onError?.({
+                        error,
+                        type,
+                        code: DeviceCmdCodeEnum.API_ERROR,
+                    });
+                } finally {
+                    feedback.closeLoading();
                 }
-                eventAction.value = EventAction.AddAccount;
+                // if (socialPlatformList.length > 0) {
+                //     sendGetUserInfo(content.deviceId, socialPlatformList[0].type);
+                // }
+                // eventAction.value = EventAction.AddAccount;
                 break;
             case DeviceCmdEnum.GET_USER_INFO:
                 try {

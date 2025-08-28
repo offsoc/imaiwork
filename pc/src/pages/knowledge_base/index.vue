@@ -1,214 +1,192 @@
 <template>
-    <div class="min-h-full w-full p-4 flex flex-col" v-if="!showCreatePanel">
-        <div class="header-wrap flex items-center justify-between">
-            <div class="h-full flex items-center relative w-full z-20">
-                <img src="@/assets/images/kn_header_img.png" class="w-[61px] mt-4" />
-                <div class="h-full ml-6 mt-10">
-                    <div class="text-[20px] font-bold">知识库索引</div>
-                    <div class="text-[#9093B1] mt-3">创建和管理用于RAG应用的知识库索引，基于对数据中心的统一引用</div>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <ElButton type="primary" @click="handleCreate()">创建知识库</ElButton>
-            </div>
-        </div>
-        <div class="mt-4">
-            <div class="p-1.5 rounded-xl bg-primary-light-8 inline-flex">
-                <ElSegmented v-model="currentTab" :options="tabs">
-                    <template #default="{ item }">
-                        <div class="flex items-center gap-2">
-                            <img :src="item.icon" class="w-[24px] h-[24px]" />
-                            <div>{{ item.label }}</div>
-                        </div>
-                    </template>
-                </ElSegmented>
-            </div>
-        </div>
+    <div class="h-full w-full p-4 flex flex-col" v-if="!isCreate">
         <div
-            class="grow min-h-0 flex flex-col mt-4 overflow-y-auto -mx-4"
-            :infinite-scroll-immediate="false"
-            :infinite-scroll-disabled="!pager.isLoad"
-            :infinite-scroll-distance="10"
-            v-infinite-scroll="load">
-            <template v-if="pager.lists.length > 0">
-                <div class="grid grid-cols-3 gap-6 pb-4 mx-4 mt-2">
+            class="rounded-[20px] flex items-center gap-3 px-[30px]"
+            style="
+                background: linear-gradient(152deg, rgba(0, 101, 251, 0.88) -42.44%, rgba(255, 255, 255, 0) 12.19%)
+                    rgb(255, 255, 255);
+            ">
+            <img src="@/assets/images/kb.svg" class="w-11 mt-7" />
+            <div>
+                <div class="text-[#000000cc]">
+                    {{ ToolEnumMap[ToolEnum.DATABASE] }}
+                </div>
+                <div class="text-[#00000080]">打通企业知识脉络，智能检索、主动推送让知识流转如呼吸般自然简单。</div>
+            </div>
+        </div>
+        <div class="grow min-h-0 flex flex-col bg-white rounded-[20px] mt-4">
+            <ElTabs v-model="currentTab" @tab-click="handleTabClick">
+                <ElTabPane v-for="item in tabs" :key="item.value" :label="item.label" :name="item.value"> </ElTabPane>
+            </ElTabs>
+            <div
+                class="grow min-h-0 flex flex-col overflow-y-auto"
+                :infinite-scroll-immediate="false"
+                :infinite-scroll-disabled="!pager.isLoad"
+                :infinite-scroll-distance="10"
+                v-infinite-scroll="load">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[18px] py-4 px-[20px]">
+                    <div class="kb-item">
+                        <div class="flex justify-between gap-x-2">
+                            <div class="flex items-center gap-x-2">
+                                <div
+                                    class="flex-shrink-0 w-[50px] h-[50px] flex items-center justify-center rounded-md border border-[#0000001a]">
+                                    <Icon name="local-icon-windows2" :size="24"></Icon>
+                                </div>
+                                <div>
+                                    <div>知识库</div>
+                                    <div class="text-[#00000080]">立即创建知识库</div>
+                                </div>
+                            </div>
+                            <div>
+                                <ElButton type="primary" class="!h-[30px]" @click="handleCreate">
+                                    <span class="text-[11px]">立即创建</span>
+                                </ElButton>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-[#00000080] h-[50px]">
+                            导入相关文件数据，知识库将被集成到各项应用中作为上下文,或可以创建为独立的调用库使用
+                        </div>
+                    </div>
                     <div
                         v-for="(item, index) in pager.lists"
                         :key="index"
-                        class="h-[168px] rounded-[6px] bg-white px-6 py-4 group relative cursor-pointer flex flex-col hover:scale-[1.02] transition-all duration-300"
-                        @click="handleViewDetail(item.id)">
-                        <div class="flex items-center gap-4">
-                            <img src="@/assets/images/kn_logo.png" lazy fit="cover" class="w-10 h-10 rounded-[5px]" />
-                            <span class="text-lg">{{ item.name }}</span>
+                        class="kb-item group"
+                        @click="handleViewDetail(item)">
+                        <div class="flex items-center gap-x-2">
+                            <div
+                                class="w-[50px] h-[50px] flex items-center justify-center rounded-md border border-[#0000001a] p-[2px]">
+                                <img
+                                    :src="item.image"
+                                    class="w-full h-full object-cover rounded-md"
+                                    v-if="item.image" />
+                                <Icon name="local-icon-windows2" :size="24" v-else />
+                            </div>
+                            <div>
+                                <div>{{ item.name }}</div>
+                                <div class="text-[#00000080]">{{ item.file_counts || 0 }}文档</div>
+                            </div>
                         </div>
-                        <div class="grow">
-                            <div class="line-clamp-3 text-xs text-[#524B6B] mt-3 leading-5">
-                                {{ item.description }}
+                        <ElTooltip
+                            popper-class="max-w-[400px]"
+                            :content="item.intro || item.description"
+                            v-if="item.is_ellipsis">
+                            <div class="text-[#00000080] h-[40px] overflow-hidden mt-3 break-all flex-shrink-0">
+                                <div ref="contentRef" class="line-clamp-2">
+                                    {{ item.intro || item.description }}
+                                </div>
+                            </div>
+                        </ElTooltip>
+                        <div class="text-[#00000080] h-[40px] overflow-hidden mt-3 break-all flex-shrink-0" v-else>
+                            <div ref="contentRef">
+                                {{ item.intro || item.description }}
                             </div>
                         </div>
                         <div class="text-[10px] flex items-center justify-between text-[#AAA6B9] mt-3">
                             <div>
-                                {{ dayjs(item.create_time).format("YYYY/MM/DD") }}
+                                {{ item.create_time }}
                                 创建
                             </div>
-                            <div>知识库数：{{ item.file_count || 0 }}</div>
                         </div>
-                        <div
-                            class="absolute right-2 top-2 z-[1000] invisible group-hover:visible"
-                            :class="[activeKn == item.id ? '!visible' : '']">
-                            <ElPopover
-                                :show-arrow="false"
-                                popper-class="!w-[130px] !min-w-[130px] !p-[6px] !rounded-xl"
-                                @show="visibleChange(true, item.id)"
-                                @hide="visibleChange(false, item.id)">
-                                <template #reference>
-                                    <div class="rotate-90 origin-center p-1">
-                                        <Icon name="el-icon-MoreFilled"></Icon>
-                                    </div>
-                                </template>
-                                <div class="flex flex-col gap-2">
-                                    <div
-                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleEdit(item.id)">
-                                        <Icon name="el-icon-Setting"></Icon>
-                                        <span>编辑</span>
-                                    </div>
-                                    <div
-                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleFileAdd(item)">
-                                        <Icon name="el-icon-Plus"></Icon>
-                                        <span>添加文件</span>
-                                    </div>
-                                    <div
-                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleHitTest(item.id)">
-                                        <Icon name="el-icon-Aim"></Icon>
-                                        <span>命中测试</span>
-                                    </div>
-                                    <div
-                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleViewDetail(item.id)">
-                                        <Icon name="el-icon-View"></Icon>
-                                        <span>查看详情</span>
-                                    </div>
-                                    <div
-                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleDelete(item.id, index)">
-                                        <Icon name="el-icon-Delete"></Icon>
-                                        <span>删除</span>
-                                    </div>
-                                </div>
-                            </ElPopover>
+                        <div class="absolute right-2 top-2 z-[1000] invisible group-hover:visible">
+                            <handle-menu :data="item" :menu-list="handleMenuList" />
                         </div>
                     </div>
                 </div>
                 <div v-if="pager.isLoad" class="text-center py-4 text-gray-500">暂无更多了</div>
-            </template>
-            <div v-else class="grow flex items-center justify-center">
-                <ElEmpty description="暂无数据"></ElEmpty>
             </div>
         </div>
-        <edit-popup v-if="showEditPopup" ref="editPopupRef" @success="resetPage" @close="showEditPopup = false" />
-        <file-add v-if="showFileAdd" ref="fileAddRef" @success="resetPage" @close="showFileAdd = false" />
     </div>
-    <create-panel v-else ref="createPanelRef" @success="reset" @close="reset" />
+    <create-panel v-if="isCreate" ref="createPanelRef" @back="back" />
 </template>
 
 <script setup lang="ts">
-import { knowledgeBaseLists, knowledgeBaseDelete } from "@/api/knowledge_base";
-import KnMyIcon from "@/assets/images/kn_my.png";
-import dayjs from "dayjs";
-import EditPopup from "./_components/edit-popup.vue";
-import FileAdd from "./_components/file-add.vue";
+import { knowledgeBaseLists, knowledgeBaseDelete, vectorKnowledgeBaseLists } from "@/api/knowledge_base";
+import { HandleMenuType } from "@/components/handle-menu/typings";
+import { ToolEnumMap, ToolEnum } from "@/enums/appEnums";
+import { useElementSize } from "@vueuse/core";
+import { KnTypeEnum } from "./_enums";
 import CreatePanel from "./_components/create-panel.vue";
+
 const router = useRouter();
 const route = useRoute();
 const nuxtApp = useNuxtApp();
-enum Tab {
-    MyKn = "my_kn",
-    AidKn = "aid_kn",
-}
 
-const currentTab = ref<Tab>(Tab.MyKn);
-const tabs: { label: string; value: Tab; icon: string }[] = [
+const currentTab = ref<KnTypeEnum>(KnTypeEnum.VECTOR);
+const tabs: { label: string; value: KnTypeEnum }[] = [
     {
-        label: "我的知识库",
-        value: Tab.MyKn,
-        icon: KnMyIcon,
+        label: "向量知识库",
+        value: KnTypeEnum.VECTOR,
     },
-    // {
-    //     label: "数字员工知识库",
-    //     value: Tab.AidKn,
-    //     icon: KnAidIcon,
-    // },
+    {
+        label: "RAG知识库",
+        value: KnTypeEnum.RAG,
+    },
 ];
-
-const showCreatePanel = ref(false);
 
 const queryParams = reactive({
     page_no: 1,
 });
 
 const { pager, getLists, resetPage } = usePaging({
-    fetchFun: knowledgeBaseLists,
+    fetchFun: (params: any) =>
+        currentTab.value === KnTypeEnum.VECTOR ? vectorKnowledgeBaseLists(params) : knowledgeBaseLists(params),
     params: queryParams,
     isScroll: true,
 });
 
-const activeKn = ref<number | undefined>();
-const visibleChange = (flag: boolean, id: number) => {
-    if (!flag) {
-        activeKn.value = undefined;
-    } else {
-        activeKn.value = id;
-    }
+const contentRef = ref<HTMLElement>();
+
+const handleTabClick = (tab: any) => {
+    currentTab.value = tab.paneName as KnTypeEnum;
+    resetPage();
 };
 
-const showEditPopup = ref(false);
-const editPopupRef = ref<InstanceType<typeof EditPopup>>();
+const handleMenuList: HandleMenuType[] = [
+    {
+        label: "删除知识库",
+        icon: "local-icon-delete",
+        click: ({ id }: any) => {
+            nuxtApp.$confirm({
+                message: "确定删除该知识库吗？",
+                onConfirm: async () => {
+                    try {
+                        await knowledgeBaseDelete({
+                            id,
+                        });
+                        const index = pager.lists.findIndex((item) => item.id == id);
+                        if (index !== -1) {
+                            pager.lists.splice(index, 1);
+                        }
+                        feedback.msgSuccess("删除成功");
+                    } catch (error) {
+                        feedback.msgError(error);
+                    }
+                },
+            });
+        },
+    },
+];
+
+const isCreate = ref(route.query.is_create == "1");
 
 const handleCreate = async () => {
-    showCreatePanel.value = true;
-    replaceState({ type: "add" });
+    isCreate.value = true;
+    router.push({
+        query: {
+            is_create: 1,
+            type: currentTab.value,
+        },
+    });
 };
 
-const handleEdit = async (id: number) => {
-    showEditPopup.value = true;
-    await nextTick();
-    editPopupRef.value?.open();
-    editPopupRef.value?.getDetail(id);
-};
-
-const showFileAdd = ref(false);
-const fileAddRef = ref<InstanceType<typeof FileAdd>>();
-const handleFileAdd = async (item: any) => {
-    showFileAdd.value = true;
-    await nextTick();
-    fileAddRef.value?.open();
-    fileAddRef.value?.getDetail(item);
-};
-
-const handleHitTest = (id: number) => {
-    router.push(`/knowledge_base/hit_test?id=${id}`);
-};
-
-const handleViewDetail = (id: number) => {
-    router.push(`/knowledge_base/detail/${id}`);
-};
-
-const handleDelete = (id: number, index: number) => {
-    nuxtApp.$confirm({
-        message: "确定删除该知识库吗？",
-        onConfirm: async () => {
-            try {
-                await knowledgeBaseDelete({
-                    id,
-                });
-                pager.lists.splice(index, 1);
-                feedback.msgSuccess("删除成功");
-            } catch (error) {
-                feedback.msgError(error);
-            }
+const handleViewDetail = (item: any) => {
+    router.push({
+        path: `/knowledge_base/detail/${item.id}`,
+        query: {
+            kn_type: currentTab.value,
+            index_id: item.index_id || undefined,
+            category_id: item.category_id || undefined,
+            kn_name: item.name,
         },
     });
 };
@@ -218,67 +196,74 @@ const load = () => {
     getLists();
 };
 
-const reset = () => {
-    showCreatePanel.value = false;
-    showEditPopup.value = false;
-    showFileAdd.value = false;
+const back = () => {
+    isCreate.value = false;
     router.replace({
         query: {
+            is_create: undefined,
             type: undefined,
-            id: undefined,
         },
     });
     resetPage();
 };
 
+const init = () => {
+    if (!isCreate.value) {
+        getLists();
+    }
+};
+
 watch(
-    () => route.query.type,
-    (val) => {
-        if (val == "add") {
-            showCreatePanel.value = true;
+    () => pager.lists,
+    async () => {
+        if (pager.lists.length) {
+            await nextTick();
+            pager.lists.forEach((item, index) => {
+                const dom = contentRef.value[index];
+                if (dom) {
+                    const { height } = useElementSize(dom);
+                    item.is_ellipsis = height.value > 40;
+                }
+            });
         }
-    },
-    {
-        immediate: true,
     }
 );
 
-getLists();
+onMounted(init);
 </script>
 
 <style scoped lang="scss">
-.header-wrap {
-    @apply relative overflow-hidden h-[131px] bg-white rounded-xl px-4;
-    &::after {
-        @apply content-[''] absolute;
-        left: -52px;
-        top: -86px;
-        width: 209px;
-        height: 209px;
-        opacity: 1;
-        background: linear-gradient(157.71deg, rgba(163, 255, 243, 1) 0%, rgba(204, 204, 204, 0) 100%);
-        filter: blur(55px);
-    }
-}
-:deep(.el-segmented__item) {
-    @apply p-2  border-none;
-}
-:deep(.el-segmented) {
-    @apply bg-[transparent];
-    .el-segmented__group {
-        @apply gap-x-2;
-    }
-    .el-segmented__item-selected {
-        @apply bg-white;
-    }
-    .el-segmented__item {
-        @apply font-bold;
-        &.is-selected {
-            @apply text-primary;
+:deep(.el-tabs) {
+    --el-border-color-light: #0000000d;
+    .el-tabs__header {
+        margin-bottom: 0;
+        .el-tabs__nav {
+            height: 62px;
+            padding: 0 20px;
+            .el-tabs__item {
+                height: 62px;
+                padding: 0 20px;
+                font-weight: bold;
+                color: rgba(0, 0, 0, 0.3);
+                &.is-active {
+                    color: var(--el-color-black);
+                }
+            }
+            .el-tabs__nav-next,
+            .el-tabs__nav-prev {
+                line-height: 62px;
+            }
         }
-        &:hover {
-            @apply bg-white;
+        .el-tabs__active-bar {
+            height: 1px;
+        }
+        .el-tabs__nav-wrap::after {
+            height: 1px;
         }
     }
+}
+
+.kb-item {
+    @apply rounded-xl bg-[#F6F6F6] p-[16px] border border-[#EFEFEF]  relative cursor-pointer flex flex-col hover:scale-[1.02] transition-all duration-300;
 }
 </style>

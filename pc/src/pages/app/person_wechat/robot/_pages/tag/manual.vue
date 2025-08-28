@@ -9,7 +9,7 @@
                     :show-add-we-chat="false"
                     @update:current-wechat="handleSelectWeChat" />
             </div>
-            <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex-1 flex flex-col overflow-hidden" v-loading="tagPager.loading">
                 <div class="flex-shrink-0">
                     <ElTabs v-model="activeTab">
                         <ElTabPane label="标签管理" name="tag"></ElTabPane>
@@ -81,12 +81,11 @@
                 </div>
             </div>
         </div>
-
         <!-- 中间面板: 好友列表 -->
-        <div class="grow min-h-0 bg-white ml-6 rounded-tl-xl rounded-bl-xl border-r border-gray-200">
+        <div class="grow min-h-0 bg-white ml-4 rounded-xl overflow-hidden" v-loading="friendPager.loading">
             <div class="flex flex-col h-full">
                 <div class="flex-shrink-0">
-                    <div class="h-[70px] flex items-center justify-end gap-x-2 px-4">
+                    <div class="h-[70px] flex items-center justify-between gap-x-2 px-4">
                         <ElInput
                             v-model="friendParams.friend_nickname"
                             placeholder="搜索"
@@ -100,6 +99,10 @@
                                 </ElButton>
                             </template>
                         </ElInput>
+                        <div>
+                            <ElButton type="danger" @click="openTagPopup('remove')"> 批量移除标签 </ElButton>
+                            <ElButton type="primary" @click="openTagPopup('add')"> 批量新增标签 </ElButton>
+                        </div>
                     </div>
                 </div>
                 <div class="grow min-h-0">
@@ -111,66 +114,27 @@
                         height="100%"
                         row-key="friend_id"
                         :row-style="{ height: '60px' }"
+                        :header-row-style="{ height: '63px' }"
                         @selection-change="handleFriendSelectionChange">
+                        <ElTableColumn type="selection" reserve-selection width="55" fixed="left" />
                         <ElTableColumn prop="friend_nickname" label="微信名称" />
                         <ElTableColumn prop="friend_avatar" label="头像">
                             <template #default="{ row }">
                                 <img :src="row.friend_avatar" class="w-8 h-8 rounded mx-auto" />
                             </template>
                         </ElTableColumn>
-                        <ElTableColumn type="selection" reserve-selection width="55" fixed="right" />
+                        <ElTableColumn label="操作" width="160" v-if="!isFriendNoTag">
+                            <template #default="{ row }">
+                                <ElButton type="primary" link @click="openTagPopup('remove', row)">
+                                    从已选标签中移除
+                                </ElButton>
+                            </template>
+                        </ElTableColumn>
                     </ElTable>
                 </div>
                 <div class="p-4 flex justify-end">
                     <pagination v-model="friendPager" @change="getTagFriendList" />
                 </div>
-            </div>
-        </div>
-
-        <!-- 右侧面板: 已选好友 & 保存操作 -->
-        <div class="w-[248px] flex-shrink-0 flex flex-col rounded-tr-xl rounded-br-xl bg-white overflow-hidden">
-            <div class="flex-shrink-0">
-                <div class="w-full h-[66px] bg-primary flex justify-between items-center px-4">
-                    <div class="text-white">已选好友（{{ selectedFriends.length }}）人</div>
-                    <ElButton link @click="clearSelectedFriends">
-                        <Icon name="local-icon-clean" :size="16" color="#ffffff" />
-                        <span class="text-white ml-2">清空</span>
-                    </ElButton>
-                </div>
-            </div>
-            <div class="grow min-h-0 py-4">
-                <ElScrollbar v-if="selectedFriends.length > 0">
-                    <div class="flex flex-col gap-y-4 px-4">
-                        <div v-for="item in selectedFriends" :key="item.friend_id" class="flex items-center gap-x-4">
-                            <img :src="item.friend_avatar" class="flex-shrink-0 w-8 h-8 rounded" />
-                            <div class="flex-1 text-[#414142]">
-                                <div class="line-clamp-1">{{ item.friend_nickname }}</div>
-                            </div>
-                            <div
-                                class="flex-shrink-0 w-4 h-4 rounded-full bg-error flex items-center justify-center cursor-pointer"
-                                @click="removeSelectedFriend(item)">
-                                <Icon name="local-icon-close" color="#ffffff" />
-                            </div>
-                        </div>
-                    </div>
-                </ElScrollbar>
-                <div v-else class="flex items-center justify-center h-full">
-                    <ElEmpty description="暂无数据" />
-                </div>
-            </div>
-            <div class="flex-shrink-0 mx-2 py-2">
-                <div class="mb-2">
-                    <ElSelect v-model="tagsToAssign" placeholder="请选择标签" multiple filterable>
-                        <ElOption
-                            v-for="item in getSavaTagLists"
-                            :key="item.id"
-                            :label="item.tag_name"
-                            :value="item.id" />
-                    </ElSelect>
-                </div>
-                <ElButton type="primary" class="w-full !h-[37px]" :loading="isSaving" @click="saveFriendTags">
-                    保存标签
-                </ElButton>
             </div>
         </div>
     </div>
@@ -180,6 +144,24 @@
         ref="editTagPopupRef"
         @close="showEditTagPopup = false"
         @success="resetTagPage" />
+    <popup
+        :title="tagType == 'add' ? '分配标签' : '移除标签'"
+        v-if="showTagPopup"
+        ref="tagPopupRef"
+        async
+        :confirm-loading="isSaving"
+        @confirm="saveFriendTags"
+        @close="closeTagPopup">
+        <div>
+            <ElSelect
+                v-model="tagsToAssign"
+                :placeholder="tagType == 'add' ? '请选择要分配标签' : '请选择要移除标签'"
+                multiple
+                filterable>
+                <ElOption v-for="item in getSavaTagLists" :key="item.id" :label="item.tag_name" :value="item.id" />
+            </ElSelect>
+        </div>
+    </popup>
 </template>
 
 <script setup lang="ts">
@@ -191,6 +173,7 @@ import {
     tagUpdateV2,
     tagFriendLists,
     tagFriendAdd,
+    tagFriendDelete,
 } from "@/api/person_wechat";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
@@ -208,7 +191,7 @@ const wechatLists = ref<any[]>([]);
 const currentWechat = ref<any>({});
 
 // 标签列表相关
-const tagParams = reactive({ page_no: 1, page_size: 15 });
+const tagParams = reactive({ page_no: 1, page_size: 15, wechat_id: "" });
 const {
     pager: tagPager,
     getLists: getTagList,
@@ -239,23 +222,26 @@ const selectedFriends = ref<any[]>([]);
 const tagsToAssign = ref<number[]>([]); // 待分配给好友的标签
 const showEditTagPopup = ref(false);
 const editTagPopupRef = ref<InstanceType<typeof TagEditPopup>>();
-
+const tagPopupRef = ref();
 const getSavaTagLists = computed(() => {
     return tagPager.lists.filter((item) => item.id !== 0);
 });
 
+const isFriendNoTag = computed(() => {
+    return selectedTags.value.length == 1 && selectedTags.value[0] == firstTagId.value;
+});
+
 const initialize = async () => {
-    await getWechatListsFn();
+    await getWeChatListsFn();
+    tagParams.wechat_id = currentWechat.value.wechat_id;
     await getInitialTags();
 };
 
-const getWechatListsFn = async () => {
+const getWeChatListsFn = async () => {
     try {
         const { lists } = await getWeChatLists({ page_size: 999 });
         wechatLists.value = lists;
-        if (lists.length > 0 && !currentWechat.value.wechat_id) {
-            currentWechat.value = lists[0];
-        }
+        currentWechat.value = lists.find((item) => item.wechat_status == 1);
     } catch (error) {
         feedback.msgError("获取微信列表失败");
     }
@@ -273,10 +259,21 @@ const getInitialTags = async () => {
     }
 };
 
+const setSelectFriendTable = () => {
+    selectedFriends.value = [];
+    friendTableRef.value?.clearSelection();
+    nextTick(() => {
+        friendPager.lists.forEach((item) => {
+            friendTableRef.value?.toggleRowSelection(item);
+        });
+    });
+};
+
 // --- 3. 微信与标签面板逻辑 ---
 
-const handleSelectWeChat = (wechat: any) => {
+const handleSelectWeChat = async (wechat: any) => {
     currentWechat.value = wechat;
+    tagParams.wechat_id = wechat.wechat_id;
     friendParams.tag_ids = "";
     friendParams.wechat_id = wechat.wechat_id;
     friendParams.friend_nickname = "";
@@ -284,12 +281,21 @@ const handleSelectWeChat = (wechat: any) => {
     selectedFriends.value = [];
     isEditMode.value = false;
     friendTableRef.value?.clearSelection();
+    await getInitialTags();
     resetFriendPage();
 };
 
-const handleSelectTag = (id: number) => {
+const handleSelectTag = async (id: number) => {
     if (isEditMode.value) return; // 编辑模式下不可选择
-
+    friendTableRef.value?.clearSelection();
+    if (id == 0) {
+        selectedTags.value = [0];
+        selectedFriends.value = [];
+        friendParams.tag_ids = "";
+        resetFriendPage();
+        return;
+    }
+    selectedTags.value = selectedTags.value.filter((item) => item !== 0);
     const index = selectedTags.value.indexOf(id);
     if (index > -1) {
         // 如果只剩最后一个选中的标签，则不允许取消
@@ -300,11 +306,11 @@ const handleSelectTag = (id: number) => {
         selectedTags.value.push(id);
     }
     friendParams.tag_ids = selectedTags.value.join(",");
-    resetFriendPage();
+    await resetFriendPage();
 };
 
 const clearSelectTags = () => {
-    selectedTags.value = selectedTags.value.filter((item) => item == firstTagId.value);
+    selectedTags.value = [firstTagId.value];
     friendParams.friend_nickname = "";
 };
 
@@ -323,6 +329,9 @@ const openTagEditPopup = async () => {
     showEditTagPopup.value = true;
     await nextTick();
     editTagPopupRef.value?.open();
+    editTagPopupRef.value?.setFormData({
+        wechat_id: currentWechat.value.wechat_id,
+    });
 };
 
 const handleDeleteTag = async (id: number) => {
@@ -332,6 +341,13 @@ const handleDeleteTag = async (id: number) => {
             try {
                 await deleteTagV2({ id });
                 tagPager.lists = tagPager.lists.filter((item) => item.id !== id);
+                await resetFriendPage();
+                setSelectFriendTable();
+
+                if (tagPager.lists.length == 1) {
+                    selectedTags.value = [firstTagId.value];
+                }
+
                 feedback.msgSuccess("删除成功");
             } catch (error) {
                 feedback.msgError(error);
@@ -354,8 +370,6 @@ const handleUpdateTag = async (item: any) => {
     }
 };
 
-// --- 5. 好友列表逻辑 ---
-
 const resetFriendPageAndFetch = async () => {
     await resetFriendPage();
     const selectionRows = friendTableRef.value?.getSelectionRows();
@@ -369,20 +383,25 @@ const handleFriendSelectionChange = (val: any[]) => {
     selectedFriends.value = val;
 };
 
-const removeSelectedFriend = async (friendToRemove: any) => {
-    friendTableRef.value?.toggleRowSelection(friendToRemove, false);
+// --- 5. 保存逻辑 ---
+
+const showTagPopup = ref(false);
+const tagType = ref<"add" | "remove">("add");
+
+const openTagPopup = async (type: "add" | "remove", row?: any) => {
+    tagType.value = type;
+    showTagPopup.value = true;
+    await nextTick();
+    tagPopupRef.value?.open();
+    if (row) {
+        selectedFriends.value = [row];
+    }
 };
 
-const clearSelectedFriends = async () => {
-    await nuxtApp.$confirm({
-        message: "确定要清空已选好友吗？",
-        onConfirm: async () => {
-            friendTableRef.value?.clearSelection();
-        },
-    });
+const closeTagPopup = () => {
+    showTagPopup.value = false;
+    tagsToAssign.value = [];
 };
-
-// --- 6. 保存逻辑 ---
 
 const { isLock: isSaving, lockFn: saveFriendTags } = useLockFn(async () => {
     if (selectedFriends.value.length === 0) {
@@ -393,35 +412,26 @@ const { isLock: isSaving, lockFn: saveFriendTags } = useLockFn(async () => {
     }
 
     try {
-        await tagFriendAdd({
-            tag_ids: tagsToAssign.value,
-            friend_ids: selectedFriends.value.map((item) => item.friend_id),
-        });
-        feedback.msgSuccess("保存成功");
-        tagsToAssign.value = [];
+        tagType.value == "add"
+            ? await tagFriendAdd({
+                  tag_ids: tagsToAssign.value,
+                  friend_ids: selectedFriends.value.map((item) => item.friend_id),
+                  wechat_id: currentWechat.value.wechat_id,
+              })
+            : await tagFriendDelete({
+                  tag_id: tagsToAssign.value,
+                  friend_id: selectedFriends.value.map((item) => item.friend_id),
+                  wechat_id: currentWechat.value.wechat_id,
+              });
         selectedFriends.value = [];
+        feedback.msgSuccess("保存成功");
         friendTableRef.value?.clearSelection();
-        initialize();
+        closeTagPopup();
+        resetTagPage();
+        resetFriendPage();
     } catch (error) {
         feedback.msgError(error);
     }
-});
-
-// --- 2. 初始化与数据加载 ---
-
-// 监视当前微信账号变化，自动刷新数据
-watch(currentWechat, async (newVal, oldVal) => {
-    if (newVal?.wechat_id && oldVal?.wechat_id && newVal.wechat_id !== oldVal?.wechat_id) {
-        friendParams.wechat_id = newVal.wechat_id;
-        await initialize();
-    }
-});
-
-// 监视选中标签的变化，自动获取对应的好友列表
-watch(selectedTags, () => {
-    friendParams.tag_ids = selectedTags.value.join(",");
-    friendParams.wechat_id = currentWechat.value.wechat_id;
-    resetFriendPageAndFetch();
 });
 
 onMounted(async () => {
@@ -461,10 +471,8 @@ onMounted(async () => {
     }
 }
 
-.dynamic-scroller {
-    scrollbar-width: none; /* Firefox */
-    &::-webkit-scrollbar {
-        display: none; /* Chrome, Safari, Opera*/
-    }
+:deep(.el-input-group__append) {
+    background-color: transparent;
+    border: none;
 }
 </style>

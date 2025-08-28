@@ -43,7 +43,7 @@ class PublishDetailLists extends BaseApiDataLists implements ListsSearchInterfac
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('ps.exec_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
             })
-            ->order('ps.id', 'desc')
+            ->order('ps.id', 'asc')
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {

@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="show"
-        class="fixed bottom-[50px] left-[50%] transform -translate-x-1/2 transition-all duration-300 animate-slide-up"
+        class="fixed bottom-[50px] left-[50%] transform -translate-x-1/2 transition-all duration-300 shadow-light rounded-xl animate-slide-up"
         :class="{
             'translate-y-0 opacity-100': show,
             'translate-y-full opacity-0': !show,

@@ -3,7 +3,11 @@
         <el-card class="!border-none" shadow="never">
             <el-form ref="formRef" class="mb-[-16px]" :model="queryParams" :inline="true">
                 <el-form-item label="状态" prop="status">
-                    <el-select v-model="queryParams.status" class="!w-[120px]" :empty-values="[null, undefined]">
+                    <el-select
+                        v-model="queryParams.status"
+                        class="!w-[120px]"
+                        :empty-values="[null, undefined]"
+                        @change="getLists()">
                         <el-option label="全部" value="" />
                         <el-option label="开启" value="1" />
                         <el-option label="关闭" value="0" />

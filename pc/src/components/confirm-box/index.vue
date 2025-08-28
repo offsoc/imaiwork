@@ -12,9 +12,10 @@
             <div class="text-[15px] text-center font-bold text-inherit" :style="{ color: getTheme.titleColor }">
                 {{ title }}
             </div>
-            <div class="mt-4 text-center text-base text-inherit" :style="{ color: getTheme.msgColor }">
-                {{ message }}
-            </div>
+            <div
+                class="mt-4 text-center text-base text-inherit"
+                :style="{ color: getTheme.msgColor }"
+                v-html="message" />
             <div
                 class="mt-6 flex items-center"
                 :style="{
@@ -22,9 +23,8 @@
                 }">
                 <ElButton
                     class="!h-[50px] flex-1 !rounded-full"
+                    :color="getTheme.cancelBgColor"
                     :style="{
-                        backgroundColor: getTheme.cancelBgColor,
-                        color: getTheme.textColor,
                         borderColor: getTheme.borderColor,
                     }"
                     @click="cancel()">
@@ -85,7 +85,7 @@ const getTheme = computed(() => {
             borderColor: "var(--app-border-color-1)",
             titleColor: "rgba(255,255,255,0.8)",
             msgColor: "rgba(255,255,255,0.5)",
-            cancelBgColor: "var(--app-bg-color-2)",
+            cancelBgColor: "#181818",
         };
     }
 });

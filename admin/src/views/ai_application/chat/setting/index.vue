@@ -55,7 +55,9 @@
         </el-card>
     </div>
     <footer-btns>
-        <el-button type="primary" @click="lockSubmit" :loading="isLock"> 保存 </el-button>
+        <el-button v-perm="['ai_application.chat/setConfig']" type="primary" @click="lockSubmit" :loading="isLock">
+            保存
+        </el-button>
     </footer-btns>
     <add-greeting v-if="showAddGreeting" ref="addGreetingRef" @success="getGreeting" @close="showAddGreeting = false" />
 </template>

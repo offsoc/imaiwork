@@ -198,10 +198,12 @@
             <ConfigTable title="思维导图" :data="getMindMapConfig" />
             <ConfigTable title="会议纪要" :data="getMeetingConfig" />
             <ConfigTable title="AI陪练" :data="getAiTrainConfig" />
-            <ConfigTable title="AI微信" :data="getWechatConfig" />
+            <ConfigTable title="AI客服" :data="getServiceConfig" />
             <ConfigTable title="AI面试" :data="getInterviewConfig" />
             <ConfigTable title="知识库" :data="getKnbConfig" />
+            <ConfigTable title="AI视频获客" :data="getSphConfig" />
             <ConfigTable title="小红书" :data="getRedbookConfig" />
+            <ConfigTable title="其他" :data="getOtherConfig" />
         </div>
     </div>
     <popup ref="rechargePopup" title="充值算力" width="500px" async cancel-button-text="" confirm-button-text="">
@@ -314,7 +316,6 @@ const getAiPersonConfig = computed(() => {
             "human_avatar_ymt",
             "human_avatar_chanjing",
             "human_voice_chanjing",
-            "human_audio_chanjing",
             "human_video_chanjing",
         ].includes(item.scene)
     );
@@ -359,13 +360,15 @@ const getInterviewConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) => ["interview_chat"].includes(item.scene));
 });
 
-const getWechatConfig = computed(() => {
-    return workbenchData.tokens_lists.filter((item: any) => ["ai_wechat"].includes(item.scene));
+const getServiceConfig = computed(() => {
+    return workbenchData.tokens_lists.filter((item: any) =>
+        ["ai_wechat", "ai_xhs", "openai_chat", "ai_reply_like"].includes(item.scene)
+    );
 });
 
 const getKnbConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["knowledge_create", "knowledge_chat"].includes(item.scene)
+        ["knowledge_create", "knowledge_chat", "create_vector_knowledge", "text_to_vector"].includes(item.scene)
     );
 });
 
@@ -373,6 +376,16 @@ const getRedbookConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
         ["keyword_to_title", "keyword_to_subtitle", "keyword_to_copywriting", "ai_xhs"].includes(item.scene)
     );
+});
+
+const getSphConfig = computed(() => {
+    return workbenchData.tokens_lists.filter((item: any) =>
+        ["sph_add_friends", "sph_private_chat", "sph_search_terms"].includes(item.scene)
+    );
+});
+
+const getOtherConfig = computed(() => {
+    return workbenchData.tokens_lists.filter((item: any) => ["video_clip"].includes(item.scene));
 });
 
 const refreshData = async () => {

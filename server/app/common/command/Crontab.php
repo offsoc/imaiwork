@@ -27,13 +27,13 @@ class Crontab extends Command
 
     protected function execute(Input $input, Output $output)
     {
+
         $lists = CrontabModel::where('status', CrontabEnum::START)->select()->toArray();
         if (empty($lists)) {
             return false;
         }
         $time =  time();
         foreach ($lists as $item) {
-
             if (empty($item['last_time'])) {
                 $lastTime = (new CronExpression($item['expression']))
                     ->getNextRunDate()
@@ -71,6 +71,9 @@ class Crontab extends Command
             // 清除错误信息
             CrontabModel::where('id', $item['id'])->update(['error' => '']);
         } catch (\Exception $e) {
+
+            Log::channel('crontab')->info("定时任务".$item['name']."执行失败".$e->getMessage()."\n");
+
             // 记录错误信息
             CrontabModel::where('id', $item['id'])->update([
                 'error' => $e->getMessage(),

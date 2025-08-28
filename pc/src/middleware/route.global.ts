@@ -9,6 +9,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         if (isEmptyObject(appStore.config)) {
             await appStore.getConfig();
         }
+        if (isEmptyObject(appStore.oem)) {
+            appStore.getOem();
+        }
         if (userStore.isLogin) {
             if (isEmptyObject(userStore.userInfo)) {
                 await userStore.getUser();
@@ -27,5 +30,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
     if (isEmptyObject(appStore.menuList)) {
         await appStore.getMenu();
+    }
+    if (isEmptyObject(appStore.scenePrompt)) {
+        appStore.getScenePrompt();
     }
 });

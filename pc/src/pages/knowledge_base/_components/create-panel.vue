@@ -1,75 +1,48 @@
 <template>
-    <div class="flex flex-col p-4">
-        <ElCard class="!border-none !rounded-xl" shadow="never">
-            <div class="flex items-center justify-between">
-                <ElBreadcrumb>
-                    <ElBreadcrumbItem>
-                        <span class="cursor-pointer text-[#8A8C99] hover:text-primary" @click="close">知识库</span>
-                    </ElBreadcrumbItem>
-                    <ElBreadcrumbItem>新建知识库</ElBreadcrumbItem>
-                </ElBreadcrumb>
+    <div class="p-4 h-full">
+        <div class="h-full flex flex-col bg-white rounded-xl">
+            <div class="flex-shrink-0 flex items-center justify-between px-[14px] h-[88px] border-b border-[#0000000d]">
+                <div class="flex items-center gap-2 cursor-pointer" @click="back">
+                    <Icon name="el-icon-ArrowLeft"></Icon>
+                    <div>返回上一步</div>
+                </div>
             </div>
-        </ElCard>
-        <div class="grow min-h-0 mt-4 bg-white rounded-xl flex flex-col p-6">
-            <div class="text-lg font-bold">知识库基本设置</div>
-            <div class="grow min-h-0 mt-6">
-                <ElScrollbar>
-                    <div class="w-[700px]">
-                        <ElForm ref="formRef" :model="formData" label-width="120px" :rules="rules">
-                            <template v-if="nextStep == 1">
-                                <ElFormItem label="知识库名称" prop="name">
-                                    <ElInput
-                                        class="!w-[380px]"
-                                        v-model="formData.name"
-                                        show-word-limit
-                                        maxlength="12"
-                                        placeholder="请输入知识库名称" />
-                                </ElFormItem>
-                                <ElFormItem label="知识库描述" prop="description">
-                                    <ElInput
-                                        class="!w-[380px]"
-                                        v-model="formData.description"
-                                        show-word-limit
-                                        maxlength="1000"
-                                        type="textarea"
-                                        resize="none"
-                                        :rows="8"
-                                        placeholder="请输入知识库描述" />
-                                </ElFormItem>
-                            </template>
-                            <template v-else-if="nextStep == 2">
-                                <file-add-form ref="fileAddFormRef" v-model="formData"></file-add-form>
-                            </template>
-                        </ElForm>
-                    </div>
-                </ElScrollbar>
-            </div>
-            <div>
-                <ElButton
-                    type="primary"
-                    v-if="nextStep <= maxStep"
-                    :loading="isLock"
-                    :disabled="userTokens < tokensValue"
-                    @click="lockFn">
-                    {{ nextStep == maxStep ? "确定" : "创建知识库" }}
-                    <template v-if="!formData.id">({{ tokensValue }})算力</template>
-                </ElButton>
-                <ElButton :loading="isLock" @click="close">取消</ElButton>
+            <div class="grow min-h-0 mt-4 flex flex-col w-[456px] mx-auto">
+                <div class="text-[20px] font-bold mt-6">创建新的知识库</div>
+                <div class="flex-shrink min-h-0 mt-[23px]">
+                    <ElScrollbar>
+                        <div class="px-2">
+                            <base-form ref="baseFormRef" v-model="formData"></base-form>
+                        </div>
+                    </ElScrollbar>
+                </div>
+                <div class="flex justify-center my-[30px]">
+                    <ElButton
+                        type="primary"
+                        class="!h-[50px] !rounded-full w-[318px]"
+                        :loading="isLock"
+                        :disabled="userTokens < tokensValue && isRag"
+                        @click="lockFn">
+                        创建知识库
+                        <template v-if="tokensValue && isRag">({{ tokensValue }}算力)</template>
+                    </ElButton>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { knowledgeBaseAdd, knowledgeBaseEdit, knowledgeBaseDetail, knowledgeBaseFileAdd } from "@/api/knowledge_base";
-import { ElForm } from "element-plus";
-import FileAddForm from "./file-add-form.vue";
+import { knowledgeBaseAdd, vectorKnowledgeBaseAdd } from "@/api/knowledge_base";
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
+import type { CreateFormData } from "./type";
+import { KnTypeEnum } from "../_enums";
+import BaseForm from "./base-form.vue";
 
-const emit = defineEmits(["success", "close"]);
+const emit = defineEmits(["success", "back"]);
 const route = useRoute();
-
+const router = useRouter();
 const userStore = useUserStore();
 const { getTokenByScene } = userStore;
 const { userTokens } = toRefs(userStore);
@@ -78,92 +51,95 @@ const tokensValue = computed(() => {
     return getTokenByScene(TokensSceneEnum.KNOWLEDGE_CREATE)?.score;
 });
 
-const formData = reactive({
-    id: route.query.id,
-    name: "",
-    description: "",
-    category_id: "",
-    strategy: 1,
-    separator: "",
-    chunk_size: 600,
-    overlap_size: 100,
-    rerank_min_score: 0.5,
-    documents: [],
-    index_id: "",
+const isRag = computed(() => {
+    return route.query.type == KnTypeEnum.RAG;
 });
 
-const rules = {
-    name: [{ required: true, message: "请输入知识库名称", trigger: "blur" }],
-    description: [{ required: true, message: "请输入知识库描述", trigger: "blur" }],
-};
+const formData = reactive<CreateFormData>({
+    name: "",
+    description: "",
+    cover: "",
+    type: route.query.type as KnTypeEnum,
+});
 
-const formRef = shallowRef<InstanceType<typeof ElForm>>();
-const fileAddFormRef = shallowRef<InstanceType<typeof FileAddForm>>();
-
-const nextStep = ref<number>(1);
-const maxStep = ref<number>(2);
+const baseFormRef = shallowRef<InstanceType<typeof BaseForm>>();
 
 const handleNext = async () => {
+    await baseFormRef.value.validateForm();
     try {
-        if (nextStep.value == 1) {
-            await formRef.value.validate();
-            const params = {
-                name: formData.name,
-                description: formData.description,
-            };
-            const data = formData.id
-                ? await knowledgeBaseEdit({
-                      ...params,
-                      id: formData.id,
-                  })
-                : await knowledgeBaseAdd(params);
-            formData.id = data.id;
-            formData.index_id = data.index_id;
-            formData.category_id = data.category_id;
-            replaceState({
-                id: formData.id,
-            });
-            nextStep.value += 1;
-        } else if (nextStep.value == 2) {
-            if (!fileAddFormRef.value.validateForm()) return;
-            await knowledgeBaseFileAdd(formData);
-            emit("success");
-        }
+        const { name, description, cover } = formData;
+        const data = isRag.value
+            ? await knowledgeBaseAdd({
+                  name,
+                  description,
+                  image: cover,
+              })
+            : await vectorKnowledgeBaseAdd({
+                  name,
+                  intro: description,
+                  image: cover,
+                  documents_model_id: 2,
+                  documents_model_sub_id: 2,
+                  embedding_model_id: 3,
+                  embedding_model_sub_id: 3,
+              });
+        router.replace({
+            path: `/knowledge_base/detail/${data.id}`,
+            query: {
+                kn_type: formData.type,
+                index_id: data.index_id,
+                category_id: data.category_id,
+                kn_name: data.name,
+            },
+        });
     } catch (error) {
         feedback.msgError(error || "操作失败");
     }
 };
 
+const back = () => {
+    emit("back");
+};
+
 const { lockFn, isLock } = useLockFn(handleNext);
 
-const handleBack = () => {
-    nextStep.value -= 1;
-};
-
-const handleSubmit = (type: "empty" | "add") => {};
-
-const close = () => {
-    emit("close");
-};
-
-const getDetail = async () => {
-    const data = await knowledgeBaseDetail({
-        id: formData.id,
-    });
-    formData.name = data.name;
-    formData.description = data.description;
-    formData.index_id = data.index_id;
-    formData.category_id = data.category_id;
-};
-
-onMounted(() => {
-    if (formData.id) {
-        getDetail();
+watch(
+    () => route.query,
+    () => {
+        formData.type = route.query.type as KnTypeEnum;
     }
-});
+);
 </script>
-<style scoped lang="scss">
-:deep(.el-upload-dragger) {
-    @apply p-0;
+<style lang="scss">
+.kb-type-select {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(6px);
+    .el-select-dropdown__list {
+        @apply p-2 flex flex-col gap-y-2;
+    }
+    .el-select-dropdown__item {
+        @apply h-11 px-3 rounded-md;
+        &.is-selected {
+            @apply bg-[#F6F6F6] text-black shadow-[0_0_0_1px_rgba(239,239,239,1)];
+            .options-item {
+                .item-icon {
+                    @apply bg-primary;
+                    svg {
+                        color: #ffffff !important;
+                    }
+                }
+            }
+        }
+
+        .options-item {
+            @apply h-full;
+            .item-icon {
+                @apply w-5 h-5 flex items-center justify-center rounded bg-[#00000003];
+            }
+        }
+    }
 }
 </style>

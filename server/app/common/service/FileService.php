@@ -29,7 +29,7 @@ class FileService
     public static function getFileUrl(string $uri = '', string $type = ''): string
     {
         $uri = trim($uri);
-
+        if ($uri == '')  return $uri;
         if (strstr($uri, 'http://'))  return $uri;
         if (strstr($uri, 'https://')) return $uri;
 

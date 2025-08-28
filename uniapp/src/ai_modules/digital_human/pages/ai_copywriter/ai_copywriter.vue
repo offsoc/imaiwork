@@ -79,7 +79,7 @@ import { generatePrompt } from "@/api/digital_human";
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { aiTemplateCopywriter } from "../../config/copywriter";
-import { ListenerType } from "../../enums";
+import { ListenerTypeEnum } from "../../enums";
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
 const getChatToken = userStore.getTokenByScene(TokensSceneEnum.CHAT)?.score;
@@ -153,7 +153,7 @@ const scrollToBottom = async () => {
 
 const useContent = (content: string) => {
     uni.$emit("confirm", {
-        type: ListenerType.AI_COPYWRITER,
+        type: ListenerTypeEnum.AI_COPYWRITER,
         data: { content },
     });
     chatContentList.value = [];

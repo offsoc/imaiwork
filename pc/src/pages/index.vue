@@ -90,7 +90,7 @@
                                         class="w-[76px] !rounded-full !h-[28px] hover:scale-[1.3] !transition-all !duration-500"
                                         @click="
                                             handleStart({
-                                                key: 'redbook',
+                                                key: AppKeyEnum.REDBOOK,
                                                 title: '小红书',
                                             })
                                         ">
@@ -170,6 +170,7 @@
 </template>
 
 <script setup lang="ts">
+import { AppKeyEnum, appKeyNameMap } from "@/enums/appEnums";
 import AppIntro from "./app/_components/app-intro.vue";
 import AppLive from "./app/_components/app-live.vue";
 const appImageModules = import.meta.glob("./app/_assets/app/*.png", {
@@ -198,29 +199,29 @@ const showLive = ref(false);
 const aiList = [
     {
         id: 6,
-        key: "ladder_player",
-        title: "AI员工陪练",
+        key: AppKeyEnum.LADDER_PLAYER,
+        title: appKeyNameMap[AppKeyEnum.LADDER_PLAYER],
         desc: "量身定制训练方案",
         desc2: "量身定制训练方案，智能纠错、即时反馈，让你的每一次练习都更高效。",
     },
     {
         id: 2,
-        key: "interview",
-        title: "AI面试",
+        key: AppKeyEnum.INTERVIEW,
+        title: appKeyNameMap[AppKeyEnum.INTERVIEW],
         desc: "轻松筛选优质人才",
         desc2: "自动化面试系统，轻松筛选优质人才，标准化评估每一位候选人。",
     },
     {
         id: 4,
-        key: "meeting_minutes",
-        title: "会议助手",
+        key: AppKeyEnum.MEETING_MINUTES,
+        title: appKeyNameMap[AppKeyEnum.MEETING_MINUTES],
         desc: "一键生成会议纪要",
         desc2: "自动记录、智能摘要、要点提取、任务分配，一键生成会议纪要，让决策更精准。",
     },
     {
         id: 5,
-        key: "mind_map",
-        title: "头脑风暴",
+        key: AppKeyEnum.MIND_MAP,
+        title: appKeyNameMap[AppKeyEnum.MIND_MAP],
         desc: "快速打破思维惯性",
         desc2: "激活灵感源泉，快速打破思维惯性，生成多元、创新、可落地的解决方案。",
     },
@@ -229,8 +230,8 @@ const aiList = [
 // AI智能拓客
 const aiCustomerList = [
     {
-        key: "broaden",
-        title: "AI视频号获客手",
+        key: AppKeyEnum.SPH,
+        title: appKeyNameMap[AppKeyEnum.SPH],
         desc: "精准洞察客户需求，自动跟进潜在商机，提升转化效率。帮你打造更贴心、更高效的客户体验。",
     },
 ];
@@ -239,15 +240,15 @@ const aiCustomerList = [
 const aiContentList = [
     {
         id: 1,
-        key: "digital_human",
-        title: "AI数字人",
+        key: AppKeyEnum.DIGITAL_HUMAN,
+        title: appKeyNameMap[AppKeyEnum.DIGITAL_HUMAN],
         desc: "自定台词精准匹配口型",
         desc2: "打造专属于您的数字伙伴，智能（AI）为您提升效率、降低成本、创造无限可能。",
     },
     {
         id: 3,
-        key: "drawing",
-        title: "AI美工",
+        key: AppKeyEnum.DRAWING,
+        title: appKeyNameMap[AppKeyEnum.DRAWING],
         desc: "输入需求定制专属创意",
         desc2: "为品牌注入新活力，助力企业实现更具影响力的视觉表达。",
     },
@@ -256,27 +257,27 @@ const aiContentList = [
 // AI客户管理
 const aiCustomerManagementList = [
     {
-        key: "person_wechat",
-        title: "个微操盘手",
+        key: AppKeyEnum.PERSON_WECHAT,
+        title: appKeyNameMap[AppKeyEnum.PERSON_WECHAT],
         desc: "轻松实现自动化管理",
         desc2: "高效回复、智能提醒、自动归类，助你轻松管理微信消息，告别漏消息与重复操作。",
     },
     {
         id: 10,
-        key: "telemarketing",
-        title: "AI电销",
+        key: AppKeyEnum.TELEMARKETING,
+        title: appKeyNameMap[AppKeyEnum.TELEMARKETING],
         desc: "大幅提升销售转化率",
         desc2: "全天候高效运转，精准筛选意向客户，自动跟进、智能对话，大幅提升销售转化率。",
     },
     {
-        key: "service",
-        title: "AI客服",
+        key: AppKeyEnum.SERVICE,
+        title: appKeyNameMap[AppKeyEnum.SERVICE],
         desc: "智能应答每一个问题",
         desc2: "智能应答每一个问题，释放人力成本，让您的团队专注于更重要的业务拓展。",
     },
     {
-        key: "live",
-        title: "AI无人直播",
+        key: AppKeyEnum.LIVE,
+        title: appKeyNameMap[AppKeyEnum.LIVE],
         desc: "无需人工值守",
         desc2: "无需人工值守，大幅降低运营成本，轻松实现高效、可持续的内容传播。",
     },
@@ -285,36 +286,36 @@ const aiCustomerManagementList = [
 // 持续开发中
 const aiIngList = [
     {
-        key: "tax",
-        title: "自动报税",
+        key: AppKeyEnum.TAX,
+        title: appKeyNameMap[AppKeyEnum.TAX],
     },
     {
-        key: "law",
-        title: "法律咨询",
+        key: AppKeyEnum.LAW,
+        title: appKeyNameMap[AppKeyEnum.LAW],
     },
     {
-        key: "word",
-        title: "AI-WORD",
+        key: AppKeyEnum.WORD,
+        title: appKeyNameMap[AppKeyEnum.WORD],
     },
     {
-        key: "ppt",
-        title: "AI-PPT",
+        key: AppKeyEnum.PPT,
+        title: appKeyNameMap[AppKeyEnum.PPT],
     },
     {
-        key: "company_wechat",
-        title: "智能企微",
+        key: AppKeyEnum.COMPANY_WECHAT,
+        title: appKeyNameMap[AppKeyEnum.COMPANY_WECHAT],
     },
     {
-        key: "statement",
-        title: "AI-BI报表",
+        key: AppKeyEnum.STATEMENT,
+        title: appKeyNameMap[AppKeyEnum.STATEMENT],
     },
     {
-        key: "poster",
-        title: "智能海报",
+        key: AppKeyEnum.POSTER,
+        title: appKeyNameMap[AppKeyEnum.POSTER],
     },
     {
-        key: "contract",
-        title: "合同审查",
+        key: AppKeyEnum.CONTRACT,
+        title: appKeyNameMap[AppKeyEnum.CONTRACT],
     },
 ];
 
@@ -330,39 +331,32 @@ const aiBaseList = [
     },
 ];
 
-const toDetail = (key: string, id?: number) => {
-    if (key === "management" || key === "telemarketing" || !id) {
-        feedback.msgWarning("功能正在开发中，敬请期待!");
-        return;
-    }
-    router.push(`/app/detail?id=${id}`);
-};
-
 const appName = ref("");
 
 const handleStart = async (item: any) => {
     const { key, name } = item;
     switch (key) {
-        case "digital_human":
-        case "drawing":
-        case "meeting_minutes":
-        case "mind_map":
-        case "interview":
-        case "redbook":
-        case "service":
+        case AppKeyEnum.DIGITAL_HUMAN:
+        case AppKeyEnum.DRAWING:
+        case AppKeyEnum.MEETING_MINUTES:
+        case AppKeyEnum.MIND_MAP:
+        case AppKeyEnum.INTERVIEW:
+        case AppKeyEnum.REDBOOK:
+        case AppKeyEnum.SERVICE:
+        case AppKeyEnum.SPH:
             router.push(`/app/${key}`);
             break;
 
-        case "ladder_player":
+        case AppKeyEnum.LADDER_PLAYER:
             appName.value = name;
             showTips.value = true;
             await nextTick();
             appTipsRef.value?.open("ladder_player");
             break;
-        case "person_wechat":
+        case AppKeyEnum.PERSON_WECHAT:
             router.push(`/app/person_wechat/chat`);
             break;
-        case "live":
+        case AppKeyEnum.LIVE:
             showLive.value = true;
             await nextTick();
             appLiveRef.value?.open();

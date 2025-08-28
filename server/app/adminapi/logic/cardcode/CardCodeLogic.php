@@ -21,7 +21,7 @@ class CardCodeLogic
      * @notes 添加卡密
      * @param array $post
      * @return bool
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 15:47
      */
     public function add(array $post)
@@ -53,7 +53,7 @@ class CardCodeLogic
     /**
      * @notes 卡密详情
      * @param int $id
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 17:18
      */
     public function detail(int $id)
@@ -82,7 +82,7 @@ class CardCodeLogic
     /**
      * @notes 删除卡密
      * @param int $id
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 17:33
      */
     public function del(int $id)
@@ -94,7 +94,7 @@ class CardCodeLogic
     /**
      * @notes 获取卡密配置
      * @return array|int|mixed|string
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 11:53
      */
     public function getConfig()
@@ -108,7 +108,7 @@ class CardCodeLogic
     /**
      * @notes 设置卡密设置
      * @param array $post
-     * @author cjhao
+     * @author kb
      * @date 2023/7/11 11:55
      */
     public function setConfig(array $post)

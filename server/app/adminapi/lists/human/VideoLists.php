@@ -44,7 +44,8 @@ class VideoLists extends BaseAdminDataLists implements ListsSearchInterface
 
         return HumanVideoTask::alias('hv')
             ->join('user u', 'u.id = hv.user_id')
-            ->field('hv.voice_name,hv.id,hv.name,hv.user_id,hv.model_version,hv.anchor_id,hv.create_time,hv.pic,hv.result_url,hv.gender,hv.status,hv.audio_type,hv.task_id,u.nickname,u.avatar')
+            ->field('hv.voice_name,hv.id,hv.name,hv.user_id,hv.model_version,hv.anchor_id,hv.create_time,hv.pic,hv.clip_result_url,hv.clip_status,hv.automatic_clip,
+            hv.clip_type,hv.result_url,hv.gender,hv.status,hv.audio_type,hv.task_id,u.nickname,u.avatar')
             ->when($this->request->get('user'), function ($query) {
                 $query->where('u.nickname', 'like', '%' . $this->request->get('user') . '%');
             })
@@ -57,6 +58,7 @@ class VideoLists extends BaseAdminDataLists implements ListsSearchInterface
             ->select()
             ->each(function ($item) use ($modelVersion) {
                 $item['pic']            = FileService::getFileUrl($item['pic']);
+                $item['clip_result_url']     = FileService::getFileUrl($item['clip_result_url']);
                 $item['result_url']     = FileService::getFileUrl($item['result_url']);
                 $item['avatar']         = FileService::getFileUrl($item['avatar']);
                 $item['anchor_name']    = HumanAnchor::where('anchor_id', $item['anchor_id'])->value('name') ?? '';
@@ -107,8 +109,27 @@ class VideoLists extends BaseAdminDataLists implements ListsSearchInterface
 
                     });
 
-                $item['points']          = $points;
+                $item['video_points']          = $points;
                 $item['duration']        = $duration;
+                $item['clip_points']     = 0;
+                if ($item['clip_status'] == 3) {
+                    $points = 0;
+                    UserTokensLog::where('user_id', $item['user_id'])
+                        ->where('change_type', '5101')
+                        ->where('task_id', $item['task_id'])
+                        ->field('extra, change_type,action,change_amount')
+                        ->select()
+                        ->each(function ($item) use (&$points, &$duration) {
+
+                            if ($item['action'] == 1){
+                                $points    -=$item['change_amount'];
+                            }else{
+                                $points     += $item['change_amount'] ?? 0;
+                            }
+                        });
+
+                    $item['clip_points'] = $points;;
+                }
             })
             ->toArray();
     }

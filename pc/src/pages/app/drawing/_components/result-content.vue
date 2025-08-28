@@ -1,7 +1,7 @@
 <template>
     <DefineTemplate v-slot="{ msg }">
         <div class="flex flex-col gap-2 items-center justify-center">
-            <Icon name="local-icon-error" :size="32" color="#d81e06"></Icon>
+            <Icon name="local-icon-error_fill" :size="32"></Icon>
             <div class="text-white mt-4 text-lg font-bold">{{ msg || "生成失败" }}</div>
         </div>
     </DefineTemplate>
@@ -44,7 +44,7 @@
                             </div>
                             <ElImage
                                 fit="contain"
-                                class="w-full h-full max-h-[50vh] rounded-xl"
+                                class="w-full h-full rounded-xl"
                                 preview-teleported
                                 :src="image.url"
                                 :preview-src-list="[image.url]" />

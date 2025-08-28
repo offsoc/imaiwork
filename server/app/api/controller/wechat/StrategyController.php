@@ -17,7 +17,7 @@ use app\api\lists\wechat\TagStrategyLists;
 class StrategyController extends BaseApiController
 {
 
-    public array $notNeedLogin = [];
+    public array $notNeedLogin = ['exec'];
 
 
     /**
@@ -204,42 +204,14 @@ class StrategyController extends BaseApiController
         return $this->fail(StrategyLogic::getError());
     }
 
-    /**
-     * @desc 朋友圈评论策略
-     */
-    public function circleReply()
-    {
-        $params = $this->request->post();
-        $result = StrategyLogic::circleReplyStrategy($params);
-        if ($result)
-        {
-            return $this->success(data: StrategyLogic::getReturnData());
-        }
-        return $this->fail(StrategyLogic::getError());
-    }
-
-    /**
-     * @desc 朋友圈评论策略信息
-     */
-    public function circleReplyInfo()
-    {
-        $id = $this->request->get('id');
-        $result = StrategyLogic::circleReplyInfo($id);
-        if ($result)
-        {
-            return $this->success(data: StrategyLogic::getReturnData());
-        }
-        return $this->fail(StrategyLogic::getError());
-    }
-
 
     /**
      * @desc 朋友圈点赞策略
      */
-    public function circleLike()
+    public function circleReplyLike()
     {
         $params = $this->request->post();
-        $result = StrategyLogic::circleLikeStrategy($params);
+        $result = StrategyLogic::circleReplyLikeStrategy($params);
         if ($result)
         {
             return $this->success(data: StrategyLogic::getReturnData());
@@ -250,13 +222,25 @@ class StrategyController extends BaseApiController
     /**
      * @desc 朋友圈点赞策略信息
      */
-    public function circleLikeInfo()
+    public function circleReplyLikeInfo()
     {
-        $result = StrategyLogic::circleLikeInfo();
+        
+        $result = StrategyLogic::circleReplyLikeInfo();
         if ($result)
         {
             return $this->success(data: StrategyLogic::getReturnData());
         }
         return $this->fail(StrategyLogic::getError());
     }
+
+    public function exec()
+    {
+        try {
+            StrategyLogic::execCircleReplyLikeStrategy();
+            return $this->success();
+        } catch (\Throwable $th) {
+            return $this->fail($th->getMessage());
+        }
+    }
+
 }

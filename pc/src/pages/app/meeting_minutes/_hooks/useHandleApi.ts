@@ -150,7 +150,6 @@ export default function useHandleApi(options?: any) {
                 content += item.Question + "\n" + item.Answer;
             });
 
-            console.log(content, "content");
             cb({
                 type: "txt",
                 fileName: data.name,

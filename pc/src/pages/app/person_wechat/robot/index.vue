@@ -19,20 +19,20 @@ import useSidebar from "../../_hooks/useSidebar";
 const { sidebar, sidebarIndex, getComponents, getSliderIndex } = useSidebar();
 
 sidebar.value = [
-    { name: "机器人管理", icon: "robot", components: markRaw(Robot), type: 1 },
-    { name: "自动标签管理", icon: "price_tag", components: markRaw(Tag), type: 2 },
+    // { name: "机器人管理", icon: "robot", components: markRaw(Robot), type: 1 },
+    { name: "自动标签管理", icon: "price_tag", components: markRaw(Tag), type: 1 },
     {
         name: "手动设置标签",
         icon: "draft",
         components: markRaw(TagManual),
-        type: 3,
+        type: 2,
     },
-    { name: "回复策略", icon: "setting", components: markRaw(SettingReply), type: 4 },
+    { name: "回复策略", icon: "setting", components: markRaw(SettingReply), type: 3 },
     {
         name: "自动通过好友策略",
         icon: "setting",
         components: markRaw(SettingFriend),
-        type: 5,
+        type: 4,
     },
 ];
 

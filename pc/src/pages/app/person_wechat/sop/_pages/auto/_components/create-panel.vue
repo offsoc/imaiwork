@@ -261,7 +261,7 @@ const setTypeFormData = async () => {
 };
 
 const init = async () => {
-    const { id, step } = queryToObject();
+    const { id, step } = searchQueryToObject();
     if (step && stepLists.value.some((item) => item.key == step)) {
         stepKey.value = step as StepKey;
     } else {

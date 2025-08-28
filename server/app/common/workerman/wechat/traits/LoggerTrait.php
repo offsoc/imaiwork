@@ -92,12 +92,11 @@ trait LoggerTrait
     {
         try {
             $content = '';
-            if(is_array($this->context)){
+            if (is_array($this->context)) {
                 $content = json_encode($this->context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             }
-            Log::channel($this->channel)->{$this->level}($this->title."\n". $content);
+            Log::channel($this->channel)->{$this->level}($this->title . "\n" . $content);
         } catch (\Exception $e) {
-            //print_r($e);
         }
     }
 }

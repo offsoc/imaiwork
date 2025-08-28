@@ -10,15 +10,16 @@
 <script setup lang="ts">
 import Sidebar from "../../_components/sidebar.vue";
 import useSidebar from "../../_hooks/useSidebar";
-
-const IndexComponent = defineAsyncComponent(() => import("./_pages/index/index.vue"));
-const TaskComponent = defineAsyncComponent(() => import("./_pages/task/index.vue"));
+import Index from "./_pages/index/index.vue";
+import Task from "./_pages/task/index.vue";
+import Setting from "./_pages/setting/index.vue";
 
 const { sidebar, sidebarIndex, getComponents, getSliderIndex } = useSidebar();
 
 sidebar.value = [
-    { name: "朋友圈", icon: "camera_lens_fill", components: markRaw(IndexComponent), type: 1 },
-    { name: "任务列表", icon: "task", components: markRaw(TaskComponent), type: 2 },
+    { name: "朋友圈", icon: "camera_lens_fill", components: markRaw(Index), type: 1 },
+    { name: "任务列表", icon: "task", components: markRaw(Task), type: 2 },
+    { name: "自动评赞设置", icon: "setting", components: markRaw(Setting), type: 3 },
 ];
 
 definePageMeta({

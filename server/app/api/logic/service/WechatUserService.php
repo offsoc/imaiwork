@@ -41,7 +41,7 @@ class WechatUserService
     /**
      * @notes 设置微信返回的用户信息
      * @param $response
-     * @author cjhao
+     * @author kb
      * @date 2021/8/2 11:49
      */
     private function setParams($response): void
@@ -107,7 +107,7 @@ class WechatUserService
      * @param bool $isCheck 是否验证账号是否可用
      * @return array
      * @throws Exception
-     * @author cjhao
+     * @author kb
      * @date 2021/8/3 11:42
      */
     public function getUserInfo($isCheck = true): array
@@ -260,7 +260,7 @@ class WechatUserService
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
-     * @author cjhao
+     * @author kb
      * @date 2021/8/2 16:45
      */
     private function getToken(): void
@@ -275,7 +275,7 @@ class WechatUserService
      * 如果用户不存在，创建用户；用户存在，更新用户信息，并检查该端信息是否需要写入
      * @return WechatUserService
      * @throws Exception
-     * @author cjhao
+     * @author kb
      * @date 2021/8/2 16:35
      */
     public function authUserLogin($type = 1): self

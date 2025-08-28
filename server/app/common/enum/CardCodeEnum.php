@@ -15,7 +15,7 @@ class CardCodeEnum
      * @notes 获取卡密类型
      * @param bool $from
      * @return bool|mixed|string
-     * @author cjhao
+     * @author kb
      * @date 2023/7/10 12:22
      */
     public static function getTypeDesc($from = true)

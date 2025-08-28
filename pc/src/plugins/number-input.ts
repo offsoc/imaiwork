@@ -129,12 +129,20 @@ const numberInputDirective: Directive<HTMLElement, NumberInputOptions> = {
 
         const handleBlur = (e: Event) => {
             const target = e.target as HTMLInputElement;
-            if (target.value) {
-                const formatted = formatValue(target.value, binding.value || {});
-                if (target.value !== formatted) {
-                    target.value = formatted;
-                    dispatchInput(target);
-                }
+            const options = binding.value || {};
+            let rawValue = target.value;
+
+            // 处理空值情况：当值为空且设置了最小值时，应用最小值
+            if (rawValue === "" && options.min !== undefined) {
+                rawValue = options.min.toString();
+            }
+
+            const formatted = formatValue(rawValue, options);
+
+            // 当原始值与格式化值不同时更新
+            if (target.value !== formatted) {
+                target.value = formatted;
+                dispatchInput(target);
             }
         };
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-full flex flex-col bg-white">
+    <div class="w-full h-full flex flex-col bg-white rounded-xl">
         <!-- 分组列表 -->
         <div class="grow min-h-0 pt-5">
             <ElScrollbar>

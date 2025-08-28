@@ -57,6 +57,7 @@ export function objectToQuery(params: Record<string, any>): string {
     let query = "";
     for (const props of Object.keys(params)) {
         const value = params[props];
+
         if (!isEmpty(value)) {
             query += props + "=" + value + "&";
         }
@@ -68,7 +69,7 @@ export function objectToQuery(params: Record<string, any>): string {
  * @description 将window.location.search转换为对象
  * @return {Object}
  */
-export function queryToObject(): Record<string, any> {
+export function searchQueryToObject(): Record<string, any> {
     const searchParams = new URLSearchParams(window.location.search);
     const result = {};
     for (const [key, value] of searchParams.entries()) {

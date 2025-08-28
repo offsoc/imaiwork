@@ -25,7 +25,8 @@ return [
             // 单文件日志写入
             'single'         => false,
             // 独立日志级别
-            'apart_level'    => ['system', 'openai', 'sd', 'audio', 'error', 'sql', 'suno', 'hi_dream', 'wxchat', 'analyse', 'wxPay', 'qw', "phone_list", 'qwen', 'human', 'draw_video'],
+            'apart_level'    => ['system', 'openai', 'sd', 'audio', 'error', 'sql', 'suno', 'hi_dream', 'wxchat', 'analyse', 'wxPay', 'qw', "phone_list", 'qwen', 'human', 'draw_video', 'sph'],
+
             // 最大日志文件数量
             'max_files'      => 0,
             // 使用JSON格式记录
@@ -61,7 +62,10 @@ return [
             'single'         => false,
             'time_format'    => 'Y-m-d H:i:s',
             'format'         => '[%s][%s] %s',
-            'apart_level'   =>  ['error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'card', 'cron', 'bind', 'init', 'note', 'post'],
+            'apart_level'   =>  [
+                'error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'card', 'cron', 'bind', 'init', 'note', 'post',
+                'task_delete', 'task_paused', 'task_recovery', 'task_send', 'task_record','channel'
+            ],
         ],
         'wechat_socket' => [
             'type'           => 'File',
@@ -83,6 +87,18 @@ return [
         'jobs' => [
             'type'           => 'File',
             'path'           => app()->getRootPath() . '/runtime/log/jobs/',
+            'json'           => false,
+            'format'         => '[%s][%s] %s',
+        ],
+        'crontab' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/crontab/',
+            'json'           => false,
+            'format'         => '[%s][%s] %s',
+        ],
+        'clip' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/clip/',
             'json'           => false,
             'format'         => '[%s][%s] %s',
         ],

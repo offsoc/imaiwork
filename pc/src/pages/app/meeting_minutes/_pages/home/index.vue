@@ -1,5 +1,5 @@
 <template>
-    <div class="meeting-minutes-page">
+    <div class="meeting-minutes-page dynamic-scroller">
         <div class="w-[1000px] mx-auto">
             <div class="mt-2">
                 <img src="../../_assets/images/home_txt_title.png" class="h-[150px] object-cover" />
@@ -377,7 +377,6 @@ onUnmounted(() => {
     th.el-table__cell {
         background-color: transparent;
         color: #8f91a8;
-        @apply py-4 pt-0;
     }
     .el-table__cell {
         text-align: left;

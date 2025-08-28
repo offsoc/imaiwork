@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { AppKeyEnum, appKeyNameMap } from "@/enums/appEnums";
 import Sidebar from "../_components/sidebar.vue";
 import Home from "./_pages/home/index.vue";
 import Record from "./_pages/record/index.vue";
@@ -27,7 +28,8 @@ sidebar.value = [
 
 definePageMeta({
     layout: "base",
-    title: "会议妙记",
+    title: appKeyNameMap[AppKeyEnum.MEETING_MINUTES],
+    key: AppKeyEnum.MEETING_MINUTES,
 });
 </script>
 

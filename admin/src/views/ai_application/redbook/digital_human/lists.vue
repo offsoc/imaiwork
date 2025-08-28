@@ -11,7 +11,14 @@
                         @keyup.enter="resetPage" />
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-select class="!w-[160px]" v-model="queryParams.status" placeholder="请选择状态" clearable>
+                    <el-select
+                        class="!w-[160px]"
+                        v-model="queryParams.status"
+                        placeholder="请选择状态"
+                        clearable
+                        :empty-values="[null, undefined]"
+                        @change="getLists()">
+                        <el-option label="全部" value="" />
                         <el-option label="草稿箱" :value="GenStatus.DRAFT" />
                         <el-option label="待处理" :value="GenStatus.WAITING" />
                         <el-option label="生成中" :value="GenStatus.GENERATING" />

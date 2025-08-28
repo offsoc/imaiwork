@@ -12,7 +12,6 @@ interface Options {
 
 export function usePaging(options: Options) {
     const { page = 1, size = 15, isScroll = false, fetchFun, params = {}, firstLoading = false } = options;
-    const isLoad = ref(true);
     // 记录分页初始参数
     const paramsInit: Record<any, any> = Object.assign({}, toRaw(params));
     // 分页数据
@@ -57,6 +56,9 @@ export function usePaging(options: Options) {
     // 重置为第一页
     const resetPage = (data?: any) => {
         pager.page = 1;
+        if (params.page_no) {
+            params.page_no = 1;
+        }
         if (isScroll) {
             pager.lists = [];
         }

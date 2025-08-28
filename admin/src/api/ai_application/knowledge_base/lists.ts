@@ -9,3 +9,13 @@ export function knowKnowledgeList(params?: any) {
 export function knowKnowledgeDelete(params?: any) {
     return request.post({ url: "/knowledge.knowledge/delete", params });
 }
+
+// 向量知识库列表
+export function knowKnowledgeVectorList(params?: any) {
+    return request.get({ url: "/kb.know/lists", params });
+}
+
+// 向量知识库删除
+export function knowKnowledgeVectorDelete(params?: any) {
+    return request.post({ url: "/kb.know/del", params });
+}

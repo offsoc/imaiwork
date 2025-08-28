@@ -90,6 +90,7 @@ const queryParams = reactive({
     name: "",
     status: 1,
     page_no: 1,
+    type: 0,
 });
 
 const { pager, getLists, resetPage } = usePaging({
@@ -123,7 +124,6 @@ const load = async () => {
 };
 
 const handleConfirm = () => {
-    console.log(currAnchor.value);
     emit("confirm", currAnchor.value);
     close();
 };

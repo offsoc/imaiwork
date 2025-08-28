@@ -77,6 +77,10 @@ const props = defineProps({
         type: [String, Number],
         default: "",
     },
+    showOriginalTone: {
+        type: Boolean,
+        default: false,
+    },
 });
 const emit = defineEmits(["update:show", "confirm"]);
 
@@ -91,12 +95,15 @@ const showPopup = computed({
 
 const appStore = useAppStore();
 const systemToneLists = computed(() => {
-    return [
-        { voice_id: -1, name: "视频原音", type: 1 },
+    const list = [
         ...(appStore.getDigitalHumanConfig?.voice || [])
             .filter((item: any) => item.status == "1")
             .map((item: any) => ({ ...item, voice_id: item.code, type: 0 })),
     ];
+    if (props.showOriginalTone) {
+        list.unshift({ voice_id: -1, name: "视频原音", type: 1 });
+    }
+    return list;
 });
 
 const pagingRef = shallowRef();

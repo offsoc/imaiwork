@@ -97,7 +97,7 @@
 import config from "@/config";
 import { createAnchor } from "@/api/digital_human";
 import { TokensSceneEnum } from "@/enums/appEnums";
-import { ModeType, ListenerType, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
+import { ModeTypeEnum, ListenerTypeEnum, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
 import VideoPlayer from "@/ai_modules/digital_human/components/video-player/video-player.vue";
 import UploadLoading from "@/ai_modules/digital_human/components/upload-loading/upload-loading.vue";
 import { useUserStore } from "@/stores/user";
@@ -128,7 +128,7 @@ const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
 
 // 使用shallowRef优化性能，因为这些值不需要深层响应式
-const modeType = shallowRef<ModeType>();
+const modeType = shallowRef<ModeTypeEnum>();
 
 // 使用类型定义提高代码可维护性
 const formData = reactive<FormData>({
@@ -254,7 +254,7 @@ const getSceneKeysByModelVersion = (modelVersion: number): { avatar: string } =>
  */
 const startUpload = async () => {
     // 检查是否为形象模式，并验证积分
-    if (modeType.value === ModeType.ANCHOR) {
+    if (modeType.value === ModeTypeEnum.ANCHOR) {
         const modelVersion = parseInt(String(formData.model_version));
         const keys = getSceneKeysByModelVersion(modelVersion);
         const { score } = getTokenByScene(keys.avatar);
@@ -373,7 +373,7 @@ const handelUploadConfirm = async () => {
             url: "/ai_modules/digital_human/pages/video_create/video_create",
             type: "redirect",
             params: {
-                type: ListenerType.UPLOAD_VIDEO,
+                type: ListenerTypeEnum.UPLOAD_VIDEO,
                 data: JSON.stringify(formData),
             },
         });

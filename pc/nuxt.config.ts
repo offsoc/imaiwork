@@ -29,12 +29,6 @@ export default defineNuxtConfig({
                     content: "noarchive, max-image-preview:large, max-video-preview:-1",
                 },
             ],
-            link: [
-                {
-                    rel: "icon",
-                    href: "/favicon.ico",
-                },
-            ],
         },
     },
     spaLoadingTemplate: "spa-loading.html",

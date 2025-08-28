@@ -13,7 +13,7 @@
                         <ElSelect
                             v-model="formData.model"
                             class="!h-11"
-                            popper-class="custom-select-popper"
+                            popper-class="dark-select-popper"
                             placeholder="请选择模型名称"
                             :show-arrow="false"
                             @change="handleModelChange">

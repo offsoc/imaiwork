@@ -31,6 +31,7 @@ class SvVideoTaskLogic extends SvBaseLogic
     const VOICE_TRAINING = 'voiceTraining'; //音色训练
     const AUDIO_TRAINING = 'audioTraining'; //文字转音频
     const VIDEO_TRAINING = 'videoTraining'; //视频训练
+
     const COPYWRITING_CREATE = 'copywritingCreate'; //文案创作
     const AVATAR_TRAINING_PRO = 'avatarTrainingPro'; //形象训练
     const VOICE_TRAINING_PRO = 'voiceTrainingPro'; //音色训练
@@ -48,6 +49,11 @@ class SvVideoTaskLogic extends SvBaseLogic
     const AUDIO_TRAINING_YMT = 'audioTrainingYmt'; //文字转音频
     const VIDEO_TRAINING_YMT = 'videoTrainingYmt'; //视频训练
 
+    const AVATAR_TRAINING_CHANJING = 'avatarTrainingChanjing'; //形象训练
+    const VOICE_TRAINING_CHANJING = 'voiceTrainingChanjing'; //音色训练
+    const AUDIO_TRAINING_CHANJING = 'audioTrainingChanjing'; //文字转音频
+    const VIDEO_TRAINING_CHANJING = 'videoTrainingChanjing'; //视频训练
+
     /**
      * 处理形象合成任务
      * @param string $taskId 任务ID
@@ -60,10 +66,9 @@ class SvVideoTaskLogic extends SvBaseLogic
             $where = [
                 ['status', '=', 0], // 待处理
                 ['anchor_id', '=', ''], // 待处理
-                ['model_version', '=', 4],
-                ['tries', '<', 5]
+                ['tries', '<', 5],
+                ['model_version', 'in', [4,6,7]]
             ];
-
             if (!empty($taskId)) {
                 $where[] = ['task_id', '=', $taskId];
             }
@@ -110,6 +115,9 @@ class SvVideoTaskLogic extends SvBaseLogic
                             case 6:
                                 $scene = self::AVATAR_TRAINING_YMT;
                                 break;
+                            case 7:
+                                $scene = self::AVATAR_TRAINING_CHANJING;
+                                break;
                             default:
                                 $scene = self::AVATAR_TRAINING_YM;
                                 break;
@@ -119,6 +127,7 @@ class SvVideoTaskLogic extends SvBaseLogic
                             'name' => $anchor->name,
                             'gender' => $anchor->gender,
                             'video_url' => $anchor->url,
+                            'notify_url' => '/api/sv.videoTask/notify',
                         ], $scene, $task->user_id, $task->task_id);
                         // var_dump(  $response);
                         if (!isset($response['id']) || empty($response['id'])) {
@@ -185,31 +194,32 @@ class SvVideoTaskLogic extends SvBaseLogic
             $where = [
                 ['status', '=', 10], // 待处理
                 ['voice_id', '=', ''], // 待处理
-                ['model_version', '=', 4],
-                ['tries', '<', 5]
+                ['tries', '<', 5],
+                ['model_version', 'in', [4,6,7]]
             ];
-
             if (!empty($taskId)) {
                 $where[] = ['task_id', '=', $taskId];
             }
-
             // 获取待处理的任务，限制5条
             $tasks = SvVideoTask::where($where)
                 ->order('tries DESC, id ASC')
                 ->limit(5)
                 ->select();
-
             if ($tasks->isEmpty()) {
                 //  Log::channel('sv')->info('没有需要处理的音频任务');
                 return;
             }
-
             foreach ($tasks as $task) {
                 try {
-
-                    $voice = HumanVoice::where('user_id', $task->user_id)->where('voice_id', $task->voice_id)->findOrEmpty();
-                    $voice_urls =  $task->voice_urls != '' ?   $task->voice_urls :  $task->upload_video_url;
-                    $is_video =  $task->voice_urls != '' ?  false :  true;
+                    $wherev = [
+                    'user_id'=>$task->user_id,
+                    'voice_id'=>$task->voice_id,
+                    'model_version'=>$task->model_version,
+                    'type'=>$task->type,
+                    ];
+                    $voice = HumanVoice::where($wherev)->findOrEmpty();
+                    $voice_urls =  trim($task->voice_urls) != '' ?   $task->voice_urls :  $task->upload_video_url;
+                    $is_video = trim($task->voice_urls) != '' ?  false :  true;
                     $voiceres = false;
                     // 如果音色不存在，则创建音色
                     if ($voice->isEmpty()) {
@@ -230,10 +240,7 @@ class SvVideoTaskLogic extends SvBaseLogic
                             $voice->voice_id = $task->voice_id;
                             $voiceres = true;
                         }
-
-
                     }
-
 
                     if ($voice->voice_id == "" && !$voiceres) {
                         //    var_dump('创建音色');
@@ -252,14 +259,20 @@ class SvVideoTaskLogic extends SvBaseLogic
                                     $scene = self::VOICE_TRAINING_YMT;
                                     $voice_urls = FileService::getFileUrl($voice_urls);
                                     break;
+                                case 7:
+                                    $scene = self::VOICE_TRAINING_CHANJING;
+                                    $voice_urls = FileService::getFileUrl($voice_urls);
+                                    break;
                                 default:
                                     $scene = self::VOICE_TRAINING_PRO;
                                     break;
                             }
+
                             $response = self::requestUrl([
                                 'name' => $voice->name,
                                 'gender' => $voice->gender,
                                 'is_video' => $is_video,
+                                'notify_url' => '/api/sv.videoTask/notify',
                                 'audio_url' => $voice_urls
                             ], $scene, $task->user_id, $task->task_id);
                             // var_dump( $response );
@@ -320,10 +333,10 @@ class SvVideoTaskLogic extends SvBaseLogic
             // 构建查询条件：待处理状态的任务
             $where = [
                 ['status', '=', 13],
-                ['model_version', '=', 4],
-                ['tries', '<', 5]
+                ['tries', '<', 5],
+                ['model_version', 'in', [4,6]]
             ];
-            
+
             if (!empty($taskId)) {
                 $where[] = ['task_id', '=', $taskId];
             }
@@ -449,22 +462,26 @@ class SvVideoTaskLogic extends SvBaseLogic
     public static function compositeVideoCron(string $taskId = '')
     {
         try {
-            // 构建查询条件：音频合成成功的任务
-            $where = [
-                ['status', '=', 3], // 音频合成成功
-                ['model_version', '=', 4],
-                ['tries', '<', 5]
-            ];
-            
-            if (!empty($taskId)) {
-                $where[] = ['task_id', '=', $taskId];
-            }
-
+           
             // 获取待处理的任务，限制5条
-            $tasks = SvVideoTask::where($where)
-                ->order('speed DESC, id ASC')
-                ->limit(5)
-                ->select();
+            $tasks =  SvVideoTask::where(function ($q) use ($taskId) {
+                // 第一组条件
+                $q->where('status', 3)
+                  ->whereIn('model_version', [4, 6]);
+    
+                if (!empty($taskId)) {
+                    $q->where('task_id', $taskId);
+                }
+                $q->whereOr(function ($q2) {
+                    $q2->where('model_version', 7)
+                       ->where('status', 13);
+                });
+            })
+        
+            ->where('tries', '<', 5)
+            ->order('speed DESC, id ASC')
+            ->limit(5)
+            ->select();
 
             if ($tasks->isEmpty()) {
                 //Log::channel('sv')->info('没有需要处理的视频任务');
@@ -484,19 +501,37 @@ class SvVideoTaskLogic extends SvBaseLogic
                         case 6:
                             $scene = self::VIDEO_TRAINING_YMT;
                             break;
+                        case 7:
+                            $scene = self::VIDEO_TRAINING_CHANJING;
+                            break;
                         default:
                             $scene = self::VIDEO_TRAINING_YM;
                             break;
                     }
-
-                    $response = self::requestUrl([
-                        'name'      => $task->name,
-                        'avatar_id' => $task->anchor_id,
-                        'video_url' => $task->upload_video_url,
-                        'audio_url' => $task->audio_url,
-                        'priority' => $task->speed,
-                        'notify_url' => '/api/sv.videoTask/notify'
-                    ], $scene, $task->user_id, $task->task_id);
+                    if ($task->model_version == 7) {
+                        $response = self::requestUrl([
+                            'name'      => $task->name,
+                            'msg'       => $task->msg,
+                            'width'     => $task->width,
+                            'height'    => $task->height,
+                            'avatar_id' => $task->anchor_id,
+                            'voice_id'  => $task->voice_id,
+                            'video_url' => $task->upload_video_url,
+                            'audio_url' => $task->audio_url,
+                            'notify_url' => '/api/sv.videoTask/notify'
+                        ], $scene, $task->user_id, $task->task_id);
+                    
+                    }else{
+                        $response = self::requestUrl([
+                            'name'      => $task->name,
+                            'avatar_id' => $task->anchor_id,
+                            'video_url' => $task->upload_video_url,
+                            'audio_url' => $task->audio_url,
+                            'priority' => $task->speed,
+                            'notify_url' => '/api/sv.videoTask/notify'
+                        ], $scene, $task->user_id, $task->task_id);
+                    }
+                    
 
                     if (!isset($response['id']) || empty($response['id'])) {
                         $task->tries = $task->tries + 1;
@@ -649,7 +684,7 @@ class SvVideoTaskLogic extends SvBaseLogic
             // 构建查询条件：音色合成成功的任务
             $where = [
                 ['status', '=', 11], // 音色已合成
-                ['model_version', '=', 4],
+                ['model_version', 'in', [4,6]],
                 ['tries', '<', 20]
             ];
 
@@ -742,6 +777,15 @@ class SvVideoTaskLogic extends SvBaseLogic
         $requestService = \app\common\service\ToolsService::Human();
 
         [$tokenScene, $tokenCode] = match ($scene) {
+            self::AUDIO_TRAINING => ['human_audio', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO],
+            self::AVATAR_TRAINING => ['human_avatar', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR],
+            self::VOICE_TRAINING => ['human_voice', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE],
+            self::VIDEO_TRAINING => ['human_video', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO],
+            self::COPYWRITING_CREATE => ['copywriting_create', AccountLogEnum::TOKENS_DEC_HUMAN_COPYWRITING],
+            self::AUDIO_TRAINING_PRO => ['human_audio_pro', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_PRO],
+            self::AVATAR_TRAINING_PRO => ['human_avatar_pro', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_PRO],
+            self::VOICE_TRAINING_PRO => ['human_voice_pro', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_PRO],
+            self::VIDEO_TRAINING_PRO => ['human_video_pro', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO],
             self::AVATAR_TRAINING_YM => ['human_avatar_ym', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_YM],
             self::VOICE_TRAINING_YM => ['human_voice_ym', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YM],
             self::AUDIO_TRAINING_YM => ['human_audio_ym', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YM],
@@ -750,6 +794,10 @@ class SvVideoTaskLogic extends SvBaseLogic
             self::VOICE_TRAINING_YMT => ['human_voice_ymt', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT],
             self::AUDIO_TRAINING_YMT => ['human_audio_ymt', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT],
             self::VIDEO_TRAINING_YMT => ['human_video_ymt', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT],
+            self::AVATAR_TRAINING_CHANJING => ['human_avatar_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_CHANJING],
+            self::VOICE_TRAINING_CHANJING => ['human_voice_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_CHANJING],
+            self::AUDIO_TRAINING_CHANJING => ['human_audio_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_CHANJING],
+            self::VIDEO_TRAINING_CHANJING => ['human_video_chanjing', AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_CHANJING],
         };
 
         //计费
@@ -760,6 +808,46 @@ class SvVideoTaskLogic extends SvBaseLogic
         $request['user_id'] = $userId;
         $request['now'] = time();
         switch ($scene) {
+            case self::AVATAR_TRAINING:
+
+                $response = $requestService->avatarTraining($request);
+                break;
+
+            case self::VOICE_TRAINING:
+
+                $response = $requestService->voiceTraining($request);
+                break;
+
+            case self::AUDIO_TRAINING:
+
+                $response = $requestService->audioTraining($request);
+                break;
+
+            case self::VIDEO_TRAINING:
+
+                $response = $requestService->videoTraining($request);
+                break;
+            case self::COPYWRITING_CREATE:
+
+                $response = $requestService->copywritingCreate($request);
+                break;
+            case self::AVATAR_TRAINING_PRO:
+
+                $response = $requestService->avatarTrainingPro($request);
+                break;
+            case self::VOICE_TRAINING_PRO:
+
+                $response = $requestService->voiceTrainingPro($request);
+                break;
+            case self::AUDIO_TRAINING_PRO:
+
+                $response = $requestService->audioTrainingPro($request);
+                break;
+            case self::VIDEO_TRAINING_PRO:
+
+                $response = $requestService->videoTrainingPro($request);
+                break;
+
             case self::AVATAR_TRAINING_YM:
                 $response = $requestService->avatarTrainingYm($request);
                 break;
@@ -784,6 +872,20 @@ class SvVideoTaskLogic extends SvBaseLogic
             case self::VIDEO_TRAINING_YMT:
                 $response = $requestService->videoTrainingYmt($request);
                 break;  
+
+            case self::AVATAR_TRAINING_CHANJING:
+                $response = $requestService->avatarTrainingChanjing($request);
+                break;
+            case self::VOICE_TRAINING_CHANJING:
+                $response = $requestService->voiceTrainingChanjing($request);
+                break;
+            case self::AUDIO_TRAINING_CHANJING:
+                $response = $requestService->audioTrainingChanjing($request);
+                break;
+            case self::VIDEO_TRAINING_CHANJING:
+                $response = $requestService->videoTrainingChanjing($request);
+                break;
+
             default:
         }
 
@@ -798,8 +900,11 @@ class SvVideoTaskLogic extends SvBaseLogic
 
                 //合成视频按时长扣费
                 if (in_array($scene, [
-                   self::AUDIO_TRAINING_YM, self::VIDEO_TRAINING_YM,
-                   self::AUDIO_TRAINING_YMT, self::VIDEO_TRAINING_YMT
+                    self::AUDIO_TRAINING, self::VIDEO_TRAINING,
+                    self::AUDIO_TRAINING_PRO, self::VIDEO_TRAINING_PRO,
+                    self::AUDIO_TRAINING_YM, self::VIDEO_TRAINING_YM,
+                    self::AUDIO_TRAINING_YMT, self::VIDEO_TRAINING_YMT,
+                    self::AUDIO_TRAINING_CHANJING, self::VIDEO_TRAINING_CHANJING
                 ])) {
 
                     $duration = $response['data']['duration'] ?? 1;
@@ -819,6 +924,133 @@ class SvVideoTaskLogic extends SvBaseLogic
     }
 
 
+     /**
+     * 更新形象
+     * @param array $data
+     * @param string $modelVersion
+     * @return bool
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     */
+    public static function updateAnchor(array $data, string $modelVersion): bool
+    {
+        $model = SvVideoTask::where('model_version', $modelVersion)->where('status', 8);
+        if (in_array($modelVersion,[1,7])) {
+            $model = $model->where('anchor_id', $data['id']);
+        }elseif ($modelVersion == 2) {
+            return true;
+        } else {
+
+            return false;
+        }
+
+        $model->select()
+            ->each(function ($item) use ($data) {
+                if ($item->model_version === 7) {
+
+                    if (in_array($data['status'], [2, 4, 5])) {
+                        $item->status = ($data['status'] == 2) ? 13 : 9;
+                        // TODO 失败退费
+                        if ($item->status == 9) {
+                            self::refundTokens($item->user_id, $item->anchor_id, $item->task_id, 'human_anchor_chanjing');
+                            $anchor = ['status' => 2];
+                        }else{
+                           
+                            if (isset($data['audio_man_id']) && $data['audio_man_id'] != '' && $item->voice_id == '') {
+                                $addData = [
+                                    'user_id'       => $item->user_id,
+                                    'status'        => 1,
+                                    'type'          => $item->type,
+                                    'voice_id'      => $data['audio_man_id'],
+                                    'name'          => $data['name'],
+                                    'gender'        => $item->gender,
+                                    'model_version' => 7,
+                                    'task_id'       => $item->task_id,
+                                    'voice_urls'    => $item->upload_video_url
+                                ];
+                                HumanVoice::create($addData);
+                              
+                                $item->voice_id = $data['audio_man_id'];
+                                $item->status = 13;
+                            }
+                            
+                            $item->width = $data['width'] ?? '';
+                            $item->height = $data['height'] ?? '';
+                            $anchor = [
+                                'width' => $data['width'] ?? '',
+                                'height' => $data['height'] ?? '',
+                                'status' => 1,
+                            ];
+
+                        }
+
+                        HumanAnchor::where('task_id', $item->task_id)->where('type',$item->type)->update($anchor);
+                    } 
+                }
+                $item->save();
+            });
+
+        return true;
+    }
+
+    /**
+     * 更新音色
+     * @param array $data
+     * @param string $modelVersion
+     * @return bool
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     */
+    public static function updateVoice(array $data, string $modelVersion): bool
+    {
+
+        //查询形象
+        $model = SvVideoTask::where('model_version', $modelVersion)->where('status', 11);
+        if (in_array($modelVersion,[1,7])) {
+            $model = $model->where('voice_id', $data['id']);
+        }elseif ($modelVersion == 2) {
+            return true;
+        } else {
+
+            return false;
+        }
+
+        $model->select()
+            ->each(function ($item) use ($data) {
+                if ($item->model_version === 1) { //标准版
+                    if (in_array($data['current_status'], ['completed', 'failed'])) {
+                        $item->status = ($data['current_status'] == 'completed') ? 1 : 2;
+
+                        // TODO 失败退费
+                        if ($item->status == 2) {
+                            self::refundTokens($item->user_id, $item->anchor_id, $item->task_id, 'human_anchor');
+                        }
+
+                    } else {
+                        $item->status = 0;
+                    }
+                }
+                if ($item->model_version === 7) {
+
+                    if (in_array($data['status'], [2, 3, 4])) {
+                        $item->status = ($data['status'] == 2) ? 1 : 2;
+                        // TODO 失败退费
+                        if ($item->status == 2) {
+                            self::refundTokens($item->user_id, $item->voice_id, $item->task_id, 'human_voice_chanjing');
+                        }
+                    } else {
+                        $item->status = 0;
+                    }
+                }
+                $item->save();
+            });
+
+        return true;
+    }
+
+
         /**
      * 更新视频
      * @param array $data
@@ -832,7 +1064,9 @@ class SvVideoTaskLogic extends SvBaseLogic
     {
         //查询形象
         $model = SvVideoTask::where('model_version', $modelVersion)->where('status', 4);
-        if (in_array($modelVersion,[4,6])) {
+        if (in_array($modelVersion,[1,7])) {
+            $model = $model->where('result_id', $data['id']);
+        }elseif (in_array($modelVersion,[4,6])) {
             $model = $model->where('result_id', $data['job_id']);
         }elseif ($modelVersion == 2) {
             return true;
@@ -848,8 +1082,29 @@ class SvVideoTaskLogic extends SvBaseLogic
                     if (in_array($data['status'], [3,4])) {
                         $item->status = ($data['status'] == 3) ? 6 : 5;
                         $scene = $item->model_version == 4 ? "human_video_ym" : "human_video_ymt";
+                    } else {
+                        $item->status = 4;
+                    }
+                    $item->video_result_url   = FileService::downloadFileBySource($data['video_Url'], 'video');
+                    $item->remark       = $data['message'] ?? '';
+                }
 
-                        $videoSetting = SvVideoSetting::where('id', $item->video_setting_id)->find();
+                if ($item->model_version === 7) { //标准版
+                    $status = (int)$data['status'];
+                    if ($status != 10) {
+                        $item->status = ($data['status'] == 30) ? 6 : 5;
+                        $scene ="human_video_chanjing";
+                       
+                    } 
+                    if ($status == 30){
+                        $item->video_result_url   = FileService::downloadFileBySource($data['video_url'], 'video');
+                        $item->audio_url   = FileService::downloadFileBySource($data['audio_urls'][0], 'audio');
+                    }
+                    $item->remark       = $data['msg'] ?? '';
+                }
+
+                if(in_array($item->status,[5,6])){
+                    $videoSetting = SvVideoSetting::where('id', $item->video_setting_id)->find();
                         if($item->status == 5){
                             self::refundTokens($item->user_id, $item->result_id, $item->task_id, $scene);
                             $videoSetting->error_num += 1;
@@ -870,14 +1125,39 @@ class SvVideoTaskLogic extends SvBaseLogic
                         }
 
                         $videoSetting->save();
-
-
-                    } else {
-                        $item->status = 4;
-                    }
-                    $item->video_result_url   = FileService::downloadFileBySource($data['video_Url'], 'video');
-                    $item->remark       = $data['message'] ?? '';
                 }
+
+                if($item->status == 6 && $item->automatic_clip == 1&& $item->clip_status == 1){
+                    $unit = TokenLogService::checkToken($item->user_id, 'video_clip');
+                    $result_url = FileService::getFileUrl($item->video_result_url);
+                    $params = [
+                        'video_id' => $item->id,
+                        'task_id' => $item->task_id,
+                        'clip_type' => $item->clip_type,
+                        'music_url' => $item->music_url,
+                        'result_url' => $result_url,
+                        'type' => 2,
+                    ];
+                    Log::channel('clip')->write('短视频视频剪辑参数'.json_encode($params));
+
+
+                    $response = \app\common\service\ToolsService::Sv()->clip($params);
+                    if (isset($response['code']) && $response['code'] == 10000) {
+
+                        $points = $unit;
+                        $item->clip_token = $points;
+                        if ($points > 0) {
+                            $extra = [];
+                            //token扣除
+                            User::userTokensChange($item->user_id, $points);
+                            //记录日志
+                            AccountLogLogic::recordUserTokensLog(true, $item->user_id, AccountLogEnum::TOKENS_DEC_VIDEO_CLIP, $points,  $item->task_id, $extra);
+                        }
+                        $item->clip_status = 2;
+                    }
+
+                }
+
                 $item->save();
             });
 
@@ -899,12 +1179,27 @@ class SvVideoTaskLogic extends SvBaseLogic
         try {
 
             [$typeIndex, $typeID] = match ($type) {
+                'human_anchor' => [1, AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR],
+                'human_voice' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE],
+                'human_audio' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO],
+                'human_video' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO],
+                'human_anchor_pro' => [1, AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_PRO],
+                'human_voice_pro' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_PRO],
+                'human_audio_pro' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_PRO],
+                'human_video_pro' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_PRO],
+
                 'human_voice_ym' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YM],
                 'human_audio_ym' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YM],
                 'human_video_ym' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YM],
+
                 'human_voice_ymt' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_YMT],
                 'human_audio_ymt' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_YMT],
                 'human_video_ymt' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_YMT],
+
+                'human_anchor_chanjing' => [1, AccountLogEnum::TOKENS_DEC_HUMAN_AVATAR_CHANJING],
+                'human_voice_chanjing' => [2, AccountLogEnum::TOKENS_DEC_HUMAN_VOICE_CHANJING],
+                'human_audio_chanjing' => [3, AccountLogEnum::TOKENS_DEC_HUMAN_AUDIO_CHANJING],
+                'human_video_chanjing' => [4, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_CHANJING],
             };
             // 请求查询接口
             $requestParams = [
@@ -917,6 +1212,10 @@ class SvVideoTaskLogic extends SvBaseLogic
                 $response = \app\common\service\ToolsService::Human()->detailYmt($requestParams);
             }elseif (strpos($type, '_ym') !== false) {
                 $response = \app\common\service\ToolsService::Human()->detailYm($requestParams);
+            }elseif (strpos($type, '_pro') !== false) {
+                $response = \app\common\service\ToolsService::Human()->detailPro($requestParams);
+            }elseif (strpos($type, '_chanjing') !== false) {
+                $response = \app\common\service\ToolsService::Human()->detailChanjing($requestParams);
             } else {
                 $response = \app\common\service\ToolsService::Human()->detail($requestParams);
             }
@@ -1021,6 +1320,35 @@ class SvVideoTaskLogic extends SvBaseLogic
         }
 
 
+    }
+
+    public static function updateClipVideo(array $data): bool
+    {
+        $model = SvVideoTask::where('id', $data['id'])->where('task_id', $data['task_id'])->where('clip_status', 2)->find();
+        if(empty($model)){
+            self::setError('参数错误');
+            return false;
+        }
+        if ($data['status'] == 4){
+            $count = UserTokensLog::where('user_id', $model['user_id'])->where('change_type', '5101')->where('action', 2)->where('task_id', $data['task_id'])->count();
+            //查询是否已返还
+            if (UserTokensLog::where('user_id',  $model['user_id'])->where('change_type', '5101')->where('action', 1)->where('task_id', $data['task_id'])->count() < $count) {
+                $points = UserTokensLog::where('user_id', $model['user_id'])->where('change_type', '5101')->where('task_id', $data['task_id'])->value('change_amount') ?? 0;
+                AccountLogLogic::recordUserTokensLog(false, $model['user_id'], '5101', $points, $data['task_id']);
+            }
+            $update['clip_token'] = 0;
+        }
+
+        $url = '';
+        if($data['url'] != ''){
+            $url = FileService::setFileUrl($data['url']);
+        }
+        $update['id'] = $data['id'];
+        $update['clip_status'] = $data['status'];
+        $update['clip_result_url'] = $url;
+        SvVideoTask::update($update);
+        
+        return true;
     }
 
 }

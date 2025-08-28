@@ -188,12 +188,14 @@ const handleUploadChange = (fileLists: any[]) => {
 };
 
 const validateForm = () => {
-    const isUploading = fileLists.value.some((item: any) => item.status == "uploading");
-    if (isUploading) {
-        feedback.msgError("文件上传中，请稍后再试");
-        return;
-    }
-    return formRef.value?.validate();
+    return new Promise((resolve, reject) => {
+        const isUploading = fileLists.value.some((item: any) => item.status == "uploading");
+        if (isUploading) {
+            feedback.msgError("文件上传中，请稍后再试");
+            return;
+        }
+        formRef.value?.validate().then(resolve).catch(reject);
+    });
 };
 
 const clearUploadFile = () => {

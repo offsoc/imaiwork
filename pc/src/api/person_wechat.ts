@@ -228,6 +228,11 @@ export function tagFriendAdd(params: any) {
     return $request.post({ url: "/wechat.tag/batchFriends", params });
 }
 
+// 好友标签删除
+export function tagFriendDelete(params: any) {
+    return $request.post({ url: "/wechat.tag/friendTagDelete", params });
+}
+
 // 列表v2
 export function tagListsV2(params: any) {
     return $request.get({ url: "/wechat.tag/lists", params });
@@ -281,6 +286,16 @@ export function circleTaskDelete(params: any) {
 // 朋友圈任务详情
 export function circleTaskInfo(params: any) {
     return $request.get({ url: "/wechat.circle/taskInfo", params });
+}
+
+// 朋友圈策略设置
+export function circleStrategySet(params: any) {
+    return $request.post({ url: "/wechat.strategy/circleReplyLike", params });
+}
+
+// 朋友圈策略设置详情
+export function circleStrategyInfo() {
+    return $request.get({ url: "/wechat.strategy/circleReplyLikeInfo" });
 }
 
 // 素材分组列表

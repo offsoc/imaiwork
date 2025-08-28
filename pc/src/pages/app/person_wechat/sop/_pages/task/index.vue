@@ -190,10 +190,4 @@ onMounted(() => {
     }
 });
 </script>
-<style lang="scss" scoped>
-:deep(.el-table) {
-    th.el-table__cell.is-leaf {
-        border-top: var(--el-table-border);
-    }
-}
-</style>
+<style lang="scss" scoped></style>

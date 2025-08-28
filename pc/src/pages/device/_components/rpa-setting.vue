@@ -17,14 +17,14 @@
                         </div>
                         <div class="flex items-center gap-2 flex-1">
                             <img :src="item.icon" alt="icon" class="w-6 h-6" />
-                            <span>{{ item.name }}</span>
+                            <span>{{ item.app_name }}</span>
                         </div>
                         <div class="flex items-center gap-2 border border-[#EAEDF1] rounded-lg py-1 px-2">
                             <span>单轮执行时间：</span>
                             <ElInput
-                                v-model="item.singleRoundTime"
-                                disabled
-                                class="!w-[70px]"
+                                v-model="item.exec_duration"
+                                type="number"
+                                class="!w-[150px]"
                                 v-number-input="{ min: 0, decimal: 0 }"></ElInput>
                             <span>分钟</span>
                         </div>
@@ -36,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { getDeviceConfigList, updateDeviceConfig } from "@/api/device";
 import Popup from "@/components/popup/index.vue";
 import { useSocialPlatform } from "@/composables/useSocialPlatform";
 const emit = defineEmits<{
@@ -45,12 +46,7 @@ const emit = defineEmits<{
 
 const { socialPlatformList } = useSocialPlatform();
 
-const getSocialPlatformList = ref(
-    socialPlatformList.map((item) => ({
-        ...item,
-        singleRoundTime: 0,
-    }))
-);
+const getSocialPlatformList = ref<any[]>([]);
 
 const popupRef = ref<InstanceType<typeof Popup>>();
 
@@ -61,11 +57,18 @@ const draggableOptions = [
             animation: 150,
             handle: ".move-icon",
             onEnd: ({ newIndex, oldIndex }: any) => {
+                const platforms = getSocialPlatformList.value;
+                // 交换两个元素中的weight
+                [platforms[oldIndex].weight, platforms[newIndex].weight] = [
+                    platforms[newIndex].weight,
+                    platforms[oldIndex].weight,
+                ];
+
                 const arr = getSocialPlatformList.value;
                 const currRow = arr.splice(oldIndex, 1)[0];
                 arr.splice(newIndex, 0, currRow);
                 getSocialPlatformList.value = [];
-                nextTick(() => {
+                nextTick(async () => {
                     getSocialPlatformList.value = arr;
                 });
             },
@@ -73,12 +76,37 @@ const draggableOptions = [
     },
 ];
 
-const confirm = async () => {};
+const getIcon = (name: string) => {
+    return socialPlatformList.find((item) => item.name === name)?.icon;
+};
+
+const getDeviceLists = async (device_code: string) => {
+    const { lists } = await getDeviceConfigList({
+        device_code,
+        page_size: 99,
+    });
+    getSocialPlatformList.value = lists.map((item, index) => ({
+        ...item,
+        icon: getIcon(item.app_name),
+    }));
+};
+
+const confirm = async () => {
+    try {
+        await updateDeviceConfig(getSocialPlatformList.value);
+        feedback.msgSuccess("设置成功");
+        close();
+        emit("success");
+    } catch (error) {
+        feedback.msgError(error);
+    }
+};
 
 const { lockFn, isLock } = useLockFn(confirm);
 
-const open = () => {
+const open = (device_code: string) => {
     popupRef.value?.open();
+    getDeviceLists(device_code);
 };
 
 const close = () => {

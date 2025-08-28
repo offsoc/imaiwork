@@ -46,7 +46,7 @@ class RoleLists extends BaseAdminDataLists
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
-     * @author cjhao
+     * @author kb
      * @date 2021/8/25 18:00
      */
     public function lists(): array

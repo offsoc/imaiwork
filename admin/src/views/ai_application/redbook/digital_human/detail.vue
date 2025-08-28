@@ -36,21 +36,28 @@
                 :data="pager.lists"
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" fixed="left" />
-                <el-table-column label="ID" prop="id" width="100" />
+                <el-table-column label="ID" prop="id" width="80" />
                 <el-table-column label="名称" prop="name" min-width="100" />
                 <el-table-column label="生成状态" min-width="100">
                     <template #default="{ row }">
                         {{ getStatusText(row.status) }}
                     </template>
                 </el-table-column>
+                <el-table-column label="智能剪辑类型" width="120">
+                    <template #default="{ row }">
+                        {{ ClipStyleMap[row.clip_type] }}
+                    </template>
+                </el-table-column>
                 <el-table-column label="使用音色" prop="voice_name" min-width="120" />
                 <el-table-column label="创作文案" prop="msg" min-width="180" show-overflow-tooltip />
-                <el-table-column label="费用记录">
+                <el-table-column label="费用记录" min-width="120">
                     <template #default="{ row }">
                         <div class="">
                             <div>形象：{{ row.anchor_token }}算力</div>
+                            <div>音频：{{ row.audio_token }}算力</div>
                             <div>音色：{{ row.voice_token }}算力</div>
                             <div>视频：{{ row.video_token }}算力</div>
+                            <div v-if="row.automatic_clip == 1">剪辑：{{ row.clip_token }}算力</div>
                         </div>
                     </template>
                 </el-table-column>
@@ -81,6 +88,8 @@
 import { usePaging } from "@/hooks/usePaging";
 import { getDigitalHumanTaskList, deleteDigitalHumanTask } from "@/api/ai_application/redbook";
 import feedback from "@/utils/feedback";
+import { ClipStyleMap } from "@/enums/appEnums";
+
 const route = useRoute();
 
 const queryParams = reactive({

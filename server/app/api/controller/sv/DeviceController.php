@@ -6,7 +6,10 @@ namespace app\api\controller\sv;
 use app\api\controller\BaseApiController;
 use app\api\logic\sv\DeviceLogic;
 use app\api\validate\sv\DeviceValidate;
+use app\api\validate\sv\DeviceRpaValidate;
+
 use app\api\lists\sv\DeviceLists;
+use app\api\lists\sv\DeviceRpaLists;
 use think\exception\HttpResponseException;
 
 /**
@@ -17,7 +20,7 @@ use think\exception\HttpResponseException;
 class DeviceController extends BaseApiController
 {
 
-    public array $notNeedLogin = ['check'];
+    public array $notNeedLogin = ['check', 'execDeviceRpaCron'];
 
     /**
      * @desc 获取设备列表
@@ -25,6 +28,30 @@ class DeviceController extends BaseApiController
     public function lists()
     {
         return $this->dataLists(new DeviceLists());
+    }
+
+    /**
+     * @desc 获取设备rpa配置
+     */
+    public function rpaLists()
+    {
+        $params = (new DeviceRpaValidate())->get()->goCheck('lists');
+        return $this->dataLists(new DeviceRpaLists());
+    }
+
+    
+    public function rpaUpdate()
+    {
+        try {
+            $params = (new DeviceRpaValidate())->post()->goCheck('update');
+            $result = DeviceLogic::rpaUpdate($params);
+            if ($result) {
+                return $this->success(data: DeviceLogic::getReturnData());
+            }
+            return $this->fail(DeviceLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
     }
 
     /**
@@ -73,4 +100,14 @@ class DeviceController extends BaseApiController
         }
         return $this->fail(DeviceLogic::getError());
     }
+
+    public function execDeviceRpaCron()
+    {
+        try {
+            DeviceLogic::execDeviceRpaCron();
+        } catch (\Throwable $th) {
+            print_r($th->__toString());
+        }
+    }
+
 }

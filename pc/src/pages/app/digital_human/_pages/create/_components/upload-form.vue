@@ -152,7 +152,7 @@
                     </upload>
                 </div>
                 <div class="mt-4 flex justify-center">
-                    <ElTooltip placement="top" v-if="modelType == ModeType.FIGURE">
+                    <ElTooltip placement="top" v-if="modelType == ModeTypeEnum.FIGURE">
                         <ElButton
                             type="primary"
                             class="w-full !h-[50px] !rounded-full"
@@ -166,7 +166,7 @@
                         </template>
                     </ElTooltip>
                     <ElButton
-                        v-if="modelType == ModeType.VIDEO"
+                        v-if="modelType == ModeTypeEnum.VIDEO"
                         type="primary"
                         class="w-full !h-[50px] !rounded-full"
                         :loading="isLock || parseLoading"
@@ -189,15 +189,11 @@ import { TokensSceneEnum } from "@/enums/appEnums";
 import { useUserStore } from "@/stores/user";
 import { getVideoFirstFrame } from "@/utils/util";
 import Popup from "@/components/popup/index.vue";
-import {
-    DigitalHumanModelVersionEnum,
-    DigitalHumanModelVersionEnumMap,
-    commonUploadLimit,
-    uploadLimit,
-} from "../../../_enums";
+import { DigitalHumanModelVersionEnum } from "../../../_enums";
+import { commonUploadLimit, uploadLimit } from "../../../_config";
 import ExampleVideo from "../../../_assets/video/example.mp4";
-import { get } from "sortablejs";
-enum ModeType {
+
+enum ModeTypeEnum {
     VIDEO = 1,
     FIGURE = 2,
 }
@@ -210,7 +206,13 @@ const emit = defineEmits<{
 
 const appStore = useAppStore();
 const userStore = useUserStore();
-const modelChannel = computed(() => appStore.getDigitalHumanConfig?.channel);
+const modelChannel = computed(() => {
+    const { channel } = appStore.getDigitalHumanConfig;
+    if (channel && channel.length > 0) {
+        return channel.filter((item) => item.status == 1 && DigitalHumanModelVersionEnum.CHANJING == item.id);
+    }
+    return [];
+});
 
 const formData = reactive<any>({
     model_version: DigitalHumanModelVersionEnum.STANDARD,
@@ -356,13 +358,13 @@ const handleCreate = async () => {
         feedback.msgError("请上传视频");
         return;
     }
-    if (modelType.value == ModeType.VIDEO) {
+    if (modelType.value == ModeTypeEnum.VIDEO) {
         emit("create", {
             modelType: modelType.value,
             formData,
         });
         close();
-    } else if (modelType.value == ModeType.FIGURE) {
+    } else if (modelType.value == ModeTypeEnum.FIGURE) {
         try {
             await createAnchor({
                 name: formData.anchor_name,
@@ -390,9 +392,9 @@ const { lockFn: lockSubmit, isLock } = useLockFn(handleCreate);
 
 const uploadPopRef = ref<InstanceType<typeof Popup>>();
 
-const modelType = ref<ModeType>(ModeType.VIDEO);
+const modelType = ref<ModeTypeEnum>(ModeTypeEnum.VIDEO);
 
-const open = async (type: ModeType) => {
+const open = async (type: ModeTypeEnum) => {
     modelType.value = type;
     uploadPopRef.value?.open();
 };

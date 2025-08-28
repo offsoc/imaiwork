@@ -82,7 +82,7 @@ const emit = defineEmits<{
 }>();
 
 const nuxtApp = useNuxtApp();
-const query = queryToObject();
+const query = searchQueryToObject();
 
 const queryParams = reactive({
     nickname: "",
@@ -112,10 +112,4 @@ onMounted(() => {
     getLists();
 });
 </script>
-<style lang="scss" scoped>
-:deep(.el-table) {
-    th.el-table__cell.is-leaf {
-        border-top: var(--el-table-border);
-    }
-}
-</style>
+<style lang="scss" scoped></style>

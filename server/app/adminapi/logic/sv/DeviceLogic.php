@@ -4,6 +4,7 @@ namespace app\adminapi\logic\sv;
 
 use app\common\logic\BaseLogic;
 use app\common\model\sv\SvDevice;
+use app\common\model\sv\SvDeviceRpa;
 use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvSetting;
 use app\common\model\sv\SvAccountContact;
@@ -39,7 +40,8 @@ class DeviceLogic extends BaseLogic
 
                 $account->delete();
             });
-
+            //删除设备rpa配置
+            SvDeviceRpa::where('device_code', $params['device_code'])->select()->delete();
             $device->delete();
 
             return true;

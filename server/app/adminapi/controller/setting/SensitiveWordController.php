@@ -17,7 +17,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 敏感词列表
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function lists(): Json
     {
@@ -27,7 +27,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 敏感词详情
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function detail(): Json
     {
@@ -39,7 +39,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 敏感词新增
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function add(): Json
     {
@@ -54,7 +54,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 敏感词编辑
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function edit(): Json
     {
@@ -69,7 +69,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 敏感词删除
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function del(): Json
     {
@@ -84,7 +84,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 敏感词状态
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function status(): Json
     {
@@ -99,7 +99,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 配置详情
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function getConfig(): Json
     {
@@ -110,7 +110,7 @@ class SensitiveWordController extends BaseAdminController
     /**
      * @notes 配置保存
      * @return Json
-     * @author fzr
+     * @author kb
      */
     public function setConfig(): Json
     {

@@ -309,7 +309,7 @@ class HumanLogic extends ApiLogic
                     } else {
                         $item->status = 0;
                     }
-                    $item->result_url   = FileService::downloadFileBySource($data['video_Url'], 'video');
+                    $item->result_url   =  FileService::downloadFileBySource($data['video_Url'], 'video');
                     $item->remark       = $data['msg'] ?? '';
                 }
                 if ($item->model_version === 7) { //标准版
@@ -330,6 +330,37 @@ class HumanLogic extends ApiLogic
                         $item->audio_url   = FileService::downloadFileBySource($data['audio_urls'][0], 'audio');
                     }
                     $item->remark       = $data['msg'] ?? '';
+                }
+                if($item->status == 1 && $item->automatic_clip == 1&& $item->clip_status == 1){
+                    $unit = TokenLogService::checkToken($item->user_id, 'video_clip');
+                    $result_url = FileService::getFileUrl($item->result_url);
+                    $params = [
+                        'video_id' => $item->id,
+                        'task_id' => $item->task_id,
+                        'clip_type' => $item->clip_type,
+                        'music_url' => $item->music_url,
+                        'result_url' => $result_url,
+                        'type' => 1,
+                    ];
+                    Log::channel('clip')->write('数字人视频剪辑参数'.json_encode($params));
+
+
+                    $response = \app\common\service\ToolsService::Sv()->clip($params);
+                    if (isset($response['code']) && $response['code'] == 10000) {
+
+                        $points = $unit;
+
+                        if ($points > 0) {
+                            $extra = [];
+                            //token扣除
+                            User::userTokensChange($item->user_id, $points);
+
+                            //记录日志
+                            AccountLogLogic::recordUserTokensLog(true, $item->user_id, AccountLogEnum::TOKENS_DEC_VIDEO_CLIP, $points,  $item->task_id, $extra);
+                        }
+                        $item->clip_status = 2;
+                    }
+
                 }
                 $item->save();
             });
@@ -432,6 +463,9 @@ class HumanLogic extends ApiLogic
             $voice_type = $request['voice_type'] ?? 1;
             $width = $request['width'] ?? '';
             $height = $request['height'] ?? '';
+            $clip_type = $request['clip_type'] ?? 1;
+            $automatic_clip = $request['automatic_clip'] ?? 0;
+            $music_url = $request['music_url'] ?? '';
             if (empty($anchor_name) || empty($name) || !in_array($model_version, [1, 2, 4, 6, 7]) || !in_array($gender, ['male', 'female'])) {
 
                 throw new \Exception('参数错误');
@@ -545,7 +579,9 @@ class HumanLogic extends ApiLogic
                     throw new \Exception('音色错误');
                 }
             }
-
+            if ($automatic_clip == 1 && !preg_match('#^https?://#i', $music_url)) {
+                throw new \Exception('背景音乐错误');
+            }
             $videoTaskData = [
                 'user_id' => self::$uid,
                 'name' => $name,
@@ -563,6 +599,9 @@ class HumanLogic extends ApiLogic
                 'model_version' => $model_version,
                 'upload_video_url' => $video_url,
                 'upload_audio_url' => $audio_url,
+                'music_url' => $music_url,
+                'automatic_clip' => $automatic_clip,
+                'clip_type' => $clip_type,
             ];
 
             if ($audio_type == 2) {
@@ -1751,7 +1790,8 @@ class HumanLogic extends ApiLogic
                             'video_url' => $anchor->url,
                         ], $scene, $item->user_id, $item->task_id);
                         if (empty($response['id'])) {
-
+                            $item->remark = $response['message'] ?? '形象创建失败';
+                            $item->save();
                             message('形象创建失败');
                         }
 
@@ -1828,7 +1868,8 @@ class HumanLogic extends ApiLogic
                                 'audio_url' => $item->upload_video_url
                             ], $scene, $item->user_id, $item->task_id);
                             if (empty($response['id'])) {
-
+                                $item->remark = $response['message'] ?? '音色创建失败';
+                                $item->save();
                                 message('音色创建失败');
                             }
 
@@ -1888,7 +1929,8 @@ class HumanLogic extends ApiLogic
                             ], $scene, $item->user_id, $item->task_id);
                             // Log::write( $item->task_id .'高级版视频合成' . json_encode($response));
                             if (empty($response['id'])) {
-
+                                $item->remark = $response['message'] ?? '视频创建失败';
+                                $item->save();
                                 message('视频创建失败');
                             }
                             $item->voice_name = $item->voice_name ? $item->voice_name : $item->name;
@@ -2020,6 +2062,9 @@ class HumanLogic extends ApiLogic
                             case 6:
                                 $scene = self::VIDEO_TRAINING_YMT;
                                 break;
+                            case 7:
+                                $scene = self::VIDEO_TRAINING_CHANJING;
+                                break;
                             default:
                                 $scene = self::VIDEO_TRAINING_PRO;
                                 break;
@@ -2029,7 +2074,10 @@ class HumanLogic extends ApiLogic
                             'name'      => $item->name,
                             'avatar_id' => $item->anchor_id,
                             'video_url' => $item->upload_video_url,
-                            'audio_url' => $item->audio_url
+                            'audio_url' => $item->audio_url,
+                            'msg'       => $item->msg,
+                            'width'     => $item->width,
+                            'height'    => $item->height,
                         ], $scene, $item->user_id, $item->task_id);
                         // Log::write( $item->task_id .'高级版视频合成' . json_encode($response));
                         if (empty($response['id'])) {
@@ -2724,5 +2772,37 @@ class HumanLogic extends ApiLogic
             Log::write('获取图片任务失败11' . $e->getMessage());
             return false;
         }
+    }
+
+
+    public static function updateClipVideo(array $data): bool
+    {
+
+        //查询形象
+        $model = HumanVideoTask::where('id', $data['id'])->where('task_id', $data['task_id'])->where('clip_status', 2)->find();
+        if(empty($model)){
+            self::setError('参数错误');
+            return false;
+        }
+
+        if ($data['status'] == 4){
+            $count = UserTokensLog::where('user_id', $model['user_id'])->where('change_type', '5101')->where('action', 2)->where('task_id', $data['task_id'])->count();
+            //查询是否已返还
+            if (UserTokensLog::where('user_id',  $model['user_id'])->where('change_type', '5101')->where('action', 1)->where('task_id', $data['task_id'])->count() < $count) {
+                $points = UserTokensLog::where('user_id', $model['user_id'])->where('change_type', '5101')->where('task_id', $data['task_id'])->value('change_amount') ?? 0;
+                AccountLogLogic::recordUserTokensLog(false, $model['user_id'], '5101', $points, $data['task_id']);
+            }
+        }
+        $url = '';
+        if($data['url'] != ''){
+            $url = FileService::setFileUrl($data['url']);
+        }
+        HumanVideoTask::update([
+            'id' => $data['id'],
+            'clip_status' => $data['status'],
+            'clip_result_url'=>$url
+        ]);
+        
+        return true;
     }
 }
