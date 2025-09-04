@@ -17,13 +17,20 @@
             </el-form>
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
-            <div>
+            <div class="flex justify-between">
                 <el-button v-perms="['ai_assistant.category/add']" type="primary" @click="handleAdd">
                     <template #icon>
                         <icon name="el-icon-Plus" />
                     </template>
                     新增
                 </el-button>
+                <el-button
+                    v-if="isImport"
+                    v-perms="['ai_assistant.category/import']"
+                    type="primary"
+                    @click="handleImport"
+                    >导入分类</el-button
+                >
             </div>
             <el-table
                 size="large"
@@ -35,7 +42,7 @@
                 <el-table-column label="类别名称" prop="name" min-width="180" />
                 <el-table-column label="类别logo" prop="logo" min-width="120">
                     <template #default="{ row }">
-                        <el-image v-if="row.logo" :src="row.logo" class="w-[44px] h-[44px]" fir="cover" />
+                        <el-image v-if="row.logo" :src="row.logo" class="w-[44px] h-[44px]" fit="cover" />
                     </template>
                 </el-table-column>
                 <el-table-column label="类型描述" prop="description" min-width="160" />
@@ -84,6 +91,8 @@ import {
     getAssistantCategoryList,
     assistantCategoryDelete,
     assistantCategoryStatus,
+    assistantCategoryImport,
+    assistantCategoryImportCheck,
 } from "@/api/ai_assistant/category";
 import feedback from "@/utils/feedback";
 const editRef = shallowRef<InstanceType<typeof EditPopup>>();
@@ -98,6 +107,7 @@ const handleAdd = async () => {
     await nextTick();
     editRef.value?.open("add");
 };
+
 //编辑
 const handleEdit = async (data: any) => {
     showEdit.value = true;
@@ -105,6 +115,7 @@ const handleEdit = async (data: any) => {
     editRef.value?.open("edit");
     editRef.value?.setFormData(data);
 };
+
 //删除
 const handleDelete = async (id: number) => {
     await feedback.confirm("确定要删除？");
@@ -121,10 +132,30 @@ const changeStatus = async (id: any) => {
     }
 };
 
+const handleImport = async () => {
+    await feedback.confirm("确定要导入？");
+    feedback.loading("导入中...");
+
+    try {
+        await assistantCategoryImport();
+        getLists();
+        feedback.msgSuccess("导入成功");
+    } finally {
+        feedback.closeLoading();
+    }
+};
+
+const isImport = ref(false);
+const importCheck = async () => {
+    const data = await assistantCategoryImportCheck();
+    isImport.value = data.import;
+};
+
 const { pager, getLists, resetPage, resetParams } = usePaging({
     fetchFun: getAssistantCategoryList,
     params: queryParams,
 });
 
+importCheck();
 getLists();
 </script>

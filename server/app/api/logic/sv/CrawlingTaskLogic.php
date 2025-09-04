@@ -6,8 +6,12 @@ use app\common\model\sv\SvCrawlingRecord;
 use app\common\model\sv\SvCrawlingTask;
 use app\common\model\sv\SvCrawlingTaskDeviceBind;
 use think\facade\Db;
-
 use app\common\traits\SphTaskTrait;
+
+use app\api\logic\service\TokenLogService;
+use app\common\enum\user\AccountLogEnum;
+use app\common\logic\AccountLogLogic;
+use app\common\model\user\User;
 
 /**
  * CrawlingTaskLogic
@@ -46,6 +50,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             $params['device_codes'] = json_encode(array_values($device_codes), JSON_UNESCAPED_UNICODE);
             $params['name'] = date('mdHis', time()) . '视频号获客任务';
             $params['status'] = 1;
+            $params['type'] = 4;
 
             $task = SvCrawlingTask::create($params);
             //将关键词平均分配给设备
@@ -69,13 +74,14 @@ class CrawlingTaskLogic extends SvBaseLogic
                     throw new \Exception('设备任务绑定失败');
                 }
             }
-            Db::commit();
+            
             $result = $task->toArray();
             $result['device_codes'] = json_decode($result['device_codes'], JSON_UNESCAPED_UNICODE);
             $result['keywords'] = json_decode($result['keywords'], JSON_UNESCAPED_UNICODE);
 
             self::setOldTaskStatus($task->id);
             self::sphSend($task->id);
+            Db::commit();
             self::$returnData = $result;
             return true;
         } catch (\Exception $e) {
@@ -283,6 +289,40 @@ class CrawlingTaskLogic extends SvBaseLogic
             $task->save();
             return true;
         } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function ocr(array $params = [])
+    {
+        try {
+            $response = \app\common\service\ToolsService::Sv()->ocr($params);
+            if (isset($response['code']) && $response['code'] == 10000) {
+                $task = SvCrawlingTask::where('id', $params['task_id'])->findOrEmpty();
+                if($task->isEmpty()){
+                    self::setError('爬取任务不存在');
+                    return false;
+                }
+
+                 //检查扣费
+                $unit = TokenLogService::checkToken($task['user_id'], 'sph_ocr');
+                //计算消耗tokens
+                $points = $unit;
+                $task_id = generate_unique_task_id();
+                //token扣除
+                User::userTokensChange($task['user_id'], $points);
+                $extra = ['算力单价' => $unit . '算力/次', '实际消耗算力' => $points, '场景' => 'ocr'];
+                //扣费记录
+                AccountLogLogic::recordUserTokensLog(true, $task['user_id'], AccountLogEnum::TOKENS_DEC_SPH_OCR, $points, $task_id, $extra);
+
+                self::$returnData = $response;
+                return true;
+            }else{
+                self::setError($response['msg'] ?? '请求失败');
+                return false;
+            }
+        } catch (\Throwable $e) {
             self::setError($e->getMessage());
             return false;
         }

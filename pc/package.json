@@ -1,6 +1,6 @@
 {
     "name": "imai.work",
-    "version": "2.2.0",
+    "version": "2.2.2",
     "private": true,
     "license": "MIT",
     "scripts": {
@@ -64,7 +64,7 @@
         "markmap-toolbar": "^0.18.10",
         "markmap-view": "^0.18.10",
         "md-editor-v3": "^5.4.5",
-        "pdfjs-dist": "^5.4.54",
+        "pdfjs-dist": "2.10.377",
         "pinia": "^3.0.2",
         "postcss-custom-properties": "^13.3.10",
         "qrcode.vue": "^3.6.0",

@@ -58,8 +58,8 @@
                 <ElTableColumn prop="type" label="文件格式" min-width="100px">
                     <template #default="{ row }">
                         <div class="flex items-center justify-center gap-x-2">
-                            <img :src="getFileType(row.type)" v-if="row.type" class="w-5 h-5" />
-                            <span>{{ row.type }}</span>
+                            <img :src="getFileType(row.type)" v-if="getFileType(row.type)" class="w-5 h-5" />
+                            <span>{{ row.type || "-" }}</span>
                         </div>
                     </template>
                 </ElTableColumn>
@@ -166,10 +166,15 @@ const getFileType = (type: string) => {
             return importImage("ppt");
         case "xls":
         case "xlsx":
+        case "csv":
             return importImage("excel");
         case "jpg":
         case "jpeg":
             return importImage("jpg");
+        case "pdf":
+            return importImage("pdf");
+        case "md":
+            return importImage("txt");
         default:
             return importImage(type);
     }

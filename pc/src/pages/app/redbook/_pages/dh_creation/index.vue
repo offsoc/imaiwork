@@ -56,7 +56,8 @@
                                 class="flex-shrink-0 w-[143px] border border-app-border-2 overflow-hidden rounded-md bg-black">
                                 <ElImage :src="item.pic" class="w-full h-full" fit="cover">
                                     <template #error>
-                                        <div class="w-full h-full flex items-center justify-center text-white">
+                                        <div
+                                            class="w-full h-full flex items-center justify-center text-white card-gradient">
                                             暂无封面
                                         </div>
                                     </template>

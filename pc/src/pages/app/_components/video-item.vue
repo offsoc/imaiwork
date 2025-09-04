@@ -1,5 +1,5 @@
 <template>
-    <div class="video-item group">
+    <div class="video-item card-gradient group">
         <div
             class="grow min-h-0 relative"
             :style="{

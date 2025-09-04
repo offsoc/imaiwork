@@ -99,7 +99,7 @@
                     <view> 为企业释放无限可能 </view>
                 </view>
                 <view class="flex justify-center items-center mt-[50rpx]">
-                    <image :src="webSiteConfig.shop_logo" class="w-[100rpx] h-[100rpx]"></image>
+                    <image :src="webSiteConfig.shop_logo" class="w-[100rpx] h-[100rpx] rounded-full"></image>
                 </view>
             </view>
             <view class="w-full absolute top-[365rpx] left-0">

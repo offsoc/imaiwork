@@ -180,7 +180,8 @@ class IndexLogic extends BaseLogic
 
         return [
             'copyright' => ConfigService::get('copyright', 'config',''),
-            'domain' => FileService::getFileUrl(),
+//            'domain' => FileService::getFileUrl(),
+            'domain' => config('app.app_host') . '/',
             'style' => $style,
             'tabbar' => $tabbar,
             'login' => $loginConfig,

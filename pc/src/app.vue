@@ -22,11 +22,11 @@ const config = {
 
 // 网站配置
 const { pc_title, pc_ico, pc_keywords, pc_desc } = appStore.getWebsiteConfig;
-const { is_oem, logo_url } = appStore.getOemConfig;
+const { is_oem, logo_url, name } = appStore.getOemConfig;
 
 // 设置网站头部信息
 useHead({
-    title: pc_title,
+    title: is_oem == 1 ? name : pc_title,
     meta: [
         { name: "description", content: pc_desc },
         { name: "keywords", content: pc_keywords },

@@ -163,12 +163,8 @@ const handleConfirm = async () => {
 const getRobotReplyStrategyFn = async () => {
     const data = await circleStrategyInfo();
     setFormData(data, formData);
-    if (data.reply_tag_ids) {
-        formData.reply_tag_ids = data.reply_tag_ids.map((item: any) => parseInt(item));
-    }
-    if (data.like_tag_ids) {
-        formData.like_tag_ids = data.like_tag_ids.map((item: any) => parseInt(item));
-    }
+    formData.reply_tag_ids = data.reply_tag_ids?.map((item: any) => parseInt(item));
+    formData.like_tag_ids = data.like_tag_ids?.map((item: any) => parseInt(item));
 };
 
 const { lockFn: lockConfirm, isLock } = useLockFn(handleConfirm);

@@ -297,22 +297,12 @@ const getCommonConfig = computed(() => {
 const getAiPersonConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
         [
-            "human_prompt",
-            "human_avatar",
-            "human_voice",
-            "human_audio",
-            "human_video",
-            "human_avatar_pro",
-            "human_voice_pro",
-            "human_audio_pro",
-            "human_video_pro",
+            "human_copywriting",
             "human_video_ym",
             "human_audio_ym",
-            "human_voice_ym",
             "human_avatar_ym",
             "human_video_ymt",
             "human_audio_ymt",
-            "human_voice_ymt",
             "human_avatar_ymt",
             "human_avatar_chanjing",
             "human_voice_chanjing",
@@ -329,8 +319,8 @@ const getAiDrawConfig = computed(() => {
             "goods_image",
             "model_image",
             "image_prompt",
-            "volc_txt_to_img",
             "txt_to_posterimg",
+            "volc_txt_to_img",
             "volc_txt_to_posterimg",
             "volc_txt_to_posterimg_v2",
             "volc_text_to_video",
@@ -362,7 +352,7 @@ const getInterviewConfig = computed(() => {
 
 const getServiceConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["ai_wechat", "ai_xhs", "openai_chat", "ai_reply_like"].includes(item.scene)
+        ["ai_wechat", "openai_chat", "ai_reply_like", "ai_xhs"].includes(item.scene)
     );
 });
 
@@ -374,13 +364,13 @@ const getKnbConfig = computed(() => {
 
 const getRedbookConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["keyword_to_title", "keyword_to_subtitle", "keyword_to_copywriting", "ai_xhs"].includes(item.scene)
+        ["keyword_to_title", "keyword_to_subtitle", "keyword_to_copywriting"].includes(item.scene)
     );
 });
 
 const getSphConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["sph_add_friends", "sph_private_chat", "sph_search_terms"].includes(item.scene)
+        ["sph_add_wechat", "sph_add_friends", "sph_private_chat", "sph_search_terms", "sph_ocr"].includes(item.scene)
     );
 });
 

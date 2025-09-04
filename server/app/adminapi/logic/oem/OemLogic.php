@@ -50,6 +50,7 @@ class OemLogic extends BaseLogic
             }
             $params['auth_time'] = date('Y-m-d H:i:s', time());
             $params['status'] = $params['status'] ?? 1;
+            $params['name'] = $params['name'] ?? 1;
             $params['update_time'] = time();
             $params['logo_url'] = $params['logo_url'] ? FileService::setFileUrl($params['logo_url']) : '';
             $params['username'] = User::where('id', $params['user_id'])->value('nickname');
@@ -97,7 +98,6 @@ class OemLogic extends BaseLogic
                 self::setError('该域名已绑定oem');
                 return false;
             }
-
             $params['update_time'] = time();
             $params['logo_url'] = $params['logo_url'] ? FileService::setFileUrl($params['logo_url']) : '';
             $params['username'] = User::where('id', $params['user_id'])->value('nickname');

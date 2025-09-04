@@ -306,7 +306,7 @@ class DoubaoLogic extends ApiLogic
                 }
 
                 //计费
-                $points = $unit * 5;
+                $points = round($unit * 5,2);
                 $extra = ['算力单价' => $unit . '算力/秒', '实际消耗算力' => $points];
                 User::userTokensChange($userId, $points);
                 //扣费记录

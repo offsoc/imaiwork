@@ -17,11 +17,7 @@
             </div>
         </div>
         <div class="mt-2">
-            <div
-                ref="editRef"
-                :contenteditable="isEdit"
-                @input="(event) => emit('update:data',(event.target as HTMLElement).innerText)"
-                @blur="isEdit = false">
+            <div ref="editRef" :contenteditable="isEdit" @blur="isEdit = false">
                 {{ value }}
             </div>
         </div>

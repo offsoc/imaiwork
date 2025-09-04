@@ -107,7 +107,7 @@ const getSceneSubList = () => {
         ? (queryParams.scene_id = getSceneId.value)
         : (queryParams.scene_id = sceneSubList.value?.[sceneSubIndex.value]?.id);
     pager.lists = [];
-    getLists();
+    resetPage();
 };
 
 const handleSceneSubTab = (e: any) => {
@@ -122,7 +122,7 @@ const queryParams = reactive<any>({
     page_no: 1,
 });
 
-const { pager, getLists } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: robotLists,
     params: queryParams,
     isScroll: true,

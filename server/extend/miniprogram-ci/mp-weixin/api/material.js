@@ -1,0 +1,1 @@
+"use strict";const t=require("../utils/request/index.js");exports.addMaterialMusic=e=>t.request.post({url:"/material.music/add",data:e}),exports.getMaterialLibraryList=function(e){return t.request.get({url:"/sv.mediaMaterial/lists",data:e})},exports.getMaterialMusicList=e=>t.request.get({url:"/material.music/lists",data:e});

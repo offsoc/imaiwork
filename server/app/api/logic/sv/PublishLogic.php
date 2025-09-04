@@ -8,11 +8,11 @@ use app\common\model\sv\SvPublishSetting;
 use app\common\model\sv\SvPublishSettingAccount;
 use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvDevice;
-use app\common\model\sv\SvVideoSetting;
 use app\common\model\sv\SvMediaSetting;
-use app\common\model\sv\SvVideoTask;
 use app\common\model\sv\SvPublishSettingDetail;
 use app\common\service\FileService;
+use app\common\model\sv\SvDeviceRpa;
+use Channel\Client as ChannelClient;
 
 /**
  * PublishLogic
@@ -42,7 +42,7 @@ class PublishLogic extends SvBaseLogic
             if (isset($params['time_config']) && is_array($params['time_config'])) {
                 $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
             }
-            if(isset($params['publish_json']) && is_array($params['publish_json'])){
+            if (isset($params['publish_json']) && is_array($params['publish_json'])) {
                 $params['publish_json'] = json_encode($params['publish_json'], JSON_UNESCAPED_UNICODE);
             }
             $params['video_setting_id'] = $params['video_setting_id'] ?? 0;
@@ -51,7 +51,7 @@ class PublishLogic extends SvBaseLogic
             // 添加
             $publish = SvPublishSetting::create($params);
             if (!$publish->isEmpty()) {
-                if(!isset($params['accounts'])){
+                if (!isset($params['accounts'])) {
                     //创建空任务
                     SvPublishSettingAccount::create([
                         'publish_id' => $publish->id,
@@ -66,10 +66,9 @@ class PublishLogic extends SvBaseLogic
                         'status' => 0,
                         'created_time' => time(),
                     ]);
-                }else{
+                } else {
                     self::batchPushlishAccount($publish, $params);
                 }
-
             }
             // 提交事务
             Db::commit();
@@ -116,20 +115,20 @@ class PublishLogic extends SvBaseLogic
                 $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
             }
 
-            if((int)$params['date_type'] === 1){
-                $times = array_map(function($item){
+            if ((int)$params['date_type'] === 1) {
+                $times = array_map(function ($item) {
                     return strtotime($item);
                 }, array_column($params['publish_json'], 'publish_time'));
                 $params['publish_start'] = date('Y-m-d', min($times));
                 $params['publish_end'] = date('Y-m-d', max($times));
-            }else{
-                if(empty($params['publish_start']) || empty($params['publish_end'])){
+            } else {
+                if (empty($params['publish_start']) || empty($params['publish_end'])) {
                     self::setError('请输入发布时间');
                     return false;
                 }
             }
 
-            if(is_array($params['publish_json'])){
+            if (is_array($params['publish_json'])) {
                 $params['publish_json'] = json_encode($params['publish_json'], JSON_UNESCAPED_UNICODE);
             }
             //print_r($params);die;
@@ -137,7 +136,7 @@ class PublishLogic extends SvBaseLogic
             // 更新
             SvPublishSetting::where('id', $publish->id)->update($params);
             SvPublishSettingAccount::where('publish_id', $publish->id)->select()->delete();
-            SvPublishSettingDetail ::where('publish_id', $publish->id)->select()->delete();
+            SvPublishSettingDetail::where('publish_id', $publish->id)->select()->delete();
             self::batchPushlishAccount($publish, $params);
 
             Db::commit();
@@ -156,17 +155,16 @@ class PublishLogic extends SvBaseLogic
             $insertData = [];
             $accounts = explode(',', $params['accounts']);
             $mediaSetting = SvMediaSetting::where('id', $params['video_setting_id'])->limit(1)->findOrEmpty();
-            if($mediaSetting->isEmpty()){
+            if ($mediaSetting->isEmpty()) {
                 return;
-            } 
+            }
             $media_url = json_decode($mediaSetting['media_url'], true);
             $mediaCount = 0;
-            if(!empty($media_url)){
+            if (!empty($media_url)) {
                 $mediaCount = count($media_url[0]['url']);
-
             }
             $publishJson = json_decode($params['publish_json'], true);
-            
+
 
             $nextPublishTime = $params['date_type'] == 1 ? (!empty($publishJson) ? $publishJson[0]['publish_time'] : '') : '';
             //print_r($publishJson);die;
@@ -182,7 +180,7 @@ class PublishLogic extends SvBaseLogic
                     'account_type' => $account['type'],
                     'device_code' => $account['device_code'],
                     'video_setting_id' => $params['video_setting_id'],
-                    'poi' =>$params['poi'],
+                    'poi' => $params['poi'],
                     'media_type' => $params['media_type'],
                     'publish_start' => $params['publish_start'] ?? null,
                     'publish_end' => $params['publish_end'] ?? null,
@@ -200,7 +198,6 @@ class PublishLogic extends SvBaseLogic
             //print_r($th->__toString());die;
             throw new \Exception($th->getMessage(), $th->getCode());
         }
-
     }
 
     public static function change(array $params)
@@ -367,7 +364,8 @@ class PublishLogic extends SvBaseLogic
     }
 
 
-    public static function recordRepublish(array $params){
+    public static function recordRepublish(array $params)
+    {
         try {
             $record = SvPublishSettingDetail::field('*')
                 ->where('id', $params['id'])
@@ -378,18 +376,17 @@ class PublishLogic extends SvBaseLogic
                 return false;
             }
 
-            if(isset($params['time']) && !empty($params['time']) && strtotime($params['time']) < time()){
+            if (isset($params['time']) && !empty($params['time']) && strtotime($params['time']) < time()) {
                 self::setError('重新发布时间不能小于当前时间');
                 return false;
             }
 
-            $record->status = 5;//重新发布
+            $record->status = 5; //重新发布
             $record->publish_time = $params['time'] != '' ? $params['time'] : date('Y-m-d H:i:s', time() + 90);
             $record->save();
 
             self::$returnData = $record->toArray();
             return true;
-
         } catch (\Throwable $e) {
             self::setError($e->getMessage());
             return false;
@@ -406,16 +403,16 @@ class PublishLogic extends SvBaseLogic
                 return false;
             }
 
-            if(mb_strlen($params['title'], 'utf-8') > 150){
+            if (mb_strlen($params['title'], 'utf-8') > 150) {
                 self::setError('标题不能超过150个字');
                 return false;
             }
 
-            if(mb_strlen($params['subtitle'], 'utf-8') > 150){
+            if (mb_strlen($params['subtitle'], 'utf-8') > 150) {
                 self::setError('正文不能超过150个字');
                 return false;
             }
-            
+
 
             $publish = SvPublishSetting::create([
                 'user_id' => self::$uid,
@@ -438,7 +435,7 @@ class PublishLogic extends SvBaseLogic
             $count = count($params['accounts']);
             foreach ($params['accounts'] as $key => $account) {
                 $account = SvAccount::where('account', $account)->where('user_id', self::$uid)->limit(1)->findOrEmpty();
-                if($account->isEmpty()){
+                if ($account->isEmpty()) {
                     self::setError("{$account}该账号信息不存在");
                     return false;
                 }
@@ -498,7 +495,7 @@ class PublishLogic extends SvBaseLogic
             return false;
         }
     }
-   
+
     public static function setPublishDetail()
     {
         //print_r('执行发布记录拉取任务');
@@ -511,7 +508,7 @@ class PublishLogic extends SvBaseLogic
                 ->join('sv_account a', 'a.account = pa.account and a.user_id = pa.user_id')
                 ->where('pa.status', 1)
                 //->where('pa.id', 150)
-                ->where('pa.id', 'NOT IN', function($query){
+                ->where('pa.id', 'NOT IN', function ($query) {
                     $query->name('sv_publish_setting_detail')
                         ->field('publish_account_id')
                         ->where('delete_time is null')
@@ -521,7 +518,7 @@ class PublishLogic extends SvBaseLogic
                 //->order('pa.id desc')
                 //->where('vs.status', 'in', [3, 5])
                 ->select()->toArray();
-            
+
             //print_r(Db::getLastSql());die;
             // print_r("count: " . count($accounts));
             $insertData = [];
@@ -579,18 +576,20 @@ class PublishLogic extends SvBaseLogic
         }
     }
 
-    private static function _getMaterialUrl($media){
-        if(!is_array($media['material_url'])){
+    private static function _getMaterialUrl($media)
+    {
+        if (!is_array($media['material_url'])) {
             return FileService::getFileUrl($media['material_url']);
-        }else{
+        } else {
             $urls = $media['material_url'];
-            return implode(',', array_map(function($url){
+            return implode(',', array_map(function ($url) {
                 return FileService::getFileUrl($url);
             }, $urls));
         }
     }
 
-    private static function _getMedias(array $account){
+    private static function _getMedias(array $account)
+    {
         //print_r($account);die;
 
         // 合并后的新数组
@@ -602,28 +601,28 @@ class PublishLogic extends SvBaseLogic
         $media_title = json_decode($account['media_title'], true);
         $media_subtitle = json_decode($account['media_subtitle'], true);
         $topics = array_column($media_subtitle, 'topic');
-        
+
         $date_type = $account['date_type'];
         $publish_json = $date_type == 1 ? json_decode($account['publish_json'], true) : [];
         //print_r($media_url);die;
 
-        
-    
+
+
         // 获取各数组长度
         $mediaUrlCount = count($media_url);
         $titleCount = count($media_title);
         $subtitleCount = count($media_subtitle);
-        if($mediaUrlCount == 0){
+        if ($mediaUrlCount == 0) {
             return [];
         }
-        
+
         // 循环匹配（以media_url的长度为基准）
         for ($i = 0; $i < $mediaUrlCount; $i++) {
             $topic = isset($topics[$i]) ? $topics[$i] : [];
             $topic = implode(',', $topic);
 
             $mergedArray[] = [
-                'material_url' => isset($media_url[$i]['url']) ? $media_url[$i]['url'] :  $media_url[$i] ,
+                'material_url' => isset($media_url[$i]['url']) ? $media_url[$i]['url'] :  $media_url[$i],
                 'material_title' => $titleCount == 0 ? ' ' : ($media_title[$i % $titleCount]['content'] ?? ' '), // 循环匹配title
                 'material_subtitle' => $subtitleCount == 0 ? ' ' : ($media_subtitle[$i % $subtitleCount]['content'] ?? ' '), //
                 'topic' => $topic,
@@ -668,7 +667,7 @@ class PublishLogic extends SvBaseLogic
                 $currentDate = $startDate->format('Y-m-d');
                 // 遍历每个时间段配置
                 foreach ($timeConfig as $timeSlot) {
-                    if(strtotime("{$currentDate} {$timeSlot['end_time']}") < time()){
+                    if (strtotime("{$currentDate} {$timeSlot['end_time']}") < time()) {
                         continue;
                     }
                     $periods[] = [
@@ -685,118 +684,147 @@ class PublishLogic extends SvBaseLogic
         } catch (\Exception $e) {
             //print_r($e->__toString());die;
             throw new \Exception($e->getMessage(), $e->getCode());
-
         }
     }
 
 
 
 
-    public static function aiNotePushCron(int $dataType = 0){
-
+    public static function aiNotePushCron(int $dataType = 0)
+    {
         try {
             $deviceids = SvDevice::where('status', 1)->column('device_code');
-            if(empty($deviceids)){
+            if (empty($deviceids)) {
                 return;
             }
+            //print_r($deviceids);die;
 
-            
+            foreach ($deviceids as $deviceid) {
+                $publishes = SvPublishSettingDetail::alias('ps')
+                    ->field('ps.*')
+                    // ->join('sv_video_task v', 'v.id = ps.video_task_id')
+                    ->join('sv_publish_setting_account s', 's.id = ps.publish_account_id')
+                    ->where('ps.device_code', 'in', $deviceid)
+                    ->where('ps.status', 'in', [0, 5])
+                    ->where('s.status', 'in', [1])
+                    ->where('ps.data_type', $dataType)
+                    ->where('ps.publish_time', '<', date('Y-m-d H:i:s', time()))
+                    ->order('ps.publish_time asc')
+                    ->limit(1)
+                    ->select()->toArray();
 
-            $publishes = SvPublishSettingDetail::alias('ps')
-                ->field('ps.*')
-                // ->join('sv_video_task v', 'v.id = ps.video_task_id')
-                ->join('sv_publish_setting_account s', 's.id = ps.publish_account_id')
-                ->where('ps.device_code', 'in', $deviceids)
-                ->where('ps.status', 'in', [0, 5])
-                ->where('s.status', 'in', [1])
-                ->where('ps.data_type', $dataType)
-                ->where('ps.publish_time', '<', date('Y-m-d H:i:s', time()))
-                ->order('ps.publish_time asc')
-                ->limit(1)
-                ->select()->toArray(); 
-            foreach ($publishes as $publish){               
-                $material_url = explode(',', $publish['material_url']);
-                if(count($material_url) > 12){
-                    $material_url = array_slice($material_url, 0, 12);
+                foreach ($publishes as $publish) {
+                    //判断当前rpa是否在操作小红书
+                    $app = SvDeviceRpa::where('device_code', $publish['device_code'])
+                        ->where('app_type', 3)
+                        ->where('status', 1)
+                        ->findOrEmpty();
+                    if ($app->isEmpty()) {
+                        //将执行app直接改为小红书
+                        self::sendAppExec($publish['device_code'], 3);
+                        sleep(30);
+                    }
+
+                    $material_url = explode(',', $publish['material_url']);
+                    if (count($material_url) > 12) {
+                        $material_url = array_slice($material_url, 0, 12);
+                    }
+                    $payload = array(
+                        'appType' => 3,
+                        'messageId' => 0,
+                        'type' => 5,
+                        'deviceId' => $publish['device_code'],
+                        'appVersion' => '2.1.2',
+                        'code' => 200,
+                        'action' => 'send',
+                        'content' => json_encode(array(
+                            'title' => $publish['material_title'],
+                            'type' => $publish['material_type'] ?? 1,
+                            'list' => $material_url,
+                            'isLocation' => !empty($publish['poi']) ? 1 : 0,
+                            'location' => $publish['poi'],
+                            'isScheduledTime' => true,
+                            'scheduledTime' => $publish['publish_time'],
+                            'taskId' => $publish['task_id'],
+                            'body' => $publish['material_subtitle'],
+                            'tag' => $publish['material_tag'] ?? '',
+                            'material_id' => $publish['id']
+                        ),  JSON_UNESCAPED_UNICODE)
+                    );
+                    print_r($payload);
+                    $channel = "device.{$publish['device_code']}.message";
+                    ChannelClient::connect('127.0.0.1', 2206);
+                    ChannelClient::publish($channel, [
+                        'data' => json_encode($payload)
+                    ]);
+
+                    self::_setPublishStatus($publish);
                 }
-                $payload = array(
-                    'appType' => 3,
-                    'messageId' => 0,
-                    'type' => 5,
-                    'deviceId' => $publish['device_code'],
-                    'appVersion' => '2.1.1',
-                    'worker' => array(
-                        'id' => $publish['task_id'],
-                    ),
-                    'reply' => [
-                        'title' => $publish['material_title'],
-                        'type' => $publish['material_type'] ?? 1,
-                        'list' => $material_url,
-                        'isLocation' => !empty($publish['poi']) ? 1 : 0,
-                        'location' => $publish['poi'],
-                        'isScheduledTime' => true,
-                        'scheduledTime' => $publish['publish_time'],
-                        'taskId' => $publish['task_id'],
-                        'body' => $publish['material_subtitle'],
-                        'tag' => $publish['material_tag'] ?? '',
-                        'material_id' => $publish['id']
-                    ]
-                );
-                $payload['code'] = 200;
-
-                $channel = "device.{$publish['device_code']}.message";
-                \Channel\Client::connect('127.0.0.1', 2206);
-                \Channel\Client::publish($channel, [
-                    'data' => json_encode($payload)
-                ]);
-
-                self::_setPublishStatus($publish);
-                
             }
-
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             print_r($e->__toString());
         }
     }
-    private static function _setPublishStatus($publish){
 
+    private function sendAppExec($deviceid, $appType)
+    {
         try {
-            
+            $app = SvDeviceRpa::where('device_code', $deviceid)->where('app_type', $appType)->findOrEmpty();
+            if ($app->isEmpty()) {
+                throw new \Exception('当前设备未绑定app');
+            }
+            $payload = [
+                "messageId" => 2,
+                "type" => 90, //执行那个app指令
+                "appType" => $appType,
+                "content" => json_encode([
+                    "deviceId" => $deviceid,
+                    "appType" => $appType,
+                    'msg' => '小红书',
+                    'task_id' => $app->id
+                ], JSON_UNESCAPED_UNICODE),
+                "deviceId" => $deviceid,
+                "appVersion" => "2.1.2"
+            ];
+
+            $channel = "device.{$deviceid}.message";
+            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::publish($channel, [
+                'data' => json_encode($payload)
+            ]);
+
+            SvDeviceRpa::where('device_code', $deviceid)->where('app_type', '<>', $appType)->update(['status' => 0, 'update_time' => time()]);
+            SvDeviceRpa::where('device_code', $deviceid)->where('app_type', $appType)->update(['status' => 1, 'update_time' => time()]);
+        } catch (\Throwable $e) {
+            print_r($e->__toString());
+        }
+    }
+
+    private static function _setPublishStatus($publish)
+    {
+        try {
             $detail = SvPublishSettingDetail::where('id', $publish['id'])->findOrEmpty();
-            if(!$detail->isEmpty()){
+            if (!$detail->isEmpty()) {
                 $detail->save([
                     'status' => 3,
                     'update_time' => time(),
                     'exec_time' => time()
                 ]);
-            }else{
+            } else {
                 $publish['message'] = '待发布数据丢失:';
             }
-            
-            
             $account = SvPublishSettingAccount::where('id', $publish['publish_account_id'])->findOrEmpty();
-            if(!$account->isEmpty()){
+            if (!$account->isEmpty()) {
                 $account->save([
                     'update_time' => time(),
                     'published_count' => Db::raw('published_count+1'),
                 ]);
-            }else{
+            } else {
 
                 $account['message'] = '待发布账号数据丢失:';
             }
-
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             print_r($e->__toString());
         }
-        
-        
     }
-
-
-
-
-
-
-
-    
 }

@@ -6,10 +6,7 @@
             <ElTooltip :content="getWebsiteConfig.shop_title">
                 <div class="w-10 h-10 rounded-full border border-[#EDEDED] p-[2px]" v-show="!hideSidebar">
                     <router-link to="/" class="flex-shrink-0">
-                        <img
-                            :src="getWebsiteConfig.pc_logo"
-                            alt="logo"
-                            class="w-full h-full rounded-full object-contain" />
+                        <img :src="getLogo" alt="logo" class="w-full h-full rounded-full object-contain" />
                     </router-link>
                 </div>
             </ElTooltip>
@@ -29,8 +26,14 @@
 import { useAppStore } from "@/stores/app";
 
 const { toggleSidebar } = useAppStore();
-const { getWebsiteConfig } = useAppStore();
+const { getWebsiteConfig, getOemConfig } = useAppStore();
 const hideSidebar = computed(() => useAppStore().hideSidebar);
+
+const { is_oem, logo_url } = getOemConfig;
+
+const getLogo = computed(() => {
+    return is_oem == 1 ? logo_url : getWebsiteConfig.pc_logo;
+});
 </script>
 
 <style scoped lang="scss"></style>

@@ -91,14 +91,16 @@
                                     {{ content }}
                                 </div>
                                 <div class="justify-end flex mt-2">
-                                    <ElButton size="small" @click="useContent(content)">使用文案</ElButton>
+                                    <ElButton type="primary" size="small" @click="useContent(content)"
+                                        >使用文案</ElButton
+                                    >
                                 </div>
                             </div>
                         </div>
                     </div>
                 </ElScrollbar>
             </div>
-            <div v-if="isReceiving" class="chat-loader mt-2"></div>
+            <div v-if="isReceiving" class="chat-loader mt-2 !text-white"></div>
         </div>
     </ElPopover>
 </template>

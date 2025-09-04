@@ -47,7 +47,7 @@
                                 type="textarea"
                                 show-word-limit
                                 placeholder="点击输入您要要设定的内容"
-                                :maxlength="2000"
+                                :maxlength="20000"
                                 :rows="6" />
                         </ElFormItem>
                         <!-- 知识库类型 -->

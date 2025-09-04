@@ -1,22 +1,27 @@
 <template>
     <div class="h-full">
-        <div class="flex items-center gap-2 overflow-y-auto">
-            <div
-                v-for="(item, index) in categoryLists"
-                class="px-2 py-1 rounded-md cursor-pointer"
-                :class="[
-                    sceneIndex == index
-                        ? 'text-[#000000] font-bold bg-[rgba(120,96,254,.08)]'
-                        : 'bg-[rgba(139,95,95,0.04)]',
-                ]"
-                @click="handleSceneType(index)">
-                <span class="text-base">
-                    {{ item.name }}
-                </span>
-            </div>
+        <div class="">
+            <ElScrollbar>
+                <div class="flex items-center gap-2 pb-4">
+                    <div
+                        v-for="(item, index) in categoryLists"
+                        class="px-2 py-1 rounded-md cursor-pointer whitespace-nowrap"
+                        :class="[
+                            sceneIndex == index
+                                ? 'text-[#000000] font-bold bg-[rgba(120,96,254,.08)]'
+                                : 'bg-[rgba(139,95,95,0.04)]',
+                        ]"
+                        @click="handleSceneType(index)">
+                        <span class="text-base">
+                            {{ item.name }}
+                        </span>
+                    </div>
+                </div>
+            </ElScrollbar>
         </div>
+
         <div
-            class="mt-4"
+            class="mt-2"
             :infinite-scroll-distance="10"
             :infinite-scroll-immediate="false"
             :infinite-scroll-disabled="!pager.isLoad"

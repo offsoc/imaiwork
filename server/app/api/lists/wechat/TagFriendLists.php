@@ -34,7 +34,7 @@ class TagFriendLists extends BaseApiDataLists implements ListsSearchInterface
     {
         // 获取微信ID
         $wechatId = AiWechat::where('user_id', $this->userId)->value('wechat_id', '');
-        $wechatId = $this->request->get('wechat_id') !== null ? $this->request->get('wechat_id') : $wechatId;
+        $wechatId = !empty($this->request->get('wechat_id')) ? $this->request->get('wechat_id') : $wechatId;
 
         // 获取标签ID
         if ($tagIds = $this->request->get('tag_ids'))

@@ -4,7 +4,7 @@
             <ElButton type="primary" @click="handleAddFlow">新建客户流程</ElButton>
             <div class="flex items-center gap-2">
                 <ElInput
-                    v-model="queryParams.name"
+                    v-model="queryParams.flow_name"
                     class="!w-[240px]"
                     clearable
                     placeholder="请输入流程名称"
@@ -89,7 +89,7 @@ import { SidebarTypeEnum } from "../../_enums";
 const { query } = useRoute();
 const nuxtApp = useNuxtApp();
 const queryParams = reactive({
-    name: "",
+    flow_name: "",
 });
 
 const { pager, getLists, resetPage, resetParams } = usePaging({
@@ -99,7 +99,7 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
 });
 
 const clearSearch = () => {
-    queryParams.name = "";
+    queryParams.flow_name = "";
     resetPage();
 };
 

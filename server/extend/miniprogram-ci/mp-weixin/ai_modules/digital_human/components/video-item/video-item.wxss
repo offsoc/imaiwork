@@ -1,0 +1,1 @@
+.rotation.data-v-8276dbbc{margin-bottom:32rpx;display:inline-block;height:64rpx;width:64rpx;border-radius:9999px;border-width:5px;border-style:dotted;border-color:var(--color-white, #ffffff);animation:rotation-8276dbbc 3s linear infinite}@keyframes rotation-8276dbbc{0%{transform:rotate(0)}to{transform:rotate(360deg)}}

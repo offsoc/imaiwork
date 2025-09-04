@@ -7,6 +7,8 @@ use app\common\model\chat\Assistants;
 use app\common\model\chat\Scene;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use think\facade\Db;
 
 class AssistantsLogic extends BaseLogic
 {
@@ -246,5 +248,136 @@ class AssistantsLogic extends BaseLogic
         $assistant->save();
         self::$returnData = $assistant->toArray();
         return true;
+    }
+
+    public static function check(){
+        $exists = Db::name('assistants')
+            ->where('name', '社区关系建设方案')
+            ->find();
+        if ($exists){
+            return false;
+        }
+        return true;
+    }
+
+    public static function import()
+    {
+        try {
+            $inputFileName = public_path().'static/file/template/assistants.xlsx';
+            if (!file_exists($inputFileName)) {
+                throw new \Exception("文件不存在");
+            }
+
+            $spreadsheet = IOFactory::load($inputFileName);
+
+            // 获取活动工作表内容
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            Db::startTrans();          // 事务
+            $inserted = 0;
+
+            foreach ($rows as $k => $row) {
+                if ($k == 1) continue; // 跳过表头
+                $number = random_int(1, 50);
+                $logo =   'static/images/assistant/assistant' . $number . '.png';
+
+                $level2 = $row['B'] != '' ? trim($row['B']) : '';
+                $C =  $row['C'] != '' ? trim($row['C']) : '';
+                $D =  $row['D'] != '' ? trim($row['D']) : '';
+                $E =  $row['E'] != '' ? trim($row['E']) : '';
+                $F =  $row['F'] != '' ? trim($row['F']) : '';
+                $G =  $row['G'] != '' ? trim($row['G']) : '';
+                $H =  $row['H'] != '' ? trim($row['H']) : '';
+                $I =  $row['I'] != '' ? trim($row['I']) : '';
+                $J =  $row['J'] != '' ? trim($row['J']) : '';
+
+                /* ---------- 二级场景 ---------- */
+                $exists = Db::name('scene')
+                    ->where('name', $level2)
+                    ->whereNull('delete_time')
+                    ->find();
+
+                if ($exists) {
+
+                    $template_info = [
+                        'form' => [
+                            [
+                                'name' => 'WidgetInput',
+                                'title' => '单行文本',
+                                'id' =>  '1',
+                                'props' => [
+                                    'field' => 'Input1',
+                                    'title' => $G,
+                                    'placeholder' => '',
+                                    'maxlength' => 200,
+                                    'isRequired' => false
+                                ]
+                            ],
+                            [
+                                'name' => 'WidgetInput',
+                                'title' => '单行文本',
+                                'id' => '2',
+                                'props' => [
+                                    'field' => 'Input2',
+                                    'title' => $H,
+                                    'placeholder' => '',
+                                    'maxlength' => 200,
+                                    'isRequired' => false
+                                ]
+                            ],
+                            [
+                                'name' => 'WidgetInput',
+                                'title' => '单行文本',
+                                'id' => '3',
+                                'props' => [
+                                    'field' => 'Input3',
+                                    'title' => $I,
+                                    'placeholder' => '',
+                                    'maxlength' => 200,
+                                    'isRequired' => false
+                                ]
+                            ],
+                            [
+                                'name' => 'WidgetInput',
+                                'title' => '单行文本',
+                                'id' => '4',
+                                'props' => [
+                                    'field' => 'Input4',
+                                    'title' => $J,
+                                    'placeholder' => '',
+                                    'maxlength' => 200,
+                                    'isRequired' => false
+                                ]
+                            ]
+                        ]
+                    ];
+
+                    // 转换为JSON格式
+                    $template_info_json = json_encode($template_info, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+                    Db::name('assistants')->insert([
+                        'scene_id'         => $exists['id'],
+                        'name'        => $C,
+                        'description'        => $E,
+                        'instructions' => $D,
+                        'preliminary_ask' => '[{"value":""}]',
+                        'template_info' => $template_info_json,
+                        'form_info' =>  $F,
+
+                        'logo'        => $logo,
+                        'create_time' => time(),
+                        'update_time' => time(),
+                    ]);
+                    $inserted++;
+                }
+            }
+            if ($inserted == 0){
+                throw new \Exception("先导入助理分类");
+            }
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            throw new \Exception($e->getMessage());
+        }
     }
 }

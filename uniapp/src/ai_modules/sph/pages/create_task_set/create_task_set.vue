@@ -230,7 +230,7 @@ enum GreetingContentSettingTypeEnum {
 }
 
 const formData = reactive({
-    chat_type: "1",
+    chat_type: "0",
     chat_number: 30,
     chat_interval_time: 10,
     greeting_content: "",

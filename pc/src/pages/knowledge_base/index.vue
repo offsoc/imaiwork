@@ -100,7 +100,12 @@
 </template>
 
 <script setup lang="ts">
-import { knowledgeBaseLists, knowledgeBaseDelete, vectorKnowledgeBaseLists } from "@/api/knowledge_base";
+import {
+    knowledgeBaseLists,
+    knowledgeBaseDelete,
+    vectorKnowledgeBaseLists,
+    vectorKnowledgeBaseDelete,
+} from "@/api/knowledge_base";
 import { HandleMenuType } from "@/components/handle-menu/typings";
 import { ToolEnumMap, ToolEnum } from "@/enums/appEnums";
 import { useElementSize } from "@vueuse/core";
@@ -150,9 +155,12 @@ const handleMenuList: HandleMenuType[] = [
                 message: "确定删除该知识库吗？",
                 onConfirm: async () => {
                     try {
-                        await knowledgeBaseDelete({
-                            id,
-                        });
+                        currentTab.value === KnTypeEnum.VECTOR
+                            ? await vectorKnowledgeBaseDelete({ id })
+                            : await knowledgeBaseDelete({
+                                  id,
+                              });
+
                         const index = pager.lists.findIndex((item) => item.id == id);
                         if (index !== -1) {
                             pager.lists.splice(index, 1);

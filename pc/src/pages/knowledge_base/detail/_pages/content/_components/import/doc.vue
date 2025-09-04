@@ -123,15 +123,15 @@ const onFileChange = async ({ raw: file }: UploadFile) => {
     try {
         if (file) {
             loading.value = true;
-            const { uri } = await uploadFile({
-                file: file,
-            });
+
             // 验证文件类型
             const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
             if (!fileAccept.includes(fileExtension)) {
                 throw `不支持的文件类型，请上传 ${accept} 格式的文件`;
             }
-
+            const { uri } = await uploadFile({
+                file: file,
+            });
             await isSameFile(file, fileList.value);
             const content = await parseFile(file);
             if (!content) {

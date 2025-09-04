@@ -1,9 +1,11 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers;
 
 use app\common\workerman\rpa\BaseMessageHandler;
 use app\common\workerman\rpa\WorkerEnum;
 use Workerman\Connection\TcpConnection;
+
 class CheckInitHandler extends BaseMessageHandler
 {
     protected int $msgType;
@@ -14,12 +16,12 @@ class CheckInitHandler extends BaseMessageHandler
             $this->uid = $uid;
             $this->payload = $payload;
             $this->connection = $connection;
-        
+
             $this->userId = $content['userId'] ?? 0;
-            
+
             $worker = $this->service->getWorker();
             $uid = $worker->devices[$this->payload['deviceId']] ?? '';
-            if($uid == ''){
+            if ($uid == '') {
                 $this->payload['reply'] = "设备{$this->payload['deviceId']}不在线,无法获取账号信息";
                 $this->payload['code'] = WorkerEnum::DEVICE_NOT_ONLINE;
                 $this->sendError($this->connection,  $this->payload);
@@ -27,7 +29,7 @@ class CheckInitHandler extends BaseMessageHandler
             }
 
             $isInit = $worker->uidConnections[$uid]->initial == 1 ? 1 : 0;
-            
+
             $message = array(
                 'messageId' => $uid,
                 'type' => WorkerEnum::WEB_INIT_CHECK_TEXT,
@@ -45,9 +47,8 @@ class CheckInitHandler extends BaseMessageHandler
             );
             $this->setLog($message, 'init');
             $this->sendResponse($this->uid, $message, $message['reply']);
-            
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'init'); 
+            $this->setLog('异常信息' . $e, 'init');
 
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::INIT_CHECK_ERROR_CODE;
@@ -55,6 +56,4 @@ class CheckInitHandler extends BaseMessageHandler
             $this->sendError($this->connection,  $this->payload);
         }
     }
-
-
 }

@@ -210,7 +210,7 @@ class AccountLogEnum
     const TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE = 11001;
     const TOKENS_DEC_TEXT_TO_VECTOR = 11002;
 
-
+    const TOKENS_DEC_SPH_OCR = 11003;
 
 
     /**
@@ -282,7 +282,8 @@ class AccountLogEnum
         self::TOKENS_DEC_AI_REPLY_LIKE,
         self::TOKENS_DEC_VIDEO_CLIP,
         self::TOKENS_DEC_TEXT_TO_VECTOR,
-        self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE
+        self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE,
+        self::TOKENS_DEC_SPH_OCR,
 
     ];
 
@@ -417,6 +418,7 @@ class AccountLogEnum
             self::TOKENS_DEC_VIDEO_CLIP               => '视频剪辑减少算力',
             self::TOKENS_DEC_TEXT_TO_VECTOR           => '文本转向量减少算力',
             self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE  => '创建向量知识库减少算力',
+            self::TOKENS_DEC_SPH_OCR                 => '视频号OCR减少算力',
         ];
         if ($flag) {
             return $desc;

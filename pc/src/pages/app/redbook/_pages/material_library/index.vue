@@ -78,7 +78,10 @@
                 <div v-if="pager.lists.length">
                     <div
                         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 cursor-pointer">
-                        <div v-for="(item, index) in pager.lists" class="material-item group" :key="index">
+                        <div
+                            v-for="(item, index) in pager.lists"
+                            class="material-item card-gradient group"
+                            :key="index">
                             <div class="w-full px-3 absolute z-[22] top-2">
                                 <div class="line-clamp-1 text-white">
                                     {{ item.name }}

@@ -5,6 +5,8 @@ namespace app\adminapi\logic\assistants;
 use app\common\model\chat\Scene;
 use app\common\logic\BaseLogic;
 use app\common\service\FileService;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use think\facade\Db;
 
 
 /**
@@ -132,5 +134,94 @@ class SceneLogic extends BaseLogic
             self::setError($exception->getMessage());
             return false;
         }
+    }
+
+    /**
+     * @desc 导入
+     * @param array $params
+     * @return bool
+     */
+    public static function import()
+    {
+        try {
+            $inputFileName = public_path().'static/file/template/scene.xlsx';
+            if (!file_exists($inputFileName)) {
+                throw new \Exception("文件不存在");
+            }
+
+            // 加载 Excel 文件
+            $spreadsheet = IOFactory::load($inputFileName);
+
+            // 获取活动工作表内容
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            Db::startTrans();          // 事务
+            $inserted = 0;
+
+            foreach ($rows as $k => $row) {
+                if ($k == 1) continue; // 跳过表头
+                $number = random_int(1, 50);
+                $logo =   'static/images/assistant/assistant' . $number . '.png';
+                if ($row['A'] == '' || $row['B'] == '') continue;
+                $level1 = trim($row['A']);
+                $level2 = trim($row['B']);
+
+                if ($level1 === '' || $level2 === '') continue;
+                /* ---------- 一级场景 ---------- */
+                $parentId = Db::name('scene')
+                    ->where('pid', 0)
+                    ->where('name', $level1)
+                    ->whereNull('delete_time')
+                    ->value('id');
+
+                if (!$parentId) {
+                    $parentId = Db::name('scene')->insertGetId([
+                        'pid'         => 0,
+                        'name'        => $level1,
+                        'logo'        => $logo,
+                        'status'      => 1,
+                        'description' => '',
+                        'sort'        => 0,
+                        'create_time' => time(),
+                        'update_time' => time(),
+                    ]);$inserted++;
+                }
+
+                /* ---------- 二级场景 ---------- */
+                $exists = Db::name('scene')
+                    ->where('pid', $parentId)
+                    ->where('name', $level2)
+                    ->whereNull('delete_time')
+                    ->find();
+
+                if (!$exists) {
+                    Db::name('scene')->insert([
+                        'pid'         => $parentId,
+                        'name'        => $level2,
+                        'logo'        => $logo,
+                        'status'      => 1,
+                        'description' => '',
+                        'sort'        => 0,
+                        'create_time' => time(),
+                        'update_time' => time(),
+                    ]);
+                    $inserted++; }
+            }
+
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public static function check(){
+        $exists = Db::name('scene')
+            ->where('name', '利益相关方沟通')
+            ->find();
+        if ($exists){
+            return false;
+        }
+        return true;
     }
 }

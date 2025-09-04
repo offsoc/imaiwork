@@ -15,6 +15,8 @@ use app\common\logic\AccountLogLogic;
 use app\common\model\user\User;
 use app\common\model\sv\SvDeviceRpa;
 
+use Predis\Client as redisClient;
+
 trait SphTaskTrait
 {
 
@@ -41,10 +43,26 @@ trait SphTaskTrait
 
         ChannelClient::connect('127.0.0.1', 2206);
         foreach ($rows as $row) {
-            $device = SvDeviceRpa::where('device_code', $row['device_code'])->where('status', 1)->where('app_type', 4)->findOrEmpty();
-            if ($device->isEmpty()) {
-                throw new \Exception('当前设备正在执行其他app,稍后重试');
+            // $device = SvDeviceRpa::where('device_code', $row['device_code'])->where('status', 1)->where('app_type', 4)->findOrEmpty();
+            // if ($device->isEmpty()) {
+            //     throw new \Exception('当前设备正在执行其他app,稍后重试');
+            // }
+            $deviceTaskStatus = self::redis()->get("xhs:device:{$row['device_code']}:taskStatus");
+            //print_r($deviceTaskStatus);die;
+            if(!empty($deviceTaskStatus)){
+                $deviceTaskStatus = json_decode(($deviceTaskStatus), true);
+                if($deviceTaskStatus['taskStatus'] == 'running'){
+                    $datetime = date('Y-m-d H:i:s', strtotime($deviceTaskStatus['time']) + (int)$deviceTaskStatus['duration']);
+                    $msg = "设备正在执行小红书任务，请在【{$datetime}】秒后重试";
+                    $time = strtotime($deviceTaskStatus['time']) + (int)$deviceTaskStatus['duration'];
+                    if(time() < $time){
+                        throw new \Exception($msg);
+                    }
+                }
             }
+
+            self::sendAppExec($row, 4);
+            usleep(200 * 1000);//200毫秒
             $task = [
                 'id' => $row['id'],
                 'task_id' => $task_id,
@@ -81,8 +99,48 @@ trait SphTaskTrait
                 'data' => json_encode($data)
             ]);
             //SvCrawlingTaskDeviceBind::where('task_id', $task_id)->where('device_code', $row['device_code'])->update(['status' => 0, 'update_time' => time()]);
+
+            self::redis()->set("xhs:device:{$row['device_code']}:taskStatus", json_encode([
+                'taskStatus' => 'standby',
+                'taskType' => 'setSph',
+                'msg' => '执行视频号',
+                'duration' => 0,
+                'time' => date('Y-m-d H:i:s', time()),
+            ], JSON_UNESCAPED_UNICODE));
         }
-        
+    }
+
+    private static function sendAppExec($row, $appType)
+    {
+        $app = SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', $appType)->findOrEmpty();
+        if($app->isEmpty()){
+            throw new \Exception('当前设备未绑定app');
+        }
+        $payload = [
+            "messageId" => 2,
+            "type" => 90, //执行那个app指令
+            "appType" => $appType,
+            "content" => json_encode( [
+                "deviceId" => $row['device_code'],
+                "appType" => $appType,
+                'msg' => '视频号',
+                'task_id' => $app->id
+            ], JSON_UNESCAPED_UNICODE),
+            "deviceId" => $row['device_code'],
+            "appVersion" => "2.1.2"
+        ];
+
+        $channel = "device.{$row['device_code']}.message";
+        ChannelClient::publish($channel, [
+            'data' => json_encode($payload)
+        ]);
+
+        SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', '<>', $appType)->update(['status' => 0, 'update_time' => time()]);
+        SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', $appType)->update([
+            'status' => 1, 
+            'update_time' => time(),
+            'start_time' => date('Y-m-d H:i:s', time()),
+        ]);
     }
 
     public static function sphPause(string $task_id): void
@@ -266,14 +324,14 @@ trait SphTaskTrait
                 'usage_tokens' => $response['data']['usage'] ?? [],
             ];
             //计算消耗tokens
-            $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+            $points = $unit > 0 ? round($tokens / $unit,2) : 0;
             //token扣除
-            User::userTokensChange($user_id, (int)$points);
+            User::userTokensChange($user_id, $points);
 
             $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit, '实际消耗算力' => $points, '场景' => '视频号获客私信打招呼内容'];
             $desc = AccountLogEnum::TOKENS_DEC_OPENAI_CHAT;
             //扣费记录
-            AccountLogLogic::recordUserTokensLog(true, $user_id, $desc, (int)$points, $task_id, $extra);
+            AccountLogLogic::recordUserTokensLog(true, $user_id, $desc, $points, $task_id, $extra);
 
 
             return $reply;
@@ -283,6 +341,24 @@ trait SphTaskTrait
         }
     }
 
+    private static function redis(): redisClient
+    {
+        
+        return new redisClient([
+            'host'        => env('redis.HOST', '127.0.0.1'),
+            'port'        => env('redis.PORT', 6379),
+            'password'    => env('redis.PASSWORD', '123456'),
+            'database'      => env('redis.WS_SELECT', 9),
+            'timeout'     => 0,
+            'pool' => [
+                'max_connections' => 5,
+                'min_connections' => 1,
+                'wait_timeout' => 3,
+                'idle_timeout' => 60,
+                'heartbeat_interval' => 50,
+            ],
+        ]);
+    }
 
 
     private static function setLog($content)

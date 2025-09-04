@@ -114,7 +114,7 @@ class MindMapLogic extends ApiLogic
             ChatLogic::saveChatResponseLog($request, $response);
 
             //计算消耗tokens
-            $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+            $points = $unit > 0 ? round($tokens / $unit,2) : 0;
 
             //token扣除
             User::userTokensChange(self::$uid, $points);

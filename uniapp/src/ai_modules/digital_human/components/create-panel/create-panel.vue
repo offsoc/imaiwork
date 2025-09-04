@@ -229,7 +229,7 @@ const getAudioDuration = (msg: string, duration: number) => {
 
 const handleConfirm = () => {
     initData();
-    if (userTokens.value < getConstTotal.value) {
+    if (userTokens.value < parseFloat(getConstTotal.value)) {
         uni.$u.toast("算力不足，请充值！");
         emit("recharge");
         show.value = false;

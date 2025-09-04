@@ -1,5 +1,6 @@
 import { getUserCenter, getTokensConfig } from "@/api/user";
 import { TOKEN_KEY } from "@/enums/cacheEnums";
+import { parentPort } from "node:worker_threads";
 import { defineStore } from "pinia";
 import { LoginPopupTypeEnum } from "~/enums/appEnums";
 
@@ -25,7 +26,7 @@ export const useUserStore = defineStore("userStore", {
     },
     getters: {
         isLogin: (state) => !!state.token,
-        userTokens: (state) => state.userInfo.tokens,
+        userTokens: (state) => parseFloat(state.userInfo.tokens),
         getTokenByScene: (state) => (scene: string) => state.tokensConfig.find((item) => item.scene === scene) || {},
     },
     actions: {

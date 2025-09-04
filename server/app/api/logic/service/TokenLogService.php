@@ -18,11 +18,11 @@ class TokenLogService
     /**
      * 获取任务需要的算力
      * @param string $scene
-     * @return int
+     * @return float
      * @author L
      * @data 2024/7/31 16:34
      */
-    public static function getTypeScore(string $scene = ""): int
+    public static function getTypeScore(string $scene = ""): float
     {
         return ModelConfig::where('scene', $scene)->value('score', 0);
     }
@@ -31,12 +31,12 @@ class TokenLogService
      * @desc 检查用户token是否足够
      * @param int $uid
      * @param string $scene
-     * @return int
+     * @return float
      * @date 2024/7/29 16:15
      * @throws \Exception
      * @author dagouzi
      */
-    public static function checkToken(int $uid, string $scene = ""): int
+    public static function checkToken(int $uid, string $scene = ""): float
     {
         $use_token   = self::getTypeScore($scene);
         $userInfo = User::findOrEmpty($uid)->toArray();

@@ -40,22 +40,12 @@ const getCommonConfig = computed(() => {
 const getAiPersonConfig = computed(() => {
     return tableData.value.filter((item) =>
         [
-            "human_prompt",
-            "human_avatar",
-            "human_voice",
-            "human_audio",
-            "human_video",
-            "human_avatar_pro",
-            "human_voice_pro",
-            "human_audio_pro",
-            "human_video_pro",
+            "human_copywriting",
             "human_video_ym",
             "human_avatar_ym",
-            "human_voice_ym",
             "human_audio_ym",
             "human_video_ymt",
             "human_avatar_ymt",
-            "human_voice_ymt",
             "human_audio_ymt",
             "human_avatar_chanjing",
             "human_voice_chanjing",
@@ -123,7 +113,7 @@ const getRedbookConfig = computed(() => {
 
 const getSphConfig = computed(() => {
     return tableData.value.filter((item) =>
-        ["sph_add_friends", "sph_private_chat", "sph_search_terms"].includes(item.scene)
+        ["sph_add_wechat", "sph_add_friends", "sph_private_chat", "sph_search_terms", "sph_ocr"].includes(item.scene)
     );
 });
 

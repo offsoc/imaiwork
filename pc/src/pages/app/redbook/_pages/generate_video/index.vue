@@ -83,7 +83,6 @@ import VideoCard from "../../_components/dh-video-card.vue";
 const queryParams = reactive({
 	name: "",
 	page_no: 1,
-	// status: 3,
 });
 
 const { pager, getLists, resetPage } = usePaging({

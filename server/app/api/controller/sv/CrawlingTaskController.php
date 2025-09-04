@@ -18,7 +18,7 @@ use think\exception\HttpResponseException;
 class CrawlingTaskController extends BaseApiController
 {
     use SphTaskTrait;
-    public array $notNeedLogin = [];
+    public array $notNeedLogin = ['ocr'];
 
     public function lists()
     {
@@ -184,5 +184,17 @@ class CrawlingTaskController extends BaseApiController
         }catch (HttpResponseException $e){
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
+    }
+
+
+
+    public function ocr()
+    {
+        $params = $this->request->post();
+        $result = CrawlingTaskLogic::ocr($params);
+        if ($result) {
+            return $this->success(data: CrawlingTaskLogic::getReturnData());
+        }
+        return $this->fail(CrawlingTaskLogic::getError());
     }
 }

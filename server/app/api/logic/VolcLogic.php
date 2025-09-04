@@ -214,8 +214,10 @@ class VolcLogic extends ApiLogic
             ];
             $refund_num = UserTokensLog::where('user_id', $user_id)->where('change_type', $change_type[$type])->where('action', 1)->where('task_id', $task->task_id)->count();
             if ($refund_num == 0) {
-                $points = UserTokensLog::where('user_id', $user_id)->where('change_type', $change_type[$type])->where('task_id', $task->task_id)->value('change_amount') ?? 0;
-                AccountLogLogic::recordUserTokensLog(false, $user_id, $change_type[$type], $points, $task->task_id);
+                $points = UserTokensLog::where('user_id', $user_id)->where('change_type', $change_type[$type])->where('task_id', $task->task_id)->value('change_amount');
+                if (!empty($points) && $points > 0) {
+                    AccountLogLogic::recordUserTokensLog(false, $user_id, $change_type[$type], $points, $task->task_id);
+                }
             }
         }
         return $result;
@@ -308,7 +310,7 @@ class VolcLogic extends ApiLogic
                 }
 
                 //计费
-                $points = $unit * 5;
+                $points = round($unit * 5,2);
                 $extra = ['算力单价' => '65算力/秒', '实际消耗算力' => $points];
                 User::userTokensChange($userId, $points);
                 //扣费记录

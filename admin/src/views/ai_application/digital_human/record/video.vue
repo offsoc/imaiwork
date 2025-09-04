@@ -82,8 +82,13 @@
                         {{ getVideoType(row.audio_type) }}
                     </template>
                 </el-table-column>
-                <el-table-column label="消耗算力" prop="points" min-width="100">
-                    <template #default="{ row }"> {{ row.status == 2 ? 0 : row.points || 0 }}算力 </template>
+                <el-table-column label="消耗算力" min-width="120">
+                    <template #default="{ row }">
+                        <div>
+                            <div>合成：{{ row.video_points || 0 }}算力</div>
+                            <div v-if="row.automatic_clip == 1">剪辑：{{ row.clip_points || 0 }}算力</div>
+                        </div>
+                    </template>
                 </el-table-column>
                 <el-table-column label="生成状态" min-width="120">
                     <template #default="{ row }">

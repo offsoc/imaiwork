@@ -274,8 +274,7 @@
 				{
 					"path": "pages/video_create/video_create",
 					"style": {
-						"navigationBarTitleText": "智能数字人",
-						"navigationBarBackgroundColor": "#F9FAFB"
+						"navigationBarTitleText": "智能数字人"
 					},
 					"meta": {
 						"share": true

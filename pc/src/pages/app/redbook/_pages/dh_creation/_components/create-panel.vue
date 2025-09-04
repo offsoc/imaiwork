@@ -48,8 +48,10 @@
                             <template #content>
                                 <div class="text-[#ffffff80] text-[11px] leading-6">
                                     <div>
-                                        1、若选择原视频音色，音色数量将按照视频数量进行扣费 <br />
-                                        2、若视频生成视频，而音色生成成功，将扣除音色费用，退回视频合成费用 <br />
+                                        1、若选择原视频音色，音色数量将按照视频数量进行扣费
+                                        <br />
+                                        2、若视频生成视频，而音色生成成功，将扣除音色费用，退回视频合成费用
+                                        <br />
                                         3、在合成时将按照每个不同视频对应的时常收取合成费用
                                     </div>
                                 </div>
@@ -105,7 +107,8 @@
                                         </div>
                                         <template #content>
                                             <div class="text-[#ffffff80] text-[11px] leading-6 w-[212px]">
-                                                1.如配置口播文案等于形象数量，将按照形象顺序匹配标题。 <br />
+                                                1.如配置口播文案等于形象数量，将按照形象顺序匹配标题。
+                                                <br />
                                                 2.如配置标题数量不等于形象数量，将口播文案随机匹配给各形象。
                                             </div>
                                         </template>
@@ -214,7 +217,9 @@
                                                     v-if="item.value == formData.extra.currentVoiceType"
                                                     class="w-full h-full rounded-full bg-primary"></div>
                                             </div>
-                                            <div class="text-white text-[11px]">{{ item.label }}</div>
+                                            <div class="text-white text-[11px]">
+                                                {{ item.label }}
+                                            </div>
                                             <ElTooltip
                                                 placement="top"
                                                 popper-class="!rounded-xl !bg-app-bg-2 !border-app-border-2 !p-2"
@@ -336,6 +341,7 @@
         v-if="showVideoMaterial"
         ref="materialPopupRef"
         :type="MaterialTypeEnum.VIDEO"
+        :show-tab="false"
         :multiple="replaceMaterialIndex == -1"
         @close="showVideoMaterial = false"
         @confirm="getChooseVideo" />
@@ -393,7 +399,10 @@ interface RedbookCreationFormData {
     clip: Array<{
         type: number | string;
     }>;
-    model_version: number | string;
+    music_type: Array<{
+        type: number | string;
+    }>;
+    model_version: DigitalHumanModelVersionEnum;
 }
 
 enum VoiceType {
@@ -439,7 +448,8 @@ const formData = reactive<RedbookCreationFormData>({
     automatic_clip: 0,
     music: [],
     clip: [],
-    model_version: "",
+    music_type: [{ type: 1 }],
+    model_version: DigitalHumanModelVersionEnum.ADVANCED,
 });
 
 const handleBack = () => {
@@ -629,11 +639,13 @@ const getClipConfigData = async () => {
 
 const handleChangeModelVersion = (value: number) => {
     useNuxtApp().$confirm({
-        message: "切换模型将会清空形象数据，是否继续？",
+        message: "切换模型将会清空形象、音色数据，是否继续？",
         theme: "dark",
         onConfirm: () => {
             formData.model_version = value;
             formData.anchor.length = 0;
+            formData.voice.length = 0;
+            formData.extra.currentVoiceType = VoiceType.Custom;
             handleUpdateCreateTask();
         },
     });
@@ -651,7 +663,7 @@ const handleAddVoice = () => {
 const handleSelectVoice = async () => {
     showVoiceMaterial.value = true;
     await nextTick();
-    voiceMaterialRef.value.open(DigitalHumanModelVersionEnum.ADVANCED);
+    voiceMaterialRef.value.open(formData.model_version);
 };
 
 const handleClickVoice = (index: number) => {
@@ -664,7 +676,7 @@ const getUploadVoiceSuccess = (result: any) => {
     const data = {
         voice_urls: uri,
         name: name.split(".")[0],
-        model_version: DigitalHumanModelVersionEnum.ADVANCED,
+        model_version: formData.model_version,
         voice_id: "",
     };
     if (currentVoiceIndex.value > -1) {
@@ -682,7 +694,7 @@ const getChooseTone = (result: any) => {
         const data = {
             voice_id,
             name,
-            model_version: DigitalHumanModelVersionEnum.ADVANCED,
+            model_version: formData.model_version,
             voice_urls: "",
             voice_type: builtin,
         };
@@ -696,7 +708,7 @@ const getChooseTone = (result: any) => {
             const data = {
                 voice_id: item.voice_id,
                 name: item.name,
-                model_version: DigitalHumanModelVersionEnum.ADVANCED,
+                model_version: formData.model_version,
                 voice_urls: "",
                 voice_type: item.builtin,
             };
@@ -768,13 +780,16 @@ const handleUpdateCreateTask = async () => {
             ...formData,
             extra: JSON.stringify(formData.extra),
             anchor: anchor.map((item) => ({
-                model_version: DigitalHumanModelVersionEnum.ADVANCED,
+                model_version: formData.model_version,
                 anchor_url: item,
                 name: item.slice(item.lastIndexOf("/") + 1),
             })),
             voice:
                 VoiceType.Custom == formData.extra.currentVoiceType
-                    ? voice.map((item) => ({ model_version: DigitalHumanModelVersionEnum.ADVANCED, ...item }))
+                    ? voice.map((item) => ({
+                          model_version: formData.model_version,
+                          ...item,
+                      }))
                     : [],
         })
             .then((res) => {
@@ -796,6 +811,9 @@ const handleCreate = async (type: CreateType) => {
         return;
     } else if (copywriting.length == 0) {
         feedback.msgWarning("请添加文案");
+        return;
+    } else if (copywriting.length == 1 && copywriting[0].content.length == 0) {
+        feedback.msgWarning("文案不能为空");
         return;
     } else if (VoiceType.Custom == formData.extra.currentVoiceType && voice.length == 0) {
         feedback.msgWarning("请添加音色");

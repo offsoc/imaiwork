@@ -10,34 +10,28 @@
                 @keyup.enter="getLists"
                 @clear="getLists" />
         </div>
-        <div class="grow min-h-0 mt-6">
-            <template v-if="!pager.loading">
-                <div v-if="pager.lists && pager.lists.length" class="h-full flex flex-col">
-                    <div class="grow min-h-0">
-                        <ElScrollbar>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-6">
-                                <RecordCard
-                                    :item="item"
-                                    v-for="(item, index) in pager.lists"
-                                    :key="index"
-                                    @delete="handleDelete"
-                                    @again="handleAgain"
-                                    @train="handleTrain" />
-                            </div>
-                        </ElScrollbar>
-                    </div>
-                    <div class="flex justify-end p-4">
-                        <pagination v-model="pager" @change="getLists"></pagination>
-                    </div>
+        <div class="grow min-h-0 mt-6" v-loading="pager.loading">
+            <div v-if="pager.lists && pager.lists.length" class="h-full flex flex-col">
+                <div class="grow min-h-0">
+                    <ElScrollbar>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-6">
+                            <RecordCard
+                                :item="item"
+                                v-for="(item, index) in pager.lists"
+                                :key="index"
+                                @delete="handleDelete"
+                                @again="handleAgain"
+                                @train="handleTrain" />
+                        </div>
+                    </ElScrollbar>
                 </div>
-                <div v-else class="text-center py-4 text-gray-500">
-                    <ElEmpty description="暂无数据"></ElEmpty>
-                </div>
-            </template>
-            <div class="h-full flex justify-center items-center flex-col" v-else>
-                <Loader />
-                <div class="text-sm text-gray-500 mt-10">加载中...</div>
             </div>
+            <div v-else class="text-center py-4 text-gray-500">
+                <ElEmpty description="暂无数据"></ElEmpty>
+            </div>
+        </div>
+        <div class="flex justify-end p-4">
+            <pagination v-model="pager" @change="getLists"></pagination>
         </div>
     </div>
     <KnbBind ref="knbBindRef" v-if="showKnbBind" @close="showKnbBind = false" />

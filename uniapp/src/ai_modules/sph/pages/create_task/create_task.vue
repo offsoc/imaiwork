@@ -16,7 +16,7 @@
                             :key="index">
                             <text class="line-clamp-1">{{ item }}</text>
                             <view
-                                class="absolute right-1 top-[24rpx] w-4 h-4 rounded-full bg-[#efefef] border border-solid border-[#00000008] flex items-center justify-center z-10"
+                                class="absolute right-1 top-[20rpx] w-5 h-5 rounded-full bg-[#efefef] border border-solid border-[#00000008] flex items-center justify-center z-10"
                                 @click="handleDelete(index)">
                                 <u-icon name="close" color="#787878" :size="16"></u-icon>
                             </view>

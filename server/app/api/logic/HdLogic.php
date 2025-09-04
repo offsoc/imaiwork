@@ -634,7 +634,7 @@ class HdLogic extends ApiLogic
             //计费
             $unit = TokenLogService::checkToken($userId, $tokenScene);
 
-            $points = ceil($request['img_count'] * $unit);
+            $points = round($request['img_count'] * $unit,2);
 
             //token扣除
             User::userTokensChange(self::$uid, $points);

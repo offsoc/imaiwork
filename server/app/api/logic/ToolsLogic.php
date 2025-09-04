@@ -118,7 +118,7 @@ class ToolsLogic extends BaseLogic
             $tokenCode = AccountLogEnum::TOKENS_DEC_SPH_SEARCH_TERMS;
             $res = \app\common\service\ToolsService::Sv()->getSearchTerms($params);
             if ($res['code'] == 10000) {
-                $points = $num * $unit;
+                $points = round($num * $unit,2);
                 if ($points > 0){
                     //token扣除
                     User::userTokensChange($params['user_id'], $points);

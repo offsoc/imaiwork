@@ -56,7 +56,12 @@
 
         <tabbar v-if="chatContentList.length === 0" />
     </view>
-    <popup-bottom v-model:show="showHistory" title="历史记录" :is-disabled-touch="true" custom-class="bg-[#F9FAFB]">
+    <popup-bottom
+        v-model:show="showHistory"
+        title="历史记录"
+        show-close-btn
+        :is-disabled-touch="true"
+        custom-class="bg-[#F9FAFB]">
         <template #content>
             <view class="h-full py-[30rpx]">
                 <z-paging

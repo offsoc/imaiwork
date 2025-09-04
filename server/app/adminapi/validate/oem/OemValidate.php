@@ -16,6 +16,7 @@ class OemValidate extends BaseValidate
     protected $rule = [
         'id' => 'require',
         'domain' => 'require|length:1,255',
+        'name' => 'require|length:1,255',
         'logo_url' => 'require',
         'user_id' => 'require',
         'status' => 'require|in:0,1',
@@ -26,6 +27,8 @@ class OemValidate extends BaseValidate
         'id.require' => '参数id不能为空',
         'domain.require' => '站点域名不能为空',
         'domain.length' => '站点域名长度须在1-255位字符',
+        'name.require' => '站点名称不能为空',
+        'name.length' => '站点名称长度须在1-255位字符',
         'logo_url.require' => 'logo图不能为空',
         'user_id.require' => '用户id必须存在',
         'status.require' => '状态不能为空',
@@ -39,7 +42,7 @@ class OemValidate extends BaseValidate
      */
     public function sceneAdd()
     {
-        return $this->only(['domain', 'logo_url', 'user_id']);
+        return $this->only(['domain', 'logo_url', 'user_id', 'name']);
     }
 
     /**
@@ -62,7 +65,7 @@ class OemValidate extends BaseValidate
 
     public function sceneEdit()
     {
-        return $this->only(['id', 'domain', 'logo_url', 'user_id']);
+        return $this->only(['id', 'domain', 'name', 'logo_url', 'user_id']);
     }
 
     /**

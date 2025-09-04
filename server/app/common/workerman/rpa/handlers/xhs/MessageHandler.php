@@ -51,6 +51,15 @@ class MessageHandler extends BaseMessageHandler
             $this->payload = $payload;
             $this->userId = $content['userId'] ?? 0;
 
+            $this->service->getRedis()->set("xhs:device:" . $this->payload['deviceId'] . ":taskStatus", json_encode([
+                'taskStatus' => 'running',
+                'taskType' => 'setMessage',
+                'duration' => 30,
+                'scene' => 'xhs',
+                'msg' => '小红书正在回复聊天信息',
+                'time' => date('Y-m-d H:i:s', time()),
+            ], JSON_UNESCAPED_UNICODE));
+
 
             $worker = $this->service->getWorker();
             //$this->setLog(array_keys($worker->uidConnections), 'msg');
@@ -1086,7 +1095,7 @@ class MessageHandler extends BaseMessageHandler
             ChatLogic::saveChatResponseLog($this->request, $response);
 
             //计算消耗tokens
-            $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+            $points = $unit > 0 ? round($tokens / $unit,2) : 0;
 
             //token扣除
             User::userTokensChange($this->userId, $points);

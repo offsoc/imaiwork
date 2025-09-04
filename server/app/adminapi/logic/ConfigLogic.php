@@ -27,10 +27,15 @@ class ConfigLogic
         $modelList = ConfigService::get('model', 'list', []);
         $hdList = ConfigService::get('hd', 'list', []);
 
+        $default = ConfigService::get('storage', 'default', 'local');
+        $storage = ConfigService::get('storage', $default);
+        $ossDomain = $storage ?  $storage['domain'].'/' : (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://'.$_SERVER['HTTP_HOST'].'/' : 'http://'.$_SERVER['HTTP_HOST']).'/';
+
         //配置按模块分类，配置放到对应的模块里面，不要单独写，或者写到别的模块里面
         $config = [
             // 文件域名
-            'oss_domain' => FileService::getFileUrl(),
+//            'oss_domain' => FileService::getFileUrl(),
+            'oss_domain' => $ossDomain,
 
             // 网站名称
             'web_name' => ConfigService::get('website', 'name'),

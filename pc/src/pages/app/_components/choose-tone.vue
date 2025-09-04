@@ -158,7 +158,7 @@ const isChoose = (voice_id: number) => {
 };
 
 const choose = (item: any) => {
-    const { voice_id, type, name, builtin } = item;
+    const { voice_id } = item;
     if (isChoose(voice_id)) {
         if (multiple.value) {
             selectTone.value = selectTone.value.filter((item: any) => item.voice_id !== voice_id);

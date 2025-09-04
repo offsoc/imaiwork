@@ -39,6 +39,15 @@
                     </ElButton>
                 </div>
             </div>
+            <div class="px-4" v-if="showTab">
+                <ElTabs v-model="currentTab" class="!text-white" @tab-click="handleTabClick">
+                    <ElTabPane
+                        v-for="(tab, index) in tabs"
+                        :key="index"
+                        :label="tab.label"
+                        :name="tab.value"></ElTabPane>
+                </ElTabs>
+            </div>
             <div
                 class="h-[600px] overflow-y-auto relative dynamic-scroller"
                 :infinite-scroll-immediate="false"
@@ -50,7 +59,7 @@
                         <div class="grid grid-cols-3 gap-2 p-2">
                             <div v-for="item in pager.lists" :key="item.id" @click="choose(item)">
                                 <div
-                                    class="cursor-pointer bg-black w-full relative h-[210px] flex flex-col overflow-hidden rounded-xl shadow-[0_0_0_1px_var(--app-border-color-2)]">
+                                    class="card-gradient cursor-pointer bg-black w-full relative h-[210px] flex flex-col overflow-hidden rounded-xl">
                                     <div class="w-full px-3 absolute z-[22] top-2 pr-[50px]">
                                         <ElTooltip :content="item.name">
                                             <div class="line-clamp-1 text-white">
@@ -64,12 +73,20 @@
                                         class="w-full h-full rounded-xl"
                                         preview-teleported
                                         fit="cover" />
-                                    <video v-else :src="item.content" class="w-full h-full rounded-xl object-cover" />
+                                    <video
+                                        v-else
+                                        :src="item.content || item.video_result_url"
+                                        class="w-full h-full rounded-xl object-cover" />
                                     <div class="absolute top-2 right-2 z-[1000] w-6 h-6 rounded-full">
                                         <Icon
                                             name="local-icon-success_fill"
                                             :size="20"
                                             :color="isChoose(item) ? 'var(--color-primary)' : '#ffffff1a'"></Icon>
+                                    </div>
+                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                        <div @click.stop="handlePreview(item)">
+                                            <play-btn />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -88,10 +105,11 @@
             </div>
         </div>
     </popup>
+    <preview-video ref="previewVideoRef" v-if="showPreviewVideo" @close="showPreviewVideo = false"></preview-video>
 </template>
 
 <script setup lang="ts">
-import { getMaterialLibraryList } from "@/api/redbook";
+import { getMaterialLibraryList, getDigitalHumanVideo } from "@/api/redbook";
 import Popup from "@/components/popup/index.vue";
 import { MaterialTypeEnum } from "../_enums";
 
@@ -101,11 +119,13 @@ const props = withDefaults(
         limit?: number;
         // 是否可以多选
         multiple?: boolean;
+        showTab?: boolean;
     }>(),
     {
         type: MaterialTypeEnum.IMAGE,
         multiple: true,
         limit: 9,
+        showTab: true,
     }
 );
 
@@ -114,19 +134,50 @@ const emit = defineEmits<{
     (e: "confirm", lists: any[]): void;
 }>();
 
+enum TabTypeEnum {
+    MATERIAL = "material",
+    DH = "dh",
+}
+
+const tabs = [
+    {
+        label: "素材库",
+        value: TabTypeEnum.MATERIAL,
+    },
+    {
+        label: "数字人视频",
+        value: TabTypeEnum.DH,
+    },
+];
+const currentTab = ref<any>(TabTypeEnum.MATERIAL);
+
 const popupRef = ref<InstanceType<typeof Popup>>();
 
 const queryParams = reactive<Record<string, any>>({
     name: "",
     page_no: 1,
-    m_type: props.type,
 });
 
 const { pager, getLists, resetPage } = usePaging({
-    fetchFun: getMaterialLibraryList,
+    fetchFun: (params) => {
+        if (currentTab.value === TabTypeEnum.MATERIAL) {
+            return getMaterialLibraryList({
+                ...params,
+                m_type: props.type,
+            });
+        } else {
+            return getDigitalHumanVideo({ ...params, status: 6 });
+        }
+    },
     params: queryParams,
     isScroll: true,
 });
+
+const handleTabClick = (tab: any) => {
+    currentTab.value = tab.paneName;
+    chooseList.value.length = 0;
+    resetPage();
+};
 
 const chooseList = ref<any[]>([]);
 
@@ -160,11 +211,42 @@ const handleConfirm = () => {
         feedback.msgError(`请选择素材`);
         return;
     }
-    emit(
-        "confirm",
-        chooseList.value.map((item) => item.content)
-    );
+    let list = [];
+    if (currentTab.value == TabTypeEnum.MATERIAL) {
+        list = chooseList.value.map((item) => item.content);
+    }
+    if (currentTab.value == TabTypeEnum.DH) {
+        list = chooseList.value.map((item) => {
+            if (item.automatic_clip == 1) {
+                return item.clip_result_url;
+            } else {
+                return item.video_result_url;
+            }
+        });
+    }
+    emit("confirm", list);
     close();
+};
+
+const previewVideoRef = shallowRef();
+const showPreviewVideo = ref(false);
+
+const handlePreview = async (item: any) => {
+    showPreviewVideo.value = true;
+    await nextTick();
+    if (currentTab.value == TabTypeEnum.MATERIAL) {
+        const { content } = item;
+        previewVideoRef.value.setUrl(content);
+    }
+    if (currentTab.value == TabTypeEnum.DH) {
+        const { automatic_clip, clip_result_url, video_result_url } = item;
+        if (automatic_clip == 1) {
+            previewVideoRef.value.setUrl(clip_result_url);
+        } else {
+            previewVideoRef.value.setUrl(video_result_url);
+        }
+    }
+    previewVideoRef.value.open();
 };
 
 const load = async () => {
@@ -189,6 +271,12 @@ defineExpose({
 
 <style scoped lang="scss">
 @import "@/pages/app/_assets/styles/index.scss";
+
+:deep(.el-tabs) {
+    --el-tabs-header-height: 50px;
+    padding: 0 0;
+}
+
 :deep(.search-input) {
     .el-input__wrapper {
         background-color: transparent;

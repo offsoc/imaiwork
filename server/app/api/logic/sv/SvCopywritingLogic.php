@@ -309,7 +309,7 @@ class SvCopywritingLogic extends SvBaseLogic
 
                     $count = $response['data']['image_count'] ?? 1;
 
-                    $points = ceil($count * $unit);
+                    $points = round($count * $unit,2);
 
                     $extra = ['总条数' => $count, '算力单价' => $unit, '实际消耗算力' => $points];
                 }
@@ -472,6 +472,8 @@ class SvCopywritingLogic extends SvBaseLogic
             return false;
         }
     }
+
+
 
 
 }

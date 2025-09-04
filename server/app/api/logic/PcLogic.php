@@ -199,7 +199,8 @@ class PcLogic extends BaseLogic
         $lianlian = self::getLianlianConfig();
 
         return [
-            'domain' => FileService::getFileUrl(),
+//            'domain' => FileService::getFileUrl(),
+            'domain' => config('app.app_host') . '/',
             'login' => $loginConfig,
             'website' => $website,
             'version' => $version,

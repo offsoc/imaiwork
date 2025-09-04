@@ -302,7 +302,7 @@ class ChatLogic extends ApiLogic
         self::saveChatResponseLog($request, $response);
 
         //计算消耗tokens
-        $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+        $points = $unit > 0 ? round($tokens / $unit,2) : 0;
         $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit.'tokens/算力', '实际消耗算力' => $points];
 
         //token扣除
@@ -452,7 +452,7 @@ class ChatLogic extends ApiLogic
         $unit =  TokenLogService::getTypeScore($tokenScene);
         
         //计算消耗tokens
-        $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+        $points = $unit > 0 ? round($tokens / $unit,2) : 0;
         
         //token扣除
         User::userTokensChange($request['user_id'], $points);

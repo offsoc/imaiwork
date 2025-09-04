@@ -13,7 +13,7 @@ export const commonUploadLimit = {
 };
 
 // 上传限制
-export const uploadLimit = {
+export const uploadLimit: Record<DigitalHumanModelVersionEnum, any> = {
     [DigitalHumanModelVersionEnum.STANDARD]: {
         size: 100,
         // 最小分辨率

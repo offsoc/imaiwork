@@ -50,7 +50,7 @@
                     <ElScrollbar always>
                         <div class="flex gap-[14px] py-6 px-4" v-loading="anchorPager.loading">
                             <div
-                                class="anchor-item group bg-black flex-shrink-0"
+                                class="anchor-item card-gradient group bg-black flex-shrink-0"
                                 v-for="(item, index) in anchorPager.lists"
                                 :key="item.id"
                                 :class="{
@@ -283,8 +283,7 @@
                                         v-model="formData.automatic_clip"
                                         style="--el-switch-off-color: #333333"
                                         active-value="1"
-                                        inactive-value="0"
-                                        @change="handleAutomaticClipChange" />
+                                        inactive-value="0" />
                                 </div>
                                 <template v-if="formData.automatic_clip == 1 && false">
                                     <div class="mt-3">
@@ -456,6 +455,7 @@ const formData = reactive<Record<string, any>>({
     voice_type: 1,
     music_url: "",
     music_name: "",
+    music_type: 1,
     clip_type: `${ClipStyleEnum.AI_RECOMMEND}`,
     automatic_clip: 0,
 });
@@ -667,20 +667,6 @@ const handleDeleteMusic = () => {
     formData.music_url = "";
 };
 
-const randomBgMusicUrl = ref<string>();
-const getBgMusicLists = async () => {
-    const { lists } = await getMaterialMusicList({ type: 0, page_size: 9999 });
-    randomBgMusicUrl.value = lists[Math.floor(Math.random() * lists.length)].uri;
-};
-
-const handleAutomaticClipChange = (value: number) => {
-    if (value == 1) {
-        formData.music_url = randomBgMusicUrl.value;
-    } else {
-        formData.music_url = "";
-    }
-};
-
 /** 剪辑操作 End */
 
 const uploadFormRef = shallowRef<InstanceType<typeof UploadForm>>();
@@ -799,7 +785,6 @@ const getClipConfigData = async () => {
 const { DefineTemplate, UseTemplate: AddTemplate } = useTemplate();
 
 getAnchorLists();
-getBgMusicLists();
 getClipConfigData();
 </script>
 

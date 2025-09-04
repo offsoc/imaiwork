@@ -344,3 +344,7 @@ input:-webkit-autofill:active {
 .splitpanes--dragging .splitpanes__pane {
     pointer-events: none;
 }
+
+.card-gradient {
+    background: linear-gradient(43deg, #4158d0 0%, #c850c0 46%, #ffcc70 100%);
+}

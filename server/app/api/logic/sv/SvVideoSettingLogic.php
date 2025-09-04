@@ -31,7 +31,7 @@ class SvVideoSettingLogic extends SvBaseLogic
             }
 
             // 预处理JSON字段
-            $jsonFields = ['anchor', 'voice', 'copywriting', 'music', 'clip'];
+            $jsonFields = ['anchor', 'voice', 'copywriting', 'music', 'clip', 'music_type'];
             $decodedData = [];
             foreach ($jsonFields as $field) {
                 if (!empty($params[$field])) {
@@ -66,11 +66,12 @@ class SvVideoSettingLogic extends SvBaseLogic
                 $copywritingCount = count($decodedData['copywriting'] ?? []);
                 $clipCount = count($decodedData['clip'] ?? []);
                 $musicCount = count($decodedData['music'] ?? []);
+                $musictypeCount = count($decodedData['music_type'] ?? []);
 
                 if($voiceCount == 0){
-                    $maxCombinations = max(1, $anchorCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount);
+                    $maxCombinations = max(1, $anchorCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount) * max(1, $musictypeCount);
                 }else{
-                    $maxCombinations = max(1, $anchorCount) * max(1, $voiceCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount);
+                    $maxCombinations = max(1, $anchorCount) * max(1, $voiceCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount)* max(1, $musictypeCount);
                 }
                 // 最大可能组合数量
                 if ($videoCount > $maxCombinations) {
@@ -95,6 +96,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                     $voiceArr = $decodedData['voice'] ?? [];
                     $clipArr = $decodedData['clip'] ?? [];
                     $musicArr = $decodedData['music'] ?? [];
+                    $musicTypeArr = $decodedData['music_type'] ?? [];
                     $anchorCount = count($anchorArr);
                     $copywritingCount = count($copywritingArr);
                     $voiceCount = count($voiceArr);
@@ -139,6 +141,17 @@ class SvVideoSettingLogic extends SvBaseLogic
                         } else {
                             $musicItem = [];
                         }
+                        // music_type分配
+                        if ($musictypeCount > 0) {
+                            if ($musictypeCount == $anchorCount) {
+                                $musictypeIndex = $anchorIndex;
+                            }else {
+                                $musictypeIndex = array_rand($musicTypeArr);
+                            }
+                            $musictypeItem = $musicTypeArr[$musictypeIndex] ?? [];
+                        }else {
+                            $musictypeItem = [];
+                        }
 
                          // voice分配
                          if ($voiceCount > 0) {
@@ -178,9 +191,6 @@ class SvVideoSettingLogic extends SvBaseLogic
                         }
                         $automatic_clip = $params['automatic_clip'] ?? 0;
                         $music_url = $musicItem['url'] ?? '';
-                        if ($automatic_clip == 1 && !preg_match('#^https?://#i', $music_url)) {
-                            throw new \Exception('背景音乐错误');
-                        }
                         $taskItem = [
                             'user_id' => self::$uid,
                             'video_setting_id' => $setting->id,
@@ -203,6 +213,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                             'clip_type' => $clipItem['type'] ?? 1,
                             'automatic_clip' => $params['automatic_clip'] ?? 0,
                             'music_url' => $musicItem['url'] ?? '',
+                            'music_type' => $musictypeItem['type'] ?? 1,
                             'audio_type' => 1,
                             'extra' => json_encode([
                                 'copywriting' => $copywritingItem,
@@ -301,7 +312,7 @@ class SvVideoSettingLogic extends SvBaseLogic
             $params['user_id'] = self::$uid;
 
             // 预处理JSON字段
-            $jsonFields = ['anchor', 'voice', 'copywriting', 'music', 'clip'];
+            $jsonFields = ['anchor', 'voice', 'copywriting', 'music', 'clip', 'music_type'];
             $decodedData = [];
             foreach ($jsonFields as $field) {
                 if (!empty($params[$field])) {
@@ -335,12 +346,13 @@ class SvVideoSettingLogic extends SvBaseLogic
                 $copywritingCount = count($decodedData['copywriting'] ?? []);
                 $clipCount = count($decodedData['clip'] ?? []);
                 $musicCount = count($decodedData['music'] ?? []);
-
+                $musictypeCount = count($decodedData['music_type'] ?? []);
                   
                 if($voiceCount == 0){
-                    $maxCombinations = max(1, $anchorCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount);
+
+                    $maxCombinations = max(1, $anchorCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount)* max(1, $musictypeCount);
                 }else{
-                    $maxCombinations = max(1, $anchorCount) * max(1, $voiceCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount);
+                    $maxCombinations = max(1, $anchorCount) * max(1, $voiceCount) * max(1, $copywritingCount) * max(1, $clipCount) * max(1, $musicCount)* max(1, $musictypeCount);
                 }
                 // 最大可能组合数量
                 if ($videoCount > $maxCombinations) {
@@ -363,6 +375,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                     $voiceArr = $decodedData['voice'] ?? [];
                     $clipArr = $decodedData['clip'] ?? [];
                     $musicArr = $decodedData['music'] ?? [];
+                    $musicTypeArr = $decodedData['music_type'] ?? [];
 
                     $anchorCount = count($anchorArr);
                     $copywritingCount = count($copywritingArr);
@@ -408,6 +421,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                             $clipItem = [];
                         }
 
+
                         // music分配
                         if ($musicCount > 0) {
                             if ($musicCount == $anchorCount) {
@@ -419,7 +433,17 @@ class SvVideoSettingLogic extends SvBaseLogic
                         } else {
                             $musicItem = [];
                         }
-
+                        // music_type分配
+                        if ($musictypeCount > 0) {
+                            if ($musictypeCount == $anchorCount) {
+                                $musictypeIndex = $anchorIndex;
+                            }else {
+                                $musictypeIndex = array_rand($musicTypeArr);
+                            }
+                            $musictypeItem = $musicTypeArr[$musictypeIndex] ?? [];
+                        }else {
+                            $musictypeItem = [];
+                        }
                         $model_version = $params['model_version'] ?? 7;
                         $voice_id = $voiceItem['voice_id'] ?? '';
                         $voice_type = $voiceItem['voice_type'] ?? 1;
@@ -445,9 +469,9 @@ class SvVideoSettingLogic extends SvBaseLogic
                         }
                         $automatic_clip = $params['automatic_clip'] ?? 0;
                         $music_url = $musicItem['url'] ?? '';
-                        if ($automatic_clip == 1 && !preg_match('#^https?://#i', $music_url)) {
-                            throw new \Exception('背景音乐错误');
-                        }
+//                        if ($automatic_clip == 1 && !preg_match('#^https?://#i', $music_url)) {
+//                            throw new \Exception('背景音乐错误');
+//                        }
                         $taskItem = [
                             'user_id' => self::$uid,
                             'video_setting_id' => $setting['id'],
@@ -468,6 +492,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                             'msg' => $copywritingItem['content'] ?? '',
                             'poi' => $params['poi'] ?? '',
                             'clip_type' => $clipItem['type'] ?? 1,
+                            'music_type' => $musictypeItem['type'] ?? 1,
                             'automatic_clip' => $params['automatic_clip'] ?? 0,
                             'music_url' => $musicItem['url'] ?? '',
                             'audio_type' => 1,

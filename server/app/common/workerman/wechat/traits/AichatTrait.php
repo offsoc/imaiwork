@@ -373,79 +373,98 @@ trait AichatTrait
 
     private function _parseAiPrompt(KbRobot $robot, array $request, array $logs): void
     {
-        //检查扣费
-        $unit = TokenLogService::checkToken($request['user_id'], 'ai_wechat');
-
-        //获取提示词
-        $keyword = ChatPrompt::where('prompt_name', '微信客服')->value('prompt_text') ?? '';
-        if (!$keyword) {
-            throw new \Exception('提示词不存在');
-        }
-
-        $task_id = generate_unique_task_id();
-        $knowledge = [];
-        if($robot->kb_type == 1){//rag
-            // 检查是否挂载知识库
-            $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $request['user_id'])->where('type', 1)->limit(1)->find();
-            if (!empty($bind)) {
-                $knowledge = \app\common\model\knowledge\Knowledge::where('id', $bind['kid'])->limit(1)->find();
-                if (empty($knowledge)) {
-                    throw new \Exception('挂载的知识库不存在');
-                }
-                $knowledge['task_id'] = $task_id;
+        try {
+            //检查扣费
+            //获取提示词
+            $keyword = ChatPrompt::where('prompt_name', '微信客服')->value('prompt_text') ?? '';
+            if (!$keyword) {
+                throw new \Exception('提示词不存在');
             }
+
+            $task_id = generate_unique_task_id();
+            $knowledge = [];
+            if($robot->kb_type == 1){//rag
+                // 检查是否挂载知识库
+                $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $request['user_id'])->where('type', 1)->limit(1)->find();
+                if (!empty($bind)) {
+                    $knowledge = \app\common\model\knowledge\Knowledge::where('id', $bind['kid'])->limit(1)->find();
+                    if (empty($knowledge)) {
+                        throw new \Exception('挂载的知识库不存在');
+                    }
+                    $knowledge['task_id'] = $task_id;
+                }
+            }
+
+            if ($robot->kb_type == 2) { //向量
+                // 检查是否挂载知识库
+                $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $request['user_id'])->where('type', 1)->where('kb_type',2)->limit(1)->find();
+                if (!empty($bind)) {
+                    $knowledge = \app\common\model\kb\KbKnow::where('id', $bind['kid'])->limit(1)->find();
+                    if (empty($knowledge)) {
+                        throw new \Exception('挂载的知识库不存在');
+                    }
+                    $knowledge['task_id'] = $task_id;
+                }
+            }
+
+            $history = implode("\n", array_column($logs, 'content'));
+            $keyword = str_replace(
+                ['角色设定', '用户发送的内容', '历史对话上下文', '相关知识库检索结果'],
+                [$robot->description, $request['message'], $history, empty($knowledge) ? '' : '相关知识库检索结果'],
+                $keyword
+            );
+            $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('智能体说明')->withContext([
+                'keyword' => $keyword
+            ])->log();
+
+            $request = [
+                'user_id' => $request['user_id'],
+                'task_id' => $task_id,
+                'wechat_id' => $request['wechat_id'],
+                'friend_id' => $request['friend_id'],
+                'friend_remark' => $request['friend_remark'],
+                'device_code' => $request['device_code'],
+                'message' => $request['message'],
+                'message_id' => $request['message_id'],
+                'MsgSvrId' => $request['MsgSvrId'],
+                'message_type' => $request['message_type'],
+                'chat_type' => AccountLogEnum::TOKENS_DEC_AI_WECHAT,
+                'now'       => time(),
+                'messages' => array_merge([['role' => 'system', 'content' => $keyword]], $logs),
+                'knowledge' => $knowledge,
+                'reply_strategy' => $request['reply_strategy'],
+                'user_message' => $request['user_message'],
+                'is_chatroom' => $request['is_chatroom'],
+                'model' => $request['model']
+            ];
+
+            // 任务数据
+            $data = [
+                'wechat_id' => $request['wechat_id'],
+                'friend_id' => $request['friend_id'],
+                'device_code' => $request['device_code'],
+                'task_id' => $request['task_id'],
+                'user_id' => $request['user_id'],
+                'request' => $request,
+                'knowledge' => $knowledge,
+                'reply_strategy' => $request['reply_strategy'],
+                'user_message' => $request['user_message'],
+                'is_chatroom' => $request['is_chatroom'],
+                'model' => $request['model'],
+                'robot' => $robot->toArray(),
+            ];
+            $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('请求数据')->withContext($data)->log();
+            $this->_beforeSend($data);
+        } catch (\Throwable $e) {
+            $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('_parseAiPrompt Error')->withContext([
+                'data' => $request,
+                'e' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ])->log();
         }
-
-        $history = implode("\n", array_column($logs, 'content'));
-        $keyword = str_replace(
-            ['角色设定', '用户发送的内容', '历史对话上下文', '相关知识库检索结果'],
-            [$robot->description, $request['message'], $history, empty($knowledge) ? '' : '相关知识库检索结果'],
-            $keyword
-        );
-        $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('智能体说明')->withContext([
-            'keyword' => $keyword
-        ])->log();
-
         
-
-        $request = [
-            'user_id' => $request['user_id'],
-            'task_id' => $task_id,
-            'wechat_id' => $request['wechat_id'],
-            'friend_id' => $request['friend_id'],
-            'friend_remark' => $request['friend_remark'],
-            'device_code' => $request['device_code'],
-            'message' => $request['message'],
-            'message_id' => $request['message_id'],
-            'MsgSvrId' => $request['MsgSvrId'],
-            'message_type' => $request['message_type'],
-            'chat_type' => AccountLogEnum::TOKENS_DEC_AI_WECHAT,
-            'now'       => time(),
-            'messages' => array_merge([['role' => 'system', 'content' => $keyword]], $logs),
-            'knowledge' => $knowledge,
-            'reply_strategy' => $request['reply_strategy'],
-            'user_message' => $request['user_message'],
-            'is_chatroom' => $request['is_chatroom'],
-            'model' => $request['model']
-        ];
-
-        // 任务数据
-        $data = [
-            'wechat_id' => $request['wechat_id'],
-            'friend_id' => $request['friend_id'],
-            'device_code' => $request['device_code'],
-            'task_id' => $request['task_id'],
-            'user_id' => $request['user_id'],
-            'request' => $request,
-            'knowledge' => $knowledge,
-            'reply_strategy' => $request['reply_strategy'],
-            'user_message' => $request['user_message'],
-            'is_chatroom' => $request['is_chatroom'],
-            'model' => $request['model'],
-            'robot' => $robot->toArray(),
-        ];
-        $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('请求数据')->withContext($data)->log();
-        $this->_beforeSend($data);
     }
 
     private function _beforeSend(array $payload)
@@ -532,14 +551,14 @@ trait AichatTrait
         ChatLogic::saveChatResponseLog($request, $response);
 
         //计算消耗tokens
-        $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+        $points = $unit > 0 ? round($tokens / $unit,2) : 0;
         //token扣除
-        User::userTokensChange($request['user_id'], (int)$points);
+        User::userTokensChange($request['user_id'], (float)$points);
 
         $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit, '实际消耗算力' => $points];
 
         //扣费记录
-        AccountLogLogic::recordUserTokensLog(true, $request['user_id'], AccountLogEnum::TOKENS_DEC_AI_WECHAT, (int)$points, $request['task_id'], $extra);
+        AccountLogLogic::recordUserTokensLog(true, $request['user_id'], AccountLogEnum::TOKENS_DEC_AI_WECHAT, (float)$points, $request['task_id'], $extra);
 
         return $reply;
     }

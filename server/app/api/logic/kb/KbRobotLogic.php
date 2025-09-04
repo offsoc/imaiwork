@@ -16,6 +16,8 @@ use app\common\model\kb\KbRobotShareLog;
 use app\common\model\kb\KbRobotSquare;
 use app\common\model\kb\KbRobotVisitor;
 use app\common\model\knowledge\Knowledge;
+
+use app\common\model\knowledge\KnowledgeBind;
 use app\common\model\user\User;
 use app\common\model\user\UserAccountLog;
 use app\common\service\ConfigService;
@@ -156,6 +158,10 @@ class KbRobotLogic extends BaseLogic
             if (!$robot || !$robot['is_enable']) {
                 $errMsg = !$robot ? '机器人不存在了' : '机器人被禁用,禁止操作!';
                 throw new Exception($errMsg);
+            }
+
+            if(count($post['kb_ids']) == 0){
+                KnowledgeBind::where('data_id', $robot->id)->where('user_id', $userId)->where('type', 1)->select()->delete();
             }
 
             // 向量知识库检测

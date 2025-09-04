@@ -33,6 +33,7 @@
                         <image-contain :src="row.logo_url" width="32" height="32" />
                     </template>
                 </el-table-column>
+                <el-table-column label="站点标题" prop="name" min-width="160" />
                 <el-table-column label="所属用户" prop="username" min-width="160" />
                 <el-table-column label="授权时间" prop="auth_time" width="180" />
                 <el-table-column label="状态" prop="auth_time" width="120">

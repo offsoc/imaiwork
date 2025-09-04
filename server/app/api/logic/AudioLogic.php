@@ -131,7 +131,7 @@ class AudioLogic extends ApiLogic
                 //折算分钟
                 $minutes = ((int)($duration / 60)) + ($duration % 60 > 0 ? 1 : 0);
 
-                $points = ceil($minutes * $unit);
+                $points = round($minutes * $unit,2);
 
                 //token扣除
                 User::userTokensChange(self::$uid, $points);
@@ -229,7 +229,7 @@ class AudioLogic extends ApiLogic
                 //折算分钟
                 $minutes = ((int)($duration / 60)) + ($duration % 60 > 0 ? 1 : 0);
 
-                $points = ceil($minutes * $unit);
+                $points = round($minutes * $unit,2);
 
                 //token扣除
                 User::userTokensChange(self::$uid, $points);

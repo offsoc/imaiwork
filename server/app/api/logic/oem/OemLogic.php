@@ -25,11 +25,13 @@ class OemLogic extends ApiLogic
                 'is_oem' => 0,
                 'domain' => $domain,
                 'logo_url' => '',
+                'name' => '',
             ];
         } else {
             self::$returnData = [
                 'is_oem' => 1,
                 'domain' => $result->domain,
+                'name' => $result->name,
                 'logo_url' => FileService::getFileUrl($result->logo_url),
             ];
         }

@@ -62,8 +62,9 @@
             :infinite-scroll-immediate="false"
             :infinite-scroll-disabled="!pager.isLoad"
             :infinite-scroll-distance="10"
-            v-infinite-scroll="load">
-            <div class="h-full" v-loading="pager.loading">
+            v-infinite-scroll="load"
+            v-loading="pager.loading">
+            <div class="h-full">
                 <div v-if="pager.lists.length">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
                         <div

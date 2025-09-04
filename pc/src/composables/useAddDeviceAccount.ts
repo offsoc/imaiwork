@@ -88,6 +88,8 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                         code: DeviceCmdCodeEnum.API_ERROR,
                     });
                 } finally {
+                    addDeviceLoading.value = false;
+                    showAddDevice.value = false;
                     feedback.closeLoading();
                 }
                 // if (socialPlatformList.length > 0) {
@@ -118,7 +120,11 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                             showAddDevice.value = false;
                             eventAction.value = null;
                             progressValue.value = 100;
-                            options.onSuccess?.({ msg: "添加账号成功", type, data });
+                            options.onSuccess?.({
+                                msg: "添加账号成功",
+                                type,
+                                data,
+                            });
                         } catch (error) {
                             options.onError?.({
                                 error,
@@ -142,7 +148,11 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                             }
                             eventAction.value = null;
                             progressValue.value = 100;
-                            options.onSuccess?.({ msg: "更新成功", type, data });
+                            options.onSuccess?.({
+                                msg: "更新成功",
+                                type,
+                                data,
+                            });
                         } catch (error) {
                             console.log(error);
                             options.onError?.({
@@ -203,18 +213,30 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
     };
 
     const completeProgress = () => {
+        // 清除之前的定时器
+        if (progressInterval.value) {
+            clearInterval(progressInterval.value);
+            progressInterval.value = null;
+        }
+
         const startTime = Date.now();
         const duration = 10 * 1000;
         const updateInterval = 300;
         const maxIncrementPerInterval = 2; // 限制每次最大增量
+
+        // 重置进度值
         progressValue.value = 0;
+
         progressInterval.value = setInterval(() => {
             const elapsedTime = Date.now() - startTime;
             const randomIncrement = Math.min(maxIncrementPerInterval, Math.random() * (99 - progressValue.value) * 0.1);
             progressValue.value = Math.floor(Math.min(99, progressValue.value + randomIncrement));
 
             if (progressValue.value >= 99 || elapsedTime >= duration) {
-                clearInterval(progressInterval.value);
+                if (progressInterval.value) {
+                    clearInterval(progressInterval.value);
+                    progressInterval.value = null;
+                }
                 progressValue.value = 99;
             }
         }, updateInterval);

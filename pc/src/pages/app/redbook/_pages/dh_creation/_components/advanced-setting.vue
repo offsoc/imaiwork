@@ -33,7 +33,7 @@
                             </ElSelect>
                         </div>
                     </div>
-                    <div class="mt-3">
+                    <div class="mt-3" v-if="false">
                         <div class="text-xs text-white mb-3">背景音乐上传：</div>
                         <ElPopover
                             width="264"
@@ -83,7 +83,9 @@
                                 <div class="w-5 h-5 flex items-center justify-center rounded bg-[#ffffff0d]">
                                     <Icon name="local-icon-music" :size="14" color="#ffffff"></Icon>
                                 </div>
-                                <div class="text-white text-base line-clamp-1">{{ item.name }}</div>
+                                <div class="text-white text-base line-clamp-1">
+                                    {{ item.name }}
+                                </div>
                             </div>
                             <div class="w-[1px] h-[12px] bg-[#ffffff1a]"></div>
                             <div>
@@ -169,10 +171,10 @@ const handleConfirm = () => {
             feedback.msgWarning("请选择剪辑风格");
             return;
         }
-        if (formData.music.length == 0) {
-            feedback.msgWarning("请上传背景音乐");
-            return;
-        }
+        // if (formData.music.length == 0) {
+        //     feedback.msgWarning("请上传背景音乐");
+        //     return;
+        // }
     }
     close();
     emit("success", formData);

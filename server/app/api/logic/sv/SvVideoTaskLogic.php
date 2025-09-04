@@ -908,7 +908,7 @@ class SvVideoTaskLogic extends SvBaseLogic
                 ])) {
 
                     $duration = $response['data']['duration'] ?? 1;
-                    $points = ceil($duration * $unit);
+                    $points = round($duration * $unit,2);
                     $extra = ['音视频时长' => $duration, '算力单价' => $unit, '实际消耗算力' => $points];
                 }
                 $response['data']['token'] = $points;
@@ -1135,6 +1135,7 @@ class SvVideoTaskLogic extends SvBaseLogic
                         'task_id' => $item->task_id,
                         'clip_type' => $item->clip_type,
                         'music_url' => $item->music_url,
+                        'music_type' => $item->music_type,
                         'result_url' => $result_url,
                         'type' => 2,
                     ];

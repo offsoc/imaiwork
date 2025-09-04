@@ -43,7 +43,6 @@ class VideoTaskController extends BaseApiController
                 $data = $this->request->param('data');
             }
 
-
             switch ($type) {
                 case 'avatar':
                     SvVideoTaskLogic::updateAnchor($data, $modelVersion);

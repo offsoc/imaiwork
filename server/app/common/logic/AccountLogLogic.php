@@ -86,12 +86,12 @@ class AccountLogLogic extends BaseLogic
      * @param bool $success
      * @param int $userId
      * @param int $changeType
-     * @param int $tokens
+     * @param float $tokens
      * @return void
      * @author L
      * @data 2024/8/2 9:43
      */
-    public static function recordUserTokensLog(bool $success, int $userId, int $changeType, int $tokens, $source_sn = '', $extra = []): void
+    public static function recordUserTokensLog(bool $success, int $userId, int $changeType, float $tokens, $source_sn = '', $extra = []): void
     {
         $remark = AccountLogEnum::getChangeTypeDesc($changeType);
 

@@ -21,7 +21,7 @@ export const useUserStore = defineStore({
     }),
     getters: {
         isLogin: (state) => !!state.token,
-        userTokens: (state) => state.userInfo.tokens || 0,
+        userTokens: (state) => parseFloat(state.userInfo.tokens) || 0,
         getTokenByScene: (state) => (scene: string) => state.tokensConfig.find((item) => item.scene === scene) || {},
     },
     actions: {

@@ -1,8 +1,5 @@
 <template>
     <div class="h-full flex flex-col">
-        <div class="px-4">
-            <ElAlert title="此配置只有向量知识库才有效，RAG知识库不支持" type="warning" />
-        </div>
         <div class="grow min-h-0 mt-4">
             <ElScrollbar>
                 <div class="px-4 w-[550px]">
@@ -36,6 +33,35 @@
                                     clearable />
                             </div>
                         </ElFormItem> -->
+                        <ElFormItem label="引用上限" prop="search_tokens">
+                            <template #label="{ label }">
+                                <span class="flex items-center">
+                                    {{ label }}
+                                    <ElTooltip placement="top">
+                                        <span class="ml-1 cursor-pointer">
+                                            <Icon name="local-icon-privacy" color="#00000080"></Icon>
+                                        </span>
+                                        <template #content>
+                                            <p>该参数表示单次文档从知识库检索最大的Tokens数量</p>
+                                            <p>说明: 引用越多意味着所需消耗的token越多</p>
+                                            <p>注意: 切记不要超出模型的最大token限制</p>
+                                        </template>
+                                    </ElTooltip>
+                                </span>
+                            </template>
+                            <div class="flex items-center">
+                                <ElSlider class="!w-64" v-model="formData.search_tokens" :min="100" :max="20000" />
+                                <ElInputNumber
+                                    class="ml-4"
+                                    v-model="formData.search_tokens"
+                                    size="small"
+                                    :min="100"
+                                    :max="20000" />
+                            </div>
+                        </ElFormItem>
+                        <div class="px-4">
+                            <ElAlert title="此配置只有向量知识库才有效，RAG知识库不支持" type="warning" />
+                        </div>
                         <div class="mx-8 mt-4">
                             <ElDivider content-position="left">召回设置</ElDivider>
                         </div>
@@ -66,32 +92,7 @@
                                     :value="option.value" />
                             </ElSelect>
                         </ElFormItem>
-                        <ElFormItem label="引用上限" prop="search_tokens">
-                            <template #label="{ label }">
-                                <span class="flex items-center">
-                                    {{ label }}
-                                    <ElTooltip placement="top">
-                                        <span class="ml-1 cursor-pointer">
-                                            <Icon name="local-icon-privacy" color="#00000080"></Icon>
-                                        </span>
-                                        <template #content>
-                                            <p>该参数表示单次文档从知识库检索最大的Tokens数量</p>
-                                            <p>说明: 引用越多意味着所需消耗的token越多</p>
-                                            <p>注意: 切记不要超出模型的最大token限制</p>
-                                        </template>
-                                    </ElTooltip>
-                                </span>
-                            </template>
-                            <div class="flex items-center">
-                                <ElSlider class="!w-64" v-model="formData.search_tokens" :min="100" :max="30000" />
-                                <ElInputNumber
-                                    class="ml-4"
-                                    v-model="formData.search_tokens"
-                                    size="small"
-                                    :min="100"
-                                    :max="30000" />
-                            </div>
-                        </ElFormItem>
+
                         <ElFormItem label="引用上下文" prop="context_num">
                             <template #label="{ label }">
                                 <span class="flex items-center">

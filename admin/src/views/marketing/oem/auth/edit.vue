@@ -30,6 +30,9 @@
                     <el-input v-model="formData.domain" placeholder="请输入站点域名" />
                     <div class="form-tips">不要带上http或者https，例如：www.baidu.com</div>
                 </el-form-item>
+                <el-form-item label="站点标题" prop="name">
+                    <el-input v-model="formData.name" placeholder="请输入站点标题" maxlength="30" />
+                </el-form-item>
                 <el-form-item label="站点ICON" prop="logo_url">
                     <material-picker v-model="formData.logo_url" :limit="1" />
                     <div class="form-tips">建议尺寸：64*64像素，支持jpg，jpeg，png格式</div>
@@ -56,11 +59,13 @@ const formData = reactive<any>({
     user_id: "",
     domain: "",
     logo_url: "",
+    name: "",
 });
 const rules = {
     user_id: [{ required: true, message: "请输入用户" }],
     domain: [{ required: true, message: "请输入站点域名" }],
     logo_url: [{ required: true, message: "请上传站点ICON" }],
+    name: [{ required: true, message: "请输入站点标题" }],
 };
 
 const popupRef = ref();

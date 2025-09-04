@@ -44,6 +44,9 @@ return [
         'ai_circle_reply_like' => 'app\common\command\AiCircleReplyLike',
         'device_rpa_cron' => 'app\common\command\DeviceRpaCron',
         'start_channel' => 'app\common\command\StartChannel',
+        'note_publish_cron' => 'app\common\command\NotePublishCron',
 
     ],
+
+    
 ];

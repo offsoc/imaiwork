@@ -18,7 +18,7 @@ use app\common\logic\AccountLogLogic;
 
 /**
  * 自动微信朋友圈点赞评论
- * 
+ *
  * @author my
  * @package app\traits
  */
@@ -63,15 +63,20 @@ trait AiCircleTrait
                 $circles = $data['Content']['Circles'];
                 foreach ($circles as $circle) {
                     $PublishTime = $circle['PublishTime'];
-                    if(date('d', time()) != date('d', (int)$PublishTime)){
+                    if (date('d', time()) != date('d', (int)$PublishTime)) {
                         continue;
                     }
+                    $difftime = (time() - (int)$PublishTime) / 60;
                     if ($strategy->is_enable_like === 1) {
-                        $this->runCircleLikeTask($device, $wechatid, $circle, $strategy, $likeFriends);
+                        if ($difftime > $strategy->like_interval_time) {
+                            $this->runCircleLikeTask($device, $wechatid, $circle, $strategy, $likeFriends);
+                        }
                     }
 
                     if ($strategy->is_enable_reply === 1) {
-                        $this->runCircleReplyTask($device, $wechatid, $circle, $strategy, $replyFriends);
+                        if ($difftime > $strategy->reply_interval_time) {
+                            $this->runCircleReplyTask($device, $wechatid, $circle, $strategy, $replyFriends);
+                        }
                     }
                 }
             }
@@ -108,24 +113,24 @@ trait AiCircleTrait
                 ])->log();
                 return;
             }
-            $optLog = AiWechatLog::where('user_id', $device->user_id)
-                ->where('wechat_id', $wechatid)
-                ->where('friend_id', $circle['WeChatId'])
-                ->where('log_type', AiWechatLog::TYPE_REPLY_CIRCLE)
-                ->order('id desc')
-                ->findOrEmpty();
-            if (!$optLog->isEmpty()) {
-                $difftime = (time() - strtotime($optLog->create_time)) / 60;
-                if ($difftime < $strategy->reply_interval_time) {
-                    $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Reply Log')->withContext([
-                        'msg' => '评论间隔时间太短了',
-                        'CircleId' => $circle['CircleId'],
-                        'wechat_id' => $wechatid,
-                        'friend_id' => $circle['WeChatId'],
-                    ])->log();
-                    return;
-                }
-            }
+            // $optLog = AiWechatLog::where('user_id', $device->user_id)
+            //     ->where('wechat_id', $wechatid)
+            //     ->where('friend_id', $circle['WeChatId'])
+            //     ->where('log_type', AiWechatLog::TYPE_REPLY_CIRCLE)
+            //     ->order('id desc')
+            //     ->findOrEmpty();
+            // if (!$optLog->isEmpty()) {
+            //     $difftime = (time() - strtotime($optLog->create_time)) / 60;
+            //     if ($difftime < $strategy->reply_interval_time) {
+            //         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Reply Log')->withContext([
+            //             'msg' => '评论间隔时间太短了',
+            //             'CircleId' => $circle['CircleId'],
+            //             'wechat_id' => $wechatid,
+            //             'friend_id' => $circle['WeChatId'],
+            //         ])->log();
+            //         return;
+            //     }
+            // }
 
             $optCount =  AiWechatLog::where('user_id', $device->user_id)
                 ->where('wechat_id', $wechatid)
@@ -188,12 +193,12 @@ trait AiCircleTrait
                 return '';
             }
             $knowledge = [];
-            if($robot->kb_type == 1){//rag
+            if ($robot->kb_type == 1) { //rag
                 // 检查是否挂载知识库
                 $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $user_id)->where('type', 1)->limit(1)->find();
                 if (!empty($bind)) {
-                    $knowledge = \app\common\model\knowledge\Knowledge::where('id', $bind['kid'])->limit(1)->find()->toArray();
-                    if (empty($knowledge)) {
+                    $bindFind = \app\common\model\knowledge\Knowledge::where('id', $bind['kid'])->limit(1)->find();
+                    if (empty($bindFind)) {
                         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('createReplyContent')->withContext([
                             'msg' => '挂载知识库不存在',
                             'user_id' => $user_id,
@@ -201,10 +206,31 @@ trait AiCircleTrait
                             'reply_robot_id' => $strategy->reply_robot_id
                         ])->log();
                         return '';
+                    }else{
+                        $knowledge = $bindFind->toArray();
                     }
                 }
             }
-            
+
+            if ($robot->kb_type == 2) { //向量
+                // 检查是否挂载知识库
+                $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $user_id)->where('type', 1)->limit(1)->find();
+                if (!empty($bind)) {
+                    $bindFind = \app\common\model\kb\KbKnow::where('id', $bind['kid'])->limit(1)->find();
+                    if (empty($bindFind)) {
+                        $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('createReplyContent')->withContext([
+                            'msg' => '挂载知识库不存在',
+                            'user_id' => $user_id,
+                            'strategy' => $strategy->id,
+                            'reply_robot_id' => $strategy->reply_robot_id
+                        ])->log();
+                        return '';
+                    }else{
+                        $knowledge = $bindFind->toArray();
+                    }
+                }
+            }
+
 
             $messages = array(
                 array(
@@ -300,14 +326,14 @@ trait AiCircleTrait
         ChatLogic::saveChatResponseLog($request, $response);
 
         //计算消耗tokens
-        $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+        $points = $unit > 0 ? round($tokens / $unit,2) : 0;
         //token扣除
-        User::userTokensChange($request['user_id'], (int)$points);
+        User::userTokensChange($request['user_id'], (float)$points);
 
         $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit, '实际消耗算力' => $points, '场景' => '朋友圈评论'];
         $desc = $request['model'] == 'deepseek' ? AccountLogEnum::TOKENS_DEC_AI_REPLY_LIKE : AccountLogEnum::TOKENS_DEC_OPENAI_CHAT;
         //扣费记录
-        AccountLogLogic::recordUserTokensLog(true, $request['user_id'], $desc, (int)$points, $request['task_id'], $extra);
+        AccountLogLogic::recordUserTokensLog(true, $request['user_id'], $desc, (float)$points, $request['task_id'], $extra);
 
         return $reply;
     }
@@ -337,24 +363,24 @@ trait AiCircleTrait
                 ])->log();
                 return;
             }
-            $optLog = AiWechatLog::where('user_id', $device->user_id)
-                ->where('wechat_id', $wechatid)
-                ->where('friend_id', $circle['WeChatId'])
-                ->where('log_type', AiWechatLog::TYPE_LIKE_CIRCLE)
-                ->order('id desc')
-                ->findOrEmpty();
-            if (!$optLog->isEmpty()) {
-                $difftime = (time() - strtotime($optLog->create_time)) / 60;
-                if ($difftime < $strategy->like_interval_time) {
-                    $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Like Log')->withContext([
-                        'msg' => '点赞间隔时间太短了',
-                        'CircleId' => $circle['CircleId'],
-                        'wechat_id' => $wechatid,
-                        'friend_id' => $circle['WeChatId'],
-                    ])->log();
-                    return;
-                }
-            }
+            // $optLog = AiWechatLog::where('user_id', $device->user_id)
+            //     ->where('wechat_id', $wechatid)
+            //     ->where('friend_id', $circle['WeChatId'])
+            //     ->where('log_type', AiWechatLog::TYPE_LIKE_CIRCLE)
+            //     ->order('id desc')
+            //     ->findOrEmpty();
+            // if (!$optLog->isEmpty()) {
+            //     $difftime = (time() - strtotime($optLog->create_time)) / 60;
+            //     if ($difftime < $strategy->like_interval_time) {
+            //         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Like Log')->withContext([
+            //             'msg' => '点赞间隔时间太短了',
+            //             'CircleId' => $circle['CircleId'],
+            //             'wechat_id' => $wechatid,
+            //             'friend_id' => $circle['WeChatId'],
+            //         ])->log();
+            //         return;
+            //     }
+            // }
 
             $optCount =  AiWechatLog::where('user_id', $device->user_id)
                 ->where('wechat_id', $wechatid)

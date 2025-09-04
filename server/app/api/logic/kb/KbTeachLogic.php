@@ -3,6 +3,7 @@
 
 namespace app\api\logic\kb;
 
+use app\api\logic\service\TokenLogService;
 use app\common\enum\ChatEnum;
 use app\common\enum\kb\KnowEnum;
 use app\common\logic\BaseLogic;
@@ -429,6 +430,8 @@ class KbTeachLogic extends BaseLogic
      */
     public static function import(array $post, int $userId): bool
     {
+        //算力不足20时拦截上传
+        TokenLogService::checkToken($userId, 'create_vector_knowledge');
         // 接收参数
         $kid    = intval($post['kb_id']);  // 知识库ID
         $method = intval($post['method']); // 录入方式: [1=文件导入, 2=QA拆分, 3=CSV导入]
@@ -506,6 +509,7 @@ class KbTeachLogic extends BaseLogic
                 // 处理数据
                 switch ($method) {
                     case 1:
+                    case 2:
                     case 3:
                     case 4:
                         $fid = KbKnowFiles::create([
@@ -521,6 +525,10 @@ class KbTeachLogic extends BaseLogic
                         $index = 1;
                         $batchCode = md5(time().$fid.$name);
                         foreach ($data as $word) {
+                            if (empty($word['q'])){
+                                KbKnowFiles::destroy(['id' => $fid]);
+                                throw new Exception('上传格式有误，请参考csv模板文件的格式上传！');
+                            }
                             $lists[] = [
                                 'uuid'         => (Uuid::uuid4())->toString(),
                                 'user_id'      => $userId,
@@ -543,7 +551,7 @@ class KbTeachLogic extends BaseLogic
                             $index++;
                         }
                         break;
-                    case 2:
+                    case 5:
                         $qi = 1;
                         foreach ($data as $word) {
                             $pre = '';

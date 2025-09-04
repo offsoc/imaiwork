@@ -22,7 +22,6 @@ class DeviceAppStartExecHandler extends BaseMessageHandler
             $this->payload = $payload;
             $this->userId = $content['userId'] ?? 0;
             $this->connection = $connection;
-            
             $this->payload['reply'] = $this->appExecReport($content);
 
             $this->sendResponse($uid, $this->payload, $this->payload['reply']);

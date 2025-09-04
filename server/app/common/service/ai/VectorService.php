@@ -44,17 +44,18 @@ class VectorService
 //            'qwen'             => $this->textQwen($model, $document, $isReturnStr),
 //            default            => [],
 //        };
-        $unit = TokenLogService::checkToken($userId, 'text_to_vector');
+        //TODO 暂时不收费
+//        $unit = TokenLogService::checkToken($userId, 'text_to_vector');
         $params['model'] = $model;
         $params['document'] = $document;
         $result = ToolsService::VectorKnowledge()->text2vector($params);
-        if ($result['code']==10000){
-            $points = ceil($result['data']['usage'] / $unit);
-            $extra = ['总消耗tokens数' => $result['data']['usage'], '算力单价' => '1算力/10000tokens', '实际消耗算力' => $points];
-            User::userTokensChange($userId, $points);
-            //扣费记录
-            AccountLogLogic::recordUserTokensLog(true, $userId, 11002, $points, '', $extra);
-        }
+//        if ($result['code']==10000){
+//            $points = ceil($result['data']['usage'] / $unit);
+//            $extra = ['总消耗tokens数' => $result['data']['usage'], '算力单价' => '1算力/10000tokens', '实际消耗算力' => $points];
+//            User::userTokensChange($userId, $points);
+//            //扣费记录
+//            AccountLogLogic::recordUserTokensLog(true, $userId, 11002, $points, '', $extra);
+//        }
         return $result['data']['document'];
     }
 

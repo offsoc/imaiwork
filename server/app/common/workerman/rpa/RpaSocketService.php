@@ -6,7 +6,9 @@ namespace app\common\workerman\rpa;
 
 use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
-use think\cache\driver\Redis;
+//use think\cache\driver\Redis;
+
+use Predis\Client as redisClient;
 use think\facade\Log;
 use Workerman\Lib\Timer;
 use app\common\model\sv\SvDevice;
@@ -168,12 +170,12 @@ class RpaSocketService
                     }
                     $payload['content'] = $content;
                     //当前设备执行的app
-                    $app = SvDeviceRpa::where('device_code', $payload['deviceId'])->where('status', 1)->findOrEmpty();
-                    if(!$app->isEmpty()){
-                        if($type == 'getUserInfo' && (int)$app->app_type !== 3){
-                            throw new \Exception('当前设备正在执行其他app,暂时无法获取小红书账号信息', WorkerEnum::DEVICE_EXEC_OTHER_APP_ERROR_CODE);
-                        }
-                    }
+                    // $app = SvDeviceRpa::where('device_code', $payload['deviceId'])->where('status', 1)->findOrEmpty();
+                    // if(!$app->isEmpty()){
+                    //     if($type == 'getUserInfo' && (int)$app->app_type !== 3){
+                    //         throw new \Exception('当前设备正在执行其他app,暂时无法获取小红书账号信息', WorkerEnum::DEVICE_EXEC_OTHER_APP_ERROR_CODE);
+                    //     }
+                    // }
                 }
             }
 
@@ -235,7 +237,7 @@ class RpaSocketService
     public function onClose(TcpConnection $connection)
     {
         try {
-            $this->setLog('socket链接断开:' . $connection->uid . ' name:' . $connection->name);
+            $this->setLog('socket链接断开:' . ($connection->uid ?? '') . ' name:' . ($connection->name ?? ''));
             //代表用户下线，清除用户信息
             if (isset($connection->uid)) {
                 $this->_unBind($connection->uid);
@@ -376,6 +378,15 @@ class RpaSocketService
                 $this->setLog("正在向: {$connection->clientType} 端发送消息", 'send');
                 $this->setLog('name ' . $connection->name . ' uid:' . $connection->uid . '  init:' . $connection->initial, 'send');
                 $this->setLog('发送完成', 'send');
+
+                // if(isset($payload['deviceId']) && !empty($payload['deviceId'])){
+                //     $this->getRedis()->set("xhs:device:" . $payload['deviceId'] . ":taskStatus", json_encode([
+                //         'taskStatus' => 'standby',
+                //         'taskType' => 'send',
+                //         'msg' => '发送完成',
+                //         'time' => date('Y-m-d H:i:s', time()),
+                //     ], JSON_UNESCAPED_UNICODE));
+                // }
             } else {
                 $this->setLog('uid 未找到: ' . $uid, 'error');
                 return false;
@@ -482,10 +493,10 @@ class RpaSocketService
 
             if (isset($this->worker->uidConnections[$uid]->deviceid)) {
                 $deviceid = $this->worker->uidConnections[$uid]->deviceid;
-                $this->redis->delete("xhs:device:{$deviceid}");
-                $this->redis->delete("xhs:device:{$deviceid}:status");
-                $this->redis->delete("xhs:init:{$deviceid}");
-                $this->redis->delete("xhs:getUser:{$deviceid}");
+                $this->redis->del("xhs:device:{$deviceid}");
+                $this->redis->del("xhs:device:{$deviceid}:status");
+                $this->redis->del("xhs:init:{$deviceid}");
+                $this->redis->del("xhs:getUser:{$deviceid}");
                 // $account = $this->redis->get("xhs:{$deviceid}:accountNo");
                 // $this->redis->delete("xhs:{$deviceid}:accountNo");
                 // $this->redis->delete("xhs:{$deviceid}:accountInfo:{$account}");
@@ -534,7 +545,7 @@ class RpaSocketService
             }
 
             $userId = $this->worker->uidConnections[$uid] ? $this->worker->uidConnections[$uid]->userid : 0;
-            $this->redis->delete("xhs:user:{$userId}");
+            $this->redis->del("xhs:user:{$userId}");
             // 连接断开时删除映射
             unset($this->worker->uidConnections[$uid]);
         } catch (\Exception $e) {
@@ -546,12 +557,27 @@ class RpaSocketService
     private  function _connRedis()
     {
         if ($this->redis == null) {
-            $this->redis = new Redis([
+            // $this->redis = new Redis([
+            //     'host'        => env('redis.HOST', '127.0.0.1'),
+            //     'port'        => env('redis.PORT', 6379),
+            //     'password'    => env('redis.PASSWORD', '123456'),
+            //     'select'      => env('redis.WS_SELECT', 8),
+            //     'timeout'     => 0,
+            // ]);
+
+            $this->redis = new redisClient([
                 'host'        => env('redis.HOST', '127.0.0.1'),
                 'port'        => env('redis.PORT', 6379),
                 'password'    => env('redis.PASSWORD', '123456'),
-                'select'      => env('redis.WS_SELECT', 8),
+                'database'      => env('redis.WS_SELECT', 8),
                 'timeout'     => 0,
+                'pool' => [
+                    'max_connections' => 5,
+                    'min_connections' => 1,
+                    'wait_timeout' => 3,
+                    'idle_timeout' => 60,
+                    'heartbeat_interval' => 50,
+                ],
             ]);
         }
     }

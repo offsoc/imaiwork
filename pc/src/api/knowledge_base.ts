@@ -84,7 +84,7 @@ export function vectorKnowledgeBaseEdit(params: any) {
 
 // 向量知识库删除
 export function vectorKnowledgeBaseDelete(params: any) {
-    return $request.post({ url: "/kb.know/delete", params });
+    return $request.post({ url: "/kb.know/del", params });
 }
 
 // 向量知识库详情

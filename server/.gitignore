@@ -19,6 +19,5 @@ composer.lock
 /public/admin
 swoole.php
 .history
-/extend/miniprogram-ci/
 /public/.well-known
 /public/.user.ini

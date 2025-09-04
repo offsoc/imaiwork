@@ -117,7 +117,6 @@ export enum TokensSceneEnum {
     HUMAN_AUDIO_PRO = "human_audio_pro",
     HUMAN_VOICE_PRO = "human_voice_pro",
     HUMAN_VIDEO_PRO = "human_video_pro",
-    HUMAN_PROMPT = "human_prompt",
     HUMAN_VIDEO_ADVANCED = "human_video_ym",
     HUMAN_AUDIO_ADVANCED = "human_audio_ym",
     HUMAN_VOICE_ADVANCED = "human_voice_ym",

@@ -165,13 +165,13 @@ class User extends BaseModel
     /**
      * 用户token变动
      * @param int $userId
-     * @param int $tokens
+     * @param float $tokens
      * @param string $type
      * @return bool
      * @author L
      * @data 2024/8/2 9:19
      */
-    public static function userTokensChange(int $userId, int $tokens, string $type = "dec"): bool
+    public static function userTokensChange(int $userId, float $tokens, string $type = "dec"): bool
     {
         User::where('id', $userId)->$type("tokens", $tokens)->update();
         return true;

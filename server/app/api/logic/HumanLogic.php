@@ -339,11 +339,10 @@ class HumanLogic extends ApiLogic
                         'task_id' => $item->task_id,
                         'clip_type' => $item->clip_type,
                         'music_url' => $item->music_url,
+                        'music_type' => $item->music_type,
                         'result_url' => $result_url,
                         'type' => 1,
                     ];
-                    Log::channel('clip')->write('数字人视频剪辑参数'.json_encode($params));
-
 
                     $response = \app\common\service\ToolsService::Sv()->clip($params);
                     if (isset($response['code']) && $response['code'] == 10000) {
@@ -466,6 +465,8 @@ class HumanLogic extends ApiLogic
             $clip_type = $request['clip_type'] ?? 1;
             $automatic_clip = $request['automatic_clip'] ?? 0;
             $music_url = $request['music_url'] ?? '';
+            $music_type = $request['music_type'] ?? 1;
+
             if (empty($anchor_name) || empty($name) || !in_array($model_version, [1, 2, 4, 6, 7]) || !in_array($gender, ['male', 'female'])) {
 
                 throw new \Exception('参数错误');
@@ -579,9 +580,7 @@ class HumanLogic extends ApiLogic
                     throw new \Exception('音色错误');
                 }
             }
-            if ($automatic_clip == 1 && !preg_match('#^https?://#i', $music_url)) {
-                throw new \Exception('背景音乐错误');
-            }
+
             $videoTaskData = [
                 'user_id' => self::$uid,
                 'name' => $name,
@@ -600,6 +599,7 @@ class HumanLogic extends ApiLogic
                 'upload_video_url' => $video_url,
                 'upload_audio_url' => $audio_url,
                 'music_url' => $music_url,
+                'music_type' => $music_type,
                 'automatic_clip' => $automatic_clip,
                 'clip_type' => $clip_type,
             ];
@@ -2549,7 +2549,7 @@ class HumanLogic extends ApiLogic
 
                     $duration = $response['data']['duration'] ?? 1;
 
-                    $points = ceil($duration * $unit);
+                    $points = round($duration * $unit,2);
 
                     $extra = ['音视频时长' => $duration, '算力单价' => $unit, '实际消耗算力' => $points];
                 }
@@ -2627,7 +2627,7 @@ class HumanLogic extends ApiLogic
                 ])) {
 
                     $duration = $response['data']['duration'] ?? 1;
-                    $points = ceil($duration * $unit);
+                    $points = round($duration * $unit,2);
                     $extra = ['音视频时长' => $duration, '算力单价' => $unit, '实际消耗算力' => $points];
                 }
 

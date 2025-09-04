@@ -124,7 +124,7 @@
                                         <div
                                             v-if="row.status == 1"
                                             class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                            @click="handleRefreshData(row)">
+                                            @click.stop="handleRefreshData(row)">
                                             <span class="flex items-center justify-center">
                                                 <Icon name="el-icon-Refresh"></Icon>
                                             </span>
@@ -133,13 +133,13 @@
                                         <div
                                             v-if="row.account_type == 1 && row.status == 1"
                                             class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                            @click="handleGetBusinessCard(row)">
+                                            @click.stop="handleGetBusinessCard(row)">
                                             <Icon name="el-icon-Postcard"></Icon>
                                             <span>名片获取</span>
                                         </div>
                                         <div
                                             class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                            @click="handleDelete(row)">
+                                            @click.stop="handleDelete(row)">
                                             <Icon name="el-icon-Delete"></Icon>
                                             <span>账号移除</span>
                                         </div>

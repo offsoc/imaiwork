@@ -32,8 +32,14 @@ class SvAccountLogic extends SvBaseLogic
             // 获取信息
             $account = self::accountInfo($params['account'], false);
             if ($account instanceof SvAccount) {
-                self::setError('账号已存在');
-                return false;
+                $params['user_id'] = self::$uid;
+                $params['update_time'] = time();
+                $res = SvAccount::where('account', $params['account'])->where('user_id', self::$uid)->update($params);
+                $account = self::accountInfo($params['account'], false);
+
+                $data = $account->toArray();
+                self::$returnData = $data;
+                return true;
             }
 
             $params['user_id'] = self::$uid;

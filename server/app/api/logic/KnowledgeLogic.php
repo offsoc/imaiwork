@@ -41,12 +41,14 @@ class KnowledgeLogic extends ApiLogic
      */
     public static function getListData(array $params)
     {
-
+        $page = $params['page_no'] ?? 1;
+        $size = $params['page_size'] ?? 10;
         $params['name'] = $params['name'] ?? '';
         $result = Knowledge::where(['user_id' => self::$uid])
             ->when($params['name'], function ($query) use ($params) {
                 $query->where('name', 'like', '%' . $params['name'] . '%');
             })
+            ->limit(($page - 1) * $size, $size)
             ->select()
             ->each(function ($item) {
                 $item->file_count = KnowledgeFile::where(['index_id' => $item['index_id']])->count();
@@ -1187,7 +1189,7 @@ class KnowledgeLogic extends ApiLogic
                 $usage = $response['data']['usage'];
                 $tokens = $usage['total_tokens'] + $request['knowledge_tokens'];
                 //计算消耗tokens
-                $points = $unit > 0 ? ceil($tokens / $unit) : 0;
+                $points = $unit > 0 ? round($tokens / $unit,2) : 0;
                 $knowlwdge_tokens = $request['knowledge_tokens'];
             }
 

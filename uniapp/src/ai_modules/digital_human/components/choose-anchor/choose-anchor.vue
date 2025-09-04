@@ -13,11 +13,6 @@
                             <view
                                 class="flex-shrink-0 h-[288rpx] rounded-[24rpx] bg-cover relative bg-black"
                                 :style="{ backgroundImage: `url(${item.pic})` }">
-                                <view class="absolute top-2 right-2" v-if="activeIds.includes(item.anchor_id)">
-                                    <image
-                                        src="@/ai_modules/digital_human/static/icons/success.svg"
-                                        class="w-[28rpx] h-[28rpx]"></image>
-                                </view>
                                 <view class="absolute bottom-2 z-[77] w-full flex justify-center">
                                     <view class="dh-version-name">
                                         {{ modelVersionMap[item.model_version] }}
@@ -41,6 +36,7 @@
 <script setup lang="ts">
 import { getAnchorList } from "@/api/digital_human";
 import { useAppStore } from "@/stores/app";
+import { DigitalHumanModelVersionEnum } from "../../enums";
 
 const props = defineProps({
     show: {
@@ -77,8 +73,9 @@ const pagingRef = shallowRef();
 const dataLists = ref<any[]>([]);
 const queryParams = reactive<any>({
     name: "",
-    model_version: "",
+    model_version: DigitalHumanModelVersionEnum.CHANJING,
     status: 1,
+    type: 0,
 });
 const queryList = async (page_no: number, page_size: number) => {
     try {

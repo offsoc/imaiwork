@@ -117,4 +117,6 @@ class CopywritingController extends BaseApiController
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
+
+
 }

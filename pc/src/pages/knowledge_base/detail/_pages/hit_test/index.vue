@@ -97,7 +97,11 @@
                                     <div class="px-[14px] py-[12px]">
                                         <div
                                             class="line-clamp-4 text-[11px] leading-5 mt-[6px] break-all text-[#00000080]">
-                                            {{ item.content || item.question }}
+                                            问：{{ item.content || item.question }}
+                                        </div>
+                                        <div
+                                            class="line-clamp-4 text-[11px] leading-5 mt-[6px] break-all text-[#00000080]">
+                                            答：{{ item.answer || "-" }}
                                         </div>
                                     </div>
                                     <div

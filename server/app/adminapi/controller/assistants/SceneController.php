@@ -97,5 +97,31 @@ class SceneController extends BaseAdminController
         }
         return SceneLogic::changeStatus($id) ? $this->success() : $this->fail(SceneLogic::getError());
     }
+
+    public function import(){
+        try {
+            $res = SceneLogic::import();
+            $data['import'] = $res;
+            if ($res){
+                return $this->success('导入成功',$data,1,0);
+            }
+            $this->fail('导入失败',$data,0,0);
+        } catch (\Exception $e) {
+            return $this->fail('导入失败: ' . $e->getMessage(),['import'=>false],0,0);
+        }
+    }
+
+    public function check(){
+        try {
+            $res = SceneLogic::check();
+            $data['import'] = $res;
+            if ($res){
+                return $this->success('可以导入',$data,1,0);
+            }
+            return $this->fail('文件已导入',$data,0,0);
+        } catch (\Exception $e) {
+            return $this->fail('错误: ' . $e->getMessage(),['import'=>false],0,0);
+        }
+    }
 }
                         

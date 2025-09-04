@@ -8,7 +8,9 @@
             ">
             <img src="@/assets/images/device.svg" class="w-11 mt-7" />
             <div>
-                <div class="text-[#000000cc]">{{ ToolEnumMap[ToolEnum.DEVICE] }}</div>
+                <div class="text-[#000000cc]">
+                    {{ ToolEnumMap[ToolEnum.DEVICE] }}
+                </div>
                 <div class="text-[#00000080]">
                     键绑定跨平台设备，激活智能流程引擎，全链路接管部门任务，让团队拥有数字化中枢管家。
                 </div>
@@ -49,8 +51,8 @@
                     <ElTableColumn prop="device_code" label="设备码" show-overflow-tooltip />
                     <ElTableColumn prop="name" label="设备状态">
                         <template #default="{ row }">
-                            <ElTag v-if="row.status === 1" type="success">在线</ElTag>
-                            <ElTag v-else type="danger">离线</ElTag>
+                            <ElTag v-if="row.status === 1" type="success" :disable-transitions="false">在线</ElTag>
+                            <ElTag v-else type="danger" :disable-transitions="false">离线</ElTag>
                         </template>
                     </ElTableColumn>
                     <ElTableColumn prop="create_time" label="绑定时间" width="180" show-overflow-tooltip />
@@ -80,6 +82,7 @@
                                         <span>更新数据</span>
                                     </div>
                                     <div
+                                        v-if="false"
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                         @click="handleConfigRPA(row.device_code)">
                                         <Icon name="el-icon-Setting"></Icon>
@@ -128,7 +131,6 @@ import { AppTypeEnum, DeviceCmdCodeEnum, DeviceCmdEnum, ToolEnumMap, ToolEnum } 
 import RpaSetting from "./_components/rpa-setting.vue";
 import DeviceAdd from "./_components/device-add.vue";
 import DeviceProgress from "./_components/device-progress.vue";
-import { EventAction } from "@/composables/useAddDeviceAccount";
 
 const router = useRouter();
 const nuxtApp = useNuxtApp();
@@ -141,56 +143,47 @@ const progressError = ref(false);
 
 const { isConnected, onEvent, send } = useDeviceWs();
 
-const {
-    showAddDevice,
-    addDeviceLoading,
-    progressValue,
-    eventAction,
-    refreshAccount,
-    handleAddDeviceConfirm,
-    handleAddAccount,
-    handleRefreshAccount,
-} = useAddDeviceAccount({
-    send,
-    onEvent,
-    onSuccess: (res) => {
-        const { msg, type } = res;
-        if (msg) feedback.msgSuccess(msg);
-        switch (type) {
-            case DeviceCmdEnum.ADD_DEVICE:
+const { showAddDevice, addDeviceLoading, progressValue, refreshAccount, handleAddDeviceConfirm, handleRefreshAccount } =
+    useAddDeviceAccount({
+        send,
+        onEvent,
+        onSuccess: (res) => {
+            const { msg, type } = res;
+            if (msg) feedback.msgSuccess(msg);
+            switch (type) {
+                case DeviceCmdEnum.GET_USER_INFO:
+                    addDeviceId.value = "";
+                    progressError.value = false;
+                    currDevice.value = null;
+                    showProgress.value = false;
+                    getLists();
+                    break;
+                default:
+                    getLists();
+                    break;
+            }
+        },
+        onError: (err) => {
+            progressError.value = true;
+            progressValue.value = 0;
+            const { code, error, type } = err;
+            if (code != DeviceCmdCodeEnum.CONNECT_ERROR && type != DeviceCmdEnum.BIND_WS) {
+                feedback.msgError(error);
                 getLists();
-                break;
-            default:
-                addDeviceId.value = "";
-                progressError.value = false;
-                currDevice.value = null;
-                break;
-        }
-    },
-    onError: (err) => {
-        progressError.value = true;
-        progressValue.value = 0;
-        const { code, error, type } = err;
-        if (code != DeviceCmdCodeEnum.CONNECT_ERROR && type != DeviceCmdEnum.BIND_WS) {
-            feedback.msgError(error);
-        }
-    },
-});
+            }
+        },
+    });
 
 const addDeviceId = ref("");
 
 const retryAddDevice = () => {
     progressError.value = false;
-    if (eventAction.value == EventAction.UpdateAccount) {
-        handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
-    } else {
-        handleAddDeviceConfirm(addDeviceId.value);
-    }
+    handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
 };
 
 const confirmAddDevice = (deviceId: string) => {
     addDeviceId.value = deviceId;
-    showAddDevice.value = false;
+    progressError.value = false;
     handleAddDeviceConfirm(deviceId);
 };
 
@@ -198,16 +191,8 @@ const currDevice = ref(null);
 const handleRefreshData = (row: any) => {
     currDevice.value = row.device_code;
     refreshAccount.value = row.account;
-    if (row.account.length) {
-        showProgress.value = true;
-        handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
-    } else {
-        showProgress.value = true;
-        handleAddAccount({
-            device_code: currDevice.value,
-            type: AppTypeEnum.REDBOOK,
-        });
-    }
+    showProgress.value = true;
+    handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
 };
 
 const handleAccountDetail = (row: any) => {
@@ -252,7 +237,10 @@ const handleDelete = (row: any) => {
         message: "确定删除该设备吗？",
         onConfirm: async () => {
             try {
-                await deleteDevice({ id: row.id, device_code: row.device_code });
+                await deleteDevice({
+                    id: row.id,
+                    device_code: row.device_code,
+                });
                 feedback.msgSuccess("删除设备成功");
                 getLists();
             } catch (error) {
