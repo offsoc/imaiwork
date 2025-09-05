@@ -55,6 +55,8 @@
                                     multiple
                                     filterable
                                     clearable
+                                    collapse-tags
+                                    collapse-tags-tooltip
                                     popper-class="dark-select-popper"
                                     :show-arrow="false">
                                     <ElOption
@@ -177,7 +179,9 @@
                                             type="primary"
                                             class="!h-[26px] !text-[11px]"
                                             @click="
-                                                handleGreetingContentSetting(GreetingContentSettingTypeEnum.ADD_FRIEND)
+                                                handleGreetingContentSetting(
+                                                    GreetingContentSettingTypeEnum.PRIVATE_CHAT
+                                                )
                                             "
                                             >AI提示词设置</ElButton
                                         >
@@ -197,6 +201,38 @@
                                 </div>
                             </div>
                             <template v-if="formData.add_type == '1'">
+                                <div class="mt-2">
+                                    <div class="text-[#ffffff80] mb-3">加微微信：</div>
+                                    <ElSelect
+                                        v-model="formData.wechat_id"
+                                        placeholder="请选择添加的微信"
+                                        class="!h-11"
+                                        multiple
+                                        filterable
+                                        clearable
+                                        collapse-tags
+                                        collapse-tags-tooltip
+                                        popper-class="dark-select-popper"
+                                        :show-arrow="false">
+                                        <ElOption
+                                            v-for="item in deviceOptions.wechatLists"
+                                            :label="item.wechat_nickname"
+                                            :value="item.wechat_id"
+                                            :key="item.wechat_id"></ElOption>
+                                    </ElSelect>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="text-[#ffffff80] mb-3">加微规则：</div>
+                                    <ElSelect
+                                        v-model="formData.wechat_reg_type"
+                                        class="!h-11"
+                                        popper-class="dark-select-popper"
+                                        :show-arrow="false">
+                                        <ElOption label="全部" :value="0"></ElOption>
+                                        <ElOption label="微信号" :value="1"></ElOption>
+                                        <ElOption label="手机号" :value="2"></ElOption>
+                                    </ElSelect>
+                                </div>
                                 <div class="mt-2">
                                     <div class="text-[#ffffff80] mb-3">自动加好友频率：</div>
                                     <div class="flex items-center gap-x-4">
@@ -247,9 +283,7 @@
                                             type="primary"
                                             class="!h-[26px] !text-[11px]"
                                             @click="
-                                                handleGreetingContentSetting(
-                                                    GreetingContentSettingTypeEnum.PRIVATE_CHAT
-                                                )
+                                                handleGreetingContentSetting(GreetingContentSettingTypeEnum.ADD_FRIEND)
                                             "
                                             >AI提示词设置</ElButton
                                         >
@@ -283,6 +317,7 @@
 <script setup lang="ts">
 import { createTask } from "@/api/sph";
 import { getDeviceList } from "@/api/device";
+import { getWeChatLists } from "@/api/person_wechat";
 import dayjs from "dayjs";
 import { AppTypeEnum } from "@/enums/appEnums";
 import { CreateTypeEnum } from "@/pages/app/sph/_enums";
@@ -307,6 +342,8 @@ interface FormData {
     crawl_type: CreateTypeEnum;
     private_message_prompt: string;
     add_friends_prompt: string;
+    wechat_id: string[];
+    wechat_reg_type: 0 | 1 | 2;
 }
 
 const formData = reactive<FormData>({
@@ -322,16 +359,24 @@ const formData = reactive<FormData>({
     add_number: 15,
     add_interval_time: 10,
     greeting_content: "",
-    crawl_type: CreateTypeEnum.VIDEO,
+    crawl_type: CreateTypeEnum.ACCOUNT,
     private_message_prompt: "",
     add_friends_prompt: "",
+    wechat_id: [],
+    wechat_reg_type: 0,
 });
 
 const { optionsData: deviceOptions } = useDictOptions<{
     deviceLists: any[];
+    wechatLists: any[];
 }>({
     deviceLists: {
         api: getDeviceList,
+        params: { page_size: 1000 },
+        transformData: (data) => data.lists,
+    },
+    wechatLists: {
+        api: getWeChatLists,
         params: { page_size: 1000 },
         transformData: (data) => data.lists,
     },

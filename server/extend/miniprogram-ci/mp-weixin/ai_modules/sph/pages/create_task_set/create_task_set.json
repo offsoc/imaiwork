@@ -8,6 +8,7 @@
     "u-switch": "../../../../uni_modules/vk-uview-ui/components/u-switch/u-switch",
     "u-input": "../../../../uni_modules/vk-uview-ui/components/u-input/u-input",
     "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
+    "data-select": "../../../../components/data-select/data-select",
     "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup"
   }
 }

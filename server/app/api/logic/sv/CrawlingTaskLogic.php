@@ -51,6 +51,10 @@ class CrawlingTaskLogic extends SvBaseLogic
             $params['name'] = date('mdHis', time()) . '视频号获客任务';
             $params['status'] = 1;
             $params['type'] = 4;
+            if(isset($params['wechat_id']) && is_array($params['wechat_id'])){
+                $params['wechat_id'] = implode(',', $params['wechat_id']);
+            }
+            $params['wechat_reg_type'] = $params['wechat_reg_type'] ?? 0;
 
             $task = SvCrawlingTask::create($params);
             //将关键词平均分配给设备
@@ -74,7 +78,7 @@ class CrawlingTaskLogic extends SvBaseLogic
                     throw new \Exception('设备任务绑定失败');
                 }
             }
-            
+
             $result = $task->toArray();
             $result['device_codes'] = json_decode($result['device_codes'], JSON_UNESCAPED_UNICODE);
             $result['keywords'] = json_decode($result['keywords'], JSON_UNESCAPED_UNICODE);
@@ -95,7 +99,6 @@ class CrawlingTaskLogic extends SvBaseLogic
     {
         SvCrawlingTask::where('id', '<', $task_id)->where('status', 'in', [0, 1, 2])->where('user_id', self::$uid)->update(['status' => 3, 'update_time' => time()]);
         SvCrawlingTaskDeviceBind::where('task_id', '<', $task_id)->where('status', 'in', [0, 1, 2])->where('user_id', self::$uid)->update(['status' => 3, 'update_time' => time()]);
-
     }
 
     /**
@@ -178,7 +181,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             }
             $task->update_time = time();
             $task->save();
-            
+
 
 
             self::$returnData = $task->toArray();
@@ -216,8 +219,8 @@ class CrawlingTaskLogic extends SvBaseLogic
             }
 
             $binds = SvCrawlingTaskDeviceBind::where('task_id', $task['id'])->where('user_id', self::$uid)->select();
-            foreach($binds as $bind){
-                if(!empty($bind['exec_keyword'])){
+            foreach ($binds as $bind) {
+                if (!empty($bind['exec_keyword'])) {
                     $result[$bind['exec_keyword']]['status'] = $bind['status'];
                     $result[$bind['exec_keyword']]['device_code'] = $bind['device_code'];
                 }
@@ -300,12 +303,12 @@ class CrawlingTaskLogic extends SvBaseLogic
             $response = \app\common\service\ToolsService::Sv()->ocr($params);
             if (isset($response['code']) && $response['code'] == 10000) {
                 $task = SvCrawlingTask::where('id', $params['task_id'])->findOrEmpty();
-                if($task->isEmpty()){
+                if ($task->isEmpty()) {
                     self::setError('爬取任务不存在');
                     return false;
                 }
 
-                 //检查扣费
+                //检查扣费
                 $unit = TokenLogService::checkToken($task['user_id'], 'sph_ocr');
                 //计算消耗tokens
                 $points = $unit;
@@ -318,7 +321,7 @@ class CrawlingTaskLogic extends SvBaseLogic
 
                 self::$returnData = $response;
                 return true;
-            }else{
+            } else {
                 self::setError($response['msg'] ?? '请求失败');
                 return false;
             }

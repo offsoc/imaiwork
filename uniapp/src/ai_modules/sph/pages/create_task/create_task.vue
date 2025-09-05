@@ -214,7 +214,6 @@ onShow(() => {
     getDeviceList();
     uni.$on("save", (data: any) => {
         Object.assign(formData, data);
-        console.log(formData);
         uni.$off("save");
     });
 });

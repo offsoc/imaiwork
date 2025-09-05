@@ -8,6 +8,8 @@ use app\common\workerman\rpa\WorkerEnum;
 use app\common\model\sv\SvAddWechatRecord;
 use app\common\model\sv\SvAddWechatStrategy;
 use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatLog;
+
 use think\facade\Db;
 use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
@@ -86,23 +88,6 @@ class TaskRecordSaveHandler extends BaseMessageHandler
     private function addTaskRecord(array $content)
     {
         try {
-            // $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:accountNo");
-            // if(empty($accountNo)){
-            //     $this->setLog('设备未更新账号信息,请先更新账号信息' , 'task_record');
-            //     return;
-            // }
-            // $where = [];
-            // $where[] = ['a.device_code', '=', $this->payload['deviceId']];
-            // if ($accountNo != '') {
-            //     $where[] = ['a.account', '=', $accountNo];
-            // }
-            // $account = SvAccount::alias('a')
-            //     ->field('*')
-            //     ->where($where)
-            //     ->join('sv_setting s', 's.account = a.account and s.user_id = a.user_id')
-            //     ->order('a.update_time desc')
-            //     ->limit(1)->find();
-
             if (in_array($content['username'], ['WebSocket地址', 'WebSocket 地址', 'WebSocket地址:', 'WebSocket 地址:'])) {
                 $this->setLog('用户名包含WebSocket地址,忽略', 'task_record');
                 $this->payload['type'] = 27;
@@ -247,7 +232,6 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $crawlContent = implode("\n", $strings);
             $crawlContent = str_replace(array_values($this->provinces), "", $crawlContent);
 
-
             $wechatPattern = '/[-_a-zA-Z0-9]{6,20}/';
             $phonePattern = '/1[3-9]\d{9}/';
             $pattern = '/([-_a-zA-Z0-9]{6,20})|(1[3-9]\d{9})/';
@@ -295,176 +279,168 @@ class TaskRecordSaveHandler extends BaseMessageHandler
     {
 
         try {
-            $strategy = SvAddWechatStrategy::where('device_code', $device_code)
-                ->where('user_id', $userid)
-                ->order('id desc')
-                ->limit(1)->findOrEmpty();
-
-            if ($strategy->isEmpty()) {
-                $strategy = [
-                    "account_type" => 3,
-                    "wechat_enable" => 0,
-                    "wechat_reg_type" => 0,
-                    "wechat_id" => '',
-                    "remark" => '您好',
-                    'after_reply' => '好的.老板稍等,马上加您'
-                ];
+            $wechat_ids = explode(',', $task->wechat_id);
+            $wechat_reg_type = (int)$task->wechat_reg_type;
+            if (empty($wechat_ids)) {
+                $this->setLog('任务ID:' . $task->id . '没有配置微信账号', 'task_record');
                 $addWechat = $this->getRegContent($payload['crawl_content']);
                 return [true, $addWechat];
             }
-            $this->setLog(is_array($strategy) ? $strategy : $strategy->toArray(), 'task_record');
+
             $addWechat = array();
-            if ($strategy['wechat_enable'] == 1) {
-                $replyContent = $payload['crawl_content'];
-                $strings = explode("\n", $replyContent);
-                if (count($strings) > 2) {
-                    $strings = array_values(array_slice($strings, 2));
-                } else {
-                    $strings = [];
+            $replyContent = $payload['crawl_content'];
+            $strings = explode("\n", $replyContent);
+            if (count($strings) > 2) {
+                $strings = array_values(array_slice($strings, 2));
+            } else {
+                $strings = [];
+            }
+            if (empty($strings)) {
+                return [false, []];
+            }
+            $replyContent = implode("\n", $strings);
+            $replyContent = str_replace(array_values($this->provinces), "", $replyContent);
+
+            $wechatPattern = '/[-_a-zA-Z0-9]{6,20}/';
+            $phonePattern = '/1[3-9]\d{9}/';
+            $pattern = '/([-_a-zA-Z0-9]{6,20})|(1[3-9]\d{9})/';
+
+            $blacklist = array(
+                'imaiwork'
+            );
+
+            $isInWechat = false;
+            $content = str_replace(["加vx", "加VX", "加v", "加V", "加wx", "加WX", "+wx", "+WX", "+vx", "+VX", "+v", "+V"], '', $replyContent);
+            $matchs = [];
+            if ($wechat_reg_type === 0) {
+                preg_match_all($pattern, $content, $matchs, PREG_SET_ORDER);
+            } else {
+                if ($wechat_reg_type === 1) {
+                    preg_match_all($wechatPattern, $content, $matchs);
                 }
-                if (empty($strings)) {
-                    return [false, []];
+                if ($wechat_reg_type === 2) {
+                    preg_match_all($phonePattern, $content, $matchs);
                 }
-                $replyContent = implode("\n", $strings);
-                $replyContent = str_replace(array_values($this->provinces), "", $replyContent);
+            }
 
-                $wechatPattern = '/[-_a-zA-Z0-9]{6,20}/';
-                $phonePattern = '/1[3-9]\d{9}/';
-                $pattern = '/([-_a-zA-Z0-9]{6,20})|(1[3-9]\d{9})/';
-
-                $blacklist = array(
-                    'imaiwork'
-                );
-
-                $isInWechat = false;
-                $content = str_replace(["加vx", "加VX", "加v", "加V", "加wx", "加WX", "+wx", "+WX", "+vx", "+VX", "+v", "+V"], '', $replyContent);
-                $matchs = [];
-                if ($strategy['wechat_reg_type'] == 0) {
-                    preg_match_all($pattern, $content, $matchs, PREG_SET_ORDER);
-                } else {
-                    if ($strategy['wechat_reg_type'] == 1) {
-                        preg_match_all($wechatPattern, $content, $matchs);
+            if (!empty($matchs)) {
+                $isInWechat = true;
+                foreach ($matchs as $match) {
+                    $this->setLog($match, 'task_record');
+                    if (empty($match)) {
+                        continue;
                     }
-                    if ($strategy['wechat_reg_type'] == 2) {
-                        preg_match_all($phonePattern, $content, $matchs);
+                    $userWechatNo = $match[0];
+                    $this->setLog($userWechatNo, 'task_record');
+
+                    if (in_array(strtolower($userWechatNo), $blacklist)) {
+                        $this->setLog('忽略字符串', 'task_record');
+                        continue;
                     }
-                }
+                    $addWechat[] = $userWechatNo;
+                    $status = 2;
 
-                if (!empty($matchs)) {
-                    $isInWechat = true;
-                    foreach ($matchs as $match) {
-                        $this->setLog($match, 'task_record');
-                        if (empty($match)) {
-                            continue;
-                        }
-                        $userWechatNo = $match[0];
-                        $this->setLog($userWechatNo, 'task_record');
+                    //查询当前设备该微信号执行记录
+                    $recordCount = SvAddWechatRecord::where('user_id', $userid)
+                        ->where('device_code', $device_code)
+                        ->where('account_type', 4)
+                        ->where('reg_wechat', $userWechatNo)
+                        ->where('status', 0)
+                        ->where('channel', 4)
+                        ->count();
+                    $this->setLog($recordCount, 'task_record');
+                    if ($recordCount >= 5) {
+                        $this->setLog($userWechatNo . '该账号已执行5次,忽略', 'task_record');
+                        continue;
+                    }
 
-                        if (in_array(strtolower($userWechatNo), $blacklist)) {
-                            $this->setLog('忽略字符串', 'task_record');
-                            continue;
-                        }
-                        $addWechat[] = $userWechatNo;
-                        $status = 2;
+                    $record = [
+                        'user_id' => $userid,
+                        'device_code' => $device_code,
+                        'account' => $payload['account'] ?? ($payload['username'] ?? ''),
+                        'account_type'  => 4,
+                        'user_account' => $payload['username'],
+                        'original_message' => $payload['crawl_content'],
+                        'reg_wechat' => $userWechatNo,
+                        'action' => 1,
+                        'status' => $status,
+                        'channel' => 4,
+                        'exec_type' => $payload['exec_type'] ?? 2,
+                        'task_id' => time() . rand(100, 9999),
+                        'create_time' => time()
+                    ];
+
+                    $useWechat = [];
+                    foreach ($wechat_ids as $wechat_id) {
                         //计算微信加微间隔
-                        $interval_find = SvAddWechatRecord::where('device_code', $device_code)
-                            ->where('channel', 4)
-                            ->where('account_type', 4)
-                            ->where('wechat_no', 'in', $strategy['wechat_id'])
-                            ->order('id desc')
+                        $interval_find = AiWechatLog::where('user_id', $userid)
+                            ->where('log_type', 0)
+                            ->where('wechat_id', $wechat_id)
+                            ->where('create_time', '>', (time() - ((int)$task->add_interval_time * 60)))
+                            ->order('id', 'desc')
                             ->findOrEmpty();
                         if (!$interval_find->isEmpty()) {
-                            if (time() - (int)$interval_find['create_time'] < (int)$task->add_interval_time) {
-                                $this->setLog('间隔时间未到', 'task_record');
-                                $status = 0;
-                            }
-
-                            //计算该账号加微次数
-                            $addCount =  SvAddWechatRecord::where('wechat_no', $interval_find->wechat_no)
-                                ->where('channel', 4)
-                                ->where('account_type', 4)
-                                ->where('create_time', 'between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))])
-                                ->count();
-                            if ($addCount >= $task->add_number) {
-                                $this->setLog('加微次数已到', 'task_record');
-                                $status = 0;
-                            }
-                        }
-
-                        $currentTime = time(); // 获取当前时间戳
-                        $coolingThreshold = $currentTime - 7200; // 2小时前的时间戳（7200秒）
-                        $wechat = AiWechat::field('*')
-                            //->where('user_id', $strategy['user_id'])
-                            ->where('wechat_id', 'in', explode(',', $strategy['wechat_id']))
-                            ->where('wechat_no', '<>', $interval_find->wechat_no)
-                            ->where(function ($query) use ($coolingThreshold) {
-                                $query->where('is_cooling', 0)
-                                    ->whereOr('cooling_time', '<', $coolingThreshold);
-                            })
-                            ->order('update_time asc')->limit(1)->findOrEmpty();
-
-
-                        $this->setLog(Db::getLastSql(), 'task_record');
-                        //查询当前设备该微信号执行记录
-                        $recordCount = SvAddWechatRecord::where('user_id', $userid)
-                            ->where('device_code', $device_code)
-                            ->where('account_type', 4)
-                            ->where('reg_wechat', $userWechatNo)
-                            ->where('status', 0)
-                            ->where('channel', 4)
-                            ->count();
-                        $this->setLog($recordCount, 'task_record');
-
-                        $record = [
-                            'user_id' => $userid,
-                            'device_code' => $device_code,
-                            'account' => $payload['account'] ?? ($payload['username'] ?? ''),
-                            'account_type'  => 4,
-                            'user_account' => $payload['username'],
-                            'original_message' => $payload['crawl_content'],
-                            'reg_wechat' => $userWechatNo,
-                            'action' => 1,
-                            'status' => $status,
-                            'channel' => 4,
-                            'exec_type' => $payload['exec_type'] ?? 2,
-                            'task_id' => time() . rand(100, 9999),
-                            'create_time' => time()
-                        ];
-                        if ($recordCount >= 5) {
-                            $this->setLog('该账号已执行5次,忽略', 'task_record');
-                            $this->setLog($record, 'task_record');
+                            $this->setLog('当前微信' . $wechat_id . '加微间隔未到', 'task_record');
                             continue;
                         }
-                        // $content  =$this->createGreetingMessage($task, $userid);
-                        // $this->setLog($task->remark, 'task_record');
-                        // $this->setLog($content , 'task_record');
-                        if (!$wechat->isEmpty()) {
-                            $this->setLog($wechat, 'task_record');
-                            $record['wechat_no'] = $wechat['wechat_id'];
-                            $record['wechat_name'] = $wechat['wechat_nickname'];
-                            //$record['status'] = 2;
-                            $this->setLog($record, 'task_record');
 
-                            $this->sendChannelAddWechatMessage([
-                                'WechatId' => $wechat['wechat_id'],
-                                'DeviceCode' => $wechat['device_code'],
-                                'Phones' => $userWechatNo,
-                                'message' => $this->createGreetingMessage($task, $userid), //ai生成打招呼消息
-                            ], $wechat, $record);
-                        } else {
-                            $record['status'] = 3;
-                            $record['result'] = '微信账号冷却中,稍后手动重试';
-                            SvAddWechatRecord::create($record);
+                        $addCount = AiWechatLog::where('user_id', $userid)
+                            ->where('log_type', 0)
+                            ->where('wechat_id', $wechat_id)
+                            ->where('create_time', 'between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))])
+                            ->count();
+                        if ($addCount >= $task->add_number) {
+                            $this->setLog('当前微信' . $wechat_id . '今日加微信次数已到', 'task_record');
+                            continue;
                         }
+
+                        array_push($useWechat, $wechat_id);
+                    }
+
+                    if (empty($useWechat)) {
+                        $this->setLog('当前无可以使用的微信账号', 'task_record');
+                        $record['status'] = 0;
+                        $record['result'] = '当前暂无可以使用的微信账号';
+                        SvAddWechatRecord::create($record);
+                        continue;
+                    }
+
+
+                    $currentTime = time(); // 获取当前时间戳
+                    $coolingThreshold = $currentTime - 7200; // 2小时前的时间戳（7200秒）
+                    $wechat = AiWechat::field('*')
+                        ->where('wechat_id', 'in', $useWechat)
+                        ->where(function ($query) use ($coolingThreshold) {
+                            $query->where('is_cooling', 0)->whereOr('cooling_time', '<', $coolingThreshold);
+                        })
+                        ->order('update_time asc')->limit(1)->findOrEmpty();
+
+                    $this->setLog(Db::getLastSql(), 'task_record');
+
+                    if (!$wechat->isEmpty()) {
+                        $this->setLog($wechat, 'task_record');
+                        $record['wechat_no'] = $wechat['wechat_id'];
+                        $record['wechat_name'] = $wechat['wechat_nickname'];
+                        $this->setLog($record, 'task_record');
+
+                        $this->sendChannelAddWechatMessage([
+                            'WechatId' => $wechat['wechat_id'],
+                            'DeviceCode' => $wechat['device_code'],
+                            'Phones' => $userWechatNo,
+                            'message' => $this->createGreetingMessage($task, $userid), //ai生成打招呼消息
+                        ], $wechat, $record);
+                    } else {
+                        $record['status'] = 3;
+                        $record['result'] = '微信账号冷却中,稍后手动重试';
+                        SvAddWechatRecord::create($record);
+                        $this->setLog('微信账号冷却中,稍后手动重试或者微信号不存在', 'task_record');
                     }
                 }
-                if ($addWechat) {
-                    return [true, $addWechat];
-                }
-            } else {
-                $addWechat = $this->getRegContent($payload['crawl_content']);
+            }
+            if ($addWechat) {
                 return [true, $addWechat];
             }
+
             return [false, []];
         } catch (\Throwable $e) {
             $this->setLog('异常信息' . $e, 'task_record');
@@ -553,7 +529,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                 'usage_tokens' => $response['data']['usage'] ?? [],
             ];
             //计算消耗tokens
-            $points = $unit > 0 ? round($tokens / $unit,2) : 0;
+            $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
             //token扣除
             User::userTokensChange($user_id, $points);
 
@@ -621,6 +597,14 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                 $wechat->cooling_time = 0;
                 $wechat->update_time = time();
                 $wechat->save();
+
+                AiWechatLog::create([
+                    'user_id' => $wechat->user_id,
+                    'wechat_id' => $wechat->wechat_id,
+                    'log_type' => 0,
+                    'friend_id' => $payload['Phones'],
+                    'create_time' => time()
+                ]);
             } else {
                 $record->status = 0;
                 $record->result = '检测当天添加好友超过阈值';

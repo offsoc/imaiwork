@@ -523,10 +523,9 @@ const prepareAttachmentContent = () => {
  * 处理表单提交
  */
 const handleCreate = async () => {
+    // 表单验证
+    await formRef.value?.validate();
     try {
-        // 表单验证
-        await formRef.value?.validate();
-
         // 设置附件内容
         formData.value.attachment_content = prepareAttachmentContent();
 
@@ -546,10 +545,7 @@ const handleCreate = async () => {
         close();
         emit("success");
     } catch (error) {
-        // 验证错误会在此处捕获，无需显示通知
-        if (error) {
-            feedback.msgError(error);
-        }
+        feedback.msgError(error);
     }
 };
 

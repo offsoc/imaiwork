@@ -66,15 +66,15 @@ class StageLogic extends ApiLogic
             }
 
             // 检查阶段名称是否有实际变化
-            if (isset($params['sub_stage_name'])) {
-                $newName = trim((string)$params['sub_stage_name']);
-                $oldName = trim((string)$subStage->sub_stage_name);
-
-                if ($newName === $oldName) {
-                    self::setError('阶段名称没有变化');
-                    return false;
-                }
-            }
+//            if (isset($params['sub_stage_name'])) {
+//                $newName = trim((string)$params['sub_stage_name']);
+//                $oldName = trim((string)$subStage->sub_stage_name);
+//
+//                if ($newName === $oldName) {
+//                    self::setError('阶段名称没有变化');
+//                    return false;
+//                }
+//            }
 
             $params['update_time'] = time();
             $subStage->save($params);

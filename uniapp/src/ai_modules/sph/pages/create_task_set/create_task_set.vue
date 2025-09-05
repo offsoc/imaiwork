@@ -23,7 +23,7 @@
                                             :size="32"
                                             active-value="1"
                                             inactive-value="0"
-                                            @change="(e:any) => formData.chat_type = e == '1' ? '0' : '1'" />
+                                            @change="(e: any) => formData.chat_type = e == '1' ? '0' : '1'" />
                                     </view>
                                 </view>
                                 <template v-if="formData.chat_type == '1'">
@@ -96,10 +96,27 @@
                                             :size="32"
                                             active-value="1"
                                             inactive-value="0"
-                                            @change="(e:any) => formData.add_type = e == '1' ? '0' : '1'" />
+                                            @change="(e: any) => formData.add_type = e == '1' ? '0' : '1'" />
                                     </view>
                                 </view>
                                 <template v-if="formData.add_type == '1'">
+                                    <view class="mt-[32rpx]">
+                                        <view class="mb-3">加微微信</view>
+                                        <data-select
+                                            v-model="formData.wechat_id"
+                                            multiple
+                                            :localdata="optionsData.wechatLists"></data-select>
+                                    </view>
+                                    <view class="mt-[32rpx]">
+                                        <view class="mb-3">加微规则</view>
+                                        <data-select
+                                            v-model="formData.wechat_reg_type"
+                                            :localdata="[
+                                                { text: '全部', value: 0 },
+                                                { text: '微信号', value: 1 },
+                                                { text: '手机号', value: 2 },
+                                            ]"></data-select>
+                                    </view>
                                     <view class="flex gap-x-[30rpx] mt-[32rpx]">
                                         <view class="flex-1">
                                             <view>当前执行</view>
@@ -223,6 +240,8 @@
 <script setup lang="ts">
 import { setFormData } from "@/utils/util";
 import { getScenePrompt as getScenePromptApi } from "@/api/app";
+import { getWeChatLists } from "@/api/person_wechat";
+import { useDictOptions } from "@/hooks/useDictOptions";
 
 enum GreetingContentSettingTypeEnum {
     ADD_FRIEND = "add_friends_prompt",
@@ -240,6 +259,8 @@ const formData = reactive({
     add_interval_time: 10,
     private_message_prompt: "",
     add_friends_prompt: "",
+    wechat_id: "",
+    wechat_reg_type: 0,
 });
 
 const showChatPopup = ref(false);
@@ -247,6 +268,20 @@ const showChatPopup = ref(false);
 const currentGreetingContentSettingType = ref<GreetingContentSettingTypeEnum>(
     GreetingContentSettingTypeEnum.PRIVATE_CHAT
 );
+
+const { optionsData } = useDictOptions<{
+    wechatLists: any[];
+}>({
+    wechatLists: {
+        api: getWeChatLists,
+        params: { page_size: 1000 },
+        transformData: (res: any) =>
+            res.lists?.map((item: any) => ({
+                text: item.wechat_nickname,
+                value: item.wechat_id,
+            })),
+    },
+});
 
 const handleGreetingContentSetting = (type: GreetingContentSettingTypeEnum) => {
     currentGreetingContentSettingType.value = type;
@@ -266,6 +301,10 @@ const handleDefaultPrompt = () => {
 };
 
 const handleSaveAndReturn = () => {
+    if (formData.add_type == "1" && formData.wechat_id.length == 0) {
+        uni.$u.toast("请选择加微微信");
+        return;
+    }
     uni.$emit("save", formData);
     uni.navigateBack();
 };

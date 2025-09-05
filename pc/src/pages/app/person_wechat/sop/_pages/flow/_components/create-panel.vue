@@ -300,7 +300,7 @@ const draggableOptions = [
                 nextTick(() => {
                     stageLists.value = arr;
                 });
-                getDetail();
+                // getDetail();
             },
         },
     },
@@ -414,9 +414,9 @@ const toggleFollowRemindList = (id: any) => {
 };
 
 const getMatchType = (type: string, value: any) => {
-    const { match_type, action_type, status } = value;
+    const { match_type, chat_match_mode, status } = value;
     if (type == "trigger") {
-        return match_type == 1 ? "动作匹配" : action_type == 1 ? "模糊匹配" : "精确匹配";
+        return match_type == 1 ? "动作匹配" : chat_match_mode == 1 ? "模糊匹配" : "精确匹配";
     } else if (type == "follow") {
         return status == 1 ? "未联系提醒" : "停留提醒";
     }

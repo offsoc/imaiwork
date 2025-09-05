@@ -37,7 +37,7 @@ class InterviewLogic extends BaseLogic
      */
     public static function jobs(array $params)
     {
-     
+
         if (!empty($params['job_id'])){
             $result = InterviewJob::where(['user_id' => $params['user_id'], 'status' => 1])->where('id', $params['job_id'])->select()->toArray();
         } else {
@@ -83,12 +83,12 @@ class InterviewLogic extends BaseLogic
         if(!$user_id){
             throw new Exception('岗位不存在!');
         }
-        
+
         // Db::startTrans();
-        try {   
-           
+        try {
+
             //计费
-           //$unit = TokenLogService::checkToken($user_id, 'interview_cv');
+            //$unit = TokenLogService::checkToken($user_id, 'interview_cv');
             $unit = 0;
             $url = $params['word'];
 //            $urlData = parse_url($url);
@@ -108,10 +108,10 @@ class InterviewLogic extends BaseLogic
 
             $file_id = 'fileid://' . $file_id;
             $cv_content = [
-                        "role"=>"简历信息解析助手",
-                        "description"=>"从用户上传的简历文本中精准提取结构化信息，并以标准化JSON格式返回。",
-                        "instruction"=> 
-                        '请严格按照以下规则解析简历内容：
+                "role"=>"简历信息解析助手",
+                "description"=>"从用户上传的简历文本中精准提取结构化信息，并以标准化JSON格式返回。",
+                "instruction"=>
+                    '请严格按照以下规则解析简历内容：
                         1. **提取字段**：
                            - 姓名（需全称，忽略昵称/英文名）
                            - 性别（若未明确标注则留空）
@@ -150,14 +150,14 @@ class InterviewLogic extends BaseLogic
                             "分布式消息队列优化 | 技术负责人 | Kafka/Go/Prometheus | 降低端到端延迟从200ms至80ms",
                             "智能风控系统 | 核心开发者 | Spring Cloud/Redis/Elasticsearch | 拦截欺诈交易准确率达99.2%"
                           ]'
-              ];
+            ];
 
             $messages = [
                 [
                     "role"=>"system",
                     "content"=> json_encode($cv_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                       
-                    ],
+
+                ],
                 [
                     "role"=>"system",
                     "content"=> $file_id
@@ -167,7 +167,7 @@ class InterviewLogic extends BaseLogic
                     "content"=>"请把这份简历文件给我JSON格式数据"
                 ]
             ];
-       
+
             $response = \app\common\service\ToolsService::Interview()->jx([
                 'messages'  => $messages,
                 'action' => 'qwen'
@@ -176,33 +176,33 @@ class InterviewLogic extends BaseLogic
             {
                 throw new Exception('简历分析失败!');
             }
-        
+
             $message = $response['data']['message'];
             $json = format_json($message);
             $sex = [
                 '男' => 1,
                 '女' => 2
             ];
-          
+
             foreach($json as $key => &$value){
                 if(is_array($value)){
                     $value = json_encode($value,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 }
-               //性别替换
+                //性别替换
                 if($key == 'sex'){
                     $value= $sex[$value] ?? 0;
                 }
                 if(empty($value)){
                     $value = '';
                 }
-                
+
             }
-            $json['word_url'] =  $url ; 
-            $json['company_id'] =  $user_id; 
-            $json['type'] =  2; 
-            $json['interview_job_id'] =  $params['interview_job_id']; 
-            $json['user_id'] =  $params['user_id']; 
-           // $cvres = InterviewCv::create($json);
+            $json['word_url'] =  $url ;
+            $json['company_id'] =  $user_id;
+            $json['type'] =  2;
+            $json['interview_job_id'] =  $params['interview_job_id'];
+            $json['user_id'] =  $params['user_id'];
+            // $cvres = InterviewCv::create($json);
             // if($unit > 0){
             //     //扣除算力
             //     User::userTokensChange($user_id, $unit);
@@ -299,28 +299,28 @@ class InterviewLogic extends BaseLogic
         $params['company_id'] = $user_id;
         $params['interview_job_id'] = $params['interview_job_id'];
         $cv = InterviewCv::where(['user_id' => $params['user_id'],'interview_job_id'=>$params['interview_job_id']])->findOrEmpty();
-       
+
 
         foreach($params as $key => &$value){
             $value = trim($value);
             if($key == 'word_url'){
-              continue;
+                continue;
             }
             if($key == 'work_url'){
                 continue;
-              }
+            }
             if(empty($value)){
                 throw new Exception('参数不能为空');
             }
         }
         if(isset($params['work_url'])){
-           unset($params['work_url']);
+            unset($params['work_url']);
         }
         if ($cv->isEmpty())
         {
             InterviewCv::create($params);
         } else {
-           
+
             InterviewCv::where(['id' => $cv->id])->save($params);
         }
         return true;
@@ -370,12 +370,12 @@ class InterviewLogic extends BaseLogic
                         "算力单价" => $unit,
                         "实际消耗算力" => $unit
                     ];
-                   
+
                     AccountLogLogic::recordUserTokensLog(true, $job['user_id'], AccountLogEnum::TOKENS_DEC_AI_INTERVIEW_CHAT, $unit, $interviewRecord['id'], $extra);
-                    
+
                 }
             }
-            
+
             $interview = Interview::where(['user_id' => $params['user_id'], 'job_id' => $params['job_id']])->order('id', 'desc')->findOrEmpty()->toArray();
             //没有面试邀约，生成一个新的
             if (empty($interview)) {
@@ -440,7 +440,7 @@ class InterviewLogic extends BaseLogic
 
     public static function chat($params)
     {
-       
+
         $user_id = $params['user_id'];
         $interview_id = $params['id'];
         $isEnd = 0;
@@ -493,29 +493,29 @@ class InterviewLogic extends BaseLogic
         // 判断当前对话类型
         $attentionArray = json_decode($job->attention, true);
         $attentionCount = count($attentionArray);   // 关注点个数
-       
+
 
         // 检测是否已结束
         $chatTypeEnd = self::chatType($dialogCount + 1, $attentionCount);
-       
+
         if ($chatTypeEnd == 0)
         {
             // 访问通义获取评分和面试评价
             Queue::push('app\common\Jobs\EndInterviewJob@handle',  $interview->id);
-            
+
             $interview->end_time = time();
             $interview->status = Interview::STATUS_ANALYZE;
             $interview->save();
-           
+
             $duration = $interview->end_time -  $interviewRecord->first_start_time;
             $interviewRecord->duration = $duration;
             $interviewRecord->end_time = $interview->end_time;
             $interviewRecord->status = Interview::STATUS_ANALYZE;
             $interviewRecord->last_interview_id = $interview->id;
             $interviewRecord->save();
-           
-           
-            $message = $endMessgae = '好的，大致情况我已经了解，本轮面试已结束，感谢您的配合，请提交面试过程并耐心等待通知。';  
+
+
+            $message = $endMessgae = '好的，大致情况我已经了解，本轮面试已结束，感谢您的配合，请提交面试过程并耐心等待通知。';
             self::$returnData = [
                 'id' => $interview_id,
                 'status' => 1,
@@ -554,7 +554,7 @@ class InterviewLogic extends BaseLogic
                 ->order('id DESC')
                 ->findOrEmpty();
             $dialogs = InterviewDialog::where('id', '>=', $mainDialog->id)->where('interview_id', $interview_id)->select()->toArray();
-            
+
             $message = self::chat2($job, $cv, $dialogs);
             if (!empty($message))
             {
@@ -690,40 +690,40 @@ class InterviewLogic extends BaseLogic
         $sex = $cv->sex == 2 ? '女' : '男';
         $attention = implode(";", json_decode($job->attention, true));
         $system = "
-# 角色定位  
-你是一位经验丰富的HR面试官，擅长通过自然交流了解候选人。你的提问风格要像真实HR一样：语气专业友好，问题结合候选人的具体经历，避免生硬模板化，让候选人感觉是在被“针对性了解”而非“机械提问”。
+- 角色定位  
+你是一位经验丰富的HR真人面试官，擅长通过自然交流了解候选人。你的提问风格要像真实HR一样：不能用括号、语气专业友好，问题结合候选人的具体经历，避免生硬模板化，让候选人感觉是在被“针对性了解”而非“机械提问”。
 
-# 核心任务  
+- 核心任务  
 基于候选人的简历和岗位要求，生成1个面试问题。请严格遵循以下逻辑：  
-## 关键依据（必须结合）：  
+-- 关键依据（必须结合）：  
 1. 岗位核心信息：  
-    - 岗位名称：{$job->name}  
-    - 主要职责：{$job->desc}（问题要关联岗位实际工作内容）  
-    - 任职要求：{$job->jd}（聚焦岗位必备技能/经验）  
-    - 附加考察要求：{$job->extra} 
+    岗位名称：{$job->name}  
+    主要职责：{$job->desc}
+    任职要求：{$job->jd}
+    附加考察要求：{$job->extra} 
 2. 候选人具体情况：
-    - 姓名：{$cv->name} 
-    - 性别：{$sex} 
-    - 年龄：{$cv->age} 
-    - 学历：{$cv->degree} 
-    - 毕业院校：{$cv->school} 
-    - 工作经历：{$cv->work_ex} 
-    - 项目经历：{$cv->project_ex}（针对具体项目中的角色、成果提问）
-3. HR关注点：{$attention}（问题必须紧扣这个核心考察点，如“团队协作”“抗压能力”等）  
+    姓名：{$cv->name} 
+    性别：{$sex} 
+    年龄：{$cv->age} 
+    学历：{$cv->degree} 
+    毕业院校：{$cv->school} 
+    工作经历：{$cv->work_ex} 
+    项目经历：{$cv->project_ex}
+3. HR关注点：{$attention}
 
-## 提问要求（必须满足）：  
-- 自然口语化：像日常对话一样，避免“请描述XX”“请说明XX”这种生硬开头，可用“你之前在XX公司做XX的时候，遇到过XX情况吗？”“我注意到你有XX项目经历，当时你是如何XX的？”等更自然的表达。  
-- 针对性强：问题中要体现你“看过候选人简历”，比如提及具体公司、岗位、项目名称（如果简历中有），避免泛泛而谈（例：不要问“你如何处理团队矛盾？”，而要结合简历问“你在XX公司担任XX岗位时，团队中如果出现意见分歧，你通常会怎么协调？”）。  
-- 聚焦考察点：问题要让候选人的回答能直接体现HR关注点（如考察“抗压能力”，就结合其过往高压场景提问）。  
-- 不重复/不解释：只说问题本身，不用编号、不用说明“这个问题考察XX”，直接像真实面试中一样抛出问题。  
+-- 提问要求（必须满足）：  
+1.自然口语化：你是个真人HR，像日常对话一样对候选人进行提问，不能加说明，不能用括号、不能“请描述XX”“请说明XX”这种生硬开头，可用“你之前在XX公司做XX的时候，遇到过XX情况吗？”“我注意到你有XX项目经历，当时你是如何XX的？”等更自然的表达。  
+2.针对性强：问题中要体现你“看过候选人简历”，比如提及具体公司、岗位、项目名称，不能泛泛而谈（例：不要问“你如何处理团队矛盾？”，而要结合简历问“你在XX公司担任XX岗位时，团队中如果出现意见分歧，你通常会怎么协调？”）。  
+3.聚焦考察点：问题要让候选人的回答能直接体现HR关注点（如考察“抗压能力”，就结合其过往高压场景提问）。  
+4.不重复/不解释：只说问题本身，要像真人对话一样、像真实面试中一样提问，不能用编号、不能用括号、不能说“这个问题考察了XXX”。  
 
-# 示例（参考这种自然感和针对性）  
-## 背景：  
-- 岗位：新媒体运营（职责含“突发舆情处理”）  
-- 候选人工作经历：有2年电商平台新媒体运营经验，负责过“618大促期间的用户评论管理”  
-- HR关注点：应急处理能力  
+- 示例（参考这种自然感和针对性）  
+-- 候选人背景：
+岗位：新媒体运营
+候选人工作经历：有2年电商平台新媒体运营经验，负责过“618大促期间的用户评论管理”  
+HR关注点：应急处理能力  
 
-## 输出（正确示例）：  
+-- 输出提问：  
 你之前在电商平台做新媒体运营时，618大促期间肯定遇到过用户集中投诉的情况吧？当时如果突然出现大量负面评论，你是怎么快速响应处理的？
 ";
         $message[] = [
@@ -760,42 +760,43 @@ class InterviewLogic extends BaseLogic
 //        $curDialog = reset($dialogs);
         $curDialog = $dialogs[0];
         $system = "
-# 角色定位  
-你是一位经验丰富的HR面试官，擅长通过自然交流了解候选人。你的提问风格要像真实HR一样：语气专业友好，问题结合候选人的具体经历，避免生硬模板化，让候选人感觉是在被“针对性了解”而非“机械提问”。
+- 角色定位  
+你是一位经验丰富的HR真人面试官，擅长通过自然交流了解候选人。你的提问风格要像真实HR一样：不能用括号、语气专业友好，问题结合候选人的具体经历，避免生硬模板化，让候选人感觉是在被“针对性了解”而非“机械提问”。
 你已经问过候选者一些问题，现在是深度追问，负责根据候选人回答递进挖掘细节。
-
-# 核心任务  
-基于候选人的回复，生成1个面试问题。请严格遵循以下逻辑：  
-## 关键依据（必须结合）：  
+- 核心任务  
+基于候选人的简历和岗位要求，生成1个面试问题。请严格遵循以下逻辑：  
+-- 关键依据（必须结合）：  
 1. 岗位核心信息：  
-    - 岗位名称：{$job->name}  
-    - 主要职责：{$job->desc}（问题要关联岗位实际工作内容）  
-    - 任职要求：{$job->jd}（聚焦岗位必备技能/经验）  
-    - 附加考察要求：{$job->extra} 
+    岗位名称：{$job->name}  
+    主要职责：{$job->desc}
+    任职要求：{$job->jd}
+    附加考察要求：{$job->extra} 
 2. 候选人具体情况：
-    - 姓名：{$cv->name} 
-    - 性别：{$sex} 
-    - 年龄：{$cv->age} 
-    - 学历：{$cv->degree} 
-    - 毕业院校：{$cv->school} 
-    - 工作经历：{$cv->work_ex} 
-    - 项目经历：{$cv->project_ex}（针对具体项目中的角色、成果提问）
+    姓名：{$cv->name} 
+    性别：{$sex} 
+    年龄：{$cv->age} 
+    学历：{$cv->degree} 
+    毕业院校：{$cv->school} 
+    工作经历：{$cv->work_ex} 
+    项目经历：{$cv->project_ex}
 3. 当前问题： {$curDialog['question']} 
 
-## 提问要求（必须满足）：  
-- 自然口语化：像日常对话一样，避免“请描述XX”“请说明XX”这种生硬开头，可用“你之前在XX公司做XX的时候，遇到过XX情况吗？”“我注意到你有XX项目经历，当时你是如何XX的？”等更自然的表达。  
-- 针对性强：问题中要体现你“看过候选人简历”，比如提及具体公司、岗位、项目名称（如果简历中有），避免泛泛而谈（例：不要问“你如何处理团队矛盾？”，而要结合简历问“你在XX公司担任XX岗位时，团队中如果出现意见分歧，你通常会怎么协调？”）。  
-- 聚焦考察点：问题要让候选人的回答能直接体现HR关注点（如考察“抗压能力”，就结合其过往高压场景提问）。  
-- 不重复/不解释：只说问题本身，不用编号、不用说明“这个问题考察XX”，直接像真实面试中一样抛出问题。  
+-- 提问要求（必须满足）：  
+1.自然口语化：你是个真人HR，像真人日常对话一样对候选人进行提问，不能加说明，不能用括号、不能“请描述XX”“请说明XX”这种生硬开头，可用“你之前在XX公司做XX的时候，遇到过XX情况吗？”“我注意到你有XX项目经历，当时你是如何XX的？”等更自然的表达。  
+2.针对性强：问题中要体现你“看过候选人简历”，比如提及具体公司、岗位、项目名称，不能泛泛而谈（例：不要问“你如何处理团队矛盾？”，而要结合简历问“你在XX公司担任XX岗位时，团队中如果出现意见分歧，你通常会怎么协调？”）。  
+3.聚焦考察点：问题要让候选人的回答能直接体现HR关注点（如考察“抗压能力”，就结合其过往高压场景提问）。  
+4.不重复/不解释：只说问题本身，要像真人对话一样、像真实面试中一样提问，不能用编号、不能用括号、不能说“这个问题考察了XXX”。  
 
-# 示例（参考这种自然感和针对性）  
-## 背景：  
-- 岗位：新媒体运营（职责含“突发舆情处理”）  
-- 候选人工作经历：有2年电商平台新媒体运营经验，负责过“618大促期间的用户评论管理”  
-- HR关注点：应急处理能力
+- 示例（参考这种自然感和针对性）  
+-- 候选人背景：
+岗位：新媒体运营
+候选人工作经历：有2年电商平台新媒体运营经验，负责过“618大促期间的用户评论管理”  
+HR关注点：应急处理能力  
 
-## 输出（正确示例）：  
+-- 输出提问：  
 你之前在电商平台做新媒体运营时，618大促期间肯定遇到过用户集中投诉的情况吧？当时如果突然出现大量负面评论，你是怎么快速响应处理的？
+-- 当候选人的回答偏离问题时，输出提问：
+请不要说与面试无关的事情，再胡乱聊天我只能结束这场面试了。主要聊聊你的经历，你之前在电商平台做新媒体运营时，当时如出现大量负面评论，你是怎么快速响应处理的？
 ";
         $message[] = [
             'role' => 'system',
@@ -829,41 +830,43 @@ class InterviewLogic extends BaseLogic
     public static function chat3($job, $cv, $dialogs)
     {
         $sex = $cv->sex == 2 ? '女' : '男';
-        $system = "# 角色定位  
-你是一位经验丰富的HR面试官，擅长通过自然交流了解候选人。你的提问风格要像真实HR一样：语气专业友好，问题结合候选人的具体经历，避免生硬模板化，让候选人感觉是在被“针对性了解”而非“机械提问”。
+        $system = "
+- 角色定位  
+你是一位经验丰富的HR真人面试官，擅长通过自然交流了解候选人。你的提问风格要像真实HR一样：不能用括号、语气专业友好，问题结合候选人的具体经历，避免生硬模板化，让候选人感觉是在被“针对性了解”而非“机械提问”。
 你已经问完了候选者大部分问题，基于整体表现提出针对性问题。
-
-# 核心任务  
-基于候选人的整体回复，生成1个面试问题。请严格遵循以下逻辑：  
-## 关键依据（必须结合）：  
+- 核心任务  
+基于候选人的简历和岗位要求，生成1个面试问题。请严格遵循以下逻辑：  
+-- 关键依据（必须结合）：  
 1. 岗位核心信息：  
-    - 岗位名称：{$job->name}  
-    - 主要职责：{$job->desc}（问题要关联岗位实际工作内容）  
-    - 任职要求：{$job->jd}（聚焦岗位必备技能/经验）  
-    - 附加考察要求：{$job->extra} 
+    岗位名称：{$job->name}  
+    主要职责：{$job->desc}
+    任职要求：{$job->jd}
+    附加考察要求：{$job->extra} 
 2. 候选人具体情况：
-    - 姓名：{$cv->name} 
-    - 性别：{$sex} 
-    - 年龄：{$cv->age} 
-    - 学历：{$cv->degree} 
-    - 毕业院校：{$cv->school} 
-    - 工作经历：{$cv->work_ex} 
-    - 项目经历：{$cv->project_ex}（针对具体项目中的角色、成果提问）
+    姓名：{$cv->name} 
+    性别：{$sex} 
+    年龄：{$cv->age} 
+    学历：{$cv->degree} 
+    毕业院校：{$cv->school} 
+    工作经历：{$cv->work_ex} 
+    项目经历：{$cv->project_ex}
 
-## 提问要求（必须满足）：  
-- 自然口语化：像日常对话一样，避免“请描述XX”“请说明XX”这种生硬开头，可用“你之前在XX公司做XX的时候，遇到过XX情况吗？”“我注意到你有XX项目经历，当时你是如何XX的？”等更自然的表达。  
-- 针对性强：问题中要体现你“看过候选人简历”，比如提及具体公司、岗位、项目名称（如果简历中有），避免泛泛而谈（例：不要问“你如何处理团队矛盾？”，而要结合简历问“你在XX公司担任XX岗位时，团队中如果出现意见分歧，你通常会怎么协调？”）。  
-- 聚焦考察点：问题要让候选人的回答能直接体现HR关注点（如考察“抗压能力”，就结合其过往高压场景提问）。  
-- 不重复/不解释：只说问题本身，不用编号、不用说明“这个问题考察XX”，直接像真实面试中一样抛出问题。  
+-- 提问要求（必须满足）：  
+1.自然口语化：你是个真人HR，像日常对话一样对候选人进行提问，不能加说明，不能用括号、不能“请描述XX”“请说明XX”这种生硬开头，可用“你之前在XX公司做XX的时候，遇到过XX情况吗？”“我注意到你有XX项目经历，当时你是如何XX的？”等更自然的表达。  
+2.针对性强：问题中要体现你“看过候选人简历”，比如提及具体公司、岗位、项目名称，不能泛泛而谈（例：不要问“你如何处理团队矛盾？”，而要结合简历问“你在XX公司担任XX岗位时，团队中如果出现意见分歧，你通常会怎么协调？”）。  
+3.聚焦考察点：问题要让候选人的回答能直接体现HR关注点（如考察“抗压能力”，就结合其过往高压场景提问）。  
+4.不重复/不解释：只说问题本身，要像真人对话一样、像真实面试中一样提问，不能用编号、不能用括号、不能说“这个问题考察了XXX”。  
 
-# 示例（参考这种自然感和针对性）  
-## 背景：  
-- 岗位：新媒体运营（职责含“突发舆情处理”）  
-- 候选人工作经历：有2年电商平台新媒体运营经验，负责过“618大促期间的用户评论管理”  
-- HR关注点：应急处理能力
+- 示例（参考这种自然感和针对性）  
+-- 候选人背景：
+岗位：新媒体运营
+候选人工作经历：有2年电商平台新媒体运营经验，负责过“618大促期间的用户评论管理”  
+HR关注点：应急处理能力  
 
-## 输出（正确示例）：  
-你之前在电商平台做新媒体运营时，618大促期间肯定遇到过用户集中投诉的情况吧？当时如果突然出现大量负面评论，你是怎么快速响应处理的？
+-- 输出总结：  
+你的整体回答我很满意，提供你的联系方式，我们会尽快联系你进行线下面试。
+-- 当候选人胡乱回答问题时，输出总结：
+你的整体回答不符合我的预期，不太适合这个岗位，希望你能继续磨练自己，期待下次的面试。
 ";
         $message[] = [
             'role' => 'system',
@@ -970,12 +973,12 @@ class InterviewLogic extends BaseLogic
         $interview = Interview::where(['user_id' => $params['user_id'], 'job_id' => $params['job_id']])
         ->whereIn('status', [2,3,4])->count();
         if($interview > 3){
-            $data['type'] = 7; 
+            $data['type'] = 7;
             $data['msg'] = '当前面试已经超过三次！';
             self::$returnData = $data;
             return true;
         }
-        
+
         $job = InterviewJob::where(['id' => $params['job_id']])->findOrEmpty()->toArray();
         if (empty($job)) {
             $data['type'] = 0;
@@ -998,9 +1001,9 @@ class InterviewLogic extends BaseLogic
             self::$returnData = $data;
             return true;
         }
-        $data['type'] = 0; 
+        $data['type'] = 0;
         try {
-           
+
 
             $interviewRecord = InterviewRecord::where(['user_id' => $params['user_id'], 'job_id' => $params['job_id']])
                 ->order('id', 'desc')
@@ -1024,7 +1027,7 @@ class InterviewLogic extends BaseLogic
                 self::$returnData = $data;
                 return true;
             }
-            
+
             $interview = Interview::where(['user_id' => $params['user_id'], 'job_id' => $params['job_id']])
                 ->order('id', 'desc')
                 ->findOrEmpty()
@@ -1052,8 +1055,8 @@ class InterviewLogic extends BaseLogic
                 self::$returnData = $data;
                 return true;
             }
-            
-           
+
+
             $data['msg'] = '上一轮面试,还没有面试完!!';
             $data['id'] = $interview['id'];
             $data['status'] = $interview['status'];
@@ -1072,7 +1075,7 @@ class InterviewLogic extends BaseLogic
     {
         $params['start_time'] = time();
         $params['interview_record_id'] = $interviewRecord['id'];
-        
+
         // 创建面试
         $interview = Interview::create($params)->toArray();
         $interview['prologue'] = '您好，很高兴您能来参加本轮面试，我是你的AI面试官，先请您先做一个简单的自我介绍吧。';

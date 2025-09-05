@@ -308,7 +308,7 @@ trait AichatTrait
                             return true;
                         }
 
-                        $historyMsg = array(
+                        $historyMsg[] = array(
                             'role' => 'user',
                             'content' => $request['message']
                         );

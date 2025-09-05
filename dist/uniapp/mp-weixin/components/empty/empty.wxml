@@ -1,1 +1,0 @@
-<view class="flex flex-col items-center justify-center"><image src="/static/images/common/empty.png" class="w-_400rpx_ h-_400rpx_"></image><text class="text-xs text-_h969EA9_">{{a}}</text></view>
