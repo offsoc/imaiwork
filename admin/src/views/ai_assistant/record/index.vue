@@ -66,7 +66,7 @@
                 <el-table-column label="用户提问内容" prop="message" min-width="180" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column label="场景类型" prop="scene_name" min-width="120" show-overflow-tooltip />
-                <el-table-column label="消耗算力" width="100">
+                <el-table-column label="消耗算力" min-width="100">
                     <template #default="{ row }">
                         <el-tooltip>
                             <div class="flex items-center justify-center gap-1 cursor-pointer">

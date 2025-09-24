@@ -1,6 +1,6 @@
 import { getUserCenter, getTokensConfig } from "@/api/user";
-import { TOKEN_KEY } from "@/enums/cacheEnums";
-import { parentPort } from "node:worker_threads";
+import { TOKEN_KEY, VISITOR_ID } from "@/enums/cacheEnums";
+import { useLocalStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { LoginPopupTypeEnum } from "~/enums/appEnums";
 
@@ -11,11 +11,15 @@ interface UserSate {
     showLogin: boolean;
     loginPopupType: LoginPopupTypeEnum;
     tokensConfig: any[];
+    visitorId: string;
 }
 export const useUserStore = defineStore("userStore", {
     state: (): UserSate => {
         const TOKEN = useCookie(TOKEN_KEY);
+        const visitorId = useLocalStorage(VISITOR_ID, "");
+
         return {
+            visitorId: visitorId.value || "",
             userInfo: {},
             token: TOKEN.value,
             temToken: null,
@@ -61,6 +65,13 @@ export const useUserStore = defineStore("userStore", {
             this.token = null;
             this.userInfo = {};
             TOKEN.value = null;
+        },
+        async getFingerprint() {
+            const visitorId = useLocalStorage(VISITOR_ID, "");
+            if (this.visitorId) return this.visitorId;
+            this.visitorId = uniqueId();
+            visitorId.value = this.visitorId;
+            return this.visitorId;
         },
     },
 });

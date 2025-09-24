@@ -42,7 +42,13 @@ class PoiMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>float Lng = 5;</code>
      */
-    private $Lng = 0.0;
+    protected $Lng = 0.0;
+    /**
+     *qqmap_ id，能正确显示地址的关键
+     *
+     * Generated from protobuf field <code>string PoiId = 6;</code>
+     */
+    protected $PoiId = '';
 
     /**
      * Constructor.
@@ -60,6 +66,8 @@ class PoiMessage extends \Google\Protobuf\Internal\Message
      *           纬度
      *     @type float $Lng
      *           经度
+     *     @type string $PoiId
+     *          qqmap_ id，能正确显示地址的关键
      * }
      */
     public function __construct($data = NULL) {
@@ -193,6 +201,32 @@ class PoiMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkFloat($var);
         $this->Lng = $var;
+
+        return $this;
+    }
+
+    /**
+     *qqmap_ id，能正确显示地址的关键
+     *
+     * Generated from protobuf field <code>string PoiId = 6;</code>
+     * @return string
+     */
+    public function getPoiId()
+    {
+        return $this->PoiId;
+    }
+
+    /**
+     *qqmap_ id，能正确显示地址的关键
+     *
+     * Generated from protobuf field <code>string PoiId = 6;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setPoiId($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->PoiId = $var;
 
         return $this;
     }

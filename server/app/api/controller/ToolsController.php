@@ -3,7 +3,6 @@
 namespace app\api\controller;
 
 use app\api\lists\tools\ToolsLists;
-use app\api\lists\tools\ToolsLogLists;
 use app\api\logic\ToolsLogic;
 use app\api\validate\ToolsValidate;
 use think\facade\Log;
@@ -11,7 +10,7 @@ use think\response\Json;
 
 class ToolsController extends BaseApiController
 {
-    public array $notNeedLogin = ['clip'];
+    public array $notNeedLogin = ['clip', 'getPrompt'];
 
     /**
      * 工具列表

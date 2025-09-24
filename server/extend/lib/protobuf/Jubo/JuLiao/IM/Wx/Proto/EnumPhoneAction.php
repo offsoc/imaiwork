@@ -65,6 +65,12 @@ class EnumPhoneAction
      * Generated from protobuf enum <code>RestartWx = 9;</code>
      */
     const RestartWx = 9;
+    /**
+     * 退出客服系统
+     *
+     * Generated from protobuf enum <code>RestartSelf = 10;</code>
+     */
+    const RestartSelf = 10;
 
     private static $valueToName = [
         self::None => 'None',
@@ -76,6 +82,7 @@ class EnumPhoneAction
         self::CleanFileUrlCache => 'CleanFileUrlCache',
         self::PhoneCall => 'PhoneCall',
         self::RestartWx => 'RestartWx',
+        self::RestartSelf => 'RestartSelf',
     ];
 
     public static function name($value)

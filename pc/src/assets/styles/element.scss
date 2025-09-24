@@ -90,4 +90,12 @@
     .el-button:focus-visible {
         outline: none;
     }
+    .el-input-number.is-controls-right .el-input-number__decrease,
+    .el-input-number.is-controls-right .el-input-number__increase {
+        --el-input-number-controls-height: 20px;
+    }
+    .el-input-number.is-controls-right[class*="small"] [class*="decrease"],
+    .el-input-number.is-controls-right[class*="small"] [class*="increase"] {
+        --el-input-number-controls-height: 12px;
+    }
 }

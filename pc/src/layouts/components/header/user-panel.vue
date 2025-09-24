@@ -1,5 +1,5 @@
 <template>
-    <ElPopover trigger="click" width="256px" popper-class="!border-none !rounded-2xl !p-0" :show-arrow="false">
+    <ElPopover trigger="click" width="222px" popper-class="!border-none !rounded-2xl !p-0" :show-arrow="false">
         <template #reference>
             <div class="w-10 h-10 p-[2px] rounded-full cursor-pointer">
                 <div
@@ -8,7 +8,7 @@
                 </div>
             </div>
         </template>
-        <div class="px-6 py-[18px]">
+        <div class="px-4 py-[18px]">
             <div class="flex flex-col gap-y-2 text-xs">
                 <div class="flex items-center gap-x-2">
                     用户名：<span class="text-[#00000080]">{{ userInfo.nickname }}</span>
@@ -46,25 +46,20 @@
                 </svg>
             </div>
             <div class="">
-                <div
-                    class="h-12 cursor-pointer rounded-md border border-[transparent] hover:border-token-primary p-[1px]"
-                    @click="openBase">
-                    <div
-                        class="rounded-md flex items-center gap-x-3 px-[10px] h-full hover:bg-[#fbfbfb] hover:text-primary group">
-                        <div
-                            class="w-5 h-5 rounded bg-[rgba(0,0,0,0.05)] flex items-center justify-center group-hover:bg-primary-light-9">
-                            <Icon name="local-icon-setting2"></Icon>
+                <router-link to="/creation">
+                    <div class="util-menu">
+                        <div class="wrapper group">
+                            <div class="icon">
+                                <Icon name="local-icon-menu_creation"></Icon>
+                            </div>
+                            <div class="font-bold">创作记录</div>
                         </div>
-                        <div class="font-bold">关于我们</div>
                     </div>
-                </div>
-                <div
-                    class="h-12 cursor-pointer rounded-md border border-[transparent] hover:border-token-primary p-[1px]">
-                    <div
-                        class="rounded-md flex items-center justify-between px-[10px] h-full hover:bg-[#fbfbfb] hover:text-primary group">
+                </router-link>
+                <div class="util-menu" @click="openBase">
+                    <div class="wrapper group">
                         <div class="flex items-center gap-x-3">
-                            <div
-                                class="w-5 h-5 rounded bg-[rgba(0,0,0,0.05)] flex items-center justify-center group-hover:bg-primary-light-9">
+                            <div class="icon">
                                 <Icon name="local-icon-color_switch"></Icon>
                             </div>
                             <div class="font-bold">颜色主题</div>
@@ -74,14 +69,9 @@
                         </div>
                     </div>
                 </div>
-
-                <div
-                    class="h-12 cursor-pointer rounded-md border border-[transparent] hover:border-token-primary p-[1px]"
-                    @click="quit()">
-                    <div
-                        class="rounded-md flex items-center gap-x-3 px-[10px] h-full hover:bg-[#fbfbfb] hover:text-primary group">
-                        <div
-                            class="w-5 h-5 rounded bg-[rgba(0,0,0,0.05)] flex items-center justify-center group-hover:bg-primary-light-9">
+                <div class="util-menu" @click="quit()">
+                    <div class="wrapper group">
+                        <div class="icon">
                             <Icon name="local-icon-logout"></Icon>
                         </div>
                         <div class="font-bold">退出登录</div>
@@ -130,4 +120,14 @@ const quit = async () => {
 const { copy } = useCopy();
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.util-menu {
+    @apply h-11 cursor-pointer rounded-md border border-[transparent] hover:border-token-primary p-[1px];
+    .wrapper {
+        @apply rounded-md flex items-center gap-x-3 px-[10px] h-full hover:bg-[#fbfbfb] hover:text-primary;
+        .icon {
+            @apply w-5 h-5 rounded bg-[#0000000d] flex items-center justify-center group-hover:bg-primary-light-9;
+        }
+    }
+}
+</style>

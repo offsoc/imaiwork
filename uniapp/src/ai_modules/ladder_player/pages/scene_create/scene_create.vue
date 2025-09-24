@@ -219,7 +219,7 @@
             </view>
         </view>
     </u-popup>
-    <knb-select ref="knbSelectRef" @confirm="getSelectKnb"></knb-select>
+    <knb-select ref="knbSelectRef" :show-vector="false" @confirm="getSelectKnb"></knb-select>
 </template>
 
 <script setup lang="ts">

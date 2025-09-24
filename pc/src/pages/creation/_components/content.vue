@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCreativeRecord, deleteCreativeRecord } from "@/api/chat";
+import { getChatRecord, deleteChatRecord } from "@/api/chat";
 import { useAppStore } from "@/stores/app";
 import KnbBind from "@/components/knb-bind/index.vue";
 import { dayjs } from "element-plus";
@@ -114,7 +114,7 @@ const queryParams = reactive({
 });
 const { pager, getLists, resetPage } = usePaging({
     size: 25,
-    fetchFun: getCreativeRecord,
+    fetchFun: getChatRecord,
     params: queryParams,
     isScroll: true,
 });
@@ -138,7 +138,7 @@ const visibleChange = (flag: boolean, id: number) => {
 const handleRecord = (row: any) => {
     const { assistant_id, task_id } = row;
     if (assistant_id == 0) {
-        router.push(`/chat?task_id=${task_id}`);
+        router.push(`/?task_id=${task_id}`);
     } else {
         router.push(`/robot/chat?task_id=${task_id}&id=${assistant_id}`);
     }
@@ -146,10 +146,10 @@ const handleRecord = (row: any) => {
 
 const handleDelete = async (task_id: number, index: number) => {
     await nuxtApp.$confirm({
-        message: "确定删除此机器人吗？",
+        message: "确定删除此记录吗？",
         onConfirm: async () => {
             try {
-                await deleteCreativeRecord({ task_id });
+                await deleteChatRecord({ task_id });
                 feedback.msgSuccess("删除成功");
                 pager.lists.splice(index, 1);
             } catch (error) {

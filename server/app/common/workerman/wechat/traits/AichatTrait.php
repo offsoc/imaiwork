@@ -4,33 +4,31 @@ declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
 
+use app\api\logic\ChatLogic;
+use app\api\logic\service\TokenLogService;
 use app\api\logic\wechat\sop\StageLogic;
+use app\common\enum\user\AccountLogEnum;
+use app\common\logic\AccountLogLogic;
+use app\common\model\chat\ChatLog;
+use app\common\model\ChatPrompt;
+use app\common\model\kb\KbRobot;
+use app\common\model\sv\SvReplyStrategy;
+use app\common\model\sv\SvRobotKeyword;
+use app\common\model\user\User;
+use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatContact;
+use app\common\model\wechat\AiWechatDevice;
+use app\common\model\wechat\AiWechatFriendTag;
+use app\common\model\wechat\AiWechatTagStrategy;
+use app\common\service\FileService;
 use app\common\workerman\wechat\constants\SocketType;
 use app\common\workerman\wechat\handlers\client\TalkToFriendTaskHandler;
 use app\common\workerman\wechat\handlers\client\VoiceTransTextTaskHandler;
-use app\common\service\FileService;
-use app\common\model\wechat\AiWechatDevice;
-use app\common\model\wechat\AiWechat;
-use app\common\model\wechat\AiWechatContact;
-use app\common\model\wechat\AiWechatReplyStrategy;
-use app\common\model\wechat\AiWechatRobot;
-use app\common\model\wechat\AiWechatRobotKeyword;
-use app\common\model\ChatPrompt;
-use app\api\logic\service\TokenLogService;
-use app\common\enum\user\AccountLogEnum;
-use app\common\model\chat\ChatLog;
-use app\api\logic\ChatLogic;
-use app\common\model\user\User;
-use app\common\logic\AccountLogLogic;
+use Channel\Client as ChannelClient;
+use Google\Protobuf\Any;
+use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
 use Workerman\Connection\TcpConnection;
 use Workerman\Lib\Timer;
-use app\common\model\wechat\AiWechatTagStrategy;
-use app\common\model\wechat\AiWechatFriendTag;
-use app\common\model\kb\KbRobot;
-use app\common\model\sv\SvRobotKeyword;
-use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
-use Google\Protobuf\Any;
-use Channel\Client as ChannelClient;
 
 /**
  * ai聊天
@@ -73,9 +71,9 @@ trait AichatTrait
             $device  = $this->_getDeviceInfo($deviceId);
             $wechat = $this->_getWechatInfo($payload['WeChatId'], $device);
             $friend = $this->_getFriendInfo($payload['FriendId'], $payload['WeChatId']);
-            $reply = $this->_getReplyStrategy($device['user_id']);
 
-            if($wechat['robot_id'] == null){
+
+            if ($wechat['robot_id'] == null) {
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('请设置机器人')->withContext([
                     'msg' => '请设置机器人',
                     'data' => $wechat
@@ -83,9 +81,17 @@ trait AichatTrait
                 return;
             }
             $robot = $this->_getWechatRobot($wechat['robot_id']);
+            $reply = $this->_getReplyStrategy($robot);
             $payload['userId'] = $device['user_id'];
 
-            if ($wechat['open_ai'] === 0 || $wechat['takeover_mode'] === 0) {
+            if ($friend['takeover_mode'] == 0) {
+                $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('人工接管中')->withContext([
+                    'data' => $friend,
+                    'msg' => '人工接管中'
+                ])->log();
+                return;
+            }
+            if ((int)$wechat['open_ai'] === 0 || (int)$wechat['takeover_mode'] === 0) {
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('未开启ai')->withContext([
                     'data' => $wechat,
                     'msg' => '账号未开启ai'
@@ -131,6 +137,13 @@ trait AichatTrait
                 $promat = explode(":\n", $tmpStr);
                 $promat = $promat[count($promat) - 1];
                 $promat = str_replace(["@{$wechat['wechat_nickname']}", " "], '', $promat);
+            }
+
+            if(trim($promat) == '' || is_null($promat)){
+                $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
+                    'msg' => '空消息不需要ai回复'
+                ])->log();
+                return;
             }
 
             // 组装请求参数
@@ -210,6 +223,7 @@ trait AichatTrait
                 } else if ($request['message_type'] == 3) { //语音
                     if ((int)$reply['voice_enable'] !== 1) {
                         $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
+                            'data' => $reply,
                             'msg' => '未开启语音回复策略'
                         ])->log();
                         return true;
@@ -365,6 +379,7 @@ trait AichatTrait
         $voiceToTextMsg = $message->serializeToString();
 
         $channel = "{$targetProcess}.{$deviceId}.message";
+        ChannelClient::connect('127.0.0.1', 2206);
         ChannelClient::publish($channel, [
             'data' => is_array($voiceToTextMsg) ? json_encode($voiceToTextMsg) : $voiceToTextMsg
         ]);
@@ -383,7 +398,7 @@ trait AichatTrait
 
             $task_id = generate_unique_task_id();
             $knowledge = [];
-            if($robot->kb_type == 1){//rag
+            if ($robot->kb_type == 1) { //rag
                 // 检查是否挂载知识库
                 $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $request['user_id'])->where('type', 1)->limit(1)->find();
                 if (!empty($bind)) {
@@ -397,7 +412,7 @@ trait AichatTrait
 
             if ($robot->kb_type == 2) { //向量
                 // 检查是否挂载知识库
-                $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $request['user_id'])->where('type', 1)->where('kb_type',2)->limit(1)->find();
+                $bind = \app\common\model\knowledge\KnowledgeBind::where('data_id', $robot->id)->where('user_id', $request['user_id'])->where('type', 1)->where('kb_type', 2)->limit(1)->find();
                 if (!empty($bind)) {
                     $knowledge = \app\common\model\kb\KbKnow::where('id', $bind['kid'])->limit(1)->find();
                     if (empty($knowledge)) {
@@ -410,12 +425,33 @@ trait AichatTrait
             $history = implode("\n", array_column($logs, 'content'));
             $keyword = str_replace(
                 ['角色设定', '用户发送的内容', '历史对话上下文', '相关知识库检索结果'],
-                [$robot->description, $request['message'], $history, empty($knowledge) ? '' : '相关知识库检索结果'],
+                [$robot->roles_prompt, $request['message'], $history, empty($knowledge) ? '' : '相关知识库检索结果'],
                 $keyword
             );
+
+            // 分段回复
+            if (isset($request['reply_strategy']['paragraph_enable']) && $request['reply_strategy']['paragraph_enable'] == 1) {
+                $keyword .= "\n 【请分条列出你的回答，每一条用换行分隔，禁止出现序号。】";
+            }
+
             $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('智能体说明')->withContext([
                 'keyword' => $keyword
             ])->log();
+
+//            此处为通用工具聊天的设置，个微用智能体里的设置
+//            $modelSetting = ModelsSetting::where('user_id', $robot->user_id)->where('model_id', $robot->model_id)->where('model_sub_id', $robot->model_sub_id)->findOrEmpty();
+//            if ($modelSetting->isEmpty()) {
+//                $modelSetting = [
+//                    'temperature' => 0.5, //温度
+//                    'top_p' => 0.85, //多样性范围
+//                    'presence_penalty' =>  0.2, //避免重复力度
+//                    'frequency_penalty' => 0.3, //避免重复用词力度
+//                    'max_tokens' => 4096, //token上限
+//                    'context_num' => 5, //上下文数
+//                ];
+//            } else {
+//                $modelSetting = $modelSetting->toArray();
+//            }
 
             $request = [
                 'user_id' => $request['user_id'],
@@ -435,7 +471,14 @@ trait AichatTrait
                 'reply_strategy' => $request['reply_strategy'],
                 'user_message' => $request['user_message'],
                 'is_chatroom' => $request['is_chatroom'],
-                'model' => $request['model']
+                'model' => $request['model'],
+
+                'temperature' => $robot->temperature ?? 1.0,
+                'top_p'             => $robot->top_p ?? 0.5,
+                'presence_penalty'  => $robot->presence_penalty ?? 0.2, //避免重复力度
+                'frequency_penalty' => $robot->frequency_penalty ?? 0.3, //避免重复用词力度
+                'max_tokens'        => $robot->max_tokens ?? 4096, //token上限
+                'context_num'       => $robot->context_num ?? 3, //上下文数
             ];
 
             // 任务数据
@@ -464,7 +507,6 @@ trait AichatTrait
                 'trace' => $e->getTraceAsString()
             ])->log();
         }
-        
     }
 
     private function _beforeSend(array $payload)
@@ -485,6 +527,12 @@ trait AichatTrait
                     'model' => $payload['model'],
                     'robot' => $payload['robot'],
 
+                    'temperature' => $payload['request']['temperature'] ?? 1.0,
+                    'top_p'       => $payload['request']['top_p'] ?? 0.5,
+                    'presence_penalty' => $payload['request']['presence_penalty'] ?? 0.2,
+                    'frequency_penalty' => $payload['request']['frequency_penalty'] ?? 0.3,
+                    'max_tokens' => $payload['request']['max_tokens'] ?? 4096,
+                    'context_num' => $payload['request']['context_num'] ?? 3,
                 ]);
                 if ($chatStatus === false) {
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('队列请求知识库失败:')->withContext([
@@ -502,7 +550,6 @@ trait AichatTrait
                     // 处理响应
                     $reply = $this->_handleResponse($response, $payload['request']);
                 } else {
-                    //Log::write($payload['task_id'] . '队列请求失败' . json_encode($response));
                     // 重试
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('chat 错误')->withContext([
                         'response' => $response
@@ -513,20 +560,40 @@ trait AichatTrait
 
             $reply = $log->reply;
         }
-        $this->_sendMessage([
-            'wechat_id' => $payload['wechat_id'],
-            'friend_id' => $payload['friend_id'],
-            'device_code' => $payload['device_code'],
-            'message' => formatMarkdown($reply),
-            'message_id' => $payload['request']['message_id'],
-            'MsgSvrId' => $payload['request']['MsgSvrId'],
-            'message_type' => $payload['request']['message_type'],
-            'MsgSvrId' => $payload['request']['MsgSvrId'],
-            'reply_strategy' => $payload['reply_strategy'],
-            'user_message' => $payload['user_message'],
-            'is_chatroom' => $payload['is_chatroom'],
-            'user_id' => $payload['user_id'],
-        ]);
+
+        //分段回复
+        if ($payload['reply_strategy']['paragraph_enable'] == 1) {
+            $replies = explode("\n", formatMarkdown($reply));
+            foreach ($replies as $reply) {
+                $this->_sendMessage([
+                    'wechat_id'      => $payload['wechat_id'],
+                    'friend_id'      => $payload['friend_id'],
+                    'device_code'    => $payload['device_code'],
+                    'message'        => $reply,
+                    'message_id'     => $payload['request']['message_id'],
+                    'MsgSvrId'       => $payload['request']['MsgSvrId'],
+                    'message_type'   => $payload['request']['message_type'],
+                    'reply_strategy' => $payload['reply_strategy'],
+                    'user_message'   => $payload['user_message'],
+                    'is_chatroom'    => $payload['is_chatroom'],
+                    'user_id'        => $payload['user_id'],
+                ]);
+            }
+        } else {
+            $this->_sendMessage([
+                'wechat_id'      => $payload['wechat_id'],
+                'friend_id'      => $payload['friend_id'],
+                'device_code'    => $payload['device_code'],
+                'message'        => formatMarkdown($reply),
+                'message_id'     => $payload['request']['message_id'],
+                'MsgSvrId'       => $payload['request']['MsgSvrId'],
+                'message_type'   => $payload['request']['message_type'],
+                'reply_strategy' => $payload['reply_strategy'],
+                'user_message'   => $payload['user_message'],
+                'is_chatroom'    => $payload['is_chatroom'],
+                'user_id'        => $payload['user_id'],
+            ]);
+        }
     }
 
     private function _handleResponse(array $response, array $request)
@@ -551,7 +618,7 @@ trait AichatTrait
         ChatLogic::saveChatResponseLog($request, $response);
 
         //计算消耗tokens
-        $points = $unit > 0 ? round($tokens / $unit,2) : 0;
+        $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
         //token扣除
         User::userTokensChange($request['user_id'], (float)$points);
 
@@ -637,6 +704,41 @@ trait AichatTrait
                     $request['message'] = FileService::getFileUrl($item['content']);
                     $request['message_type'] = 2;
                     break;
+                case 2: //视频
+                    // 推送消息
+                    $request['message'] = FileService::getFileUrl($item['content']);
+                    $request['message_type'] = 4;
+                    break;
+                case 3: //链接
+                    // 推送消息
+                    $request['message'] = json_encode([
+                        'title' => $item['content']['name'] ?? '',
+                        'desc' => $item['content']['desc'] ?? '',
+                        'url' => $item['content']['link'] ?? '',
+                        'thumb' => FileService::getFileUrl($item['content']['img'] ?? ''),
+                    ]);
+                    $request['message_type'] = 6;
+                    break;
+                case 4: //小程序
+                    // 推送消息
+                    $request['message'] = json_encode([
+                        "Title" => $item['content']['name'] ?? '',
+                        "Url" => "https://mp.weixin.qq.com/mp/waerrpage?appid={$item['content']['appid']}&type=upgrade&upgradetype=3#wechat_redirect",
+                        "PagePath" => $item['content']['link'] ?? 'pages/index/index.html',
+                        "Source" => $item['content']['Source'] ?? '',
+                        "SourceName" => $item['content']['SourceName'] ?? '',
+                        "Thumb" => FileService::getFileUrl($item['content']['pic'] ?? ''),
+                        "AppId" => $item['content']['appid'] ?? '',
+                        "Icon" =>  FileService::getFileUrl($item['content']['pic'] ?? ''),
+                        'version' => 48,
+                    ], JSON_UNESCAPED_UNICODE);
+                    $request['message_type'] = 13;
+                    break;
+                case 5: //文件
+                    // 推送消息
+                    $request['message'] = json_encode($item['content'], JSON_UNESCAPED_UNICODE);
+                    $request['message_type'] = 8;
+                    break;
                 default:
                     $send = false;
             }
@@ -677,7 +779,7 @@ trait AichatTrait
             ->join('ai_wechat_tag at', 'ts.tag_name = at.tag_name and ts.user_id = at.user_id')
             ->where('ts.user_id', $payload['user_id'])->select()->each(function ($item) use ($payload) {
                 $match_keywords = explode(';', $item->match_keywords);
-                foreach ($match_keywords as $match_keyword){
+                foreach ($match_keywords as $match_keyword) {
                     if ($item->match_type == 0) { //模糊匹配
                         if ($item->match_mode == 0) { //客户
                             if (strpos((string)$match_keyword, $payload['message']) !== false || strpos($payload['message'], (string)$match_keyword) !== false) {
@@ -694,7 +796,7 @@ trait AichatTrait
                                 $this->setFriendTag($item->tag_id, $payload);
                             }
                         } else {
-    
+
                             if ((string)$match_keyword === $payload['user_message']) {
                                 $this->setFriendTag($item->tag_id, $payload);
                             }
@@ -781,9 +883,9 @@ trait AichatTrait
         return $robot;
     }
 
-    private function _getReplyStrategy(int $userId): array|AiWechatReplyStrategy
+    private function _getReplyStrategy(KbRobot $robot): array|SvReplyStrategy
     {
-        $reply = AiWechatReplyStrategy::where('user_id', $userId)->findOrEmpty();
+        $reply = SvReplyStrategy::where('user_id', $robot->user_id)->where('robot_id', $robot->id)->findOrEmpty();
         if ($reply->isEmpty()) {
             return [
                 "multiple_type" => 0,
@@ -794,7 +896,8 @@ trait AichatTrait
                 "stop_enable" => 0,
                 "stop_keywords" => "",
                 "bottom_enable" => 0,
-                "bottom_reply" => ''
+                "bottom_reply" => '',
+                'paragraph_enable' => 0,
             ];
         }
         return $reply->toArray();

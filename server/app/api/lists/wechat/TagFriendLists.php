@@ -70,21 +70,27 @@ class TagFriendLists extends BaseApiDataLists implements ListsSearchInterface
      */
     public function count(): int
     {
-        // 获取微信ID
+         // 获取微信ID
         $wechatId = AiWechat::where('user_id', $this->userId)->value('wechat_id', '');
-        $wechatId = $this->request->get('wechat_id') !== null ? $this->request->get('wechat_id') : $wechatId;
+        $wechatId = !empty($this->request->get('wechat_id')) ? $this->request->get('wechat_id') : $wechatId;
+
         // 获取标签ID
         if ($tagIds = $this->request->get('tag_ids'))
         {
+            $res = strpos($tagIds, ',');
+            if ($res){
+                $tagIds = explode(',', $tagIds);
+            }
             $friendIds = app(AiWechatTag::class)->friendIds($wechatId, $tagIds);
         }
         else
         {
             $friendIds = app(AiWechatTag::class)->untagFriendIds($wechatId);
         }
+        //print_r($friendIds);die;
         // 获取好友列表
         return AiWechatContact::where('wechat_id', $wechatId)
-            ->field(field: 'friend_id, nickname as friend_nickname, avatar as friend_avatar')
+            ->field('*')
             ->whereIn('friend_id', $friendIds)
             ->when($this->request->get('friend_nickname'), function ($query)
             {

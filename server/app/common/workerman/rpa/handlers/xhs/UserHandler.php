@@ -135,10 +135,10 @@ class UserHandler extends BaseMessageHandler
         try {
             $deviceTaskStatus = $this->service->getRedis()->get("xhs:device:{$deviceid}:taskStatus");
             //print_r($deviceTaskStatus);die;
-            if(!empty($deviceTaskStatus)){
+            if (!empty($deviceTaskStatus)) {
                 $deviceTaskStatus = json_decode(($deviceTaskStatus), true);
-                if($deviceTaskStatus['taskStatus'] == 'running' && $deviceTaskStatus['scene'] == 'xhs'){
-                   return;
+                if ($deviceTaskStatus['taskStatus'] == 'running' && $deviceTaskStatus['scene'] == 'xhs') {
+                    return;
                 }
             }
 
@@ -183,7 +183,7 @@ class UserHandler extends BaseMessageHandler
                 'scene' => 'xhs',
                 'time' => date('Y-m-d H:i:s', time()),
             ], JSON_UNESCAPED_UNICODE));
-            
+
             sleep(20);
         } catch (\Throwable $e) {
             $this->setLog('sendAppExec' . $e, 'error');

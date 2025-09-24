@@ -207,6 +207,13 @@ const initChat = () => {
         isReceiving.value = chat.isEmpty();
         chattingRef.value.setInput(chat.getText());
     });
+    chat.addEventListener("defaultAction", (type) => {
+        switch (type) {
+            case "CUT": // 剪切
+                chattingRef.value.setInput("");
+                break;
+        }
+    });
     if (template_info?.form && !taskId.value) {
         processTextAndForm(
             detail.form_info,
@@ -439,10 +446,6 @@ const resetChat = () => {
     isStopChat.value = false;
 };
 
-const resetURLPath = () => {
-    window.history.replaceState(null, "", window.location.pathname);
-};
-
 const chatClose = (index?: number) => {
     streamReader.cancel();
     chatContentList.value[chatContentList.value.length - 1].loading = false;
@@ -453,19 +456,6 @@ const chatClose = (index?: number) => {
     }
     // $request.cancelRequest();
 };
-
-function replaceKeysInString(str, keyValues) {
-    for (const [key, value] of Object.entries(keyValues)) {
-        const regex = new RegExp(`\\$\\{${key}\\}`, "g");
-        str = str.replace(regex, value);
-    }
-    return str;
-    for (const [key, value] of Object.entries(keyValues)) {
-        const regex = new RegExp(`\\$\\{${key}\\}`, "g");
-        str = str.replace(regex, value);
-    }
-    return str;
-}
 
 // 聊天内容区 E
 
@@ -527,11 +517,6 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
-:deep(.chat-message) {
-    .message-contain--his {
-        background-color: #f5f6f7;
-    }
-}
 :deep(.chat-area-pc) {
     * {
         font-size: var(--el-font-size-base);
@@ -539,9 +524,11 @@ definePageMeta({
     svg {
         display: inline;
     }
+
     .chat-rich-text {
         font-size: var(--el-font-size-base);
         padding: 8px 0;
+        min-height: 80px;
         .chat-grid-input {
             font-size: var(--el-font-size-base);
         }

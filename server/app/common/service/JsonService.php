@@ -10,9 +10,9 @@ use app\common\enum\ExportEnum;
 use app\common\lists\BaseDataLists;
 use app\common\lists\ListsExcelInterface;
 use app\common\lists\ListsExtendInterface;
+use think\exception\HttpResponseException;
 use think\Response;
 use think\response\Json;
-use think\exception\HttpResponseException;
 
 class JsonService
 {
@@ -44,6 +44,21 @@ class JsonService
      * @date 2021/12/24 18:28
      */
     public static function fail(string $msg = 'fail', array $data = [], int $code = 0, int $show = 1): Json
+    {
+        return self::result($code, $show, $msg, $data);
+    }
+
+    /**
+     * @notes pc接口操作失败，返回信息
+     * @param string $msg
+     * @param array $data
+     * @param int $code
+     * @param int $show
+     * @return Json
+     * @author 段誉
+     * @date 2021/12/24 18:28
+     */
+    public static function pc_fail(string $msg = 'fail', array $data = [], int $code = 0, int $show = 0): Json
     {
         return self::result($code, $show, $msg, $data);
     }
@@ -93,6 +108,23 @@ class JsonService
     public static function throw(string $msg = 'fail', array $data = [], int $code = 0, int $show = 1): Json
     {
         $data = compact('code', 'show', 'msg', 'data');
+        $response = Response::create($data, 'json', 200);
+        throw new HttpResponseException($response);
+    }
+
+    /**
+     * @notes 抛出异常json
+     * @param string $msg
+     * @param array $data
+     * @param int $code
+     * @param int $show
+     * @return Json
+     * @author 段誉
+     * @date 2021/12/24 18:29
+     */
+    public static function pc_throw(string $msg = 'fail', array $data = [], int $code = 0, int $show = 0): Json
+    {
+        $data     = compact('code', 'show', 'msg', 'data');
         $response = Response::create($data, 'json', 200);
         throw new HttpResponseException($response);
     }

@@ -649,6 +649,12 @@ class EnumMsgType
      */
     const TriggerLabelPushTask = 1239;
     /**
+     * 触发企微会话列表推送
+     *
+     * Generated from protobuf enum <code>TriggerQwConvPushTask = 1240;</code>
+     */
+    const TriggerQwConvPushTask = 1240;
+    /**
      * 获取时间段内的所有聊天消息msgSvrId
      *
      * Generated from protobuf enum <code>TriggerChatMsgIdsPushTask = 1251;</code>
@@ -863,6 +869,14 @@ class EnumMsgType
      */
     const QueryHbStatusTaskResultNotice = 1288;
     /**
+     * Generated from protobuf enum <code>GetPoiListTask = 1290;</code>
+     */
+    const GetPoiListTask = 1290;
+    /**
+     * Generated from protobuf enum <code>GetPoiListTaskResultNotice = 1291;</code>
+     */
+    const GetPoiListTaskResultNotice = 1291;
+    /**
      * Generated from protobuf enum <code>SendSmsTask = 1289;</code>
      */
     const SendSmsTask = 1289;
@@ -926,6 +940,10 @@ class EnumMsgType
      * Generated from protobuf enum <code>SetConfigTask = 1382;</code>
      */
     const SetConfigTask = 1382;
+    /**
+     * Generated from protobuf enum <code>SetForbiddenWord = 1383;</code>
+     */
+    const SetForbiddenWord = 1383;
     /**
      * 手机端主动发出的交互类消息 
      *
@@ -1028,6 +1046,42 @@ class EnumMsgType
      * Generated from protobuf enum <code>UnreadListPushNotice = 2042;</code>
      */
     const UnreadListPushNotice = 2042;
+    /**
+     * 视频号 获取动态消息
+     *
+     * Generated from protobuf enum <code>SphGetMentionTask = 2200;</code>
+     */
+    const SphGetMentionTask = 2200;
+    /**
+     * 视频号 推送动态消息列表
+     *
+     * Generated from protobuf enum <code>SphMentionListNotice = 2201;</code>
+     */
+    const SphMentionListNotice = 2201;
+    /**
+     * Generated from protobuf enum <code>SphUserPageTask = 2202;</code>
+     */
+    const SphUserPageTask = 2202;
+    /**
+     * Generated from protobuf enum <code>SphUserPagePushNotice = 2203;</code>
+     */
+    const SphUserPagePushNotice = 2203;
+    /**
+     * Generated from protobuf enum <code>SphPostTask = 2210;</code>
+     */
+    const SphPostTask = 2210;
+    /**
+     * Generated from protobuf enum <code>SphPostTaskResultNotice = 2211;</code>
+     */
+    const SphPostTaskResultNotice = 2211;
+    /**
+     * Generated from protobuf enum <code>SphLikeTask = 2212;</code>
+     */
+    const SphLikeTask = 2212;
+    /**
+     * Generated from protobuf enum <code>SphCommentTask = 2213;</code>
+     */
+    const SphCommentTask = 2213;
     /**
      * 客服客户端主动发出的交互类消息，与手机端无关
      *
@@ -1382,6 +1436,7 @@ class EnumMsgType
         self::GetGroupSendHistoryTask => 'GetGroupSendHistoryTask',
         self::TriggerUnreadPushTask => 'TriggerUnreadPushTask',
         self::TriggerLabelPushTask => 'TriggerLabelPushTask',
+        self::TriggerQwConvPushTask => 'TriggerQwConvPushTask',
         self::TriggerChatMsgIdsPushTask => 'TriggerChatMsgIdsPushTask',
         self::RequestTalkMsgTask => 'RequestTalkMsgTask',
         self::RequestTalkMsgTaskResultNotice => 'RequestTalkMsgTaskResultNotice',
@@ -1419,6 +1474,8 @@ class EnumMsgType
         self::QwUserPUshNotice => 'QwUserPUshNotice',
         self::QueryHbStatusTask => 'QueryHbStatusTask',
         self::QueryHbStatusTaskResultNotice => 'QueryHbStatusTaskResultNotice',
+        self::GetPoiListTask => 'GetPoiListTask',
+        self::GetPoiListTaskResultNotice => 'GetPoiListTaskResultNotice',
         self::SendSmsTask => 'SendSmsTask',
         self::CallLogPushNotice => 'CallLogPushNotice',
         self::SmsPushNotice => 'SmsPushNotice',
@@ -1431,6 +1488,7 @@ class EnumMsgType
         self::TriggerConfigPush => 'TriggerConfigPush',
         self::ConfigPushNotice => 'ConfigPushNotice',
         self::SetConfigTask => 'SetConfigTask',
+        self::SetForbiddenWord => 'SetForbiddenWord',
         self::FriendPushNotice => 'FriendPushNotice',
         self::PostDeviceInfoNotice => 'PostDeviceInfoNotice',
         self::PostFriendDetectCountNotice => 'PostFriendDetectCountNotice',
@@ -1448,6 +1506,14 @@ class EnumMsgType
         self::QwConversPushNotice => 'QwConversPushNotice',
         self::BizConversPushNotice => 'BizConversPushNotice',
         self::UnreadListPushNotice => 'UnreadListPushNotice',
+        self::SphGetMentionTask => 'SphGetMentionTask',
+        self::SphMentionListNotice => 'SphMentionListNotice',
+        self::SphUserPageTask => 'SphUserPageTask',
+        self::SphUserPagePushNotice => 'SphUserPagePushNotice',
+        self::SphPostTask => 'SphPostTask',
+        self::SphPostTaskResultNotice => 'SphPostTaskResultNotice',
+        self::SphLikeTask => 'SphLikeTask',
+        self::SphCommentTask => 'SphCommentTask',
         self::GetWeChatsReq => 'GetWeChatsReq',
         self::GetWeChatsRsp => 'GetWeChatsRsp',
         self::RecentFriendChangeNotice => 'RecentFriendChangeNotice',

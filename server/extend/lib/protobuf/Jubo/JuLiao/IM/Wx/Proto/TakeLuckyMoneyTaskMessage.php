@@ -42,7 +42,13 @@ class TakeLuckyMoneyTaskMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>int64 TaskId = 5;</code>
      */
-    private $TaskId = 0;
+    protected $TaskId = 0;
+    /**
+     *
+     *
+     * Generated from protobuf field <code>bool Refuse = 6;</code>
+     */
+    protected $Refuse = false;
 
     /**
      * Constructor.
@@ -59,6 +65,8 @@ class TakeLuckyMoneyTaskMessage extends \Google\Protobuf\Internal\Message
      *     @type string $MsgKey
      *           消息内容中的Key
      *     @type int|string $TaskId
+     *          
+     *     @type bool $Refuse
      *          
      * }
      */
@@ -193,6 +201,32 @@ class TakeLuckyMoneyTaskMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->TaskId = $var;
+
+        return $this;
+    }
+
+    /**
+     *
+     *
+     * Generated from protobuf field <code>bool Refuse = 6;</code>
+     * @return bool
+     */
+    public function getRefuse()
+    {
+        return $this->Refuse;
+    }
+
+    /**
+     *
+     *
+     * Generated from protobuf field <code>bool Refuse = 6;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setRefuse($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->Refuse = $var;
 
         return $this;
     }

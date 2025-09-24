@@ -10,6 +10,7 @@ use app\common\model\user\User;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
 use app\common\service\UserService;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use think\facade\Db;
 use think\facade\Config;
 use app\common\model\recharge\GiftPackageOrder;
@@ -255,4 +256,71 @@ class UserLogic extends BaseLogic
             return false;
         }
     }
+
+
+    /**
+     * 批量导入用户（仅手机号+算力）—— 真 · 一条 SQL
+     */
+    public static function import($file)
+    {
+        $fileinfo = $file->getRealPath();
+        $spreadsheet = IOFactory::load($fileinfo);
+        $sheet       = $spreadsheet->getActiveSheet();
+        $rows        = $sheet->toArray(null, true, true, true); // 二维数组
+        $salt  = Config::get('project.unique_identification');
+        $defaultAvatar = ConfigService::get('default_image', 'user_avatar');
+        /* 1. 预生成所有数据 */
+        $insertData = [];
+        $now = time();
+        $modelUser = new User();
+
+        foreach ($rows as $k => $row) {
+            if ($k == 1) continue; // 跳过表头
+            if ($row['A'] == '' || $row['B'] == '') continue;
+            $mobile = trim($row['A']);
+            $token = trim($row['B']);
+
+            if (!preg_match('/^1[3-9]\d{9}$/', $mobile)) {
+                throw new \Exception("第" . ($k + 1) . "行手机格式错误");
+            }
+            if ($token < 0) {
+                throw new \Exception("第" . ($k + 1) . "行算力不能小于0");
+            }
+            $isMobile = $modelUser->where(['mobile' => $mobile])->findOrEmpty();
+            if (!$isMobile->isEmpty()) {
+                throw new Exception("第" . ($k + 1) . "行手机已被占用,换一个吧！");
+            }
+            $token = round($token, 2);
+            $sn   = User::createUserSn();          // 还是原规则
+            $pwd  = create_password($mobile, $salt);
+
+            $insertData[] = [
+                'sn'        => $sn,
+                'account'   => $mobile,
+                'mobile'    => $mobile,
+                'password'  => $pwd,
+                'nickname'  => '用户' . $sn,
+                'tokens'    => $token,
+                'avatar'    => $defaultAvatar,
+                'channel'   => UserTerminalEnum::ADMIN,
+                'create_time' => $now,
+                'update_time' => $now,
+            ];
+
+        }
+        Db::startTrans();          // 事务
+
+        /* 2. 一条 SQL 插完 */
+        try {
+            (new User)->insertAll($insertData);   // TP 自带批量插入
+            Db::commit();
+            return true;
+        } catch (\Exception $e) {
+            Db::rollback();
+            throw new \Exception($e->getMessage());
+        }
+
+
+    }
+
 }

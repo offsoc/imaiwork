@@ -9,7 +9,7 @@ export enum KnTypeEnum {
     RAG = "rag",
 }
 
-export enum KnTypeIdEnum {
+export enum KnbTypeEnum {
     RAG = 1,
     VECTOR = 2,
 }

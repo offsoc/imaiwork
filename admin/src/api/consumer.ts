@@ -110,3 +110,8 @@ export function userSurveyLists(params: any) {
 export function userSurveyDel(params: any) {
     return request.post({ url: "/survey.survey/delete", params });
 }
+
+// 用户批量导入
+export function userBatchImport(params: any) {
+    return request.post({ url: "/user.user/import", params });
+}

@@ -3,21 +3,23 @@
 
 namespace app\api\logic;
 
-use app\common\model\kb\KbKnow;
-use app\common\model\knowledge\Knowledge;
-use app\common\model\knowledge\KnowledgeFile;
+use app\api\logic\service\TokenLogService;
 use app\common\enum\FileEnum;
+use app\common\enum\user\AccountLogEnum;
+use app\common\logic\AccountLogLogic;
+use app\common\model\kb\KbKnow;
+use app\common\model\kb\KbRobot;
+use app\common\model\kb\KbRobotRecord;
+use app\common\model\knowledge\Knowledge;
+use app\common\model\knowledge\KnowledgeBind;
+use app\common\model\knowledge\KnowledgeFile;
 use app\common\model\knowledge\KnowledgeFileSlice;
 use app\common\model\knowledge\KnowledgeRetrieve;
 use app\common\model\knowledge\KnowledgeRetrieveSlice;
 use app\common\model\knowledge\KnowledgeUseSceneRecord;
-use app\common\model\knowledge\KnowledgeBind;
+use app\common\model\user\User;
 use app\common\service\FileService;
 use app\common\service\UploadService;
-use app\api\logic\service\TokenLogService;
-use app\common\enum\user\AccountLogEnum;
-use app\common\logic\AccountLogLogic;
-use app\common\model\user\User;
 use app\common\service\WordsService;
 use Exception;
 
@@ -319,7 +321,7 @@ class KnowledgeLogic extends ApiLogic
      * 知识库删除
      *
      * @param array $params
-     * @return void
+     * @return bool
      */
     public static function delete(array $params)
     {
@@ -347,6 +349,23 @@ class KnowledgeLogic extends ApiLogic
 
             Knowledge::destroy(['id' => $params['id'], 'user_id' => self::$uid]);
             KnowledgeFile::destroy(['kid' => $params['id'], 'user_id' => self::$uid]);
+
+            // 删除机器人绑定关系
+            $robot = (new KbRobot())->where('kb_ids', 'like', '%' . $params['id'] . '%')->select()->toArray();
+            if ($robot) {
+                foreach ($robot as $item) {
+                    $item['kb_ids'] = explode(',', $item['kb_ids']);
+                    foreach ($item['kb_ids'] as $key => $value) {
+                        if ($value == $params['id']) {
+                            unset($item['kb_ids'][$key]);
+                        }
+                    }
+                    KbRobot::update([
+                                        'kb_ids' => implode(',', $item['kb_ids'])
+                                    ], ['id' => $item['id']]);
+                }
+                KnowledgeBind::where('kid', $params['id'])->delete();
+            }
 
             return true;
         } catch (\Throwable $e) {
@@ -980,11 +999,26 @@ class KnowledgeLogic extends ApiLogic
                 'kid' => $knowledge['id'],
                 'data_id' => $data['id'],
                 'type' =>  $params['type'],
+                'kb_type' => $params['kb_type'] ?? 1,
                 'index_id' => $params['index_id'],
                 'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE,
                 'create_time' => time(),
             ]);
         }
+
+//        if ($params['kb_type'] == 2){
+//            $knowledge = KbKnow::where('id', $params['kb_id'])->limit(1)->find();
+//            //挂载向量知识库
+//            KnowledgeBind::create([
+//                                      'user_id' => self::$uid,
+//                                      'kid' => $knowledge['id'],
+//                                      'data_id' => $data['id'],
+//                                      'type' =>  $params['kb_type'],
+//                                      'index_id' => '',
+//                                      'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE,
+//                                      'create_time' => time(),
+//                                  ]);
+//        }
     }
 
     /**
@@ -1005,13 +1039,13 @@ class KnowledgeLogic extends ApiLogic
             //->where('kb_type', $kbType)
             ->select()
             ->delete();
-            
+
         if (isset($params['index_id']) && !empty($params['index_id']) && $kbType == 1) {
             $knowledge = Knowledge::where('index_id', $params['index_id'])->findOrEmpty();
         } else {
             $knowledge = KbKnow::where('id', $params['id'])->findOrEmpty();
         }
-        
+
 
         if ($knowledge->isEmpty()) {
             throw new \Exception('知识库不存在');
@@ -1173,7 +1207,7 @@ class KnowledgeLogic extends ApiLogic
         }
         //print_r($response);die;
 
-        if ($scene == self::KNOELEDGE_CHAT && $request['stream'] == true) {
+        if (in_array($scene, [self::KNOELEDGE_CHAT, self::OPENAI_CHAT]) && $request['stream'] == true) {
             exit;
         }
 
@@ -1189,7 +1223,7 @@ class KnowledgeLogic extends ApiLogic
                 $usage = $response['data']['usage'];
                 $tokens = $usage['total_tokens'] + $request['knowledge_tokens'];
                 //计算消耗tokens
-                $points = $unit > 0 ? round($tokens / $unit,2) : 0;
+                $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
                 $knowlwdge_tokens = $request['knowledge_tokens'];
             }
 
@@ -1381,11 +1415,12 @@ class KnowledgeLogic extends ApiLogic
         // 问题审核(百度)
         WordsService::askCensor($params['message']);
         $uid = $params['user_id'] ?? self::$uid;
-        $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
+        // 兼容发布聊天，取消user_id冗余条件
+//        $knowlwdge = Knowledge::where('index_id', $params['indexid'])->where('user_id', $uid)->fetchSql(false)->limit(1)->find();
+        $knowlwdge = Knowledge::where('index_id', $params['indexid'])->fetchSql(false)->limit(1)->find();
         if (empty($knowlwdge)) {
             message('知识库不存在');
         }
-
         $message = $params['message'];
         // 表单变量替换
         $message_ext = $params['message_ext'] ?? '';
@@ -1398,18 +1433,36 @@ class KnowledgeLogic extends ApiLogic
 
         $request = [
             'indexid' => $params['indexid'],
+            'robot_id' => $params['robot_id'] ?? 0,
             'prompt' => $message,
             'rerank_min_score' => $params['rerank_min_score'] ?? ($knowledge['rerank_min_score'] ?? self::RERANK_MIN_SCORE), // 默认为0
             'stream' =>  (bool)$params['stream'] ?? true,
             'task_id' => $params['task_id'] ?? generate_unique_task_id(),
             'scene' => $params['scene'] ?? '未知聊天',
-            'assistant_id' => $params['assistant_id'] ?? 0
+            'assistant_id' => $params['assistant_id'] ?? 0,
+            'model' => $params['model'] ?? 'deepseek', // 默认为默认模型
+            'temperature' => $params['temperature'] ?? 1.0, //温度
+            'top_p'       => $params['top_p'] ?? 0.5, //多样性范围
+            'presence_penalty' => $params['presence_penalty'] ?? 0.2, //避免重复力度
+            'frequency_penalty' => $params['frequency_penalty'] ?? 0.3, //避免重复用词力度
+            'max_tokens' => $params['max_tokens'] ?? 4096, //token上限
+            'context_num' => $params['context_num'] ?? 3, //上下文数
+            'file_info' => $params['file_info'] ?? [], //文件信息
+            //            'channel' => $params['channel'] ?? 0, //应用渠道 1:个微 2:小红书 3:通用聊天
         ];
 
         if ($params['scene'] == '陪练聊天') {
             $request['voice'] = $params['voice'] ?? '';
             $request['emotion'] =  $params['emotion'] ?? '';
             $request['intensity'] =  $params['intensity'] ?? '';
+        }
+
+        if (isset($params['unique_id'])) {
+            $request['unique_id'] = $params['unique_id'];
+            $request['apiKey']    = $params['apiKey'];
+            $request['identity']  = $params['identity'];
+            $request['share_id']  = $params['share_id'];
+            $request['question']  = $params['question'];
         }
 
         self::__getRequestData($request, $params);
@@ -1421,16 +1474,22 @@ class KnowledgeLogic extends ApiLogic
                 'rerank_min_score' => $params['rerank_min_score'] ?? self::RERANK_MIN_SCORE, // 默认为0
                 'scene' => $params['scene'] ?? '未知聊天',
             );
-
             // 根据用户提示词检索
             $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
 
             // 拼接切片内容
             if ((int)$response['code'] === 10000) {
+                $texts = '';
+                if (isset($params['robot_id']) && $params['robot_id'] != 0 && $params['robot_id'] != '0') {
+                    $robot_set = KbRobot::where('id', $params['robot_id'])->value('roles_prompt');
+                    if (!empty($robot_set)) {
+                        $texts = "你的角色设定是：" . $robot_set . "\n";
+                    }
+                }
                 if (isset($response['data']['Nodes'])) {
-                    $texts = implode("\n", array_column($response['data']['Nodes'], 'Text'));
+                    $texts .= implode("\n", array_column($response['data']['Nodes'], 'Text'));
                 } else {
-                    $texts = '';
+                    $texts .= '';
                 }
 
                 $textLength = mb_strlen($texts, 'utf-8');
@@ -1439,24 +1498,78 @@ class KnowledgeLogic extends ApiLogic
                 $record['retrieve_length'] = $textLength;
                 $record['retrieve_tokens'] = ceil($textLength / 4); //2个字一个token
 
+                $texts = str_replace('"', "'", $texts);
                 $prompt = "请根据以下知识库内容回答问题：
                         {$texts}
                         问题：{$message}";
 
+                $logs = [];
+                //区分发布聊天
+                if (!isset($params['unique_id'])) {
+                    if (isset($params['task_id']) && $params['task_id']) {
+                        $request['task_id'] = $params['task_id'];
+                        // 对话记录
+                        $logs = \app\api\logic\ChatLogic::chatLog($request['task_id'], $params['assistant_id'], $uid, $params['context_num']);
+                        if (!$logs) {
+                            message('对话记录ID错误');
+                        }
+                    } else {
+                        $request['task_id'] = generate_unique_task_id();
+                    }
+                } else {
+                    $ids = KbRobotRecord::where('unique_id', $params['unique_id'])
+                                        ->column('id');
+                    if (count($ids) > $params['context_num']) {
+                        $ids = array_slice($ids, count($ids) - $params['context_num'], $params['context_num']);
+                    }
+                    KbRobotRecord::whereIn('id', $ids)
+                                 ->order('id asc')
+                                 ->select()
+                                 ->each(function ($item) use (&$logs) {
+                                     $logs[] = [
+                                         'role'    => 'user',
+                                         'content' => $item->ask
+                                     ];
+                                     $logs[] = [
+                                         'role'    => 'assistant',
+                                         'content' => $item->reply
+                                     ];
+                                 })
+                                 ->toArray();
+                    $request['task_id'] = $params['unique_id'];
+                }
+
+                if (isset($params['file_content']) && !empty($params['file_content'])) {
+                    $logs[] = ['role' => 'user','content' => $params['file_content']];
+                }
+
+                if (isset($params['net_content']) && !empty($params['net_content'])) {
+                    $logs[] = ['role' => 'user','content' => $params['net_content']];
+                }
+
+                $messages = array_merge($logs, [
+                    ['role' => 'user','content' => $prompt]
+                ]);
+
+                if ($uid == 0 && isset($params['unique_id'])) {
+                    $uid = KbRobot::where('id', $params['robot_id'])->value('user_id');
+                }
                 $request['user_id'] = $uid; // 替换为实际的用户ID
                 $request['prompt'] = $prompt;
+                $request['messages'] = $messages;
                 $request['knowledge_tokens'] = ceil($textLength / 4);
                 $request['chat_type'] = 9006;
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;
-
-                $result = self::requestUrl($request, self::KNOELEDGE_CHAT, $uid, $record);
+                //print_r($request);die;
+                $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
+                $result = self::requestUrl($request, $scene, $uid, $record);
                 self::$returnData = $result;
                 return $result;
             }
             return true;
         } catch (\Throwable $e) {
-            //            clogger($e);
+            clogger($e->__toString());
             if ($params['scene'] !== 'socket') {
                 message($e->getMessage());
             } else {
@@ -1475,10 +1588,67 @@ class KnowledgeLogic extends ApiLogic
         WordsService::sensitive($params['message']);
         // 问题审核(百度)
         WordsService::askCensor($params['message']);
-        
+
         try {
-            
-            $texts =  \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'], $params['message']);
+            $num = 0;
+            $texts = '';
+            $robotTexts = '';
+            if (isset($params['robot_id']) && $params['robot_id'] != 0 && $params['robot_id'] != '0') {
+                $robot_set = KbRobot::where('id', $params['robot_id'])->value('roles_prompt');
+                if (!empty($robot_set)) {
+                    $robotTexts = "你的角色设定是：" . $robot_set . "\n";
+                }
+            }
+            if (is_array($params['kb_id']) && count($params['kb_id']) > 1) {
+
+                $num   = 1;
+                foreach ($params['kb_id'] as $kb_id) {
+                    $texts .= '知识库' . $num . '：' . \app\api\logic\kb\KbKnowLogic::embAiChatSearch($kb_id, $params['message']);
+                    $num++;
+                }
+            } else if (is_array($params['kb_id']) && count($params['kb_id']) == 1) {
+                $texts = \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'][0], $params['message']);
+            } else {
+                $texts = \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'], $params['message']);
+            }
+            $num = $num - 1;
+            if (($texts == '未找到匹配内容' || substr_count($texts, '未找到匹配内容') == $num) && isset($params['robot_id'])) {
+                $robot = KbRobot::where('id', $params['robot_id'])->findOrEmpty();
+                if (!$robot->isEmpty() && $robot['search_empty_type'] == 2 && $robot['search_empty_text']) {
+                    $texts   = $robot['search_empty_text'];
+                    $task_id = $params['task_id'] ?? uniqid('eq') . time();
+                    if (isset($params['unique_id'])) {
+                        // 发布聊天的task_id使用前端传过来的unique_id
+                        $task_id            = $params['unique_id'];
+                        $params['question'] = $params['message'];
+                        $params['messages'] = [];
+                    }
+                    header('Content-type: text/event-stream');
+                    header('Cache-Control: no-cache');
+                    header('Connection: keep-alive');
+                    header('X-Accel-Buffering: no');
+                    $str1 = 'data:{"object":"loading","created":' . time() . ',"content":"' . $texts . '","file_info":[],"reasoning_content":null,"usage":{"prompt_tokens":0,"completion_tokens":0,"total_tokens":0,"knowledge_tokens":0},"task_id":"' . $task_id . '"}' . "\n\n";
+                    $str  = 'data:{"object":"finished","created":' . time() . ',"content":"' . $texts . '","file_info":[],"reasoning_content":null,"usage":{"prompt_tokens":0,"completion_tokens":0,"total_tokens":0,"knowledge_tokens":0},"task_id":"' . $task_id . '"}' . "\n\n";
+                    echo $str1;
+                    ob_flush();
+                    flush();
+                    echo $str;
+                    ob_flush();
+                    flush();
+                    //记录日志
+                    ChatLogic::saveChatResponseLog($params, [
+                        'reply'             => $texts ?? '',
+                        'reasoning_content' => null,
+                        'usage_tokens'      => 0,
+                        'extra'             => [
+                            'file' => [], //文件信息
+                        ]
+                    ]);
+                    exit;
+                }
+            }
+            $texts = str_replace('"', "'", $robotTexts . $texts);
+
             $textLength = mb_strlen($texts, 'utf-8');
 
             $record = array(
@@ -1495,10 +1665,57 @@ class KnowledgeLogic extends ApiLogic
             $prompt = "请根据以下知识库内容回答问题：
                     {$texts}
                     问题：{$params['message']}";
+            $logs = [];
+            if (!isset($params['unique_id'])) {
+                if (isset($params['task_id']) && $params['task_id']) {
+                    // 对话记录
+                    $logs = \app\api\logic\ChatLogic::chatLog($params['task_id'], $params['assistant_id'], self::$uid, $params['context_num']);
+                    if (!$logs) {
+                        message('对话记录ID错误');
+                    }
+                } else {
+                    $params['task_id'] = generate_unique_task_id();
+                }
+            } else {
+                $ids = KbRobotRecord::where('unique_id', $params['unique_id'])
+                                    ->column('id');
+                if (count($ids) > $params['context_num']) {
+                    $ids = array_slice($ids, count($ids) - $params['context_num'], $params['context_num']);
+                }
+                KbRobotRecord::whereIn('id', $ids)
+                             ->order('id asc')
+                             ->select()
+                             ->each(function ($item) use (&$logs) {
+                                 $logs[] = [
+                                     'role'    => 'user',
+                                     'content' => $item->ask
+                                 ];
+                                 $logs[] = [
+                                     'role'    => 'assistant',
+                                     'content' => $item->reply
+                                 ];
+                             })
+                             ->toArray();
+                $request['task_id'] = $params['unique_id'];
+            }
+
+            if (isset($params['file_content']) && !empty($params['file_content'])) {
+                $logs[] = ['role' => 'user', 'content' => $params['file_content']];
+            }
+
+            if (isset($params['net_content']) && !empty($params['net_content'])) {
+                $logs[] = [ 'role' => 'user', 'content' => $params['net_content']];
+            }
+
+            $messages = array_merge($logs, [
+                ['role' => 'user','content' => $prompt]
+            ]);
 
             $request = [
                 'prompt' => $prompt,
+                'messages' => $messages,
                 'stream' =>  (bool)$params['stream'] ?? true,
+                'robot_id' => $params['robot_id'] ?? 0,
                 'task_id' => $params['task_id'] ?? generate_unique_task_id(),
                 'scene' => $params['scene'] ?? '未知聊天',
                 'user_id' => self::$uid,
@@ -1506,11 +1723,29 @@ class KnowledgeLogic extends ApiLogic
                 'chat_type' => 9006,
                 'now' => time(),
                 'knowledge_record' => $record,
+                'model' => $params['model'] ?? 'deepseek', // 默认为默认模型
+                'temperature' => $params['temperature'] ?? 1.0, //温度
+                'top_p'       => $params['top_p'] ?? 0.5, //多样性范围
+                'presence_penalty' => $params['presence_penalty'] ?? 0.2, //避免重复力度
+                'frequency_penalty' => $params['frequency_penalty'] ?? 0.3, //避免重复用词力度
+                'max_tokens' => $params['max_tokens'] ?? 4096, //token上限
+                'context_num' => $params['context_num'] ?? 3, //上下文数
+                'file_info' => $params['file_info'] ?? [], //文件信息
+                //                'channel' => $params['channel'] ?? 0, // 应用渠道 1:个微 2:小红书 3:通用聊天
             ];
-
-            
-
-            $result = self::requestUrl($request, self::KNOELEDGE_CHAT, self::$uid, $record);
+            if (isset($params['unique_id'])) {
+                $request['unique_id'] = $params['unique_id'];
+                $request['apiKey']    = $params['apiKey'];
+                $request['identity']  = $params['identity'];
+                $request['share_id']  = $params['share_id'];
+                $request['question']  = $params['question'];
+            }
+            $uid    = self::$uid;
+            if ($uid == 0 && isset($params['unique_id'])) {
+                $uid = KbRobot::where('id', $params['robot_id'])->value('user_id');
+            }
+            $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
+            $result = self::requestUrl($request, $scene, $uid, $record);
             self::$returnData = $result;
             return $result;
         } catch (\Throwable $e) {
@@ -1559,6 +1794,13 @@ class KnowledgeLogic extends ApiLogic
                 'scene' => $params['scene'] ?? '未知聊天',
                 'assistant_id' => $params['assistant_id'] ?? 0,
                 'model' => $params['model'] ?? 'deepseek',
+
+                'temperature' => $params['temperature'] ?? 1.0, //温度
+                'top_p'       => $params['top_p'] ?? 0.5, //多样性范围
+                'presence_penalty' => $params['presence_penalty'] ?? 0.2, //避免重复力度
+                'frequency_penalty' => $params['frequency_penalty'] ?? 0.3, //避免重复用词力度
+                'max_tokens' => $params['max_tokens'] ?? 4096, //token上限
+                'context_num' => $params['context_num'] ?? 3, //上下文数
             ];
 
             self::__getRequestData($request, $params);
@@ -1637,7 +1879,7 @@ class KnowledgeLogic extends ApiLogic
 
                 return [true, $result];
             } else {
-                return [false, $response['message'] ?? '知识库检索失败'];
+                return [true, '知识库未检索到内容'];
             }
         } catch (\Throwable $e) {
             return [false, $e->getMessage()];
@@ -1761,16 +2003,16 @@ class KnowledgeLogic extends ApiLogic
         }
 
         $uid = $params['user_id'] ?? self::$uid;
-        
+
 
         $message = $params['message'];
 
-        
+
         //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
         if (mb_strlen(mb_trim($message), 'utf-8') == 0) {
             message('提示词 不能为空');
         }
-        
+
         try {
             $record = array(
                 'user_id' => $uid,
@@ -1913,7 +2155,7 @@ class KnowledgeLogic extends ApiLogic
         }
 
         $uid = $params['user_id'] ?? self::$uid;
-        
+
         $message = $params['message'];
 
         $request = [
@@ -1929,7 +2171,7 @@ class KnowledgeLogic extends ApiLogic
         $request['emotion'] =  $params['emotion'] ?? '';
         $request['intensity'] =  $params['intensity'] ?? '';
 
-        
+
         try {
             $texts =  \app\api\logic\kb\KbKnowLogic::embAiChatSearch($params['kb_id'], $params['message']);
             $record = array(

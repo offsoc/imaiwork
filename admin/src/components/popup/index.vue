@@ -13,8 +13,8 @@
             :close-on-click-modal="clickModalClose"
             :destroy-on-close="destroyOnClose"
             :fullscreen="fullscreen"
-            @closed="close"
-        >
+            v-bind="$attrs"
+            @closed="close">
             <!-- 弹窗内容 -->
             <template v-if="title" #header>{{ title }}</template>
 
@@ -30,8 +30,7 @@
                         v-if="confirmButtonText"
                         type="primary"
                         @click="handleEvent('confirm')"
-                        :loading="confirmLoading"
-                    >
+                        :loading="confirmLoading">
                         {{ confirmButtonText }}
                     </el-button>
                 </div>
@@ -46,97 +45,97 @@ export default defineComponent({
         title: {
             // 弹窗标题
             type: String,
-            default: ''
+            default: "",
         },
         content: {
             // 弹窗内容
             type: String,
-            default: ''
+            default: "",
         },
         confirmButtonText: {
             // 确认按钮内容
             type: [String, Boolean],
-            default: '确定'
+            default: "确定",
         },
         cancelButtonText: {
             // 取消按钮内容
             type: [String, Boolean],
-            default: '取消'
+            default: "取消",
         },
         width: {
             // 弹窗的宽度
             type: String,
-            default: '400px'
+            default: "400px",
         },
         disabled: {
             // 是否禁用
             type: Boolean,
-            default: false
+            default: false,
         },
         async: {
             // 是否开启异步关闭
             type: Boolean,
-            default: false
+            default: false,
         },
         clickModalClose: {
             // 点击遮罩层关闭对话窗口
             type: Boolean,
-            default: false
+            default: false,
         },
         center: {
             // 是否居中布局
             type: Boolean,
-            default: false
+            default: false,
         },
         customClass: {
             type: String,
-            default: ''
+            default: "",
         },
         destroyOnClose: {
-            default: false
+            default: false,
         },
         fullscreen: {
             type: Boolean,
-            default: false
+            default: false,
         },
         confirmLoading: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+        },
     },
-    emits: ['confirm', 'cancel', 'close', 'open'],
+    emits: ["confirm", "cancel", "close", "open"],
     setup(props, { emit }) {
-        const visible = ref(false)
+        const visible = ref(false);
 
-        const handleEvent = (type: 'confirm' | 'cancel') => {
-            emit(type)
-            if (!props.async || type === 'cancel') {
-                close()
+        const handleEvent = (type: "confirm" | "cancel") => {
+            emit(type);
+            if (!props.async || type === "cancel") {
+                close();
             }
-        }
+        };
 
         const close = () => {
-            visible.value = false
+            visible.value = false;
             nextTick(() => {
-                emit('close')
-            })
-        }
+                emit("close");
+            });
+        };
         const open = () => {
             if (props.disabled) {
-                return
+                return;
             }
-            emit('open')
-            visible.value = true
-        }
-        provide('visible', visible)
+            emit("open");
+            visible.value = true;
+        };
+        provide("visible", visible);
         return {
             visible,
             handleEvent,
             close,
-            open
-        }
-    }
-})
+            open,
+        };
+    },
+});
 </script>
 
 <style scoped lang="scss">

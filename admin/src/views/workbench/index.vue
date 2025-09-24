@@ -291,7 +291,9 @@ const getData = () => {
 };
 
 const getCommonConfig = computed(() => {
-    return workbenchData.tokens_lists.filter((item: any) => ["common_chat", "scene_chat"].includes(item.scene));
+    return workbenchData.tokens_lists.filter((item: any) =>
+        ["common_chat", "scene_chat", "coze_agent_chat", "coze_workflow"].includes(item.scene)
+    );
 });
 
 const getAiPersonConfig = computed(() => {

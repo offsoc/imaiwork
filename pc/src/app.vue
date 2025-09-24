@@ -26,11 +26,21 @@ const { is_oem, logo_url, name } = appStore.getOemConfig;
 
 // 设置网站头部信息
 useHead({
-    title: is_oem == 1 ? name : pc_title,
+    title: (is_oem == 1 ? name : pc_title) || "AI数字员工开源系统",
     meta: [
-        { name: "description", content: pc_desc },
-        { name: "keywords", content: pc_keywords },
+        {
+            name: "description",
+            content:
+                pc_desc ||
+                "专注于AI数字员工解决方案，为企业提供智能化的虚拟助手和自动化员工，提升工作效率，降低人力成本。支持多场景应用，助力企业数字化转型。",
+        },
+        {
+            name: "keywords",
+            content:
+                pc_keywords || "AI数字员工, 虚拟助手, 自动化员工, 数字化转型, 智能化办公, 人工智能员工, 企业AI解决方案",
+        },
     ],
+
     link: [
         {
             rel: "icon",

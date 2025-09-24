@@ -32,7 +32,10 @@
             </el-form>
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
-            <el-button v-perms="['user.user/add']" type="primary" @click="addUser">+ 创建用户</el-button>
+            <div class="flex justify-between">
+                <el-button v-perms="['user.user/add']" type="primary" @click="addUser">+ 创建用户</el-button>
+                <el-button v-perms="['user.user/add']" type="primary" @click="batchImport">批量导入</el-button>
+            </div>
             <el-table class="mt-4" size="large" v-loading="pager.loading" :data="pager.lists">
                 <el-table-column label="用户编号" prop="sn" min-width="120" show-overflow-tooltip />
                 <el-table-column label="头像" min-width="100">
@@ -92,6 +95,7 @@
             </div>
         </el-card>
         <add-user-pop v-if="popShow" ref="addUserPopRef" @close="popClose" />
+        <import-user-pop v-if="importShow" ref="importUserPopRef" @close="importShow = false" @success="getLists()" />
     </div>
 </template>
 <script lang="ts" setup name="consumerLists">
@@ -100,7 +104,7 @@ import { getRoutePath } from "@/router";
 import { getUserList } from "@/api/consumer";
 import { ClientMap } from "@/enums/appEnums";
 import AddUserPop from "../components/add-user-pop.vue";
-
+import ImportUserPop from "./import.vue";
 //弹框ref
 const addUserPopRef = shallowRef();
 const popShow = ref(false);
@@ -128,6 +132,15 @@ const addUser = async () => {
 const popClose = () => {
     getLists();
     popShow.value = false;
+};
+
+// 批量导入
+const importShow = ref(false);
+const importUserPopRef = shallowRef();
+const batchImport = async () => {
+    importShow.value = true;
+    await nextTick();
+    importUserPopRef.value.open();
 };
 
 onActivated(() => {

@@ -18,19 +18,23 @@ class TriggerCirclePushTaskMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string WeChatId = 1;</code>
      */
-    private $WeChatId = '';
+    protected $WeChatId = '';
     /**
      * 起始时间 选其一 单位 秒
      *
      * Generated from protobuf field <code>int64 StartTime = 2;</code>
      */
-    private $StartTime = 0;
+    protected $StartTime = 0;
     /**
-     * 朋友圈ids 选其一
+     * 废弃，准备删除
      *
      * Generated from protobuf field <code>repeated int64 CircleIds = 3;</code>
      */
     private $CircleIds;
+    /**
+     * Generated from protobuf field <code>int64 TaskId = 4;</code>
+     */
+    protected $TaskId = 0;
 
     /**
      * Constructor.
@@ -43,7 +47,8 @@ class TriggerCirclePushTaskMessage extends \Google\Protobuf\Internal\Message
      *     @type int|string $StartTime
      *           起始时间 选其一 单位 秒
      *     @type int[]|string[]|\Google\Protobuf\Internal\RepeatedField $CircleIds
-     *           朋友圈ids 选其一
+     *           废弃，准备删除
+     *     @type int|string $TaskId
      * }
      */
     public function __construct($data = NULL) {
@@ -104,7 +109,7 @@ class TriggerCirclePushTaskMessage extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * 朋友圈ids 选其一
+     * 废弃，准备删除
      *
      * Generated from protobuf field <code>repeated int64 CircleIds = 3;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -115,7 +120,7 @@ class TriggerCirclePushTaskMessage extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * 朋友圈ids 选其一
+     * 废弃，准备删除
      *
      * Generated from protobuf field <code>repeated int64 CircleIds = 3;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var
@@ -125,6 +130,28 @@ class TriggerCirclePushTaskMessage extends \Google\Protobuf\Internal\Message
     {
         $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::INT64);
         $this->CircleIds = $arr;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 TaskId = 4;</code>
+     * @return int|string
+     */
+    public function getTaskId()
+    {
+        return $this->TaskId;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 TaskId = 4;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setTaskId($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->TaskId = $var;
 
         return $this;
     }

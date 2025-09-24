@@ -1,9 +1,7 @@
 <template>
-    <div
-        class="w-full h-full flex items-center justify-center bg-[#ffffff33] rounded-full"
-        style="backdrop-filter: blur(5px)">
+    <div class="w-full h-full bg-[#ffffff33] rounded-full" style="backdrop-filter: blur(5px)">
         <ElPopover
-            popper-class="!min-w-[212px] !p-2 !rounded-xl "
+            popper-class="!min-w-[212px] !p-2 !rounded-xl !border-[#efefef]"
             :popper-style="{
                 backgroundColor: getTheme.bgColor,
                 borderColor: getTheme.borderColor,
@@ -16,7 +14,9 @@
             @show="visibleChange(true, data.id)"
             @hide="visibleChange(false, data.id)">
             <template #reference>
-                <div class="rotate-90 origin-center mr-1 cursor-pointer">
+                <div
+                    class="origin-center cursor-pointer w-full h-full flex items-center justify-center"
+                    :class="[horizontal ? 'rotate-0' : 'rotate-90']">
                     <Icon name="el-icon-MoreFilled" :color="getTheme.showIconColor"></Icon>
                 </div>
             </template>
@@ -63,6 +63,10 @@ const props = defineProps({
         type: Array as PropType<Array<HandleMenuType>>,
         default: () => [],
     },
+    horizontal: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const active = ref();
@@ -75,7 +79,7 @@ const getTheme = computed(() => {
     if (props.theme == ThemeEnum.LIGHT) {
         return {
             bgColor: "var(--color-white)",
-            borderColor: "var(--color-white)",
+            borderColor: "var(--color-white) !important",
             textColor: "#000000",
             iconColor: "#000000",
             iconBgColor: "#0000000b",
@@ -84,10 +88,10 @@ const getTheme = computed(() => {
     } else {
         return {
             bgColor: "var(--app-bg-color-2)",
-            borderColor: "#333333",
+            borderColor: "#333333 !important",
             textColor: "#ffffffcc",
             iconColor: "#ffffff",
-            iconBgColor: "rgba(255,255,255,0.05)",
+            iconBgColor: "#ffffff0d",
             showIconColor: "#ffffff",
         };
     }

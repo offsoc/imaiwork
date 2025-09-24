@@ -1,41 +1,54 @@
 <template>
-	<div
-		class="flex flex-nowrap gap-2 overflow-x-auto pb-1.5 pt-[7px] file-list"
-		v-if="fileList.length">
-		<div
-			class="group relative inline-block text-sm text-token-text-primary file-item-group"
-			v-for="(item, index) in fileList"
-			:key="index">
-			<file-item :index="index" :item="item" @on-delete="del"></file-item>
-		</div>
-	</div>
+    <div class="flex flex-nowrap gap-2 overflow-x-auto h-full items-center">
+        <div
+            class="group relative inline-block text-sm text-token-text-primary file-item-group"
+            v-for="(item, index) in fileList"
+            :key="index">
+            <files-card
+                show-del-icon
+                :uid="item.uid"
+                :name="item.file.name"
+                :percent="item.progress"
+                :status="item.status"
+                :file-size="item.file.size"
+                :url="item.url"
+                @delete="del"></files-card>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import FileItem from "./file-item.vue";
+import { cancelRequest } from "@/utils/http";
+import FilesCard from "./file-card/index.vue";
+import { UPLOAD_STATUS } from "~/composables/usePasteImage";
 const props = withDefaults(
-	defineProps<{
-		fileList: any[];
-	}>(),
-	{
-		fileList: () => [],
-	}
+    defineProps<{
+        fileList: any[];
+    }>(),
+    {
+        fileList: () => [],
+    }
 );
 const emit = defineEmits<{
-	(event: "update:file-list", value: any[]): void;
+    (event: "update:file-list", value: any[]): void;
 }>();
 
 const fileList = computed({
-	get() {
-		return props.fileList;
-	},
-	set(value) {
-		emit("update:file-list", value);
-	},
+    get() {
+        return props.fileList;
+    },
+    set(value) {
+        emit("update:file-list", value);
+    },
 });
 
-const del = (index: number) => {
-	fileList.value.splice(index, 1);
+const del = ({ uid, status }) => {
+    const index = fileList.value.findIndex((item) => item.uid === uid);
+    if (status == UPLOAD_STATUS.UPLOADING) {
+        const { requestKey } = fileList.value[index];
+        cancelRequest(requestKey);
+    }
+    fileList.value.splice(index, 1);
 };
 </script>
 

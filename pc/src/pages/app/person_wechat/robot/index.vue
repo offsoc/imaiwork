@@ -27,7 +27,7 @@ sidebar.value = [
         components: markRaw(TagManual),
         type: 2,
     },
-    { name: "回复策略", icon: "setting", components: markRaw(SettingReply), type: 3 },
+    // { name: "回复策略", icon: "setting", components: markRaw(SettingReply), type: 3 },
     {
         name: "自动通过好友策略",
         icon: "setting",

@@ -1,20 +1,18 @@
 <template>
     <div class="h-full flex flex-col w-full">
-        <div class="h-full flex-1 flex flex-col min-h-0 relative" v-if="contentList.length">
+        <div class="h-full flex-1 flex flex-col min-h-0 relative py-5" v-if="contentList.length">
             <ElScrollbar ref="scrollbarRef" height="100%" @scroll="scroll">
                 <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto h-full">
-                    <div ref="innerRef" class="contentList">
+                    <div ref="containerRef" class="contentList">
                         <div v-for="(item, index) in contentList" :key="index" class="py-[10px]">
                             <div class="message-contain message--his" v-if="item.type === 2">
-                                <ChatMsgItem
+                                <chat-msg-item
                                     :avatar="item.form_avatar"
-                                    :type="2"
+                                    :type="item.type"
                                     :loading="item.loading"
                                     :stopping="!!item.reply"
                                     :consume-tokens="item.consume_tokens"
-                                    :record-id="item.id"
-                                    @copy-content="copyContent(item.reply || item.error)"
-                                    @close="emit('close', index)">
+                                    @copy-content="copyContent(item.reply || item.error)">
                                     <template #rob>
                                         <chat-content
                                             :type="item.type"
@@ -24,26 +22,22 @@
                                             :is-reasoning-finished="item.is_reasoning_finished"
                                             :use-markdown="true"
                                             :index="index"
-                                            :is-prompt="item.is_prompt"
-                                            :error="item.error"
-                                            :show-copy-btn="!item.loading"
-                                            @copy="copyContent(item.reply || item.error)" />
+                                            :error="item.error" />
                                     </template>
-                                </ChatMsgItem>
+                                </chat-msg-item>
                             </div>
                             <div class="flex w-full flex-col gap-1 items-end rtl:items-start">
                                 <div class="message-contain message--my max-w-[70%]" v-if="item.type === 1">
-                                    <ChatMsgItem
+                                    <chat-msg-item
                                         :type="item.type"
                                         :avatar="item.form_avatar"
-                                        :is-preview="isPreview"
-                                        :file-lists="item.fileLists"
+                                        :file-lists="item.fileList"
                                         :message="item.message"
                                         @copy-my-content="copyContent(item.message)">
                                         <template #my>
                                             <chat-content :type="item.type" :content="item.message" />
                                         </template>
-                                    </ChatMsgItem>
+                                    </chat-msg-item>
                                 </div>
                             </div>
                         </div>
@@ -60,68 +54,114 @@
             ]">
             <slot name="content" v-if="contentList.length == 0"></slot>
             <div class="w-full mt-6">
-                <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto mb-4">
+                <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto mb-4 relative">
                     <div class="flex flex-col">
-                        <div
-                            class="flex items-end cursor-pointer bg-white rounded-tl-[24px] rounded-tr-[24px] border border-b-0 border-[#F1F1F2] px-[18px] relative">
-                            <div class="py-[12px] flex-1 mr-8">
-                                <slot name="input" v-if="$slots.input"></slot>
-                                <ElInput
-                                    v-else
-                                    v-model="inputContent"
-                                    type="textarea"
-                                    class="content-ipt transition-all duration-300"
-                                    resize="none"
-                                    :autosize="{
-                                        minRows: 1,
-                                        maxRows: 10,
-                                    }"
-                                    @keydown="handleInputEnter"
-                                    :placeholder="placeholder" />
+                        <slot name="chat-area-top" />
+                        <div class="flex items-center mb-3 relative h-10" v-if="isNewChat || !isDisabledHumanize">
+                            <div class="flex items-center gap-x-3 relative z-[10]" v-if="!isDisabledHumanize">
+                                <ElSelect
+                                    v-model="currModel.model_id"
+                                    placeholder="请选择模型"
+                                    class="ai-model-select"
+                                    popper-class="ai-model-popper"
+                                    :show-arrow="false"
+                                    @change="handleModelChange">
+                                    <ElOption
+                                        v-for="(item, index) in getAIModels"
+                                        :key="index"
+                                        :label="item.name"
+                                        :value="item.model_id"></ElOption>
+                                </ElSelect>
+                                <humanize-pop
+                                    ref="humanizePopRef"
+                                    :model-id="currModel.model_id"
+                                    :model-sub-id="currModel.model_sub_id" />
                             </div>
-                            <div class="w-8 h-8 mb-[12px] absolute right-2 z-10">
-                                <button
-                                    v-if="isStop"
-                                    @click="emit('close')"
-                                    class="flex w-full h-full items-center justify-center rounded-full bg-primary-light-9">
-                                    <Icon name="local-icon-chat_stop" :size="18"></Icon>
-                                </button>
-                                <button
-                                    v-else
-                                    @click="contentPost"
-                                    :disabled="isSendDisabled"
-                                    class="flex w-full h-full items-center justify-center rounded-full bg-primary-light-9 text-white disabled:bg-[#F2F2F2] disabled:text-[#f4f4f4] disabled:hover:opacity-100">
-                                    <Icon
-                                        :name="isSendDisabled ? 'local-icon-arrow_up' : 'local-icon-arrow_up_primary'"
-                                        :size="18"></Icon>
-                                </button>
+                            <div class="w-full h-full flex items-center justify-center absolute z-[9]" v-if="isNewChat">
+                                <div
+                                    class="bg-white rounded-xl w-[114px] h-8 flex items-center justify-center shadow-[0_0_4px_1px_rgba(0,0,0,0.05)] gap-x-1 cursor-pointer hover:bg-[#F5F5F5]"
+                                    @click="emit('newChat')">
+                                    <Icon name="local-icon-message" color="#989898"></Icon>
+                                    <span class="text-[#989898] text-xs">开启全新对话</span>
+                                </div>
                             </div>
                         </div>
                         <div
-                            class="flex items-center h-[50px] px-[6px] bg-[#F9FAFB border border-[#F1F1F2] border-t-0 rounded-bl-[24px] rounded-br-[24px]">
+                            class="bg-white rounded-tl-[24px] rounded-tr-[24px] border border-b-0 border-[#F1F1F2]"
+                            :class="{
+                                '!border-b-[1px] rounded-bl-[24px] rounded-br-[24px] shadow-[0_2px_6px_0px_rgba(0,0,0,0.04)]':
+                                    !showChattingBottom,
+                            }">
+                            <div
+                                class="h-[80px] border-b-[1px] border-[#F1F1F2] w-full px-2"
+                                v-if="fileList.length > 0">
+                                <file-lists v-model:file-list="fileList" />
+                            </div>
+                            <div class="flex items-end cursor-pointer px-[18px] relative">
+                                <div class="py-[12px] flex-1 mr-8">
+                                    <slot name="input" v-if="$slots.input"></slot>
+                                    <ElInput
+                                        v-else
+                                        v-model="inputContent"
+                                        type="textarea"
+                                        class="content-ipt transition-all duration-300"
+                                        resize="none"
+                                        :autosize="{
+                                            minRows: 1,
+                                            maxRows: 10,
+                                        }"
+                                        :placeholder="placeholder"
+                                        @keydown="handleInputEnter" />
+                                </div>
+                                <div class="w-8 h-8 mb-[12px] absolute right-2 z-10">
+                                    <button
+                                        v-if="isStop"
+                                        @click="emit('close')"
+                                        class="flex w-full h-full items-center justify-center rounded-full bg-primary-light-9">
+                                        <Icon name="local-icon-chat_stop" :size="18"></Icon>
+                                    </button>
+                                    <button
+                                        v-else
+                                        :disabled="isSendDisabled"
+                                        class="flex w-full h-full items-center justify-center rounded-full bg-primary-light-9 text-white disabled:bg-[#F6F6F6] disabled:text-[#f4f4f4] disabled:hover:opacity-100"
+                                        @click="contentPost">
+                                        <Icon
+                                            name="local-icon-arrow_up"
+                                            :color="isSendDisabled ? '#a9a9a9' : 'var(--color-primary)'"
+                                            :size="18"></Icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-if="showChattingBottom"
+                            class="flex items-center h-[50px] px-[6px] bg-[#F6F6F6] border border-[#F1F1F2] border-t-0 rounded-bl-[24px] rounded-br-[24px]">
                             <div class="flex items-center">
                                 <div
                                     class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#1ba7991a] cursor-pointer"
                                     :class="{
-                                        '!bg-[#1ba7991a] !text-[#1BA799]': selectedDeep,
+                                        '!bg-[#1ba7991a] !text-[#1BA799]': selectedNetwork,
                                     }"
-                                    v-if="isDeep"
-                                    @click="handleDeep">
+                                    v-if="isNetwork"
+                                    @click="handleNetwork">
                                     <Icon name="local-icon-deep" color="#1BA799" :size="16"></Icon>
-                                    <span class="text-xs">深度思考</span>
+                                    <span class="text-xs">联网搜索</span>
                                 </div>
-                                <ElDivider direction="vertical" class="!border-[#ededed]" v-if="isDeep" />
-                                <div
-                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#FF79191a] cursor-pointer"
-                                    :class="{
-                                        '!bg-[#FF79191a] !text-[#FF7919]': selectedKnowledgeBase || activeKnb.id,
-                                    }"
-                                    @click="handleKnowledgeBase">
-                                    <Icon name="local-icon-note_book" color="#FF7919" :size="16"></Icon>
-                                    <span class="text-xs">关联知识库</span>
-                                </div>
+                                <ElDivider direction="vertical" class="!border-[#ededed]" v-if="isNetwork" />
+                                <file-upload
+                                    v-model="fileList"
+                                    :file-limit="fileLimit"
+                                    :accept="uploadAccept"
+                                    @update:modelValue="emit('update:fileList', fileList)">
+                                    <div
+                                        class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#FF79191a] cursor-pointer">
+                                        <Icon name="local-icon-note_book" color="#FF7919" :size="16"></Icon>
+                                        <span class="text-xs">文件上传</span>
+                                    </div>
+                                </file-upload>
                             </div>
                         </div>
+                        <slot name="chat-area-bottom" />
                     </div>
                 </div>
             </div>
@@ -132,11 +172,6 @@
                 </div>
             </div>
         </div>
-        <KnbSelect
-            ref="knbSelectRef"
-            :active-knb="activeKnb"
-            @confirm="getSelectKnb"
-            @close="selectedKnowledgeBase = false" />
     </div>
 </template>
 
@@ -144,20 +179,15 @@
 import { ElInput, ElScrollbar } from "element-plus";
 import feedback from "@/utils/feedback";
 import { useElementSize } from "@vueuse/core";
+import cloneDeep from "lodash/cloneDeep";
 import { useUserStore } from "@/stores/user";
+import { useAppStore } from "@/stores/app";
 import { FileParams } from "@/composables/usePasteImage";
-import KnbSelect from "@/components/knb-select/index.vue";
+import FileUpload from "./file-upload.vue";
+import FileLists from "./file-lists.vue";
+import HumanizePop from "./humanize-pop.vue";
 
-const emit = defineEmits([
-    "contentPost",
-    "close",
-    "top",
-    "update:fileLists",
-    "newChat",
-    "update:deep",
-    "update:network",
-    "confirmKnb",
-]);
+const emit = defineEmits(["contentPost", "close", "top", "update:fileList", "newChat", "update:network"]);
 const props = defineProps({
     contentList: {
         type: Array as any,
@@ -172,51 +202,86 @@ const props = defineProps({
     avatar: {
         type: String,
     },
-    isPreview: {
-        type: Boolean,
-        default: false,
-    },
     placeholder: {
         type: String,
         default: "在这里输入任何问题 ...",
     },
-    isDeep: {
-        type: Boolean,
-    },
     isNetwork: {
         type: Boolean,
     },
+    isUploadFile: {
+        type: Boolean,
+        default: true,
+    },
+    isDisabledHumanize: {
+        type: Boolean,
+        default: false,
+    },
+    isNewChat: {
+        type: Boolean,
+        default: false,
+    },
+    isAuthLogin: {
+        type: Boolean,
+        default: true,
+    },
 });
 
-const router = useRouter();
+const appStore = useAppStore();
+const { getAiModelConfig } = appStore;
+
 const userStore = useUserStore();
 const { isLogin, toggleShowLogin } = userStore;
 
+const currModel = ref({
+    id: "",
+    name: "",
+    model_id: "",
+    model_sub_id: "",
+});
+
+const humanizePopRef = shallowRef<InstanceType<typeof HumanizePop>>();
+
 //输入框输入内容.
 const inputContent = ref("");
-//对话框ref
-const innerRef = ref<HTMLDivElement>(null);
+const containerRef = ref<HTMLDivElement>(null);
 //滚动条ref
 const scrollbarRef = ref<InstanceType<typeof ElScrollbar>>(null);
 
-const fileLists = ref<FileParams[]>([]);
-const fileLimit = ref(9);
-const imageLimit = ref(1);
+const fileList = ref<FileParams[]>([]);
+const fileLimit = ref(1);
 const fileIsLoad = ref(false);
 
 const uploadAccept = computed(() => {
-    return "image/*,.zip,.rar,.txt,.pdf,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.ftr,.7z,.gz,.jpg,.png,.gif,.jpeg,.webp,.ico,.json,.jsonl";
+    return ".html,.xml,.doc,.docx,.txt,.pdf,.csv,.xlsx";
 });
 
 const previousScrollTop = ref(0);
 const disabledScroll = ref(false);
 
+const getAIModels = computed(() => {
+    const models = cloneDeep(getAiModelConfig?.channel || []);
+    models.length && (currModel.value = cloneDeep(models[0]));
+    return models;
+});
+
+const showChattingBottom = computed(() => {
+    return props.isUploadFile && props.isNetwork;
+});
+
 // 判断发送框是否禁用
 const isSendDisabled = computed(() => {
     // 发送框禁用 1. 发送框禁用 2. 输入框为空 3. 文件列表为空 4. 文件上传中
-    const flag = fileLists.value.length === 0 ? !inputContent.value : !fileIsLoad.value;
+    const flag = fileList.value.length === 0 ? !inputContent.value : !fileIsLoad.value;
     return props.sendDisabled || flag;
 });
+
+const handleModelChange = (value: string) => {
+    const data = getAiModelConfig?.channel?.find((item) => item.model_id == value);
+    if (data) {
+        Object.assign(currModel.value, data);
+    }
+};
 
 //复制文本
 const { copy } = useCopy();
@@ -224,28 +289,10 @@ const copyContent = async (content) => {
     await copy(content);
 };
 
-const selectedDeep = ref(false);
 const selectedNetwork = ref(false);
-const handleDeep = () => {
-    selectedDeep.value = !selectedDeep.value;
-    emit("update:deep", selectedDeep.value);
-};
 const handleNetwork = () => {
     selectedNetwork.value = !selectedNetwork.value;
     emit("update:network", selectedNetwork.value);
-};
-
-const knbSelectRef = ref<InstanceType<typeof KnbSelect>>(null);
-const activeKnb = ref<any>({});
-const selectedKnowledgeBase = ref(false);
-const handleKnowledgeBase = () => {
-    selectedKnowledgeBase.value = !selectedKnowledgeBase.value;
-    knbSelectRef.value?.open();
-};
-
-const getSelectKnb = (val: any) => {
-    activeKnb.value = val.data;
-    emit("confirmKnb", val);
 };
 
 //计算滚动到底部高度
@@ -256,6 +303,7 @@ const toScrollHeight = () => {
 //对话框滚动
 const scroll = (value) => {
     const currentScrollTop = value.scrollTop;
+
     if (currentScrollTop < previousScrollTop.value) {
         disabledScroll.value = true;
     } else if (currentScrollTop > previousScrollTop.value) {
@@ -272,12 +320,18 @@ const refresh = ({ scrollTop }) => {
     }
 };
 
+// 重置滚动
+const resetScroll = () => {
+    disabledScroll.value = false;
+    previousScrollTop.value = 0;
+};
+
 //滚动到底部
 const scrollToBottom = async () => {
     if (disabledScroll.value) return;
     const scrollH = toScrollHeight();
     await nextTick();
-    scrollbarRef.value?.setScrollTop(scrollH);
+    scrollbarRef.value?.setScrollTop(scrollH + 100);
 };
 
 // 滚动到指定位置
@@ -286,7 +340,7 @@ const scrollTo = async (top: number) => {
     scrollbarRef.value?.setScrollTop(top);
 };
 
-const { height } = useElementSize(innerRef);
+const { height } = useElementSize(containerRef);
 watch(height, (value) => {
     if (props.sendDisabled) {
         scrollToBottom();
@@ -296,7 +350,7 @@ watch(height, (value) => {
 //清空输入框
 const cleanInput = () => {
     inputContent.value = "";
-    fileLists.value = [];
+    fileList.value = [];
     fileIsLoad.value = false;
 };
 
@@ -306,12 +360,11 @@ const setInput = (val: string) => {
 };
 
 //点击回车键
-const isInputChinese = ref(false);
 const handleInputEnter = (e: any) => {
     if (e.shiftKey && e.keyCode === 13) {
         return;
     }
-    if (!isLogin) {
+    if (!isLogin && props.isAuthLogin) {
         toggleShowLogin();
         return;
     }
@@ -323,16 +376,17 @@ const handleInputEnter = (e: any) => {
 
 //发送
 const contentPost = () => {
-    if (inputContent.value.replace(/(^\s*)|(\s*$)/g, "") == "" && fileLists.value.length == 0) {
+    if (inputContent.value.replace(/(^\s*)|(\s*$)/g, "") == "" && fileList.value.length == 0) {
         feedback.msgError("输入为空！");
         return;
     }
 
     if (props.sendDisabled) return;
-    if (!fileIsLoad.value && fileLists.value.length > 0) {
+    if (!fileIsLoad.value && fileList.value.length > 0) {
         feedback.msgError("文件正在上传中...");
         return;
     }
+
     emit("contentPost", inputContent.value);
     nextTick(() => {
         scrollToBottom();
@@ -341,19 +395,29 @@ const contentPost = () => {
 };
 
 watch(
-    () => fileLists.value,
+    () => fileList.value,
     (value) => {
-        fileIsLoad.value = value.some((item) => item.status === 1);
-        if (fileIsLoad.value) {
-            emit("update:fileLists", value);
-        }
+        fileIsLoad.value = value?.some((item) => item.status === UPLOAD_STATUS.SUCCESS);
     },
     {
         deep: true,
     }
 );
 
-defineExpose({ scrollToBottom, scrollTo, cleanInput, setInput });
+defineExpose({
+    scrollToBottom,
+    scrollTo,
+    resetScroll,
+    cleanInput,
+    setInput,
+    getChatConfig: () => {
+        return {
+            ...humanizePopRef.value?.formData,
+            model_id: currModel.value.model_id || undefined,
+            model_sub_id: currModel.value.model_sub_id || undefined,
+        };
+    },
+});
 </script>
 
 <style scoped lang="scss">
@@ -385,10 +449,35 @@ defineExpose({ scrollToBottom, scrollTo, cleanInput, setInput });
 :deep(.el-scrollbar__view) {
     @apply h-full;
 }
+
+:deep(.ai-model-select) {
+    width: 159px;
+    .el-select__wrapper {
+        border-radius: 20px;
+        box-shadow: none;
+        background: #f6f6f6;
+    }
+}
 textarea {
     resize: none;
     &:focus-visible {
         outline: none;
+    }
+}
+</style>
+<style lang="scss">
+.ai-model-popper.el-popper {
+    border: none;
+    border-radius: 20px;
+    background: #f6f6f6;
+    .el-select-dropdown {
+        border-radius: 20px;
+        .el-select-dropdown__item {
+            border-radius: 20px;
+            &:hover {
+                background: #ffffff;
+            }
+        }
     }
 }
 </style>

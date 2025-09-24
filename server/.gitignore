@@ -21,3 +21,4 @@ swoole.php
 .history
 /public/.well-known
 /public/.user.ini
+/app/api/controller/TestController.php

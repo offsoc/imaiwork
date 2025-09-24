@@ -70,3 +70,9 @@ export const ClipStyleMap: any = {
     [ClipStyleEnum.KNOWLEDGE]: "知识科普风格",
     [ClipStyleEnum.VARIETY]: "综艺风格",
 };
+
+// 知识库类型
+export enum KnbTypeEnum {
+    RAG = 1,
+    VECTOR = 2,
+}

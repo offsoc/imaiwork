@@ -66,7 +66,13 @@ class AcceptFriendAddRequestTaskMessage extends \Google\Protobuf\Internal\Messag
      *
      * Generated from protobuf field <code>bool OnlyWW = 10;</code>
      */
-    private $OnlyWW = false;
+    protected $OnlyWW = false;
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     */
+    protected $Permission = 0;
 
     /**
      * Constructor.
@@ -92,6 +98,8 @@ class AcceptFriendAddRequestTaskMessage extends \Google\Protobuf\Internal\Messag
      *          任务Id
      *     @type bool $OnlyWW
      *           只在企微添加
+     *     @type int $Permission
+     *          朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
      * }
      */
     public function __construct($data = NULL) {
@@ -329,6 +337,32 @@ class AcceptFriendAddRequestTaskMessage extends \Google\Protobuf\Internal\Messag
     {
         GPBUtil::checkBool($var);
         $this->OnlyWW = $var;
+
+        return $this;
+    }
+
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     * @return int
+     */
+    public function getPermission()
+    {
+        return $this->Permission;
+    }
+
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setPermission($var)
+    {
+        GPBUtil::checkInt32($var);
+        $this->Permission = $var;
 
         return $this;
     }

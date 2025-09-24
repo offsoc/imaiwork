@@ -42,6 +42,10 @@ interface Theme {
 const getTheme = computed<Theme>(() => {
     const key = route.meta.key;
     switch (key) {
+        case "home":
+            return {
+                bgColor: "#ffffff",
+            };
         case AppKeyEnum.DIGITAL_HUMAN:
         case AppKeyEnum.DRAWING:
         case AppKeyEnum.REDBOOK:
@@ -51,7 +55,7 @@ const getTheme = computed<Theme>(() => {
             };
         default:
             return {
-                bgColor: !props.isFixed ? "#ffffff" : "transparent",
+                bgColor: "",
             };
     }
 });

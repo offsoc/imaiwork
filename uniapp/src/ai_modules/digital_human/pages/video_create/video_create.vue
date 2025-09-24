@@ -105,8 +105,8 @@
                                         <u-switch
                                             v-model="formData.automatic_clip"
                                             size="36"
-                                            active-value="1"
-                                            inactive-value="0"></u-switch>
+                                            :active-value="1"
+                                            :inactive-value="0"></u-switch>
                                     </view>
                                 </view>
                                 <view class="flex items-center justify-between h-[80rpx] gap-x-2" v-if="false">

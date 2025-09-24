@@ -3,11 +3,11 @@
 namespace app\adminapi\lists\assistants;
 
 use app\adminapi\lists\BaseAdminDataLists;
+use app\common\enum\user\AccountLogEnum;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\chat\ChatLog;
-use app\common\service\FileService;
 use app\common\model\user\UserTokensLog;
-use app\common\enum\user\AccountLogEnum;
+use app\common\service\FileService;
 
 /**
  * 列表
@@ -52,7 +52,7 @@ class ChatLogLists extends BaseAdminDataLists implements ListsSearchInterface
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
-                $item['avatar']             = FileService::getFileUrl($item['avatar']);
+                $item['avatar'] = $item['avatar'] ? FileService::getFileUrl($item['avatar']) : '';
                 $item['scene_name']         = $item['scene_name'] ?? '通用聊天';
                 $item['assistant_name']     = $item['assistant_name'] ?? '通用聊天';
                 $item['scene_id']           = $item['scene_id'] ?? 0;

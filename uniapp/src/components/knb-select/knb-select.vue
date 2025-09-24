@@ -5,7 +5,7 @@
                 <view class="px-4">
                     <u-tabs
                         ref="tabsRef"
-                        :list="knbTypes"
+                        :list="getKnbTypes"
                         :current="currentKnb"
                         bg-color="transparent"
                         font-size="26"
@@ -77,16 +77,38 @@ import { knowledgeBaseLists, vectorKnowledgeBaseLists } from "@/api/knowledge_ba
 import { KnbTypeEnum } from "@/enums/appEnums";
 const emit = defineEmits(["close", "confirm"]);
 
+const props = withDefaults(
+    defineProps<{
+        showVector: boolean;
+        showRag: boolean;
+    }>(),
+    {
+        showVector: true,
+        showRag: true,
+    }
+);
+
 const knbTypes = ref<any[]>([
     {
+        id: 0,
         name: "向量知识库",
         value: KnbTypeEnum.VECTOR,
     },
     {
+        id: 1,
         name: "RAG知识库",
         value: KnbTypeEnum.RAG,
     },
 ]);
+const getKnbTypes = computed(() => {
+    if (props.showVector && props.showRag) {
+        return knbTypes.value;
+    } else if (props.showVector) {
+        return knbTypes.value.filter((item) => item.value == KnbTypeEnum.VECTOR);
+    } else {
+        return knbTypes.value.filter((item) => item.value == KnbTypeEnum.RAG);
+    }
+});
 
 const currentKnb = ref<number>(0);
 
@@ -99,7 +121,8 @@ const search = ref("");
 const queryList = async (page_no: number, page_size: number) => {
     try {
         const params = { page_no, page_size, name: search.value };
-        const { lists } = await (currentKnb.value == 0 ? vectorKnowledgeBaseLists : knowledgeBaseLists)(params);
+        const currId = getKnbTypes.value[currentKnb.value].id;
+        const { lists } = await (currId == 0 ? vectorKnowledgeBaseLists : knowledgeBaseLists)(params);
         pagingRef.value?.complete(lists);
     } catch (error) {
         pagingRef.value?.complete(false);
@@ -131,7 +154,8 @@ const clearSearch = () => {
 
 const activeKnb = ref<any>({});
 const handleSelect = (item: any) => {
-    if (currentKnb.value == 0) {
+    const currId = getKnbTypes.value[currentKnb.value].id;
+    if (currId == 0) {
         if (activeKnb.value.id == item.id) {
             activeKnb.value = {};
         } else {
@@ -147,7 +171,7 @@ const handleSelect = (item: any) => {
     show.value = false;
     emit("confirm", {
         data: activeKnb.value,
-        type: currentKnb.value == 0 ? KnbTypeEnum.VECTOR : KnbTypeEnum.RAG,
+        type: currId == 0 ? KnbTypeEnum.VECTOR : KnbTypeEnum.RAG,
     });
 };
 

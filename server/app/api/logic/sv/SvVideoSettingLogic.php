@@ -189,7 +189,7 @@ class SvVideoSettingLogic extends SvBaseLogic
                         if ($i == 0 && $params['pic'] == '') {
                             $params['pic'] = $anchorItem['pic'] ?? '';
                         }
-                        $automatic_clip = $params['automatic_clip'] ?? 0;
+                        $ai_type = $params['ai_type'] ?? 0;
                         $music_url = $musicItem['url'] ?? '';
                         $taskItem = [
                             'user_id' => self::$uid,
@@ -211,8 +211,9 @@ class SvVideoSettingLogic extends SvBaseLogic
                             'msg' => $copywritingItem['content'] ?? '',
                             'poi' => $params['poi'] ?? '',
                             'clip_type' => $clipItem['type'] ?? 1,
+                            'ai_type' => $ai_type,
                             'automatic_clip' => $params['automatic_clip'] ?? 0,
-                            'music_url' => $musicItem['url'] ?? '',
+                            'music_url' => $music_url,
                             'music_type' => $musictypeItem['type'] ?? 1,
                             'audio_type' => 1,
                             'extra' => json_encode([
@@ -468,10 +469,12 @@ class SvVideoSettingLogic extends SvBaseLogic
                             $params['pic'] = $anchorItem['pic'] ?? '';
                         }
                         $automatic_clip = $params['automatic_clip'] ?? 0;
+                        $ai_type = $params['ai_type'] ?? 0;
                         $music_url = $musicItem['url'] ?? '';
 //                        if ($automatic_clip == 1 && !preg_match('#^https?://#i', $music_url)) {
 //                            throw new \Exception('背景音乐错误');
 //                        }
+
                         $taskItem = [
                             'user_id' => self::$uid,
                             'video_setting_id' => $setting['id'],
@@ -492,9 +495,10 @@ class SvVideoSettingLogic extends SvBaseLogic
                             'msg' => $copywritingItem['content'] ?? '',
                             'poi' => $params['poi'] ?? '',
                             'clip_type' => $clipItem['type'] ?? 1,
+                            'ai_type' => $ai_type,
                             'music_type' => $musictypeItem['type'] ?? 1,
                             'automatic_clip' => $params['automatic_clip'] ?? 0,
-                            'music_url' => $musicItem['url'] ?? '',
+                            'music_url' => $music_url,
                             'audio_type' => 1,
                             'extra' => json_encode([
                                 'copywriting' => $copywritingItem,

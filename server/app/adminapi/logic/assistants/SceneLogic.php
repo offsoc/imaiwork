@@ -156,7 +156,6 @@ class SceneLogic extends BaseLogic
             $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
             Db::startTrans();          // 事务
             $inserted = 0;
-
             foreach ($rows as $k => $row) {
                 if ($k == 1) continue; // 跳过表头
                 $number = random_int(1, 50);

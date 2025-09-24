@@ -25,6 +25,7 @@ class MsgReplyHandler extends BaseMessageHandler
                 'msg' => '小红书正在变更通知状态',
                 'duration' => 10,
                 'time' => date('Y-m-d H:i:s', time()),
+                'scene' => 'xhs'
             ], JSON_UNESCAPED_UNICODE));
 
             if ($this->msgType == 12) {

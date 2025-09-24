@@ -11,7 +11,7 @@
 const router = useRouter();
 
 const handleBack = () => {
-    navigateTo("/");
+    router.back();
 };
 </script>
 

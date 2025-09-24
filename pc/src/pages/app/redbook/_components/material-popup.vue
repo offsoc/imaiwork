@@ -41,11 +41,11 @@
             </div>
             <div class="px-4" v-if="showTab">
                 <ElTabs v-model="currentTab" class="!text-white" @tab-click="handleTabClick">
+                    <ElTabPane :name="TabTypeEnum.MATERIAL" label="素材库"></ElTabPane>
                     <ElTabPane
-                        v-for="(tab, index) in tabs"
-                        :key="index"
-                        :label="tab.label"
-                        :name="tab.value"></ElTabPane>
+                        :name="TabTypeEnum.DH"
+                        label="数字人视频"
+                        v-if="MaterialTypeEnum.VIDEO == type"></ElTabPane>
                 </ElTabs>
             </div>
             <div
@@ -83,7 +83,9 @@
                                             :size="20"
                                             :color="isChoose(item) ? 'var(--color-primary)' : '#ffffff1a'"></Icon>
                                     </div>
-                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                    <div
+                                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                        v-if="type == MaterialTypeEnum.VIDEO">
                                         <div @click.stop="handlePreview(item)">
                                             <play-btn />
                                         </div>
@@ -105,7 +107,12 @@
             </div>
         </div>
     </popup>
-    <preview-video ref="previewVideoRef" v-if="showPreviewVideo" @close="showPreviewVideo = false"></preview-video>
+    <preview-video ref="previewVideoRef" v-if="showPreview" @close="showPreview = false"></preview-video>
+    <ElImageViewer
+        v-if="showPreview"
+        :initial-index="0"
+        :url-list="previewImageUrl"
+        @close="showPreview = false"></ElImageViewer>
 </template>
 
 <script setup lang="ts">
@@ -229,10 +236,17 @@ const handleConfirm = () => {
 };
 
 const previewVideoRef = shallowRef();
-const showPreviewVideo = ref(false);
+const showPreview = ref(false);
+
+const previewImageUrl = ref<string[]>([]);
 
 const handlePreview = async (item: any) => {
-    showPreviewVideo.value = true;
+    showPreview.value = true;
+
+    if (props.type == MaterialTypeEnum.IMAGE) {
+        previewImageUrl.value = [item.content];
+        return;
+    }
     await nextTick();
     if (currentTab.value == TabTypeEnum.MATERIAL) {
         const { content } = item;

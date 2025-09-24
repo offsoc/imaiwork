@@ -13,7 +13,7 @@ class VideoSettingLists extends BaseAdminDataLists implements ListsSearchInterfa
     public function setSearch(): array
     {
         return [
-            '=' => [ 'type'],
+            '=' => [ 'type', 'ai_type'],
             '%like%' => ['name'],
             'between' => ['create_time'],
             'in' => ['status']

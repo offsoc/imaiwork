@@ -27,13 +27,13 @@ trait AiCircleTrait
     public function circleReplyLikeTask(string $deviceId, array $response): void
     {
         try {
-            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('circleReplyLikeTask')->withContext([
-                'msg' => 'circleReplyLikeTask'
-            ])->log();
             $data = $response['Data'];
-            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Data')->withContext([
-                'response' => $response
-            ])->log();
+
+            // $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('circleReplyLikeTask')->withContext([
+            //     'msg' => 'circleReplyLikeTask',
+            //     'response' => $response
+            // ])->log();
+
             if ($data['MsgType'] == 'CirclePushNotice') {
                 $device = AiWechatDevice::where('device_code', $deviceId)->findOrEmpty();
                 if ($device->isEmpty()) {
@@ -206,7 +206,7 @@ trait AiCircleTrait
                             'reply_robot_id' => $strategy->reply_robot_id
                         ])->log();
                         return '';
-                    }else{
+                    } else {
                         $knowledge = $bindFind->toArray();
                     }
                 }
@@ -225,7 +225,7 @@ trait AiCircleTrait
                             'reply_robot_id' => $strategy->reply_robot_id
                         ])->log();
                         return '';
-                    }else{
+                    } else {
                         $knowledge = $bindFind->toArray();
                     }
                 }
@@ -326,7 +326,7 @@ trait AiCircleTrait
         ChatLogic::saveChatResponseLog($request, $response);
 
         //计算消耗tokens
-        $points = $unit > 0 ? round($tokens / $unit,2) : 0;
+        $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
         //token扣除
         User::userTokensChange($request['user_id'], (float)$points);
 
@@ -437,6 +437,7 @@ trait AiCircleTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
+            \Channel\Client::connect('127.0.0.1', 2206);
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);
@@ -469,6 +470,7 @@ trait AiCircleTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
+            \Channel\Client::connect('127.0.0.1', 2206);    
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);

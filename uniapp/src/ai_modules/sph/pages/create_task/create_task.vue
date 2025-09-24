@@ -119,6 +119,18 @@ const keyword = ref("");
 
 const formData = reactive({
     crawl_type: "",
+    chat_type: "0",
+    chat_number: 30,
+    chat_interval_time: 10,
+    greeting_content: "",
+    add_type: "0",
+    remark: "",
+    add_number: 15,
+    add_interval_time: 10,
+    private_message_prompt: "",
+    add_friends_prompt: "",
+    wechat_id: "",
+    wechat_reg_type: 0,
 });
 
 const { pager: devicePager, getLists: getDeviceList } = usePaging({

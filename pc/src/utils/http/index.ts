@@ -6,19 +6,19 @@ import { Request } from "./request";
 import { getApiPrefix, getApiUrl, getVersion } from "../env";
 import { useUserStore } from "@/stores/user";
 import { createPinia } from "pinia";
+import { cancelTokenManager, cancelRequest, cancelRequestsByUrl, cancelAllRequests } from "./cancel";
 const pinia = createPinia();
 
 export function createRequest(opt?: Partial<FetchOptions>) {
     // 因为是考虑到ssr情况，这里使用store需要注入pinia
     const userStore = useUserStore(pinia);
-    const router = useRouter();
-    const route = useRoute();
     const defaultOptions: FetchOptions = {
         // 基础接口地址
         baseURL: getApiUrl(),
         //请求头
         headers: {
             version: getVersion(),
+            terminal: "4",
         },
         retry: 2,
         requestOptions: {
@@ -93,3 +93,6 @@ export function createRequest(opt?: Partial<FetchOptions>) {
         merge(defaultOptions, opt || {})
     );
 }
+
+// 导出取消请求相关功能
+export { cancelTokenManager, cancelRequest, cancelRequestsByUrl, cancelAllRequests };

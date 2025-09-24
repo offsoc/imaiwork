@@ -38,31 +38,27 @@ trait SphTaskTrait
         if (empty($rows)) {
             throw new \Exception('暂时没有需要执行的设备');
         }
-        //print_r($rows);die;
-
 
         ChannelClient::connect('127.0.0.1', 2206);
         foreach ($rows as $row) {
-            // $device = SvDeviceRpa::where('device_code', $row['device_code'])->where('status', 1)->where('app_type', 4)->findOrEmpty();
-            // if ($device->isEmpty()) {
-            //     throw new \Exception('当前设备正在执行其他app,稍后重试');
-            // }
-            $deviceTaskStatus = self::redis()->get("xhs:device:{$row['device_code']}:taskStatus");
-            //print_r($deviceTaskStatus);die;
-            if(!empty($deviceTaskStatus)){
-                $deviceTaskStatus = json_decode(($deviceTaskStatus), true);
-                if($deviceTaskStatus['taskStatus'] == 'running'){
+            $_deviceTaskStatus = self::redis()->get("xhs:device:{$row['device_code']}:taskStatus");
+            if (!empty($_deviceTaskStatus)) {
+                $deviceTaskStatus = json_decode(($_deviceTaskStatus), true);
+                if (is_null($deviceTaskStatus)) {
+                    $deviceTaskStatus = json_decode(unserialize($_deviceTaskStatus), true);
+                }
+                if (is_array($deviceTaskStatus) && $deviceTaskStatus['taskStatus'] == 'running') {
                     $datetime = date('Y-m-d H:i:s', strtotime($deviceTaskStatus['time']) + (int)$deviceTaskStatus['duration']);
                     $msg = "设备正在执行小红书任务，请在【{$datetime}】秒后重试";
                     $time = strtotime($deviceTaskStatus['time']) + (int)$deviceTaskStatus['duration'];
-                    if(time() < $time){
+                    if (time() < $time) {
                         throw new \Exception($msg);
                     }
                 }
             }
 
             self::sendAppExec($row, 4);
-            usleep(200 * 1000);//200毫秒
+            usleep(200 * 1000); //200毫秒
             $task = [
                 'id' => $row['id'],
                 'task_id' => $task_id,
@@ -106,6 +102,7 @@ trait SphTaskTrait
                 'msg' => '执行视频号',
                 'duration' => 0,
                 'time' => date('Y-m-d H:i:s', time()),
+                'scene' => 'sph'
             ], JSON_UNESCAPED_UNICODE));
         }
     }
@@ -113,14 +110,14 @@ trait SphTaskTrait
     private static function sendAppExec($row, $appType)
     {
         $app = SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', $appType)->findOrEmpty();
-        if($app->isEmpty()){
+        if ($app->isEmpty()) {
             throw new \Exception('当前设备未绑定app');
         }
         $payload = [
             "messageId" => 2,
             "type" => 90, //执行那个app指令
             "appType" => $appType,
-            "content" => json_encode( [
+            "content" => json_encode([
                 "deviceId" => $row['device_code'],
                 "appType" => $appType,
                 'msg' => '视频号',
@@ -137,7 +134,7 @@ trait SphTaskTrait
 
         SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', '<>', $appType)->update(['status' => 0, 'update_time' => time()]);
         SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', $appType)->update([
-            'status' => 1, 
+            'status' => 1,
             'update_time' => time(),
             'start_time' => date('Y-m-d H:i:s', time()),
         ]);
@@ -207,7 +204,6 @@ trait SphTaskTrait
             ]);
             SvCrawlingTaskDeviceBind::where('task_id', $task_id)->where('device_code', $_deviceId)->update(['status' => 1, 'update_time' => time()]);
         }
-       
     }
 
     public static function sphDelete(string $task_id): void
@@ -254,13 +250,13 @@ trait SphTaskTrait
         );
         return $maps[$type] ?? '视频号';
     }
-    
+
     private static function createGreetingContents(array $task, int $user_id): array
     {
         try {
             $returnContent = '';
-             //获取提示词
-            $keyword = $task['add_friends_prompt'] != '' ? $task['add_friends_prompt'] : ( ChatPrompt::where('prompt_name', '私信内容')->value('prompt_text') ?? '');
+            //获取提示词
+            $keyword = $task['add_friends_prompt'] != '' ? $task['add_friends_prompt'] : (ChatPrompt::where('prompt_name', '私信内容')->value('prompt_text') ?? '');
             $keyword .= "\n- 生成10条不同描述的文案\n- 生成的结果文案首部的数字和点号.\n- 只能生成中文文案\n- 每条文案长度不能超过100个字符";
 
             $request = [
@@ -291,7 +287,6 @@ trait SphTaskTrait
             }
             $returnContent = self::formatReturnContent($returnContent);
             return $returnContent;
-
         } catch (\Throwable $e) {
             self::setLog($e->__toString());
             throw new \Exception('AI生成私信失败:' . $e->getMessage());
@@ -324,7 +319,7 @@ trait SphTaskTrait
                 'usage_tokens' => $response['data']['usage'] ?? [],
             ];
             //计算消耗tokens
-            $points = $unit > 0 ? round($tokens / $unit,2) : 0;
+            $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
             //token扣除
             User::userTokensChange($user_id, $points);
 
@@ -343,7 +338,7 @@ trait SphTaskTrait
 
     private static function redis(): redisClient
     {
-        
+
         return new redisClient([
             'host'        => env('redis.HOST', '127.0.0.1'),
             'port'        => env('redis.PORT', 6379),
@@ -361,11 +356,11 @@ trait SphTaskTrait
     }
 
 
-    private static function setLog($content)
+    private static function setLog($content, $type = 'sph')
     {
         if (is_array($content)) {
             $content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
-        Log::write($content, 'sph');
+        Log::write($content, $type);
     }
 }

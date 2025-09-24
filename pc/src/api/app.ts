@@ -14,23 +14,24 @@ export function getPolicy(params: any) {
 }
 
 // 上传图片
-export function uploadImage(params: any) {
-    return $request.uploadFile({ url: "/upload/image" }, params);
+export function uploadImage(params: any, onProgress?: (percent: number) => void) {
+    return $request.uploadFile({ url: "/upload/image" }, params, onProgress);
 }
 
 // 上传音频
-export function uploadAudio(params: any) {
-    return $request.uploadFile({ url: "/upload/audio" }, params);
+export function uploadAudio(params: any, onProgress?: (percent: number) => void) {
+    return $request.uploadFile({ url: "/upload/audio" }, params, onProgress);
 }
 
 // 上传文件
-export function uploadFile(params: any) {
-    return $request.uploadFile({ url: "/upload/file" }, params);
+export function uploadFile(params: any, onProgress?: (percent: number) => void) {
+    return $request.uploadFile({ url: "/upload/file" }, params, onProgress);
 }
 
 // 上传GPT文件
-export function uploadGPTFile(params: any) {
-    return $request.uploadFile({ url: "/GptFile/add" }, params);
+export function uploadGPTFile(params: any, onProgress?: (percent: number) => void) {
+    // 确保requestKey参数被正确传递
+    return $request.uploadFile({ url: "/GptFile/add" }, params, onProgress);
 }
 
 // 获取默认机器人

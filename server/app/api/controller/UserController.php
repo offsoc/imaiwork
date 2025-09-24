@@ -161,6 +161,18 @@ class UserController extends BaseApiController
      */
     public function getModelConfigList(): Json
     {
-        return $this->success(data: ModelConfig::where('status', 1)->select()->toArray(), show: 0);
+        $list = ModelConfig::where('status', 1)->select()->toArray();
+        $del = [
+            'human_avatar',  'human_voice',  'human_audio',  'human_video',
+            'human_avatar_pro',  'human_voice_pro',  'human_audio_pro',  'human_video_pro',
+            'knowledge_chat'
+        ];
+        foreach ($list as $k => $v) {
+            if (in_array($v['scene'], $del)) {
+                unset($list[$k]);
+            }
+        }
+        $list = array_values($list);
+        return $this->success(data: $list, show: 0);
     }
 }

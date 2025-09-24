@@ -1,37 +1,43 @@
 <template>
     <div class="chat-message flex gap-x-2">
         <!-- My message -->
-        <div v-if="type == 1" class="ml-auto flex flex-col group relative">
-            <div class="message-contain message-contain--my" v-if="message">
-                <slot name="my"></slot>
-            </div>
-            <div class="flex flex-col gap-2">
-                <div v-for="(file, index) in fileLists">
-                    <file-item :item="file" :index="index" :show-close="false">
-                        <template #image="{ url }">
-                            <div>
-                                <ElImage :src="url" :preview-src-list="[url]" class="max-w-96 max-h-64 p-2" fit="cover">
-                                </ElImage>
-                            </div>
-                        </template>
-                    </file-item>
+        <div v-if="type == 1" class="ml-auto flex flex-col mt-1">
+            <div class="relative group">
+                <div class="message-contain message-contain--my" v-if="message">
+                    <slot name="my"></slot>
+                </div>
+
+                <div
+                    class="flex items-center justify-end cursor-pointer invisible group-hover:visible absolute bottom-0 right-0 translate-y-1/2"
+                    v-if="message">
+                    <ElTooltip content="拷贝">
+                        <ElButton
+                            :icon="isCopying === 'my' ? 'el-icon-Check' : 'el-icon-CopyDocument'"
+                            size="small"
+                            @click="copyMyContent"></ElButton>
+                    </ElTooltip>
                 </div>
             </div>
-            <div
-                class="flex items-center justify-end cursor-pointer invisible group-hover:visible absolute bottom-0 right-0 translate-y-1/2"
-                v-if="message">
-                <ElTooltip content="拷贝">
-                    <ElButton
-                        :icon="isCopying === 'my' ? 'el-icon-Check' : 'el-icon-CopyDocument'"
-                        size="small"
-                        @click="copyMyContent"></ElButton>
-                </ElTooltip>
+            <div class="flex flex-col gap-2 mt-2 items-end" v-if="fileLists.length > 0">
+                <div v-for="(file, index) in fileLists" class="relative group">
+                    <file-card :uid="file.uid || index" :name="file.name" :size="file.size" :url="file.url" />
+                    <div
+                        class="rounded-lg absolute top-0 left-0 w-full h-full group-hover:visible invisible bg-[rgba(0,0,0,0.4)] cursor-pointer flex items-center justify-center">
+                        <div>
+                            <ElTooltip content="查看">
+                                <a :href="file.url" target="_blank"
+                                    ><Icon name="el-icon-Download" size="18" color="#ffffff"></Icon
+                                ></a>
+                            </ElTooltip>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Avatar -->
         <div class="flex-shrink-0">
-            <img v-if="avatar" :src="avatar" class="w-[48px] h-[48px] rounded-full p-1 object-cover" />
+            <img v-if="avatar" :src="avatar" class="w-[48px] h-[48px] rounded-full object-cover" />
             <div class="w-[48px] h-[48px]" v-else>
                 <img src="@/assets/images/chat_logo.png" />
             </div>
@@ -84,9 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ElAvatar, ElButton } from "element-plus";
-import { CopyDocument } from "@element-plus/icons-vue";
-import FileItem from "../chatting/file-item.vue";
+import FileCard from "../chatting/file-card/index.vue";
 
 const emit = defineEmits(["copyContent", "copyMyContent"]);
 const props = defineProps({
@@ -114,12 +118,8 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
-    isPreview: {
-        type: Boolean,
-        default: false,
-    },
     fileLists: {
-        type: Array,
+        type: Array<{ uid?: string; name: string; type: string; size: number | string; url: string }>,
         default: [],
     },
     consumeTokens: {
@@ -127,8 +127,6 @@ const props = defineProps({
         default: () => ({}),
     },
 });
-
-const isMyCopy = ref(false);
 
 const isCopying = ref<"my" | "his" | null>(null);
 

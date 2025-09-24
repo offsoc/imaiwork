@@ -72,7 +72,13 @@ class AddFriendsTaskMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>int64 CustomId = 10;</code>
      */
-    private $CustomId = 0;
+    protected $CustomId = 0;
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     */
+    protected $Permission = 0;
 
     /**
      * Constructor.
@@ -100,6 +106,8 @@ class AddFriendsTaskMessage extends \Google\Protobuf\Internal\Message
      *          客户自定义
      *     @type int|string $CustomId
      *          客户自定义
+     *     @type int $Permission
+     *          朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
      * }
      */
     public function __construct($data = NULL) {
@@ -363,6 +371,32 @@ class AddFriendsTaskMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->CustomId = $var;
+
+        return $this;
+    }
+
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     * @return int
+     */
+    public function getPermission()
+    {
+        return $this->Permission;
+    }
+
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setPermission($var)
+    {
+        GPBUtil::checkInt32($var);
+        $this->Permission = $var;
 
         return $this;
     }

@@ -233,7 +233,7 @@ const isFriendNoTag = computed(() => {
 
 const initialize = async () => {
     await getWeChatListsFn();
-    tagParams.wechat_id = currentWechat.value.wechat_id;
+    tagParams.wechat_id = currentWechat.value?.wechat_id;
     await getInitialTags();
     getTagFriendList();
 };

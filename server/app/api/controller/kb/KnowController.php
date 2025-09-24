@@ -130,7 +130,7 @@ class KnowController extends BaseApiController
      */
     public function files(): Json
     {
-        (new KbKnowValidate())->get()->goCheck('kid');
+        (new KbKnowValidate())->get()->goCheck('kid', [], 1);
         return $this->dataLists((new KbFilesLists()));
     }
 

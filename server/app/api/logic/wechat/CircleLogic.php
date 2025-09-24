@@ -165,13 +165,23 @@ class CircleLogic extends WechatBaseLogic
     {
         try
         {
-            print_r('定时推送朋友圈');
+            //print_r('定时推送朋友圈');
+            $wechatIds = AiWechat::alias('w')
+                ->join('ai_wechat_device d', 'd.user_id = w.user_id and d.device_code = w.device_code')
+                ->where('w.wechat_status', 1)
+                ->where('d.device_status', 1)
+                ->column('w.wechat_id');
+            if (empty($wechatIds))
+            {
+                return;
+            }
             // 即时发圈
             AiWechatCircleTask::where('task_type', $taskType)
                 ->when($uid, function ($query) use ($uid)
                 {
                     $query->where('user_id', $uid);
                 })
+                ->where('wechat_id', 'in', $wechatIds)
                 ->where('send_status', 0)
                 ->select()
                 ->each(function ($item)
@@ -179,7 +189,6 @@ class CircleLogic extends WechatBaseLogic
 
                     // 获取微信设备码
                     $deviceCode = AiWechat::where('user_id', $item->user_id)->where('wechat_id', $item->wechat_id)->value('device_code', '');
-
                     if (!$deviceCode)
                     {
                         $item->task_status = 2;

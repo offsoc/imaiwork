@@ -45,6 +45,8 @@ return [
         'device_rpa_cron' => 'app\common\command\DeviceRpaCron',
         'start_channel' => 'app\common\command\StartChannel',
         'note_publish_cron' => 'app\common\command\NotePublishCron',
+        'single:server' => 'app\common\command\SingleWorkerService',
+        'sph_clues_add_wechat' => 'app\common\command\SphCluesAddWechat',
 
     ],
 

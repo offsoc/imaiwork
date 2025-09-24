@@ -20,7 +20,7 @@ class SvVideoTaskLists extends BaseAdminDataLists implements ListsSearchInterfac
     public function setSearch(): array
     {
         return [
-            '=' => [ 'type','video_setting_id', 'audio_type', 'model_version'],
+            '=' => [ 'type','video_setting_id', 'audio_type', 'ai_type', 'model_version'],
             '%like%' => ['name'],
             'between' => ['create_time'],
             'in' => ['status']

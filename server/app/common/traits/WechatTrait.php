@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace app\common\traits;
@@ -8,7 +9,7 @@ use app\common\workerman\wechat\handlers\client\TalkToFriendTaskHandler;
 use app\common\workerman\wechat\handlers\client\AcceptFriendAddRequestTaskHandler;
 use app\common\workerman\wechat\handlers\client\PostSNSNewsTaskHandler;
 use app\common\workerman\wechat\constants\ResponseCode;
-use app\common\workerman\wechat\traits\{ DeviceTrait, CacheTrait};
+use app\common\workerman\wechat\traits\{DeviceTrait, CacheTrait};
 use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
 use Google\Protobuf\Any;
 use think\facade\Log;
@@ -16,6 +17,7 @@ use think\facade\Log;
 use app\common\service\FileService;
 use Predis\Client as redisClient;
 use GuzzleHttp\Client as httpClient;
+
 /**
  * 微信操作能力
  * @author Qasim
@@ -33,7 +35,7 @@ trait WechatTrait
     protected static function wxPush(array $params): array
     {
         try {
-            
+
             // 1. 参数验证
             if (!isset($params['wechat_id']) || !isset($params['friend_id']) || !isset($params['message']) || !isset($params['device_code'])) {
                 throw new \Exception(ResponseCode::getMessage(ResponseCode::INVALID_PARAMS), ResponseCode::INVALID_PARAMS);
@@ -58,9 +60,9 @@ trait WechatTrait
             ];
             // $key = "push:device:{$deviceId}";
             // self::redis()->lpush($key, json_encode($data, JSON_UNESCAPED_UNICODE));
-            
 
-                // 3. 构建消息发送请求
+
+            // 3. 构建消息发送请求
             $content = \app\common\workerman\wechat\handlers\client\TalkToFriendTaskHandler::handle($data);
             // 4. 构建protobuf消息
             $message = new \Jubo\JuLiao\IM\Wx\Proto\TransportMessage();
@@ -80,7 +82,6 @@ trait WechatTrait
                 'code' => 10000,
                 'message' => 'success'
             ];
-
         } catch (\Throwable $th) {
             self::setLog([
                 'title' => 'Send message Device push',
@@ -105,27 +106,32 @@ trait WechatTrait
     public static function wxOnline(array $params): array
     {
         try {
-            
+
             // 1. 参数验证
             if (!isset($params['wechat_id']) || !isset($params['device_code']) || !isset($params['type'])) {
                 throw new \Exception(ResponseCode::getMessage(ResponseCode::INVALID_PARAMS), ResponseCode::INVALID_PARAMS);
             }
-            
+
             $wechatId = $params['wechat_id'];
             $deviceId = $params['device_code'];
-            $type     = $params['type'];  
+            $type     = $params['type'];
 
-            if($type == 1){
-                
+            if ($type == 1) {
+
                 $online = self::isDeviceOnline($deviceId);
                 $content = [
                     'online_status' => $online ? 1 : 0
                 ];
-            }else{
-                // 获取微信信息
-                $key = self::getWechatKey($deviceId, $wechatId);
-                $content = self::redis()->hGetAll($key) ?: [];
-                $content['online_status'] = (isset($content['Status']) && $content['Status'] == 'online') ? 1 : 0;
+            } else {
+                $online = self::isDeviceOnline($deviceId);
+                if ($online) {
+                    // 获取微信信息
+                    $key = self::getWechatKey($deviceId, $wechatId);
+                    $content = self::redis()->hGetAll($key) ?: [];
+                    $content['online_status'] = (isset($content['Status']) && $content['Status'] == 'online') ? 1 : 0;
+                } else {
+                    $content['online_status'] = 0;
+                }
             }
 
             return [
@@ -133,7 +139,7 @@ trait WechatTrait
                 'message' => 'success',
                 'data' => $content
             ];
-        }catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             self::setLog([
                 'title' => 'Send message Device online',
                 'params' => $params,
@@ -141,7 +147,7 @@ trait WechatTrait
                 'code' => $th->getCode(),
                 'trace' => $th->getTraceAsString()
             ]);
-            
+
             return [
                 'code' => $th->getCode(),
                 'message' => $th->getMessage()
@@ -162,7 +168,7 @@ trait WechatTrait
                 'title' => 'Send message Device accept',
                 'params' => $params,
             ]);
-             // 1. 参数验证
+            // 1. 参数验证
             if (!isset($params['wechat_id']) || !isset($params['friend_id']) || !isset($params['device_code'])) {
                 throw new \Exception(ResponseCode::getMessage(ResponseCode::INVALID_PARAMS), ResponseCode::INVALID_PARAMS);
             }
@@ -201,8 +207,7 @@ trait WechatTrait
                 'code' => 10000,
                 'message' => 'success',
             ];
-
-        }catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             self::setLog([
                 'title' => 'Send message Device accept',
                 'params' => $params,
@@ -224,8 +229,8 @@ trait WechatTrait
                 'title' => 'Send message Device pcircleush',
                 'params' => $params,
             ]);
-             // 1. 参数验证
-            if (!isset($params['wechat_id']) ||!isset($params['content']) ||!isset($params['device_code'])) {
+            // 1. 参数验证
+            if (!isset($params['wechat_id']) || !isset($params['content']) || !isset($params['device_code'])) {
                 throw new \Exception(ResponseCode::getMessage(ResponseCode::INVALID_PARAMS), ResponseCode::INVALID_PARAMS);
             }
             // 2. 验证设备是否存在
@@ -250,7 +255,7 @@ trait WechatTrait
                     $attachment = [
                         'Type' => 3,
                         'Content' => explode(',', $params['attachment_content']) ?? []
-                    ];  
+                    ];
                     break;
                 case 3:
                     $attachment = [
@@ -261,7 +266,7 @@ trait WechatTrait
                             'url' => $params['attachment_content']['link'] ?? '',
                             'thumb' => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
                         ]
-                    ];  
+                    ];
                     break;
                 case 4:
                     $attachment = [
@@ -277,13 +282,13 @@ trait WechatTrait
                             "Icon" => FileService::getFileUrl($params['attachment_content']['pic'] ?? ''),
                             'version' => 48,
                         ], JSON_UNESCAPED_UNICODE)]
-                    ];      
+                    ];
                     break;
-                
+
                 default:
                     break;
             }
-            
+
             $data = [
                 'WeChatId' => $params['wechat_id'],
                 'Content' => $params['content'],
@@ -309,13 +314,12 @@ trait WechatTrait
             ChannelClient::publish($channel, [
                 'data' => $data
             ]);
-            
+
             return [
                 'code' => 10000,
                 'message' => 'success',
             ];
-
-        }catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             self::setLog([
                 'title' => 'Send message Device circle',
                 'params' => $params,
@@ -343,9 +347,8 @@ trait WechatTrait
     public static function updateWxDevices(array $deviceInfo): void
     {
         try {
-            
+
             $body = \app\common\service\ToolsService::Auth()->deviceUpdate($deviceInfo);
-            
         } catch (\Throwable $e) {
             //throw $th;
             self::setLog([
@@ -374,15 +377,15 @@ trait WechatTrait
     private static function getDeviceInfo(string $deviceId): array
     {
         try {
-            
+
             $result = \app\common\service\ToolsService::Auth()->checkDevice($deviceId);
-            if((int)$result['code'] === 10000){
+            if ((int)$result['code'] === 10000) {
                 return $result['data'];
-            }else{
+            } else {
                 return [];
             }
         } catch (\Throwable $e) {
-            
+
             self::setLog([
                 'title' => 'getDeviceInfo',
                 'deviceId' => $deviceId,
@@ -391,7 +394,7 @@ trait WechatTrait
             return [];
         }
     }
-    
+
     /**
      * 检查设备是否在线
      * 
@@ -405,17 +408,17 @@ trait WechatTrait
 
         return $status === 'online';
     }
-    
+
     private static function getDeviceKey(string $deviceId, string $type): string
     {
         return sprintf('%s:%s:%s', 'device', $deviceId, $type);
     }
-    
+
     private static function getWechatKey(string $deviceId, string $type): string
     {
         return sprintf('%s:%s:%s', 'wechat', $deviceId, $type);
     }
-    
+
     private static function redis(): redisClient
     {
         return new redisClient([
@@ -435,8 +438,9 @@ trait WechatTrait
     }
 
 
-    private static function setLog($content){
-        if(is_array($content)){
+    private static function setLog($content)
+    {
+        if (is_array($content)) {
             $content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
         Log::write($content, 'wxchat');

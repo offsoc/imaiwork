@@ -17,7 +17,6 @@ use think\response\Json;
  */
 class UserController extends BaseAdminController
 {
-
     /**
      * @notes 用户列表
      * @return \think\response\Json
@@ -112,5 +111,19 @@ class UserController extends BaseAdminController
             return $this->fail(UserLogic::getError());
         }
         return $this->success('创建成功', [], 1, 1);
+    }
+
+    public function import(){
+        try {
+            $file = $this->request->file('file');
+            $res = UserLogic::import($file);
+            $data['import'] = $res;
+            if ($res){
+                return $this->success('导入成功',$data,1,0);
+            }
+            $this->fail('导入失败',$data,0,0);
+        } catch (\Exception $e) {
+            return $this->fail('导入失败: ' . $e->getMessage(),['import'=>false],0,0);
+        }
     }
 }

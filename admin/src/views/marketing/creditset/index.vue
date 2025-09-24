@@ -34,7 +34,9 @@ const formData = reactive<any>({});
 const tableData = ref<any[]>([]);
 
 const getCommonConfig = computed(() => {
-    return tableData.value.filter((item) => ["common_chat", "scene_chat"].includes(item.scene));
+    return tableData.value.filter((item) =>
+        ["common_chat", "scene_chat", "coze_agent_chat", "coze_workflow"].includes(item.scene)
+    );
 });
 
 const getAiPersonConfig = computed(() => {

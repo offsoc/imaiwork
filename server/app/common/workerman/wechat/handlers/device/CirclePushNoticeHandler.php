@@ -108,10 +108,10 @@ class CirclePushNoticeHandler extends BaseHandler
             'Page' => $request->getPage(),
         ];
 
-        $this->logInfo('Circle push notice', array_merge($content, [
-            'Circles' => count($circles),
-            'CircleLists' => $circles,
-        ]), FILE_APPEND);
+        // $this->logInfo('Circle push notice', array_merge($content, [
+        //     'Circles' => count($circles),
+        //     'CircleLists' => $circles,
+        // ]), FILE_APPEND);
 
         return $content;
     }

@@ -32,6 +32,7 @@ const handlerMap = new WeakMap<HTMLElement, Record<string, EventListener>>();
  * @param options 指令选项
  * @returns 格式化后的值
  */
+
 const formatValue = (value: string, options: NumberInputOptions): string => {
     if (value === "" || value === "-") return "";
 
@@ -40,7 +41,6 @@ const formatValue = (value: string, options: NumberInputOptions): string => {
 
     if (isNaN(numValue)) return "";
 
-    // 约束最大/最小值
     if (min !== undefined && numValue < min) {
         numValue = min;
     }
@@ -48,8 +48,14 @@ const formatValue = (value: string, options: NumberInputOptions): string => {
         numValue = max;
     }
 
-    // 根据小数位数格式化
-    return numValue.toFixed(decimal);
+    const formatted = numValue.toFixed(decimal);
+
+    // 如果小数点后都是0，则显示为整数
+    if (decimal > 0 && Number(formatted) % 1 === 0) {
+        return Number(formatted).toString();
+    }
+
+    return formatted;
 };
 
 const numberInputDirective: Directive<HTMLElement, NumberInputOptions> = {

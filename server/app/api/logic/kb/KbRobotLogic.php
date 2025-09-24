@@ -9,21 +9,22 @@ use app\common\logic\BaseLogic;
 use app\common\logic\NoticeLogic;
 use app\common\model\chat\Models;
 use app\common\model\chat\ModelsCost;
+use app\common\model\coze\AgentCate;
 use app\common\model\kb\KbKnow;
 use app\common\model\kb\KbRobot;
 use app\common\model\kb\KbRobotCategory;
+use app\common\model\kb\KbRobotInstruct;
 use app\common\model\kb\KbRobotShareLog;
 use app\common\model\kb\KbRobotSquare;
 use app\common\model\kb\KbRobotVisitor;
 use app\common\model\knowledge\Knowledge;
-
 use app\common\model\knowledge\KnowledgeBind;
+use app\common\model\sv\SvReplyStrategy;
 use app\common\model\user\User;
 use app\common\model\user\UserAccountLog;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
 use Exception;
-use think\facade\Config;
 use think\facade\Db;
 
 /**
@@ -46,22 +47,42 @@ class KbRobotLogic extends BaseLogic
     {
         $modelKbRobot = new KbRobot();
         $detail = $modelKbRobot
-            ->field('id,user_id,kb_type,kb_ids,icons,image,name,intro,roles_prompt,model,model_id,model_sub_id,search_mode,search_tokens,search_similar,ranking_status,ranking_score,context_num,is_public,is_enable')
-            ->where(['id'=>$id])
+            ->field('id,user_id,cate_id,kb_type,kb_ids,icons,image,bg_image,name,intro,roles_prompt,model,model_id,model_sub_id,search_mode,search_tokens,search_similar,ranking_status,ranking_score,context_num,is_public,is_enable,optimize_ask,optimize_model,top_p,presence_penalty,frequency_penalty,search_empty_type,search_empty_text,welcome_introducer,copyright')
+            ->where(['id' => $id])
             ->findOrEmpty()
             ->toArray();
 
         if ($detail) {
-            if (!$detail['is_public'] && $detail['user_id'] !== $userId) {
-                throw new Exception('无权限使用');
-            }
+//            if (!$detail['is_public'] && $detail['user_id'] !== $userId) {
+//                throw new Exception('无权限使用');
+//            }
 
             unset($detail['user_id']);
-            $detail['kb_ids']       = $detail['kb_ids'] ? explode(',', $detail['kb_ids']) : [];
+            $detail['kb_ids']    = !empty($detail['kb_ids']) ? explode(',', $detail['kb_ids']) : [];
             $detail['icons']        = FileService::getFileUrl($detail['icons']);
-            $detail['model']        = $detail['model'] ?: '';
-            $detail['model_id']     = $detail['model_id'] ?: '';
-            $detail['model_sub_id'] = $detail['model_sub_id'] ?: '';
+            $detail['model']     = $detail['model'] ?: 'deepseek';
+            $detail['model_id']  = $detail['model_id'] ?: 4;
+            $detail['model_sub_id'] = $detail['model_sub_id'] ?: 4;
+            $detail['cate_id']   = $detail['cate_id'] ?: '';
+            $detail['cate_name'] = $detail['cate_id'] ? AgentCate::where('id', $detail['cate_id'])->value('name') : '';
+
+            // 快捷菜单
+            $modelKbRobotInstruct = new KbRobotInstruct();
+            $detail['menus']      = $modelKbRobotInstruct
+                ->field(['keyword,content,images'])
+                ->where(['robot_id' => $id])
+                ->order('id asc')
+                ->select()
+                ->each(function ($item) {
+                    $item['images'] = empty($item['images']) ? [] : explode(',', $item['images']);
+                })
+                ->toArray();
+
+            // 问题模型
+            $optimizeModel           = explode(':', $detail['optimize_model']);
+            $detail['optimize_m_id'] = (intval($optimizeModel[0] ?? 0)) ?: '';
+            $detail['optimize_s_id'] = (intval($optimizeModel[1] ?? 0)) ?: '';
+            unset($detail['optimize_model']);
 
             // 关联知识库
             if ($detail['kb_ids']) {
@@ -86,6 +107,11 @@ class KbRobotLogic extends BaseLogic
                         'kb_ids' => implode(',', $okExistIds)
                     ], ['id'=>$id]);
                 }
+            }
+
+            // 工作流配置
+            if (empty($detail['flow_config'])) {
+                $detail['flow_config'] = self::flowConfigDefault();
             }
 
         }
@@ -113,20 +139,35 @@ class KbRobotLogic extends BaseLogic
             // 创建机器人
             $botCode = generate_sn(KbRobot::class, 'code', $userId);
             $robot = KbRobot::create([
-                'user_id'            => $userId,
-                'code'               => $botCode,
-                'kb_ids'             => '',
-                'icons'              => $iconImage,
-                'image'              => $chatImage,
-                'name'               => $post['name'] ?? '默认助理',
-                'intro'              => $post['intro'] ?? '默认助理简介',
-                'sort'               => 0,
-                'roles_prompt'       => '默认助理描述',
-                'is_public'          => 0,
-                'context_num'        => $post['context_num'] ?? 0, // 上下文数量
-                'create_time'        => time(),
-                'update_time'        => time()
-            ]);
+                                         'user_id'      => $userId,
+                                         'code'         => $botCode,
+                                         'kb_ids'       => '',
+                                         'icons'        => $iconImage,
+                                         'image'        => $chatImage,
+                                         'name'         => $post['name'] ?? '默认助理',
+                                         'intro'        => $post['intro'] ?? '默认助理简介',
+                                         'sort'         => 0,
+                                         'roles_prompt' => '',
+                                         'is_public'    => 0,
+                                         'context_num'  => $post['context_num'] ?? 0, // 上下文数量
+                                         'create_time'  => time(),
+                                         'update_time'  => time()
+                                     ]);
+
+            // 创建智能体默认回复策略
+            SvReplyStrategy::create([
+                                        "user_id"            => $userId,
+                                        "multiple_type"      => 0,
+                                        "robot_id"           => $robot['id'],
+                                        "number_chat_rounds" => 3,
+                                        "voice_enable"       => 0,
+                                        "image_enable"       => 0,
+                                        "image_reply"        => "",
+                                        "stop_enable"        => 0,
+                                        "stop_keywords"      => "",
+                                        "bottom_enable"      => 0,
+                                        "bottom_reply"       => ""
+                                    ]);
 
             $model->commit();
             return ['id'=>$robot['id']]??[];
@@ -154,12 +195,13 @@ class KbRobotLogic extends BaseLogic
                 ->where(['id'=>intval($post['id'])])
                 ->where(['user_id'=>$userId])
                 ->findOrEmpty();
-
             if (!$robot || !$robot['is_enable']) {
                 $errMsg = !$robot ? '机器人不存在了' : '机器人被禁用,禁止操作!';
                 throw new Exception($errMsg);
             }
-
+            if (is_string($post['kb_ids'])) {
+                $post['kb_ids'] = explode(',', $post['kb_ids']);
+            }
             if(count($post['kb_ids']) == 0){
                 KnowledgeBind::where('data_id', $robot->id)->where('user_id', $userId)->where('type', 1)->select()->delete();
             }
@@ -199,6 +241,10 @@ class KbRobotLogic extends BaseLogic
                     ->whereIn('id', $post['kb_ids'])
                     ->select()
                     ->toArray();
+
+                if (count($post['kb_ids']) > 1) {
+                    throw new Exception('RAG知识库只可挂载一个!');
+                }
 
                 if (count($post['kb_ids']) !== count($Knowledges)) {
                     throw new Exception('检测到RAG知识库存在变动,请刷新后再试!');
@@ -241,11 +287,37 @@ class KbRobotLogic extends BaseLogic
 //                throw new Exception('请配置重排模型');
 //            }
 
+            // 问题优化模型
+            $optimizeModel = '';
+            if ($post['optimize_m_id'] ?? '') {
+                $optimizeModel = ($post['optimize_m_id'] ?: '') . ':' . ($post['optimize_s_id'] ?? '') ?: '';
+            }
+            if (($post['optimize_ask'] ?? 0) and !$optimizeModel) {
+                throw new Exception('请配置问题优化模型');
+            }
+
+            if (isset($post['top_p']) && ($post['top_p'] > 1 || $post['top_p'] <= 0)) {
+                throw new \Exception('词汇多样性取值范围 0.01到1');
+            }
+            if (isset($post['temperature']) && ($post['temperature'] > 1 || $post['temperature'] < 0)) {
+                throw new \Exception('结果相似性取值范围 0到1');
+            }
+            if (isset($post['presence_penalty']) && ($post['presence_penalty'] > 1 || $post['presence_penalty'] < 0)) {
+                throw new \Exception('特定词重复率取值范围 0到1');
+            }
+            if (isset($post['frequency_penalty']) && ($post['frequency_penalty'] > 2 || $post['frequency_penalty'] < -2)) {
+                throw new \Exception('重复词频率取值范围 -2到2');
+            }
+            if (isset($post['context_num']) && ($post['context_num'] > 5 || $post['context_num'] < 0)) {
+                throw new \Exception('上下文数量取值范围 0到5');
+            }
+
             KbRobot::update([
                 'kb_type'            => intval($post['kb_type']??2),
                 'kb_ids'             => implode(',', $post['kb_ids']),
                 'icons'              => FileService::setFileUrl($post['icons']??''),
                 'image'              => $post['image'],
+                'bg_image' => $post['bg_image'],
                 'name'               => $post['name'],
                 'intro'              => $post['intro']??'',
                 'model'              => $subModel['name']??'',
@@ -261,9 +333,49 @@ class KbRobotLogic extends BaseLogic
                 'ranking_status'     => $post['ranking_status']??0,
                 'ranking_score'      => $post['ranking_score']??0,
                 'is_enable'          => $post['is_enable']??1,
-                'context_num'        => $post['context_num'] ?? 0,
-                'update_time'        => time()
+                'update_time'        => time(),
+                //问题优化模型
+                'optimize_ask'       => $post['optimize_ask'] ?? 0,
+                'optimize_model'     => $optimizeModel,
+                //空搜索
+                'search_empty_type' => intval($post['search_empty_type']) ?? 0,
+                'search_empty_text'  => trim($post['search_empty_text'] ?? ''),
+                'welcome_introducer' => trim($post['welcome_introducer'] ?? ''),
+                'copyright'          => $post['copyright'] ?? '',
+                //拟人化
+                'context_num'        => $post['context_num'] ?? 3,
+                'top_p'       => floatval($post['top_p'] ?? 0.5),
+                'frequency_penalty'  => floatval($post['frequency_penalty'] ?? 0.3),
+                'presence_penalty'   => floatval($post['presence_penalty'] ?? 0.2),
+                'temperature' => floatval($post['temperature'] ?? 1.0),
+                //工作流
+                'flow_status' => $post['flow_status'] ?? 0,
+                'flow_config' => $post['flow_config'] ?? self::flowConfigDefault(),
             ], ['id'=>intval($post['id'])]);
+
+            // 自定义菜单
+            if (is_array($post['menus'])) {
+                $menus = [];
+                foreach ($post['menus'] as $item) {
+                    $images = [];
+                    foreach (($item['images'] ?? []) as $img) {
+                        $images[] = FileService::setFileUrl($img);
+                    }
+                    $menus[] = [
+                        'user_id'  => $userId,
+                        'robot_id' => $robot['id'],
+                        'keyword'  => $item['keyword'],
+                        'content'  => $item['content'],
+                        'images'   => implode(',', $images)
+                    ];
+                }
+                $modelKbRobotInstruct = new KbRobotInstruct();
+                $modelKbRobotInstruct
+                    ->where(['user_id' => $userId])
+                    ->where(['robot_id' => $robot['id']])
+                    ->delete();
+                $modelKbRobotInstruct->saveAll($menus);
+            }
 
             $model->commit();
             return true;
@@ -298,6 +410,9 @@ class KbRobotLogic extends BaseLogic
 
             // 发起删除
             KbRobot::destroy($id);
+
+            // 删除智能体关联的回复策略
+            SvReplyStrategy::where('robot_id', $id)->delete();
 
             $model->commit();
             return true;

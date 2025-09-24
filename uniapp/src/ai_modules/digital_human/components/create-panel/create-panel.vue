@@ -155,7 +155,7 @@ const getConstTotal = computed(() => {
 
 // Methods
 const getCostRules = async () => {
-    const { anchor_id, model_version, audio_type, voice_id, voice_type } = props.formData;
+    const { anchor_id, model_version, voice_id, voice_type } = props.formData;
     const _costTokens = reactive({
         video_cost: 0,
         figure_cost: 0,
@@ -168,14 +168,15 @@ const getCostRules = async () => {
     });
 
     const setCosts = (videoKey: string, voiceKey: string, audioKey: string, figureKey?: string) => {
-        _costTokens.video_cost = getTokenByScene(videoKey).score;
+        _costTokens.video_cost = parseFloat(getTokenByScene(videoKey).score || 0);
         _costTokens.video_unit = getTokenByScene(videoKey).unit;
-        _costTokens.voice_cost = voice_type == 1 && voice_id == -1 ? getTokenByScene(voiceKey).score : 0;
+        _costTokens.voice_cost =
+            voice_type == 1 && voice_id == -1 ? parseFloat(getTokenByScene(voiceKey).score || 0) : 0;
         _costTokens.voice_unit = getTokenByScene(voiceKey).unit;
-        _costTokens.audio_cost = getTokenByScene(audioKey).score;
+        _costTokens.audio_cost = parseFloat(getTokenByScene(audioKey).score || 0);
         _costTokens.audio_unit = getTokenByScene(audioKey).unit;
         if (figureKey) {
-            _costTokens.figure_cost = getTokenByScene(figureKey).score;
+            _costTokens.figure_cost = parseFloat(getTokenByScene(figureKey).score || 0);
             _costTokens.figure_unit = getTokenByScene(figureKey).unit;
         }
     };
@@ -229,7 +230,7 @@ const getAudioDuration = (msg: string, duration: number) => {
 
 const handleConfirm = () => {
     initData();
-    if (userTokens.value < parseFloat(getConstTotal.value)) {
+    if (userTokens.value < parseFloat(getConstTotal.value || 0)) {
         uni.$u.toast("算力不足，请充值！");
         emit("recharge");
         show.value = false;

@@ -110,12 +110,11 @@
                                     v-if="MaterialTypeEnum.MUSIC == item.m_type" />
                                 <div
                                     class="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] z-[1000]">
-                                    <div class="w-12 h-12" @click="handlePlay(item.content)">
+                                    <div class="w-12 h-12" @click="handlePlay(item)">
                                         <play-btn />
                                     </div>
                                 </div>
                             </template>
-
                             <div class="absolute right-2 top-2 z-[1000] w-9 h-9 invisible group-hover:visible">
                                 <handle-menu :theme="ThemeEnum.DARK" :data="item" :menu-list="utilsMenuList" />
                             </div>
@@ -137,6 +136,7 @@
         </div>
     </div>
     <preview-video v-if="showPreviewVideo" ref="previewVideoRef" @close="showPreviewVideo = false" />
+    <preview-audio v-if="showPreviewAudio" ref="previewAudioRef" @close="showPreviewAudio = false" />
     <edit-popup v-if="showEditPopup" ref="editPopupRef" @close="showEditPopup = false" @success="resetPage()" />
 </template>
 
@@ -192,12 +192,17 @@ const uploadLock = ref(false);
 
 const handleUploadSuccess = async (result: any) => {
     try {
-        const { name, size, response } = result;
+        const {
+            name,
+            size,
+            response,
+            raw: { type },
+        } = result;
         const { uri } = response.data;
         // 根据名字判断是视频还是图片
-        const isVideo = name.endsWith(".mp4");
-        const isImage = name.endsWith(".jpg") || name.endsWith(".png");
-        const isAudio = name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".m4a");
+        const isVideo = type.includes("video");
+        const isImage = type.includes("image");
+        const isAudio = type.includes("audio");
         const params = {
             name: name.split(".")[0],
             size,
@@ -279,12 +284,22 @@ const utilsMenuList: HandleMenuType[] = [
 ];
 
 const showPreviewVideo = ref(false);
+const showPreviewAudio = ref(false);
 const previewVideoRef = ref();
-const handlePlay = async (url: string) => {
-    showPreviewVideo.value = true;
-    await nextTick();
-    previewVideoRef.value.open();
-    previewVideoRef.value.setUrl(url);
+const previewAudioRef = ref();
+const handlePlay = async (data: any) => {
+    const { m_type, content } = data;
+    if (m_type == MaterialTypeEnum.VIDEO) {
+        showPreviewVideo.value = true;
+        await nextTick();
+        previewVideoRef.value.open();
+        previewVideoRef.value.setUrl(content);
+    } else {
+        showPreviewAudio.value = true;
+        await nextTick();
+        previewAudioRef.value.open();
+        previewAudioRef.value.setUrl(content);
+    }
 };
 
 getLists();

@@ -25,14 +25,13 @@ import hljs from "highlight.js";
 import { katex } from "@mdit/plugin-katex";
 import PlantUml from "markdown-it-plantuml";
 import { EChartsPlugin, MermaidPlugIn } from "./plugins";
-import Mermaid from "@datatraccorporation/markdown-it-mermaid";
 
 import "katex/dist/katex.min.css";
 
 const props = withDefaults(
     defineProps<{
         content: string;
-        typing: boolean;
+        typing?: boolean;
         typingOptions?: any;
         theme?: "light" | "dark";
     }>(),

@@ -18,7 +18,7 @@ class SvVideoTaskLists extends BaseApiDataLists implements ListsSearchInterface,
     public function setSearch(): array
     {
         return [
-            '=' => [ 'type', 'status', 'video_setting_id', 'audio_type', 'model_version'],
+            '=' => [ 'type', 'status', 'video_setting_id', 'audio_type', 'model_version', 'ai_type'],
             '%like%' => ['name'],
             'between' => ['create_time'],
             // 其他搜索条件

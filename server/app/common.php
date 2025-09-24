@@ -434,3 +434,23 @@ function format_amount_zero($value): string
     }
     return $value;
 }
+
+/**
+ * @notes 生成随机字符串
+ * @param $length
+ * @return string
+ * @author fzr
+ */
+function generate_random_str($length): string
+{
+    $chars     = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $str       = '';
+    $charCount = strlen($chars);
+
+    for ($i = 0; $i < $length; $i++) {
+        $randomIndex = rand(0, $charCount - 1);
+        $str         .= $chars[$randomIndex];
+    }
+
+    return $str;
+}

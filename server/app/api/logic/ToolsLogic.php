@@ -111,7 +111,7 @@ class ToolsLogic extends BaseLogic
             }
             $targetCount = (int)$params['targetCount'];
             if ($targetCount % 10 !== 0){
-                throw new \Exception('生成数量错误');
+                throw new \Exception('生成数量必须是10的倍数');
             }
             $num = $targetCount / 10;
             $unit = TokenLogService::checkToken($params['user_id'], 'sph_add_friends');

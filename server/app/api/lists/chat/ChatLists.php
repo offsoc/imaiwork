@@ -3,11 +3,13 @@
 namespace app\api\lists\chat;
 
 use app\api\lists\BaseApiDataLists;
+use app\common\enum\user\AccountLogEnum;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\chat\Assistants;
 use app\common\model\chat\ChatLog;
-use app\common\enum\user\AccountLogEnum;
 use app\common\model\chat\Scene;
+use app\common\model\kb\KbRobot;
+use app\common\model\user\User;
 
 class ChatLists extends BaseApiDataLists implements ListsSearchInterface
 {
@@ -40,6 +42,16 @@ class ChatLists extends BaseApiDataLists implements ListsSearchInterface
             $this->searchWhere[] = ['assistant_id', 'in', $assistantIds];
         }
 
+        $chatType = (int)$this->request->get('chat_type');
+        if ($chatType == AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT) {
+            $this->searchWhere[] = ['robot_id', '>', 0];
+        }
+
+        $robotId = (int)$this->request->get('robot_id');
+        if ($robotId) {
+            $this->searchWhere[] = ['robot_id', '=', $robotId];
+        }
+
         // 首先获取所有不同的 task_id（按最新记录排序）
         $taskIds = ChatLog::where($this->searchWhere)
             ->whereIn('chat_type', [AccountLogEnum::TOKENS_DEC_COMMON_CHAT, AccountLogEnum::TOKENS_DEC_SCENE_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT])
@@ -58,10 +70,20 @@ class ChatLists extends BaseApiDataLists implements ListsSearchInterface
         foreach ($taskIds as $taskId) {
             $logInfo = ChatLog::where('task_id', $taskId)
                 ->order('id', 'asc')
-                ->field('task_id,message,assistant_id,create_time,update_time')
+                ->field('id,chat_type,user_id,task_id,robot_id,message,reply,assistant_id,create_time,update_time')
                 ->find()
                 ->toArray();
 
+            //过滤知识库回复内容
+            if (mb_strpos($logInfo['message'], '请根据以下知识库内容回答问题：', 0, 'UTF-8') !== false) {
+                $lastSepPos         = mb_strrpos($logInfo['message'], '问题：', 0, 'UTF-8');
+                $startPos           = $lastSepPos + mb_strlen('问题：', 'UTF-8');
+                $logInfo['message'] = mb_substr($logInfo['message'], $startPos, null, 'UTF-8');;
+            }
+            $user                = User::where('id', $logInfo['user_id'])->field('nickname,avatar')->find();
+            $logInfo['nickname'] = $user['nickname'];
+            $logInfo['avatar']   = $user['avatar'];
+            $logInfo['robot_name'] = !empty($logInfo['robot_id']) ? KbRobot::where('id', $logInfo['robot_id'])->value('name') : '';
             // 场景名
             if ($logInfo['assistant_id'] == 0) {
                 $logInfo['scene_name'] = Assistants::where('id', 1)->value('name');

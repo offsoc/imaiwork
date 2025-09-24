@@ -52,7 +52,7 @@
                 stripe
                 height="100%"
                 :row-style="{ height: '60px', cursor: 'pointer' }"
-                :header-row-style="{ height: '63px' }"
+                :header-row-style="{ height: '62px' }"
                 @row-click="handleEdit">
                 <ElTableColumn label="文档名称" prop="name" min-width="200px" />
                 <ElTableColumn prop="type" label="文件格式" min-width="100px">

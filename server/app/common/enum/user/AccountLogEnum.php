@@ -212,6 +212,8 @@ class AccountLogEnum
 
     const TOKENS_DEC_SPH_OCR = 11003;
 
+    const TOKENS_DEC_COZE_AGENT_CHAT = 10100;
+    const TOKENS_DEC_COZE_WORKFLOW= 10101;
 
     /**
      * 用户算力（减少类型汇总）
@@ -284,6 +286,8 @@ class AccountLogEnum
         self::TOKENS_DEC_TEXT_TO_VECTOR,
         self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE,
         self::TOKENS_DEC_SPH_OCR,
+        self::TOKENS_DEC_COZE_AGENT_CHAT,
+        self::TOKENS_DEC_COZE_WORKFLOW,
 
     ];
 
@@ -419,6 +423,8 @@ class AccountLogEnum
             self::TOKENS_DEC_TEXT_TO_VECTOR           => '文本转向量减少算力',
             self::TOKENS_DEC_CREATE_VECTOR_KNOWLEDGE  => '创建向量知识库减少算力',
             self::TOKENS_DEC_SPH_OCR                 => '视频号OCR减少算力',
+            self::TOKENS_DEC_COZE_AGENT_CHAT         => 'Coze智能体聊天减少算力',
+            self::TOKENS_DEC_COZE_WORKFLOW           => 'Coze智能体工作流减少算力',
         ];
         if ($flag) {
             return $desc;

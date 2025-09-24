@@ -55,22 +55,22 @@ class MessageService
      */
     public function handleDeviceMessage(TcpConnection $connection, string $data): void
     {
-        
+
         $message = new TransportMessage();
         $message->mergeFromString($data);
 
         $msgType = $message->getMsgType();
         $content = $message->getContent();
-        
+
         try {
-            
+
             // 特殊消息类型处理
             $content = match ($msgType) {
                 EnumMsgType::HeartBeatReq => '',
                 default => $content->getValue()
             };
-            
-            
+
+
             // 构建业务数据上下文
             $context = ['Connection' => $connection];
 
@@ -88,8 +88,8 @@ class MessageService
 
             // 调用业务处理，获取响应内容
             $response = $handlerClass::handle($content, $context);
-            if($msgType !== EnumMsgType::HeartBeatReq){
-                
+            if ($msgType !== EnumMsgType::HeartBeatReq) {
+
                 // 记录下日志
                 $this->withChannel('wechat_socket')->withLevel('info')->withTitle('Device message received')->withContext([
                     'msgType' => EnumMsgType::name($msgType),
@@ -105,17 +105,17 @@ class MessageService
                 // 绑定设备连接
                 $this->service->connectionService->bindConnection($connection, $deviceId, SocketType::SOCKET);
             }
-            
-            if($msgType == 1025){
-                
+
+            if ($msgType == 1025) {
+
                 $this->voiceToTextOpt($deviceId, $response);
                 $this->AddFriendsTaskOpt($deviceId, $response);
             }
-            if($msgType == 1027){
+            if ($msgType == 1027) {
                 $this->AcceptFriendAddRequestTaskOpt($deviceId, $response);
             }
 
-            if($msgType == 2029){
+            if ($msgType == 2029) {
                 $this->circleReplyLikeTask($deviceId, $response);
             }
 
@@ -126,7 +126,7 @@ class MessageService
                 EnumMsgType::DeviceAuthReq => $this->sendChannelMessage(SocketType::SOCKET, $deviceId, $response),
                 EnumMsgType::FriendTalkNotice => $this->sendFriendTalkNoticeMessage(SocketType::SOCKET, $deviceId, $response, $connection),
                 EnumMsgType::FriendAddNotice => $this->sendFriendAddNotice(SocketType::SOCKET, $deviceId, $response, $connection),
-                    // 其他业务消息通过Channel广播
+                // 其他业务消息通过Channel广播
                 default => $this->sendChannelMessage(SocketType::WEBSOCKET, $deviceId, $response)
             };
         } catch (ResponseException $e) {
@@ -160,7 +160,7 @@ class MessageService
         [$msgType, $content] = $this->validator->validateClientMessage($connection, $message);
 
         try {
-            if($msgType !== ClientRequestMsgType::HEARTBEAT){
+            if ($msgType !== ClientRequestMsgType::HEARTBEAT) {
                 $this->withChannel('wechat_socket')->withLevel('info')->withTitle('Client message received')->withContext([
                     'msgType' => $msgType,
                     'content' => $content,
@@ -179,7 +179,7 @@ class MessageService
             if ($msgType === ClientRequestMsgType::AUTH) {
                 $this->service->connectionService->bindConnection($connection, $content['DeviceId'], SocketType::WEBSOCKET);
             }
-        
+
             // 发送响应消息
             match ($msgType) {
                 // Socket设备消息响应
@@ -190,7 +190,7 @@ class MessageService
                 ClientRequestMsgType::WX_INFO => $connection->send(json_encode($response, JSON_UNESCAPED_UNICODE)),
                 ClientRequestMsgType::DEVICE_INFO => $connection->send(json_encode($response, JSON_UNESCAPED_UNICODE)),
                 ClientRequestMsgType::CLEAN_CACHE => $connection->send(json_encode($response, JSON_UNESCAPED_UNICODE)),
-                    // 其他业务消息通过Channel广播
+                // 其他业务消息通过Channel广播
                 default => $this->sendChannelMessage(SocketType::SOCKET, $content['DeviceId'], $response)
             };
         } catch (ResponseException $e) {
@@ -224,7 +224,6 @@ class MessageService
 
             // 构建protobuf消息
             $data = $this->buildMessage($data);
-            
         }
         $channel = "{$targetProcess}.{$deviceId}.message";
 
@@ -242,7 +241,7 @@ class MessageService
      */
     public function buildMessage(array $data): string
     {
-        
+
         $message = new TransportMessage();
         $message->setMsgType($data['MsgType']);
 
@@ -252,7 +251,7 @@ class MessageService
         return $message->serializeToString();
     }
 
-        /**
+    /**
      * 构建传输消息
      * 
      * @param int $msgType 消息类型

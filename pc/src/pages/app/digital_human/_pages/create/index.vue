@@ -790,9 +790,8 @@ getClipConfigData();
 
 <style scoped lang="scss">
 .upload-container {
-    @apply h-full w-full flex flex-col items-center justify-center bg-no-repeat bg-center;
+    @apply h-full w-full flex flex-col items-center justify-center bg-no-repeat bg-center bg-contain;
     background-image: url("../../_assets/images/upload_bg.png");
-    background-size: cover;
 }
 .upload-title {
     background: linear-gradient(90deg, #fff 24.36%, #0065fb 65.91%, #e02188 100%);

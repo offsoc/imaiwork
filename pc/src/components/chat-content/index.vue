@@ -79,10 +79,6 @@ const props = defineProps({
         type: String,
         default: "",
     },
-    isPrompt: {
-        type: Boolean,
-        default: false,
-    },
 });
 
 const isHide = ref(false);

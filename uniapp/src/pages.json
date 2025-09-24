@@ -612,6 +612,12 @@
 					}
 				},
 				{
+					"path": "pages/task_prompt/task_prompt",
+					"style": {
+						"navigationBarTitleText": "AI提示词设置"
+					}
+				},
+				{
 					"path": "pages/clue_list/clue_list",
 					"style": {
 						"navigationBarTitleText": "线索词",

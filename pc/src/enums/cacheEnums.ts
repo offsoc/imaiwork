@@ -6,5 +6,8 @@ export const TOKEN_KEY = "token";
 export const ACCOUNT_KEY = "account";
 // 下载弹窗
 export const DOWNLOAD_NOTICE_KEY = "download_notice";
-// 关注列表
-export const FOLLOW_LIST_KEY = "follow_list";
+
+// 分享聊天的token
+export const AUTHORIZATION_KEY = "Authorization";
+
+export const VISITOR_ID = "visitor_id";

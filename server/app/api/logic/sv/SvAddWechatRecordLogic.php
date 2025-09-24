@@ -48,7 +48,7 @@ class SvAddWechatRecordLogic extends SvBaseLogic
                 })
                 ->order('update_time asc')->limit(1)->findOrEmpty();
             if($wechat->isEmpty()){
-                throw new \Exception('微信账号冷却中,稍后重试', 400);
+                throw new \Exception('当前账号存在安全风险，暂停添加', 400);
             }
             // $addNum = $wechat->add_num ?? 0;
             // $date = date('Ymd', time());

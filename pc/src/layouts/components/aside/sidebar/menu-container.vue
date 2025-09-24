@@ -17,11 +17,6 @@
                             <div class="leading-5">
                                 {{ item.name }}
                             </div>
-                            <div
-                                v-if="item.is_new"
-                                class="text-[#FB7100] text-[11px] rounded bg-[#FDF0E6] px-[6px] py-[1px] ml-[6px]">
-                                新功能
-                            </div>
                         </div>
                     </router-link>
                 </div>
@@ -31,13 +26,9 @@
 </template>
 
 <script setup lang="ts">
-import { getDefaultRobot } from "@/api/app";
 import { ToolEnum, ToolEnumMap } from "@/enums/appEnums";
-import { useAppStore } from "@/stores/app";
 
-const router = useRouter();
 const route = useRoute();
-const appStore = useAppStore();
 
 interface Tools {
     icon?: string;
@@ -50,25 +41,19 @@ interface Tools {
 
 const tools = ref<Tools[]>([
     {
-        id: ToolEnum.TOOL,
-        name: ToolEnumMap[ToolEnum.TOOL],
-        icon: "menu_tool",
-        link: "/",
-        is_new: false,
-    },
-    {
         id: ToolEnum.CHAT,
         name: ToolEnumMap[ToolEnum.CHAT],
         icon: "menu_chat",
-        link: "/chat",
+        link: "/",
     },
     {
-        id: ToolEnum.AID,
-        name: ToolEnumMap[ToolEnum.AID],
-        icon: "menu_aid",
-        link: "/robot/aid",
-        is_new: true,
+        id: ToolEnum.STAFF,
+        name: ToolEnumMap[ToolEnum.STAFF],
+        icon: "menu_staff",
+        link: "/staff",
+        is_new: false,
     },
+
     {
         id: ToolEnum.DATABASE,
         name: ToolEnumMap[ToolEnum.DATABASE],
@@ -88,18 +73,6 @@ const tools = ref<Tools[]>([
         icon: "menu_agent",
         link: "/agent",
     },
-    {
-        id: ToolEnum.CREATIVE_RECORD,
-        name: ToolEnumMap[ToolEnum.CREATIVE_RECORD],
-        icon: "menu_creation",
-        link: "/creation",
-    },
-    // {
-    // 	id: ToolEnum.MORE,
-    // 	name: ToolEnumMap[ToolEnum.MORE],
-    // 	icon: "more",
-    // 	link: "/robot",
-    // },
 ]);
 
 const activeMenu = ref(null);
@@ -140,13 +113,12 @@ onMounted(() => {
 <style lang="scss" scoped>
 .menu-container {
     .link-icon {
-        @apply flex-shrink-0 flex items-center justify-center rounded w-5 h-5 bg-[#F1F1F1];
+        @apply flex-shrink-0 flex items-center justify-center rounded w-5 h-5 bg-[#ECECEC];
     }
     .router-link-active {
-        @apply text-primary bg-[#fbfbfb];
-        box-shadow: 0px 0px 0px 1px rgba(237, 237, 237, 1);
+        @apply bg-white shadow-[0_0_0_1px_rgba(237,237,237,1)];
         .link-icon {
-            background-color: var(--sidebar-surface-secondary-primary);
+            @apply bg-black text-white;
         }
     }
 }

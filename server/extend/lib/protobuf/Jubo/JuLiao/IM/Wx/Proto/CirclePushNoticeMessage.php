@@ -48,7 +48,11 @@ class CirclePushNoticeMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string RetTips = 7;</code>
      */
-    private $RetTips = '';
+    protected $RetTips = '';
+    /**
+     * Generated from protobuf field <code>int64 TaskId = 8;</code>
+     */
+    protected $TaskId = 0;
 
     /**
      * Constructor.
@@ -67,6 +71,7 @@ class CirclePushNoticeMessage extends \Google\Protobuf\Internal\Message
      *           获取朋友圈返回结果代码（0 还有更多，203 ? 207 已是最底 2001 ? 2003 拉黑？ 2004 展示三天 2005 展示一个月 ）
      *     @type string $RetTips
      *           朋友圈底线提示：非对方的朋友只显示最近十条朋友圈，朋友仅展示最近三天的朋友圈，。。。
+     *     @type int|string $TaskId
      * }
      */
     public function __construct($data = NULL) {
@@ -240,6 +245,28 @@ class CirclePushNoticeMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->RetTips = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 TaskId = 8;</code>
+     * @return int|string
+     */
+    public function getTaskId()
+    {
+        return $this->TaskId;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 TaskId = 8;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setTaskId($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->TaskId = $var;
 
         return $this;
     }

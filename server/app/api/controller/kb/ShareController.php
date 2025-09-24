@@ -22,7 +22,7 @@ class ShareController extends BaseApiController
      */
     public function lists(): Json
     {
-        (new KbShareValidate())->get()->goCheck('lists');
+        (new KbShareValidate())->get(1)->goCheck('lists', [], 1);
         $lists = KbShareLogic::lists($this->request->get(), $this->userId);
         return $this->data($lists);
     }
@@ -37,7 +37,7 @@ class ShareController extends BaseApiController
         $apiKey = $this->request->get('apikey', '');
         $detail = KbShareLogic::detail($apiKey, $this->terminal);
         if (empty($detail)) {
-            return $this->fail(KbShareLogic::getError());
+            return $this->pc_fail(KbShareLogic::getError());
         }
         return $this->data($detail);
     }
@@ -49,10 +49,10 @@ class ShareController extends BaseApiController
      */
     public function add(): Json
     {
-        $params = (new KbShareValidate())->post()->goCheck('add');
+        $params = (new KbShareValidate())->post(1)->goCheck('add', [], 1);
         $result = KbShareLogic::add($params, $this->userId);
         if ($result === false) {
-            return $this->fail(KbShareLogic::getError());
+            return $this->pc_fail(KbShareLogic::getError());
         }
         return $this->success('发布成功');
     }
@@ -64,10 +64,10 @@ class ShareController extends BaseApiController
      */
     public function edit(): Json
     {
-        $params = (new KbShareValidate())->post()->goCheck('edit');
+        $params = (new KbShareValidate())->post(1)->goCheck('edit', [], 1);
         $result = KbShareLogic::edit($params, $this->userId);
         if ($result === false) {
-            return $this->fail(KbShareLogic::getError());
+            return $this->pc_fail(KbShareLogic::getError());
         }
         return $this->success('设置成功');
     }
@@ -79,10 +79,10 @@ class ShareController extends BaseApiController
      */
     public function update(): Json
     {
-        $params = (new KbShareValidate())->post()->goCheck('update');
+        $params = (new KbShareValidate())->post(1)->goCheck('update', [], 1);
         $result = KbShareLogic::update($params, $this->userId);
         if ($result === false) {
-            return $this->fail(KbShareLogic::getError());
+            return $this->pc_fail(KbShareLogic::getError());
         }
         return $this->success('更新成功');
     }
@@ -94,10 +94,10 @@ class ShareController extends BaseApiController
      */
     public function del(): Json
     {
-        $params = (new KbShareValidate())->post()->goCheck('del');
+        $params = (new KbShareValidate())->post(1)->goCheck('del', [], 1);
         $result = KbShareLogic::del(intval($params['id']), $this->userId);
         if ($result === false) {
-            return $this->fail(KbShareLogic::getError());
+            return $this->pc_fail(KbShareLogic::getError());
         }
         return $this->success('删除成功');
     }
@@ -109,10 +109,10 @@ class ShareController extends BaseApiController
      */
     public function setBg(): Json
     {
-        $params = (new KbShareValidate())->post()->goCheck('setBg');
+        $params = (new KbShareValidate())->post(1)->goCheck('setBg', [], 1);
         $result = KbShareLogic::setBg(intval($params['id']), $this->userId, $params['url']);
         if ($result === false) {
-            return $this->fail(KbShareLogic::getError());
+            return $this->pc_fail(KbShareLogic::getError());
         }
         return $this->success('设置成功');
     }

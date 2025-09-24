@@ -140,7 +140,8 @@ const handleDelete = async (id: number | number[]) => {
 };
 
 const getAudioTime = (row: any) => {
-    const { AudioInfo } = row.response.Result.Transcription.Transcription;
+    const { AudioInfo } = row.response?.Result?.Transcription?.Transcription || {};
+    if (!AudioInfo) return "-";
     return formatAudioTime(AudioInfo.Duration / 1000);
 };
 

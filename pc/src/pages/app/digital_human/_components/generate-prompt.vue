@@ -81,7 +81,7 @@
             </div>
             <div class="mt-4" v-if="chatContentList.length">
                 <ElScrollbar ref="scrollRef">
-                    <div class="!text-xs max-h-[500px]">
+                    <div class="!text-xs max-h-[30vh]">
                         <div class="flex flex-col gap-2 content-box">
                             <div
                                 v-for="(content, index) in chatContentList"

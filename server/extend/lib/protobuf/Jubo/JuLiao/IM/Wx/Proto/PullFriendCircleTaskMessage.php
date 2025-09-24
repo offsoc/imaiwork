@@ -48,7 +48,13 @@ class PullFriendCircleTaskMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>int64 RefSnsId = 6;</code>
      */
-    private $RefSnsId = 0;
+    protected $RefSnsId = 0;
+    /**
+     *
+     *
+     * Generated from protobuf field <code>int64 TaskId = 7;</code>
+     */
+    protected $TaskId = 0;
 
     /**
      * Constructor.
@@ -68,6 +74,8 @@ class PullFriendCircleTaskMessage extends \Google\Protobuf\Internal\Message
      *           废弃 //UTC秒，大于该时间，用于向上翻页
      *     @type int|string $RefSnsId
      *           首次传0，获取下一页传上一页最后一条的snsid
+     *     @type int|string $TaskId
+     *          
      * }
      */
     public function __construct($data = NULL) {
@@ -227,6 +235,32 @@ class PullFriendCircleTaskMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->RefSnsId = $var;
+
+        return $this;
+    }
+
+    /**
+     *
+     *
+     * Generated from protobuf field <code>int64 TaskId = 7;</code>
+     * @return int|string
+     */
+    public function getTaskId()
+    {
+        return $this->TaskId;
+    }
+
+    /**
+     *
+     *
+     * Generated from protobuf field <code>int64 TaskId = 7;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setTaskId($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->TaskId = $var;
 
         return $this;
     }

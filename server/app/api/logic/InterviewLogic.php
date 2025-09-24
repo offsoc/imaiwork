@@ -14,13 +14,11 @@ use app\common\model\interview\InterviewJob;
 use app\common\model\interview\InterviewRecord;
 use app\common\model\ModelConfig;
 use app\common\model\user\User;
-use app\common\service\ConfigService;
 use PhpOffice\PhpWord\IOFactory;
 use think\Exception;
 use think\facade\Db;
 use think\facade\Log;
 use think\facade\Queue;
-use think\Log as ThinkLog;
 
 class InterviewLogic extends BaseLogic
 {
@@ -218,7 +216,7 @@ class InterviewLogic extends BaseLogic
             self::$returnData = $json;
             return true;
         } catch (\Exception $e) {
-            Log::error('简历上传失败'.$e->getMessage().'参数'.json_encode($json));
+            Log::error('简历上传失败' . $e->getMessage());
             // Db::rollback();
             throw new Exception($e->getMessage());
         }

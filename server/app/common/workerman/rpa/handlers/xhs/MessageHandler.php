@@ -7,8 +7,9 @@ use app\common\workerman\rpa\BaseMessageHandler;
 use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvPrivateMessage;
 use app\common\model\sv\SvReplyStrategy;
-use app\common\model\sv\SvRobot;
+use app\common\model\wechat\AiWechatLog;
 use app\common\model\kb\KbRobot;
+use app\common\model\chat\ModelsSetting;
 use app\common\model\sv\SvAccountContact;
 use app\common\model\sv\SvAccountKeyword;
 use app\common\model\sv\SvRobotKeyword;
@@ -62,7 +63,6 @@ class MessageHandler extends BaseMessageHandler
 
 
             $worker = $this->service->getWorker();
-            //$this->setLog(array_keys($worker->uidConnections), 'msg');
             $device_uid = $worker->devices[$this->payload['deviceId']] ?? '';
             if ($device_uid == '') {
                 $this->payload['reply'] = "设备{$this->payload['deviceId']}不在线,无法获取账号信息";
@@ -77,7 +77,6 @@ class MessageHandler extends BaseMessageHandler
                 $this->sendResponse($this->uid, $this->payload, $this->payload['reply']);
                 return;
             }
-            //$this->setLog('当前设备对应进程名称:' . $this->connection->name .  ' : ' . $this->connection->uid, 'msg');
 
             if ($this->msgType == WorkerEnum::RPA_NEW_PRIVATE_MESSAGE) {
                 $this->connection->replyMessage = [];
@@ -86,7 +85,6 @@ class MessageHandler extends BaseMessageHandler
 
                 $this->_updatePrivateMessage($content);
             } else if ($this->msgType == WorkerEnum::WEB_SEND_PRIVATE_MESSAGE) {
-
                 $this->_sendMessageToDevice($content);
             }
         } catch (\Exception $e) {
@@ -100,8 +98,6 @@ class MessageHandler extends BaseMessageHandler
             $this->sendErrorResponse($content, $this->payload['reply']);
         }
     }
-
-
 
     private function _sendMessageToDevice($content)
     {
@@ -145,7 +141,6 @@ class MessageHandler extends BaseMessageHandler
                     if (!$this->checkDeviceStatus($device)) {
                         $this->payload['reply'] = "设备正在回复消息中, 请稍后再试";
                         $this->payload['code'] = WorkerEnum::DEVICE_RUNNING_REPLY_MSG;
-                        //$this->sendResponse($this->uid, $this->payload, $this->payload['reply']);
                         $this->sendError($this->connection,  $this->payload);
                         return;
                     }
@@ -165,7 +160,6 @@ class MessageHandler extends BaseMessageHandler
                         ]
                     );
 
-
                     $this->sendResponse($uid, $message, $message['reply']);
                     $this->setLog($message, 'msg');
                 } else {
@@ -175,7 +169,6 @@ class MessageHandler extends BaseMessageHandler
                     $this->payload['reply'] = "请先对账号做基础设置";
                     $this->payload['code'] = WorkerEnum::MSG_DEVICE_ACCOUNT_SETTING;
                     $this->sendError($this->connection, $this->payload);
-
                     $this->sendErrorResponse($content, $this->payload['reply']);
                 }
             }
@@ -192,7 +185,6 @@ class MessageHandler extends BaseMessageHandler
             $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:accountNo");
             if (empty($accountNo)) {
                 $this->setLog('设备未更新账号信息,请先更新账号信息', 'msg');
-                //return;
                 $accountNo = '';
             }
             $where = [];
@@ -201,14 +193,12 @@ class MessageHandler extends BaseMessageHandler
                 $where[] = ['a.account', '=', $accountNo];
             }
             $this->setLog('accountNo:' . $accountNo, 'msg');
-            //$this->setLog($where, 'msg');
             $account = SvAccount::alias('a')
                 ->field('*')
                 ->where($where)
                 ->join('sv_setting s', 's.account = a.account and s.user_id = a.user_id')
                 ->order('a.update_time desc')
                 ->limit(1)->find();
-            //$this->setLog($account->toArray(), 'msg');
 
             if (empty($account)) {
                 $sql = SvAccount::alias('a')
@@ -242,14 +232,9 @@ class MessageHandler extends BaseMessageHandler
                 return;
             }
 
-
             //接收到的消息
             $content['type'] = WorkerEnum::WEB_RECEIVE_PRIVATE_MESSAGE_TEXT;
             $this->sendToWeb($account, $content);
-            //回复内容发送给web端
-            // $payload['reply']['type'] = WorkerEnum::WEB_SEND_PRIVATE_MESSAGE_TEXT;
-            // $this->sendToWeb($account, $payload['reply']);
-            // return;
 
             //1 查询私信用户信息是否存在,不存在则创建,并讲私信消息记录
             $friend = $this->getFriendInfo($account, $content);
@@ -267,8 +252,23 @@ class MessageHandler extends BaseMessageHandler
                     $this->updatePrivateMessageStatus($account, $friend);
                     return;
                 }
-                //4 获取ai回复策略数据,未配置策略则提示
-                $reply = SvReplyStrategy::where('user_id', $account['user_id'])->findOrEmpty();
+
+                //4 查询配置的机器人,不存在则提示
+                $robot = KbRobot::where('id', $account['robot_id'])->findOrEmpty();
+                if ($robot->isEmpty()) {
+                    $this->setLog('机器人不存在:' . $this->payload['deviceId'], 'msg');
+                    $this->payload['reply'] = "机器人不存在";
+                    $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
+                    $this->sendError($this->connection, $this->payload);;
+
+                    $this->sendErrorResponse($content, $this->payload['reply']);
+                    $this->updatePrivateMessageStatus($account, $friend);
+                    return;
+                }
+                $this->setLog('机器人:', 'msg');
+                $this->setLog($robot, 'msg');
+                //5 获取ai回复策略数据,未配置策略则提示
+                $reply = SvReplyStrategy::where('user_id', $robot->user_id)->where('robot_id', $robot->id)->findOrEmpty();
                 if ($reply->isEmpty()) {
                     $this->setLog('请先设置回复的配置:' . $this->payload['deviceId'], 'msg');
                     $this->setLog($account, 'msg');
@@ -284,24 +284,6 @@ class MessageHandler extends BaseMessageHandler
                 $this->setLog('回复策略:', 'msg');
                 $this->setLog($reply, 'msg');
 
-                //5 查询配置的机器人,不存在则提示
-                $robot = KbRobot::where('id', $account['robot_id'])->findOrEmpty();
-                if ($robot->isEmpty()) {
-                    $this->setLog('机器人不存在:' . $this->payload['deviceId'], 'msg');
-                    //$this->setLog($account, 'msg');
-
-                    $this->payload['reply'] = "机器人不存在";
-                    $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
-                    $this->sendError($this->connection, $this->payload);;
-
-                    $this->sendErrorResponse($content, $this->payload['reply']);
-                    $this->updatePrivateMessageStatus($account, $friend);
-                    return;
-                }
-
-                $this->setLog('机器人:', 'msg');
-                $this->setLog($robot, 'msg');
-                //6匹配停止策略
                 // 组装请求参数
                 $request = [
                     'uid' => $this->uid,
@@ -345,7 +327,6 @@ class MessageHandler extends BaseMessageHandler
                         return;
                     }
                 }
-
 
                 //step 1. 正则匹配停止AI回复
                 $stop = $this->regularMatchStopAI($reply, $request);
@@ -421,7 +402,6 @@ class MessageHandler extends BaseMessageHandler
                         ]);
                     }
                     $this->setLog('回复消息数组', 'msg');
-                    $this->setLog($this->connection->replyMessage, 'msg');
                     $this->connection->replyMessage = array_values(array_filter($this->connection->replyMessage));
                     $this->setLog($this->connection->replyMessage, 'msg');
                     if (empty($this->connection->replyMessage)) {
@@ -506,7 +486,6 @@ class MessageHandler extends BaseMessageHandler
                                 return;
                             }
 
-
                             $match = $this->regularMatchKeyword($robot, $request);
                             if ($match) {
                                 $this->setLog('正则匹配关键词:' . $this->payload['deviceId'], 'msg');
@@ -545,7 +524,6 @@ class MessageHandler extends BaseMessageHandler
             $this->payload['reply'] = "回复私信异常:" . $e->getMessage();
             $this->payload['code'] =  WorkerEnum::MSG_ERROR_CODE;
             $this->sendError($this->connection,  $this->payload);
-
             $this->sendErrorResponse($content, $this->payload['reply']);
         }
     }
@@ -560,7 +538,6 @@ class MessageHandler extends BaseMessageHandler
                 return;
             }
             $strategy = SvAddWechatStrategy::where('device_code', $this->payload['deviceId'])->where('account', $account['account'])->where('user_id', $account['user_id'])->limit(1)->findOrEmpty();
-
             if ($strategy->isEmpty()) {
                 $strategy = [
                     "account_type" => 3,
@@ -574,9 +551,9 @@ class MessageHandler extends BaseMessageHandler
             $this->setLog(is_array($strategy) ? $strategy : $strategy->toArray(), 'msg');
             if ($strategy['wechat_enable'] == 1) {
 
-                $wechatPattern = '/[-_a-zA-Z0-9]{6,20}/';
+                $wechatPattern = '/[a-zA-Z][a-zA-Z0-9_-]{5,19}/';
                 $phonePattern = '/1[3-9]\d{9}/';
-                $pattern = '/([-_a-zA-Z0-9]{6,20})|(1[3-9]\d{9})/';
+                $pattern = '/(?:[a-zA-Z][a-zA-Z0-9_-]{5,19}|1[3-9]\d{9})/';
 
                 $replyContent = $payload['replyContent'];
                 $blacklist = array(
@@ -585,7 +562,6 @@ class MessageHandler extends BaseMessageHandler
 
                 $isInWechat = false;
                 foreach ($replyContent  as $key => $content) {
-                    //$this->setLog($content , 'msg');
                     list($content, $messageType) = $this->parseContent($content);
                     $content = str_replace(["加vx", "加VX", "加v", "加V", "加wx", "加WX", "+wx", "+WX", "+vx", "+VX", "+v", "+V"], '', $content);
                     if ($messageType === 2) {
@@ -604,7 +580,6 @@ class MessageHandler extends BaseMessageHandler
                     }
 
                     if (!empty($matchs)) {
-                        //$this->setLog($matchs , 'msg');
                         $isInWechat = true;
                         foreach ($matchs as $match) {
                             $this->setLog($match, 'msg');
@@ -658,7 +633,7 @@ class MessageHandler extends BaseMessageHandler
                                 ], $wechat, $record);
                             } else {
                                 $record['status'] = 3;
-                                $record['result'] = '微信账号冷却中,稍后手动重试';
+                                $record['result'] = '当前账号存在安全风险，暂停添加';
                                 SvAddWechatRecord::create($record);
                             }
                         }
@@ -678,7 +653,6 @@ class MessageHandler extends BaseMessageHandler
             $this->payload['code'] =  WorkerEnum::MSG_ERROR_CODE;
             $this->payload['type'] = 'error';
             $this->sendError($this->connection,  $this->payload);
-
             $this->sendErrorResponse($payload, $this->payload['reply']);
         }
 
@@ -700,22 +674,6 @@ class MessageHandler extends BaseMessageHandler
             ];
 
             $this->setLog($message, 'msg');
-            //检测当天添加好友是否超过阈值
-            // $addNum = $wechat->add_num ?? 0;
-            // $date = date('Ymd', time());
-            // $key = "xhs:device:{$payload['DeviceCode']}:{$payload['WechatId']}:addFlag";
-            // $flag = $this->service->getRedis()->get($key);
-            // if(empty($flag)){
-            //     $this->service->getRedis()->set($key, $date);
-            // }
-            // $this->setLog($flag, 'msg');
-            // if($date > (int)$flag){
-            //     $addNum = 0;
-            //     $wechat->add_num = 0;
-            //     $wechat->update_time = time();
-            //     $wechat->save();
-            //     $this->service->getRedis()->set($key, $date);
-            // }
             $addNum = 0;
             if ($addNum <= 20) {
                 $content = \app\common\workerman\wechat\handlers\client\AddFriendsTaskHandler::handle($message);
@@ -738,6 +696,14 @@ class MessageHandler extends BaseMessageHandler
                 $wechat->cooling_time = 0;
                 $wechat->update_time = time();
                 $wechat->save();
+
+                AiWechatLog::create([
+                    'user_id' => $wechat->user_id,
+                    'wechat_id' => $wechat->wechat_id,
+                    'log_type' => 0,
+                    'friend_id' => $payload['Phones'],
+                    'create_time' => time()
+                ]);
             } else {
                 $record->status = 0;
                 $record->result = '检测当天添加好友超过阈值';
@@ -785,8 +751,6 @@ class MessageHandler extends BaseMessageHandler
                         'new_message_count' => 1,
                         'create_time' => time()
                     ]);
-                    //$this->setLog('addMessage消息记录:', 'msg');
-                    //$this->setLog($result, 'msg');
                 }
             } else {
                 $result = SvPrivateMessage::create([
@@ -802,23 +766,17 @@ class MessageHandler extends BaseMessageHandler
                     'new_message_count' => 1,
                     'create_time' => time()
                 ]);
-                //$this->setLog('addMessage消息记录:', 'msg');
-                //$this->setLog($result, 'msg');
             }
         } catch (\Exception $e) {
             $this->setLog('addMessage' . $e, 'error');
         }
     }
 
-
     private function getFriendInfo($account, $content)
     {
         try {
-
             $nickname = $content['targetRecipient'] ?? $content['replyName'];
-
             $friendId = md5($account['user_id'] . $account['account'] . $account['device_code'] . $nickname);
-
             $friend = SvAccountContact::where('account', $account['account'])->where('account_type', $account['type'])->where('friend_id', $friendId)->limit(1)->find();
             if (empty($friend)) {
                 $friend = SvAccountContact::create([
@@ -853,9 +811,7 @@ class MessageHandler extends BaseMessageHandler
     {
         try {
             $this->setLog('AI回复逻辑:' . $request['device_code'], 'msg');
-
             $appType = $request['payload']['appType'] ?? 3;
-            //$this->setLog('appType:' . $appType, 'msg');
             //检查扣费
             $unit = TokenLogService::checkToken($request['user_id'], 'ai_xhs');
             $this->setLog('检查扣费unit:' . $unit, 'msg');
@@ -864,13 +820,10 @@ class MessageHandler extends BaseMessageHandler
 
             if (!$keyword) {
                 $this->setLog('提示词不存在:' . $request['device_code'], 'msg');
-
                 $this->payload['reply'] = "提示词不存在";
                 $this->payload['code'] = WorkerEnum::MSG_CHAT_PROMPT_NOT_FOUND;
                 $this->sendError($this->connection, $this->payload);
-
                 $this->sendErrorResponse($request['content'], $this->payload['reply']);
-
                 return;
             }
             $this->setLog('提示词:', 'msg');
@@ -920,6 +873,19 @@ class MessageHandler extends BaseMessageHandler
                 $keyword
             );
 
+            $modelSetting = ModelsSetting::where('user_id', $robot->user_id)->where('model_id', $robot->model_id)->where('model_sub_id', $robot->model_sub_id)->findOrEmpty();
+            if ($modelSetting->isEmpty()) {
+                $modelSetting = [
+                    'temperature' => 0.5, //温度
+                    'top_p' => 0.85, //多样性范围
+                    'presence_penalty' =>  0.2, //避免重复力度
+                    'frequency_penalty' => 0.3, //避免重复用词力度
+                    'max_tokens' => 4096, //token上限
+                    'context_num' => 5, //上下文数
+                ];
+            } else {
+                $modelSetting = $modelSetting->toArray();
+            }
 
             $request = [
                 'user_id' => $request['user_id'],
@@ -941,6 +907,12 @@ class MessageHandler extends BaseMessageHandler
                 'knowledge' => $knowledge,
                 'model' => $request['model'],
 
+                'temperature' => $modelSetting['temperature'] ?? 0.5,
+                'top_p' => $modelSetting['top_p'] ?? 0.85,
+                'presence_penalty' => $modelSetting['presence_penalty'] ?? 0.2, //避免重复力度
+                'frequency_penalty' => $modelSetting['frequency_penalty'] ?? 0.3, //避免重复用词力度
+                'max_tokens' => $modelSetting['max_tokens'] ?? 4096, //token上限
+                'context_num' => $modelSetting['context_num'] ?? 5, //上下文数
             ];
 
             // 任务数据
@@ -964,7 +936,6 @@ class MessageHandler extends BaseMessageHandler
             $this->payload['reply'] = "AI 回复异常:" . $e->getMessage();
             $this->payload['code'] = WorkerEnum::MSG_ERROR_CODE;
             $this->sendError($this->connection, $this->payload);
-
             $this->sendErrorResponse($request['content'], $this->payload['reply']);
             return;
         }
@@ -999,6 +970,12 @@ class MessageHandler extends BaseMessageHandler
                         'scene' => '小红书',
                         'model' => $this->request['model'],
                         'robot' => $data['robot'],
+                        'temperature' => $this->request['temperature'] ?? 0.5,
+                        'top_p' => $this->request['top_p'] ?? 0.85,
+                        'presence_penalty' => $this->request['presence_penalty'] ?? 0.2, //避免重复力度
+                        'frequency_penalty' => $this->request['frequency_penalty'] ?? 0.3, //避免重复用词力度
+                        'max_tokens' => $this->request['max_tokens'] ?? 4096, //token上限
+                        'context_num' => $this->request['context_num'] ?? 5, //上下文数
                     ]);
 
                     if ($chatStatus === false) {
@@ -1075,13 +1052,10 @@ class MessageHandler extends BaseMessageHandler
             $scene = $model == 'deepseek' ? 'ai_xhs' : 'openai_chat';
             //检查扣费
             $unit = TokenLogService::checkToken($this->userId, $scene);
-
             // 获取回复内容
             $reply = $response['data']['message'] ?? '';
-
             //计费
             $tokens = $response['data']['usage']['total_tokens'] ?? 0;
-
             if (!$reply || $tokens == 0) {
                 throw new \Exception('获取内容失败');
             }
@@ -1093,10 +1067,8 @@ class MessageHandler extends BaseMessageHandler
 
             // 保存聊天记录
             ChatLogic::saveChatResponseLog($this->request, $response);
-
             //计算消耗tokens
-            $points = $unit > 0 ? round($tokens / $unit,2) : 0;
-
+            $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
             //token扣除
             User::userTokensChange($this->userId, $points);
 
@@ -1129,7 +1101,6 @@ class MessageHandler extends BaseMessageHandler
                     // 模糊匹配
                     if ($item->match_type == 0) {
                         if (strpos($item->keyword, $_message) !== false || strpos($_message, $item->keyword) !== false) {
-
                             if (in_array(5, $types)) {
                                 array_push($keywords, $_message);
                             }
@@ -1227,20 +1198,15 @@ class MessageHandler extends BaseMessageHandler
                 //$this->setLog('匹配类型:' . $item->match_type . " msg: {$request['message']},   key: {$item->keyword}   reg: " . str_contains($request['message'], $item->keyword), 'msg');
                 // 模糊匹配
                 if ((int)$item->match_type === 0) {
-                    // if (str_contains($request['message'], $item->keyword)) {
-
-                    //     $this->parseMessage($request, $item->reply);
-                    //     $match = true;
-                    // }
                     if (strpos($item->keyword, $request['message']) !== false || strpos($request['message'], $item->keyword) !== false) {
-                        $this->parseMessage($request, $item->reply);
-                        $match = true;
+                        $match = $this->parseMessage($request, $item->reply);
+                        //$match = true;
                     }
                 } else {
                     $keywords = explode(';', $item->keyword);
                     if (in_array($request['message'], $keywords)) {
-                        $this->parseMessage($request, $item->reply);
-                        $match = true;
+                        $match = $this->parseMessage($request, $item->reply);
+                        //$match = true;
                     }
                 }
             });
@@ -1288,49 +1254,41 @@ class MessageHandler extends BaseMessageHandler
             $msg = array();
             $send = true;
             foreach ($content as $item) {
-
-                //$send = true;
                 $request['message'] = '';
                 switch ((int)$item['type']) {
-
                     case 0: //文本
-
                         // 推送消息
                         $request['message_type'] = 1;
                         $request['message'] = str_replace('${remark}', $request['friend_remark'], $item['content']);
                         break;
-
                     case 1: //图片
-
                         // 推送消息
                         $request['message'] = '图片地址';
                         $request['message_type'] = 2;
-
                         break;
-                    case 5: //小红书名片
-                        $request['message_type'] = 5;
-                        $request['message_list'] = $item['name'];
-                        $this->send($request);
-                        $request['message'] = '';
-                        $this->connection->isSendReply = false;
-                        $send = false;
-                        break;
+                    // case 5: //小红书名片
+                    //     if(isset($item['name'])){
+                    //         $request['message_type'] = 5;
+                    //         $request['message_list'] = $item['name'];
+                    //         $this->send($request);
+                    //         $request['message'] = '';
+                    //         $this->connection->isSendReply = false;
+                    //         $send = false;
+                    //     }else{
+                    //         $send = false;
+                    //         $request['message'] = '';
+                    //     }
+                    //     break;
                     default:
                         $send = false;
                         $request['message'] = '';
                 }
-
-                // if ($send) {
-                //     $this->send($request);
-                // }
 
                 if (!empty($request['message'])) {
                     array_push($msg, $request['message']);
                     if ($this->connection->multipleType) {
                         array_push($this->connection->replyMessage, $request['message']);
                     }
-
-                    //$send = true;;
                 }
             }
 
@@ -1340,10 +1298,12 @@ class MessageHandler extends BaseMessageHandler
                     $this->send($request);
                 }
             }
+            return $send;
         } catch (\Exception $e) {
             $this->setLog($e, 'msg');
             $this->payload['reply'] = "AI 回复异常:" . $e->getMessage();
             $this->payload['code'] = WorkerEnum::MSG_ERROR_CODE;
+            return false;
         }
     }
 

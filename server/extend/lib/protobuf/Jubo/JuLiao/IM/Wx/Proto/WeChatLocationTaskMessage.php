@@ -18,7 +18,11 @@ class WeChatLocationTaskMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string WeChatId = 1;</code>
      */
-    private $WeChatId = '';
+    protected $WeChatId = '';
+    /**
+     * Generated from protobuf field <code>bool NoCache = 2;</code>
+     */
+    protected $NoCache = false;
 
     /**
      * Constructor.
@@ -28,6 +32,7 @@ class WeChatLocationTaskMessage extends \Google\Protobuf\Internal\Message
      *
      *     @type string $WeChatId
      *           商家个人微信内部全局唯一识别码
+     *     @type bool $NoCache
      * }
      */
     public function __construct($data = NULL) {
@@ -57,6 +62,28 @@ class WeChatLocationTaskMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->WeChatId = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>bool NoCache = 2;</code>
+     * @return bool
+     */
+    public function getNoCache()
+    {
+        return $this->NoCache;
+    }
+
+    /**
+     * Generated from protobuf field <code>bool NoCache = 2;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setNoCache($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->NoCache = $var;
 
         return $this;
     }

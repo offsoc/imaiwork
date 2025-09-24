@@ -154,7 +154,7 @@ trait OperationTrait
                         'desc' => $content['content']['desc'] ?? '',
                         'url' => $content['content']['link'] ?? '',
                         'thumb' => FileService::getFileUrl($content['content']['img'] ?? ''),
-                    ]);
+                    ], JSON_UNESCAPED_UNICODE);
                     $message['message_type'] = 6;
                     break;
                 case 4: //小程序
@@ -178,7 +178,7 @@ trait OperationTrait
                     break;
                 case 5: //文件
                     // 推送消息
-                    $message['message'] = json_encode($content['content']);
+                    $message['message'] = json_encode($content['content'], JSON_UNESCAPED_UNICODE);
                     $message['message_type'] = 8;
                     break;
 
@@ -192,8 +192,8 @@ trait OperationTrait
                 'ContentType' => $message['message_type'] ?? 1,
                 'Remark' => $message['remark'] ??  '',
                 'MsgId' => time(),
-                'Immediate' => true,
-                'OptType' => $message['opt_type']
+                'Immediate' => false,
+                //'OptType' => $message['opt_type']
             ];
 
             $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('greetMessage')->withContext($payload)->log();
@@ -208,7 +208,7 @@ trait OperationTrait
             $data = $message->serializeToString();
             // 5. 发送到设备端
             $channel = "socket.{$wechat->device_code}.message";
-            //\Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', 2206);
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);

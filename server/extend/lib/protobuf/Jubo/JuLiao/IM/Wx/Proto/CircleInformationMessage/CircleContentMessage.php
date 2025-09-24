@@ -40,7 +40,11 @@ class CircleContentMessage extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>string Ext = 5;</code>
      */
-    private $Ext = '';
+    protected $Ext = '';
+    /**
+     * Generated from protobuf field <code>int32 Type = 6;</code>
+     */
+    protected $Type = 0;
 
     /**
      * Constructor.
@@ -57,6 +61,7 @@ class CircleContentMessage extends \Google\Protobuf\Internal\Message
      *     @type \Jubo\JuLiao\IM\Wx\Proto\CircleInformationMessage\CircleContentMessage\CircleNewsContentMessage $Video
      *           视频
      *     @type string $Ext
+     *     @type int $Type
      * }
      */
     public function __construct($data = NULL) {
@@ -186,6 +191,28 @@ class CircleContentMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->Ext = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>int32 Type = 6;</code>
+     * @return int
+     */
+    public function getType()
+    {
+        return $this->Type;
+    }
+
+    /**
+     * Generated from protobuf field <code>int32 Type = 6;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setType($var)
+    {
+        GPBUtil::checkInt32($var);
+        $this->Type = $var;
 
         return $this;
     }

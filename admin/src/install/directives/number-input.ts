@@ -48,7 +48,14 @@ const formatValue = (value: string, options: NumberInputOptions): string => {
         numValue = max;
     }
 
-    return numValue.toFixed(decimal);
+    const formatted = numValue.toFixed(decimal);
+
+    // 如果小数点后都是0，则显示为整数
+    if (decimal > 0 && Number(formatted) % 1 === 0) {
+        return Number(formatted).toString();
+    }
+
+    return formatted;
 };
 
 export const vNumberInput: Directive<HTMLElement, NumberInputOptions> = {
@@ -138,6 +145,7 @@ export const vNumberInput: Directive<HTMLElement, NumberInputOptions> = {
             const formatted = formatValue(rawValue, options);
 
             if (target.value !== formatted) {
+                console.log("formatted", formatted);
                 target.value = formatted;
                 dispatchInput(target);
             }

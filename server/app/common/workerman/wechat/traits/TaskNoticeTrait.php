@@ -42,14 +42,12 @@ trait TaskNoticeTrait
 
     public function AcceptFriendAddRequestTaskOpt(string $deviceId, array $response): void
     {
-        $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('AcceptFriendAddRequestTaskOpt')->withContext([
-            'msg' => 'AcceptFriendAddRequestTaskOpt'
-        ])->log();
         $data = $response['Data'];
-        $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Data')->withContext([
-            'response' => $response
-        ])->log();
         if ($data['MsgType'] == 'FriendAddReqeustNotice') {
+            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Data')->withContext([
+                'msg' => 'AcceptFriendAddRequestTaskOpt',
+                'response' => $response
+            ])->log();
             $payload = $response['Data']['Content'];
             $payload['FriendInfo']['Source'] = 1000000 + (int)$payload['FriendInfo']['Source'];
             $friend_id = $payload['FriendInfo']['FriendId'];
@@ -156,6 +154,11 @@ trait TaskNoticeTrait
     {
         $data = $response['Data'];
         if ($data['MsgType'] == 'AddFriendsTask') {
+            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('AddFriendsTaskOpt')->withContext([
+                'msg' => 'AddFriendsTaskOpt',
+                'response' => $response
+            ])->log();
+
             $record = SvAddWechatRecord::where('task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
             $errMsg = $data['Content']['ErrMsg'];
             if (!$record->isEmpty()) {
@@ -227,7 +230,7 @@ trait TaskNoticeTrait
 
         if ($wechat->isEmpty()) {
             $record->status = 3;
-            $record->result = '微信账号冷却中,稍后手动重试';
+            $record->result = '当前账号存在安全风险，暂停添加';
             return;
         }
         $record->status = 2;
@@ -298,7 +301,7 @@ trait TaskNoticeTrait
 
         // 5. 发送到设备端
         $channel = "socket.{$deviceId}.message";
-        #\Channel\Client::connect('127.0.0.1', 2206);
+        \Channel\Client::connect('127.0.0.1', 2206);
         \Channel\Client::publish($channel, [
             'data' => $data
         ]);

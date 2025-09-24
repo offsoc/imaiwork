@@ -354,7 +354,7 @@ const formData = reactive<FormData>({
     chat_type: "0",
     chat_number: 30,
     chat_interval_time: 10,
-    add_type: "1",
+    add_type: "0",
     remark: "",
     add_number: 15,
     add_interval_time: 10,

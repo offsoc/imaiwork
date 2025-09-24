@@ -83,6 +83,7 @@
         "pages/keywords/keywords",
         "pages/create_task/create_task",
         "pages/create_task_set/create_task_set",
+        "pages/task_prompt/task_prompt",
         "pages/clue_list/clue_list",
         "pages/clue_detail/clue_detail"
       ]

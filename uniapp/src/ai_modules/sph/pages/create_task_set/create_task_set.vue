@@ -194,52 +194,10 @@
             >
         </view>
     </view>
-    <u-popup v-model="showChatPopup" mode="center" width="90%" border-radius="64" :closeable="false">
-        <view class="flex flex-col p-[32rpx]">
-            <view class="text-[26rpx] text-center mt-[14rpx]">{{
-                currentGreetingContentSettingType == GreetingContentSettingTypeEnum.PRIVATE_CHAT
-                    ? "AI提示词设置（私信内容）"
-                    : "AI提示词设置（加好友内容）"
-            }}</view>
-            <view class="rounded-xl bg-[#00000005] p-[18rpx] mt-[46rpx]">
-                <view class="max-h-[500rpx] overflow-y-auto">
-                    <u-input
-                        v-model="formData[currentGreetingContentSettingType]"
-                        class="w-full"
-                        type="textarea"
-                        placeholder="请输入AI提示词"
-                        placeholder-style="font-size:26rpx;color:rgba(0,0,0,0.2)"
-                        :focus="showChatPopup"
-                        :maxlength="1000" />
-                </view>
-                <view class="text-[26rpx] text-right mt-[14rpx]">
-                    {{ formData[currentGreetingContentSettingType].length }}/1000
-                </view>
-            </view>
-            <view class="text-center text-primary mt-2" @click="handleDefaultPrompt"> 一键填写默认数据 </view>
-            <view class="flex gap-x-[24rpx] mt-[36rpx] w-full">
-                <view class="flex-1">
-                    <u-button
-                        type="primary"
-                        shape="circle"
-                        :custom-style="{
-                            flex: 1,
-                            height: '100rpx',
-                            boxShadow: '0 6px 12px 0 rgba(0, 101, 251, 0.20)',
-                            fontSize: '26rpx',
-                        }"
-                        @click="handleChatKeyword"
-                        >确定</u-button
-                    >
-                </view>
-            </view>
-        </view>
-    </u-popup>
 </template>
 
 <script setup lang="ts">
 import { setFormData } from "@/utils/util";
-import { getScenePrompt as getScenePromptApi } from "@/api/app";
 import { getWeChatLists } from "@/api/person_wechat";
 import { useDictOptions } from "@/hooks/useDictOptions";
 
@@ -253,7 +211,7 @@ const formData = reactive({
     chat_number: 30,
     chat_interval_time: 10,
     greeting_content: "",
-    add_type: "1",
+    add_type: "0",
     remark: "",
     add_number: 15,
     add_interval_time: 10,
@@ -262,8 +220,6 @@ const formData = reactive({
     wechat_id: "",
     wechat_reg_type: 0,
 });
-
-const showChatPopup = ref(false);
 
 const currentGreetingContentSettingType = ref<GreetingContentSettingTypeEnum>(
     GreetingContentSettingTypeEnum.PRIVATE_CHAT
@@ -285,19 +241,13 @@ const { optionsData } = useDictOptions<{
 
 const handleGreetingContentSetting = (type: GreetingContentSettingTypeEnum) => {
     currentGreetingContentSettingType.value = type;
-    showChatPopup.value = true;
-};
-
-const handleChatKeyword = () => {
-    showChatPopup.value = false;
-};
-
-const handleDefaultPrompt = () => {
-    if (currentGreetingContentSettingType.value == GreetingContentSettingTypeEnum.PRIVATE_CHAT) {
-        formData.private_message_prompt = scenePrompt.value.find((item: any) => item.id == 21)?.prompt_text;
-    } else {
-        formData.add_friends_prompt = scenePrompt.value.find((item: any) => item.id == 22)?.prompt_text;
-    }
+    uni.$u.route({
+        url: "/ai_modules/sph/pages/task_prompt/task_prompt",
+        params: {
+            type,
+            prompt: JSON.stringify(formData[type]),
+        },
+    });
 };
 
 const handleSaveAndReturn = () => {
@@ -309,18 +259,23 @@ const handleSaveAndReturn = () => {
     uni.navigateBack();
 };
 
-const scenePrompt = ref<any[]>([]);
-const getScenePrompt = async () => {
-    const res = await getScenePromptApi();
-    scenePrompt.value = res;
-};
-
 onLoad(({ data }: any) => {
-    getScenePrompt();
     if (data) {
         data = JSON.parse(decodeURIComponent(data));
         setFormData(data, formData);
     }
+});
+
+onShow(() => {
+    uni.$on("save", (data: any) => {
+        const { type, prompt } = data;
+        if (type == GreetingContentSettingTypeEnum.PRIVATE_CHAT) {
+            formData.private_message_prompt = prompt;
+        } else {
+            formData.add_friends_prompt = prompt;
+        }
+        uni.$off("save");
+    });
 });
 </script>
 

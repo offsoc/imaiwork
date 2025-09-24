@@ -3,10 +3,8 @@
 
 namespace app\api\logic\kb;
 
-use app\api\logic\service\TokenLogService;
 use app\common\enum\ChatEnum;
 use app\common\enum\kb\KnowEnum;
-use app\common\logic\AccountLogLogic;
 use app\common\logic\BaseLogic;
 use app\common\model\chat\Models;
 use app\common\model\chat\ModelsCost;
@@ -15,12 +13,12 @@ use app\common\model\kb\KbKnowFiles;
 use app\common\model\kb\KbKnowQa;
 use app\common\model\kb\KbKnowTeam;
 use app\common\model\kb\KbRobot;
+use app\common\model\knowledge\KnowledgeBind;
 use app\common\model\user\User;
 use app\common\pgsql\KbEmbedding;
 use app\common\service\FileService;
 use app\common\service\recall\RecallKnow;
 use app\common\service\recall\RecallUtils;
-use app\common\service\ToolsService;
 use Exception;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -307,6 +305,23 @@ class KbKnowLogic extends BaseLogic
                 ->update([
                     'delete_time' => time()
                 ]);
+
+            // 删除机器人绑定关系
+            $robot = (new KbRobot())->where('kb_ids', 'like', '%' . $id . '%')->select()->toArray();
+            if ($robot) {
+                foreach ($robot as $item) {
+                    $item['kb_ids'] = explode(',', $item['kb_ids']);
+                    foreach ($item['kb_ids'] as $key => $value) {
+                        if ($value == $id) {
+                            unset($item['kb_ids'][$key]);
+                        }
+                    }
+                    KbRobot::update([
+                                        'kb_ids' => implode(',', $item['kb_ids'])
+                                    ], ['id' => $item['id']]);
+                }
+                KnowledgeBind::where('kid', $id)->delete();
+            }
 
             // 删除知识库
             KbKnow::destroy($id);
@@ -935,6 +950,10 @@ class KbKnowLogic extends BaseLogic
 
         // 结果处理(4): 过滤最大Tokens
         $pgList = RecallUtils::filterMaxTokens($results, $searchTokens);
+
+        if (!$pgList) {
+            return '未找到匹配内容';
+        }
 
         $searchContent = '对"'.$content.'"进行知识库检索'."\n";
         $num = 1;

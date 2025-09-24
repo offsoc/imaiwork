@@ -7,6 +7,7 @@ use app\common\enum\ChatEnum;
 use app\common\enum\kb\KnowEnum;
 use app\common\enum\notice\NoticeEnum;
 use app\common\logic\BaseLogic;
+use app\common\model\chat\ChatLog;
 use app\common\model\chat\Models;
 use app\common\model\chat\ModelsCost;
 use app\common\model\kb\KbKnow;
@@ -610,7 +611,7 @@ class KbChatLogic extends BaseLogic
     public static function dataCount(int $robotId, int $userId): array
     {
         $modelKbRobot = new KbRobot();
-        $modelKbRobotRecord  = new KbRobotRecord();
+        $modelKbRobotRecord = new ChatLog();
         $modelKbRobotVisitor = new KbRobotVisitor();
 
         $kbRobot = $modelKbRobot

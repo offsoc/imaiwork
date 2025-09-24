@@ -17,7 +17,7 @@ class SvVideoSettingLists extends BaseApiDataLists implements ListsSearchInterfa
     public function setSearch(): array
     {
         return [
-            '=' => ['user_id', 'type', 'status'],
+            '=' => ['user_id', 'type', 'status', 'ai_type'],
             '%like%' => ['name'],
             // 其他搜索条件
         ];

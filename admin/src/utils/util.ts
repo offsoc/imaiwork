@@ -1,5 +1,7 @@
 import { isObject } from "@vue/shared";
 import { cloneDeep } from "lodash";
+import html2Canvas, { type Html2CanvasOptions } from "./html2canvas";
+import feedback from "./feedback";
 
 /**
  * @description 添加单位
@@ -213,3 +215,86 @@ export function formatAudioTime(seconds: number, isShowHours = false): string {
     }
     return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
+
+/**
+ * 设置表单数据
+ * @param data 数据
+ * @param sourceData 数据源
+ */
+export const setFormData = (data: Record<any, any>, sourceData: Record<any, any>) => {
+    for (const key in sourceData) {
+        if (data[key] != null && data[key] != undefined) {
+            sourceData[key] = data[key];
+        }
+    }
+};
+
+/**
+ * @param url 图片地址
+ * @param filename 文件名
+ * @returns File
+ */
+
+export const urlToFile = async (url: string, filename: string): Promise<File> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+};
+
+/**
+ * @description 下载HTML为图片
+ * @param {HTMLElement} el dom元素
+ * @param {String} params 参数配置
+ * @param {String} canvasOptions html2Canvas参数配置
+ */
+export const downloadHtml2Image = async (
+    el: HTMLElement,
+    params?: {
+        type?: "png" | "jpeg";
+        name?: string;
+    },
+    canvasOptions?: Html2CanvasOptions
+) => {
+    try {
+        const { type = "png", name = "file" } = params || {};
+        const canvas = await html2Canvas(el, {
+            useCORS: true,
+            backgroundColor: "transparent",
+            ...canvasOptions,
+        });
+        const dataURL = canvas.toDataURL(`image/${type}`);
+        download(dataURL, name);
+    } catch (error: any) {
+        feedback.msgError("下载失败，请重试");
+        throw new Error(error);
+    }
+};
+
+/**
+ * @description 下载文件
+ * @param {String} url  文件url
+ * @param {String} name 下载的文件名称
+ */
+export const download = (url: string, name: string) => {
+    const aTag = document.createElement("a");
+    document.body.appendChild(aTag);
+    aTag.href = url;
+    aTag.download = name;
+    aTag.target = "_blank";
+    aTag.click();
+    aTag.remove();
+};
+
+/**
+ * @description 是否是JSON
+ * @param {string} value
+ * @return {Boolean}
+ */
+export const isJson = (value: string) => {
+    try {
+        JSON.parse(value);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};

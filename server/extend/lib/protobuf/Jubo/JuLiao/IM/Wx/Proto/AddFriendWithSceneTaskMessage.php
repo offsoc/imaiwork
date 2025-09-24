@@ -54,7 +54,13 @@ class AddFriendWithSceneTaskMessage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string Label = 7;</code>
      */
-    private $Label = '';
+    protected $Label = '';
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     */
+    protected $Permission = 0;
 
     /**
      * Constructor.
@@ -76,6 +82,8 @@ class AddFriendWithSceneTaskMessage extends \Google\Protobuf\Internal\Message
      *          任务Id
      *     @type string $Label
      *           标签
+     *     @type int $Permission
+     *          朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
      * }
      */
     public function __construct($data = NULL) {
@@ -261,6 +269,32 @@ class AddFriendWithSceneTaskMessage extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->Label = $var;
+
+        return $this;
+    }
+
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     * @return int
+     */
+    public function getPermission()
+    {
+        return $this->Permission;
+    }
+
+    /**
+     *朋友圈权限：缺省0，不看她 1 不让她看 2 仅聊天 8
+     *
+     * Generated from protobuf field <code>int32 Permission = 11;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setPermission($var)
+    {
+        GPBUtil::checkInt32($var);
+        $this->Permission = $var;
 
         return $this;
     }

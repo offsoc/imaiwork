@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
+use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatDevice;
 
 /**
  * 设备能力
@@ -106,6 +108,13 @@ trait DeviceTrait
             $this->getDeviceKey($deviceId, 'status'),
             $online ? 'online' : 'offline'
         );
+        if(!$online){
+            AiWechatDevice::where('device_code', $deviceId)->update(['device_status' => 0, 'update_time' => time()]);
+            AiWechat::where('device_code', $deviceId)->update(['wechat_status' => 0, 'update_time' => time()]);
+            $this->withChannel('wechat_socket')->withLevel('info')->withTitle('updateDeviceStatus offile')->withContext([
+                'device' => $deviceId
+            ])->log();
+        }
         if ($online) {
             $this->updateDeviceHeartbeat($deviceId);
         }

@@ -32,9 +32,7 @@
                                     @click="handlePackage(index)">
                                     <div
                                         class="flex gap-x-[6px] min-w-[180px] justify-between"
-                                        :class="[
-                                            index === packageIndex ? 'text-[#FF9500]' : 'text-[rgba(158,180,253,0.5)]',
-                                        ]">
+                                        :class="[index === packageIndex ? 'text-[#FF9500]' : 'text-[#9eb4fd80]']">
                                         <div class="font-bold text-lg flex-shrink-0 font-digital-number">
                                             ￥{{ item.price }}
                                         </div>
@@ -121,8 +119,8 @@
                         <div class="mt-4 w-[200px] h-[200px] flex items-center justify-center">
                             <template v-if="!payLoading">
                                 <template v-if="perCode">
-                                    <div class="rounded-2xl border border-token-primary p-3">
-                                        <qr-code :value="perCode" :size="180"></qr-code>
+                                    <div class="rounded-2xl border border-token-primary p-1">
+                                        <vue-qr :text="perCode" :size="180" class="rounded-[10px]" margin="12" />
                                     </div>
                                 </template>
                                 <template v-else>
@@ -299,7 +297,7 @@ import {
     useRedeemCode,
 } from "@/api/recharge";
 import { PolicyAgreementEnum } from "@/enums/appEnums";
-import QrCode from "qrcode.vue";
+import VueQr from "vue-qr/src/packages/vue-qr.vue";
 import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import { getApiUrl } from "@/utils/env";

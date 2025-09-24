@@ -1,6 +1,6 @@
 {
     "name": "imai.work",
-    "version": "2.2.3",
+    "version": "2.3.0",
     "license": "MIT",
     "scripts": {
         "init": "node initialize.js",
@@ -20,7 +20,7 @@
         "axios": "^0.27.2",
         "css-color-function": "^1.3.3",
         "echarts": "^5.3.3",
-        "element-plus": "^2.9.4",
+        "element-plus": "2.10.7",
         "github-markdown-css": "^5.2.0",
         "highlight.js": "^11.6.0",
         "markdown-it": "^13.0.1",

@@ -5,6 +5,7 @@ namespace app\api\logic\sv;
 use app\common\model\sv\SvCrawlingRecord;
 use app\common\model\sv\SvCrawlingTask;
 use app\common\model\sv\SvCrawlingTaskDeviceBind;
+use app\common\model\sv\SvAddWechatRecord;
 use think\facade\Db;
 use app\common\traits\SphTaskTrait;
 
@@ -12,6 +13,10 @@ use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
 use app\common\logic\AccountLogLogic;
 use app\common\model\user\User;
+
+use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatLog;
+use app\common\model\ChatPrompt;
 
 /**
  * CrawlingTaskLogic
@@ -33,13 +38,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             if (!is_array($device_codes) || !is_array($keywords)) {
                 throw new \Exception('参数错误');
             }
-            // $exec_device = SvCrawlingTaskDeviceBind::whereIn('device_code', $device_codes)
-            //     ->where('status', '<', 3)
-            //     ->where('user_id', self::$uid)
-            //     ->select();
-            // if (!$exec_device->isEmpty()) {
-            //     throw new \Exception('该设备已存在爬取任务，请重新选择');
-            // }
+
             $deviceCount = count($device_codes);
             $keywordCount = count($keywords);
             if ($keywordCount < $deviceCount) {
@@ -51,10 +50,18 @@ class CrawlingTaskLogic extends SvBaseLogic
             $params['name'] = date('mdHis', time()) . '视频号获客任务';
             $params['status'] = 1;
             $params['type'] = 4;
-            if(isset($params['wechat_id']) && is_array($params['wechat_id'])){
-                $params['wechat_id'] = implode(',', $params['wechat_id']);
+
+            if (isset($params['wechat_id']) && is_string($params['wechat_id'])) {
+                $params['wechat_id'] = explode(',', $params['wechat_id']);
             }
+            $params['exec_add_count'] = count($params['wechat_id'])  * ((int)$params['add_number'] ?? 0);
+
+            $params['wechat_id'] = implode(',', $params['wechat_id']);
             $params['wechat_reg_type'] = $params['wechat_reg_type'] ?? 0;
+
+            if ((int)$params['add_type'] === 1 && empty($params['wechat_id'])) {
+                throw new \Exception('请配置添加微信的客服微信');
+            }
 
             $task = SvCrawlingTask::create($params);
             //将关键词平均分配给设备
@@ -370,5 +377,263 @@ class CrawlingTaskLogic extends SvBaseLogic
         }
 
         return $assigned;
+    }
+
+
+
+    public static function sphCluesAddWechat()
+    {
+        print_r('获客加微');
+        try {
+            $records = SvAddWechatRecord::alias('r')
+                ->field('r.*, t.add_number, t.add_interval_time, t.add_friends_prompt, t.remark, t.wechat_id, t.wechat_reg_type')
+                ->join('sv_crawling_task t', 'r.crawling_task_id = t.id')
+                ->where('t.add_type', 1)
+                ->where('r.channel', 4)
+                ->where('r.status', 'in', [3, 4, 5])
+                ->where('t.wechat_id', 'not in', ['', null]) // 过滤掉wechat_id为空的记录
+                ->where('t.status', 'in', [1, 2]) // 过滤掉已完成、已暂停、已删除的任务
+                ->whereRaw('t.exec_add_count > t.completed_add_count') // 过滤掉已执行加微次数大于等于注册类型的记录
+                ->limit(100)
+                ->order('r.create_time', 'asc')
+                ->select()
+                ->toArray();
+            //print_r(Db::getLastSql());die;
+            if (empty($records)) {
+                self::setLog('线索加微记录不存在', 'add_wechat');
+                return false;
+            }
+            //print_r(Db::getLastSql());die;
+            foreach ($records as $record) {
+                $task = SvCrawlingTask::where('id', $record['crawling_task_id'])->findOrEmpty();
+                if ($task->isEmpty()) {
+                    self::setLog('线索任务不存在', 'add_wechat');
+                    continue;
+                }
+                if ($task->completed_add_count >= $task->exec_add_count) {
+                    SvAddWechatRecord::where('crawling_task_id', $record['crawling_task_id'])
+                        ->where('status', 'in', [3, 4, 5])
+                        ->update([
+                            'status' => 0,
+                            'result' => '已完成当前添加任务',
+                            'update_time' => time(),
+                        ]);
+                    self::setLog('已完成当前添加任务', 'add_wechat');
+                    continue;
+                }
+
+
+                // 处理加微逻辑
+                $wechat_ids = explode(',', $record['wechat_id']);
+                $useWechat = [];
+                foreach ($wechat_ids as $wechat_id) {
+                    //计算微信加微间隔
+                    $interval_find = AiWechatLog::where('user_id', $record['user_id'])
+                        ->where('log_type', 0)
+                        ->where('wechat_id', $wechat_id)
+                        ->where('create_time', '>', (time() - ((int)$record['add_interval_time'] * 60)))
+                        ->order('id', 'desc')
+                        ->findOrEmpty();
+                    if (!$interval_find->isEmpty()) {
+                        //self::setLog('当前微信' . $wechat_id . '加微间隔未到', 'add_wechat');
+                        continue;
+                    }
+
+                    $addCount = AiWechatLog::where('user_id', $record['user_id'])
+                        ->where('log_type', 0)
+                        ->where('wechat_id', $wechat_id)
+                        ->where('create_time', 'between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))])
+                        ->count();
+                    if ($addCount >= $record['add_number']) {
+                        //self::setLog('当前微信' . $wechat_id . '今日加微信次数已到', 'add_wechat');
+                        continue;
+                    }
+                    array_push($useWechat, $wechat_id);
+                }
+
+                if (empty($useWechat)) {
+                    //self::setLog('当前无可以使用的微信账号', 'add_wechat');
+                    SvAddWechatRecord::where('id', $record['id'])->update([
+                        'status' => 5,
+                        'result' => '冷却中，等待后可继续添加',
+                        'update_time' => time(),
+                    ]);
+                    continue;
+                }
+
+                $currentTime = time(); // 获取当前时间戳
+                $coolingThreshold = $currentTime - 1800; // 2小时前的时间戳（7200秒）
+                $wechat = AiWechat::field('*')
+                    ->where('wechat_id', 'in', $useWechat)
+                    ->where(function ($query) use ($coolingThreshold) {
+                        $query->where('is_cooling', 0)->whereOr('cooling_time', '<', $coolingThreshold);
+                    })
+                    ->where('wechat_status', 1)
+                    ->order('update_time asc')->limit(1)->findOrEmpty();
+
+                if (!$wechat->isEmpty()) {
+                    self::setLog(Db::getLastSql(), 'add_wechat');
+                    self::setLog($wechat, 'add_wechat');
+                    //$rows = SvAddWechatRecord::where('id', $record['id'])-count();
+                    self::sendChannelAddWechatMessage([
+                        'WechatId' => $wechat['wechat_id'],
+                        'DeviceCode' => $wechat['device_code'],
+                        'Phones' => $record['reg_wechat'],
+                        'message' => self::createGreetingMessage($record, $record['user_id']), //ai生成打招呼消息
+                    ], $wechat, $record);
+                } else {
+                    SvAddWechatRecord::where('id', $record['id'])->update([
+                        'status' => 3,
+                        'result' => '当前账号存在安全风险，暂停添加',
+                        'update_time' => time(),
+                    ]);
+                    //self::setLog('冷却中，等待后可继续添加', 'add_wechat');
+                    continue;
+                }
+            }
+            return true;
+        } catch (\Exception $e) {
+            self::setLog('异常信息' . $e, 'add_wechat');
+            return false;
+        }
+    }
+
+    private static function createGreetingMessage(array $task, int $user_id)
+    {
+
+        try {
+            if (empty($task['remark'])) {
+                return '';
+            }
+            $returnContent = '';
+            //获取提示词
+            $keyword = $task['add_friends_prompt'] != '' ? $task['add_friends_prompt'] : (ChatPrompt::where('prompt_name', '加好友内容')->value('prompt_text') ?? '');
+            $request = [
+                'stream' => false,
+                'model' => 'gpt-4o',
+                'messages' => [
+                    ['role' => 'system', 'content' => $keyword],
+                    [
+                        'role' => 'user',
+                        'content' => empty($task['remark']) ? '您好!' : $task['remark'],
+                    ],
+                ],
+                'user_id' => $user_id,
+                'task_id' => generate_unique_task_id(),
+                'chat_type' => AccountLogEnum::TOKENS_DEC_OPENAI_CHAT,
+                'now'       => time(),
+            ];
+            $response = \app\common\service\ToolsService::Sv()->openaiChat($request);
+            if (isset($response['code']) && $response['code'] == 10000) {
+                // 处理响应
+                $returnContent = self::_handleResponse($response, $request['model'], $request['task_id'], $user_id);
+            } else {
+                self::setLog($request['task_id'] . '队列请求失败' . json_encode($response), 'add_wechat');
+            }
+            return $returnContent;
+        } catch (\Throwable $e) {
+            self::setLog('异常信息' . $e, 'add_wechat');
+            return '';
+        }
+    }
+
+    /**
+     * 处理响应
+     * @param array $response
+     * @return string
+     */
+    private static function _handleResponse(array $response, string $model, string $task_id, int $user_id)
+
+    {
+        try {
+            $scene = 'openai_chat';
+            //检查扣费
+            $unit = TokenLogService::checkToken($user_id, $scene);
+            // 获取回复内容
+            $reply = $response['data']['message'] ?? '';
+            //计费
+            $tokens = $response['data']['usage']['total_tokens'] ?? 0;
+            if (!$reply || $tokens == 0) {
+                throw new \Exception('获取内容失败');
+            }
+
+            $response = [
+                'reply' => $reply,
+                'usage_tokens' => $response['data']['usage'] ?? [],
+            ];
+            //计算消耗tokens
+            $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
+            //token扣除
+            User::userTokensChange($user_id, $points);
+
+            $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit, '实际消耗算力' => $points, '场景' => '视频号获客加好友内容'];
+            $desc = AccountLogEnum::TOKENS_DEC_OPENAI_CHAT;
+            //扣费记录
+            AccountLogLogic::recordUserTokensLog(true, $user_id, $desc, $points, $task_id, $extra);
+
+            return $reply;
+        } catch (\Exception $e) {
+            self::setLog('异常信息' . $e, 'add_wechat');
+            return '';
+        }
+    }
+
+    private static function sendChannelAddWechatMessage(array $payload, AiWechat $wechat, array $record)
+    {
+        try {
+            //进程通信
+            $message = [
+                'DeviceId' => $payload['DeviceCode'],
+                'WeChatId' => $payload['WechatId'],
+                'Phones' => [$payload['Phones']],
+                'Message' => $payload['message'],
+                'TaskId' => $record['task_id'],
+                'Remark' => $payload['Remark'] ?? '',
+            ];
+            self::setLog($message, 'add_wechat');
+            $content = \app\common\workerman\wechat\handlers\client\AddFriendsTaskHandler::handle($message);
+            $message = new \Jubo\JuLiao\IM\Wx\Proto\TransportMessage();
+            $message->setMsgType($content['MsgType']);
+            $any = new \Google\Protobuf\Any();
+            $any->pack($content['Content']);
+            $message->setContent($any);
+            $pushMessage = $message->serializeToString();
+
+            $channel = "socket.{$payload['DeviceCode']}.message";
+            self::setLog('channel: ' . $channel, 'add_wechat');
+
+            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::publish($channel, [
+                'data' => is_array($pushMessage) ? json_encode($pushMessage) : $pushMessage
+            ]);
+            //$wechat->add_num += 1;
+            $wechat->is_cooling = 0;
+            $wechat->cooling_time = 0;
+            $wechat->update_time = time();
+            $wechat->save();
+
+            AiWechatLog::create([
+                'user_id' => $wechat->user_id,
+                'wechat_id' => $wechat->wechat_id,
+                'log_type' => 0,
+                'friend_id' => $payload['Phones'],
+                'create_time' => time()
+            ]);
+            SvAddWechatRecord::where('id', $record['id'])->update([
+                'wechat_no' => $wechat->wechat_id,
+                'wechat_name' => $wechat->wechat_nickname,
+                'status' => 2,
+                'result' => '执行中',
+                'update_time' => time(),
+            ]);
+
+            $completed_add_count = SvCrawlingTask::where('id', $record['crawling_task_id'])->value('completed_add_count');
+            SvCrawlingTask::where('id', $record['crawling_task_id'])->update([
+                'completed_add_count' => $completed_add_count + 1,
+                'update_time' => time(),
+            ]);
+        } catch (\Throwable $e) {
+            self::setLog('异常信息' . $e, 'add_wechat');
+        }
     }
 }

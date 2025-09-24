@@ -1,16 +1,13 @@
 <?php
-
 namespace app\api\controller\kb;
 
 use app\api\controller\BaseApiController;
+use app\api\logic\ChatLogic;
 use app\api\logic\kb\KbChatLogic;
-use app\api\service\KbChatService;
 use app\api\validate\kb\KbDataValidate;
 use app\common\model\kb\KbRobotPublish;
 use app\common\model\kb\KbRobotRecord;
-use app\common\service\ai\ChatService;
 use Exception;
-use JetBrains\PhpStorm\NoReturn;
 use think\db\exception\DbException;
 use think\response\Json;
 
@@ -19,85 +16,65 @@ use think\response\Json;
  */
 class ChatController extends BaseApiController
 {
-     public array $notNeedLogin = ['chat', 'chatRecord', 'chatClean', 'test', 'feedback', 'getUniqueId'];
+    public array $notNeedLogin = ['chat', 'chatRecord', 'chatClean', 'test', 'feedback', 'getUniqueId'];
 
     /**
      * @notes 机器人对话
      * @throws Exception
      * @author fzr
      */
-    #[NoReturn]
-    public function chat()
+    public function chat(): Json
     {
         $apiKey   = $this->request->header('Authorization');
         $identity = $this->request->header('identity');
         $headers  = $this->request->header();
         $post     = $this->request->post();
 
-        $stream = (bool) ($post['stream']??'');
         $uniqueId = $post['unique_id'] ?? '';
-        try {
-            // 问题兼容处理
-            $question = $post['question']??'';
-            if (!empty($post['messages'])) {
-                $question = $post['messages'][count($post['messages']) -1]['content'];
-                $post['question'] = $question;
-            }
+        // 问题兼容处理
+        $question = $post['question'] ?? '';
 
-            if ($apiKey) {
-                // 对接微信时的密钥处理
-                $keys   = explode(" ", $apiKey);
-                $apiKey = count($keys) >= 2 ? $keys[1] : $keys[0];
+        if (!$apiKey) {
+            throw new Exception('apiKey不能为空!');
+        }
 
-                // 查发布渠道
-                $modelKbRobotPublish = new KbRobotPublish();
-                $publish = $modelKbRobotPublish->where(['apikey'=>$apiKey])->findOrEmpty()->toArray();
-                if (!$publish) {
-                    throw new Exception('apiKey校验不通过!');
-                }
+            // 对接微信时的密钥处理
+            $keys   = explode(" ", $apiKey);
+            $apiKey = count($keys) >= 2 ? $keys[1] : $keys[0];
 
-                // 验证密码
-                if ($publish['secret']) {
-                    if ($publish['secret'] !== ($headers['password']??'')) {
-                        throw new Exception('访问密码错误!', 1200);
-                    }
-                }
+        // 查发布渠道
+        $modelKbRobotPublish = new KbRobotPublish();
+        $publish             = $modelKbRobotPublish->where(['apikey' => $apiKey])->findOrEmpty()->toArray();
+        if (!$publish) {
+            throw new Exception('apiKey校验不通过!');
+        }
 
-                // 验证限制
-                $this->checkShareChat($publish, $identity);
-
-                // 对话参数
-                $chatParams = [
-                    'apiKey'      => $apiKey,
-                    'identity'    => $identity,
-                    'question'    => $question,
-                    'share_id'    => intval($publish['id']),
-                    'robot_id'    => intval($publish['robot_id']),
-                    'context_num' => intval($publish['context_num']),
-                    'unique_id'   => $uniqueId,
-                    'files'       => $post['files'] ?? [],
-                ];
-
-                $result = (new KbChatService($chatParams, $publish['user_id'], $stream))->chat();
-                return json($result);
-            } else {
-                if (!$this->userId) {
-                    throw new Exception('请先登录');
-                }
-                
-                $result = (new KbChatService($post, $this->userId, $stream))->chat();
-                if (!$stream) {
-                    return json($result);
-                }
-            }
-        } catch (Exception $e) {
-            $result = ChatService::parseReturnError($stream, $e->getMessage(), $e->getCode());
-            if (!$stream) {
-                return json($result);
+        // 验证密码
+        if ($publish['secret']) {
+            if ($publish['secret'] !== ($headers['password'] ?? '')) {
+                throw new Exception('访问密码错误!', 1200);
             }
         }
 
-        exit;
+            // 验证限制
+            $this->checkShareChat($publish, $identity);
+
+            // 对话参数
+            $chatParams = [
+                'apiKey'      => $apiKey,
+                'identity'    => $identity,
+                'question'    => $question,
+                'share_id'    => intval($publish['id']),
+                'robot_id'    => intval($publish['robot_id']),
+                'context_num' => intval($publish['context_num']),
+                'unique_id'   => $uniqueId,
+                'files'       => $post['files'] ?? [],
+
+                'message' => $question,
+                'task_id' => $uniqueId,
+            ];
+
+        return ChatLogic::generalChat($chatParams) ? $this->data(ChatLogic::getReturnData()) : $this->fail(ChatLogic::getError());
     }
 
     /**
@@ -314,34 +291,34 @@ class ChatController extends BaseApiController
     private function checkShareChat(array $publish, $identity): void
     {
         $modelKbRobotRecord = new KbRobotRecord();
-        $limitTotalChat = $publish['limit_total_chat'];
-        $limitTodayChat = $publish['limit_today_chat'];
-        $limitExceedErr = $publish['limit_exceed'];
+        $limitTotalChat     = $publish['limit_total_chat'];
+        $limitTodayChat     = $publish['limit_today_chat'];
+        $limitExceedErr     = $publish['limit_exceed'];
 
         // 验证: 限制每个用户累计总对话数
         if ($limitTotalChat) {
             $totalChatCount = $modelKbRobotRecord
-                ->where(['robot_id'=>$publish['robot_id']])
-                ->where(['share_id'=>$publish['id']])
-                ->where(['share_identity'=>$identity])
+                ->where(['robot_id' => $publish['robot_id']])
+                ->where(['share_id' => $publish['id']])
+                ->where(['share_identity' => $identity])
                 ->count();
 
             if ($totalChatCount >= $limitTotalChat) {
-                throw new Exception($limitExceedErr?:'超出累计限制对话数');
+                throw new Exception($limitExceedErr ?: '超出累计限制对话数');
             }
         }
 
         // 验证: 限制每个用户累计总对话数
         if ($limitTodayChat) {
             $todayChatCount = $modelKbRobotRecord
-                ->where(['robot_id'=>$publish['robot_id']])
-                ->where(['share_id'=>$publish['id']])
-                ->where(['share_identity'=>$identity])
+                ->where(['robot_id' => $publish['robot_id']])
+                ->where(['share_id' => $publish['id']])
+                ->where(['share_identity' => $identity])
                 ->whereDay('create_time')
                 ->count();
 
             if ($todayChatCount >= $limitTotalChat) {
-                throw new Exception($limitExceedErr?:'超出每天限制对话数');
+                throw new Exception($limitExceedErr ?: '超出每天限制对话数');
             }
         }
     }

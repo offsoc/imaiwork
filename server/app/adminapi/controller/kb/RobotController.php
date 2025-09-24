@@ -4,8 +4,8 @@
 namespace app\adminapi\controller\kb;
 
 use app\adminapi\controller\BaseAdminController;
+use app\adminapi\lists\kb\ChatLists;
 use app\adminapi\lists\kb\KbRobotLists;
-use app\adminapi\lists\kb\KbRobotShareLogLists;
 use app\adminapi\logic\kb\KbRobotLogic;
 use app\adminapi\validate\IDMustValidate;
 use think\response\Json;
@@ -23,6 +23,45 @@ class RobotController extends BaseAdminController
     public function lists(): Json
     {
         return $this->dataLists((new KbRobotLists()));
+    }
+
+    /**
+     * @desc 会话列表
+     * @return Json
+     */
+    public function chatLists()
+    {
+        return $this->dataLists(new ChatLists());
+    }
+
+    /**
+     * @notes 机器人新增
+     * @return Json
+     * @author kb
+     */
+    public function add(): Json
+    {
+        $post    = $this->request->post();
+        $results = KbRobotLogic::add($post);
+        if ($results === false) {
+            return $this->fail(KbRobotLogic::getError());
+        }
+        return $this->success('创建成功', $results);
+    }
+
+    /**
+     * @notes 机器人编辑
+     * @return Json
+     * @author kb
+     */
+    public function edit(): Json
+    {
+        $params  = $this->request->post();
+        $results = KbRobotLogic::edit($params);
+        if ($results === false) {
+            return $this->fail(KbRobotLogic::getError());
+        }
+        return $this->success('编辑成功');
     }
 
     /**
@@ -47,8 +86,10 @@ class RobotController extends BaseAdminController
     public function del(): Json
     {
         (new IDMustValidate())->post()->goCheck();
-        $id = intval($this->request->post('id'));
-
+        $id = $this->request->post('id');
+        if (is_string($id)) {
+            $id = explode(',', $id);
+        }
         $result = KbRobotLogic::del($id);
         if ($result === false) {
             return $this->fail(KbRobotLogic::getError());
@@ -121,6 +162,22 @@ class RobotController extends BaseAdminController
         return $this->success('删除成功', [], 1, 1);
     }
 
-
+    /**
+     * @notes 机器人删除
+     * @return Json
+     * @author kb
+     */
+    public function deleteChatLog(): Json
+    {
+        $id     = $this->request->post('id');
+        if (is_string($id)) {
+            $id = explode(',', $id);
+        }
+        $result = KbRobotLogic::deleteChatLog($id);
+        if ($result === false) {
+            return $this->fail(KbRobotLogic::getError());
+        }
+        return $this->success('删除成功', [], 1, 1);
+    }
 
 }

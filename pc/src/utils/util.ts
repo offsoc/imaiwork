@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import html2Canvas, { Html2CanvasOptions } from "./html2canvas";
 
 /**
  * @description 添加单位
@@ -186,11 +187,16 @@ export function replaceState(newParams: any): void {
 
     // 添加或替换查询参数
     for (const [key, value] of Object.entries(newParams)) {
-        // @ts-ignore
-        searchParams.set(key, value);
+        if (value === null || value === undefined || value === "") {
+            searchParams.delete(key);
+        } else {
+            searchParams.set(key, String(value));
+        }
     }
+
+    const newSearch = searchParams.toString();
     // 构造新的 URL 并替换
-    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+    const newUrl = newSearch ? `${window.location.pathname}?${newSearch}` : window.location.pathname;
     window.history.replaceState(null, null, newUrl);
 }
 
@@ -365,4 +371,60 @@ export const getVideoFirstFrame = (
 
         video.load();
     });
+};
+
+/**
+ * @param url 图片地址
+ * @param filename 文件名
+ * @returns File
+ */
+
+export const urlToFile = async (url: string, filename: string): Promise<File> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+};
+
+/**
+ * @description 下载HTML为图片
+ * @param {HTMLElement} el dom元素
+ * @param {String} params 参数配置
+ * @param {String} canvasOptions html2Canvas参数配置
+ */
+export const downloadHtml2Image = async (
+    el: HTMLElement,
+    params?: {
+        type?: "png" | "jpeg";
+        name?: string;
+    },
+    canvasOptions?: Html2CanvasOptions
+) => {
+    try {
+        const { type = "png", name = "file" } = params || {};
+        const canvas = await html2Canvas(el, {
+            useCORS: true,
+            backgroundColor: "transparent",
+            ...canvasOptions,
+        });
+        const dataURL = canvas.toDataURL(`image/${type}`);
+        download(dataURL, name);
+    } catch (error: any) {
+        feedback.msgError("下载失败，请重试");
+        throw new Error(error);
+    }
+};
+
+/**
+ * @description 下载文件
+ * @param {String} url  文件url
+ * @param {String} name 下载的文件名称
+ */
+export const download = (url: string, name: string) => {
+    const aTag = document.createElement("a");
+    document.body.appendChild(aTag);
+    aTag.href = url;
+    aTag.download = name;
+    aTag.target = "_blank";
+    aTag.click();
+    aTag.remove();
 };

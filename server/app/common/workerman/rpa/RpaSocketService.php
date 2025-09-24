@@ -570,14 +570,9 @@ class RpaSocketService
                 'port'        => env('redis.PORT', 6379),
                 'password'    => env('redis.PASSWORD', '123456'),
                 'database'      => env('redis.WS_SELECT', 8),
-                'timeout'     => 0,
-                'pool' => [
-                    'max_connections' => 5,
-                    'min_connections' => 1,
-                    'wait_timeout' => 3,
-                    'idle_timeout' => 60,
-                    'heartbeat_interval' => 50,
-                ],
+                'timeout'     => 2,
+                'persistent' => true,   // 启用持久连接
+                'read_write_timeout' => 0, // 读写超时（0为无限）
             ]);
         }
     }
