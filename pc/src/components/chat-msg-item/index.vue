@@ -26,7 +26,7 @@
                         <div>
                             <ElTooltip content="查看">
                                 <a :href="file.url" target="_blank"
-                                    ><Icon name="el-icon-Download" size="18" color="#ffffff"></Icon
+                                    ><Icon name="el-icon-View" size="18" color="#ffffff"></Icon
                                 ></a>
                             </ElTooltip>
                         </div>

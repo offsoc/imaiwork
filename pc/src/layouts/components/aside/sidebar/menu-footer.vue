@@ -15,25 +15,29 @@
                 ],
             }">
             <template #reference>
-                <div class="flex items-center !h-11 px-[10px] cursor-pointer bg-app-bg-1 rounded-lg">
-                    <span
-                        class="flex-shrink-0 flex items-center justify-center rounded w-5 h-5 shadow-[0px_0px_0px_1px_rgba(255,255,255,0.1)]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <rect opacity="0.1" x="0.5" y="0.5" width="19" height="19" rx="3.5" stroke="white" />
+                <div class="flex items-center !h-11 px-[10px] cursor-pointer rounded-lg">
+                    <span class="flex-shrink-0 flex items-center justify-center rounded w-5 h-5 bg-[#F1F1F1]">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink"
+                            width="8"
+                            height="12"
+                            viewBox="0 0 8 12"
+                            fill="none">
                             <path
-                                d="M12 4C13.1046 4 14 4.89543 14 6V14C14 15.1046 13.1046 16 12 16H8C6.89543 16 6 15.1046 6 14V6C6 4.89543 6.89543 4 8 4H12ZM10 12C9.44772 12 9 12.4477 9 13C9 13.5523 9.44772 14 10 14C10.5523 14 11 13.5523 11 13C11 12.4477 10.5523 12 10 12Z"
-                                fill="white" />
+                                d="M6 0L2 0C0.895431 0 0 0.895431 0 2L0 10C0 11.1046 0.895431 12 2 12L6 12C7.10457 12 8 11.1046 8 10L8 2C8 0.895431 7.10457 0 6 0ZM4 10C4.55228 10 5 9.55228 5 9C5 8.44771 4.55228 8 4 8C3.44772 8 3 8.44771 3 9C3 9.55228 3.44772 10 4 10Z"
+                                fill-rule="evenodd"
+                                style="mix-blend-mode: normal"
+                                fill="#000000"></path>
                         </svg>
                     </span>
-                    <span class="ml-3 text-white font-bold">下载客户端</span>
+                    <span class="ml-3">下载客户端</span>
                 </div>
             </template>
             <div>
                 <div class="mb-3">
                     <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46" fill="none">
-                        <rect width="46" height="46" rx="10" fill="#202020" />
                         <rect x="0.5" y="0.5" width="45" height="45" rx="9.5" stroke="white" stroke-opacity="0.1" />
-                        <rect x="4" y="4" width="38" height="38" rx="6" fill="url(#paint0_linear_1078_45410)" />
                         <mask
                             id="mask0_1078_45410"
                             style="mask-type: alpha"

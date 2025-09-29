@@ -19,7 +19,7 @@
         "ignoreDevUnusedFiles": true,
         "bigPackageSizeSupport": true
     },
-    "libVersion": "3.8.9",
+    "libVersion": "latest",
     "condition": {
         "miniprogram": {
             "list": [
@@ -27,8 +27,8 @@
                     "name": "ai_modules/interview/pages/interview_detail/interview_detail",
                     "pathName": "ai_modules/interview/pages/interview_detail/interview_detail",
                     "query": "id=108",
-                    "scene": null,
-                    "launchMode": "default"
+                    "launchMode": "default",
+                    "scene": null
                 },
                 {
                     "name": "ai_modules/interview/pages/index/index",

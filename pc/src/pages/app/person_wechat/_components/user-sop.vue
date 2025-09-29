@@ -121,9 +121,9 @@ import dayjs from "dayjs";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import { MaterialTypeEnum } from "../_enums";
-import MiniProgramCard from "../_components/mini-program-card.vue";
-import LinkCard from "../_components/link-card.vue";
-import FileCard from "../_components/file-card.vue";
+import MiniProgramCard from "./mini-program-card.vue";
+import LinkCard from "./link-card.vue";
+import FileCard from "./file-card.vue";
 const props = defineProps<{
     list: any;
 }>();

@@ -27,7 +27,7 @@
                         <div class="w-[1px] h-3 bg-[#0000001a]"></div>
                         <div
                             class="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center cursor-pointer bg-primary"
-                            @click.stop="emit('delete', item.id)">
+                            @click.stop="emit('delete', item)">
                             <Icon name="el-icon-Close" color="#ffffff" size="10"></Icon>
                         </div>
                     </div>
@@ -52,7 +52,9 @@
                 </ElButton>
             </div>
             <div class="mt-2">
-                <ElButton class="w-full !h-[50px] !rounded-xl" @click="emit('delete')">清除对话</ElButton>
+                <ElButton class="w-full !h-[50px] !rounded-xl" :disabled="isReceiving" @click="emit('delete')"
+                    >清除对话</ElButton
+                >
             </div>
         </div>
     </div>

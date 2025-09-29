@@ -317,7 +317,7 @@ class ChatController extends BaseApiController
                 ->whereDay('create_time')
                 ->count();
 
-            if ($todayChatCount >= $limitTotalChat) {
+            if ($todayChatCount >= $limitTodayChat) {
                 throw new Exception($limitExceedErr ?: '超出每天限制对话数');
             }
         }

@@ -25,7 +25,7 @@
 			}
 		},
 		{
-			"path": "pages/assistant/assistant",
+			"path": "pages/agent/agent",
 			"style": {
 				"navigationBarTitleText": "",
 				"enablePullDownRefresh": false,
@@ -85,18 +85,6 @@
 		{
 			"root": "packages",
 			"pages": [
-				{
-					"path": "pages/robot_cate/robot_cate",
-					"style": {
-						"navigationBarTitleText": "",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom",
-						"disableScroll": true
-					},
-					"meta": {
-						"share": true
-					}
-				},
 				{
 					"path": "pages/robot_chat/robot_chat",
 					"style": {
@@ -181,26 +169,6 @@
 					}
 				},
 				{
-					"path": "pages/app_detail/app_detail",
-					"style": {
-						"navigationStyle": "custom",
-						"enablePullDownRefresh": false,
-						"disableScroll": true
-					},
-					"meta": {
-						"share": true
-					}
-				},
-				{
-					"path": "pages/service/service",
-					"style": {
-						"navigationBarTitleText": "客服"
-					},
-					"meta": {
-						"share": true
-					}
-				},
-				{
 					"path": "pages/redeem/redeem",
 					"style": {
 						"navigationBarTitleText": "充值",
@@ -230,6 +198,12 @@
 					"name": "404",
 					"meta": {
 						"white": true
+					}
+				},
+				{
+					"path": "pages/choose_file/choose_file",
+					"style": {
+						"navigationBarTitleText": "选择文件"
 					}
 				}
 			]

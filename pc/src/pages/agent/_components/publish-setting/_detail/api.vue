@@ -35,7 +35,7 @@
                 <ElTableColumn label="最后使用时间" prop="use_time" width="160"></ElTableColumn>
                 <ElTableColumn label="操作" width="200">
                     <template #default="{ row }">
-                        <!-- <ElButton type="primary" link @click="handleSetting(row)"> 用量设置 </ElButton> -->
+                        <ElButton type="primary" link @click="handleSetting(row)"> 用量设置 </ElButton>
                         <ElButton type="danger" link @click="handleDelete(row)"> 删除 </ElButton>
                     </template>
                 </ElTableColumn>

@@ -175,6 +175,9 @@ on("message", async (data: any) => {
     if (MsgType === MsgTypeEnum.FriendPushNotice) {
         await handleFriendPush(Content);
     }
+    if (MsgType == MsgTypeEnum.WeChatOfflineNotice || MsgType == MsgTypeEnum.WeChatOnlineNotice) {
+        getLists();
+    }
 });
 
 // 监听需要前置授权的动作回调

@@ -17,8 +17,8 @@ button::after {
 }
 
 .safe-area {
-    padding-bottom: calc(constant(safe-area-inset-bottom) - 40rpx);
-    padding-bottom: calc(env(safe-area-inset-bottom) - 40rpx);
+    padding-bottom: calc(constant(safe-area-inset-bottom) + 20rpx);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20rpx);
 }
 
 .index-bg {
@@ -226,5 +226,22 @@ button::after {
     }
     to {
         left: 100%;
+    }
+}
+
+.zp-l-text-rpx {
+    font-size: 26rpx !important;
+}
+
+.rotation {
+    @apply w-8 h-8 border-[5px] border-dotted border-white rounded-full inline-block mb-4;
+    animation: rotation 3s linear infinite;
+}
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
     }
 }

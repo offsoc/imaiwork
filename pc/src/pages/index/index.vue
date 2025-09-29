@@ -79,6 +79,7 @@ const contentPost = (text: string) => {
     sendMessage(text);
     clear();
     chatStore.clearFiles();
+    chattingRef.value?.cleanInput();
 };
 
 watch(

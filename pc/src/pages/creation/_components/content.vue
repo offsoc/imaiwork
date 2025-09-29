@@ -40,7 +40,7 @@
                                     {{ item.scene_name }}
                                 </div>
                                 <div class="line-clamp-3 grow">
-                                    {{ item.message }}
+                                    {{ item.message || item.file_info.name }}
                                 </div>
                                 <div class="text-tx-primary text-sm">
                                     {{ item.create_time }}
@@ -136,11 +136,11 @@ const visibleChange = (flag: boolean, id: number) => {
 };
 
 const handleRecord = (row: any) => {
-    const { assistant_id, task_id } = row;
+    const { assistant_id, task_id, robot_id, robot_name } = row;
     if (assistant_id == 0) {
-        router.push(`/?task_id=${task_id}`);
+        router.push(`/?task_id=${task_id}&agent_id=${robot_id}&agent_name=${robot_name}`);
     } else {
-        router.push(`/robot/chat?task_id=${task_id}&id=${assistant_id}`);
+        feedback.msgWarning("相关助理已经暂停使用啦~");
     }
 };
 

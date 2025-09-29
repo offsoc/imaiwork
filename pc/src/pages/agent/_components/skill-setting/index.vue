@@ -114,6 +114,9 @@
                                         <Icon name="el-icon-Plus" :size="12"> </Icon>
                                     </div>
                                 </template>
+                                <div class="flex justify-end gap-x-3 mb-2">
+                                    <ElButton type="primary" @click="handleImportKeywords()">批量导入</ElButton>
+                                </div>
                                 <div class="border border-[var(--el-border-color-lighter)] rounded-lg">
                                     <ElTable
                                         v-loading="pager.loading"
@@ -177,12 +180,20 @@
         ref="workflowEditRef"
         @close="showWorkflow = false"
         @success="getWorkFlowSuccess" />
+    <import-data
+        v-if="showImportKeywords"
+        ref="importKeywordsRef"
+        title="批量导入关键词"
+        :agent-id="props.agentId"
+        @close="showImportKeywords = false"
+        @success="getLists" />
 </template>
 
 <script setup lang="ts">
 import { robotKeywordsLists, deleteRobotKeywords } from "@/api/agent";
 import KeywordsEdit from "./keywords-edit.vue";
 import WorkflowEdit from "./workflow-edit.vue";
+import ImportData from "../import-data.vue";
 import { Agent } from "../../_enums";
 
 /**
@@ -289,6 +300,17 @@ const handleKeywordsDelete = async (id: number) => {
             }
         },
     });
+};
+
+/**
+ * @description 批量导入关键词
+ */
+const showImportKeywords = ref(false);
+const importKeywordsRef = shallowRef<InstanceType<typeof ImportData>>();
+const handleImportKeywords = async () => {
+    showImportKeywords.value = true;
+    await nextTick();
+    importKeywordsRef.value?.open();
 };
 
 /**

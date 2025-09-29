@@ -10,6 +10,11 @@
 
     .el-form-item {
         --font-size: var(--el-font-size-base);
+        align-items: center;
+        .el-form-item__label {
+            line-height: initial;
+            align-items: center;
+        }
     }
 
     .el-select__wrapper {

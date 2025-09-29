@@ -7,10 +7,10 @@
             <files-card
                 show-del-icon
                 :uid="item.uid"
-                :name="item.file.name"
+                :name="item.name"
                 :percent="item.progress"
                 :status="item.status"
-                :file-size="item.file.size"
+                :file-size="item.size"
                 :url="item.url"
                 @delete="del"></files-card>
         </div>

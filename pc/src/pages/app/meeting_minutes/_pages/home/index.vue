@@ -48,7 +48,7 @@
                                         <template #default="{ row }">
                                             <div class="flex items-center gap-4">
                                                 <div
-                                                    class="bg-[#edecff] rounded"
+                                                    class="bg-[#edecff] rounded flex-shrink-0"
                                                     v-if="
                                                         row.status == TurnStatus.ING || row.status == TurnStatus.WAITING
                                                     ">
@@ -56,7 +56,7 @@
                                                         src="../../_assets/images/audio_transform.gif"
                                                         class="w-9 h-9" />
                                                 </div>
-                                                <div class="text-base">
+                                                <div class="text-base overflow-hidden text-ellipsis whitespace-nowrap">
                                                     {{ formatName(row.name) }}
                                                 </div>
                                             </div>

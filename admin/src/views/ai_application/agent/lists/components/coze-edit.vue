@@ -66,7 +66,7 @@
                     <el-form-item label="输出方式">
                         <el-radio-group v-model="formData.stream">
                             <el-radio label="流式输出" :value="1"></el-radio>
-                            <el-radio label="直接返回" :value="2"></el-radio>
+                            <el-radio label="直接返回" :value="0"></el-radio>
                         </el-radio-group>
                     </el-form-item>
                     <el-form-item label="扣费方式">

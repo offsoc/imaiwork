@@ -306,3 +306,17 @@ export const setFormData = (data: Record<any, any>, sourceData: Record<any, any>
         }
     }
 };
+
+/**
+ * @description 是否是JSON
+ * @param {string} value
+ * @return {Boolean}
+ */
+export const isJson = (value: string) => {
+    try {
+        JSON.parse(value);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};

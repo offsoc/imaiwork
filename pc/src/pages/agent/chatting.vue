@@ -56,7 +56,8 @@ const {
     chatRecordPager,
     currentRecordId,
     loadRecordMore,
-    handleSelectRecord,
+    resetChatRecordPager,
+    handleSelectRecord: selectRecord,
     handleCreateRecord,
     handleDeleteRecord,
 } = useAgentManager();
@@ -79,19 +80,22 @@ const chatComponent = computed(() => {
 });
 
 // 处理新对话创建
-const handleNewConversation = (record: any) => {
-    // 将新对话添加到记录列表顶部
-    if (!chatRecordPager.lists.some((item) => item.id === record.id)) {
-        chatRecordPager.lists.unshift(record);
-    }
+const handleNewConversation = async (record: any) => {
+    await resetChatRecordPager();
     // 更新URL和当前选中ID
-    handleSelectRecord(record);
+    selectRecord(record);
 };
 
 // 处理Coze对话ID变更
 const handleConversationIdChange = (newId: string) => {
     currentRecordId.value = newId;
-    const query = { ...route.query, conversation_id: newId };
-    router.replace({ query });
+};
+
+const handleSelectRecord = (record: any) => {
+    if (isReceiving.value) {
+        feedback.msgWarning("正在接收消息，请稍后再试~");
+        return;
+    }
+    selectRecord(record);
 };
 </script>

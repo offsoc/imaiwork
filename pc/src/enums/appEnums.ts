@@ -269,3 +269,9 @@ export const appKeyNameMap: Record<AppKeyEnum, string> = {
     [AppKeyEnum.DRAW_VIDEO]: "AI视频",
     [AppKeyEnum.DRAW_IMAGE]: "AI智能生图",
 };
+
+// 模型ID
+export enum ModelIdEnum {
+    DEEPSEEK_R1 = 4,
+    GPT_4O = 2,
+}

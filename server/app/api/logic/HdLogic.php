@@ -6,10 +6,10 @@ use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
 use app\common\logic\AccountLogLogic;
 use app\common\model\hd\HdImage;
+use app\common\model\hd\HdImageCases;
 use app\common\model\hd\HdLog;
 use app\common\model\user\User;
 use app\common\service\FileService;
-use app\common\model\hd\HdImageCases;
 use think\facade\Log;
 
 
@@ -242,6 +242,28 @@ class HdLogic extends ApiLogic
             'result_image'  => FileService::setFileUrl($params['result_image']),
         ];
         HdImageCases::create($data);
+        return true;
+    }
+
+
+    /**
+     * @desc 删除模特案例
+     * @param $params
+     * @return bool
+     * @date 2024/12/25 15:50
+     * @author dagouzi
+     */
+    public static function delModelCase($params)
+    {
+        $image = HdImageCases::where(['id' => $params['id'], 'user_id' => self::$uid])->findOrEmpty();
+        if ($image->isEmpty()) {
+            return false;
+        }
+        if (is_string($params['id'])) {
+            HdImageCases::destroy(['id' => $params['id'], 'user_id' => self::$uid]);
+        } else {
+            HdImageCases::whereIn('id', $params['id'])->where('user_id', self::$uid)->select()->delete();
+        }
         return true;
     }
 

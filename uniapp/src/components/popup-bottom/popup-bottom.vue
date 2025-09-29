@@ -82,20 +82,24 @@ const showPopup = computed({
 });
 
 // 记录触摸起始位置
+let startX = 0;
 let startY = 0;
 
 const handleTouchStart = (event: TouchEvent) => {
     if (props.isDisabledTouch) return;
+    startX = event.touches[0].clientX;
     startY = event.touches[0].clientY;
 };
 
 const handleTouchEnd = (event: TouchEvent) => {
     if (props.isDisabledTouch) return;
+    const endX = event.changedTouches[0].clientX;
     const endY = event.changedTouches[0].clientY;
+    const deltaX = endX - startX;
     const deltaY = endY - startY;
 
-    // 如果向下滑动距离超过50px，则关闭弹框
-    if (deltaY > 50) {
+    // 如果向下滑动距离超过50px，并且主要是在Y轴上滑动，则关闭弹框
+    if (deltaY > 50 && Math.abs(deltaY) > Math.abs(deltaX)) {
         closePopup();
     }
 };

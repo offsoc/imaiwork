@@ -12,15 +12,17 @@
                         <text-item :type="1" :is-markdown="isMarkdown" :content="content" />
                     </view>
                 </view>
-                <view class="flex flex-col gap-2 mt-2 max-w-[65%] ml-auto" v-if="fileLists.length">
-                    <view v-for="(file, index) in fileLists">
-                        <file-item :item="file" :show-del="false">
-                            <template #image="{ url }">
-                                <view class="h-[400rpx]">
-                                    <image :src="url" mode="aspectFill" class="h-full"></image>
-                                </view>
-                            </template>
-                        </file-item>
+                <view class="gap-2 mt-2 flex justify-end" v-if="fileList.length">
+                    <view class="flex flex-col">
+                        <view v-for="(file, index) in fileList" class="" :key="index">
+                            <file-item :item="file" :show-del="false">
+                                <template #image="{ url }">
+                                    <view class="h-[400rpx]">
+                                        <image :src="url" mode="aspectFill" class="h-full"></image>
+                                    </view>
+                                </template>
+                            </file-item>
+                        </view>
                     </view>
                 </view>
             </view>
@@ -68,7 +70,6 @@
 
 <script lang="ts" setup>
 import { useCopy } from "@/hooks/useCopy";
-import { useLockFn } from "@/hooks/useLockFn";
 import { useUserStore } from "@/stores/user";
 import { useAppStore } from "@/stores/app";
 import TextItem from "./text-item.vue";
@@ -83,7 +84,7 @@ const props = withDefaults(
         loading?: boolean;
         index?: number;
         avatar?: string;
-        fileLists: any[];
+        fileList?: any[];
         consumeTokens?: any;
         reasoningContent?: string;
         isReasoningFinished?: boolean;
@@ -93,7 +94,7 @@ const props = withDefaults(
         content: "",
         loading: false,
         isMarkdown: false,
-        fileLists: () => [],
+        fileList: () => [],
         consumeTokens: null,
         reasoningContent: "",
         isReasoningFinished: false,

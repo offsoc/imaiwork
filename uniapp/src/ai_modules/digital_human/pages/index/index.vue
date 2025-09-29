@@ -1,226 +1,154 @@
 <template>
-    <view class="min-h-screen bg-white pb-[100rpx]">
-        <view class="fixed top-0 left-0 right-0 z-50">
-            <u-navbar
-                :is-fixed="false"
-                :border-bottom="false"
-                :background="{
-                    background: 'transparent',
-                }">
-            </u-navbar>
-        </view>
-        <view class="relative w-full h-[642rpx]">
-            <image src="@/ai_modules/digital_human/static/images/home/bg.png" class="w-full h-full"></image>
-            <navigator
-                hover-class="none"
-                url="/ai_modules/digital_human/pages/video_create/video_create"
-                class="absolute bottom-[-70rpx] w-full flex justify-center">
-                <u-button
-                    type="primary"
-                    shape="circle"
-                    :custom-style="{
-                        width: '460rpx',
-                        height: '104rpx',
-                    }">
-                    <view class="flex items-center gap-2">
-                        <image
-                            src="@/ai_modules/digital_human/static/icons/tip.svg"
-                            class="w-[48rpx] h-[48rpx]"></image>
-                        <text class="text-[32rpx] font-bold">创作数字人视频</text>
+    <view class="h-screen flex flex-col bg-[#11212E]">
+        <u-navbar
+            :is-fixed="false"
+            :border-bottom="false"
+            :background="{
+                background: '#11212E',
+            }"
+            back-icon-color="#ffffff">
+        </u-navbar>
+        <view class="py-[32rpx] grow min-h-0">
+            <scroll-view scroll-y class="h-full">
+                <view class="px-[32rpx]">
+                    <image
+                        src="@/ai_modules/digital_human/static/images/home/banner.png"
+                        class="w-full h-[334rpx]"></image>
+                    <view
+                        class="mt-[30rpx] h-[144rpx] rounded-[12rpx] px-[42rpx] flex items-center justify-between"
+                        style="background: linear-gradient(154deg, #4efe99 0%, #0fe0eb 100%)"
+                        @click="handleCreateVideo">
+                        <view class="text-[36rpx] font-bold">创作数字人视频</view>
+                        <view class="bg-black rounded-full w-[48rpx] h-[48rpx] flex items-center justify-center">
+                            <u-icon name="plus" color="#ffffff" size="24"></u-icon>
+                        </view>
                     </view>
-                </u-button>
-            </navigator>
-        </view>
-        <view class="mt-[140rpx] px-4">
-            <view class="grid grid-cols-2 gap-[30rpx]">
-                <view class="w-full" v-for="(item, index) in menuLists" :key="index" @click="handleMenu(item)">
-                    <image :src="item.icon" class="h-[152rpx] w-full"></image>
-                </view>
-            </view>
-        </view>
-        <view class="mt-4 px-4">
-            <view class="flex items-center justify-between">
-                <view class="flex items-center gap-2">
-                    <view class="bg-primary w-[6rpx] h-[24rpx]"> </view>
-                    <text class="font-bold text-xl">我的作品</text>
-                </view>
-                <navigator
-                    url="/ai_modules/digital_human/pages/video_works/video_works"
-                    class="flex items-center text-[#A7A7A7]"
-                    hover-class="none">
-                    更多
-                    <u-icon name="arrow-right" color="#A7A7A7" size="28"></u-icon>
-                </navigator>
-            </view>
-            <view class="mt-4">
-                <view class="grid grid-cols-2 gap-2" v-if="pager.lists.length">
-                    <view class="h-[486rpx]" v-for="(item, index) in pager.lists" :key="index">
-                        <video-item
-                            show-more
-                            :item="{
-                                id: item.id,
-                                name: item.name,
-                                pic: item.pic,
-                                video_url: item.result_url,
-                                clip_video_url: item.clip_result_url,
-                                status: item.status,
-                                remark: item.remark,
-                                model_version: item.model_version,
-                                automatic_clip: item.automatic_clip,
-                                clip_status: item.clip_status,
-                            }"
-                            @retry="handleRetry"
-                            @play="handlePlayVideo"
-                            @delete="handleDelete"
-                            @download="saveVideoToPhotosAlbum($event)"></video-item>
+                    <view class="mt-[64rpx]">
+                        <view class="grid grid-cols-4 gap-x-3 gap-y-8">
+                            <view
+                                v-for="(menu, index) in menuLists"
+                                :key="index"
+                                class="flex flex-col items-center relative"
+                                @click="handleMenuClick(menu.key)">
+                                <image :src="menu.icon" class="w-[64rpx] h-[64rpx]"></image>
+                                <view class="text-center text-white font-bold mt-[32rpx]">{{ menu.label }}</view>
+                                <view v-if="menu.is_new" class="absolute right-[26rpx] top-[-22rpx]">
+                                    <view
+                                        class="text-[16rpx] rounded p-[4rpx]"
+                                        style="background: linear-gradient(90deg, #47d59f 0%, #37cced 100%)">
+                                        最新
+                                    </view>
+                                </view>
+                                <view v-if="menu.is_wait" class="absolute right-[26rpx] top-[-22rpx]">
+                                    <view
+                                        class="text-[16rpx] rounded p-[4rpx]"
+                                        style="background: linear-gradient(129.1deg, #ffdb93 0%, #fd9734 100%)">
+                                        等待上线
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
                     </view>
                 </view>
-                <empty v-else />
-            </view>
+            </scroll-view>
         </view>
     </view>
-    <video-preview
-        v-model:show="showVideoPreview"
-        title="视频预览"
-        :video-url="videoUrl"
-        @confirm="showVideoPreview = false" />
-    <video-preview
-        v-model:show="showExamplePopup"
-        title="新手教程"
-        confirm-btn-text="立即定制"
-        :video-url="`${config.baseUrl}static/videos/dh_example1.mp4`"
-        @close="showExamplePopup = false"
-        @confirm="handleExampleConfirm" />
     <choose-model v-model:show="showChooseModel" @confirm="handleChooseModel" />
 </template>
 
 <script setup lang="ts">
-import { digitalHumanLists, deleteDigitalHuman, retryVideo } from "@/api/digital_human";
-import ImageMenu1 from "@/ai_modules/digital_human/static/images/home/menu1.png";
-import ImageMenu2 from "@/ai_modules/digital_human/static/images/home/menu2.png";
-import ImageMenu3 from "@/ai_modules/digital_human/static/images/home/menu3.png";
-import ImageMenu4 from "@/ai_modules/digital_human/static/images/home/menu4.png";
-import { usePaging } from "@/hooks/usePaging";
+import MenuAnchorCloneIcon from "@/ai_modules/digital_human/static/images/home/menu_anchor_clone.svg";
+import MenuToneCloneIcon from "@/ai_modules/digital_human/static/images/home/menu_tone_clone.svg";
+import MenuAnchorListIcon from "@/ai_modules/digital_human/static/images/home/menu_anchor_list.svg";
+import MenuToneListIcon from "@/ai_modules/digital_human/static/images/home/menu_tone_list.svg";
+import MenuMontageBatchIcon from "@/ai_modules/digital_human/static/images/home/menu_montage_batch.svg";
+import MenuVideoBatchIcon from "@/ai_modules/digital_human/static/images/home/menu_video_batch.svg";
+import MenuMatrixIcon from "@/ai_modules/digital_human/static/images/home/menu_matrix.svg";
+import MenuMontageRecordIcon from "@/ai_modules/digital_human/static/images/home/menu_montage_record.svg";
+import MenuRecordIcon from "@/ai_modules/digital_human/static/images/home/menu_record.svg";
+import MenuImgTxtIcon from "@/ai_modules/digital_human/static/images/home/menu_img_txt.svg";
+import MenuMaterialIcon from "@/ai_modules/digital_human/static/images/home/menu_material.svg";
+import MenuCopyWriteIcon from "@/ai_modules/digital_human/static/images/home/menu_copywriter.svg";
+
 import { ModeTypeEnum } from "@/ai_modules/digital_human/enums";
-import VideoItem from "@/ai_modules/digital_human/components/video-item/video-item.vue";
-import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 import ChooseModel from "@/ai_modules/digital_human/components/choose-model/choose-model.vue";
-import Cache from "@/utils/cache";
-import config from "@/config";
-import { saveVideoToPhotosAlbum } from "@/utils/file";
 
 const menuLists = ref<any[]>([
     {
-        icon: ImageMenu1,
-        title: "形象克隆",
+        label: "形象克隆",
+        icon: MenuAnchorCloneIcon,
         key: "anchor_clone",
-        url: `/ai_modules/digital_human/pages/video_upload/video_upload?type=${ModeTypeEnum.ANCHOR}`,
     },
     {
-        icon: ImageMenu2,
-        title: "声音克隆",
+        label: "音色克隆",
+        icon: MenuToneCloneIcon,
         key: "tone_clone",
-        url: "/ai_modules/digital_human/pages/tone_clone/tone_clone",
     },
     {
-        icon: ImageMenu3,
-        title: "我的模特",
-        key: "model_manage",
-        url: "/ai_modules/digital_human/pages/model_manage/model_manage",
+        label: "形象列表",
+        icon: MenuAnchorListIcon,
+        key: "anchor_list",
     },
     {
-        icon: ImageMenu4,
-        title: "音色管理",
-        key: "tone_manage",
-        url: "/ai_modules/digital_human/pages/tone_manage/tone_manage",
+        label: "音色列表",
+        icon: MenuToneListIcon,
+        key: "tone_list",
+    },
+    {
+        label: "批量混剪",
+        icon: MenuMontageBatchIcon,
+        key: "montage_batch",
+        is_wait: true,
+    },
+    {
+        label: "批量视频",
+        icon: MenuVideoBatchIcon,
+        key: "video_batch",
+        is_wait: true,
+    },
+    {
+        label: "矩阵发布",
+        icon: MenuMatrixIcon,
+        key: "matrix",
+        is_wait: true,
+    },
+    {
+        label: "混剪记录",
+        icon: MenuMontageRecordIcon,
+        key: "montage_record",
+        is_wait: true,
+    },
+    {
+        label: "创作记录",
+        icon: MenuRecordIcon,
+        key: "record",
+        is_new: true,
+    },
+    {
+        label: "图文创作",
+        icon: MenuImgTxtIcon,
+        key: "img_txt",
+        is_wait: true,
+    },
+    {
+        label: "素材库",
+        icon: MenuMaterialIcon,
+        key: "material",
+        is_wait: true,
+    },
+    {
+        label: "文案创库",
+        icon: MenuCopyWriteIcon,
+        key: "copywriter",
+        is_wait: true,
     },
 ]);
 
-const { pager, getLists, resetPage } = usePaging({
-    fetchFun: digitalHumanLists,
-    params: {
-        page_size: 10,
-    },
-});
-
-const showExamplePopup = ref(false);
-// 缓存示例key
-const DH_EXAMPLE = "dh_example";
-const handleExampleConfirm = () => {
-    showExamplePopup.value = false;
-    uni.$u.route({
-        url: `/ai_modules/digital_human/pages/video_create/video_create`,
-    });
-};
-
-const handleRetry = async (id: number) => {
-    uni.showLoading({
-        title: "重试中...",
-        mask: true,
-    });
-    try {
-        await retryVideo({ video_id: id });
-        resetPage();
-        uni.hideLoading();
-        uni.showToast({
-            title: "重试成功",
-            icon: "none",
-            duration: 3000,
-        });
-    } catch (error: any) {
-        uni.hideLoading();
-
-        uni.showToast({
-            title: error || "重试失败",
-            icon: "none",
-            duration: 3000,
-        });
-    }
-};
-
-const handleDelete = async (id: number) => {
-    uni.showLoading({
-        title: "删除中...",
-        mask: true,
-    });
-    try {
-        await deleteDigitalHuman({ id });
-        resetPage();
-        uni.hideLoading();
-        uni.showToast({
-            title: "删除成功",
-            icon: "none",
-            duration: 3000,
-        });
-    } catch (error: any) {
-        uni.hideLoading();
-        uni.showToast({
-            title: error || "删除失败",
-            icon: "none",
-            duration: 3000,
-        });
-    }
-};
-
-const videoUrl = ref<string>("");
-const showVideoPreview = ref(false);
-const handlePlayVideo = (video_url: string) => {
-    videoUrl.value = video_url;
-    showVideoPreview.value = true;
+const handleCreateVideo = () => {
+    showChooseModel.value = true;
 };
 
 const showChooseModel = ref(false);
-const handleMenu = (item: any) => {
-    const { key } = item;
-    if (key === "anchor_clone") {
-        showChooseModel.value = true;
-        return;
-    }
-    uni.navigateTo({
-        url: item.url,
-    });
-};
-
 const handleChooseModel = (id: string) => {
     showChooseModel.value = false;
     uni.$u.route({
@@ -228,35 +156,36 @@ const handleChooseModel = (id: string) => {
     });
 };
 
-const loopTimer = ref<any>();
-const loopLists = async () => {
-    loopTimer.value = setTimeout(() => {
-        const isLoading = pager.lists.some((item: any) => item.status != 1 && item.status != 2);
-        if (isLoading) {
-            getLists();
-            loopLists();
-        } else {
-            clearTimeout(loopTimer.value);
-        }
-    }, 2000);
-};
-
-onShow(async () => {
-    await getLists();
-    loopLists();
-    if (!Cache.get(DH_EXAMPLE)) {
-        Cache.set(DH_EXAMPLE, true);
-        showExamplePopup.value = true;
+const handleMenuClick = (key: string) => {
+    switch (key) {
+        case "anchor_clone":
+            showChooseModel.value = true;
+            break;
+        case "tone_clone":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/tone_clone/tone_clone`,
+            });
+            break;
+        case "anchor_list":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/model_manage/model_manage`,
+            });
+            break;
+        case "tone_list":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/tone_manage/tone_manage`,
+            });
+            break;
+        case "record":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/video_works/video_works`,
+            });
+            break;
+        default:
+            uni.$u.toast("功能开发中...");
+            break;
     }
-});
-
-onHide(() => {
-    clearTimeout(loopTimer.value);
-});
-
-onUnload(() => {
-    clearTimeout(loopTimer.value);
-});
+};
 </script>
 
 <style scoped lang="scss">

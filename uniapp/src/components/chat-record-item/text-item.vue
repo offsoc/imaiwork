@@ -14,11 +14,14 @@
         <u-line />
         <view class="flex items-center justify-between w-full gap-x-5 mt-2">
             <view>
-                <view v-if="consumeTokens" class="text-xs text-[#808080]"
+                <view v-if="Object.keys(consumeTokens).length > 0" class="text-xs text-[#808080]"
                     >消耗TOKENS：{{ (consumeTokens.total_tokens || 0) + (consumeTokens.knowledge_tokens || 0) }}</view
                 >
             </view>
-            <view v-if="showCopyBtn && content" class="text-xs flex items-center gap-1" @click="copy(content)">
+            <view
+                v-if="showCopyBtn && content"
+                class="text-xs text-[#808080] flex items-center gap-1"
+                @click="copy(content)">
                 <text>复制内容</text>
             </view>
         </view>

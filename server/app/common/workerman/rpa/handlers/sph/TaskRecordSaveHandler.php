@@ -142,7 +142,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $hash =  empty($reg_content) ? '' : sha1(implode(',', $reg_content));
             $isExist = false;
             if ($hash !== '') {
-                $find = SvCrawlingRecord::where('user_id', $userId)->where('hash', $hash)->limit(1)->findOrEmpty();
+                $find = SvCrawlingRecord::where('user_id', $userId)->where('task_id', $content['task_id'])->where('hash', $hash)->limit(1)->findOrEmpty();
                 if (!$find->isEmpty()) {
                     $isExist = true;
                 }
@@ -161,7 +161,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                 'clue_type' => empty($reg_content) ? 0 : (preg_match('/1[3-9]\d{9}/', implode(',', $reg_content)) ? 2 : 1),
                 'address' => $content['address'] ?? '',
                 'sub_task_id' => $sub_task_id,
-                'tokens' => $isExist ? 0 : $points,
+                'tokens' => $task->ocr_type == 1 ? ($isExist ? 0 : $points) : 0,
                 'hash' => $hash,
                 'exec_time' => date('Y-m-d H:i:s'),
                 'create_time' => time()
@@ -172,10 +172,14 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $task->number_of_implemented_keywords = SvCrawlingRecord::where('task_id', $task['id'])->group('exec_keyword')->count();
             $task->update_time = time();
             $task->save();
-            if (!$isExist) {
-                User::userTokensChange($userId, $points);
-                AccountLogLogic::recordUserTokensLog(true, $userId, $tokenCode, $points, $sub_task_id, $extra);
+
+            if($task->ocr_type == 1) {
+                if (!$isExist) {
+                    User::userTokensChange($userId, $points);
+                    AccountLogLogic::recordUserTokensLog(true, $userId, $tokenCode, $points, $sub_task_id, $extra);
+                }
             }
+
             $result['msg'] = '获客内容上报成功';
             $result['ocr_type'] = 1;
             $this->payload['type'] = 27;
@@ -393,9 +397,21 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                         'crawling_task_id' => $task->id,
                         'create_time' => time()
                     ];
-                    // $response = \app\common\service\ToolsService::Sv()->validateStrings([
-                    //     "strings" => [$userWechatNo],
-                    // ]);
+
+                    $wxPattern = '/^[a-zA-Z][a-zA-Z0-9_-]{5,19}$/';
+                    if (preg_match($wxPattern, $userWechatNo)) {
+                        $response = \app\common\service\ToolsService::Sv()->validateStrings([
+                            "strings" => [$userWechatNo],
+                        ]);
+                        if (isset($response['code']) && (int)$response['code'] !== 10000) {
+                            $this->setLog($userWechatNo . '该账号不是有效的微信号,忽略', 'task_record');
+                            $this->setLog($response, 'task_record');
+                            continue;
+                        }
+                    }
+                    $addWechat[] = $userWechatNo;
+                    SvAddWechatRecord::create($record);
+
                     // $timer =  Timer::add(3, function () use ($userWechatNo, $record, &$addWechat, &$timer) {
                     //     $response = \app\common\service\ToolsService::Sv()->queryResult([
                     //         "string" => $userWechatNo,
@@ -407,8 +423,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                     //     Timer::del($timer);
                     // });
 
-                    $addWechat[] = $userWechatNo;
-                    SvAddWechatRecord::create($record);
+
 
                     // $useWechat = [];
                     // foreach ($wechat_ids as $wechat_id) {
@@ -497,180 +512,5 @@ class TaskRecordSaveHandler extends BaseMessageHandler
         }
 
         return [false, []];
-    }
-
-    /**
-     * 使用array_filter判断字符串是否包含数组中的任意一个元素
-     * @param string $str 待检查的字符串
-     * @param array $needles 要检查的元素数组
-     * @return bool 是否包含
-     */
-    private function containsAnyWithFilter($str, $needles)
-    {
-        $result = array_filter($needles, function ($needle) use ($str) {
-            return strpos($str, $needle) !== false;
-        });
-        return !empty($result);
-    }
-
-
-    private function createGreetingMessage(SvCrawlingTask $task, int $user_id)
-    {
-
-        try {
-            if (empty($task->remark)) {
-                return '';
-            }
-            $returnContent = '';
-            //获取提示词
-            $keyword = $task->add_friends_prompt != '' ? $task->add_friends_prompt : (ChatPrompt::where('prompt_name', '加好友内容')->value('prompt_text') ?? '');
-            $request = [
-                'stream' => false,
-                'model' => 'gpt-4o',
-                'messages' => [
-                    ['role' => 'system', 'content' => $keyword],
-                    [
-                        'role' => 'user',
-                        'content' => empty($task->remark) ? '您好!' : $task->remark,
-                    ],
-                ],
-                'user_id' => $user_id,
-                'task_id' => generate_unique_task_id(),
-                'chat_type' => AccountLogEnum::TOKENS_DEC_OPENAI_CHAT,
-                'now'       => time(),
-            ];
-            $response = \app\common\service\ToolsService::Sv()->openaiChat($request);
-            if (isset($response['code']) && $response['code'] == 10000) {
-                // 处理响应
-                $returnContent = $this->handleResponse($response, $request['model'], $request['task_id'], $user_id);
-            } else {
-                $this->setLog($request['task_id'] . '队列请求失败' . json_encode($response), 'msg');
-            }
-            return $returnContent;
-        } catch (\Throwable $e) {
-            $this->setLog('异常信息' . $e, 'task_record');
-            $this->payload['reply'] = "异常信息:" . $e->getMessage();
-            $this->payload['code'] =  WorkerEnum::SPH_ADD_WECHAT_ERROR;
-            $this->payload['type'] = 21;
-            $this->payload['content'] = [
-                'code' =>  WorkerEnum::SPH_ADD_WECHAT_ERROR,
-                'msg' => '异常信息:' . $e->getMessage(),
-                'deviceId' => $this->payload['deviceId']
-            ];
-
-            $this->sendError($this->connection,  $this->payload);
-        }
-    }
-
-    /**
-     * 处理响应
-     * @param array $response
-     * @return string
-     */
-    private function handleResponse(array $response, string $model, string $task_id, int $user_id)
-
-    {
-        try {
-            $scene = 'openai_chat';
-            //检查扣费
-            $unit = TokenLogService::checkToken($user_id, $scene);
-            // 获取回复内容
-            $reply = $response['data']['message'] ?? '';
-            //计费
-            $tokens = $response['data']['usage']['total_tokens'] ?? 0;
-            if (!$reply || $tokens == 0) {
-                throw new \Exception('获取内容失败');
-            }
-
-            $response = [
-                'reply' => $reply,
-                'usage_tokens' => $response['data']['usage'] ?? [],
-            ];
-            //计算消耗tokens
-            $points = $unit > 0 ? round($tokens / $unit, 2) : 0;
-            //token扣除
-            User::userTokensChange($user_id, $points);
-
-            $extra = ['总消耗tokens数' => $tokens, '算力单价' => $unit, '实际消耗算力' => $points, '场景' => '视频号获客加好友内容'];
-            $desc = AccountLogEnum::TOKENS_DEC_OPENAI_CHAT;
-            //扣费记录
-            AccountLogLogic::recordUserTokensLog(true, $user_id, $desc, $points, $task_id, $extra);
-
-            return $reply;
-        } catch (\Exception $e) {
-            $this->setLog('异常信息' . $e, 'task_record');
-            $this->payload['reply'] = "异常信息:" . $e->getMessage();
-            $this->payload['code'] =  WorkerEnum::SPH_ADD_WECHAT_ERROR;
-            $this->payload['type'] = 21;
-            $this->payload['content'] = [
-                'code' =>  WorkerEnum::SPH_ADD_WECHAT_ERROR,
-                'msg' => '异常信息:' . $e->getMessage(),
-                'deviceId' => $this->payload['deviceId']
-            ];
-
-            $this->sendError($this->connection,  $this->payload);
-        }
-    }
-
-
-
-    private function sendChannelAddWechatMessage(array $payload, AiWechat $wechat, array $insertData)
-    {
-        try {
-            $record = SvAddWechatRecord::create($insertData);
-            if ($insertData['status'] !== 2) {
-                $this->setLog('状态不是2,不发送', 'task_record');
-                return;
-            }
-
-            //进程通信
-            $message = [
-                'DeviceId' => $payload['DeviceCode'],
-                'WeChatId' => $payload['WechatId'],
-                'Phones' => [$payload['Phones']],
-                'Message' => $payload['message'],
-                'TaskId' => $insertData['task_id'],
-                'Remark' => $payload['Remark'] ?? '',
-            ];
-            $this->setLog($message, 'task_record');
-            $addNum = 0;
-            if ($addNum <= 20) {
-                $content = \app\common\workerman\wechat\handlers\client\AddFriendsTaskHandler::handle($message);
-                $message = new \Jubo\JuLiao\IM\Wx\Proto\TransportMessage();
-                $message->setMsgType($content['MsgType']);
-                $any = new \Google\Protobuf\Any();
-                $any->pack($content['Content']);
-                $message->setContent($any);
-                $pushMessage = $message->serializeToString();
-
-                $channel = "socket.{$payload['DeviceCode']}.message";
-                $this->setLog('channel: ' . $channel, 'task_record');
-
-                \Channel\Client::connect('127.0.0.1', 2206);
-                \Channel\Client::publish($channel, [
-                    'data' => is_array($pushMessage) ? json_encode($pushMessage) : $pushMessage
-                ]);
-                //$wechat->add_num += 1;
-                $wechat->is_cooling = 0;
-                $wechat->cooling_time = 0;
-                $wechat->update_time = time();
-                $wechat->save();
-
-                AiWechatLog::create([
-                    'user_id' => $wechat->user_id,
-                    'wechat_id' => $wechat->wechat_id,
-                    'log_type' => 0,
-                    'friend_id' => $payload['Phones'],
-                    'create_time' => time()
-                ]);
-            } else {
-                $record->status = 0;
-                $record->result = '检测当天添加好友超过阈值';
-                $record->save();
-                $this->setLog('当前微信号加好友超限', 'task_record');
-            }
-        } catch (\Throwable $e) {
-            $this->setLog('异常信息' . $e, 'task_record');
-        }
     }
 }

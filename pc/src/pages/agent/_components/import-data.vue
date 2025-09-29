@@ -6,8 +6,7 @@
         :title="props.title"
         :confirm-loading="isLock"
         @confirm="lockConfirm"
-        @close="close"
-    >
+        @close="close">
         <div>
             <!-- 步骤条 -->
             <div>
@@ -50,7 +49,7 @@ import { FolderOpened, SuccessFilled, UploadFilled } from "@element-plus/icons-v
 // 定义组件props
 const props = defineProps<{
     title: string; // 弹窗标题
-    agentId: string | string[]; // 智能体ID
+    agentId: string | number; // 智能体ID
 }>();
 
 const emit = defineEmits(["success", "close"]);
@@ -85,7 +84,7 @@ const handleDownloadTemplate = () => {
  */
 const getFile = (result: any) => {
     const {
-        data: { uri }
+        data: { uri },
     } = result;
     file.value = uri;
 };
@@ -101,7 +100,7 @@ const handleConfirm = async () => {
     try {
         await batchAddRobotKeywords({
             file: file.value,
-            robot_id: props.agentId as string
+            robot_id: props.agentId as string,
         });
         emit("success");
         popupRef.value?.close();
@@ -116,7 +115,7 @@ const { lockFn: lockConfirm, isLock } = useLockFn(handleConfirm);
 
 // 暴露open方法
 defineExpose({
-    open
+    open,
 });
 </script>
 

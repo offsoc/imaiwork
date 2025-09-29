@@ -54,7 +54,7 @@ class ChatLists extends BaseApiDataLists implements ListsSearchInterface
 
         // 首先获取所有不同的 task_id（按最新记录排序）
         $taskIds = ChatLog::where($this->searchWhere)
-            ->whereIn('chat_type', [AccountLogEnum::TOKENS_DEC_COMMON_CHAT, AccountLogEnum::TOKENS_DEC_SCENE_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT])
+            ->whereIn('chat_type', [AccountLogEnum::TOKENS_DEC_COMMON_CHAT, AccountLogEnum::TOKENS_DEC_SCENE_CHAT, AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT, AccountLogEnum::TOKENS_DEC_OPENAI_CHAT])
             ->group('task_id')
             ->order('update_time', 'desc')
             ->limit($this->limitOffset, $this->limitLength)
@@ -70,7 +70,7 @@ class ChatLists extends BaseApiDataLists implements ListsSearchInterface
         foreach ($taskIds as $taskId) {
             $logInfo = ChatLog::where('task_id', $taskId)
                 ->order('id', 'asc')
-                ->field('id,chat_type,user_id,task_id,robot_id,message,reply,assistant_id,create_time,update_time')
+                ->field('id,chat_type,user_id,task_id,robot_id,message,reply,assistant_id,create_time,update_time,extra')
                 ->find()
                 ->toArray();
 
@@ -90,7 +90,9 @@ class ChatLists extends BaseApiDataLists implements ListsSearchInterface
             } else {
                 $logInfo['scene_name'] = Assistants::where('id', $logInfo['assistant_id'])->value('name');
             }
-
+            $extra = json_decode($logInfo['extra'], true) ?? [];
+            $logInfo['file_info'] = $extra['file'] ?? [];
+            unset($logInfo['extra']);
             $logList[] = $logInfo;
         }
 

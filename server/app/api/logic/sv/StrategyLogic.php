@@ -2,11 +2,10 @@
 
 namespace app\api\logic\sv;
 
-use app\common\model\sv\SvReplyStrategy;
-use app\common\model\sv\SvRobot;
 use app\common\model\kb\KbRobot;
-use app\common\service\FileService;
 use app\common\model\sv\SvGreetStrategy;
+use app\common\model\sv\SvReplyStrategy;
+use app\common\service\FileService;
 
 /**
  * StrategyLogic
@@ -41,10 +40,13 @@ class StrategyLogic extends SvBaseLogic
                 $strategy = SvReplyStrategy::create($params);
             } else {
                 $params['stop_keywords'] = json_encode($params['stop_keywords'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $params['working_time'] = !empty($params['working_time']) ? json_encode($params['working_time'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
                 SvReplyStrategy::where('id', $strategy->id)->update($params);
             }
 
-            self::$returnData = $strategy->refresh()->toArray();
+            $strategy = $strategy->refresh()->toArray();
+            $strategy['working_time'] = $strategy['working_time'] ? json_decode($strategy['working_time'], true) : [];
+            self::$returnData = $strategy;
             return true;
         } catch (\Exception $e) {
             self::setError($e->getMessage());
@@ -73,11 +75,15 @@ class StrategyLogic extends SvBaseLogic
                     "stop_enable" => 0,
                     "stop_keywords" => "",
                     "bottom_enable" => 0,
-                    "bottom_reply" => ""
+                    "bottom_reply"      => "",
+                    "paragraph_enable"  => 0,
+                    "working_enable"    => 0,
+                    "working_time"      => [],
+                    "non_working_reply" => ""
                 ];
                 return true;
             }
-
+            $strategy->working_time = json_decode($strategy->working_time, true);
             self::$returnData = $strategy->toArray();
             return true;
         } catch (\Exception $e) {

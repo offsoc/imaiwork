@@ -115,6 +115,37 @@
                                 </div>
                             </div>
                         </div>
+                        <div>
+                            <div class="mb-3 flex items-center gap-x-2">
+                                <div class="text-[#ffffff80]">线索识别方式</div>
+                                <ElTooltip content="请选择线索识别方式" placement="top">
+                                    <div class="cursor-pointer">
+                                        <Icon name="local-icon-tips2" color="#ffffff"></Icon>
+                                    </div>
+                                    <template #content>
+                                        <div class="w-[303px]">
+                                            <div>
+                                                本地识别（免费）使用系统内置识别逻辑完成，不消耗算力，识别率较依赖本地环境，复杂图片可能不够精准
+                                            </div>
+                                            <div class="mt-5">
+                                                云端OCR识别（每条扣 1
+                                                算力）使用云端OCR服务识别微信号，每条线索消耗1算力，识别率更高，支持更复杂的图片和场景
+                                            </div>
+                                        </div>
+                                    </template>
+                                </ElTooltip>
+                            </div>
+                            <div>
+                                <ElRadioGroup v-model="formData.ocr_type">
+                                    <ElRadio :value="1">
+                                        <span class="text-white">云端OCR识别</span>
+                                    </ElRadio>
+                                    <ElRadio :value="2">
+                                        <span class="text-white">本地识别</span>
+                                    </ElRadio>
+                                </ElRadioGroup>
+                            </div>
+                        </div>
                         <div
                             class="bg-app-bg-3 rounded-xl shadow-[0_0_0_1px_var(--app-border-color-2)] p-4"
                             v-if="false">
@@ -344,6 +375,7 @@ interface FormData {
     add_friends_prompt: string;
     wechat_id: string[];
     wechat_reg_type: 0 | 1 | 2;
+    ocr_type: 1 | 2;
 }
 
 const formData = reactive<FormData>({
@@ -364,6 +396,7 @@ const formData = reactive<FormData>({
     add_friends_prompt: "",
     wechat_id: [],
     wechat_reg_type: 0,
+    ocr_type: 1,
 });
 
 const { optionsData: deviceOptions } = useDictOptions<{
@@ -486,6 +519,14 @@ const { lockFn, isLock } = useLockFn(async () => {
         .el-input__wrapper {
             background-color: transparent !important;
             box-shadow: none;
+        }
+    }
+}
+:deep(.el-radio__input) {
+    &:not(.is-checked) {
+        .el-radio__inner {
+            background-color: transparent !important;
+            border-color: #2a2a2a !important;
         }
     }
 }

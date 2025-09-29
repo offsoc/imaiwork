@@ -33,8 +33,8 @@
                 class="w-[400px] flex flex-col border-l-[1px] border-[#0000000d]"
                 v-if="![TabName.Publish].includes(currentTab)">
                 <div
-                    class="h-[72px] flex items-center justify-between flex-shrink-0 border-b-[1px] border-[#0000000d] px-5">
-                    <div>{{ formData.name }}</div>
+                    class="h-[72px] flex items-center gap-x-2 justify-between flex-shrink-0 border-b-[1px] border-[#0000000d] px-5">
+                    <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{ formData.name }}</div>
                     <ElButton @click="startNewChat">新建对话</ElButton>
                 </div>
                 <div class="grow min-h-0">
@@ -121,6 +121,8 @@ const formData = reactive<Agent>({
     temperature: 1,
     presence_penalty: 0.1,
     frequency_penalty: 0,
+    logprobs: 0,
+    top_logprobs: 10,
     welcome_introducer: "",
     copyright: "",
     menus: [],

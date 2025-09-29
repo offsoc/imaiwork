@@ -61,12 +61,12 @@
                                 <text class="text-xl font-bold">使用模型</text>
                                 <text class="text-[#E33C64] text-xl font-bold">*</text>
                             </view>
-                            <!-- <view>
+                            <view>
                                 <data-select
                                     v-model="formData.model_version"
                                     placeholder="请选择模型"
                                     :localdata="modelChannel"></data-select>
-                            </view> -->
+                            </view>
                             <view v-if="is_transcribe">
                                 <template v-if="step == 1">
                                     <view class="font-bold text-xl"> 参考音频文案 </view>
@@ -476,10 +476,7 @@ const startClone = async () => {
             title: "克隆中",
             mask: true,
         });
-        await voiceClone({
-            ...formData,
-            model_version: DigitalHumanModelVersionEnum.CHANJING,
-        });
+        await voiceClone(formData);
         userStore.getUser();
         setTimeout(() => {
             uni.$u.toast("克隆成功，请在我的音色中查看");

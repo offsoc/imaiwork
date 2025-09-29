@@ -14,6 +14,7 @@ export enum RequestCodeEnum {
     SUCCESS = 1, //成功
     FAILED = 0, // 失败
     TOKEN_INVALID = -1, // TOKEN参数无效
+    ABORT = 600004, // 请求已终止
 }
 
 export enum RequestErrMsgEnum {

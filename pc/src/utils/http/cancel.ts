@@ -96,12 +96,10 @@ export class CancelTokenManager {
      * 生成请求的唯一标识
      * @param url 请求URL
      * @param method 请求方法
-     * @param params 请求参数
-     * @param data 请求数据
      * @returns 请求的唯一标识
      */
-    public static generateRequestKey(url: string, method: string, params?: any, data?: any): string {
-        return `${method}:${url}:${JSON.stringify(params || {})}:${JSON.stringify(data || {})}:${Date.now()}`;
+    public static generateRequestKey(url: string, method: string): string {
+        return `${method}:${url}:${Date.now()}`;
     }
 
     /**

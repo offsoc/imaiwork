@@ -30,6 +30,7 @@
                                             placeholder="请输入"
                                             type="textarea"
                                             resize="none"
+                                            :maxlength="1000"
                                             :rows="5" />
                                     </template>
                                     <!-- 数字输入框 -->
@@ -88,7 +89,8 @@
                                     <ElButton
                                         color="#000000"
                                         size="small"
-                                        v-if="getOutputParams[key]?.type == FormFieldTypeEnum.FILE">
+                                        v-if="getOutputParams[key]?.type == FormFieldTypeEnum.FILE"
+                                        @click="download(value, getOutputParams[key]?.name)">
                                         下载
                                     </ElButton>
                                     <ElButton v-else color="#000000" size="small" @click="copy(value)">复制</ElButton>
@@ -215,7 +217,7 @@ const genLoading = ref(false);
 
 // 使用 useLockFn 防止重复提交
 const { lockFn, isLock } = useLockFn(async () => {
-    if (userTokens.value <= 0) {
+    if (userTokens.value <= 1) {
         feedback.msgPowerInsufficient();
         return;
     }

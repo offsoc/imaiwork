@@ -36,6 +36,13 @@ export class Request {
     get(fetchOptions: FetchOptions, requestOptions?: Partial<RequestOptions>) {
         return this.request({ ...fetchOptions, method: RequestMethodsEnum.GET }, requestOptions);
     }
+
+    /**
+     * @description post请求
+     */
+    post(fetchOptions: FetchOptions, requestOptions?: Partial<RequestOptions>) {
+        return this.request({ ...fetchOptions, method: RequestMethodsEnum.POST }, requestOptions);
+    }
     /**
      * @description eventStream请求，无法使用$fetch
      */
@@ -170,12 +177,6 @@ export class Request {
 
         return sseInstance;
     }
-    /**
-     * @description post请求
-     */
-    post(fetchOptions: FetchOptions, requestOptions?: Partial<RequestOptions>) {
-        return this.request({ ...fetchOptions, method: RequestMethodsEnum.POST }, requestOptions);
-    }
 
     /**
      * @description 构建文件上传的FormData
@@ -299,8 +300,7 @@ export class Request {
             const method = RequestMethodsEnum.POST;
             const requestParams = options.params || {};
             // 使用传入的requestKey或生成新的requestKey
-            const requestKey =
-                params.requestKey || CancelTokenManager.generateRequestKey(url, method, requestParams, {});
+            const requestKey = params.requestKey || CancelTokenManager.generateRequestKey(url, method);
 
             // 创建一个可以取消XHR请求的控制器
             const controller = {
@@ -323,15 +323,12 @@ export class Request {
         mergeOptions.requestOptions = merge({}, this.requestOptions, requestOptions);
 
         // 生成请求唯一标识
-        const url = `${mergeOptions.baseURL || ""}${mergeOptions.url}`;
+        const url = `${mergeOptions.baseURL || ""}${mergeOptions.requestOptions.apiPrefix}${mergeOptions.url}`;
         const method = mergeOptions.method || "GET";
-        const params = mergeOptions.params || {};
-        const body = mergeOptions.body || {};
-        this.requestKey = CancelTokenManager.generateRequestKey(url, method, params, body);
+        this.requestKey = CancelTokenManager.generateRequestKey(url, method);
 
         // 注册到取消令牌管理器
         cancelTokenManager.addRequest(this.requestKey, this.controller);
-
         const { requestInterceptorsHook, responseInterceptorsHook, responseInterceptorsCatchHook } =
             this.requestOptions;
         if (requestInterceptorsHook && isFunction(requestInterceptorsHook)) {
@@ -341,13 +338,11 @@ export class Request {
             return this.fetchInstance
                 .raw(mergeOptions.url, mergeOptions)
                 .then(async (response: FetchResponse<any>) => {
-                    // 请求成功后从管理器中移除
-                    cancelTokenManager.removeRequest(this.requestKey);
-
                     if (responseInterceptorsHook && isFunction(responseInterceptorsHook)) {
                         try {
                             response = await responseInterceptorsHook(response, mergeOptions);
-
+                            // 请求成功后从管理器中移除
+                            cancelTokenManager.removeRequest(this.requestKey);
                             resolve(response);
                         } catch (error) {
                             reject(error);

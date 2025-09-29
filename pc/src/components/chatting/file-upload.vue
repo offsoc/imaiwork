@@ -60,13 +60,21 @@ const changeFile = async (e: Event) => {
         feedback.msgError(`上传文件超出限制,最多可上传${props.fileLimit}个文件`);
         return;
     }
+    // 判断文件不能超过20M
+    const isOverSize = files.some((item: File) => item.size > 20 * 1024 * 1024);
+    if (isOverSize) {
+        feedback.msgError(`文件大小超出限制,最大支持20M`);
+        return;
+    }
     files.forEach((item: File) => {
         const reader = new FileReader();
         const fileItem: FileParams = reactive({
             uid: Date.now(),
             url: "",
-            loading: true,
             file: item,
+            loading: true,
+            name: item.name,
+            size: item.size,
             status: UPLOAD_STATUS.UPLOADING,
             create_time: dayjs().format("YYYY-MM-DD HH:mm:ss"),
         });
@@ -78,6 +86,7 @@ const changeFile = async (e: Event) => {
         }
         fileLists.value.push(fileItem);
     });
+
     emit("change", fileLists.value);
     await handleUploadFile();
     fileInputRef.value && (fileInputRef.value.value = "");
@@ -88,7 +97,6 @@ const handleUploadFile = async () => {
     await Promise.allSettled(uploadPromises);
     fileLists.value = fileLists.value.filter((item: FileParams) => item.status === UPLOAD_STATUS.SUCCESS);
     emit("update:modelValue", fileLists.value);
-
     emit("change", fileLists.value);
 };
 
@@ -102,7 +110,7 @@ const submitFileUpload = async (item: FileParams, index: number) => {
         }
 
         // 生成请求标识
-        const requestKey = `upload_${item.file.name}_${Date.now()}`;
+        const requestKey = `upload_${item.name}_${Date.now()}`;
         uploadRequestKeys.value.push(requestKey);
 
         // 保存请求标识到文件项

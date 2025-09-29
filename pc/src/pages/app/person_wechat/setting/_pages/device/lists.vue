@@ -139,6 +139,9 @@ on("message", (data: any) => {
     if (MsgType === MsgTypeEnum.CleanCache) {
         feedback.msgSuccess("清除缓存成功");
     }
+    if (MsgType == MsgTypeEnum.WeChatOfflineNotice || MsgType == MsgTypeEnum.WeChatOnlineNotice) {
+        getLists();
+    }
 });
 
 // 监听成功回调

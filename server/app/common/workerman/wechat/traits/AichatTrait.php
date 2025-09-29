@@ -83,8 +83,9 @@ trait AichatTrait
             $robot = $this->_getWechatRobot($wechat['robot_id']);
             $reply = $this->_getReplyStrategy($robot);
             $payload['userId'] = $device['user_id'];
+            $isChatroom = strpos($payload['FriendId'], '@chatroom') !== false ? 1 : 0;
 
-            if ($friend['takeover_mode'] == 0) {
+            if ($isChatroom === 0 && $friend['takeover_mode'] == 0) {
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('人工接管中')->withContext([
                     'data' => $friend,
                     'msg' => '人工接管中'
@@ -102,7 +103,7 @@ trait AichatTrait
             $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('聊天模型gpt')->withContext(['data' => $wechat, 'msg' => '聊天模型'])->log();
 
             $historyMsg = $this->getFriendHistoryMsg($payload, $reply);
-            $isChatroom = strpos($payload['FriendId'], '@chatroom') !== false ? 1 : 0;
+
 
             $promat = $payload['Content'];
             if (in_array($promat, [
@@ -123,23 +124,7 @@ trait AichatTrait
                 $promat = $promat['title'];
             }
 
-            if ($isChatroom === 1) {
-                //@客服微信的做ai回复
-                $ext = explode(',', $payload['Ext']);
-                if (!in_array($payload['WeChatId'], $ext)) {
-                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
-                        'msg' => '非@客服微信无需ai回复'
-                    ])->log();
-                    return;
-                }
-                $tmps = explode(" ", $promat);
-                $tmpStr = (strpos($tmps[0], ":\n") !== false && strpos($tmps[0], ":\n@") === false) ? $tmps[0] : end($tmps);
-                $promat = explode(":\n", $tmpStr);
-                $promat = $promat[count($promat) - 1];
-                $promat = str_replace(["@{$wechat['wechat_nickname']}", " "], '', $promat);
-            }
-
-            if(trim($promat) == '' || is_null($promat)){
+            if (trim($promat) == '' || is_null($promat)) {
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
                     'msg' => '空消息不需要ai回复'
                 ])->log();
@@ -162,6 +147,49 @@ trait AichatTrait
                 'is_chatroom' => $isChatroom,
                 'model' => $robot['model'] ?? 'deepseek',
             ];
+
+            // 判断是否在工作时间段内
+            $workingTime = $reply['working_time'][date('N')] ?? [];
+            if ($reply['working_enable'] == 1) {
+                $work = false;
+                foreach ($workingTime as $value) {
+                    $time = explode('-', $value);
+                    if (time() > strtotime(date('Y-m-d ' . $time[0] . ':00')) && time() < strtotime(date('Y-m-d ' . $time[1] . ':00'))) {
+                        $work = true;
+                    }
+                }
+                if (!$work) {
+                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('不在工作时间段内')->withContext([
+                        'msg' => '不在工作时间段内'
+                    ])->log();
+                    $nonWorkingKey = 'non-working-wechat:' . $deviceId . 'friend:' . $payload['FriendId'];
+                    $nonWorkingReplyStatus =   $this->redis()->get($nonWorkingKey);
+                    if ($nonWorkingReplyStatus){
+                        return;
+                    }
+                    $this->redis()->set($nonWorkingKey, 1, 'EX',3600);
+                    $request['message'] = $reply['non_working_reply'] ??  '你好，我现在休息中，请在工作时间再找我哦~';
+                    $request['message_type'] = 1;
+                    $this->_sendMessage($request);
+                    return;
+                }
+            }
+
+            if ($isChatroom === 1) {
+                //@客服微信的做ai回复
+                $ext = explode(',', $payload['Ext']);
+                if (!in_array($payload['WeChatId'], $ext)) {
+                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
+                                                                                                                                     'msg' => '非@客服微信无需ai回复'
+                                                                                                                                 ])->log();
+                    return;
+                }
+                $tmps = explode(" ", $promat);
+                $tmpStr = (strpos($tmps[0], ":\n") !== false && strpos($tmps[0], ":\n@") === false) ? $tmps[0] : end($tmps);
+                $promat = explode(":\n", $tmpStr);
+                $promat = $promat[count($promat) - 1];
+                $promat = str_replace(["@{$wechat['wechat_nickname']}", " "], '', $promat);
+            }
 
             if (empty($request['message'])) {
                 $request['message']  = '请详细描述您的问题';
@@ -192,17 +220,24 @@ trait AichatTrait
             }
 
 
-
-            //step 1. 正则匹配停止AI回复
+            //step 1. 正则匹配停止AI回复 TODO 此处暂时只是不回复，不会停止AI接管，后续需要根据产品完善逻辑
             $stop = $this->_regularMatchStopAI($reply, $request);
+            //            if ($stop) {
+            //                // 关闭AI接管
+            //                AiWechatContact::where('wechat_id', $wechat['wechat_id'])->where('friend_id', $payload['FriendId'])->update(['takeover_mode' => 0]);
+            //                $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
+            //                    'msg' => '关闭AI接管'
+            //                ])->log();
+            //
+            //                return true;
+            //            }
+            // step 1. 正则匹配不需要AI回复
             if ($stop) {
-                // 关闭AI接管
-                AiWechatContact::where('wechat_id', $wechat['wechat_id'])->where('friend_id', $payload['FriendId'])->update(['takeover_mode' => 0]);
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
-                    'msg' => '关闭AI接管'
+                    'msg' => '正则匹配关键词不需要AI回复'
                 ])->log();
 
-                return true;
+                return;
             }
             if ($reply['multiple_type'] == 0) { //逐条回复
                 // step 2. 正则匹配关键词
@@ -438,21 +473,6 @@ trait AichatTrait
                 'keyword' => $keyword
             ])->log();
 
-//            此处为通用工具聊天的设置，个微用智能体里的设置
-//            $modelSetting = ModelsSetting::where('user_id', $robot->user_id)->where('model_id', $robot->model_id)->where('model_sub_id', $robot->model_sub_id)->findOrEmpty();
-//            if ($modelSetting->isEmpty()) {
-//                $modelSetting = [
-//                    'temperature' => 0.5, //温度
-//                    'top_p' => 0.85, //多样性范围
-//                    'presence_penalty' =>  0.2, //避免重复力度
-//                    'frequency_penalty' => 0.3, //避免重复用词力度
-//                    'max_tokens' => 4096, //token上限
-//                    'context_num' => 5, //上下文数
-//                ];
-//            } else {
-//                $modelSetting = $modelSetting->toArray();
-//            }
-
             $request = [
                 'user_id' => $request['user_id'],
                 'task_id' => $task_id,
@@ -535,6 +555,7 @@ trait AichatTrait
                     'context_num' => $payload['request']['context_num'] ?? 3,
                 ]);
                 if ($chatStatus === false) {
+                    $reply = '我现在有点累了，稍后再回答您的问题';
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('队列请求知识库失败:')->withContext([
                         'response' => $response
                     ])->log();
@@ -831,7 +852,7 @@ trait AichatTrait
     private function setFriendHistoryMsg(array $payload, bool $isSend = false)
     {
         $reply = $payload['reply_strategy'];
-        $number_chat_rounds = $reply['number_chat_rounds'] == 0 ? 3 : $reply['number_chat_rounds'];
+        $number_chat_rounds = $reply['number_chat_rounds'] == 0 ? 1 : $reply['number_chat_rounds'];
         $key = $this->getDeviceKey($payload['device_code'], 'friendHistory:' . $payload['friend_id']);
         $json = $this->redis()->get($key);
         $role = $isSend ? 'assistant' : 'user';
@@ -898,8 +919,12 @@ trait AichatTrait
                 "bottom_enable" => 0,
                 "bottom_reply" => '',
                 'paragraph_enable' => 0,
+                "working_enable"    => 0,
+                "working_time"      => [],
+                "non_working_reply" => ""
             ];
         }
+        $reply->working_time = !empty($reply->working_time) ? json_decode($reply->working_time, true) : [];
         return $reply->toArray();
     }
 

@@ -6,10 +6,8 @@ namespace app\api\controller\kb;
 use app\api\controller\BaseApiController;
 use app\api\lists\kb\KbRobotLists;
 use app\api\logic\kb\KbRobotLogic;
-use app\api\validate\kb\KbRobotValidate;
 use app\common\logic\BaseLogic;
 use Exception;
-use think\db\exception\DbException;
 use think\response\Json;
 
 /**
@@ -17,7 +15,7 @@ use think\response\Json;
  */
 class RobotController extends BaseApiController
 {
-    public array $notNeedLogin = ['lists'];
+    public array $notNeedLogin = ['commonLists'];
 
     /**
      * @notes 机器人列表
@@ -25,6 +23,16 @@ class RobotController extends BaseApiController
      * @author kb
      */
     public function lists(): Json
+    {
+        return $this->dataLists((new KbRobotLists()));
+    }
+
+    /**
+     * @notes 机器人列表
+     * @return Json
+     * @author kb
+     */
+    public function commonLists(): Json
     {
         return $this->dataLists((new KbRobotLists()));
     }

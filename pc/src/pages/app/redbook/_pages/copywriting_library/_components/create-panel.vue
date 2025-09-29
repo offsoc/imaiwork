@@ -132,14 +132,10 @@ const isSaveDisabled = computed(() => {
 // --- API & Data Handling ---
 const getDetail = async () => {
     if (!formData.id) return;
-    try {
-        const data = await getCopywritingLibraryDetail({ id: formData.id });
-        formData.title = data.title || [];
-        formData.described = data.described || [];
-        formData.oral_copy = data.oral_copy || [];
-    } catch (error) {
-        feedback.msgError("获取详情失败");
-    }
+    const data = await getCopywritingLibraryDetail({ id: formData.id });
+    formData.title = data.title || [];
+    formData.described = data.described || [];
+    formData.oral_copy = data.oral_copy || [];
 };
 
 const handleSave = async () => {

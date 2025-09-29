@@ -80,7 +80,7 @@ export class Sse extends EventManage<EventCallback> {
                 throw response;
             }
         } catch (error) {
-            if (this.readyState === EventType.CLOSE) {
+            if (this.readyState === ReadyState.CLOSED) {
                 return;
             }
             this.triggerEvent(EventType.ERROR, error, ErrorType.CONNECT_ERROR);

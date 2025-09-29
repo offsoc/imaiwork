@@ -132,9 +132,9 @@
                                         lazy></ElImage>
                                 </div>
                             </div>
-                            <div class="px-3 my-10 w-full">
-                                <div class="text-[14px] text-center line-clamp-1">{{ item.name }}</div>
-                                <div class="mt-3 line-clamp-2 text-center text-[#737373] leading-7 h-12">
+                            <div class="px-3 mt-10 w-full">
+                                <div class="text-[14px] text-center line-clamp-1 font-bold">{{ item.name }}</div>
+                                <div class="my-3 line-clamp-2 text-center text-[#737373] break-all">
                                     {{ item.intro || item.introduced }}
                                 </div>
                             </div>
@@ -156,7 +156,7 @@
 
 <script setup lang="ts">
 import { AppKeyEnum, appKeyNameMap } from "@/enums/appEnums";
-import { getAgentCategoryList, getAgentList, getCozeAgentList } from "@/api/agent";
+import { getAgentCategoryList, getCommonAgentList, getCommonCozeAgentList } from "@/api/agent";
 import { CozeTypeEnum } from "@/pages/agent/_enums";
 
 // 导入本地资源
@@ -547,9 +547,9 @@ const fetchAgentList = async (cateId: number, type: number) => {
     try {
         let response;
         if (type === 1) {
-            response = await getAgentList({ ...params, source: 0, cate_id: cateId });
+            response = await getCommonAgentList({ ...params, source: 0, cate_id: cateId });
         } else {
-            response = await getCozeAgentList({
+            response = await getCommonCozeAgentList({
                 ...params,
                 source: 0,
                 agent_cate_id: cateId,

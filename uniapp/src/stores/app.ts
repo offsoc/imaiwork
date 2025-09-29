@@ -31,6 +31,7 @@ export const useAppStore = defineStore({
         getRechargeConfig: (state) => state.config.recharge || {},
         getCopyRightConfig: (state) => state.config.copyright || [],
         getByName: (state) => state.config.by_name || "",
+        getAiModelConfig: (state) => state.config.ai_model || {},
     },
     actions: {
         getImageUrl(url: string) {

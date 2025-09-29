@@ -114,6 +114,8 @@ const formData = reactive<Agent>({
     temperature: 1,
     presence_penalty: 0.1,
     frequency_penalty: 2,
+    top_logprobs: 10,
+    logprobs: 0,
     welcome_introducer: "",
     copyright: "",
     menus: [],

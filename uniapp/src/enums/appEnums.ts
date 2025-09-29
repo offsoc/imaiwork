@@ -109,3 +109,8 @@ export enum KnbTypeEnum {
     VECTOR = "vector",
     RAG = "rag",
 }
+
+export enum ModelIdEnum {
+    DEEPSEEK_R1 = 4,
+    GPT_4O = 2,
+}

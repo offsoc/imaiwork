@@ -3,13 +3,13 @@
 namespace app\api\controller;
 
 
-use think\exception\HttpResponseException;
+use app\api\lists\hd\HdImageCaseLists;
 use app\api\lists\hd\HdLists;
 use app\api\logic\HdCueLogic;
 use app\api\logic\HdLogic;
-use think\response\Json;
-use app\api\lists\hd\HdImageCaseLists;
 use app\api\validate\HdValidate;
+use think\exception\HttpResponseException;
+use think\response\Json;
 
 class HdController extends BaseApiController
 {
@@ -115,6 +115,22 @@ class HdController extends BaseApiController
         $params = $this->request->post();
         $result = HdLogic::addModelCase($params);
         return $this->success('添加成功');
+    }
+
+    /**
+     * @desc 删除模特案例
+     * @return Json
+     * @date 2024/7/5 14:38
+     * @author dagouzi
+     */
+    public function delModelCase()
+    {
+        $params = $this->request->post();
+        $result = HdLogic::delModelCase($params);
+        if ($result){
+            return $this->success('删除成功');
+        }
+        return $this->pc_fail('无法删除系统模特');
     }
 
     /**

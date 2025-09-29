@@ -331,7 +331,7 @@ const scrollToBottom = async () => {
     if (disabledScroll.value) return;
     const scrollH = toScrollHeight();
     await nextTick();
-    scrollbarRef.value?.setScrollTop(scrollH + 100);
+    scrollbarRef.value?.setScrollTop(scrollH);
 };
 
 // 滚动到指定位置

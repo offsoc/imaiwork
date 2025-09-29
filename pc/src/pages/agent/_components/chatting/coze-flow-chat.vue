@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { cozeAgentChatRecord } from "@/api/agent";
-import ChattingFlow from "../../_components/chatting-flow/index.vue";
+import ChattingFlow from "../chatting-flow/index.vue";
 
 /**
  * @description Coze工作流聊天组件

@@ -89,12 +89,14 @@
                                             </div>
                                         </upload>
                                         <div
-                                            v-for="(img, index) in optionsData.modelList"
+                                            v-for="(item, index) in optionsData.modelList"
                                             :key="index"
                                             class="relative h-[130px] w-full flex-col rounded-md flex items-center justify-center bg-app-bg-3 overflow-hidden border-[2px] border-[#ffffff33] cursor-pointer group"
-                                            :class="formData.persons.includes(img) ? 'border-primary' : ''"
-                                            @click="handleModelImageClick(img)">
-                                            <ElImage :src="img" class="w-full h-full" fit="cover" />
+                                            :class="
+                                                formData.persons.includes(item.result_image) ? 'border-primary' : ''
+                                            "
+                                            @click="handleModelImageClick(item.result_image)">
+                                            <ElImage :src="item.result_image" class="w-full h-full" fit="cover" />
                                             <div
                                                 class="absolute top-0 left-0 w-full h-full invisible group-hover:visible bg-[var(--el-overlay-color-lighter)] flex items-center justify-center">
                                                 <div
@@ -132,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCaseLists, addModelCase } from "@/api/drawing";
+import { getCaseLists, addModelCase, deleteModelCase } from "@/api/drawing";
 import { FashionImageTypeEnum } from "../_enums";
 import CaseImageV2 from "./case-image-v2.vue";
 
@@ -182,16 +184,15 @@ const { optionsData } = useDictOptions<{
         api: getCaseLists,
         params: {
             case_type: 4,
-            user_type: 1,
             page_size: 999,
         },
-        transformData: (data) => data.lists.map((item: any) => item.result_image),
+        transformData: (data) => data.lists.map((item: any) => ({ ...item, result_image: item.result_image })),
     },
 });
 
 const getUploadModelImage = (result: any) => {
     const uri = result.data.uri;
-    optionsData.modelList.unshift(uri);
+    optionsData.modelList.unshift({ result_image: uri });
     addModelCase({ result_image: uri });
 };
 
@@ -210,9 +211,18 @@ const handleDeleteModelImage = (index: number) => {
         title: "提示",
         message: "确定删除该模特吗？",
         theme: "dark",
-        onConfirm: () => {
-            optionsData.modelList.splice(index, 1);
-            formData.persons.splice(index, 1);
+        onConfirm: async () => {
+            const data = optionsData.modelList[index];
+            if (data.user_id) {
+                try {
+                    await deleteModelCase({ id: data.id });
+                    feedback.msgSuccess("删除成功");
+                    optionsData.modelList.splice(index, 1);
+                    formData.persons.splice(index, 1);
+                } catch (error) {
+                    feedback.msgError("删除失败");
+                }
+            }
         },
     });
 };
@@ -223,7 +233,7 @@ const previewUrl = ref([]);
 const previewModelImage = (index: number) => {
     showPreview.value = true;
     previewIndex.value = index;
-    previewUrl.value = optionsData.modelList;
+    previewUrl.value = optionsData.modelList.map((item) => item.result_image);
 };
 
 const modelImageRef = ref();
@@ -231,16 +241,19 @@ const openModelImage = () => {
     modelImageRef.value.open();
 };
 
-const handleChooseModel = (data: any) => {
-    const img = data.images[0];
-    if (optionsData.modelList.includes(img)) {
+const handleChooseModel = (res: any) => {
+    const { data } = res;
+    const img = data.result_image;
+    // 判断是否存在
+    const item = optionsData.modelList.find((item) => item.result_image == img);
+    if (item) {
         formData.persons = [img];
         if (!formData.persons.includes(img)) {
             formData.persons.push(img);
         }
         return;
     }
-    optionsData.modelList.unshift(img);
+    optionsData.modelList.unshift(item);
     formData.persons = [img];
 };
 
@@ -253,15 +266,15 @@ const opeCaseImage = () => {
     caseImageRef.value.open();
 };
 
-const handleChooseCase = (data: any) => {
-    const { case_type, images } = data;
+const handleChooseCase = (res: any) => {
+    const { case_type, data } = res;
     if (case_type == 0) {
-        formData.upper_clothes = images[0];
-        formData.lower_clothes = images[1];
+        formData.upper_clothes = data.params?.images[0];
+        formData.lower_clothes = data.params?.images[1];
         formData.type = FashionImageTypeEnum.UPPER_LOWER_CLOTHES;
     }
     if (case_type == 1) {
-        formData.dress = images[0];
+        formData.dress = data.result_image;
         formData.upper_clothes = formData.dress;
         formData.lower_clothes = formData.dress;
         formData.type = FashionImageTypeEnum.DRESS;

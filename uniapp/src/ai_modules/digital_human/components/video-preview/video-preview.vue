@@ -9,6 +9,7 @@
                 class="border-[4rpx] border-solid border-[#0065fb4d] rounded-[48rpx] h-[846rpx] mt-[40rpx] p-0.5 shadow-lg">
                 <video-player
                     v-if="show"
+                    ref="videoPlayerRef"
                     :poster="`${config.baseUrl}static/images/dh_example_bg1.png`"
                     :video-url="videoUrl"></video-player>
             </view>
@@ -70,6 +71,14 @@ watch(
         isShowVideo.value = true;
     }
 );
+
+const videoPlayerRef = ref<InstanceType<typeof VideoPlayer>>();
+
+defineExpose({
+    playVideo: () => {
+        videoPlayerRef.value?.toggleVideo();
+    },
+});
 </script>
 
 <style scoped lang="scss">

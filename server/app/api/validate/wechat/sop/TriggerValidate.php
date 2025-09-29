@@ -108,6 +108,7 @@ class TriggerValidate extends BaseValidate
             $where[] = ['chat_match_mode', '=', $data['chat_match_mode']];
             $where[] = ['chat_match_object', '=', $data['chat_match_object']];
             $where[] = ['chat_keywords', '=', trim($data['chat_keywords'])];
+            $where[] = ['user_id', '=', $this->request->userId];
             
             $exists = Db::name('ai_wechat_sop_stage_trigger')->where($where)->find();
             if ($exists) {

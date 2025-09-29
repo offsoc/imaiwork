@@ -6,6 +6,7 @@
   "usingComponents": {
     "u-navbar": "../../../../uni_modules/vk-uview-ui/components/u-navbar/u-navbar",
     "u-input": "../../../../uni_modules/vk-uview-ui/components/u-input/u-input",
+    "data-select": "../../../../components/data-select/data-select",
     "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
     "recharge-popup": "../../../../components/recharge-popup/recharge-popup"
   }

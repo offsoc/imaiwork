@@ -86,23 +86,18 @@ export function useAgentManager() {
     // --- 记录操作 ---
     const handleSelectRecord = (record: ChatRecordItem) => {
         const queryKey = agentType == AgentTypeEnum.AGENT ? "task_id" : "conversation_id";
-        // 清除另一个key
-        const otherKey = agentType == AgentTypeEnum.AGENT ? "conversation_id" : "task_id";
-        if (currentRecordId.value == record[queryKey]) return;
+        if (!record[queryKey] || currentRecordId.value == record[queryKey]) return;
         currentRecordId.value = record[queryKey];
-        replaceState({
-            [queryKey]: currentRecordId.value,
-            [otherKey]: undefined,
-        });
     };
 
     const handleCreateRecord = () => {
         if (!currentRecordId.value) return;
         currentRecordId.value = null;
-        replaceState({ task_id: undefined, conversation_id: undefined });
     };
 
-    const handleDeleteRecord = (id?: string) => {
+    const handleDeleteRecord = (item: any) => {
+        const { id, conversation_id } = item || {};
+        const deleteId = agentType === AgentTypeEnum.AGENT ? id : conversation_id;
         nuxtApp.$confirm({
             message: id ? "确定要删除该对话吗？" : "确定要清除所有对话吗？",
             onConfirm: async () => {
@@ -110,17 +105,19 @@ export function useAgentManager() {
                     if (agentType === AgentTypeEnum.AGENT) {
                         await clearChatRecord({ robot_id: agentId, task_id: id, chat_type: 9006 });
                     } else {
-                        await cozeAgentChatRecordClear({ bot_id: cozeId, conversation_id: id || "0" });
+                        await cozeAgentChatRecordClear({ bot_id: cozeId, conversation_id: conversation_id || "0" });
                     }
                     feedback.msgSuccess("删除成功");
-                    const index = chatRecordPager.lists.findIndex((item: any) => item.id === id);
+                    const index = chatRecordPager.lists.findIndex((item: any) =>
+                        agentType === AgentTypeEnum.AGENT ? item.id == id : item.conversation_id == conversation_id
+                    );
                     if (index !== -1) {
                         chatRecordPager.lists.splice(index, 1);
                     }
                     // 如果删除的是当前对话或全部对话，则重置
-                    if (!id || id === currentRecordId.value) {
+                    if (!deleteId || deleteId == currentRecordId.value) {
                         handleCreateRecord();
-                        if (!id) {
+                        if (!deleteId) {
                             resetChatRecordPager();
                         }
                     }
@@ -159,6 +156,7 @@ export function useAgentManager() {
         chatRecordPager,
         currentRecordId,
         loadRecordMore,
+        resetChatRecordPager,
         handleSelectRecord,
         handleCreateRecord,
         handleDeleteRecord,

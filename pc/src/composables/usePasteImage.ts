@@ -5,9 +5,11 @@ import { useAppStore } from "@/stores/app";
 
 export interface FileParams {
     uid?: string | number;
-    file: File | any;
+    file?: File | any;
     file_id?: number | string;
     url?: string;
+    name?: string;
+    size?: number;
     loading: boolean;
     status?: UPLOAD_STATUS; //上传状态 1是成功 2是等待 3失败
     create_time?: string | number;

@@ -155,3 +155,8 @@ export function getCaseLists(params: any) {
 export function addModelCase(params: any) {
     return $request.post({ url: "/hd/addModelCase", params });
 }
+
+// 删除模特
+export function deleteModelCase(params: any) {
+    return $request.post({ url: "/hd/delModelCase", params });
+}

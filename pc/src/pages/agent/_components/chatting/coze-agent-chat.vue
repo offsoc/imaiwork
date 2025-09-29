@@ -49,7 +49,7 @@ watch(isReceiving, (val) => emit("update:isReceiving", val));
 
 // 发送消息
 const onContentPost = async (content: string) => {
-    if (userTokens.value <= 0) {
+    if (userTokens.value <= 1) {
         feedback.msgPowerInsufficient();
         return;
     }
@@ -81,9 +81,17 @@ const getChatList = async (convId: string) => {
         const historyMessages = lists.map((item: any) =>
             item.role === "user"
                 ? { ...item, type: 1, message: item.content, form_avatar: userInfo.value.avatar }
-                : { ...item, type: 2, reply: item.content, form_avatar: props.detail?.avatar }
+                : {
+                      ...item,
+                      type: 2,
+                      reply: item.content,
+                      form_avatar: props.detail?.avatar,
+                      consume_tokens: {
+                          total_tokens: item.token_total,
+                      },
+                  }
         );
-        chatContentList.value = historyMessages.reverse();
+        chatContentList.value = historyMessages;
         await nextTick();
         chattingRef.value?.scrollToBottom();
     } catch (error) {
@@ -98,7 +106,9 @@ watch(
     () => props.conversationId,
     (newId) => {
         setConversationId(newId || "");
-        getChatList(newId || "");
+        if (!isReceiving.value) {
+            getChatList(newId || "");
+        }
         chattingRef.value?.resetScroll();
     },
     { immediate: true }

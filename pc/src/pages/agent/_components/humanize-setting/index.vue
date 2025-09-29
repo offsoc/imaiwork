@@ -26,7 +26,7 @@
                         <ElFormItem label="词汇多样性">
                             <div class="flex items-center w-full gap-x-4">
                                 <div class="flex-1">
-                                    <ElSlider v-model="formData.top_p" :min="0" :max="1" :step="0.1" />
+                                    <ElSlider v-model="formData.top_p" :min="0.01" :max="1" :step="0.1" />
                                 </div>
                                 <ElInputNumber
                                     v-model="formData.top_p"
@@ -37,7 +37,7 @@
                             </div>
                         </ElFormItem>
                         <!-- 重复词频率 -->
-                        <ElFormItem label="重复词频率">
+                        <ElFormItem label="重复词频率" v-if="formData.model_id == ModelIdEnum.GPT_4O">
                             <div class="flex items-center w-full gap-x-4">
                                 <div class="flex-1">
                                     <ElSlider v-model="formData.frequency_penalty" :min="-2" :max="2" :step="0.1" />
@@ -51,7 +51,7 @@
                             </div>
                         </ElFormItem>
                         <!-- 特定词重复率 -->
-                        <ElFormItem label="特定词重复率">
+                        <ElFormItem label="特定词重复率" v-if="formData.model_id == ModelIdEnum.GPT_4O">
                             <div class="flex items-center w-full gap-x-4">
                                 <div class="flex-1">
                                     <ElSlider v-model="formData.presence_penalty" :min="0" :max="1" :step="0.1" />
@@ -68,15 +68,36 @@
                         <ElFormItem label="结果相似性">
                             <div class="flex items-center w-full gap-x-4">
                                 <div class="flex-1">
-                                    <ElSlider v-model="formData.temperature" :min="0" :max="1" :step="0.1" />
+                                    <ElSlider
+                                        v-model="formData.temperature"
+                                        :min="0.01"
+                                        :max="getMaxTemperature"
+                                        :step="0.1" />
                                 </div>
                                 <ElInputNumber
                                     v-model="formData.temperature"
                                     controls-position="right"
-                                    :min="0"
-                                    :max="1"
+                                    :min="0.01"
+                                    :max="getMaxTemperature"
                                     :step="0.1"></ElInputNumber>
                             </div>
+                        </ElFormItem>
+                        <!-- 显示前几个候选词对数概率 -->
+                        <ElFormItem label="显示前几个候选词对数概率" v-if="formData.model_id == ModelIdEnum.GPT_4O">
+                            <div class="flex items-center w-full gap-x-4">
+                                <div class="flex-1">
+                                    <ElSlider v-model="formData.top_logprobs" :min="0" :max="20" />
+                                </div>
+                                <ElInputNumber
+                                    v-model="formData.top_logprobs"
+                                    controls-position="right"
+                                    :min="0"
+                                    :max="20"></ElInputNumber>
+                            </div>
+                        </ElFormItem>
+                        <!-- 显示候选词 -->
+                        <ElFormItem label="显示候选词" v-if="formData.model_id == ModelIdEnum.GPT_4O">
+                            <ElSwitch v-model="formData.logprobs" :active-value="1" :inactive-value="0" />
                         </ElFormItem>
                     </ElForm>
                 </div>
@@ -86,6 +107,7 @@
 </template>
 
 <script setup lang="ts">
+import { ModelIdEnum } from "@/enums/appEnums";
 import { Agent } from "../../_enums";
 
 // 使用 defineModel 实现与父组件的双向绑定
@@ -98,6 +120,13 @@ defineExpose({
         // 当前表单没有需要验证的字段，直接返回成功
         return Promise.resolve();
     },
+});
+
+const getMaxTemperature = computed(() => {
+    if (formData.value.model_id == ModelIdEnum.GPT_4O) {
+        return 2;
+    }
+    return 1;
 });
 </script>
 

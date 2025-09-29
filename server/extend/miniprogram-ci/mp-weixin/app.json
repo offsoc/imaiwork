@@ -2,7 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/staff/staff",
-    "pages/assistant/assistant",
+    "pages/agent/agent",
     "pages/user/user",
     "pages/login/login",
     "pages/login/mobile",
@@ -12,7 +12,6 @@
     {
       "root": "packages",
       "pages": [
-        "pages/robot_cate/robot_cate",
         "pages/robot_chat/robot_chat",
         "pages/recharge/recharge",
         "pages/creation_record/creation_record",
@@ -20,11 +19,10 @@
         "pages/recharge_record/recharge_record",
         "pages/tokens_rule/tokens_rule",
         "pages/agreement/agreement",
-        "pages/app_detail/app_detail",
-        "pages/service/service",
         "pages/redeem/redeem",
         "pages/setting/setting",
-        "pages/404/404"
+        "pages/404/404",
+        "pages/choose_file/choose_file"
       ]
     },
     {

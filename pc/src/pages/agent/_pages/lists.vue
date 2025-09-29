@@ -275,7 +275,9 @@ const handleAgentEdit = async (row?: AgentItem) => {
         router.push({ query: { type: "edit", id: String(row.id) } });
     } else {
         try {
-            const data = await addAgent({});
+            const data = await addAgent({
+                context_num: 3,
+            });
             router.push({ query: { type: "edit", id: String(data.id) } });
         } catch (error: any) {
             feedback.msgError(error || "创建智能体失败");

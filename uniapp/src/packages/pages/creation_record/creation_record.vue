@@ -74,22 +74,19 @@ const queryList = async (page_no: number, page_size: number) => {
 };
 
 const handleRecord = (row: any) => {
-    const { assistant_id, task_id } = row;
+    const { robot_id, assistant_id, robot_name, avatar, task_id } = row;
     if (assistant_id == 0) {
         uni.$u.route({
             url: "/pages/index/index",
             params: {
                 task_id,
+                agent_name: robot_name,
+                agent_id: robot_id,
+                agent_logo: avatar,
             },
         });
     } else {
-        uni.$u.route({
-            url: "/packages/pages/robot_chat/robot_chat",
-            params: {
-                id: assistant_id,
-                task_id,
-            },
-        });
+        uni.$u.toast("相关助理已经暂停使用啦~");
     }
 };
 

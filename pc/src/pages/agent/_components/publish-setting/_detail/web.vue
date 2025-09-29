@@ -67,12 +67,12 @@
                                     </span>
                                     <span>预览</span>
                                 </div>
-                                <!-- <div
+                                <div
                                     class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                     @click="handleSetting(row)">
                                     <Icon name="el-icon-Setting"></Icon>
                                     <span>用量设置</span>
-                                </div> -->
+                                </div>
                                 <div
                                     class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
                                     @click="handleDelete(row)">

@@ -47,7 +47,7 @@ class KbRobotLogic extends BaseLogic
     {
         $modelKbRobot = new KbRobot();
         $detail = $modelKbRobot
-            ->field('id,user_id,cate_id,kb_type,kb_ids,icons,image,bg_image,name,intro,roles_prompt,model,model_id,model_sub_id,search_mode,search_tokens,search_similar,ranking_status,ranking_score,context_num,is_public,is_enable,optimize_ask,optimize_model,top_p,presence_penalty,frequency_penalty,search_empty_type,search_empty_text,welcome_introducer,copyright')
+            ->field('id,user_id,cate_id,kb_type,kb_ids,icons,image,bg_image,name,intro,roles_prompt,model,model_id,model_sub_id,search_mode,search_tokens,search_similar,ranking_status,ranking_score,context_num,is_public,is_enable,optimize_ask,optimize_model,top_p,presence_penalty,frequency_penalty,logprobs,top_logprobs,search_empty_type,search_empty_text,welcome_introducer,copyright')
             ->where(['id' => $id])
             ->findOrEmpty()
             ->toArray();
@@ -166,7 +166,10 @@ class KbRobotLogic extends BaseLogic
                                         "stop_enable"        => 0,
                                         "stop_keywords"      => "",
                                         "bottom_enable"      => 0,
-                                        "bottom_reply"       => ""
+                                        "bottom_reply"       => "",
+                                        "paragraph_enable"   => 0,
+                                        "non_working_reply"  => "",
+                                        "working_enable"     => 0,
                                     ]);
 
             $model->commit();
@@ -351,6 +354,9 @@ class KbRobotLogic extends BaseLogic
                 //工作流
                 'flow_status' => $post['flow_status'] ?? 0,
                 'flow_config' => $post['flow_config'] ?? self::flowConfigDefault(),
+                //显示候选词
+                'logprobs'           => $post['logprobs'] ?? 0,
+                'top_logprobs'       => $post['top_logprobs'] ?? 0,
             ], ['id'=>intval($post['id'])]);
 
             // 自定义菜单

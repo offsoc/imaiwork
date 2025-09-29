@@ -134,7 +134,7 @@ export function useChatManager() {
                             ? {
                                   ...item,
                                   form_avatar: userInfo.value.avatar,
-                                  fileList: item?.extra?.file?.length ? [item.extra.file] : [],
+                                  fileList: item?.file_info ? [item.file_info] : [],
                               }
                             : {
                                   ...item,
@@ -161,9 +161,8 @@ export function useChatManager() {
      * @param isNewChatPrompt - 是否为新会话的预设提示语。
      */
     const sendMessage = async (userInput: string, isNewChatPrompt = false, cb?: () => void) => {
-        if (userTokens.value <= 0) return feedback.msgPowerInsufficient();
+        if (userTokens.value <= 1) return feedback.msgPowerInsufficient();
         if (isReceiving.value || (!userInput.trim() && fileLists.value.length === 0)) return;
-
         // 1. 准备用户消息和机器人占位消息
         if (!isNewChatPrompt) {
             chatStore.addMessage({

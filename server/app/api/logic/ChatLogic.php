@@ -615,6 +615,7 @@ class ChatLogic extends ApiLogic
                         $startPos        = $lastSepPos + mb_strlen('问题：', 'UTF-8');
                         $item['message'] = mb_substr($item['message'], $startPos, null, 'UTF-8');;
                     }
+                    $extra = json_decode($item['extra'], true) ?? [];
                     $logList[] = [
                         'avatar' => FileService::getFileUrl($user_avatar),
                         'message' => $item['message'],
@@ -623,6 +624,7 @@ class ChatLogic extends ApiLogic
                         'file_urls' => $files,
                         'tokens_info' => $item['usage_tokens'],
                         'extra' => json_decode($item['extra'], true) ?? [], //预留扩展字段
+                        'file_info' => $extra['file'] ?? [],
                     ];
 
                     $logList[] = [
@@ -920,12 +922,12 @@ class ChatLogic extends ApiLogic
             if (!empty($params['model_id']) && !empty($params['model_sub_id'])) {
                 $where[] = ['model_id', '=', $params['model_id']];
                 $where[] = ['model_sub_id', '=', $params['model_sub_id']];
-                $result  = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, is_default')
+                $result  = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, logprobs,top_logprobs,is_default')
                     ->where($where)
                     ->findOrEmpty();
                 if ($result->isEmpty()) {
                     $where[0] = ['user_id', '=', 0];
-                    $result   = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, is_default')
+                    $result   = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, logprobs,top_logprobs,is_default')
                         ->where($where)
                         ->find();
                 }
@@ -934,12 +936,12 @@ class ChatLogic extends ApiLogic
             }
 
             $result            = [];
-            $userModelsSetting = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, is_default')
+            $userModelsSetting = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, logprobs,top_logprobs,is_default')
                 ->where($where)
                 ->select()
                 ->toArray();
             $where[0]          = ['user_id', '=', 0];
-            $modelsSetting     = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, is_default')
+            $modelsSetting     = ModelsSetting::field('id, model_id, model_sub_id, top_p, temperature, presence_penalty, frequency_penalty, max_tokens, context_num, logprobs,top_logprobs, is_default')
                 ->where($where)
                 ->select()
                 ->toArray();

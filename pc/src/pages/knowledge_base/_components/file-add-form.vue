@@ -126,7 +126,7 @@ import { ElForm } from "element-plus";
 import { punctuationOptions } from "@/config/common";
 import AutoChunk from "@/assets/images/auto_chunk.png";
 import CustomChunk from "@/assets/images/custom_chunk.png";
-import KnUploadFile from "../_components/upload-file.vue";
+import KnUploadFile from "./upload-file.vue";
 
 const props = withDefaults(
     defineProps<{

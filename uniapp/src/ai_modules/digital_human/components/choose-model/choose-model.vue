@@ -5,10 +5,6 @@
                 <view
                     v-for="(item, index) in modelChannel"
                     class="flex items-start mb-[16rpx] gap-x-[24rpx] bg-white rounded-[24rpx] p-[32rpx]"
-                    :style="{
-                        'background-color': currModel == item.id ? '#F0F7FF' : '',
-                        'box-shadow': currModel == item.id ? '0px 0px 0px 1px rgba(0, 101, 251, 1)' : '',
-                    }"
                     :key="index"
                     @click="chooseModel(item.id)">
                     <view class="flex-shrink-0 p-1 leading-[0]">

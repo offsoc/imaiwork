@@ -120,19 +120,18 @@ export async function saveVideoToPhotosAlbum(url: string) {
         await uni.saveVideoToPhotosAlbum({
             filePath: tempFilePath,
         });
-
+        uni.hideLoading();
         uni.showToast({
             title: "保存成功",
             icon: "success",
             duration: 2000,
         });
     } catch (err: any) {
+        uni.hideLoading();
         uni.showToast({
             title: "保存失败",
             icon: "none",
             duration: 2000,
         });
-    } finally {
-        uni.hideLoading();
     }
 }

@@ -23,17 +23,15 @@
         <view class="grow min-h-0 relative z-10">
             <chat-scroll-view
                 ref="chattingRef"
+                v-model:file-list="fileList"
                 :is-stop="isStopChat"
                 :content-list="chatContentList"
                 :send-disabled="isReceiving"
                 :tokens="tokensValue"
-                :is-deep="true"
-                @close="chatClose"
-                @add-session="addSession"
-                @update:deep="updateDeep"
-                @update:network="updateNetwork"
-                @content-post="contentPost"
-                @confirm-knb="confirmKnb">
+                @close="handleChatClose"
+                @add-session="handleAddSession"
+                @update:network="handleUpdateNetwork"
+                @content-post="handleContentPost">
                 <template #content>
                     <view
                         v-if="chatContentList.length == 0"
@@ -69,20 +67,20 @@
                     v-model="recordLists"
                     :fixed="false"
                     :safe-area-inset-bottom="true"
-                    @query="queryRecordList">
+                    @query="handleQueryRecordList">
                     <view class="flex flex-col gap-4 px-[32rpx]">
                         <view
                             class="bg-white rounded-[24rpx] p-[24rpx]"
                             v-for="(item, index) in recordLists"
                             :key="index"
-                            @click="handleRecord(item.task_id)">
+                            @click="handleSelectRecord(item)">
                             <view class="flex items-center justify-between">
                                 <view class="text-[#AEAFB0] text-xs bg-[#F9FAFB] rounded-[12rpx] py-[4rpx] px-[8rpx]">
                                     {{ item.create_time }}
                                 </view>
                             </view>
                             <view class="line-clamp-3 mt-4 text-[26rpx]">
-                                {{ item.message }}
+                                {{ item.message || item.file_info.name }}
                             </view>
                         </view>
                     </view>
@@ -95,16 +93,47 @@
     </popup-bottom>
     <recharge-popup ref="rechargePopupRef"></recharge-popup>
 </template>
-
 <script lang="ts" setup>
 import { useUserStore } from "@/stores/user";
 import { useAppStore } from "@/stores/app";
 import { chatSendTextStream, getChatLog, getCreativeRecord } from "@/api/chat";
-import { TokensSceneEnum, KnbTypeEnum } from "@/enums/appEnums";
-import { isImageUrl } from "@/utils/util";
+import { TokensSceneEnum } from "@/enums/appEnums";
 
-const safeAreaTop = ref<number>(50);
+// 类型定义
+interface ChatMessage {
+    type: 1 | 2; // 1: 用户消息, 2: AI回复
+    message?: string;
+    fileList?: FileInfo[];
+    loading?: boolean;
+    reply?: string;
+    reasoning_content?: string;
+    consume_tokens?: Record<string, any>;
+    is_reasoning_finished?: boolean;
+    tokens_info?: Record<string, any>;
+    file_info?: Record<string, any>;
+}
 
+interface FileInfo {
+    url: string;
+    name: string;
+    size: number;
+    type: string;
+}
+
+interface ChatConfig {
+    id: string | number;
+    avatar: string;
+    name: string;
+}
+
+interface ChatLogParams {
+    page_no: number;
+    page_size: number;
+    assistant_id: number;
+    task_id?: string;
+}
+
+// 状态管理
 const appStore = useAppStore();
 const userStore = useUserStore();
 const { chatConfig } = toRefs(appStore);
@@ -112,43 +141,58 @@ const websiteConfig = computed(() => appStore.getWebsiteConfig);
 const { userTokens, isLogin } = toRefs(userStore);
 const tokensValue = userStore.getTokenByScene(TokensSceneEnum.CHAT)?.score;
 
+// 组件引用
 const rechargePopupRef = ref();
+const chattingRef = shallowRef();
+const pagingRef = shallowRef();
 
-// 获取弹窗高度
-const getPopupHeight = computed(() => {
-    const { windowHeight, statusBarHeight } = uni.$u.sys();
-    let menuButton = {
-        height: 0,
-        top: 0,
-    };
-    //#ifdef MP-WEIXIN
-    menuButton = uni.getMenuButtonBoundingClientRect();
-    //#endif
-    const navbarHeight = menuButton.height + (menuButton.top - statusBarHeight);
-
-    return `${windowHeight - statusBarHeight - navbarHeight - 40}px`;
-});
-
-const isDeep = ref(false);
+// 页面状态
+const safeAreaTop = ref<number>(50);
 const isNetwork = ref(false);
 const showHistory = ref(false);
-const updateDeep = (value: boolean) => {
-    isDeep.value = value;
-};
-const updateNetwork = (value: boolean) => {
+const isReceiving = ref(false);
+const isStopChat = ref(false);
+const fileList = ref<FileInfo[]>([]);
+const chatContentList = ref<ChatMessage[]>([]);
+const taskId = ref<string>("");
+const recordLists = ref<any[]>([]);
+
+// 流式请求读取器
+let streamReader: any = null;
+
+// 聊天记录请求参数
+const chatLogParams = reactive<ChatLogParams>({
+    page_no: 1,
+    page_size: 1500,
+    assistant_id: 0,
+});
+
+/**
+ * 网络状态更新处理
+ */
+const handleUpdateNetwork = (value: boolean) => {
     isNetwork.value = value;
 };
 
-const recordLists = ref<any[]>([]);
-const pagingRef = shallowRef();
-
-const handleRecord = async (task_id: any) => {
+/**
+ * 历史记录选择处理
+ */
+const handleSelectRecord = async (item: any) => {
+    const { robot_id, avatar, robot_name, task_id } = item;
+    chattingRef.value?.setAgentConfig({
+        id: robot_id,
+        avatar,
+        name: robot_name,
+    });
     taskId.value = task_id;
     await getChatList();
     showHistory.value = false;
 };
 
-const queryRecordList = async (page_no: number, page_size: number) => {
+/**
+ * 查询历史记录列表
+ */
+const handleQueryRecordList = async (page_no: number, page_size: number) => {
     try {
         const { lists } = await getCreativeRecord({
             page_no,
@@ -156,117 +200,68 @@ const queryRecordList = async (page_no: number, page_size: number) => {
             scene_id: 0,
             type: 1,
         });
-
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
+        console.error("查询历史记录失败:", error);
     }
 };
 
-const chattingRef = shallowRef();
-const isReceiving = ref(false);
-const isStopChat = ref(false);
-const fileLists = ref<any[]>([]);
-const fileLimit = 9;
-const imageLimit = 1;
-
-// 上传图片剩余数量
-const imageFileSum = computed(() => {
-    const images = fileLists.value.filter((item) => isImageUrl(item.url));
-    return imageLimit - images.length;
-});
-
-const chatContentList = ref<any[]>([]);
-const taskId = ref<any>("");
-
-let streamReader: any = null;
-
-const chatLogParams = reactive<any>({
-    page_no: 1,
-    page_size: 1500,
-    assistant_id: 0,
-});
-
-const chatPostParams = reactive<any>({
-    indexid: "",
-    rerank_min_score: "",
-    kb_id: "",
-});
-
-const confirmKnb = (val: any) => {
-    const { data, type } = val;
-    if (type == KnbTypeEnum.RAG) {
-        chatPostParams.indexid = data.index_id;
-        chatPostParams.rerank_min_score = data.rerank_min_score;
-    } else if (type == KnbTypeEnum.VECTOR) {
-        chatPostParams.kb_id = data.id;
-        chatPostParams.indexid = undefined;
-        chatPostParams.rerank_min_score = undefined;
-    }
-};
-
-// 获取聊天记录
+/**
+ * 获取聊天记录
+ */
 const getChatList = async () => {
     try {
         const data = await getChatLog({
             ...chatLogParams,
             task_id: taskId.value,
         });
-        const transformData = data?.map((item: any) => {
-            if (item.type == 1) {
+        const transformData = data?.map((item: ChatMessage) => {
+            if (item.type === 1)
                 return {
                     ...item,
-                    // fileLists:
-                    // 	item.file_urls && item.file_urls.length
-                    // 		? item.file_urls.map((val) => ({
-                    // 				url: val,
-                    // 				file: {
-                    // 					name: val.split("/").pop(),
-                    // 				},
-                    // 		  }))
-                    // 		: [],
+                    fileList: item?.file_info ? [item.file_info] : [],
                 };
-            } else {
-                return {
-                    ...item,
-                    is_reasoning_finished: true,
-                    consume_tokens: item.tokens_info,
-                };
-            }
+            return {
+                ...item,
+                is_reasoning_finished: true,
+                consume_tokens: item.tokens_info,
+            };
         });
 
         chatContentList.value = transformData;
         await nextTick();
         chattingRef.value.scrollToBottom();
-    } catch (err) {}
+    } catch (err) {
+        console.error("获取聊天记录失败:", err);
+    }
 };
 
-const contentPost = async (userInput?: any, isNewChat: boolean = false) => {
-    if (!isLogin.value) {
-        uni.$u.route({
-            url: "/pages/login/login",
-        });
-        return;
-    }
-    if (userTokens.value <= 0) {
+/**
+ * 发送消息处理
+ */
+const handleContentPost = async (userInput?: string, isNewChat: boolean = false) => {
+    if (userTokens.value <= 1) {
         uni.$u.toast("算力不足，请充值！");
         rechargePopupRef.value?.open();
         return;
     }
     if (isReceiving.value) return;
+
+    // 添加用户消息
     if (!isNewChat) {
         chatContentList.value.push({
             type: 1,
             message: userInput,
-            // fileLists: fileLists.value,
+            fileList: fileList.value,
         });
     }
-    const result = reactive({
+
+    // 准备AI回复消息
+    const result = reactive<ChatMessage>({
         type: 2,
         loading: true,
         reply: "",
         reasoning_content: "",
-        is_reasoning_finished: isDeep.value,
         consume_tokens: {},
     });
     chatContentList.value.push(result);
@@ -277,8 +272,10 @@ const contentPost = async (userInput?: any, isNewChat: boolean = false) => {
             {
                 message: userInput,
                 task_id: taskId.value,
-                open_reasoning: isDeep.value ? 1 : 0,
-                ...chatPostParams,
+                open_reasoning: 0,
+                is_network_search: isNetwork.value ? 1 : 0,
+                file_info: fileList.value[0],
+                ...(chattingRef.value?.getChatConfig?.() || {}),
             },
             {
                 onstart(reader) {
@@ -286,64 +283,79 @@ const contentPost = async (userInput?: any, isNewChat: boolean = false) => {
                     isStopChat.value = true;
                 },
                 onmessage(value) {
-                    value
-                        .trim()
-                        .split("data:")
-                        .forEach((text, index) => {
-                            if (text !== "") {
-                                try {
-                                    const dataJson = JSON.parse(text);
-                                    const { object, content, task_id, usage, reasoning_content } = dataJson;
-                                    if ((content || reasoning_content) && object === "loading") {
-                                        if (reasoning_content) {
-                                            result.is_reasoning_finished = false;
-                                            result.reasoning_content += reasoning_content;
-                                        } else {
-                                            result.is_reasoning_finished = true;
-                                            result.reply += content;
-                                        }
-                                    }
-                                    if (object === "finished") {
-                                        result.loading = false;
-                                        result.consume_tokens = {
-                                            ...usage,
-                                        };
-                                        if (!taskId.value) {
-                                            taskId.value = task_id;
-                                        }
-                                        return;
-                                    }
-                                    chattingRef.value.scrollToBottom();
-                                } catch (error) {}
-                            }
-                        });
+                    handleStreamMessage(value, result);
                 },
                 onclose() {
-                    result.loading = false;
-                    resetChat();
-                    userStore.getUser();
-                    setTimeout(async () => {
-                        chattingRef.value.scrollToBottom();
-                    }, 600);
+                    handleStreamClose(result);
                 },
             }
         );
     } catch (error: any) {
-        if (error.errno == 600004) {
-            result.reply = "用户已停止内容生成";
-        } else {
-            result.reply = error || "发生错误";
-            uni.$u.toast(error);
-        }
-        result.loading = false;
-        resetChat();
+        handleStreamError(error, result);
     }
-    nextTick(() => {
-        chattingRef.value.scrollToBottom();
-    });
+
+    nextTick(() => chattingRef.value.scrollToBottom());
 };
 
-const addSession = () => {
+/**
+ * 处理流式消息
+ */
+const handleStreamMessage = (value: string, result: ChatMessage) => {
+    value
+        .trim()
+        .split("data:")
+        .forEach((text) => {
+            if (!text) return;
+            try {
+                const { object, content, task_id, usage, reasoning_content } = JSON.parse(text);
+                if ((content || reasoning_content) && object === "loading") {
+                    if (reasoning_content) {
+                        result.reasoning_content += reasoning_content;
+                    } else {
+                        result.reply += content;
+                    }
+                }
+                if (object === "finished") {
+                    result.loading = false;
+                    result.consume_tokens = usage;
+                    if (!taskId.value) {
+                        taskId.value = task_id;
+                    }
+                    return;
+                }
+                chattingRef.value.scrollToBottom();
+            } catch (error) {
+                console.error("解析流式消息失败:", error);
+            }
+        });
+};
+
+/**
+ * 处理流式请求关闭
+ */
+const handleStreamClose = (result: ChatMessage) => {
+    result.loading = false;
+    resetChat();
+    userStore.getUser();
+    setTimeout(() => chattingRef.value.scrollToBottom(), 600);
+};
+
+/**
+ * 处理流式请求错误
+ */
+const handleStreamError = (error: any, result: ChatMessage) => {
+    result.reply = error.errno === 600004 ? "用户已停止内容生成" : error || "发生错误";
+    if (error.errno !== 600004) {
+        uni.$u.toast(error);
+    }
+    result.loading = false;
+    resetChat();
+};
+
+/**
+ * 添加新会话
+ */
+const handleAddSession = () => {
     if (!taskId.value) {
         uni.$u.toast("当前会话已经是最新的了");
         return;
@@ -351,22 +363,32 @@ const addSession = () => {
     taskId.value = "";
     chatContentList.value = [];
     resetChat();
-    contentPost(chatConfig.value.new_chat_prompt, true);
+    handleChatClose();
+    handleContentPost(chatConfig.value.new_chat_prompt, true);
 };
 
+/**
+ * 重置聊天状态
+ */
 const resetChat = () => {
-    fileLists.value = [];
+    fileList.value = [];
     isReceiving.value = false;
     isStopChat.value = false;
 };
 
+/**
+ * 返回聊天
+ */
 const backChat = () => {
     chatContentList.value = [];
     resetChat();
-    chatClose();
+    handleChatClose();
 };
 
-const chatClose = () => {
+/**
+ * 关闭聊天
+ */
+const handleChatClose = () => {
     //#ifdef H5
     streamReader?.cancel();
     //#endif
@@ -377,25 +399,43 @@ const chatClose = () => {
     isStopChat.value = false;
 };
 
+/**
+ * 监听文件选择
+ */
 const watchFile = () => {
-    uni.$on("chooseFile", (data: any) => {
-        fileLists.value = data;
-        contentPost();
+    uni.$on("chooseFile", (data: FileInfo[]) => {
+        fileList.value = data;
         uni.$off("chooseFile");
     });
 };
 
+/**
+ * 初始化
+ */
+const init = async (options?: Record<string, any>) => {
+    await nextTick();
+    if (options?.agent_name) {
+        chattingRef.value?.setAgentConfig({
+            name: options.agent_name,
+            id: options.agent_id,
+            avatar: options.agent_logo,
+        });
+    }
+};
+
+// 生命周期钩子
 onMounted(() => {
     watchFile();
     const { safeArea } = uni.$u.sys();
     safeAreaTop.value = safeArea.top;
 });
 
-onLoad((options: any) => {
-    if (options.task_id) {
+onLoad((options?: Record<string, any>) => {
+    if (options?.task_id) {
         taskId.value = options.task_id;
         getChatList();
     }
+    init(options);
 });
 
 onShow(() => {

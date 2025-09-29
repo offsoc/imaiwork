@@ -112,27 +112,36 @@ export function useCozeChat(detail: Ref<any>, agentId: any) {
 
                 const pollParams = { id: agentId, conversation_id: conversationId.value };
                 const { start, end } = usePolling(async () => {
-                    const { status, id: chatDetailId } = await cozeAgentChatView({ chat_id: chatId, ...pollParams });
-                    if (status === CozeChattingStatus.COMPLETED) {
-                        end();
-                        const data = await cozeAgentChatMsgList({ chat_id: chatDetailId, ...pollParams });
-                        if (data && data.length) {
-                            data.forEach((item: any) => (result.reply += item.content));
-                        }
-                        result.loading = false;
-                        isReceiving.value = false;
-                        isStopChat.value = false;
+                    try {
+                        const { status, id: chatDetailId } = await cozeAgentChatView({
+                            chat_id: chatId,
+                            ...pollParams,
+                        });
+                        if (status === CozeChattingStatus.COMPLETED) {
+                            end();
+                            const data = await cozeAgentChatMsgList({ chat_id: chatDetailId, ...pollParams });
+                            if (data && data.length) {
+                                data.forEach((item: any) => (result.reply += item.content));
+                            }
+                            result.loading = false;
+                            resetChat();
 
-                        if (isNewConversation) {
-                            onNewConversation({
-                                id: conversationId.value,
-                                title: content,
-                                conversation_id: conversationId.value,
-                                content: content,
-                            });
+                            if (isNewConversation) {
+                                onNewConversation({
+                                    id: conversationId.value,
+                                    title: content,
+                                    conversation_id: conversationId.value,
+                                    content: content,
+                                });
+                            }
+                        } else if (status === CozeChattingStatus.FAILED) {
+                            end();
+                            throw new Error("聊天失败");
                         }
-                    } else if (status === CozeChattingStatus.FAILED) {
+                    } catch (error) {
                         end();
+                        result.loading = false;
+                        result.reply = "聊天失败，请稍后重试";
                         throw new Error("聊天失败");
                     }
                 }, {});
@@ -141,17 +150,25 @@ export function useCozeChat(detail: Ref<any>, agentId: any) {
                 result.loading = false;
                 result.reply = (error as string) || "发生错误";
                 feedback.msgError((error as string) || "发生错误");
-                isReceiving.value = false;
-                isStopChat.value = false;
+                resetChat();
             }
         }
     };
 
-    // 停止聊天
-    const stopChat = () => {
-        streamReader.value?.cancel();
+    const resetChat = () => {
         isReceiving.value = false;
         isStopChat.value = false;
+    };
+
+    // 停止聊天
+    const stopChat = () => {
+        if (isStream.value) {
+            streamReader.value?.cancel();
+            isReceiving.value = false;
+            isStopChat.value = false;
+        } else {
+            feedback.msgWarning("直接返回类型，聊天不可取消~");
+        }
     };
 
     // 设置对话ID

@@ -2,31 +2,30 @@
 
 namespace app\common\workerman\rpa\handlers\xhs;
 
-use Workerman\Connection\TcpConnection;
-use app\common\workerman\rpa\BaseMessageHandler;
-use app\common\model\sv\SvAccount;
-use app\common\model\sv\SvPrivateMessage;
-use app\common\model\sv\SvReplyStrategy;
-use app\common\model\wechat\AiWechatLog;
-use app\common\model\kb\KbRobot;
+use app\api\logic\ChatLogic;
+use app\api\logic\service\TokenLogService;
+use app\common\enum\user\AccountLogEnum;
+use app\common\logic\AccountLogLogic;
+use app\common\model\chat\ChatLog;
 use app\common\model\chat\ModelsSetting;
+use app\common\model\ChatPrompt;
+use app\common\model\kb\KbRobot;
+use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvAccountContact;
 use app\common\model\sv\SvAccountKeyword;
-use app\common\model\sv\SvRobotKeyword;
-use app\common\model\sv\SvSetting;
-use app\api\logic\service\TokenLogService;
-use app\common\model\ChatPrompt;
-use app\common\enum\user\AccountLogEnum;
-use app\common\model\chat\ChatLog;
-use app\api\logic\ChatLogic;
-use app\common\logic\AccountLogLogic;
-use app\common\model\user\User;
-use app\common\workerman\rpa\WorkerEnum;
-use Workerman\Lib\Timer;
 use app\common\model\sv\SvAddWechatRecord;
 use app\common\model\sv\SvAddWechatStrategy;
+use app\common\model\sv\SvPrivateMessage;
+use app\common\model\sv\SvReplyStrategy;
+use app\common\model\sv\SvRobotKeyword;
+use app\common\model\user\User;
 use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatLog;
+use app\common\workerman\rpa\BaseMessageHandler;
+use app\common\workerman\rpa\WorkerEnum;
 use think\facade\Db;
+use Workerman\Connection\TcpConnection;
+use Workerman\Lib\Timer;
 
 class MessageHandler extends BaseMessageHandler
 {
@@ -305,6 +304,43 @@ class MessageHandler extends BaseMessageHandler
                 ];
                 $keys = $this->checkCradKeyword($account, $request);
                 $request['message'] = empty($keys) ? $content['replyContent'] : $keys;
+
+                //ai接管时间回复策略
+                if ($reply->working_enable == 1 && !empty($reply->working_time)) {
+                    $reply->working_time = json_decode($reply->working_time, true);
+                    $workingTime         = $reply->working_time ? $reply->working_time[date('N')] : [];
+                    $nonWorkingReply     = $reply->non_working_reply ?? '你好，我现在休息中，请在工作时间再找我哦~';
+                    if (!empty($workingTime)) {
+                        $work = false;
+                        foreach ($workingTime as $value) {
+                            $time = explode('-', $value);
+                            if (time() > strtotime(date('Y-m-d ' . $time[0] . ':00')) && time() < strtotime(date('Y-m-d ' . $time[1] . ':00'))) {
+                                $work = true;
+                            }
+                        }
+                        if (!$work) {
+                            $this->setLog('AI非工作时间' . $this->payload['deviceId'], 'msg');
+                            $nonWorkingKey = 'non-working-xhs:' . $this->payload['deviceId'] . 'friend:' . $friend['friend_id'];
+                            $nonWorkingReplyStatus =   $this->service->getRedis()->get($nonWorkingKey);
+                            if ($nonWorkingReplyStatus){
+                                $this->setLog('1小时内非工作时间消息不回复:' . $this->payload['deviceId'], 'msg');
+                                $this->payload['type'] = WorkerEnum::DEFAULT_TEXT;
+                                $this->payload['reply'] = "1小时内非工作时间消息不回复";
+                                $this->payload['code'] = WorkerEnum::NOT_SUPPORT;
+                                $this->sendError($this->connection, $this->payload);
+                                $this->updatePrivateMessageStatus($account, $friend);
+                                return;
+                            }
+                            $this->service->getRedis()->set($nonWorkingKey, 1, 'EX',3600);
+                            $request['message']      = $nonWorkingReply;
+                            $request['message_list'] = [$nonWorkingReply];
+                            $this->send($request);
+                            $this->updatePrivateMessageStatus($account, $friend);
+                            return;
+                        }
+                    }
+                }
+
                 //开启图片回复策略
                 if ($reply->image_enable == 1 && $request['message_type'] == 2) {
                     $this->setLog('图片回复' . $this->payload['deviceId'], 'msg');
@@ -328,20 +364,33 @@ class MessageHandler extends BaseMessageHandler
                     }
                 }
 
-                //step 1. 正则匹配停止AI回复
-                $stop = $this->regularMatchStopAI($reply, $request);
-                if ($stop) {
-                    SvSetting::where('account', $account['account'])->where('user_id', $account['user_id'])->update(['takeover_mode' => 0]);
-                    $this->setLog('已停止ai回复:' . $this->payload['deviceId'], 'msg');
-                    $this->payload['type'] = WorkerEnum::WEB_STOP_AI_TEXT;
-                    $this->payload['reply'] = "已停止ai回复";
-                    $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
-                    $this->sendError($this->connection, $this->payload);;
-
-                    $this->sendErrorResponse($content, $this->payload['reply']);
-                    $this->updatePrivateMessageStatus($account, $friend);
-                    return;
+                //new step 1. 正则匹配无需回复的关键词
+                if ($reply->stop_enable == 1){
+                    $stop = $this->regularMatchStopAI($reply, $request);
+                    if ($stop) {
+                        $this->setLog('本条消息不回复:' . $this->payload['deviceId'], 'msg');
+                        $this->payload['type'] = WorkerEnum::DEFAULT_TEXT;
+                        $this->payload['reply'] = "本条消息不回复";
+                        $this->payload['code'] = WorkerEnum::NOT_SUPPORT;
+                        $this->sendError($this->connection, $this->payload);
+                        $this->updatePrivateMessageStatus($account, $friend);
+                        return;
+                    }
                 }
+
+                //step 1. 正则匹配停止AI回复 //TODO 后续可能会加此逻辑，先保留
+//                if ($stop) {
+//                    SvSetting::where('account', $account['account'])->where('user_id', $account['user_id'])->update(['takeover_mode' => 0]);
+//                    $this->setLog('已停止ai回复:' . $this->payload['deviceId'], 'msg');
+//                    $this->payload['type'] = WorkerEnum::WEB_STOP_AI_TEXT;
+//                    $this->payload['reply'] = "已停止ai回复";
+//                    $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
+//                    $this->sendError($this->connection, $this->payload);;
+//
+//                    $this->sendErrorResponse($content, $this->payload['reply']);
+//                    $this->updatePrivateMessageStatus($account, $friend);
+//                    return;
+//                }
 
                 SvPrivateMessage::where('user_id', '=', $request['user_id'])
                     ->where('account', $request['account'])
@@ -737,7 +786,20 @@ class MessageHandler extends BaseMessageHandler
             $content['replyTime'] = $content['replyTime'] == '刚刚' ? date('Y-m-d H:i:s', time()) : $content['replyTime'];
             if (is_array($content['replyContent'])) {
                 $content['replyContent'] = array_filter($content['replyContent']);
+                //若存在AI机器人id，查询回复策略
+                if (!empty($account['robot_id'])){
+                    $robot = KbRobot::where('id', $account['robot_id'])->findOrEmpty();
+                    $reply = !$robot->isEmpty() ? SvReplyStrategy::where('user_id', $robot->user_id)->where('robot_id', $robot->id)->findOrEmpty() : [];
+                }
                 foreach ($content['replyContent'] as $_message) {
+                    //若存在无需回复策略，过滤数据
+                    if (!empty($reply) && $reply->stop_enable == 1){
+                        $data['message'] = [$_message];
+                        $stop = $this->regularMatchStopAI($reply, $data);
+                        if ($stop){
+                            continue;
+                        }
+                    }
                     $result = SvPrivateMessage::create([
                         'user_id' => $account['user_id'],
                         'device_code' => $this->payload['deviceId'],

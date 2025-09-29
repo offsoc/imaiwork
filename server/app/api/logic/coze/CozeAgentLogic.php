@@ -3,9 +3,11 @@
 namespace app\api\logic\coze;
 
 use app\api\logic\ApiLogic;
+use app\common\model\auth\Admin;
 use app\common\model\coze\CozeAgent;
 use app\common\model\coze\CozeLog;
 use app\common\model\coze\CozeWorkflow;
+use app\common\model\user\User;
 use TencentCloud\Antiddos\V20200309\Models\DDoSAIRelation;
 use think\facade\Db;
 
@@ -237,5 +239,50 @@ class CozeAgentLogic extends ApiLogic
         
         self::$returnData = $agent;
         return true;
+    }
+
+
+
+
+    public static function commonLists($data)
+    {
+        $pageNo = ($data['page_no'] - 1) * $data['page_size'];
+        $pageSize = $data['page_size'];
+        $agent_cate_id = $data['agent_cate_id'] ?? '-1';
+        $type = $data['type'] ?? '0';
+        $result = CozeAgent::where('source',CozeAgent::SOURCE_ADMIN);
+        if ($type != '0') {
+            $result = $result->where('type',$type);
+        }
+        if ($agent_cate_id != '-1') {
+            $result = $result->where('agent_cate_id',$agent_cate_id);
+        }
+        $result = $result->order(['create_time' => 'desc'])
+            ->limit($pageNo, $pageSize)
+            ->select()->toArray();
+
+        foreach ($result as &$item) {
+            $item['source_text'] = CozeAgent::getSourceText((int)($item['source'] ?? 0));
+            $item['type_text'] = CozeAgent::getTypeText((int)($item['type'] ?? 0));
+            $item['permissions_text'] = CozeAgent::getPermissionsText((int)($item['permissions'] ?? 0));
+            $item['stream_text'] = CozeAgent::getStreamText((int)($item['stream'] ?? 0));
+            $item['deduction_text'] = CozeAgent::getDeductionText((int)($item['deduction'] ?? 0));
+
+            if ($item['source'] == CozeAgent::SOURCE_USER) {
+                $item['nickname'] = User::where('id', $item['source_id'])->value('nickname');
+            }else{
+                $item['nickname'] = Admin::where('id', $item['source_id'])->value('name');
+            }
+        }
+
+        $data = [
+            'lists' => $result,
+            'count' => CozeAgent::where('type',$type)
+                ->where('source',CozeAgent::SOURCE_ADMIN)
+                ->count(),
+            'page_no' => $data['page_no'],
+            'page_size' => $data['page_size'],
+        ];
+        return $data;
     }
 }

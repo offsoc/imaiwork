@@ -39,6 +39,9 @@
                                 <span class="text-[#ffffffcc]">{{ label }}</span>
                             </div>
                         </DefineTemplate>
+                        <div v-if="item.status == 1 && isCreate" @click="handlePlay(item.video_url)">
+                            <SelectItemTemplate label="查看数字人克隆视频" icon="local-icon-play" />
+                        </div>
                         <div v-if="item.status == 1" @click="handleDownLoad(item.video_url)">
                             <SelectItemTemplate label="下载视频" icon="local-icon-download" />
                         </div>
@@ -62,7 +65,7 @@
             <template v-if="item.status == 1">
                 <div
                     class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-[99]"
-                    @click="handlePlay(item.video_url)">
+                    @click="handlePlay(item.clip_video_url || item.video_url)">
                     <div class="w-12 h-12">
                         <play-btn></play-btn>
                     </div>
@@ -138,7 +141,7 @@ const props = withDefaults(
             clip_video_url: "",
         }),
         showVersion: true,
-        isCreate: true,
+        isCreate: false,
     }
 );
 

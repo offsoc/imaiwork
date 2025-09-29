@@ -39,7 +39,7 @@ const tabbarList = computed(() => {
             selectedIconPath: AssistantSelectedIcon,
             text: "AI助理",
             link: {
-                path: "/pages/assistant/assistant",
+                path: "/pages/agent/agent",
             },
         },
         {

@@ -4,10 +4,10 @@
             <view @click="choose" class="w-full">
                 <slot name="trigger" v-if="$slots.trigger"> </slot>
                 <template v-else>
-                    <view class="file-button">
-                        <u-icon name="arrow-upward" :size="32" v-if="fileType === 'file'" />
-                        <u-icon name="camera" :size="32" v-else />
-                        <view class="ml-[10rpx]">
+                    <view
+                        class="flex flex-col items-center justify-center border border-solid border-[#efefef] rounded-[10rpx] bg-white px-2 py-4">
+                        <u-icon name="/static/images/icons/upload.svg" :size="48"></u-icon>
+                        <view class="ml-[10rpx] text-xs mt-2">
                             {{ getBtnText }}
                         </view>
                     </view>
@@ -17,8 +17,8 @@
 
         <view class="file-list">
             <view class="file-item relative" v-for="item in filesLists" :key="item.url">
-                <view class="text-primary mr-[10rpx] flex">
-                    <u-icon v-if="fileType == 'file'" :size="32" name="file-text" />
+                <view class="bg-primary mr-[10rpx] flex p-[6rpx] rounded-[10rpx]">
+                    <u-icon v-if="fileType == 'file'" :size="30" name="file-text" color="#ffffff" />
                     <image v-if="fileType == 'image'" :src="item.path || item.url" class="w-[32rpx] h-[32rpx]" />
                     <image v-if="fileType == 'video'" :src="item.path || item.url" class="w-[32rpx] h-[32rpx]" />
                 </view>
@@ -27,8 +27,11 @@
                         {{ item.name }}
                     </view>
                 </view>
-                <view v-if="!disabled" @click.stop="removeFile(item.url!)" class="relative flex items-center z-10">
-                    <u-icon name="close" :size="28" />
+                <view
+                    v-if="!disabled"
+                    @click.stop="removeFile(item.url!)"
+                    class="w-4 h-4 flex items-center justify-center rounded-full bg-primary">
+                    <u-icon name="close" :size="16" color="#ffffff" />
                 </view>
                 <view
                     class="absolute bottom-[0px] w-full left-0 flex"
@@ -344,15 +347,6 @@ defineExpose({
         display: flex;
         margin-right: 20rpx;
         flex: none;
-        .file-button {
-            display: flex;
-            align-items: center;
-            padding: 15rpx 20rpx;
-            border-radius: 10rpx;
-            background: #fff;
-            box-shadow: 0 0 10px #e6e9ed;
-            @apply text-primary text-xs;
-        }
     }
     .file-list {
         flex: 1;
@@ -360,7 +354,7 @@ defineExpose({
         .file-item {
             padding: 15rpx 20rpx;
             border-radius: 10rpx;
-            background: #f7fbff;
+            background: #f8f9ff;
             font-size: 26rpx;
             display: flex;
             align-items: center;

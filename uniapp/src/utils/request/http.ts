@@ -1,7 +1,7 @@
 import { merge } from "lodash-es";
 import { isFunction } from "@vue/shared";
 import { HttpRequestOptions, RequestConfig, RequestEventStreamConfig, RequestOptions, UploadFileOption } from "./type";
-import { RequestErrMsgEnum, RequestMethodsEnum } from "@/enums/requestEnums";
+import { RequestCodeEnum, RequestErrMsgEnum, RequestMethodsEnum } from "@/enums/requestEnums";
 import requestCancel from "./cancel";
 import { objectToQuery } from "../util";
 import { isObject } from "mathjs";
@@ -349,7 +349,7 @@ export default class HttpRequest {
                         return;
                     }
                     if (err.errMsg == RequestErrMsgEnum.ABORT) {
-                        reject("请求已终止");
+                        reject({ message: "请求已终止", errno: RequestCodeEnum.ABORT });
                         return;
                     }
                     if (responseInterceptorsCatchHook && isFunction(responseInterceptorsCatchHook)) {

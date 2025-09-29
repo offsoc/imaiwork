@@ -1,14 +1,19 @@
 <template>
     <view
-        class="h-full w-full rounded-[48rpx] bg-cover relative"
+        class="h-full w-full bg-no-repeat relative"
         :style="{
             backgroundImage: `url(${poster})`,
+            backgroundSize: '100% 100%',
+            borderRadius: borderRadius + 'rpx',
         }">
         <view class="relative z-[88] w-full h-full video-box" :class="{ 'opacity-0': !isShowVideo }">
             <video
                 id="video-player"
-                class="w-full h-full rounded-[48rpx]"
-                object-fit="cover"
+                class="w-full h-full"
+                :style="{
+                    borderRadius: borderRadius + 'rpx',
+                }"
+                object-fit="contain"
                 :src="videoUrl"
                 :controls="isFullScreen"
                 @play="onVideoPlay"
@@ -19,10 +24,17 @@
                 @fullscreenchange="fullscreenchange"></video>
         </view>
         <view
+            v-if="showClose"
+            class="absolute left-0 w-[64rpx] h-[64rpx] z-[787]"
+            :style="{ top: statusBarHeight + 'px' }"
+            @click="$emit('close')">
+            <image src="@/ai_modules/digital_human/static/icons/close.svg" class="w-full h-full"></image>
+        </view>
+        <view
             class="absolute top-[50%] left-[50%] z-[888]"
             style="transform: translate(-50%, -50%)"
             v-if="!isPlaying || isEnded"
-            @click="toggleVideo()">
+            @click.stop="toggleVideo()">
             <image
                 src="@/ai_modules/digital_human/static/images/common/video_play.png"
                 :style="{ width: `${playIconSize}rpx`, height: `${playIconSize}rpx` }"></image>
@@ -47,7 +59,7 @@
                             src="@/ai_modules/digital_human/static/icons/video_stop.svg"
                             class="w-[28rpx] h-[28rpx]"></image>
                     </view>
-                    <view class="flex-1 py-1 progress-box" @click="clickProgress">
+                    <view class="flex-1 py-1 progress-box" @click.stop="clickProgress">
                         <view class="bg-white flex-1 relative h-[4rpx]">
                             <view
                                 class="bg-primary h-full absolute left-0"
@@ -75,13 +87,19 @@ const props = withDefaults(
         poster: string;
         videoUrl: string;
         playIconSize?: number;
+        borderRadius?: number;
+        showClose?: boolean;
     }>(),
     {
         poster: "",
         videoUrl: "",
         playIconSize: 108,
+        borderRadius: 48,
+        showClose: false,
     }
 );
+
+const { statusBarHeight } = uni.$u.sys();
 
 const videoContent = ref<any>();
 
@@ -125,6 +143,7 @@ const clickProgress = async (e: any) => {
 };
 
 const clickFullScreen = () => {
+    console.log("clickFullScreen", videoContent.value);
     videoContent.value.requestFullScreen();
 };
 
@@ -166,6 +185,10 @@ const getVideoContent = async () => {
 
 onMounted(async () => {
     await getVideoContent();
+});
+
+defineExpose({
+    toggleVideo,
 });
 </script>
 

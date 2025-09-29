@@ -25,8 +25,10 @@ class KbRobotLists extends BaseApiDataLists
         }
         if (isset($this->params['source']) && ($this->params['source'] == 0 || $this->params['source'] == '0')) {
             $where[] = ['kr.user_id', '=', 0];
-        } else {
+        } else if (isset($this->params['source']) && ($this->params['source'] == 1 || $this->params['source'] == '1')) {
             $where[] = ['kr.user_id', '=', $this->userId];
+        } else {
+            $where[] = ['kr.user_id', 'in', [0, $this->userId]];
         }
         if (!empty($this->params['keyword']) && $this->params['keyword']) {
             $where[] = ['kr.name', 'like', '%' . $this->params['keyword'] . '%'];

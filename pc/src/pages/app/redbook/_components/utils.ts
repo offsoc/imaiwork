@@ -14,7 +14,7 @@ export function validateSchedule(list) {
 
         // 1. 空值检查
         if (!cur || cur.start_time == null || cur.start_time === "" || cur.end_time == null || cur.end_time === "") {
-            return { valid: false, errorType: "empty", indexes: [i] };
+            return { valid: false, errorType: "选择时间不能为空", indexes: [i] };
         }
 
         const s = toMin(cur.start_time);
@@ -22,7 +22,7 @@ export function validateSchedule(list) {
 
         // 2. 自己倒序
         if (s >= e) {
-            return { valid: false, errorType: "selfInvalid", indexes: [i] };
+            return { valid: false, errorType: "选择时间冲突", indexes: [i] };
         }
 
         // 3. 与上一段比较
@@ -32,7 +32,7 @@ export function validateSchedule(list) {
 
             if (s < pe) {
                 // 重叠 / 顺序错误
-                return { valid: false, errorType: "overlap", indexes: [i - 1, i] };
+                return { valid: false, errorType: "选择时间冲突", indexes: [i - 1, i] };
             }
         }
     }

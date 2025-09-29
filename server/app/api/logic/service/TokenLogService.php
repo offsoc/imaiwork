@@ -80,11 +80,11 @@ class TokenLogService
         } else if(in_array($scene, ['knowledge_create','create_vector_knowledge'])) {
             $need_token = 20;
         } else if(in_array($scene, ['knowledge_retrieve'])) {
-            $need_token = 100;
+            $need_token = 10;
         } else if(in_array($scene, ['knowledge_chat'])) {
-            $need_token = 100;
+            $need_token = 10;
         } else if(in_array($scene, ['keyword_to_title','keyword_to_subtitle','keyword_to_copywriting'])) {
-            $need_token = 100;
+            $need_token = 10;
         }else if(in_array($scene, ['volc_text_to_video','volc_image_to_video'])) {
             $need_token = 325;
         }else if(in_array($scene, ['doubao_txt_to_video','doubao_image_to_video'])) {

@@ -73,6 +73,7 @@
                             :key="index"
                             @click="handleChoose(item.id)">
                             <video-item
+                                is-create
                                 :item="{
                                     id: item.id,
                                     name: item.name,
@@ -177,11 +178,6 @@ const handleAllSelect = () => {
     } else {
         deleteIds.value = [];
     }
-};
-
-const handleTabClick = (tab: any) => {
-    queryParams.model_version = tab.paneName;
-    resetPage();
 };
 
 const load = async () => {

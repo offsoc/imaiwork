@@ -76,6 +76,7 @@ trait SphTaskTrait
                 'greeting_content' => $row['greeting_content'],
                 //'greeting_content' => self::createGreetingContents($row, $row['user_id']),
                 'status' => 0,
+                'ocr_type' => $row['ocr_type'],
                 'crawl_type' => $row['crawl_type'],
                 'create_time' => $row['create_time'],
             ];

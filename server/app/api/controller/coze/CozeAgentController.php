@@ -10,6 +10,8 @@ use think\exception\HttpResponseException;
 
 class CozeAgentController extends BaseApiController
 {
+    public array $notNeedLogin = ['commonLists'];
+
     public function add()
     {
         try {
@@ -69,5 +71,16 @@ class CozeAgentController extends BaseApiController
     public function lists()
     {
         return $this->dataLists(new CozeAgentLists());
+    }
+
+
+    public function commonLists(){
+        try {
+            $request = $this->request->get();
+            $result = CozeAgentLogic::commonLists($request);
+            return $this->data($result);
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
     }
 }

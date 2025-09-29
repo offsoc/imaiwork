@@ -209,7 +209,7 @@ class IndexLogic extends BaseLogic
             'app_config' => ConfigService::get('app_config', 'redbook', []),
             'ai_live' =>  ConfigService::get('ai_live', 'config', []),
             'by_name'=>  self::getByName(),
-
+            'ai_model' => ConfigService::get('chat', 'ai_model', []),
 
         ];
     }

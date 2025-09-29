@@ -4,11 +4,7 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "u-navbar": "../../../../uni_modules/vk-uview-ui/components/u-navbar/u-navbar",
-    "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
     "u-icon": "../../../../uni_modules/vk-uview-ui/components/u-icon/u-icon",
-    "empty": "../../../../components/empty/empty",
-    "video-item": "../../components/video-item/video-item",
-    "video-preview": "../../components/video-preview/video-preview",
     "choose-model": "../../components/choose-model/choose-model"
   }
 }

@@ -1,69 +1,79 @@
-import { ref } from 'vue'
+import { ref } from "vue";
 
 interface Options {
-    time?: number
-    totalTime?: number
-    count?: number
-    callback?(): void
+    key?: string;
+    time?: number;
+    totalTime?: number;
+    count?: number;
+    callback?(): void;
 }
+let pollingDict: any = {};
 
-// @ts-ignore
-export default function usePolling(fun: () => Promise<any>, options?: Options) {
-    const result = ref(null)
-    const error = ref(null)
-    const {
-        time = 2000,
-        totalTime,
-        count,
-        callback = () => false
-    } = options || ({} as Options)
-    let timer: any = null
-    let endTime: number | null = null
-    let totalCount = 0
-    const run = () => {
-        console.log('count2:', count)
+export default function usePolling(fun: any, options: Options) {
+    const { key, time = 2000, totalTime, count, callback = () => false } = options;
+
+    let timer: any = null;
+    let endTime: any = null;
+    let totalCount = 0;
+    let stopped = false; // 添加一个stopped标志
+
+    const result = ref(null);
+    const error = ref(null);
+
+    function run() {
+        if (stopped) return; // 如果stopped为true，则不再执行轮询
         if (endTime && endTime <= Date.now()) {
-            console.log('结束？？')
-            end()
-            callback()
-            return
+            end();
+            callback();
+            return;
         }
         if (count && totalCount >= count) {
-            console.log('结束？？')
-            end()
-            callback()
-            return
+            end();
+            callback();
+            return;
         }
-        totalCount++
+        totalCount++;
         timer = setTimeout(() => {
             fun()
-                .then((res) => {
-                    result.value = res
-                    run()
+                .then((res: any) => {
+                    result.value = res;
+                    run();
                 })
-                .catch((err) => {
-                    error.value = err
-                })
-        }, time)
+                .catch((err: any) => {
+                    error.value = err;
+                });
+        }, time);
     }
 
     const start = () => {
-        endTime = totalTime ? Date.now() + totalTime : null
-        console.log('不是运行了吗？？')
-        run()
-    }
+        stopped = false; // 重置stopped标志
+        end(); // add this line
+        if (key && pollingDict[key]) {
+            pollingDict[key].end();
+            delete pollingDict[key];
+        }
+        endTime = totalTime ? Date.now() + totalTime : null;
+        run();
+        if (key) {
+            pollingDict[key] = { end };
+        }
+    };
+
     const end = () => {
-        setTimeout(() => {
-            clearTimeout(timer)
-            timer = null
-            endTime = null
-            totalCount = 0
-        }, 0)
-    }
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+            endTime = null;
+            totalCount = 0;
+            stopped = true; // 设置stopped标志为true
+            if (key) delete pollingDict[key];
+        }
+    };
+
     return {
         start,
         end,
         error,
-        result
-    }
+        result,
+    };
 }

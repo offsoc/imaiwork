@@ -36,7 +36,7 @@
                             v-if="showPlay"
                             class="rounded-full bg-[#ffffff33] w-[68rpx] h-[68rpx]"
                             style="backdrop-filter: blur(5px)"
-                            @click="handlePlay(item.video_url)">
+                            @click="handlePlay(item.clip_video_url || item.video_url)">
                             <image
                                 src="@/ai_modules/digital_human/static/icons/play3.svg"
                                 class="w-full h-full"></image>
@@ -45,7 +45,7 @@
                     <slot name="content"></slot>
                     <view
                         v-if="item.automatic_clip == 1"
-                        class="absolute bottom-[80px] left-0 w-full z-[51] text-[#ffffff80] text-[22rpx] text-center">
+                        class="absolute bottom-[160rpx] left-0 w-full z-[51] text-[#ffffff80] text-[22rpx] text-center">
                         <template v-if="item.clip_status == 1 || item.clip_status == 2"> AI智能剪辑中... </template>
                         <template v-if="item.clip_status == 3">AI智能剪辑完成</template>
                         <template v-if="item.clip_status == 4">AI智能剪辑失败</template>
@@ -83,6 +83,7 @@
 
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
+import { saveVideoToPhotosAlbum } from "@/utils/file";
 const props = withDefaults(
     defineProps<{
         item: Record<string, any>;
@@ -130,41 +131,39 @@ const handlePlay = (url: string) => {
 
 const handleMore = () => {
     const { status, id, clip_status, automatic_clip } = props.item;
-    let itemList = ["删除"];
+    let itemList = [];
     if (status == 1) {
-        itemList.push("下载视频");
+        itemList.push("下载视频", "播放克隆视频");
         if (automatic_clip == 1 && clip_status == 3) {
             itemList.push("下载剪辑视频", "播放剪辑视频");
         }
     } else {
         itemList.push("重试");
     }
+    itemList.push("删除");
+
     uni.showActionSheet({
         itemList,
         success: (res) => {
             const { tapIndex } = res;
-            if (tapIndex == 0) {
-                uni.showModal({
-                    title: "提示",
-                    content: "确定要删除吗？",
-                    success: (res) => {
-                        if (res.confirm) {
-                            emit("delete", id);
-                        }
-                    },
-                });
-            }
             if (status == 1) {
-                if (tapIndex == 1) {
+                if (tapIndex == 0) {
+                    saveVideoToPhotosAlbum(props.item.video_url);
                     emit("download", props.item.video_url);
                 }
-                if (tapIndex == 2) {
-                    emit("download", props.item.clip_video_url);
+                if (tapIndex == 1) {
+                    handlePlay(props.item.video_url);
                 }
-                if (tapIndex == 3) {
-                    handlePlay(props.item.clip_video_url);
+                if (automatic_clip == 1 && clip_status == 3) {
+                    if (tapIndex == 2) {
+                        saveVideoToPhotosAlbum(props.item.clip_video_url);
+                        emit("download", props.item.clip_video_url);
+                    }
+                    if (tapIndex == 3) {
+                        handlePlay(props.item.clip_video_url);
+                    }
                 }
-            } else {
+            } else if (tapIndex == 0) {
                 uni.showModal({
                     title: "提示",
                     content: "确定要重试吗？",
@@ -175,23 +174,19 @@ const handleMore = () => {
                     },
                 });
             }
+
+            if (tapIndex === itemList.length - 1) {
+                uni.showModal({
+                    title: "提示",
+                    content: "确定要删除吗？",
+                    success: (res) => {
+                        if (res.confirm) {
+                            emit("delete", id);
+                        }
+                    },
+                });
+            }
         },
     });
 };
 </script>
-
-<style scoped lang="scss">
-.rotation {
-    @apply w-8 h-8 border-[5px] border-dotted border-white rounded-full inline-block mb-4;
-    animation: rotation 3s linear infinite;
-}
-
-@keyframes rotation {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-</style>

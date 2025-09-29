@@ -69,7 +69,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (event: "close"): void;
-    (event: "choose", value: { case_type: number; images: string[]; text?: string }): void;
+    (event: "choose", value: { case_type: number; data: any; text?: string }): void;
 }>();
 
 const goodsCasePopRef = shallowRef();
@@ -81,7 +81,7 @@ const queryParams = reactive({
     user_type: undefined,
 });
 
-const { pager, getLists } = usePaging({
+const { pager, getLists, resetPage } = usePaging({
     fetchFun: getCaseLists,
     params: queryParams,
     isScroll: true,
@@ -95,12 +95,11 @@ const load = () => {
 const choose = (item: any) => {
     const {
         case_type,
-        params: { images, text },
-        result_image,
+        params: { text },
     } = item;
     emit("choose", {
         case_type,
-        images: ["goods", "model"].includes(props.type) ? [result_image] : images,
+        data: item,
         text,
     });
     close();
@@ -108,14 +107,6 @@ const choose = (item: any) => {
 
 const open = () => {
     goodsCasePopRef.value.open();
-};
-
-const close = () => {
-    emit("close");
-    goodsCasePopRef.value.close();
-};
-
-onMounted(() => {
     if (props.type == "goods") {
         queryParams.case_type = "3";
     } else if (props.type == "model") {
@@ -124,8 +115,15 @@ onMounted(() => {
     } else {
         queryParams.case_type = "0,1";
     }
-    getLists();
-});
+    resetPage();
+};
+
+const close = () => {
+    emit("close");
+    goodsCasePopRef.value.close();
+};
+
+onMounted(() => {});
 
 defineExpose({
     open,
