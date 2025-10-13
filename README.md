@@ -143,8 +143,8 @@
 
 | 模块       | 技术框架                                     |
 |------------|----------------------------------------------|
-| 前端       | Vue、Vuex、Vant、Ant Design of Vue           |
-| 后端       | PHP、MySQL、Redis、Swoole、Hyperf            |
+| 前端       | Vue、Vuex、Vue           |
+| 后端       | PHP、MySQL、Redis、Swoole           |
 | RPA 端     | auto.js                                      |
 
 ---
