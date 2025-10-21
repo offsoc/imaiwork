@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,9 @@ use TencentCloud\Common\AbstractModel;
 <li>ErrorPage：自定义错误页面；</li>
 <li>ModifyResponseHeader：修改 HTTP 节点响应头；</li>
 <li>ModifyRequestHeader：修改 HTTP 节点请求头；</li>
-<li>ResponseSpeedLimit：单连接下载限速。</li>
-<li>SetContentIdentifierParameters：设置内容标识符。</li>
-注意：此字段可能返回 null，表示取不到有效值。
+<li>ResponseSpeedLimit：单连接下载限速；</li>
+<li>SetContentIdentifier：设置内容标识符；</li>
+<li>Vary：Vary 特性配置。</li>
  * @method void setName(string $Name) 设置操作名称。名称需要与参数结构体对应，例如 Name=Cache，则 CacheParameters 必填。
 <li>Cache：节点缓存 TTL；</li>
 <li>CacheKey：自定义 Cache Key；</li>
@@ -91,9 +91,9 @@ use TencentCloud\Common\AbstractModel;
 <li>ErrorPage：自定义错误页面；</li>
 <li>ModifyResponseHeader：修改 HTTP 节点响应头；</li>
 <li>ModifyRequestHeader：修改 HTTP 节点请求头；</li>
-<li>ResponseSpeedLimit：单连接下载限速。</li>
-<li>SetContentIdentifierParameters：设置内容标识符。</li>
-注意：此字段可能返回 null，表示取不到有效值。
+<li>ResponseSpeedLimit：单连接下载限速；</li>
+<li>SetContentIdentifier：设置内容标识符；</li>
+<li>Vary：Vary 特性配置。</li>
  * @method CacheParameters getCacheParameters() 获取节点缓存 TTL 配置参数，当 Name 取值为 Cache 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setCacheParameters(CacheParameters $CacheParameters) 设置节点缓存 TTL 配置参数，当 Name 取值为 Cache 时，该参数必填。
@@ -157,6 +157,10 @@ use TencentCloud\Common\AbstractModel;
  * @method ForceRedirectHTTPSParameters getForceRedirectHTTPSParameters() 获取访问协议强制 HTTPS 跳转配置，当 Name 取值为 ForceRedirectHTTPS 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setForceRedirectHTTPSParameters(ForceRedirectHTTPSParameters $ForceRedirectHTTPSParameters) 设置访问协议强制 HTTPS 跳转配置，当 Name 取值为 ForceRedirectHTTPS 时，该参数必填。
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method OriginPullProtocolParameters getOriginPullProtocolParameters() 获取回源 HTTPS 配置参数，当 Name 取值为 OriginPullProtocol 时，该参数必填。
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setOriginPullProtocolParameters(OriginPullProtocolParameters $OriginPullProtocolParameters) 设置回源 HTTPS 配置参数，当 Name 取值为 OriginPullProtocol 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method CompressionParameters getCompressionParameters() 获取智能压缩配置，当 Name 取值为 Compression 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
@@ -226,12 +230,16 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setResponseSpeedLimitParameters(ResponseSpeedLimitParameters $ResponseSpeedLimitParameters) 设置单连接下载限速配置参数，当 Name 取值为 ResponseSpeedLimit 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
- * @method SetContentIdentifierParameters getSetContentIdentifierParameters() 获取内容标识配置参数，当 Name 取值为 HttpResponse 时，该参数必填。
+ * @method SetContentIdentifierParameters getSetContentIdentifierParameters() 获取内容标识配置参数，当 Name 取值为 SetContentIdentifier 时，该参数必填。
 
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setSetContentIdentifierParameters(SetContentIdentifierParameters $SetContentIdentifierParameters) 设置内容标识配置参数，当 Name 取值为 HttpResponse 时，该参数必填。
+ * @method void setSetContentIdentifierParameters(SetContentIdentifierParameters $SetContentIdentifierParameters) 设置内容标识配置参数，当 Name 取值为 SetContentIdentifier 时，该参数必填。
 
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method VaryParameters getVaryParameters() 获取Vary 特性配置参数，当 Name 取值为 Vary 时，该参数必填。
+ * @method void setVaryParameters(VaryParameters $VaryParameters) 设置Vary 特性配置参数，当 Name 取值为 Vary 时，该参数必填。
+ * @method ContentCompressionParameters getContentCompressionParameters() 获取内容压缩配置参数，当 Name 取值为 ContentCompression 时，该参数必填。该参数为白名单功能，如有需要，请联系腾讯云工程师处理。
+ * @method void setContentCompressionParameters(ContentCompressionParameters $ContentCompressionParameters) 设置内容压缩配置参数，当 Name 取值为 ContentCompression 时，该参数必填。该参数为白名单功能，如有需要，请联系腾讯云工程师处理。
  */
 class RuleEngineAction extends AbstractModel
 {
@@ -270,9 +278,9 @@ class RuleEngineAction extends AbstractModel
 <li>ErrorPage：自定义错误页面；</li>
 <li>ModifyResponseHeader：修改 HTTP 节点响应头；</li>
 <li>ModifyRequestHeader：修改 HTTP 节点请求头；</li>
-<li>ResponseSpeedLimit：单连接下载限速。</li>
-<li>SetContentIdentifierParameters：设置内容标识符。</li>
-注意：此字段可能返回 null，表示取不到有效值。
+<li>ResponseSpeedLimit：单连接下载限速；</li>
+<li>SetContentIdentifier：设置内容标识符；</li>
+<li>Vary：Vary 特性配置。</li>
      */
     public $Name;
 
@@ -371,6 +379,12 @@ class RuleEngineAction extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $ForceRedirectHTTPSParameters;
+
+    /**
+     * @var OriginPullProtocolParameters 回源 HTTPS 配置参数，当 Name 取值为 OriginPullProtocol 时，该参数必填。
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $OriginPullProtocolParameters;
 
     /**
      * @var CompressionParameters 智能压缩配置，当 Name 取值为 Compression 时，该参数必填。
@@ -475,11 +489,21 @@ class RuleEngineAction extends AbstractModel
     public $ResponseSpeedLimitParameters;
 
     /**
-     * @var SetContentIdentifierParameters 内容标识配置参数，当 Name 取值为 HttpResponse 时，该参数必填。
+     * @var SetContentIdentifierParameters 内容标识配置参数，当 Name 取值为 SetContentIdentifier 时，该参数必填。
 
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $SetContentIdentifierParameters;
+
+    /**
+     * @var VaryParameters Vary 特性配置参数，当 Name 取值为 Vary 时，该参数必填。
+     */
+    public $VaryParameters;
+
+    /**
+     * @var ContentCompressionParameters 内容压缩配置参数，当 Name 取值为 ContentCompression 时，该参数必填。该参数为白名单功能，如有需要，请联系腾讯云工程师处理。
+     */
+    public $ContentCompressionParameters;
 
     /**
      * @param string $Name 操作名称。名称需要与参数结构体对应，例如 Name=Cache，则 CacheParameters 必填。
@@ -516,9 +540,9 @@ class RuleEngineAction extends AbstractModel
 <li>ErrorPage：自定义错误页面；</li>
 <li>ModifyResponseHeader：修改 HTTP 节点响应头；</li>
 <li>ModifyRequestHeader：修改 HTTP 节点请求头；</li>
-<li>ResponseSpeedLimit：单连接下载限速。</li>
-<li>SetContentIdentifierParameters：设置内容标识符。</li>
-注意：此字段可能返回 null，表示取不到有效值。
+<li>ResponseSpeedLimit：单连接下载限速；</li>
+<li>SetContentIdentifier：设置内容标识符；</li>
+<li>Vary：Vary 特性配置。</li>
      * @param CacheParameters $CacheParameters 节点缓存 TTL 配置参数，当 Name 取值为 Cache 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param CacheKeyParameters $CacheKeyParameters 自定义 Cache Key 配置参数，当 Name 取值为 CacheKey 时，该参数必填。
@@ -550,6 +574,8 @@ class RuleEngineAction extends AbstractModel
      * @param HostHeaderParameters $HostHeaderParameters Host Header 重写配置参数，当 Name 取值为 HostHeader 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param ForceRedirectHTTPSParameters $ForceRedirectHTTPSParameters 访问协议强制 HTTPS 跳转配置，当 Name 取值为 ForceRedirectHTTPS 时，该参数必填。
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param OriginPullProtocolParameters $OriginPullProtocolParameters 回源 HTTPS 配置参数，当 Name 取值为 OriginPullProtocol 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param CompressionParameters $CompressionParameters 智能压缩配置，当 Name 取值为 Compression 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
@@ -585,9 +611,11 @@ class RuleEngineAction extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param ResponseSpeedLimitParameters $ResponseSpeedLimitParameters 单连接下载限速配置参数，当 Name 取值为 ResponseSpeedLimit 时，该参数必填。
 注意：此字段可能返回 null，表示取不到有效值。
-     * @param SetContentIdentifierParameters $SetContentIdentifierParameters 内容标识配置参数，当 Name 取值为 HttpResponse 时，该参数必填。
+     * @param SetContentIdentifierParameters $SetContentIdentifierParameters 内容标识配置参数，当 Name 取值为 SetContentIdentifier 时，该参数必填。
 
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param VaryParameters $VaryParameters Vary 特性配置参数，当 Name 取值为 Vary 时，该参数必填。
+     * @param ContentCompressionParameters $ContentCompressionParameters 内容压缩配置参数，当 Name 取值为 ContentCompression 时，该参数必填。该参数为白名单功能，如有需要，请联系腾讯云工程师处理。
      */
     function __construct()
     {
@@ -686,6 +714,11 @@ class RuleEngineAction extends AbstractModel
             $this->ForceRedirectHTTPSParameters->deserialize($param["ForceRedirectHTTPSParameters"]);
         }
 
+        if (array_key_exists("OriginPullProtocolParameters",$param) and $param["OriginPullProtocolParameters"] !== null) {
+            $this->OriginPullProtocolParameters = new OriginPullProtocolParameters();
+            $this->OriginPullProtocolParameters->deserialize($param["OriginPullProtocolParameters"]);
+        }
+
         if (array_key_exists("CompressionParameters",$param) and $param["CompressionParameters"] !== null) {
             $this->CompressionParameters = new CompressionParameters();
             $this->CompressionParameters->deserialize($param["CompressionParameters"]);
@@ -774,6 +807,16 @@ class RuleEngineAction extends AbstractModel
         if (array_key_exists("SetContentIdentifierParameters",$param) and $param["SetContentIdentifierParameters"] !== null) {
             $this->SetContentIdentifierParameters = new SetContentIdentifierParameters();
             $this->SetContentIdentifierParameters->deserialize($param["SetContentIdentifierParameters"]);
+        }
+
+        if (array_key_exists("VaryParameters",$param) and $param["VaryParameters"] !== null) {
+            $this->VaryParameters = new VaryParameters();
+            $this->VaryParameters->deserialize($param["VaryParameters"]);
+        }
+
+        if (array_key_exists("ContentCompressionParameters",$param) and $param["ContentCompressionParameters"] !== null) {
+            $this->ContentCompressionParameters = new ContentCompressionParameters();
+            $this->ContentCompressionParameters->deserialize($param["ContentCompressionParameters"]);
         }
     }
 }

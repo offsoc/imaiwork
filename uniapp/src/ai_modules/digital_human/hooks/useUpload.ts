@@ -57,6 +57,14 @@ export const uploadLimit: any = {
         videoMinDuration: 30,
         videoMaxDuration: 300,
     },
+    //闪剪
+    [DigitalHumanModelVersionEnum.SHANJIAN]: {
+        size: 100,
+        minResolution: 360,
+        maxResolution: 2000,
+        videoMinDuration: 10,
+        videoMaxDuration: 30,
+    },
 };
 
 export const useUpload = (options: Options) => {
@@ -103,7 +111,9 @@ export const useUpload = (options: Options) => {
 
         uploadResult.width = fileWidth;
         uploadResult.height = fileHeight;
-
+        const fileDuration = file.duration;
+        const isResolutionValid = fileWidth >= resolution[0] && fileWidth <= resolution[1];
+        const isDurationValid = fileDuration >= duration[0] && fileDuration <= duration[1];
         if (fileSize > size * 1024 * 1024) {
             uni.showToast({
                 title: `视频大小不能超过${size}M`,
@@ -111,14 +121,14 @@ export const useUpload = (options: Options) => {
                 duration: 4000,
             });
             return;
-        } else if (fileWidth < resolution[0] || fileWidth > resolution[1]) {
+        } else if (!isResolutionValid) {
             uni.showToast({
-                title: `上传视频分辨率不能满足${resolution[0]}*${resolution[1]}`,
+                title: `上传视频分辨率不能满足${resolution[0]}-${resolution[1]}`,
                 icon: "none",
                 duration: 4000,
             });
             return;
-        } else if (file.duration < duration[0] || file.duration > duration[1]) {
+        } else if (!isDurationValid) {
             uni.showToast({
                 title: `上传视频时长不能小于${duration[0]}秒或大于${duration[1]}秒`,
                 icon: "none",

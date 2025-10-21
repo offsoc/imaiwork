@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ namespace TencentCloud\Tdmq\V20200217\Models;
 use TencentCloud\Common\AbstractModel;
 
 /**
- * RabbiteMQ集群基本信息
+ * RabbitMQ 集群基本信息
  *
- * @method string getClusterId() 获取集群ID
- * @method void setClusterId(string $ClusterId) 设置集群ID
+ * @method string getClusterId() 获取集群 ID
+ * @method void setClusterId(string $ClusterId) 设置集群 ID
  * @method string getClusterName() 获取集群名称
  * @method void setClusterName(string $ClusterName) 设置集群名称
  * @method string getRegion() 获取地域信息
  * @method void setRegion(string $Region) 设置地域信息
- * @method integer getCreateTime() 获取创建时间，毫秒为单位
- * @method void setCreateTime(integer $CreateTime) 设置创建时间，毫秒为单位
+ * @method integer getCreateTime() 获取创建时间，毫秒为单位。unix 时间戳
+ * @method void setCreateTime(integer $CreateTime) 设置创建时间，毫秒为单位。unix 时间戳
  * @method string getRemark() 获取集群说明信息
  * @method void setRemark(string $Remark) 设置集群说明信息
  * @method array getVpcs() 获取VPC及网络信息
@@ -42,8 +42,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setMessagePublishRate(float $MessagePublishRate) 设置每秒生产消息数 单位：条/秒
  * @method integer getMessageStackNumber() 获取堆积消息数 单位：条
  * @method void setMessageStackNumber(integer $MessageStackNumber) 设置堆积消息数 单位：条
- * @method integer getExpireTime() 获取过期时间
- * @method void setExpireTime(integer $ExpireTime) 设置过期时间
+ * @method integer getExpireTime() 获取实例到期时间，按量付费的资源该值为 0，毫秒为单位。unix 时间戳
+ * @method void setExpireTime(integer $ExpireTime) 设置实例到期时间，按量付费的资源该值为 0，毫秒为单位。unix 时间戳
  * @method integer getChannelNumber() 获取Channel数量
  * @method void setChannelNumber(integer $ChannelNumber) 设置Channel数量
  * @method integer getConnectionNumber() 获取Connection数量
@@ -70,15 +70,19 @@ use TencentCloud\Common\AbstractModel;
  * @method void setPayMode(integer $PayMode) 设置计费模式，0-后付费，1-预付费
  * @method integer getInstanceType() 获取实例类型，0 专享版、1 Serverless 版
  * @method void setInstanceType(integer $InstanceType) 设置实例类型，0 专享版、1 Serverless 版
- * @method integer getIsolatedTime() 获取开始隔离时间
- * @method void setIsolatedTime(integer $IsolatedTime) 设置开始隔离时间
+ * @method integer getIsolatedTime() 获取开始隔离时间。unix 时间戳
+ * @method void setIsolatedTime(integer $IsolatedTime) 设置开始隔离时间。unix 时间戳
  * @method boolean getContainer() 获取是否为容器实例，默认 true
  * @method void setContainer(boolean $Container) 设置是否为容器实例，默认 true
+ * @method array getTags() 获取标签列表
+ * @method void setTags(array $Tags) 设置标签列表
+ * @method boolean getEnableDeletionProtection() 获取是否已开启删除保护
+ * @method void setEnableDeletionProtection(boolean $EnableDeletionProtection) 设置是否已开启删除保护
  */
 class RabbitMQClusterInfo extends AbstractModel
 {
     /**
-     * @var string 集群ID
+     * @var string 集群 ID
      */
     public $ClusterId;
 
@@ -93,7 +97,7 @@ class RabbitMQClusterInfo extends AbstractModel
     public $Region;
 
     /**
-     * @var integer 创建时间，毫秒为单位
+     * @var integer 创建时间，毫秒为单位。unix 时间戳
      */
     public $CreateTime;
 
@@ -133,7 +137,7 @@ class RabbitMQClusterInfo extends AbstractModel
     public $MessageStackNumber;
 
     /**
-     * @var integer 过期时间
+     * @var integer 实例到期时间，按量付费的资源该值为 0，毫秒为单位。unix 时间戳
      */
     public $ExpireTime;
 
@@ -199,7 +203,7 @@ class RabbitMQClusterInfo extends AbstractModel
     public $InstanceType;
 
     /**
-     * @var integer 开始隔离时间
+     * @var integer 开始隔离时间。unix 时间戳
      */
     public $IsolatedTime;
 
@@ -209,10 +213,20 @@ class RabbitMQClusterInfo extends AbstractModel
     public $Container;
 
     /**
-     * @param string $ClusterId 集群ID
+     * @var array 标签列表
+     */
+    public $Tags;
+
+    /**
+     * @var boolean 是否已开启删除保护
+     */
+    public $EnableDeletionProtection;
+
+    /**
+     * @param string $ClusterId 集群 ID
      * @param string $ClusterName 集群名称
      * @param string $Region 地域信息
-     * @param integer $CreateTime 创建时间，毫秒为单位
+     * @param integer $CreateTime 创建时间，毫秒为单位。unix 时间戳
      * @param string $Remark 集群说明信息
      * @param array $Vpcs VPC及网络信息
      * @param array $ZoneIds 可用区信息
@@ -220,7 +234,7 @@ class RabbitMQClusterInfo extends AbstractModel
      * @param integer $QueueNumber 队列数量
      * @param float $MessagePublishRate 每秒生产消息数 单位：条/秒
      * @param integer $MessageStackNumber 堆积消息数 单位：条
-     * @param integer $ExpireTime 过期时间
+     * @param integer $ExpireTime 实例到期时间，按量付费的资源该值为 0，毫秒为单位。unix 时间戳
      * @param integer $ChannelNumber Channel数量
      * @param integer $ConnectionNumber Connection数量
      * @param integer $ConsumerNumber Consumer数量
@@ -234,8 +248,10 @@ class RabbitMQClusterInfo extends AbstractModel
      * @param string $ClusterVersion 集群版本信息
      * @param integer $PayMode 计费模式，0-后付费，1-预付费
      * @param integer $InstanceType 实例类型，0 专享版、1 Serverless 版
-     * @param integer $IsolatedTime 开始隔离时间
+     * @param integer $IsolatedTime 开始隔离时间。unix 时间戳
      * @param boolean $Container 是否为容器实例，默认 true
+     * @param array $Tags 标签列表
+     * @param boolean $EnableDeletionProtection 是否已开启删除保护
      */
     function __construct()
     {
@@ -357,6 +373,19 @@ class RabbitMQClusterInfo extends AbstractModel
 
         if (array_key_exists("Container",$param) and $param["Container"] !== null) {
             $this->Container = $param["Container"];
+        }
+
+        if (array_key_exists("Tags",$param) and $param["Tags"] !== null) {
+            $this->Tags = [];
+            foreach ($param["Tags"] as $key => $value){
+                $obj = new Tag();
+                $obj->deserialize($value);
+                array_push($this->Tags, $obj);
+            }
+        }
+
+        if (array_key_exists("EnableDeletionProtection",$param) and $param["EnableDeletionProtection"] !== null) {
+            $this->EnableDeletionProtection = $param["EnableDeletionProtection"];
         }
     }
 }

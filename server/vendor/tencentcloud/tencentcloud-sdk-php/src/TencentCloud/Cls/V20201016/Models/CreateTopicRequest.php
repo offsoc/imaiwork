@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,21 @@ use TencentCloud\Common\AbstractModel;
  * CreateTopic请求参数结构体
  *
  * @method string getLogsetId() 获取日志集ID
+- 通过[获取日志集列表](https://cloud.tencent.com/document/product/614/58624)获取日志集Id。
  * @method void setLogsetId(string $LogsetId) 设置日志集ID
+- 通过[获取日志集列表](https://cloud.tencent.com/document/product/614/58624)获取日志集Id。
  * @method string getTopicName() 获取日志主题名称
+名称限制
+- 不能为空字符串
+- 不能包含字符'|'
+- 不能使用以下名称["cls_service_log","loglistener_status","loglistener_alarm","loglistener_business","cls_service_metric"]
+
  * @method void setTopicName(string $TopicName) 设置日志主题名称
+名称限制
+- 不能为空字符串
+- 不能包含字符'|'
+- 不能使用以下名称["cls_service_log","loglistener_status","loglistener_alarm","loglistener_business","cls_service_metric"]
+
  * @method integer getPartitionCount() 获取日志主题分区个数。默认创建1个，最大支持创建10个分区。
  * @method void setPartitionCount(integer $PartitionCount) 设置日志主题分区个数。默认创建1个，最大支持创建10个分区。
  * @method array getTags() 获取标签描述列表，通过指定该参数可以同时绑定标签到相应的日志主题。最大支持10个标签键值对，同一个资源只能绑定到同一个标签键下。
@@ -48,12 +60,14 @@ use TencentCloud\Common\AbstractModel;
  * @method void setHotPeriod(integer $HotPeriod) 设置0：关闭日志沉降。
 非0：开启日志沉降后标准存储的天数，HotPeriod需要大于等于7，且小于Period。
 仅在StorageType为 hot 时生效。
- * @method string getTopicId() 获取主题自定义ID，格式为：用户自定义部分-APPID。未填写该参数时将自动生成ID。
+ * @method string getTopicId() 获取主题自定义ID，格式为：用户自定义部分-用户APPID。未填写该参数时将自动生成ID。
 - 用户自定义部分仅支持小写字母、数字和-，且不能以-开头和结尾，长度为3至40字符
-- APPID可在https://console.cloud.tencent.com/developer页面查询
- * @method void setTopicId(string $TopicId) 设置主题自定义ID，格式为：用户自定义部分-APPID。未填写该参数时将自动生成ID。
+- 尾部需要使用-拼接用户APPID，APPID可在https://console.cloud.tencent.com/developer页面查询。
+- 如果指定该字段，需保证全地域唯一
+ * @method void setTopicId(string $TopicId) 设置主题自定义ID，格式为：用户自定义部分-用户APPID。未填写该参数时将自动生成ID。
 - 用户自定义部分仅支持小写字母、数字和-，且不能以-开头和结尾，长度为3至40字符
-- APPID可在https://console.cloud.tencent.com/developer页面查询
+- 尾部需要使用-拼接用户APPID，APPID可在https://console.cloud.tencent.com/developer页面查询。
+- 如果指定该字段，需保证全地域唯一
  * @method boolean getIsWebTracking() 获取免鉴权开关。 false：关闭； true：开启。默认为false。
 开启后将支持指定操作匿名访问该日志主题。详情请参见[日志主题](https://cloud.tencent.com/document/product/614/41035)。
  * @method void setIsWebTracking(boolean $IsWebTracking) 设置免鉴权开关。 false：关闭； true：开启。默认为false。
@@ -65,11 +79,17 @@ class CreateTopicRequest extends AbstractModel
 {
     /**
      * @var string 日志集ID
+- 通过[获取日志集列表](https://cloud.tencent.com/document/product/614/58624)获取日志集Id。
      */
     public $LogsetId;
 
     /**
      * @var string 日志主题名称
+名称限制
+- 不能为空字符串
+- 不能包含字符'|'
+- 不能使用以下名称["cls_service_log","loglistener_status","loglistener_alarm","loglistener_business","cls_service_metric"]
+
      */
     public $TopicName;
 
@@ -118,9 +138,10 @@ class CreateTopicRequest extends AbstractModel
     public $HotPeriod;
 
     /**
-     * @var string 主题自定义ID，格式为：用户自定义部分-APPID。未填写该参数时将自动生成ID。
+     * @var string 主题自定义ID，格式为：用户自定义部分-用户APPID。未填写该参数时将自动生成ID。
 - 用户自定义部分仅支持小写字母、数字和-，且不能以-开头和结尾，长度为3至40字符
-- APPID可在https://console.cloud.tencent.com/developer页面查询
+- 尾部需要使用-拼接用户APPID，APPID可在https://console.cloud.tencent.com/developer页面查询。
+- 如果指定该字段，需保证全地域唯一
      */
     public $TopicId;
 
@@ -137,7 +158,13 @@ class CreateTopicRequest extends AbstractModel
 
     /**
      * @param string $LogsetId 日志集ID
+- 通过[获取日志集列表](https://cloud.tencent.com/document/product/614/58624)获取日志集Id。
      * @param string $TopicName 日志主题名称
+名称限制
+- 不能为空字符串
+- 不能包含字符'|'
+- 不能使用以下名称["cls_service_log","loglistener_status","loglistener_alarm","loglistener_business","cls_service_metric"]
+
      * @param integer $PartitionCount 日志主题分区个数。默认创建1个，最大支持创建10个分区。
      * @param array $Tags 标签描述列表，通过指定该参数可以同时绑定标签到相应的日志主题。最大支持10个标签键值对，同一个资源只能绑定到同一个标签键下。
      * @param boolean $AutoSplit 是否开启自动分裂，默认值为true
@@ -150,9 +177,10 @@ class CreateTopicRequest extends AbstractModel
      * @param integer $HotPeriod 0：关闭日志沉降。
 非0：开启日志沉降后标准存储的天数，HotPeriod需要大于等于7，且小于Period。
 仅在StorageType为 hot 时生效。
-     * @param string $TopicId 主题自定义ID，格式为：用户自定义部分-APPID。未填写该参数时将自动生成ID。
+     * @param string $TopicId 主题自定义ID，格式为：用户自定义部分-用户APPID。未填写该参数时将自动生成ID。
 - 用户自定义部分仅支持小写字母、数字和-，且不能以-开头和结尾，长度为3至40字符
-- APPID可在https://console.cloud.tencent.com/developer页面查询
+- 尾部需要使用-拼接用户APPID，APPID可在https://console.cloud.tencent.com/developer页面查询。
+- 如果指定该字段，需保证全地域唯一
      * @param boolean $IsWebTracking 免鉴权开关。 false：关闭； true：开启。默认为false。
 开启后将支持指定操作匿名访问该日志主题。详情请参见[日志主题](https://cloud.tencent.com/document/product/614/41035)。
      * @param TopicExtendInfo $Extends 日志主题扩展信息

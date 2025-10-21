@@ -125,11 +125,15 @@
                                     <template #content>
                                         <div class="w-[303px]">
                                             <div>
-                                                本地识别（免费）使用系统内置识别逻辑完成，不消耗算力，识别率较依赖本地环境，复杂图片可能不够精准
+                                                本地识别（每条扣{{
+                                                    getOCRLocalToken
+                                                }}算力）使用系统内置识别逻辑完成，识别率较依赖本地环境，复杂图片可能不够精准
                                             </div>
                                             <div class="mt-5">
-                                                云端OCR识别（每条扣 1
-                                                算力）使用云端OCR服务识别微信号，每条线索消耗1算力，识别率更高，支持更复杂的图片和场景
+                                                云端OCR识别（每条扣
+                                                {{ getOCRCloudToken }} 算力）使用云端OCR服务识别微信号，每条线索消耗{{
+                                                    getOCRCloudToken
+                                                }}算力，识别率更高，支持更复杂的图片和场景
                                             </div>
                                         </div>
                                     </template>
@@ -302,22 +306,58 @@
                                     </div>
                                 </div>
                                 <div class="mt-3">
-                                    <div class="text-white mb-3">加好友备注内容</div>
-                                    <ElInput
-                                        v-model="formData.remark"
-                                        type="textarea"
-                                        placeholder="请输入备注内容，为了避免封控，系统将自动调用AI进行去重润色"
-                                        resize="none"
-                                        :rows="3" />
-                                    <div class="flex justify-end mt-4">
-                                        <ElButton
-                                            type="primary"
-                                            class="!h-[26px] !text-[11px]"
-                                            @click="
-                                                handleGreetingContentSetting(GreetingContentSettingTypeEnum.ADD_FRIEND)
-                                            "
-                                            >AI提示词设置</ElButton
-                                        >
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-white mb-3">加好友备注内容</div>
+                                        <ElSwitch
+                                            v-model="formData.add_remark_enable"
+                                            style="--el-switch-off-color: #333333"
+                                            :active-value="1"
+                                            :inactive-value="0" />
+                                    </div>
+                                    <div class="mt-3" v-if="formData.add_remark_enable == 0">
+                                        <ElInput
+                                            v-model="formData.remark"
+                                            type="textarea"
+                                            placeholder="请输入备注内容，为了避免封控，系统将自动调用AI进行去重润色"
+                                            resize="none"
+                                            :rows="3" />
+                                        <div class="flex justify-end mt-4">
+                                            <ElButton
+                                                type="primary"
+                                                class="!h-[26px] !text-[11px]"
+                                                @click="
+                                                    handleGreetingContentSetting(
+                                                        GreetingContentSettingTypeEnum.ADD_FRIEND
+                                                    )
+                                                "
+                                                >AI提示词设置</ElButton
+                                            >
+                                        </div>
+                                    </div>
+                                    <div v-if="formData.add_remark_enable == 1">
+                                        <div class="flex flex-wrap gap-2">
+                                            <div
+                                                v-for="(item, index) in getWechatRemarks"
+                                                :key="index"
+                                                class="cursor-pointer hover:bg-app-bg-1 transition-all duration-300 border border-app-border-2 rounded-md px-4 py-2 flex items-center"
+                                                @click="handleEditRemark(item, index)">
+                                                <div class="text-white text-xs">{{ item }}</div>
+                                                <div class="w-[1px] h-[8px] bg-app-border-2 mx-2"></div>
+                                                <div class="w-4 h-4" @click.stop="handleDeleteRemark(index)">
+                                                    <close-btn :icon-size="10"></close-btn>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <ElDivider class="!my-4 !border-app-border-2" />
+                                        <div class="flex justify-end">
+                                            <ElButton
+                                                class="!h-8 !border-[#ffffff1a]"
+                                                color="#121212"
+                                                @click="handleAddRemark">
+                                                <Icon name="el-icon-Plus" color="#ffffff" :size="12"></Icon>
+                                                <div class="text-white text-xs ml-1">新增文案</div>
+                                            </ElButton>
+                                        </div>
                                     </div>
                                 </div>
                             </template>
@@ -343,6 +383,11 @@
         ref="aiPrivateChatRef"
         @close="isPrivateChatGen = false"
         @confirm="handleAddPrivateChatSuccess" />
+    <remark-pop
+        v-if="isAddRemarkGen"
+        ref="remarkPopupRef"
+        @close="isAddRemarkGen = false"
+        @confirm="handleAddRemarkConfirm" />
 </template>
 
 <script setup lang="ts">
@@ -350,11 +395,14 @@ import { createTask } from "@/api/sph";
 import { getDeviceList } from "@/api/device";
 import { getWeChatLists } from "@/api/person_wechat";
 import dayjs from "dayjs";
-import { AppTypeEnum } from "@/enums/appEnums";
+import { AppTypeEnum, TokensSceneEnum } from "@/enums/appEnums";
 import { CreateTypeEnum } from "@/pages/app/sph/_enums";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
 import AiAddKeyword from "./ai-add-keyword.vue";
 import AiAddFriend from "./ai-add-friend.vue";
 import AiPrivateChat from "./ai-private-chat.vue";
+import RemarkPop from "@/pages/app/sph/_components/remark-pop.vue";
 const emit = defineEmits(["back"]);
 
 interface FormData {
@@ -365,7 +413,7 @@ interface FormData {
     chat_type: string;
     chat_number: number;
     chat_interval_time: number;
-    add_type: string;
+    add_type: "0" | "1";
     add_number: number;
     add_interval_time: number;
     remark: string;
@@ -376,7 +424,28 @@ interface FormData {
     wechat_id: string[];
     wechat_reg_type: 0 | 1 | 2;
     ocr_type: 1 | 2;
+    add_remark_enable: 0 | 1;
+    remarks: any[];
 }
+enum GreetingContentSettingTypeEnum {
+    ADD_FRIEND = "add_friend",
+    PRIVATE_CHAT = "private_chat",
+}
+
+const appStore = useAppStore();
+const userStore = useUserStore();
+
+const getOCRCloudToken = computed(() => {
+    return userStore.getTokenByScene(TokensSceneEnum.SPH_OCR)?.score;
+});
+
+const getOCRLocalToken = computed(() => {
+    return userStore.getTokenByScene(TokensSceneEnum.SPH_LOCAL_OCR)?.score;
+});
+
+const getWechatRemarks = computed(() => {
+    return appStore.config.wechat_remarks || [];
+});
 
 const formData = reactive<FormData>({
     name: dayjs().format("MMDDHHmmss") + "视频号获客任务",
@@ -386,7 +455,7 @@ const formData = reactive<FormData>({
     chat_type: "0",
     chat_number: 30,
     chat_interval_time: 10,
-    add_type: "0",
+    add_type: "1",
     remark: "",
     add_number: 15,
     add_interval_time: 10,
@@ -397,6 +466,8 @@ const formData = reactive<FormData>({
     wechat_id: [],
     wechat_reg_type: 0,
     ocr_type: 1,
+    add_remark_enable: 1,
+    remarks: getWechatRemarks.value || [],
 });
 
 const { optionsData: deviceOptions } = useDictOptions<{
@@ -451,11 +522,6 @@ const handleKeywordDelete = (index: number) => {
     formData.keywords.splice(index, 1);
 };
 
-enum GreetingContentSettingTypeEnum {
-    ADD_FRIEND = "add_friend",
-    PRIVATE_CHAT = "private_chat",
-}
-
 const isAddFriendGen = ref(false);
 const isPrivateChatGen = ref(false);
 const aiAddFriendRef = shallowRef<InstanceType<typeof AiAddFriend>>();
@@ -488,6 +554,37 @@ const handleAddPrivateChatSuccess = (content: string) => {
     formData.private_message_prompt = content;
 };
 
+const isAddRemarkGen = ref(false);
+const remarkPopupRef = shallowRef<InstanceType<typeof RemarkPop>>();
+const editRemarkIndex = ref(-1);
+
+const handleAddRemark = async () => {
+    isAddRemarkGen.value = true;
+    await nextTick();
+    remarkPopupRef.value?.open();
+};
+
+const handleAddRemarkConfirm = (remark: string) => {
+    if (editRemarkIndex.value == -1) {
+        formData.remarks.push(remark);
+    } else {
+        formData.remarks[editRemarkIndex.value] = remark;
+    }
+    editRemarkIndex.value = -1;
+    isAddRemarkGen.value = false;
+};
+
+const handleEditRemark = async (item: string, index: number) => {
+    isAddRemarkGen.value = true;
+    editRemarkIndex.value = index;
+    await nextTick();
+    remarkPopupRef.value?.open(item);
+};
+
+const handleDeleteRemark = (index: number) => {
+    formData.remarks.splice(index, 1);
+};
+
 const { lockFn, isLock } = useLockFn(async () => {
     if (!formData.name) {
         feedback.msgWarning("请输入任务名称");
@@ -497,6 +594,13 @@ const { lockFn, isLock } = useLockFn(async () => {
         return;
     } else if (formData.keywords.length == 1 && !formData.keywords[0]) {
         feedback.msgWarning("请输入检索关键词");
+        return;
+    } else if (formData.add_type == "1" && formData.wechat_id.length == 0) {
+        feedback.msgWarning("请选择加微微信");
+        return;
+    }
+    if (formData.add_remark_enable == 1 && formData.remarks.length == 0) {
+        feedback.msgWarning("请输入加好友备注内容");
         return;
     }
     try {

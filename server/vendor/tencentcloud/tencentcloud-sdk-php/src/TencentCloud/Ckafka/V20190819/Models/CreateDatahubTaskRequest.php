@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ use TencentCloud\Common\AbstractModel;
 /**
  * CreateDatahubTask请求参数结构体
  *
- * @method string getTaskName() 获取任务名称
- * @method void setTaskName(string $TaskName) 设置任务名称
+ * @method string getTaskName() 获取任务名称,只能以字母起始,允许包含字母、数字、- 、.  、 下划线且长度不超过64 (、为分割符号规则不包含)
+ * @method void setTaskName(string $TaskName) 设置任务名称,只能以字母起始,允许包含字母、数字、- 、.  、 下划线且长度不超过64 (、为分割符号规则不包含)
  * @method string getTaskType() 获取任务类型，SOURCE数据接入，SINK数据流出
  * @method void setTaskType(string $TaskType) 设置任务类型，SOURCE数据接入，SINK数据流出
  * @method DatahubResource getSourceResource() 获取数据源
@@ -40,11 +40,13 @@ use TencentCloud\Common\AbstractModel;
  * @method void setTaskId(string $TaskId) 设置任务Id
  * @method array getTags() 获取标签列表
  * @method void setTags(array $Tags) 设置标签列表
+ * @method string getDescription() 获取任务描述信息
+ * @method void setDescription(string $Description) 设置任务描述信息
  */
 class CreateDatahubTaskRequest extends AbstractModel
 {
     /**
-     * @var string 任务名称
+     * @var string 任务名称,只能以字母起始,允许包含字母、数字、- 、.  、 下划线且长度不超过64 (、为分割符号规则不包含)
      */
     public $TaskName;
 
@@ -70,6 +72,7 @@ class CreateDatahubTaskRequest extends AbstractModel
 
     /**
      * @var PrivateLinkParam 实例连接参数【已废弃】
+     * @deprecated
      */
     public $PrivateLinkParam;
 
@@ -94,7 +97,12 @@ class CreateDatahubTaskRequest extends AbstractModel
     public $Tags;
 
     /**
-     * @param string $TaskName 任务名称
+     * @var string 任务描述信息
+     */
+    public $Description;
+
+    /**
+     * @param string $TaskName 任务名称,只能以字母起始,允许包含字母、数字、- 、.  、 下划线且长度不超过64 (、为分割符号规则不包含)
      * @param string $TaskType 任务类型，SOURCE数据接入，SINK数据流出
      * @param DatahubResource $SourceResource 数据源
      * @param DatahubResource $TargetResource 数据目标
@@ -104,6 +112,7 @@ class CreateDatahubTaskRequest extends AbstractModel
      * @param TransformsParam $TransformsParam 数据处理规则
      * @param string $TaskId 任务Id
      * @param array $Tags 标签列表
+     * @param string $Description 任务描述信息
      */
     function __construct()
     {
@@ -166,6 +175,10 @@ class CreateDatahubTaskRequest extends AbstractModel
                 $obj->deserialize($value);
                 array_push($this->Tags, $obj);
             }
+        }
+
+        if (array_key_exists("Description",$param) and $param["Description"] !== null) {
+            $this->Description = $param["Description"];
         }
     }
 }

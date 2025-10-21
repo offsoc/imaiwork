@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,14 @@ use TencentCloud\Common\AbstractModel;
  * @method array getAuthorizationTypes() 获取指定授权方式 支持多选:
 
 <ul>
-<li><strong>1</strong>:上传授权书方式</li>
 <li><strong>2</strong>: 法人授权方式</li>
-<li><strong>3</strong>: 法人身份认证方式</li>
+<li><strong>5</strong>: 授权书+对公打款方式</li>
 </ul>
  * @method void setAuthorizationTypes(array $AuthorizationTypes) 设置指定授权方式 支持多选:
 
 <ul>
-<li><strong>1</strong>:上传授权书方式</li>
 <li><strong>2</strong>: 法人授权方式</li>
-<li><strong>3</strong>: 法人身份认证方式</li>
+<li><strong>5</strong>: 授权书+对公打款方式</li>
 </ul>
  * @method string getOrganizationName() 获取认证企业名称，请确认该名称与企业营业执照中注册的名称一致。
 
@@ -158,6 +156,28 @@ p.s. 如果上传授权书 ，需遵循以下条件
 p.s. 如果上传授权书 ，需遵循以下条件 
 1.  超管的信息（超管姓名，超管手机号）必须为必填参数。
 2.  认证方式AuthorizationTypes必须只能是上传授权书方式 
+ * @method string getUserData() 获取调用方自定义的个性化字段(可自定义此名称)，并以base64方式编码，支持的最大数据大小为 4096长度。
+
+在. 企业引导企业实名认证后回调中，该字段的信息将原封不动地透传给贵方。回调的相关说明可参考开发者中心的<a href="https://qian.tencent.com/developers/company/callback_types_staffs" target="_blank">回调通知</a>模块。
+ * @method void setUserData(string $UserData) 设置调用方自定义的个性化字段(可自定义此名称)，并以base64方式编码，支持的最大数据大小为 4096长度。
+
+在. 企业引导企业实名认证后回调中，该字段的信息将原封不动地透传给贵方。回调的相关说明可参考开发者中心的<a href="https://qian.tencent.com/developers/company/callback_types_staffs" target="_blank">回调通知</a>模块。
+ * @method string getBankAccountNumber() 获取组织机构对公打款账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+ * @method void setBankAccountNumber(string $BankAccountNumber) 设置组织机构对公打款账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+ * @method boolean getBankAccountNumberSame() 获取对方打开链接认证时，对公打款账号是否要与接口传递上来的保持一致。<ul><li><b>false（默认值）</b>：关闭状态，实际认证时允许与接口传递的信息存在不一致。</li><li><b>true</b>：启用状态，实际认证时必须与接口传递的信息完全相符。</li></ul>
+
+
+p.s. 仅在对公打款不为空时有效
+ * @method void setBankAccountNumberSame(boolean $BankAccountNumberSame) 设置对方打开链接认证时，对公打款账号是否要与接口传递上来的保持一致。<ul><li><b>false（默认值）</b>：关闭状态，实际认证时允许与接口传递的信息存在不一致。</li><li><b>true</b>：启用状态，实际认证时必须与接口传递的信息完全相符。</li></ul>
+
+
+p.s. 仅在对公打款不为空时有效
  */
 class CreateOrganizationAuthUrlRequest extends AbstractModel
 {
@@ -170,9 +190,8 @@ class CreateOrganizationAuthUrlRequest extends AbstractModel
      * @var array 指定授权方式 支持多选:
 
 <ul>
-<li><strong>1</strong>:上传授权书方式</li>
 <li><strong>2</strong>: 法人授权方式</li>
-<li><strong>3</strong>: 法人身份认证方式</li>
+<li><strong>5</strong>: 授权书+对公打款方式</li>
 </ul>
      */
     public $AuthorizationTypes;
@@ -315,13 +334,35 @@ p.s. 如果上传授权书 ，需遵循以下条件
     public $PowerOfAttorneys;
 
     /**
+     * @var string 调用方自定义的个性化字段(可自定义此名称)，并以base64方式编码，支持的最大数据大小为 4096长度。
+
+在. 企业引导企业实名认证后回调中，该字段的信息将原封不动地透传给贵方。回调的相关说明可参考开发者中心的<a href="https://qian.tencent.com/developers/company/callback_types_staffs" target="_blank">回调通知</a>模块。
+     */
+    public $UserData;
+
+    /**
+     * @var string 组织机构对公打款账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+     */
+    public $BankAccountNumber;
+
+    /**
+     * @var boolean 对方打开链接认证时，对公打款账号是否要与接口传递上来的保持一致。<ul><li><b>false（默认值）</b>：关闭状态，实际认证时允许与接口传递的信息存在不一致。</li><li><b>true</b>：启用状态，实际认证时必须与接口传递的信息完全相符。</li></ul>
+
+
+p.s. 仅在对公打款不为空时有效
+     */
+    public $BankAccountNumberSame;
+
+    /**
      * @param UserInfo $Operator 操作人信息
      * @param array $AuthorizationTypes 指定授权方式 支持多选:
 
 <ul>
-<li><strong>1</strong>:上传授权书方式</li>
 <li><strong>2</strong>: 法人授权方式</li>
-<li><strong>3</strong>: 法人身份认证方式</li>
+<li><strong>5</strong>: 授权书+对公打款方式</li>
 </ul>
      * @param string $OrganizationName 认证企业名称，请确认该名称与企业营业执照中注册的名称一致。
 
@@ -384,6 +425,17 @@ p.s. 仅在企业名称不为空时有效
 p.s. 如果上传授权书 ，需遵循以下条件 
 1.  超管的信息（超管姓名，超管手机号）必须为必填参数。
 2.  认证方式AuthorizationTypes必须只能是上传授权书方式 
+     * @param string $UserData 调用方自定义的个性化字段(可自定义此名称)，并以base64方式编码，支持的最大数据大小为 4096长度。
+
+在. 企业引导企业实名认证后回调中，该字段的信息将原封不动地透传给贵方。回调的相关说明可参考开发者中心的<a href="https://qian.tencent.com/developers/company/callback_types_staffs" target="_blank">回调通知</a>模块。
+     * @param string $BankAccountNumber 组织机构对公打款账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+     * @param boolean $BankAccountNumberSame 对方打开链接认证时，对公打款账号是否要与接口传递上来的保持一致。<ul><li><b>false（默认值）</b>：关闭状态，实际认证时允许与接口传递的信息存在不一致。</li><li><b>true</b>：启用状态，实际认证时必须与接口传递的信息完全相符。</li></ul>
+
+
+p.s. 仅在对公打款不为空时有效
      */
     function __construct()
     {
@@ -481,6 +533,18 @@ p.s. 如果上传授权书 ，需遵循以下条件
 
         if (array_key_exists("PowerOfAttorneys",$param) and $param["PowerOfAttorneys"] !== null) {
             $this->PowerOfAttorneys = $param["PowerOfAttorneys"];
+        }
+
+        if (array_key_exists("UserData",$param) and $param["UserData"] !== null) {
+            $this->UserData = $param["UserData"];
+        }
+
+        if (array_key_exists("BankAccountNumber",$param) and $param["BankAccountNumber"] !== null) {
+            $this->BankAccountNumber = $param["BankAccountNumber"];
+        }
+
+        if (array_key_exists("BankAccountNumberSame",$param) and $param["BankAccountNumberSame"] !== null) {
+            $this->BankAccountNumberSame = $param["BankAccountNumberSame"];
         }
     }
 }

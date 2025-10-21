@@ -2,18 +2,17 @@
 
 namespace app\api\logic;
 
+use app\api\logic\service\TokenLogService;
+use app\common\enum\user\AccountLogEnum;
+use app\common\logic\AccountLogLogic;
+use app\common\model\ChatPrompt;
+use app\common\model\lianlian\LlAnalysis;
 use app\common\model\lianlian\LlChat;
+use app\common\model\lianlian\LlScene;
+use app\common\model\user\User;
 use app\common\service\ConfigService;
 use app\common\service\FileService;
-use app\common\model\lianlian\LlScene;
 use think\facade\Db;
-use app\common\model\lianlian\LlAnalysis;
-use app\common\model\ChatPrompt;
-use app\api\logic\service\TokenLogService;
-use app\common\model\user\User;
-use app\common\logic\AccountLogLogic;
-use app\common\enum\user\AccountLogEnum;
-use think\facade\Log;
 
 /**
  * logic
@@ -782,8 +781,11 @@ class LianLianLogic extends ApiLogic
             ]);
 
             if (!isset($response['data'])) {
+                throw new \Exception("语音识别失败，无人声或不清晰");
+            }
 
-                throw new \Exception("语音识别失败");
+            if (empty($response['data']['message'])){
+                throw new \Exception("语音识别失败，无人声或不清晰");
             }
 
             self::$returnData = ['message' => $response['data']['message'], 'audio_duration' => $response['data']['audio_duration']];

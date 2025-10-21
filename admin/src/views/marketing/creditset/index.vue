@@ -35,7 +35,7 @@ const tableData = ref<any[]>([]);
 
 const getCommonConfig = computed(() => {
     return tableData.value.filter((item) =>
-        ["common_chat", "scene_chat", "coze_agent_chat", "coze_workflow"].includes(item.scene)
+        ["common_chat", "scene_chat", "coze_agent_chat", "coze_workflow", "gemini_chat"].includes(item.scene)
     );
 });
 
@@ -52,6 +52,10 @@ const getAiPersonConfig = computed(() => {
             "human_avatar_chanjing",
             "human_voice_chanjing",
             "human_video_chanjing",
+            "human_avatar_shanjian",
+            "human_voice_shanjian",
+            "human_video_shanjian",
+            "shanjian_copywriting_create",
         ].includes(item.scene)
     );
 });
@@ -115,7 +119,14 @@ const getRedbookConfig = computed(() => {
 
 const getSphConfig = computed(() => {
     return tableData.value.filter((item) =>
-        ["sph_add_wechat", "sph_add_friends", "sph_private_chat", "sph_search_terms", "sph_ocr"].includes(item.scene)
+        [
+            "sph_add_wechat",
+            "sph_add_friends",
+            "sph_private_chat",
+            "sph_search_terms",
+            "sph_ocr",
+            "sph_local_ocr",
+        ].includes(item.scene)
     );
 });
 

@@ -75,7 +75,7 @@ const emit = defineEmits(["close", "success"]);
 const formRef = shallowRef<FormInstance>();
 const formData = reactive<any>({
     wechat_id: "", //微信ID，微信提供的ID
-    open_ai: 0, //AI总功能开关 0：关闭 1：开启
+    open_ai: 1, //AI总功能开关 0：关闭 1：开启
     remark: "wechat_ai", //备注
     takeover_mode: 1, //接管模式 0：人工接管 1：AI接管
     takeover_type: 1, //接管类型 0：全部 1：私聊 2：群聊

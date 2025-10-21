@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setDatahubId(string $DatahubId) 设置Datahub转储Id
  * @method array getStepList() 获取步骤列表
  * @method void setStepList(array $StepList) 设置步骤列表
+ * @method string getDescription() 获取任务描述信息
+ * @method void setDescription(string $Description) 设置任务描述信息
  */
 class DatahubTaskInfo extends AbstractModel
 {
@@ -108,6 +110,11 @@ class DatahubTaskInfo extends AbstractModel
     public $StepList;
 
     /**
+     * @var string 任务描述信息
+     */
+    public $Description;
+
+    /**
      * @param string $TaskId 任务Id
      * @param string $TaskName 任务名称
      * @param string $TaskType 任务类型，SOURCE数据接入，SINK数据流出
@@ -120,6 +127,7 @@ class DatahubTaskInfo extends AbstractModel
      * @param string $TaskCurrentStep 任务当前处于的步骤
      * @param string $DatahubId Datahub转储Id
      * @param array $StepList 步骤列表
+     * @param string $Description 任务描述信息
      */
     function __construct()
     {
@@ -182,6 +190,10 @@ class DatahubTaskInfo extends AbstractModel
 
         if (array_key_exists("StepList",$param) and $param["StepList"] !== null) {
             $this->StepList = $param["StepList"];
+        }
+
+        if (array_key_exists("Description",$param) and $param["Description"] !== null) {
+            $this->Description = $param["Description"];
         }
     }
 }

@@ -2,13 +2,17 @@
     <div class="h-full flex gap-4 w-full">
         <div class="grow min-h-0 flex flex-col">
             <div>
-                <ElTabs v-model="activeName" @tab-click="handleTabClick">
-                    <ElTabPane v-for="item in typeLists" :key="item.id" :label="item.name" :name="item.id"></ElTabPane>
-                </ElTabs>
-                <ElAlert title="请注意：视频、小程序、链接、文件支持个微使用" type="warning" class="mt-2"></ElAlert>
+                <el-tabs v-model="activeName" @tab-click="handleTabClick">
+                    <el-tab-pane
+                        v-for="item in typeLists"
+                        :key="item.id"
+                        :label="item.name"
+                        :name="item.id"></el-tab-pane>
+                </el-tabs>
+                <el-alert title="请注意：视频、小程序、链接、文件支持个微使用" type="warning" class="mt-2"></el-alert>
                 <div class="mt-2">
                     <div v-if="activeName === MaterialTypeEnum.TEXT" class="relative">
-                        <ElInput
+                        <el-input
                             v-model="fileData.text"
                             ref="textInputRef"
                             type="textarea"
@@ -41,21 +45,21 @@
                                         class="rounded-lg object-cover" />
 
                                     <div class="absolute right-2 top-2">
-                                        <ElButton @click.stop="fileData.image = {}">
+                                        <el-button @click.stop="fileData.image = {}">
                                             <Icon name="el-icon-Delete"></Icon>
-                                        </ElButton>
+                                        </el-button>
                                     </div>
                                 </div>
                             </div>
                         </upload>
                     </div>
                     <div class="flex justify-center mt-4">
-                        <ElButton type="primary" @click="handleAddInfo"> 添加信息内容 </ElButton>
+                        <el-button type="primary" @click="handleAddInfo"> 添加信息内容 </el-button>
                     </div>
                 </div>
             </div>
             <div class="grow min-h-0">
-                <ElScrollbar>
+                <el-scrollbar>
                     <div class="px-4" v-draggable="draggableOptions">
                         <div class="material-list mt-4 flex flex-col gap-y-4">
                             <div
@@ -91,7 +95,7 @@
                             </div>
                         </div>
                     </div>
-                </ElScrollbar>
+                </el-scrollbar>
             </div>
         </div>
     </div>

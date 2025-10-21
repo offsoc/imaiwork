@@ -40,7 +40,7 @@ class CozeLogic extends ApiLogic
     {
 
         try {
-            $client = new Client(['timeout' => 60, 'verify' => false, 'http_errors' => false]);
+            $client = new Client(['timeout' => 6000, 'verify' => false, 'http_errors' => false]);
             $rsp = $client->post($this->url . $uri, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->pat,
@@ -109,7 +109,7 @@ class CozeLogic extends ApiLogic
             'additional_messages'  => $params['additional_messages']
         ];
 
-        $client = new Client(['timeout' => 60, 'verify' => false]);
+        $client = new Client(['timeout' => 6000, 'verify' => false]);
         $rsp    = $client->post($this->url . $url, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->pat,
@@ -306,7 +306,7 @@ class CozeLogic extends ApiLogic
         $this->getconfig($params['source'], $params['source_id']);
         unset($params['id'], $params['source'], $params['source_id']);
         $url = '/v3/chat/retrieve';
-        $client = new Client(['timeout' => 30, 'http_errors' => false]);
+        $client = new Client(['timeout' => 6000, 'http_errors' => false]);
         $query = [
            'chat_id' => $params['chat_id'],
            'conversation_id' => $params['conversation_id'],
@@ -341,7 +341,7 @@ class CozeLogic extends ApiLogic
         $this->getconfig($params['source'], $params['source_id']);
         unset($params['id'], $params['source'], $params['source_id']);
         $url = '/v3/chat/message/list';
-        $client = new Client(['timeout' => 30, 'http_errors' => false]);
+        $client = new Client(['timeout' => 6000, 'http_errors' => false]);
 
         $response = $client->get($this->url . $url, [
             'headers' => [

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ use TencentCloud\Common\AbstractModel;
 - "zh": 中文（简体）
 - "zh-TW": 中文（繁体）
 - "en": 英语
+- "16k_zh_edu"：中文教育
+- "16k_zh_medical"：中文医疗
+- "16k_zh_court"：中文法庭
 
 **标准版：**
 - "8k_zh_large": 普方大模型引擎. 当前模型同时支持中文等语言的识别，模型参数量极大，语言模型性能增强，针对电话音频中各类场景、各类中文方言的识别准确率极大提升.
@@ -74,6 +77,9 @@ use TencentCloud\Common\AbstractModel;
 - "zh": 中文（简体）
 - "zh-TW": 中文（繁体）
 - "en": 英语
+- "16k_zh_edu"：中文教育
+- "16k_zh_medical"：中文医疗
+- "16k_zh_court"：中文法庭
 
 **标准版：**
 - "8k_zh_large": 普方大模型引擎. 当前模型同时支持中文等语言的识别，模型参数量极大，语言模型性能增强，针对电话音频中各类场景、各类中文方言的识别准确率极大提升.
@@ -106,10 +112,12 @@ use TencentCloud\Common\AbstractModel;
 
 **注意：**
 如果缺少满足您需求的语言，请联系我们技术人员。
- * @method array getAlternativeLanguage() 获取**发起模糊识别为高级版能力,默认按照高级版收费,仅支持填写基础版和高级版语言.**
-注意：不支持填写"zh-dialect"
- * @method void setAlternativeLanguage(array $AlternativeLanguage) 设置**发起模糊识别为高级版能力,默认按照高级版收费,仅支持填写基础版和高级版语言.**
-注意：不支持填写"zh-dialect"
+ * @method array getAlternativeLanguage() 获取**发起模糊识别为高级版能力,默认按照高级版收费**
+注意：不支持填写"zh-dialect", "16k_zh_edu", "16k_zh_medical", "16k_zh_court", "8k_zh_large", "16k_zh_large","16k_multi_lang", "16k_zh_en"
+
+ * @method void setAlternativeLanguage(array $AlternativeLanguage) 设置**发起模糊识别为高级版能力,默认按照高级版收费**
+注意：不支持填写"zh-dialect", "16k_zh_edu", "16k_zh_medical", "16k_zh_court", "8k_zh_large", "16k_zh_large","16k_multi_lang", "16k_zh_en"
+
  * @method string getCustomParam() 获取自定义参数，联系后台使用
 
  * @method void setCustomParam(string $CustomParam) 设置自定义参数，联系后台使用
@@ -118,6 +126,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setVadSilenceTime(integer $VadSilenceTime) 设置语音识别vad的时间，范围为240-2000，默认为1000，单位为ms。更小的值会让语音识别分句更快。
  * @method string getHotWordList() 获取热词表：该参数用于提升识别准确率。 单个热词限制："热词|权重"，单个热词不超过30个字符（最多10个汉字），权重[1-11]或者100，如：“腾讯云|5” 或 “ASR|11”； 热词表限制：多个热词用英文逗号分割，最多支持128个热词，如：“腾讯云|10,语音识别|5,ASR|11”；
  * @method void setHotWordList(string $HotWordList) 设置热词表：该参数用于提升识别准确率。 单个热词限制："热词|权重"，单个热词不超过30个字符（最多10个汉字），权重[1-11]或者100，如：“腾讯云|5” 或 “ASR|11”； 热词表限制：多个热词用英文逗号分割，最多支持128个热词，如：“腾讯云|10,语音识别|5,ASR|11”；
+ * @method integer getVadLevel() 获取vad的远场人声抑制能力（不会对asr识别效果造成影响），范围为[0, 5]，默认为0，表示不开启远场人声抑制能力。推荐设置为2，有较好的远场人声抑制能力。嘈杂的办公室环境下可以设置为3，更为嘈杂的环境下可以使用4和5。注意较高的VadLevel可能会将单字当作噪声给过滤。
+ * @method void setVadLevel(integer $VadLevel) 设置vad的远场人声抑制能力（不会对asr识别效果造成影响），范围为[0, 5]，默认为0，表示不开启远场人声抑制能力。推荐设置为2，有较好的远场人声抑制能力。嘈杂的办公室环境下可以设置为3，更为嘈杂的环境下可以使用4和5。注意较高的VadLevel可能会将单字当作噪声给过滤。
  */
 class STTConfig extends AbstractModel
 {
@@ -133,6 +143,9 @@ class STTConfig extends AbstractModel
 - "zh": 中文（简体）
 - "zh-TW": 中文（繁体）
 - "en": 英语
+- "16k_zh_edu"：中文教育
+- "16k_zh_medical"：中文医疗
+- "16k_zh_court"：中文法庭
 
 **标准版：**
 - "8k_zh_large": 普方大模型引擎. 当前模型同时支持中文等语言的识别，模型参数量极大，语言模型性能增强，针对电话音频中各类场景、各类中文方言的识别准确率极大提升.
@@ -169,8 +182,9 @@ class STTConfig extends AbstractModel
     public $Language;
 
     /**
-     * @var array **发起模糊识别为高级版能力,默认按照高级版收费,仅支持填写基础版和高级版语言.**
-注意：不支持填写"zh-dialect"
+     * @var array **发起模糊识别为高级版能力,默认按照高级版收费**
+注意：不支持填写"zh-dialect", "16k_zh_edu", "16k_zh_medical", "16k_zh_court", "8k_zh_large", "16k_zh_large","16k_multi_lang", "16k_zh_en"
+
      */
     public $AlternativeLanguage;
 
@@ -191,6 +205,11 @@ class STTConfig extends AbstractModel
     public $HotWordList;
 
     /**
+     * @var integer vad的远场人声抑制能力（不会对asr识别效果造成影响），范围为[0, 5]，默认为0，表示不开启远场人声抑制能力。推荐设置为2，有较好的远场人声抑制能力。嘈杂的办公室环境下可以设置为3，更为嘈杂的环境下可以使用4和5。注意较高的VadLevel可能会将单字当作噪声给过滤。
+     */
+    public $VadLevel;
+
+    /**
      * @param string $Language 
 语音转文字支持识别的语言，默认是"zh" 中文
 
@@ -202,6 +221,9 @@ class STTConfig extends AbstractModel
 - "zh": 中文（简体）
 - "zh-TW": 中文（繁体）
 - "en": 英语
+- "16k_zh_edu"：中文教育
+- "16k_zh_medical"：中文医疗
+- "16k_zh_court"：中文法庭
 
 **标准版：**
 - "8k_zh_large": 普方大模型引擎. 当前模型同时支持中文等语言的识别，模型参数量极大，语言模型性能增强，针对电话音频中各类场景、各类中文方言的识别准确率极大提升.
@@ -234,12 +256,14 @@ class STTConfig extends AbstractModel
 
 **注意：**
 如果缺少满足您需求的语言，请联系我们技术人员。
-     * @param array $AlternativeLanguage **发起模糊识别为高级版能力,默认按照高级版收费,仅支持填写基础版和高级版语言.**
-注意：不支持填写"zh-dialect"
+     * @param array $AlternativeLanguage **发起模糊识别为高级版能力,默认按照高级版收费**
+注意：不支持填写"zh-dialect", "16k_zh_edu", "16k_zh_medical", "16k_zh_court", "8k_zh_large", "16k_zh_large","16k_multi_lang", "16k_zh_en"
+
      * @param string $CustomParam 自定义参数，联系后台使用
 
      * @param integer $VadSilenceTime 语音识别vad的时间，范围为240-2000，默认为1000，单位为ms。更小的值会让语音识别分句更快。
      * @param string $HotWordList 热词表：该参数用于提升识别准确率。 单个热词限制："热词|权重"，单个热词不超过30个字符（最多10个汉字），权重[1-11]或者100，如：“腾讯云|5” 或 “ASR|11”； 热词表限制：多个热词用英文逗号分割，最多支持128个热词，如：“腾讯云|10,语音识别|5,ASR|11”；
+     * @param integer $VadLevel vad的远场人声抑制能力（不会对asr识别效果造成影响），范围为[0, 5]，默认为0，表示不开启远场人声抑制能力。推荐设置为2，有较好的远场人声抑制能力。嘈杂的办公室环境下可以设置为3，更为嘈杂的环境下可以使用4和5。注意较高的VadLevel可能会将单字当作噪声给过滤。
      */
     function __construct()
     {
@@ -272,6 +296,10 @@ class STTConfig extends AbstractModel
 
         if (array_key_exists("HotWordList",$param) and $param["HotWordList"] !== null) {
             $this->HotWordList = $param["HotWordList"];
+        }
+
+        if (array_key_exists("VadLevel",$param) and $param["VadLevel"] !== null) {
+            $this->VadLevel = $param["VadLevel"];
         }
     }
 }

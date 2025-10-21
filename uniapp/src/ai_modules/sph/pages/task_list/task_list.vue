@@ -33,7 +33,7 @@ const queryList = async (page_no: number, page_size: number) => {
         const { lists } = await getTaskList({ page_no, page_size });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
+        pagingRef.value?.complete([]);
     }
 };
 

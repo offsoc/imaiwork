@@ -35,19 +35,6 @@
                             <ElSwitch v-model="formData.voice_enable" :active-value="1" :inactive-value="0" />
                         </div>
                     </div>
-                    <!-- 聊天轮数策略 -->
-                    <div class="flex flex-col">
-                        <div>聊天轮数策略</div>
-                        <div class="mt-2">
-                            <ElInputNumber
-                                v-model="formData.number_chat_rounds"
-                                class="mr-2"
-                                :precision="0"
-                                :min="3"
-                                :max="50"
-                                size="small" />条
-                        </div>
-                    </div>
                     <!-- 图片固定回复策略 -->
                     <div class="flex flex-col">
                         <div>智能体被调用时，接收到图片进行固定回复</div>
@@ -90,14 +77,12 @@
                         </div>
                     </div>
                     <div class="flex flex-col">
-                        <div>
-                            <div>接管时间</div>
-                        </div>
+                        <div>接管时间(AI回复)</div>
                         <div class="flex items-center justify-between gap-2">
-                            <div class="text-xs">
-                                用户可以设置 AI
+                            <div class="text-xs text-error">
+                                提醒：用户可以设置 AI
                                 在指定的时间段内接管对话，超出接管时间的消息，则会自动发送用户预先设定的固定回复。<span
-                                    class="text-error font-bold"
+                                    class="font-bold"
                                     >（一小时内仅剩生效一次）</span
                                 >
                             </div>
@@ -147,6 +132,7 @@
                                 <ElButton type="primary" size="small" @click="addWorkingTime">新增时间段</ElButton>
                             </div>
                             <div class="mt-3">
+                                <div class="mb-3">固定回复内容</div>
                                 <ElInput
                                     v-model="formData.non_working_reply"
                                     type="textarea"

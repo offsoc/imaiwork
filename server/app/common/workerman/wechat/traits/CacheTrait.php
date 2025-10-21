@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\common\workerman\wechat\traits;
 
 use Predis\Client as RedisClient;
-
+use think\cache\driver\Redis;
 /**
  * 缓存操作能力
  * 
@@ -25,22 +25,46 @@ trait CacheTrait
     ];
 
     /**
+     * Redis连接实例（单例）
+     */
+    private static $redisInstance = null;
+    /**
      * 获取Redis实例
      * 
      * @return Redis|Connection
      */
-    protected function redis(): RedisClient
+    protected function redis()
     {
-        return new RedisClient([
-            'scheme' => 'tcp',
-            'host'        => env('redis.HOST', '127.0.0.1'),
-            'port'        => env('redis.PORT', 6379),
-            'password'    => env('redis.PASSWORD', '123456'),
-            'database'    => env('redis.WX_SELECT', 9),
-            'timeout'     => 2,
-            'persistent' => true,   // 启用持久连接
-            'read_write_timeout' => 0, // 读写超时（0为无限）
-        ]);
+        if (self::$redisInstance === null) {
+            // self::$redisInstance = new RedisClient([
+            //     'scheme' => 'tcp',
+            //     'host'        => env('redis.HOST', '127.0.0.1'),
+            //     'port'        => env('redis.PORT', 6379),
+            //     'password'    => env('redis.PASSWORD', '123456'),
+            //     'database'    => env('redis.WX_SELECT', 9),
+            //     'persistent' => true,   // 启用持久连接
+            //     'timeout' => 0,           // 连接超时时间
+            //     'read_write_timeout' => 0, // 读写超时时间
+            //     // 'tcp_nodelay' => true,      // 禁用Nagle算法
+            //     // 'persistent_id' => 'my_connection', // 持久连接标识符
+            //     // // 连接池配置（如果需要）
+            //     // 'connections' => [
+            //     //     'tcp'  => 'Predis\Connection\PhpiredisStreamConnection',
+            //     //     'unix' => 'Predis\Connection\PhpiredisSocketConnection',
+            //     // ],
+            // ]);
+
+            self::$redisInstance = new Redis([
+                'host'        => env('redis.HOST', '127.0.0.1'),
+                'port'        => env('redis.PORT', 6379),
+                'password'    => env('redis.PASSWORD', '123456'),
+                'select'      => env('redis.WX_SELECT', 9),
+                'timeout'     => 0,
+                'persistent'  => true,
+            ]);
+        }
+
+        return self::$redisInstance;
     }
 
     /**

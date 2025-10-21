@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,6 +139,34 @@ use TencentCloud\Common\AbstractModel;
  * @method BankSlip getBankSlip() 获取银行回单
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setBankSlip(BankSlip $BankSlip) 设置银行回单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method OnlineTaxiItinerary getOnlineTaxiItinerary() 获取网约车行程单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setOnlineTaxiItinerary(OnlineTaxiItinerary $OnlineTaxiItinerary) 设置网约车行程单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method CustomsDeclaration getCustomsDeclaration() 获取海关进/出口货物报关单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setCustomsDeclaration(CustomsDeclaration $CustomsDeclaration) 设置海关进/出口货物报关单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method OverseasInvoice getOverseasInvoice() 获取海外发票
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setOverseasInvoice(OverseasInvoice $OverseasInvoice) 设置海外发票
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method ShoppingReceipt getShoppingReceipt() 获取购物小票
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setShoppingReceipt(ShoppingReceipt $ShoppingReceipt) 设置购物小票
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method SaleInventory getSaleInventory() 获取销货清单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setSaleInventory(SaleInventory $SaleInventory) 设置销货清单
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method MotorVehicleSaleInvoice getMotorVehicleSaleInvoiceElectronic() 获取机动车销售统一发票（电子）
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setMotorVehicleSaleInvoiceElectronic(MotorVehicleSaleInvoice $MotorVehicleSaleInvoiceElectronic) 设置机动车销售统一发票（电子）
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method UsedCarPurchaseInvoice getUsedCarPurchaseInvoiceElectronic() 获取二手车销售统一发票（电子）
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setUsedCarPurchaseInvoiceElectronic(UsedCarPurchaseInvoice $UsedCarPurchaseInvoiceElectronic) 设置二手车销售统一发票（电子）
 注意：此字段可能返回 null，表示取不到有效值。
  */
 class SingleInvoiceItem extends AbstractModel
@@ -324,6 +352,48 @@ class SingleInvoiceItem extends AbstractModel
     public $BankSlip;
 
     /**
+     * @var OnlineTaxiItinerary 网约车行程单
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $OnlineTaxiItinerary;
+
+    /**
+     * @var CustomsDeclaration 海关进/出口货物报关单
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $CustomsDeclaration;
+
+    /**
+     * @var OverseasInvoice 海外发票
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $OverseasInvoice;
+
+    /**
+     * @var ShoppingReceipt 购物小票
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $ShoppingReceipt;
+
+    /**
+     * @var SaleInventory 销货清单
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $SaleInventory;
+
+    /**
+     * @var MotorVehicleSaleInvoice 机动车销售统一发票（电子）
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $MotorVehicleSaleInvoiceElectronic;
+
+    /**
+     * @var UsedCarPurchaseInvoice 二手车销售统一发票（电子）
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $UsedCarPurchaseInvoiceElectronic;
+
+    /**
      * @param VatInvoiceInfo $VatSpecialInvoice 增值税专用发票
 注意：此字段可能返回 null，表示取不到有效值。
      * @param VatInvoiceInfo $VatCommonInvoice 增值税普通发票
@@ -383,6 +453,20 @@ class SingleInvoiceItem extends AbstractModel
      * @param CustomsPaymentReceipt $CustomsPaymentReceipt 海关缴款
 注意：此字段可能返回 null，表示取不到有效值。
      * @param BankSlip $BankSlip 银行回单
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param OnlineTaxiItinerary $OnlineTaxiItinerary 网约车行程单
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param CustomsDeclaration $CustomsDeclaration 海关进/出口货物报关单
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param OverseasInvoice $OverseasInvoice 海外发票
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param ShoppingReceipt $ShoppingReceipt 购物小票
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param SaleInventory $SaleInventory 销货清单
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param MotorVehicleSaleInvoice $MotorVehicleSaleInvoiceElectronic 机动车销售统一发票（电子）
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param UsedCarPurchaseInvoice $UsedCarPurchaseInvoiceElectronic 二手车销售统一发票（电子）
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
@@ -546,6 +630,41 @@ class SingleInvoiceItem extends AbstractModel
         if (array_key_exists("BankSlip",$param) and $param["BankSlip"] !== null) {
             $this->BankSlip = new BankSlip();
             $this->BankSlip->deserialize($param["BankSlip"]);
+        }
+
+        if (array_key_exists("OnlineTaxiItinerary",$param) and $param["OnlineTaxiItinerary"] !== null) {
+            $this->OnlineTaxiItinerary = new OnlineTaxiItinerary();
+            $this->OnlineTaxiItinerary->deserialize($param["OnlineTaxiItinerary"]);
+        }
+
+        if (array_key_exists("CustomsDeclaration",$param) and $param["CustomsDeclaration"] !== null) {
+            $this->CustomsDeclaration = new CustomsDeclaration();
+            $this->CustomsDeclaration->deserialize($param["CustomsDeclaration"]);
+        }
+
+        if (array_key_exists("OverseasInvoice",$param) and $param["OverseasInvoice"] !== null) {
+            $this->OverseasInvoice = new OverseasInvoice();
+            $this->OverseasInvoice->deserialize($param["OverseasInvoice"]);
+        }
+
+        if (array_key_exists("ShoppingReceipt",$param) and $param["ShoppingReceipt"] !== null) {
+            $this->ShoppingReceipt = new ShoppingReceipt();
+            $this->ShoppingReceipt->deserialize($param["ShoppingReceipt"]);
+        }
+
+        if (array_key_exists("SaleInventory",$param) and $param["SaleInventory"] !== null) {
+            $this->SaleInventory = new SaleInventory();
+            $this->SaleInventory->deserialize($param["SaleInventory"]);
+        }
+
+        if (array_key_exists("MotorVehicleSaleInvoiceElectronic",$param) and $param["MotorVehicleSaleInvoiceElectronic"] !== null) {
+            $this->MotorVehicleSaleInvoiceElectronic = new MotorVehicleSaleInvoice();
+            $this->MotorVehicleSaleInvoiceElectronic->deserialize($param["MotorVehicleSaleInvoiceElectronic"]);
+        }
+
+        if (array_key_exists("UsedCarPurchaseInvoiceElectronic",$param) and $param["UsedCarPurchaseInvoiceElectronic"] !== null) {
+            $this->UsedCarPurchaseInvoiceElectronic = new UsedCarPurchaseInvoice();
+            $this->UsedCarPurchaseInvoiceElectronic->deserialize($param["UsedCarPurchaseInvoiceElectronic"]);
         }
     }
 }

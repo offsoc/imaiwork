@@ -1,4 +1,4 @@
-import request, { RequestEventStreamConfig } from "@/utils/request";
+import request, { RequestEventStreamConfig, RequestOptions } from "@/utils/request";
 
 //发送短信
 export function smsSend(data: any) {
@@ -38,7 +38,7 @@ export function uploadImage(file: any, data?: any, token?: string, onProgress?: 
 export function uploadFile(
     type: "image" | "file" | "video" | "audio" | "llAudio",
     options: Omit<UniApp.UploadFileOption, "url">,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number, options: RequestOptions) => void
 ) {
     return request.uploadFile(
         { ...options, url: `/upload/${type}`, name: "file" },

@@ -7,37 +7,34 @@ namespace EasyWeChat\Work;
 use Closure;
 use EasyWeChat\Kernel\Contracts\Server as ServerInterface;
 use EasyWeChat\Kernel\Encryptor;
-use EasyWeChat\Kernel\Exceptions\BadRequestException;
-use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
-use EasyWeChat\Kernel\Exceptions\RuntimeException;
 use EasyWeChat\Kernel\ServerResponse;
+use EasyWeChat\Kernel\Traits\DecryptJsonMessage;
 use EasyWeChat\Kernel\Traits\DecryptXmlMessage;
 use EasyWeChat\Kernel\Traits\InteractWithHandlers;
 use EasyWeChat\Kernel\Traits\InteractWithServerRequest;
+use EasyWeChat\Kernel\Traits\RespondJsonMessage;
 use EasyWeChat\Kernel\Traits\RespondXmlMessage;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Throwable;
 
 class Server implements ServerInterface
 {
     use DecryptXmlMessage;
+    use DecryptJsonMessage;
     use InteractWithHandlers;
     use InteractWithServerRequest;
     use RespondXmlMessage;
+    use RespondJsonMessage;
 
     public function __construct(
         protected Encryptor $encryptor,
         ?ServerRequestInterface $request = null,
+        protected string $messageType = 'xml',
     ) {
         $this->request = $request;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws RuntimeException|BadRequestException|Throwable
-     */
     public function serve(): ResponseInterface
     {
         $query = $this->getRequest()->getQueryParams();
@@ -60,15 +57,14 @@ class Server implements ServerInterface
         $response = $this->handle(new Response(200, [], 'SUCCESS'), $message);
 
         if (! ($response instanceof ResponseInterface)) {
-            $response = $this->transformToReply($response, $message, $this->encryptor);
+            $response = $this->messageType === 'xml' ?
+                $this->transformToReply($response, $message, $this->encryptor) :
+                $this->transformJsonToReply($response, $message, $this->encryptor);
         }
 
         return ServerResponse::make($response);
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handleContactChanged(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -78,9 +74,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handleUserTagUpdated(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -93,9 +86,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handleUserCreated(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -108,9 +98,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handleUserUpdated(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -123,9 +110,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handleUserDeleted(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -138,9 +122,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handlePartyCreated(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -153,9 +134,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handlePartyUpdated(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -168,9 +146,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handlePartyDeleted(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -183,9 +158,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function handleBatchJobsFinished(callable $handler): static
     {
         $this->with(function (Message $message, Closure $next) use ($handler): mixed {
@@ -195,9 +167,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws Throwable
-     */
     public function addMessageListener(string $type, callable $handler): static
     {
         $this->withHandler(
@@ -209,9 +178,6 @@ class Server implements ServerInterface
         return $this;
     }
 
-    /**
-     * @throws Throwable
-     */
     public function addEventListener(string $event, callable $handler): static
     {
         $this->withHandler(
@@ -242,42 +208,50 @@ class Server implements ServerInterface
     {
         return function (Message $message, Closure $next): mixed {
             $query = $this->getRequest()->getQueryParams();
-            $this->decryptMessage(
-                $message,
-                $this->encryptor,
+
+            $params = [
                 $query['msg_signature'] ?? '',
                 $query['timestamp'] ?? '',
                 $query['nonce'] ?? ''
-            );
+            ];
+
+            $this->messageType === 'xml'
+                ? $this->decryptMessage($message, $this->encryptor, ...$params)
+                : $this->decryptJsonMessage($message, $this->encryptor, ...$params);
 
             return $next($message);
         };
     }
 
-    /**
-     * @throws BadRequestException
-     */
     public function getRequestMessage(?ServerRequestInterface $request = null): \EasyWeChat\Kernel\Message
     {
         return Message::createFromRequest($request ?? $this->getRequest());
     }
 
-    /**
-     * @throws BadRequestException
-     * @throws RuntimeException
-     */
     public function getDecryptedMessage(?ServerRequestInterface $request = null): \EasyWeChat\Kernel\Message
     {
         $request = $request ?? $this->getRequest();
         $message = $this->getRequestMessage($request);
         $query = $request->getQueryParams();
 
-        return $this->decryptMessage(
-            message: $message,
-            encryptor: $this->encryptor,
-            signature: $query['msg_signature'] ?? '',
-            timestamp: $query['timestamp'] ?? '',
-            nonce: $query['nonce'] ?? ''
-        );
+        $params = [
+            $query['msg_signature'] ?? '',
+            $query['timestamp'] ?? '',
+            $query['nonce'] ?? ''
+        ];
+
+        if ($this->messageType === 'xml') {
+            return $this->decryptMessage(
+                $message,
+                $this->encryptor,
+                ...$params
+            );
+        } else {
+            return $this->decryptJsonMessage(
+                $message,
+                $this->encryptor,
+                ...$params
+            );
+        }
     }
 }

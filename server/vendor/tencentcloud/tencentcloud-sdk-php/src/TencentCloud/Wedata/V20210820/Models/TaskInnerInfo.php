@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,22 @@ use TencentCloud\Common\AbstractModel;
  * @method string getRealWorkflowId() 获取真实任务工作流id
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setRealWorkflowId(string $RealWorkflowId) 设置真实任务工作流id
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method integer getCycleStep() 获取步长
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setCycleStep(integer $CycleStep) 设置步长
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getTaskAction() 获取调度配置-弹性周期配置，小时/周/月/年调度才有，小时任务指定每天的0点3点4点跑，则为 0,3,4。
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setTaskAction(string $TaskAction) 设置调度配置-弹性周期配置，小时/周/月/年调度才有，小时任务指定每天的0点3点4点跑，则为 0,3,4。
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getDependencyRel() 获取分支，依赖关系，and/or, 默认and
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setDependencyRel(string $DependencyRel) 设置分支，依赖关系，and/or, 默认and
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getDependencyWorkflow() 获取是否支持工作流依赖 yes / no 默认 no
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setDependencyWorkflow(string $DependencyWorkflow) 设置是否支持工作流依赖 yes / no 默认 no
 注意：此字段可能返回 null，表示取不到有效值。
  */
 class TaskInnerInfo extends AbstractModel
@@ -82,6 +98,30 @@ class TaskInnerInfo extends AbstractModel
     public $RealWorkflowId;
 
     /**
+     * @var integer 步长
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $CycleStep;
+
+    /**
+     * @var string 调度配置-弹性周期配置，小时/周/月/年调度才有，小时任务指定每天的0点3点4点跑，则为 0,3,4。
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $TaskAction;
+
+    /**
+     * @var string 分支，依赖关系，and/or, 默认and
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $DependencyRel;
+
+    /**
+     * @var string 是否支持工作流依赖 yes / no 默认 no
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $DependencyWorkflow;
+
+    /**
      * @param string $TaskId 任务ID
      * @param string $TaskName 任务名
      * @param string $WorkflowId 工作流id
@@ -91,6 +131,14 @@ class TaskInnerInfo extends AbstractModel
      * @param boolean $VirtualFlag 虚拟任务标记
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $RealWorkflowId 真实任务工作流id
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param integer $CycleStep 步长
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $TaskAction 调度配置-弹性周期配置，小时/周/月/年调度才有，小时任务指定每天的0点3点4点跑，则为 0,3,4。
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $DependencyRel 分支，依赖关系，and/or, 默认and
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $DependencyWorkflow 是否支持工作流依赖 yes / no 默认 no
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
@@ -132,6 +180,22 @@ class TaskInnerInfo extends AbstractModel
 
         if (array_key_exists("RealWorkflowId",$param) and $param["RealWorkflowId"] !== null) {
             $this->RealWorkflowId = $param["RealWorkflowId"];
+        }
+
+        if (array_key_exists("CycleStep",$param) and $param["CycleStep"] !== null) {
+            $this->CycleStep = $param["CycleStep"];
+        }
+
+        if (array_key_exists("TaskAction",$param) and $param["TaskAction"] !== null) {
+            $this->TaskAction = $param["TaskAction"];
+        }
+
+        if (array_key_exists("DependencyRel",$param) and $param["DependencyRel"] !== null) {
+            $this->DependencyRel = $param["DependencyRel"];
+        }
+
+        if (array_key_exists("DependencyWorkflow",$param) and $param["DependencyWorkflow"] !== null) {
+            $this->DependencyWorkflow = $param["DependencyWorkflow"];
         }
     }
 }

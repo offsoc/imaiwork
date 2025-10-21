@@ -16,6 +16,7 @@ use think\facade\Log;
 
 use app\common\service\FileService;
 use Predis\Client as redisClient;
+use think\cache\driver\Redis;
 use GuzzleHttp\Client as httpClient;
 
 /**
@@ -294,7 +295,7 @@ trait WechatTrait
                 'Content' => $params['content'],
                 'Attachment' => $attachment,
                 'ExtComment' => $params['comment'] ?? [],
-                'TaskId' => time(),
+                'TaskId' => $params['task_id'] ?? time(),
             ];
             self::setLog($data);
             // 3. 构建消息发送请求
@@ -419,21 +420,15 @@ trait WechatTrait
         return sprintf('%s:%s:%s', 'wechat', $deviceId, $type);
     }
 
-    private static function redis(): redisClient
+    private static function redis(): Redis
     {
-        return new redisClient([
+        return new Redis([
             'host'        => env('redis.HOST', '127.0.0.1'),
             'port'        => env('redis.PORT', 6379),
             'password'    => env('redis.PASSWORD', '123456'),
-            'database'      => env('redis.WX_SELECT', 9),
+            'select'      => env('redis.WX_SELECT', 9),
             'timeout'     => 0,
-            'pool' => [
-                'max_connections' => 5,
-                'min_connections' => 1,
-                'wait_timeout' => 3,
-                'idle_timeout' => 60,
-                'heartbeat_interval' => 50,
-            ],
+            'persistent'  => true,
         ]);
     }
 
@@ -443,6 +438,6 @@ trait WechatTrait
         if (is_array($content)) {
             $content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
-        Log::write($content, 'wxchat');
+        //Log::write($content, 'wxchat');
     }
 }

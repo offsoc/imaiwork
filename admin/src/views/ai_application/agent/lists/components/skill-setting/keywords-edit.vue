@@ -17,8 +17,8 @@
             <el-form ref="formRef" :model="formData" :rules="formRules" label-position="top">
                 <el-form-item label="匹配方式" prop="match_type">
                     <el-radio-group v-model="formData.match_type">
-                        <ElRadio :value="0">模糊匹配</ElRadio>
-                        <ElRadio :value="1">精确匹配</ElRadio>
+                        <el-radio :value="0">模糊匹配</el-radio>
+                        <el-radio :value="1">精确匹配</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="匹配内容" prop="keyword">

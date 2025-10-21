@@ -4,6 +4,7 @@
 namespace app\common\command;
 
 use app\api\logic\sv\PublishLogic;
+use app\api\logic\shanjian\PublishLogic as ShanjianPublishLogic;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -22,6 +23,7 @@ class PublishDetailCron extends Command
     protected function execute(Input $input, Output $output)
     {
         PublishLogic::setPublishDetail();
+        ShanjianPublishLogic::setPublishDetail();
         return true;
     }
 }

@@ -20,7 +20,7 @@
                 <view class="bg-primary mr-[10rpx] flex p-[6rpx] rounded-[10rpx]">
                     <u-icon v-if="fileType == 'file'" :size="30" name="file-text" color="#ffffff" />
                     <image v-if="fileType == 'image'" :src="item.path || item.url" class="w-[32rpx] h-[32rpx]" />
-                    <image v-if="fileType == 'video'" :src="item.path || item.url" class="w-[32rpx] h-[32rpx]" />
+                    <u-icon v-if="fileType == 'video'" :size="30" name="camera" color="#ffffff" />
                 </view>
                 <view class="flex-1 min-w-0 mr-[20rpx] w-0">
                     <view class="overflow-ellipsis overflow-hidden whitespace-nowrap">
@@ -79,8 +79,11 @@ const props = defineProps({
     },
     // 文件类型
     fileType: {
-        type: String as PropType<"image" | "video" | "file">,
-        default: "all",
+        type: String as PropType<"image" | "video" | "file" | "all">,
+        default: "file",
+        validator: (value: string) => {
+            return ["image", "video", "file", "all"].includes(value);
+        },
     },
     returnType: {
         type: String as PropType<"object" | "array">,
@@ -150,22 +153,59 @@ const limitLength = computed(() => {
     return props.limit;
 });
 
+const fileType = ref<"image" | "video" | "file" | "all">(props.fileType);
+
 const choose = async () => {
     if (props.disabled) return;
-    if (filesLists.value.length >= Number(limitLength.value) && props.returnType === "array" && limitLength.value > 1) {
+
+    // 检查文件数量限制
+    const remainingCount = limitLength.value - filesLists.value.length;
+    if (remainingCount <= 0 && props.returnType === "array" && limitLength.value > 1) {
         uni.showToast({
             title: `您最多选择 ${limitLength.value} 个文件`,
             icon: "none",
         });
         return;
     }
-    const filesResult = await chooseFile({
-        type: props.fileType,
+
+    // 通用的文件选择配置
+    const fileChooseConfig = {
         compressed: false,
         sizeType: props.sizeType,
         sourceType: props.sourceType,
         extension: props.fileExtname.length ? props.fileExtname : undefined,
-        count: limitLength.value - filesLists.value.length,
+        count: remainingCount,
+    };
+
+    // 处理所有文件类型的情况
+    if (props.fileType === "all") {
+        const FILE_TYPE_MAP = {
+            0: "image",
+            1: "video",
+            2: "file",
+        };
+
+        uni.showActionSheet({
+            itemList: ["选择图片", "选择视频", "选择文件"],
+            success: async (res) => {
+                fileType.value = FILE_TYPE_MAP[res.tapIndex as keyof typeof FILE_TYPE_MAP] as
+                    | "image"
+                    | "video"
+                    | "file";
+                const filesResult = await chooseFile({
+                    type: fileType.value,
+                    ...fileChooseConfig,
+                });
+                chooseFileCallback(filesResult);
+            },
+        });
+        return;
+    }
+
+    // 处理单一文件类型的情况
+    const filesResult = await chooseFile({
+        type: fileType.value as "image" | "video" | "file",
+        ...fileChooseConfig,
     });
     chooseFileCallback(filesResult);
 };
@@ -234,7 +274,7 @@ const upload = (files: FileData[]): Promise<void> => {
                           }
                       )
                     : await uploadFile(
-                          props.fileType,
+                          fileType.value as "image" | "video" | "file",
                           {
                               filePath: fileItem.url,
                               formData: props.data,

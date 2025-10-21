@@ -125,8 +125,19 @@ class ToolsLogic extends BaseLogic
                     $task_id = generate_unique_task_id();
                     //记录日志
                     AccountLogLogic::recordUserTokensLog(true, $params['user_id'], $tokenCode, $points, $task_id);
+                }else{
+                    self::setError('扣费有问题');
+                    return false;
                 }
-                self::$returnData = $res['data']['content'];
+                if (isset($res['data']['content']) && count($res['data']['content']) >0){
+                    self::$returnData = $res['data']['content'];
+                }else{
+                    self::setError('生成失败');
+                    return false;
+                }
+            }else{
+                self::setError('生成失败2');
+                return false;
             }
             return true;
         } catch (\Exception $e) {

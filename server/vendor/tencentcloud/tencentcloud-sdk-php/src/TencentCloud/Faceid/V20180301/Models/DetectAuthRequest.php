@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ use TencentCloud\Common\AbstractModel;
  * @method void setRedirectUrl(string $RedirectUrl) 设置认证结束后重定向的回调链接地址。
 - 最长长度1024位。
  * @method string getExtra() 获取透传字段，在获取验证结果时返回。
+- 最长长度1024位。
  * @method void setExtra(string $Extra) 设置透传字段，在获取验证结果时返回。
+- 最长长度1024位。
  * @method string getImageBase64() 获取用于人脸比对的图像数据，使用base64编码。
 - Base64编码后的图片数据大小不超过3M。
 - 仅支持jpg、png格式。
@@ -116,6 +118,7 @@ class DetectAuthRequest extends AbstractModel
 
     /**
      * @var string 透传字段，在获取验证结果时返回。
+- 最长长度1024位。
      */
     public $Extra;
 
@@ -173,6 +176,7 @@ class DetectAuthRequest extends AbstractModel
      * @param string $RedirectUrl 认证结束后重定向的回调链接地址。
 - 最长长度1024位。
      * @param string $Extra 透传字段，在获取验证结果时返回。
+- 最长长度1024位。
      * @param string $ImageBase64 用于人脸比对的图像数据，使用base64编码。
 - Base64编码后的图片数据大小不超过3M。
 - 仅支持jpg、png格式。

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ use TencentCloud\Common\AbstractModel;
  * @method string getType() 获取极速高清类型，可选值：<li>TEHD-100 表示极速高清-100;</li> <li>OFF 表示关闭极速高清。</li>不填表示 OFF。
  * @method void setType(string $Type) 设置极速高清类型，可选值：<li>TEHD-100 表示极速高清-100;</li> <li>OFF 表示关闭极速高清。</li>不填表示 OFF。
  * @method integer getMaxVideoBitrate() 获取视频码率上限，当 Type 指定了极速高清类型时有效。
-不填或填0表示不设视频码率上限。
+不填或填0表示由云点播自动设置码率上限。
  * @method void setMaxVideoBitrate(integer $MaxVideoBitrate) 设置视频码率上限，当 Type 指定了极速高清类型时有效。
-不填或填0表示不设视频码率上限。
+不填或填0表示由云点播自动设置码率上限。
  */
 class TEHDConfig extends AbstractModel
 {
@@ -36,14 +36,14 @@ class TEHDConfig extends AbstractModel
 
     /**
      * @var integer 视频码率上限，当 Type 指定了极速高清类型时有效。
-不填或填0表示不设视频码率上限。
+不填或填0表示由云点播自动设置码率上限。
      */
     public $MaxVideoBitrate;
 
     /**
      * @param string $Type 极速高清类型，可选值：<li>TEHD-100 表示极速高清-100;</li> <li>OFF 表示关闭极速高清。</li>不填表示 OFF。
      * @param integer $MaxVideoBitrate 视频码率上限，当 Type 指定了极速高清类型时有效。
-不填或填0表示不设视频码率上限。
+不填或填0表示由云点播自动设置码率上限。
      */
     function __construct()
     {

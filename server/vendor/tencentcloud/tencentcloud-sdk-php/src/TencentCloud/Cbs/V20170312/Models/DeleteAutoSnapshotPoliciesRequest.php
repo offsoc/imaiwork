@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ use TencentCloud\Common\AbstractModel;
 /**
  * DeleteAutoSnapshotPolicies请求参数结构体
  *
- * @method array getAutoSnapshotPolicyIds() 获取要删除的定期快照策略ID列表。
- * @method void setAutoSnapshotPolicyIds(array $AutoSnapshotPolicyIds) 设置要删除的定期快照策略ID列表。
+ * @method array getAutoSnapshotPolicyIds() 获取要删除的定期快照策略ID列表，通过[ DescribeAutoSnapshotPolicies](https://cloud.tencent.com/document/api/362/33556)接口查询。
+ * @method void setAutoSnapshotPolicyIds(array $AutoSnapshotPolicyIds) 设置要删除的定期快照策略ID列表，通过[ DescribeAutoSnapshotPolicies](https://cloud.tencent.com/document/api/362/33556)接口查询。
  */
 class DeleteAutoSnapshotPoliciesRequest extends AbstractModel
 {
     /**
-     * @var array 要删除的定期快照策略ID列表。
+     * @var array 要删除的定期快照策略ID列表，通过[ DescribeAutoSnapshotPolicies](https://cloud.tencent.com/document/api/362/33556)接口查询。
      */
     public $AutoSnapshotPolicyIds;
 
     /**
-     * @param array $AutoSnapshotPolicyIds 要删除的定期快照策略ID列表。
+     * @param array $AutoSnapshotPolicyIds 要删除的定期快照策略ID列表，通过[ DescribeAutoSnapshotPolicies](https://cloud.tencent.com/document/api/362/33556)接口查询。
      */
     function __construct()
     {

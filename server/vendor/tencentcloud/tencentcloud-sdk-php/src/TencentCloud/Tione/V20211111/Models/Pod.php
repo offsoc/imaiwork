@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,20 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getStatus() 获取实例的状态信息
  * @method void setStatus(string $Status) 设置实例的状态信息
+ * @method string getStartScheduleTime() 获取实例的开始调度时间
+ * @method void setStartScheduleTime(string $StartScheduleTime) 设置实例的开始调度时间
+ * @method string getMessage() 获取实例状态的补充信息
+ * @method void setMessage(string $Message) 设置实例状态的补充信息
+ * @method string getNodeIP() 获取当前实例所在的节点 IP
+ * @method void setNodeIP(string $NodeIP) 设置当前实例所在的节点 IP
+ * @method string getNodeId() 获取当前实例所在节点id
+ * @method void setNodeId(string $NodeId) 设置当前实例所在节点id
+ * @method string getResourceGroupId() 获取当时实例所属资源组 id
+ * @method void setResourceGroupId(string $ResourceGroupId) 设置当时实例所属资源组 id
+ * @method string getResourceGroupName() 获取资源组名称
+ * @method void setResourceGroupName(string $ResourceGroupName) 设置资源组名称
+ * @method ResourceInfo getResourceInfo() 获取实例的资源占用信息
+ * @method void setResourceInfo(ResourceInfo $ResourceInfo) 设置实例的资源占用信息
  */
 class Pod extends AbstractModel
 {
@@ -122,6 +136,41 @@ class Pod extends AbstractModel
     public $Status;
 
     /**
+     * @var string 实例的开始调度时间
+     */
+    public $StartScheduleTime;
+
+    /**
+     * @var string 实例状态的补充信息
+     */
+    public $Message;
+
+    /**
+     * @var string 当前实例所在的节点 IP
+     */
+    public $NodeIP;
+
+    /**
+     * @var string 当前实例所在节点id
+     */
+    public $NodeId;
+
+    /**
+     * @var string 当时实例所属资源组 id
+     */
+    public $ResourceGroupId;
+
+    /**
+     * @var string 资源组名称
+     */
+    public $ResourceGroupName;
+
+    /**
+     * @var ResourceInfo 实例的资源占用信息
+     */
+    public $ResourceInfo;
+
+    /**
      * @param string $Name pod名
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $Uid pod的唯一id
@@ -141,6 +190,13 @@ class Pod extends AbstractModel
      * @param CrossTenantENIInfo $CrossTenantENIInfo 容器调用信息
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $Status 实例的状态信息
+     * @param string $StartScheduleTime 实例的开始调度时间
+     * @param string $Message 实例状态的补充信息
+     * @param string $NodeIP 当前实例所在的节点 IP
+     * @param string $NodeId 当前实例所在节点id
+     * @param string $ResourceGroupId 当时实例所属资源组 id
+     * @param string $ResourceGroupName 资源组名称
+     * @param ResourceInfo $ResourceInfo 实例的资源占用信息
      */
     function __construct()
     {
@@ -200,6 +256,35 @@ class Pod extends AbstractModel
 
         if (array_key_exists("Status",$param) and $param["Status"] !== null) {
             $this->Status = $param["Status"];
+        }
+
+        if (array_key_exists("StartScheduleTime",$param) and $param["StartScheduleTime"] !== null) {
+            $this->StartScheduleTime = $param["StartScheduleTime"];
+        }
+
+        if (array_key_exists("Message",$param) and $param["Message"] !== null) {
+            $this->Message = $param["Message"];
+        }
+
+        if (array_key_exists("NodeIP",$param) and $param["NodeIP"] !== null) {
+            $this->NodeIP = $param["NodeIP"];
+        }
+
+        if (array_key_exists("NodeId",$param) and $param["NodeId"] !== null) {
+            $this->NodeId = $param["NodeId"];
+        }
+
+        if (array_key_exists("ResourceGroupId",$param) and $param["ResourceGroupId"] !== null) {
+            $this->ResourceGroupId = $param["ResourceGroupId"];
+        }
+
+        if (array_key_exists("ResourceGroupName",$param) and $param["ResourceGroupName"] !== null) {
+            $this->ResourceGroupName = $param["ResourceGroupName"];
+        }
+
+        if (array_key_exists("ResourceInfo",$param) and $param["ResourceInfo"] !== null) {
+            $this->ResourceInfo = new ResourceInfo();
+            $this->ResourceInfo->deserialize($param["ResourceInfo"]);
         }
     }
 }

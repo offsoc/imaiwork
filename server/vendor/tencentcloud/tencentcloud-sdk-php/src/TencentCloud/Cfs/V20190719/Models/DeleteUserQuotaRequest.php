@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,42 +20,42 @@ use TencentCloud\Common\AbstractModel;
 /**
  * DeleteUserQuota请求参数结构体
  *
- * @method string getFileSystemId() 获取文件系统 ID
- * @method void setFileSystemId(string $FileSystemId) 设置文件系统 ID
- * @method string getUserType() 获取指定配额类型，包括Uid、Gid、Dir
- * @method void setUserType(string $UserType) 设置指定配额类型，包括Uid、Gid、Dir
- * @method string getUserId() 获取UID/GID信息
- * @method void setUserId(string $UserId) 设置UID/GID信息
- * @method string getDirectoryPath() 获取设置目录配额的目录的绝对路径
- * @method void setDirectoryPath(string $DirectoryPath) 设置设置目录配额的目录的绝对路径
+ * @method string getFileSystemId() 获取文件系统ID，通过查询文件系统列表获取；[DescribeCfsFileSystems](https://cloud.tencent.com/document/product/582/38170)
+ * @method void setFileSystemId(string $FileSystemId) 设置文件系统ID，通过查询文件系统列表获取；[DescribeCfsFileSystems](https://cloud.tencent.com/document/product/582/38170)
+ * @method string getUserType() 获取指定配额类型，包括Uid（按用户ID限制）、Gid（按用户组ID限制）、Dir（按目录限制）
+ * @method void setUserType(string $UserType) 设置指定配额类型，包括Uid（按用户ID限制）、Gid（按用户组ID限制）、Dir（按目录限制）
+ * @method string getUserId() 获取UID/GID信息，和DirectoryPath参数，两者必须填写一个
+ * @method void setUserId(string $UserId) 设置UID/GID信息，和DirectoryPath参数，两者必须填写一个
+ * @method string getDirectoryPath() 获取设置目录配额的目录的绝对路径，和UserId参数，两者必须填写一个
+ * @method void setDirectoryPath(string $DirectoryPath) 设置设置目录配额的目录的绝对路径，和UserId参数，两者必须填写一个
  */
 class DeleteUserQuotaRequest extends AbstractModel
 {
     /**
-     * @var string 文件系统 ID
+     * @var string 文件系统ID，通过查询文件系统列表获取；[DescribeCfsFileSystems](https://cloud.tencent.com/document/product/582/38170)
      */
     public $FileSystemId;
 
     /**
-     * @var string 指定配额类型，包括Uid、Gid、Dir
+     * @var string 指定配额类型，包括Uid（按用户ID限制）、Gid（按用户组ID限制）、Dir（按目录限制）
      */
     public $UserType;
 
     /**
-     * @var string UID/GID信息
+     * @var string UID/GID信息，和DirectoryPath参数，两者必须填写一个
      */
     public $UserId;
 
     /**
-     * @var string 设置目录配额的目录的绝对路径
+     * @var string 设置目录配额的目录的绝对路径，和UserId参数，两者必须填写一个
      */
     public $DirectoryPath;
 
     /**
-     * @param string $FileSystemId 文件系统 ID
-     * @param string $UserType 指定配额类型，包括Uid、Gid、Dir
-     * @param string $UserId UID/GID信息
-     * @param string $DirectoryPath 设置目录配额的目录的绝对路径
+     * @param string $FileSystemId 文件系统ID，通过查询文件系统列表获取；[DescribeCfsFileSystems](https://cloud.tencent.com/document/product/582/38170)
+     * @param string $UserType 指定配额类型，包括Uid（按用户ID限制）、Gid（按用户组ID限制）、Dir（按目录限制）
+     * @param string $UserId UID/GID信息，和DirectoryPath参数，两者必须填写一个
+     * @param string $DirectoryPath 设置目录配额的目录的绝对路径，和UserId参数，两者必须填写一个
      */
     function __construct()
     {

@@ -126,6 +126,7 @@ const formData = reactive<Agent>({
         app_id: "",
         api_token: "",
     },
+    threshold: 0.5,
 });
 const formRef = ref();
 

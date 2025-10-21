@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,17 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setIsOnline(boolean $IsOnline) 设置是否在线
 注意：此字段可能返回 null，表示取不到有效值。
- * @method string getConsumeType() 获取消费类型
+ * @method string getConsumeType() 获取消费类型，枚举值如下：
+
+- PULL：PULL 消费类型
+- PUSH：PUSH 消费类型
+- POP：POP 消费类型
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setConsumeType(string $ConsumeType) 设置消费类型
+ * @method void setConsumeType(string $ConsumeType) 设置消费类型，枚举值如下：
+
+- PULL：PULL 消费类型
+- PUSH：PUSH 消费类型
+- POP：POP 消费类型
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getSubString() 获取订阅规则
 注意：此字段可能返回 null，表示取不到有效值。
@@ -56,17 +64,23 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setExpressionType(string $ExpressionType) 设置过滤类型
 注意：此字段可能返回 null，表示取不到有效值。
- * @method integer getConsistency() 获取订阅一致性
+ * @method integer getConsistency() 获取订阅一致性，枚举如下：
+
+- 0: 订阅一致
+- 1: 订阅不一致
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setConsistency(integer $Consistency) 设置订阅一致性
+ * @method void setConsistency(integer $Consistency) 设置订阅一致性，枚举如下：
+
+- 0: 订阅一致
+- 1: 订阅不一致
 注意：此字段可能返回 null，表示取不到有效值。
  * @method integer getConsumerLag() 获取消费堆积
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setConsumerLag(integer $ConsumerLag) 设置消费堆积
 注意：此字段可能返回 null，表示取不到有效值。
- * @method integer getLastUpdateTime() 获取最后消费进度更新时间，秒为单位
+ * @method integer getLastUpdateTime() 获取最后消费进度更新时间，**Unix时间戳（毫秒）**
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setLastUpdateTime(integer $LastUpdateTime) 设置最后消费进度更新时间，秒为单位
+ * @method void setLastUpdateTime(integer $LastUpdateTime) 设置最后消费进度更新时间，**Unix时间戳（毫秒）**
 注意：此字段可能返回 null，表示取不到有效值。
  * @method integer getMaxRetryTimes() 获取最大重试次数
 注意：此字段可能返回 null，表示取不到有效值。
@@ -128,7 +142,11 @@ class SubscriptionData extends AbstractModel
     public $IsOnline;
 
     /**
-     * @var string 消费类型
+     * @var string 消费类型，枚举值如下：
+
+- PULL：PULL 消费类型
+- PUSH：PUSH 消费类型
+- POP：POP 消费类型
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $ConsumeType;
@@ -146,7 +164,10 @@ class SubscriptionData extends AbstractModel
     public $ExpressionType;
 
     /**
-     * @var integer 订阅一致性
+     * @var integer 订阅一致性，枚举如下：
+
+- 0: 订阅一致
+- 1: 订阅不一致
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $Consistency;
@@ -158,7 +179,7 @@ class SubscriptionData extends AbstractModel
     public $ConsumerLag;
 
     /**
-     * @var integer 最后消费进度更新时间，秒为单位
+     * @var integer 最后消费进度更新时间，**Unix时间戳（毫秒）**
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $LastUpdateTime;
@@ -202,17 +223,24 @@ CLUSTERING 集群模式;
 注意：此字段可能返回 null，表示取不到有效值。
      * @param boolean $IsOnline 是否在线
 注意：此字段可能返回 null，表示取不到有效值。
-     * @param string $ConsumeType 消费类型
+     * @param string $ConsumeType 消费类型，枚举值如下：
+
+- PULL：PULL 消费类型
+- PUSH：PUSH 消费类型
+- POP：POP 消费类型
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $SubString 订阅规则
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $ExpressionType 过滤类型
 注意：此字段可能返回 null，表示取不到有效值。
-     * @param integer $Consistency 订阅一致性
+     * @param integer $Consistency 订阅一致性，枚举如下：
+
+- 0: 订阅一致
+- 1: 订阅不一致
 注意：此字段可能返回 null，表示取不到有效值。
      * @param integer $ConsumerLag 消费堆积
 注意：此字段可能返回 null，表示取不到有效值。
-     * @param integer $LastUpdateTime 最后消费进度更新时间，秒为单位
+     * @param integer $LastUpdateTime 最后消费进度更新时间，**Unix时间戳（毫秒）**
 注意：此字段可能返回 null，表示取不到有效值。
      * @param integer $MaxRetryTimes 最大重试次数
 注意：此字段可能返回 null，表示取不到有效值。

@@ -25,7 +25,7 @@ class CrawlingRecordLists extends BaseApiDataLists implements ListsSearchInterfa
     public function setSearch(): array
     {
         return [
-            '='      => ['user_id', 'exec_keyword', 'device_code'],
+            '='      => ['user_id', 'exec_keyword', 'device_code', 'status'],
             //'%like%' => ['device_code', 'keywords'],
         ];
     }

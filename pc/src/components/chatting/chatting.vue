@@ -70,7 +70,12 @@
                                         v-for="(item, index) in getAIModels"
                                         :key="index"
                                         :label="item.name"
-                                        :value="item.model_id"></ElOption>
+                                        :value="item.model_id">
+                                        <div class="flex items-center gap-x-2">
+                                            <img :src="item.logo" class="w-[18px] h-[18px] rounded-md object-cover" />
+                                            <span class="text-xs text-black">{{ item.name }}</span>
+                                        </div>
+                                    </ElOption>
                                 </ElSelect>
                                 <humanize-pop
                                     ref="humanizePopRef"
@@ -260,7 +265,7 @@ const previousScrollTop = ref(0);
 const disabledScroll = ref(false);
 
 const getAIModels = computed(() => {
-    const models = cloneDeep(getAiModelConfig?.channel || []);
+    const models = cloneDeep((getAiModelConfig?.channel || []).filter((item) => item.status == "1"));
     models.length && (currModel.value = cloneDeep(models[0]));
     return models;
 });
@@ -467,15 +472,17 @@ textarea {
 </style>
 <style lang="scss">
 .ai-model-popper.el-popper {
-    border: none;
-    border-radius: 20px;
-    background: #f6f6f6;
+    @apply rounded-xl w-[240px];
     .el-select-dropdown {
-        border-radius: 20px;
+        @apply py-1;
+        .el-select-dropdown__list {
+            @apply flex flex-col gap-y-2 pr-4 pl-2;
+        }
         .el-select-dropdown__item {
-            border-radius: 20px;
-            &:hover {
-                background: #ffffff;
+            @apply rounded-md h-10 flex items-center px-4;
+            &:hover,
+            &.is-selected {
+                @apply bg-[#f6f6f6];
             }
         }
     }

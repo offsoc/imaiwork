@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,6 +164,14 @@ Hadoop-Hbase
  * @method void setMultiZoneSettings(array $MultiZoneSettings) 设置节点资源的规格，有几个可用区，就填几个，按顺序第一个为主可用区，第二个为备可用区，第三个为仲裁可用区。如果没有开启跨AZ，则长度为1即可。
  * @method string getCosBucket() 获取cos桶路径，创建StarRocks存算分离集群时用到
  * @method void setCosBucket(string $CosBucket) 设置cos桶路径，创建StarRocks存算分离集群时用到
+ * @method array getNodeMarks() 获取节点标识信息，目前只提供给tf平台使用
+ * @method void setNodeMarks(array $NodeMarks) 设置节点标识信息，目前只提供给tf平台使用
+ * @method string getLoadBalancerId() 获取CLB id
+ * @method void setLoadBalancerId(string $LoadBalancerId) 设置CLB id
+ * @method string getDefaultMetaVersion() 获取数据库类型：mysql8/tdsql8
+ * @method void setDefaultMetaVersion(string $DefaultMetaVersion) 设置数据库类型：mysql8/tdsql8
+ * @method integer getNeedCdbAudit() 获取是否开通审计：0:不开通,1:开通
+ * @method void setNeedCdbAudit(integer $NeedCdbAudit) 设置是否开通审计：0:不开通,1:开通
  */
 class CreateInstanceRequest extends AbstractModel
 {
@@ -372,6 +380,26 @@ Hadoop-Hbase
     public $CosBucket;
 
     /**
+     * @var array 节点标识信息，目前只提供给tf平台使用
+     */
+    public $NodeMarks;
+
+    /**
+     * @var string CLB id
+     */
+    public $LoadBalancerId;
+
+    /**
+     * @var string 数据库类型：mysql8/tdsql8
+     */
+    public $DefaultMetaVersion;
+
+    /**
+     * @var integer 是否开通审计：0:不开通,1:开通
+     */
+    public $NeedCdbAudit;
+
+    /**
      * @param integer $ProductId 产品ID，不同产品ID表示不同的EMR产品版本。取值范围：
 51:表示STARROCKS-V1.4.0
 54:表示STARROCKS-V2.0.0
@@ -444,6 +472,10 @@ Hadoop-Hbase
      * @param boolean $MultiZone true表示开启跨AZ部署；仅为新建集群时的用户参数，后续不支持调整。
      * @param array $MultiZoneSettings 节点资源的规格，有几个可用区，就填几个，按顺序第一个为主可用区，第二个为备可用区，第三个为仲裁可用区。如果没有开启跨AZ，则长度为1即可。
      * @param string $CosBucket cos桶路径，创建StarRocks存算分离集群时用到
+     * @param array $NodeMarks 节点标识信息，目前只提供给tf平台使用
+     * @param string $LoadBalancerId CLB id
+     * @param string $DefaultMetaVersion 数据库类型：mysql8/tdsql8
+     * @param integer $NeedCdbAudit 是否开通审计：0:不开通,1:开通
      */
     function __construct()
     {
@@ -614,6 +646,27 @@ Hadoop-Hbase
 
         if (array_key_exists("CosBucket",$param) and $param["CosBucket"] !== null) {
             $this->CosBucket = $param["CosBucket"];
+        }
+
+        if (array_key_exists("NodeMarks",$param) and $param["NodeMarks"] !== null) {
+            $this->NodeMarks = [];
+            foreach ($param["NodeMarks"] as $key => $value){
+                $obj = new NodeMark();
+                $obj->deserialize($value);
+                array_push($this->NodeMarks, $obj);
+            }
+        }
+
+        if (array_key_exists("LoadBalancerId",$param) and $param["LoadBalancerId"] !== null) {
+            $this->LoadBalancerId = $param["LoadBalancerId"];
+        }
+
+        if (array_key_exists("DefaultMetaVersion",$param) and $param["DefaultMetaVersion"] !== null) {
+            $this->DefaultMetaVersion = $param["DefaultMetaVersion"];
+        }
+
+        if (array_key_exists("NeedCdbAudit",$param) and $param["NeedCdbAudit"] !== null) {
+            $this->NeedCdbAudit = $param["NeedCdbAudit"];
         }
     }
 }

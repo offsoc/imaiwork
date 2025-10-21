@@ -119,14 +119,13 @@ const loopLists = async () => {
 };
 
 const init = async () => {
+    uni.showLoading({
+        title: "加载中",
+        mask: true,
+    });
     try {
-        uni.showLoading({
-            title: "加载中",
-            mask: true,
-        });
         await getLists();
         loopLists();
-        uni.hideLoading();
     } finally {
         uni.hideLoading();
     }

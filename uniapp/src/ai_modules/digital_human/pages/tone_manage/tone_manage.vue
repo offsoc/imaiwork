@@ -137,7 +137,7 @@ const queryList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
+        pagingRef.value?.complete([]);
     }
 };
 
@@ -176,19 +176,19 @@ const handleDelete = () => {
                 try {
                     await deleteVoice({ id: active.value });
                     pagingRef.value?.reload();
+                    uni.hideLoading();
                     uni.showToast({
                         title: "删除成功",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
                 } catch (error: any) {
+                    uni.hideLoading();
                     uni.showToast({
                         title: error || "删除失败",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
-                } finally {
-                    uni.hideLoading();
                 }
             }
             isDelete.value = false;

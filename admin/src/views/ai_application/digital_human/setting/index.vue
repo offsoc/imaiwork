@@ -1,37 +1,28 @@
 <template>
     <div>
         <el-card class="!border-none" shadow="never">
-            <div class="text-xl font-medium mb-[20px]">驱动模型管理</div>
-            <el-alert title="提示：关闭后用户将无法选择对应模型" type="warning" />
-            <el-table :data="modelChannel" style="width: 100%" :row-style="{ height: '50px' }" class="mt-4">
-                <el-table-column label="名称" prop="name" />
-                <el-table-column label="描述" prop="described" />
-                <el-table-column label="图标" prop="icon">
-                    <template #default="{ row }">
-                        <el-image :src="row.icon" style="width: 50px; height: 50px" />
-                    </template>
-                </el-table-column>
-                <el-table-column label="状态" prop="status">
-                    <template #default="{ $index }">
-                        <el-switch
-                            v-model="modelChannel[$index].status"
-                            active-value="1"
-                            inactive-value="0"
-                            @change="lockSaveModelList()" />
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作" prop="action">
-                    <template #default="{ $index }">
+            <div class="text-xl font-medium mb-[20px] mt-4">基本设置</div>
+            <div class="mt-4 w-[400px]">
+                <div>
+                    <el-form-item label="首页Banner">
+                        <div>
+                            <material-picker v-model="banner" :limit="1"></material-picker>
+                            <div class="form-tips">图片尺寸推荐470*170px</div>
+                        </div>
+                    </el-form-item>
+                    <div class="">
                         <el-button
                             v-perms="['ai_application.digital_human/edit']"
                             type="primary"
-                            size="small"
-                            @click="editModelChannel($index)">
-                            编辑
-                        </el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+                            @click="lockSaveBanner"
+                            :loading="isSaveBanner"
+                            >保存</el-button
+                        >
+                    </div>
+                </div>
+            </div>
+        </el-card>
+        <el-card class="!border-none mt-4" shadow="never">
             <div class="text-xl font-medium mb-[20px] mt-4">系统音色管理</div>
             <div class="mt-4 w-[400px]">
                 <el-alert title="提示：关闭后用户将无法选择对应音色" type="warning" />
@@ -48,6 +39,27 @@
                         </template>
                     </el-table-column>
                 </el-table>
+            </div>
+        </el-card>
+        <el-card class="!border-none mt-4" shadow="never">
+            <div class="text-xl font-medium mb-[20px]">闪剪授权标识</div>
+            <el-form :model="promptConfig">
+                <el-form-item label="">
+                    <el-input
+                        v-model="shanjianAuth"
+                        class="!w-[380px]"
+                        maxlength="20"
+                        placeholder="请输入闪剪授权标识" />
+                </el-form-item>
+            </el-form>
+            <div class="">
+                <el-button
+                    v-perms="['ai_application.digital_human/edit']"
+                    type="primary"
+                    @click="lockSaveFlashClipConfig"
+                    :loading="isSaveFlashClipConfig"
+                    >保存</el-button
+                >
             </div>
         </el-card>
         <el-card class="!border-none mt-4" shadow="never">
@@ -143,17 +155,27 @@ const { config } = toRefs(appStore);
 const modelChannel = computed(() => config.value.digital_human?.channel);
 const voiceLists = computed(() => config.value?.digital_human.voice);
 
+const banner = computed({
+    get() {
+        return config.value?.digital_human.banner;
+    },
+    set(value: string) {
+        config.value.digital_human.banner = value;
+    },
+});
+
+const shanjianAuth = computed({
+    get() {
+        return config.value?.digital_human.shanjian_auth;
+    },
+    set(value: string) {
+        config.value.digital_human.shanjian_auth = value;
+    },
+});
+
 const modelEditRef = ref<InstanceType<typeof ModelEdit>>();
 const showModelEdit = ref(false);
 const currentEditIndex = ref<number>(0);
-
-const editModelChannel = async (index: number) => {
-    currentEditIndex.value = index;
-    showModelEdit.value = true;
-    await nextTick();
-    modelEditRef.value?.open();
-    modelEditRef.value?.setFormData(modelChannel.value[index]);
-};
 
 const saveModelChannel = async (data: any) => {
     modelChannel.value[currentEditIndex.value] = data;
@@ -168,6 +190,24 @@ const { lockFn: lockSaveModelList } = useLockFn(async () => {
         },
         type: "model",
         name: "list",
+    });
+    appStore.getConfig();
+});
+
+const { lockFn: lockSaveBanner, isLock: isSaveBanner } = useLockFn(async () => {
+    await saveConfig({
+        data: banner.value,
+        type: "digital_human",
+        name: "banner",
+    });
+    appStore.getConfig();
+});
+
+const { lockFn: lockSaveFlashClipConfig, isLock: isSaveFlashClipConfig } = useLockFn(async () => {
+    await saveConfig({
+        data: shanjianAuth.value,
+        type: "digital_human",
+        name: "shanjian_auth",
     });
     appStore.getConfig();
 });

@@ -1,7 +1,13 @@
 <!-- uniapp vue3 markdown解析 -->
 <template>
     <view class="ua__markdown text-[26rpx]">
-        <rich-text space="nbsp" selectable user-select :nodes="parseNodes(content)" @itemclick="handleItemClick">
+        <rich-text
+            class="break-all"
+            space="nbsp"
+            selectable
+            user-select
+            :nodes="parseNodes(content)"
+            @itemclick="handleItemClick">
         </rich-text>
         <!-- <mp-html
 			:selectable="true"

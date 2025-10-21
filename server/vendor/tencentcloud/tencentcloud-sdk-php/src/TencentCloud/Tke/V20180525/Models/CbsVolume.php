@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ namespace TencentCloud\Tke\V20180525\Models;
 use TencentCloud\Common\AbstractModel;
 
 /**
- * EKS Instnace CBS volume
+ * EKS Instance CBS volume
  *
  * @method string getCbsDiskId() 获取腾讯云cbs盘Id
  * @method void setCbsDiskId(string $CbsDiskId) 设置腾讯云cbs盘Id

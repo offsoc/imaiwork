@@ -39,7 +39,7 @@
                                 </template>
                             </ElCollapseItem>
                             <!-- 工作流技能 -->
-                            <ElCollapseItem name="2">
+                            <ElCollapseItem name="2" v-if="false">
                                 <template #title>
                                     <div class="leading-5">
                                         <div class="flex items-center gap-x-2">
@@ -114,7 +114,19 @@
                                         <Icon name="el-icon-Plus" :size="12"> </Icon>
                                     </div>
                                 </template>
-                                <div class="flex justify-end gap-x-3 mb-2">
+                                <div class="flex items-center justify-between gap-x-6 mb-2 px-4">
+                                    <div class="flex items-center w-full gap-x-4">
+                                        <div class="flex-1">
+                                            <ElSlider v-model="formData.threshold" :min="0" :max="1" :step="0.01" />
+                                        </div>
+                                        <ElInputNumber
+                                            v-model="formData.threshold"
+                                            controls-position="right"
+                                            :min="0"
+                                            :max="1"
+                                            :step="0.01">
+                                        </ElInputNumber>
+                                    </div>
                                     <ElButton type="primary" @click="handleImportKeywords()">批量导入</ElButton>
                                 </div>
                                 <div class="border border-[var(--el-border-color-lighter)] rounded-lg">

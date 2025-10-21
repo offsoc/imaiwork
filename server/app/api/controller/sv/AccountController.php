@@ -7,6 +7,8 @@ use app\api\controller\BaseApiController;
 use app\api\logic\sv\SvAccountLogic;
 use app\api\validate\sv\SvAccountValidate;
 use app\api\lists\sv\SvAccountLists;
+use app\api\lists\sv\AllAccountLists;
+
 use think\exception\HttpResponseException;
 
 /**
@@ -24,6 +26,11 @@ class AccountController extends BaseApiController
     public function lists()
     {
         return $this->dataLists(new SvAccountLists());
+    }
+
+    public function allLists()
+    {
+        return $this->dataLists(new AllAccountLists());
     }
 
     /**

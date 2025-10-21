@@ -13,6 +13,7 @@ use Nette\PhpGenerator\PropertyAccessMode;
 use Nette\PhpGenerator\PropertyHook;
 use Nette\PhpGenerator\PropertyHookType;
 use Nette\PhpGenerator\Visibility;
+use function array_filter, in_array;
 
 
 /**
@@ -20,8 +21,9 @@ use Nette\PhpGenerator\Visibility;
  */
 trait PropertyLike
 {
-	/** @var array{'set' => ?string, 'get' => ?string} */
+	/** @var array{set: ?string, get: ?string} */
 	private array $visibility = [PropertyAccessMode::Set => null, PropertyAccessMode::Get => null];
+	private bool $final = false;
 	private bool $readOnly = false;
 
 	/** @var array<string, ?PropertyHook> */
@@ -91,6 +93,19 @@ trait PropertyLike
 	public function isPrivate(string $mode = PropertyAccessMode::Get): bool
 	{
 		return $this->visibility[PropertyAccessMode::from($mode)] === Visibility::Private;
+	}
+
+
+	public function setFinal(bool $state = true): static
+	{
+		$this->final = $state;
+		return $this;
+	}
+
+
+	public function isFinal(): bool
+	{
+		return $this->final;
 	}
 
 

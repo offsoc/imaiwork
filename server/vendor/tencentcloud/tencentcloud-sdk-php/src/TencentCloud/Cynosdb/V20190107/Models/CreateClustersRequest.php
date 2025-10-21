@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,14 @@ cpu最大值，可选范围参考DescribeServerlessInstanceSpecs接口返回
  * @method void setSlaveZone(string $SlaveZone) 设置多可用区地址
  * @method array getInstanceInitInfos() 获取实例初始化配置信息，主要用于购买集群时选不同规格实例
  * @method void setInstanceInitInfos(array $InstanceInitInfos) 设置实例初始化配置信息，主要用于购买集群时选不同规格实例
+ * @method string getGdnId() 获取全球数据库唯一标识
+ * @method void setGdnId(string $GdnId) 设置全球数据库唯一标识
+ * @method ProxyConfig getProxyConfig() 获取数据库代理配置
+ * @method void setProxyConfig(ProxyConfig $ProxyConfig) 设置数据库代理配置
+ * @method string getAutoArchive() 获取是否自动归档
+ * @method void setAutoArchive(string $AutoArchive) 设置是否自动归档
+ * @method integer getAutoArchiveDelayHours() 获取暂停后的归档处理时间
+ * @method void setAutoArchiveDelayHours(integer $AutoArchiveDelayHours) 设置暂停后的归档处理时间
  */
 class CreateClustersRequest extends AbstractModel
 {
@@ -377,6 +385,26 @@ cpu最大值，可选范围参考DescribeServerlessInstanceSpecs接口返回
     public $InstanceInitInfos;
 
     /**
+     * @var string 全球数据库唯一标识
+     */
+    public $GdnId;
+
+    /**
+     * @var ProxyConfig 数据库代理配置
+     */
+    public $ProxyConfig;
+
+    /**
+     * @var string 是否自动归档
+     */
+    public $AutoArchive;
+
+    /**
+     * @var integer 暂停后的归档处理时间
+     */
+    public $AutoArchiveDelayHours;
+
+    /**
      * @param string $Zone 可用区
      * @param string $VpcId 所属VPC网络ID
      * @param string $SubnetId 所属子网ID
@@ -440,6 +468,10 @@ cpu最大值，可选范围参考DescribeServerlessInstanceSpecs接口返回
      * @param integer $ParamTemplateId 参数模板ID，可以通过查询参数模板信息DescribeParamTemplates获得参数模板ID
      * @param string $SlaveZone 多可用区地址
      * @param array $InstanceInitInfos 实例初始化配置信息，主要用于购买集群时选不同规格实例
+     * @param string $GdnId 全球数据库唯一标识
+     * @param ProxyConfig $ProxyConfig 数据库代理配置
+     * @param string $AutoArchive 是否自动归档
+     * @param integer $AutoArchiveDelayHours 暂停后的归档处理时间
      */
     function __construct()
     {
@@ -631,6 +663,23 @@ cpu最大值，可选范围参考DescribeServerlessInstanceSpecs接口返回
                 $obj->deserialize($value);
                 array_push($this->InstanceInitInfos, $obj);
             }
+        }
+
+        if (array_key_exists("GdnId",$param) and $param["GdnId"] !== null) {
+            $this->GdnId = $param["GdnId"];
+        }
+
+        if (array_key_exists("ProxyConfig",$param) and $param["ProxyConfig"] !== null) {
+            $this->ProxyConfig = new ProxyConfig();
+            $this->ProxyConfig->deserialize($param["ProxyConfig"]);
+        }
+
+        if (array_key_exists("AutoArchive",$param) and $param["AutoArchive"] !== null) {
+            $this->AutoArchive = $param["AutoArchive"];
+        }
+
+        if (array_key_exists("AutoArchiveDelayHours",$param) and $param["AutoArchiveDelayHours"] !== null) {
+            $this->AutoArchiveDelayHours = $param["AutoArchiveDelayHours"];
         }
     }
 }

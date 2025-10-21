@@ -35,6 +35,20 @@ class KnowledgeLogic extends ApiLogic
     const KNOELEDGE_CHAT = 'knowledge_chat'; //知识库聊天
     const RERANK_MIN_SCORE = 0.2; //知识库检索最小分数
     const OPENAI_CHAT = 'openai_chat'; //openai聊天
+    const GEMINI_CHAT = 'gemini_chat'; //gemini聊天
+    const GPT_MODELS = [
+        'gpt-4',
+        'gpt-4o',
+        'gpt-4o-mini',
+        'gpt-4o-2024-08-06',
+        'gpt-3.5-turbo',
+    ];
+    const GEMINI_MODELS = [
+        'google/gemini-2.5-pro',
+        'google/gemini-2.5-flash',
+        'google/gemini-2.0-flash',
+        'google/gemma-3-4b-it',
+    ];
     /**
      * 知识库列表
      *
@@ -1185,6 +1199,7 @@ class KnowledgeLogic extends ApiLogic
             self::KNOELEDGE_RETRIEVE => ['knowledge_retrieve', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_RETRIEVE],
             self::KNOELEDGE_CHAT => ['knowledge_chat', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT],
             self::OPENAI_CHAT => ['openai_chat', AccountLogEnum::TOKENS_DEC_OPENAI_CHAT],
+            self::GEMINI_CHAT => ['gemini_chat', AccountLogEnum::TOKENS_DEC_GEMINI_CHAT],
         };
 
         //计费
@@ -1203,11 +1218,14 @@ class KnowledgeLogic extends ApiLogic
             case self::OPENAI_CHAT:
                 $response = $requestService->openaiChat($request);
                 break;
+            case self::GEMINI_CHAT:
+                $response = $requestService->geminiChat($request);
+                break;
             default:
         }
         //print_r($response);die;
 
-        if (in_array($scene, [self::KNOELEDGE_CHAT, self::OPENAI_CHAT]) && $request['stream'] == true) {
+        if (in_array($scene, [self::KNOELEDGE_CHAT, self::OPENAI_CHAT, self::GEMINI_CHAT]) && $request['stream'] == true) {
             exit;
         }
 
@@ -1562,7 +1580,13 @@ class KnowledgeLogic extends ApiLogic
                 $request['now'] = time();
                 $request['knowledge_record'] = $record;
                 //print_r($request);die;
-                $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
+                if (in_array($request['model'],self::GPT_MODELS)){
+                    $scene = self::OPENAI_CHAT;
+                } else if (in_array($request['model'],self::GEMINI_MODELS)){
+                    $scene = self::GEMINI_CHAT;
+                } else {
+                    $scene = self::KNOELEDGE_CHAT;
+                }
                 $result = self::requestUrl($request, $scene, $uid, $record);
                 self::$returnData = $result;
                 return $result;
@@ -1744,7 +1768,13 @@ class KnowledgeLogic extends ApiLogic
             if ($uid == 0 && isset($params['unique_id'])) {
                 $uid = KbRobot::where('id', $params['robot_id'])->value('user_id');
             }
-            $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
+            if (in_array($request['model'],self::GPT_MODELS)){
+                $scene = self::OPENAI_CHAT;
+            } else if (in_array($request['model'],self::GEMINI_MODELS)){
+                $scene = self::GEMINI_CHAT;
+            } else {
+                $scene = self::KNOELEDGE_CHAT;
+            }
             $result = self::requestUrl($request, $scene, $uid, $record);
             self::$returnData = $result;
             return $result;
@@ -1869,7 +1899,13 @@ class KnowledgeLogic extends ApiLogic
                 $request['knowledge_record'] = $record;
                 $request['messages'] = $messages;
 
-                $scene = $request['model'] == 'deepseek' ? self::KNOELEDGE_CHAT : self::OPENAI_CHAT;
+                if (in_array($request['model'],self::GPT_MODELS)){
+                    $scene = self::OPENAI_CHAT;
+                } else if (in_array($request['model'],self::GEMINI_MODELS)){
+                    $scene = self::GEMINI_CHAT;
+                } else {
+                    $scene = self::KNOELEDGE_CHAT;
+                }
                 //clogger(json_encode($request, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
                 $result = self::requestUrl($request, $scene, $uid, $record, true);
 

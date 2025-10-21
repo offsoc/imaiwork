@@ -1,5 +1,5 @@
 <template>
-    <view class="h-screen flex flex-col" style="background: linear-gradient(132.98deg, #dbf9fc 0%, #f7fcff 50%)">
+    <view class="h-screen flex flex-col dh-bg">
         <u-navbar
             :border-bottom="false"
             :is-fixed="false"
@@ -129,37 +129,18 @@
                 </template>
             </z-paging>
         </view>
-        <view class="fixed bottom-0 left-0 w-full h-full bg-white z-[88] flex flex-col" v-if="showVideoPreview">
-            <view class="grow min-h-0">
-                <video-player
-                    v-if="showVideoPreview"
-                    show-close
-                    :border-radius="0"
-                    :poster="playItem.pic"
-                    :video-url="videoUrl"
-                    @close="showVideoPreview = false"
-                    @click="showVideoPreview = false"></video-player>
-            </view>
-            <view class="h-[278rpx] bg-black">
-                <view class="text-center mt-[28rpx] text-white">
-                    免责声明：内容由<text class="text-xs text-[#FF6A00]">AI生成</text>，请仔细甄别。
-                </view>
-                <view class="flex items-center justify-center gap-x-2 px-4 mt-4">
-                    <view
-                        class="flex-1 h-[100rpx] flex items-center justify-center bg-white rounded-[16rpx]"
-                        @click="saveVideoToPhotosAlbum(videoUrl)"
-                        >下载视频</view
-                    >
-                </view>
-            </view>
-        </view>
     </view>
+    <video-preview-v2
+        v-model:show="showVideoPreview"
+        :video-url="playItem.url"
+        :poster="playItem.pic"
+        @update:show="showVideoPreview = false"></video-preview-v2>
 </template>
 
 <script setup lang="ts">
 import { digitalHumanLists, deleteDigitalHuman } from "@/api/digital_human";
 import { saveVideoToPhotosAlbum } from "@/utils/file";
-import VideoPlayer from "@/ai_modules/digital_human/components/video-player/video-player.vue";
+import VideoPreviewV2 from "@/ai_modules/digital_human/components/video-preview-v2/video-preview-v2.vue";
 
 const dataLists = ref<any[]>([]);
 const dataCount = ref(0);
@@ -183,18 +164,22 @@ const queryList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        pagingRef.value?.complete(false);
+        pagingRef.value?.complete([]);
     }
 };
 
 const videoUrl = ref<string>("");
 const showVideoPreview = ref(false);
 const playType = ref(1);
-const playItem = ref<any>({});
+const playItem = reactive<any>({
+    url: "",
+    pic: "",
+});
 const handlePlay = (item: any, type?: number) => {
     const { result_url, clip_result_url, automatic_clip } = item;
-    playItem.value = item;
-    videoUrl.value = type == 1 ? result_url : automatic_clip == 1 ? clip_result_url : result_url;
+    playItem.url = type == 1 ? result_url : automatic_clip == 1 ? clip_result_url : result_url;
+    playItem.pic = item.pic;
+
     showVideoPreview.value = true;
     if (type) {
         playType.value = type;

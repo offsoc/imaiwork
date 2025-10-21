@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,24 @@ API：通过API手动注册
  * @method void setMaxSubscription(integer $MaxSubscription) 设置集群最大订阅数
  * @method boolean getAuthorizationPolicy() 获取授权策略开关
  * @method void setAuthorizationPolicy(boolean $AuthorizationPolicy) 设置授权策略开关
+ * @method integer getSharedSubscriptionGroupLimit() 获取共享订阅组数最大限制
+ * @method void setSharedSubscriptionGroupLimit(integer $SharedSubscriptionGroupLimit) 设置共享订阅组数最大限制
+ * @method integer getMaxTopicFilterPerSharedSubscriptionGroup() 获取单个共享订阅组TopicFilter数限制
+ * @method void setMaxTopicFilterPerSharedSubscriptionGroup(integer $MaxTopicFilterPerSharedSubscriptionGroup) 设置单个共享订阅组TopicFilter数限制
+ * @method integer getAutoSubscriptionPolicyLimit() 获取自动订阅规则条数限制
+ * @method void setAutoSubscriptionPolicyLimit(integer $AutoSubscriptionPolicyLimit) 设置自动订阅规则条数限制
+ * @method integer getMaxTopicFilterPerAutoSubscriptionPolicy() 获取单条自动订阅规则TopicFilter数限制
+ * @method void setMaxTopicFilterPerAutoSubscriptionPolicy(integer $MaxTopicFilterPerAutoSubscriptionPolicy) 设置单条自动订阅规则TopicFilter数限制
+ * @method boolean getUseDefaultServerCert() 获取是否使用默认的服务端证书
+ * @method void setUseDefaultServerCert(boolean $UseDefaultServerCert) 设置是否使用默认的服务端证书
+ * @method integer getTrustedCaLimit() 获取服务端CA最大数量
+ * @method void setTrustedCaLimit(integer $TrustedCaLimit) 设置服务端CA最大数量
+ * @method integer getServerCertLimit() 获取服务端证书最大数量
+ * @method void setServerCertLimit(integer $ServerCertLimit) 设置服务端证书最大数量
+ * @method integer getTopicPrefixSlashLimit() 获取topic前缀最大层级
+ * @method void setTopicPrefixSlashLimit(integer $TopicPrefixSlashLimit) 设置topic前缀最大层级
+ * @method integer getMessageRate() 获取单客户端发送消息限速，单位 条/秒
+ * @method void setMessageRate(integer $MessageRate) 设置单客户端发送消息限速，单位 条/秒
  * @method string getRequestId() 获取唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  * @method void setRequestId(string $RequestId) 设置唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  */
@@ -209,6 +227,51 @@ API：通过API手动注册
     public $AuthorizationPolicy;
 
     /**
+     * @var integer 共享订阅组数最大限制
+     */
+    public $SharedSubscriptionGroupLimit;
+
+    /**
+     * @var integer 单个共享订阅组TopicFilter数限制
+     */
+    public $MaxTopicFilterPerSharedSubscriptionGroup;
+
+    /**
+     * @var integer 自动订阅规则条数限制
+     */
+    public $AutoSubscriptionPolicyLimit;
+
+    /**
+     * @var integer 单条自动订阅规则TopicFilter数限制
+     */
+    public $MaxTopicFilterPerAutoSubscriptionPolicy;
+
+    /**
+     * @var boolean 是否使用默认的服务端证书
+     */
+    public $UseDefaultServerCert;
+
+    /**
+     * @var integer 服务端CA最大数量
+     */
+    public $TrustedCaLimit;
+
+    /**
+     * @var integer 服务端证书最大数量
+     */
+    public $ServerCertLimit;
+
+    /**
+     * @var integer topic前缀最大层级
+     */
+    public $TopicPrefixSlashLimit;
+
+    /**
+     * @var integer 单客户端发送消息限速，单位 条/秒
+     */
+    public $MessageRate;
+
+    /**
      * @var string 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     public $RequestId;
@@ -243,6 +306,15 @@ API：通过API手动注册
      * @param string $RegistrationCode 证书注册码
      * @param integer $MaxSubscription 集群最大订阅数
      * @param boolean $AuthorizationPolicy 授权策略开关
+     * @param integer $SharedSubscriptionGroupLimit 共享订阅组数最大限制
+     * @param integer $MaxTopicFilterPerSharedSubscriptionGroup 单个共享订阅组TopicFilter数限制
+     * @param integer $AutoSubscriptionPolicyLimit 自动订阅规则条数限制
+     * @param integer $MaxTopicFilterPerAutoSubscriptionPolicy 单条自动订阅规则TopicFilter数限制
+     * @param boolean $UseDefaultServerCert 是否使用默认的服务端证书
+     * @param integer $TrustedCaLimit 服务端CA最大数量
+     * @param integer $ServerCertLimit 服务端证书最大数量
+     * @param integer $TopicPrefixSlashLimit topic前缀最大层级
+     * @param integer $MessageRate 单客户端发送消息限速，单位 条/秒
      * @param string $RequestId 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     function __construct()
@@ -352,6 +424,42 @@ API：通过API手动注册
 
         if (array_key_exists("AuthorizationPolicy",$param) and $param["AuthorizationPolicy"] !== null) {
             $this->AuthorizationPolicy = $param["AuthorizationPolicy"];
+        }
+
+        if (array_key_exists("SharedSubscriptionGroupLimit",$param) and $param["SharedSubscriptionGroupLimit"] !== null) {
+            $this->SharedSubscriptionGroupLimit = $param["SharedSubscriptionGroupLimit"];
+        }
+
+        if (array_key_exists("MaxTopicFilterPerSharedSubscriptionGroup",$param) and $param["MaxTopicFilterPerSharedSubscriptionGroup"] !== null) {
+            $this->MaxTopicFilterPerSharedSubscriptionGroup = $param["MaxTopicFilterPerSharedSubscriptionGroup"];
+        }
+
+        if (array_key_exists("AutoSubscriptionPolicyLimit",$param) and $param["AutoSubscriptionPolicyLimit"] !== null) {
+            $this->AutoSubscriptionPolicyLimit = $param["AutoSubscriptionPolicyLimit"];
+        }
+
+        if (array_key_exists("MaxTopicFilterPerAutoSubscriptionPolicy",$param) and $param["MaxTopicFilterPerAutoSubscriptionPolicy"] !== null) {
+            $this->MaxTopicFilterPerAutoSubscriptionPolicy = $param["MaxTopicFilterPerAutoSubscriptionPolicy"];
+        }
+
+        if (array_key_exists("UseDefaultServerCert",$param) and $param["UseDefaultServerCert"] !== null) {
+            $this->UseDefaultServerCert = $param["UseDefaultServerCert"];
+        }
+
+        if (array_key_exists("TrustedCaLimit",$param) and $param["TrustedCaLimit"] !== null) {
+            $this->TrustedCaLimit = $param["TrustedCaLimit"];
+        }
+
+        if (array_key_exists("ServerCertLimit",$param) and $param["ServerCertLimit"] !== null) {
+            $this->ServerCertLimit = $param["ServerCertLimit"];
+        }
+
+        if (array_key_exists("TopicPrefixSlashLimit",$param) and $param["TopicPrefixSlashLimit"] !== null) {
+            $this->TopicPrefixSlashLimit = $param["TopicPrefixSlashLimit"];
+        }
+
+        if (array_key_exists("MessageRate",$param) and $param["MessageRate"] !== null) {
+            $this->MessageRate = $param["MessageRate"];
         }
 
         if (array_key_exists("RequestId",$param) and $param["RequestId"] !== null) {

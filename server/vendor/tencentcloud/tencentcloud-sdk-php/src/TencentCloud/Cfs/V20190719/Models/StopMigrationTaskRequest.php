@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ use TencentCloud\Common\AbstractModel;
 /**
  * StopMigrationTask请求参数结构体
  *
- * @method string getTaskId() 获取迁移任务名称
- * @method void setTaskId(string $TaskId) 设置迁移任务名称
+ * @method string getTaskId() 获取迁移任务Id
+ * @method void setTaskId(string $TaskId) 设置迁移任务Id
  */
 class StopMigrationTaskRequest extends AbstractModel
 {
     /**
-     * @var string 迁移任务名称
+     * @var string 迁移任务Id
      */
     public $TaskId;
 
     /**
-     * @param string $TaskId 迁移任务名称
+     * @param string $TaskId 迁移任务Id
      */
     function __construct()
     {

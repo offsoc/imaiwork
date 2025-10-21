@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ use TencentCloud\Common\AbstractModel;
 /**
  * StartInstance请求参数结构体
  *
- * @method string getInstanceId() 获取实例ID
- * @method void setInstanceId(string $InstanceId) 设置实例ID
+ * @method string getInstanceId() 获取实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
+ * @method void setInstanceId(string $InstanceId) 设置实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
  * @method boolean getDryRun() 获取默认为False，True代表只验证接口连通性
  * @method void setDryRun(boolean $DryRun) 设置默认为False，True代表只验证接口连通性
  */
 class StartInstanceRequest extends AbstractModel
 {
     /**
-     * @var string 实例ID
+     * @var string 实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
      */
     public $InstanceId;
 
@@ -38,7 +38,7 @@ class StartInstanceRequest extends AbstractModel
     public $DryRun;
 
     /**
-     * @param string $InstanceId 实例ID
+     * @param string $InstanceId 实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
      * @param boolean $DryRun 默认为False，True代表只验证接口连通性
      */
     function __construct()

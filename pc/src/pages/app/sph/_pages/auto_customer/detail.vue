@@ -2,24 +2,27 @@
     <div class="h-full flex flex-col gap-[10px]">
         <div class="bg-app-bg-2 rounded-[20px] p-[18px] flex justify-between gap-x-4">
             <div class="flex flex-col gap-y-3">
-                <div>
-                    <span class="text-[#ffffff80]">执行设备：</span>
-                    <span
-                        class="px-[10px] py-[4px] rounded-md text-[#ffffffcc] shadow-[0_0_0_1px_var(--app-border-color-2)]"
-                        v-for="item in detail?.device_codes"
-                        :key="item"
-                        >{{ item }}</span
-                    >
+                <div class="flex">
+                    <span class="text-[#ffffff80] flex-shrink-0">执行设备：</span>
+                    <span class="flex flex-wrap gap-2">
+                        <span
+                            class="px-[10px] py-[4px] rounded-md text-[#ffffffcc] shadow-[0_0_0_1px_var(--app-border-color-2)]"
+                            v-for="item in detail?.device_codes"
+                            :key="item"
+                            >{{ item }}</span
+                        >
+                    </span>
                 </div>
-                <div class="flex flex-wrap gap-x-2 gap-y-1">
-                    <span class="text-[#ffffff80]">线索词：</span>
-                    <span
-                        class="px-[10px] py-[4px] rounded-md text-[#ffffffcc] text-[11px] shadow-[0_0_0_1px_var(--app-border-color-2)]"
-                        v-for="item in detail?.keywords"
-                        :key="item"
-                        >{{ item }}</span
-                    >
-                    <
+                <div class="flex">
+                    <span class="text-[#ffffff80] flex-shrink-0">线索词：</span>
+                    <span class="flex flex-wrap gap-2">
+                        <span
+                            class="px-[10px] py-[4px] rounded-md text-[#ffffffcc] text-[11px] shadow-[0_0_0_1px_var(--app-border-color-2)]"
+                            v-for="item in detail?.keywords"
+                            :key="item"
+                            >{{ item }}</span
+                        >
+                    </span>
                 </div>
                 <div>
                     <span class="text-[#ffffff80]">关键词执行数量：</span>

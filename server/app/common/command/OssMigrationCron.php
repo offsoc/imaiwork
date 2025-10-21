@@ -28,7 +28,7 @@ class OssMigrationCron extends Command
         $data = ConfigService::get('storage', $storage);
         $key = 'oss_migration_cron' ;
         if (isset($data['migration']) && in_array($data['migration'],[0,2]) ){
-            echo 1;die;
+            return true;
         }
         cache($key, 1);
 

@@ -102,7 +102,13 @@ export enum TokensSceneEnum {
     HUMAN_VIDEO_CHANJING = "human_video_chanjing",
     HUMAN_AUDIO_CHANJING = "human_audio_chanjing",
     HUMAN_VOICE_CHANJING = "human_voice_chanjing",
+    HUMAN_AVATAR_SHANJIAN = "human_avatar_shanjian",
+    HUMAN_VIDEO_SHANJIAN = "human_video_shanjian",
+    HUMAN_VOICE_SHANJIAN = "human_voice_shanjian",
     AI_LADDER_PLAYER = "lianlian",
+    SHANJIAN_COPYWRITING_CREATE = "shanjian_copywriting_create",
+    SPH_OCR = "sph_ocr",
+    SPH_LOCAL_OCR = "sph_local_ocr",
 }
 
 export enum KnbTypeEnum {
@@ -113,4 +119,9 @@ export enum KnbTypeEnum {
 export enum ModelIdEnum {
     DEEPSEEK_R1 = 4,
     GPT_4O = 2,
+}
+
+export enum AppTypeEnum {
+    SPH = 1,
+    XHS = 3,
 }

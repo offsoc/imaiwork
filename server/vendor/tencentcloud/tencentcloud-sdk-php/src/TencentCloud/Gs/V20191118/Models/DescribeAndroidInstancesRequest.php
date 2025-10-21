@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,13 @@ use TencentCloud\Common\AbstractModel;
  * @method array getFilters() 获取字段过滤器。Filter 的 Name 有以下值：
 Name：实例名称
 UserId：实例用户ID
+HostSerialNumber：宿主机序列号
+HostServerSerialNumber：机箱序列号
  * @method void setFilters(array $Filters) 设置字段过滤器。Filter 的 Name 有以下值：
 Name：实例名称
 UserId：实例用户ID
+HostSerialNumber：宿主机序列号
+HostServerSerialNumber：机箱序列号
  */
 class DescribeAndroidInstancesRequest extends AbstractModel
 {
@@ -82,6 +86,8 @@ class DescribeAndroidInstancesRequest extends AbstractModel
      * @var array 字段过滤器。Filter 的 Name 有以下值：
 Name：实例名称
 UserId：实例用户ID
+HostSerialNumber：宿主机序列号
+HostServerSerialNumber：机箱序列号
      */
     public $Filters;
 
@@ -96,6 +102,8 @@ UserId：实例用户ID
      * @param array $Filters 字段过滤器。Filter 的 Name 有以下值：
 Name：实例名称
 UserId：实例用户ID
+HostSerialNumber：宿主机序列号
+HostServerSerialNumber：机箱序列号
      */
     function __construct()
     {

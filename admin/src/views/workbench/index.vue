@@ -5,14 +5,14 @@
                 <template #header>
                     <div class="flex justify-between items-center">
                         <span class="card-title">版本信息</span>
-                        <el-popover width="200">
+                        <!-- <el-popover width="200">
                             <template #reference>
                                 <el-button type="primary">技术支持</el-button>
                             </template>
                             <div class="flex justify-center items-center">
                                 <img class="w-[150px] h-[150px]" src="@/assets/images/support.png" />
                             </div>
-                        </el-popover>
+                        </el-popover> -->
                     </div>
                 </template>
                 <div class="relative">
@@ -211,7 +211,7 @@
             <el-form-item label="兑换CDK" prop="cdkey">
                 <div class="w-full">
                     <el-input v-model="rechargeForm.cdkey" placeholder="请输入兑换CDK" />
-                    <div class="text-primary flex justify-end">
+                    <!-- <div class="text-primary flex justify-end">
                         <el-popover trigger="click">
                             <template #reference>
                                 <span class="cursor-pointer"> 未有CDK？点此前往购买 </span>
@@ -220,7 +220,7 @@
                                 <img src="@/assets/images/cdk_qrcode.jpg" />
                             </div>
                         </el-popover>
-                    </div>
+                    </div> -->
                 </div>
             </el-form-item>
         </el-form>
@@ -292,7 +292,7 @@ const getData = () => {
 
 const getCommonConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["common_chat", "scene_chat", "coze_agent_chat", "coze_workflow"].includes(item.scene)
+        ["common_chat", "scene_chat", "coze_agent_chat", "coze_workflow", "gemini_chat"].includes(item.scene)
     );
 });
 
@@ -309,6 +309,10 @@ const getAiPersonConfig = computed(() => {
             "human_avatar_chanjing",
             "human_voice_chanjing",
             "human_video_chanjing",
+            "human_avatar_shanjian",
+            "human_voice_shanjian",
+            "human_video_shanjian",
+            "shanjian_copywriting_create",
         ].includes(item.scene)
     );
 });
@@ -372,7 +376,14 @@ const getRedbookConfig = computed(() => {
 
 const getSphConfig = computed(() => {
     return workbenchData.tokens_lists.filter((item: any) =>
-        ["sph_add_wechat", "sph_add_friends", "sph_private_chat", "sph_search_terms", "sph_ocr"].includes(item.scene)
+        [
+            "sph_add_wechat",
+            "sph_add_friends",
+            "sph_private_chat",
+            "sph_search_terms",
+            "sph_ocr",
+            "sph_local_ocr",
+        ].includes(item.scene)
     );
 });
 

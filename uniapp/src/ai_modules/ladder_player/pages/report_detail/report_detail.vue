@@ -79,19 +79,19 @@ const handleKnbBind = async (knbId: string) => {
             indexid: knbId,
         });
         knbBindRef.value?.close();
+        uni.hideLoading();
         uni.showToast({
             title: "训练成功",
             icon: "none",
-            duration: 2000,
+            duration: 3000,
         });
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "绑定知识库失败",
             icon: "none",
             duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 
@@ -104,14 +104,14 @@ const getDetail = async () => {
         const data = await lpAnalysisDetail({ id: state.id });
         detail.value = data;
         getSceneDetail();
+        uni.hideLoading();
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "获取报告详情失败",
             icon: "none",
             duration: 2000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

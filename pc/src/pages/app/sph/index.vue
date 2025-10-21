@@ -17,6 +17,7 @@ import { SidebarTypeEnum } from "./_enums/index";
 import useSidebar from "../_hooks/useSidebar";
 import AutoCustomer from "./_pages/auto_customer/index.vue";
 import AutoAddWechat from "./_pages/auto_add_wechat/index.vue";
+import ManualAddWechat from "./_pages/manual_add_wechat/index.vue";
 import MsgManagement from "./_pages/msg_manage/index.vue";
 
 const { sidebar, sidebarIndex, getComponents, getSliderIndex, updateSliderIndex } = useSidebar();
@@ -33,6 +34,12 @@ sidebar.value = [
         icon: "menu_auto_wechat",
         components: markRaw(AutoAddWechat),
         type: SidebarTypeEnum.AUTO_ADD_WECHAT,
+    },
+    {
+        name: "手动加微",
+        icon: "menu_manual_wechat",
+        components: markRaw(ManualAddWechat),
+        type: SidebarTypeEnum.MANUAL_ADD_WECHAT,
     },
     {
         name: "私信管理",
@@ -56,7 +63,13 @@ const getSidebar = computed(() => {
     sidebar.value.forEach((item) => {
         let group;
 
-        if ([SidebarTypeEnum.AUTO_GET_CUSTOMER, SidebarTypeEnum.AUTO_ADD_WECHAT].includes(item.type)) {
+        if (
+            [
+                SidebarTypeEnum.AUTO_GET_CUSTOMER,
+                SidebarTypeEnum.AUTO_ADD_WECHAT,
+                SidebarTypeEnum.MANUAL_ADD_WECHAT,
+            ].includes(item.type)
+        ) {
             group = groupedItems.find((g) => g.title === SidebarGroupEnum.GET_CUSTOMER_MANAGEMENT) || {
                 title: SidebarGroupEnum.GET_CUSTOMER_MANAGEMENT,
                 children: [],

@@ -126,12 +126,14 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'O' => 
         array (
             'Overtrue\\Socialite\\' => 19,
+            'Overtrue\\Pinyin\\' => 16,
             'OSS\\' => 4,
         ),
         'N' => 
         array (
             'Nyholm\\Psr7\\' => 12,
             'Nyholm\\Psr7Server\\' => 18,
+            'Nette\\' => 6,
         ),
         'M' => 
         array (
@@ -420,6 +422,10 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         array (
             0 => __DIR__ . '/..' . '/overtrue/socialite/src',
         ),
+        'Overtrue\\Pinyin\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/overtrue/pinyin/src',
+        ),
         'OSS\\' => 
         array (
             0 => __DIR__ . '/..' . '/aliyuncs/oss-sdk-php/src/OSS',
@@ -431,6 +437,11 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'Nyholm\\Psr7Server\\' => 
         array (
             0 => __DIR__ . '/..' . '/nyholm/psr7-server/src',
+        ),
+        'Nette\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nette/php-generator/src',
+            1 => __DIR__ . '/..' . '/nette/utils/src',
         ),
         'MyCLabs\\Enum\\' => 
         array (
@@ -695,6 +706,7 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'getid3_flac' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio.flac.php',
         'getid3_flv' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
         'getid3_gif' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.graphic.gif.php',
+        'getid3_gpx' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.misc.gpx.php',
         'getid3_gzip' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.gzip.php',
         'getid3_handler' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/getid3.php',
         'getid3_hpk' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.archive.hpk.php',

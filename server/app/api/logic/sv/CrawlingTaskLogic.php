@@ -64,6 +64,11 @@ class CrawlingTaskLogic extends SvBaseLogic
             if ((int)$params['add_type'] === 1 && empty($params['wechat_id'])) {
                 throw new \Exception('请配置添加微信的客服微信');
             }
+            if ((int)$params['add_remark_enable'] === 1 && empty($params['remarks'])) {
+                throw new \Exception('请至少配置一条打招呼话术');
+            }
+            $params['remarks'] = json_encode($params['remarks'], JSON_UNESCAPED_UNICODE);
+
             $task = SvCrawlingTask::create($params);
             //将关键词平均分配给设备
             $devices = CrawlingTaskLogic::distributeKeywords($keywords, $device_codes, $keywordCount, $deviceCount);
@@ -350,6 +355,51 @@ class CrawlingTaskLogic extends SvBaseLogic
         }
     }
 
+    public static function localOcr(array $params = [])
+    {
+        try {
+            $find = SvDevice::where('device_code', $params['device_code'])->findOrEmpty();
+            if ($find->isEmpty()) {
+                self::setError('设备不存在');
+                return false;
+            }
+
+            $response = \app\common\service\ToolsService::Sv()->localOcr($params);
+            if (isset($response['code']) && $response['code'] == 10000) {
+                $task = SvCrawlingTask::where('id', $params['task_id'])->findOrEmpty();
+                if ($task->isEmpty()) {
+                    self::setError('爬取任务不存在');
+                    return false;
+                }
+                $device_codes = json_decode($task->device_codes, true);
+                if (!in_array($params['device_code'], $device_codes)) {
+                    self::setError("{$params['device_code']}设备不在该任务{$params['task_id']}中");
+                    return false;
+                }
+
+                //检查扣费
+                $unit = TokenLogService::checkToken($task['user_id'], 'sph_local_ocr');
+                //计算消耗tokens
+                $points = $unit;
+                $task_id = generate_unique_task_id();
+                //token扣除
+                User::userTokensChange($task['user_id'], $points);
+                $extra = ['算力单价' => $unit . '算力/次', '实际消耗算力' => $points, '场景' => '本地识别'];
+                //扣费记录
+                AccountLogLogic::recordUserTokensLog(true, $task['user_id'], AccountLogEnum::TOKENS_DEC_SPH_LOCAL_OCR, $points, $task_id, $extra);
+
+                self::$returnData = $response;
+                return true;
+            } else {
+                self::setError($response['msg'] ?? '请求失败');
+                return false;
+            }
+        } catch (\Throwable $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * 设备平均分配关键词，多出来的随机分配
      */
@@ -398,7 +448,7 @@ class CrawlingTaskLogic extends SvBaseLogic
         print_r('获客加微');
         try {
             $records = SvAddWechatRecord::alias('r')
-                ->field('r.*, t.add_number, t.add_interval_time, t.add_friends_prompt, t.remark, t.wechat_id, t.wechat_reg_type')
+                ->field('r.*, t.add_number, t.add_interval_time, t.add_friends_prompt, t.add_remark_enable, t.remarks, t.wechat_id, t.wechat_reg_type')
                 ->join('sv_crawling_task t', 'r.crawling_task_id = t.id')
                 ->where('t.add_type', 1)
                 ->where('r.channel', 4)
@@ -442,6 +492,10 @@ class CrawlingTaskLogic extends SvBaseLogic
                     if (isset($response['code']) && (int)$response['code'] === 10000) {
                         if (is_null($response['data'])) {
                             self::setLog($record['reg_wechat'] . '该账号还未开始验证', 'add_wechat');
+                            self::setLog($response, 'add_wechat');
+                            $response = \app\common\service\ToolsService::Sv()->validateStrings([
+                                "strings" => [$record['reg_wechat']],
+                            ]);
                             self::setLog($response, 'add_wechat');
                             continue;
                         }
@@ -568,9 +622,13 @@ class CrawlingTaskLogic extends SvBaseLogic
     {
 
         try {
-            if (empty($task['remark'])) {
-                return '';
+            if (isset($task['add_remark_enable']) && (int)$task['add_remark_enable'] === 1) {
+                $remarks = json_decode($task['remarks'], true) ?? [];
+                $remark = $remarks[array_rand($remarks)] ?? '您好！';
+                return $remark;
             }
+            return '';
+
             $returnContent = '';
             //获取提示词
             $keyword = $task['add_friends_prompt'] != '' ? $task['add_friends_prompt'] : (ChatPrompt::where('prompt_name', '加好友内容')->value('prompt_text') ?? '');

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,10 @@ use TencentCloud\Common\AbstractModel;
  * @method string getTraceId() 获取TraceId
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setTraceId(string $TraceId) 设置TraceId
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getFiles() 获取文件信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setFiles(array $Files) 设置文件信息
 注意：此字段可能返回 null，表示取不到有效值。
  */
 class AgentThought extends AbstractModel
@@ -104,6 +108,12 @@ class AgentThought extends AbstractModel
     public $TraceId;
 
     /**
+     * @var array 文件信息
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $Files;
+
+    /**
      * @param string $SessionId 会话 ID
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $RequestId 请求 ID
@@ -119,6 +129,8 @@ class AgentThought extends AbstractModel
      * @param array $Procedures 具体思考过程详情
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $TraceId TraceId
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $Files 文件信息
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
@@ -169,6 +181,15 @@ class AgentThought extends AbstractModel
 
         if (array_key_exists("TraceId",$param) and $param["TraceId"] !== null) {
             $this->TraceId = $param["TraceId"];
+        }
+
+        if (array_key_exists("Files",$param) and $param["Files"] !== null) {
+            $this->Files = [];
+            foreach ($param["Files"] as $key => $value){
+                $obj = new FileInfo();
+                $obj->deserialize($value);
+                array_push($this->Files, $obj);
+            }
         }
     }
 }

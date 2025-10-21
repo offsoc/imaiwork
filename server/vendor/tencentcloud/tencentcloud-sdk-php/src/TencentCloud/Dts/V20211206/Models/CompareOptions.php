@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setMethod(string $Method) 设置对比方式：dataCheck(完整数据对比)、sampleDataCheck(抽样数据对比)、rowsCount(行数对比), 默认为dataCheck
  * @method integer getSampleRate() 获取抽样比例;范围0,100。默认为100
  * @method void setSampleRate(integer $SampleRate) 设置抽样比例;范围0,100。默认为100
- * @method integer getThreadCount() 获取线程数，取值1-5，默认为1
- * @method void setThreadCount(integer $ThreadCount) 设置线程数，取值1-5，默认为1
+ * @method integer getThreadCount() 获取线程数，取值1-8，默认为1
+ * @method void setThreadCount(integer $ThreadCount) 设置线程数，取值1-8，默认为1
  */
 class CompareOptions extends AbstractModel
 {
@@ -40,14 +40,14 @@ class CompareOptions extends AbstractModel
     public $SampleRate;
 
     /**
-     * @var integer 线程数，取值1-5，默认为1
+     * @var integer 线程数，取值1-8，默认为1
      */
     public $ThreadCount;
 
     /**
      * @param string $Method 对比方式：dataCheck(完整数据对比)、sampleDataCheck(抽样数据对比)、rowsCount(行数对比), 默认为dataCheck
      * @param integer $SampleRate 抽样比例;范围0,100。默认为100
-     * @param integer $ThreadCount 线程数，取值1-5，默认为1
+     * @param integer $ThreadCount 线程数，取值1-8，默认为1
      */
     function __construct()
     {

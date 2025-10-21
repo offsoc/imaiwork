@@ -11,9 +11,7 @@
         <view class="py-[32rpx] grow min-h-0">
             <scroll-view scroll-y class="h-full">
                 <view class="px-[32rpx]">
-                    <image
-                        src="@/ai_modules/digital_human/static/images/home/banner.png"
-                        class="w-full h-[334rpx]"></image>
+                    <image :src="banner" class="w-full h-[334rpx]"></image>
                     <view
                         class="mt-[30rpx] h-[144rpx] rounded-[12rpx] px-[42rpx] flex items-center justify-between"
                         style="background: linear-gradient(154deg, #4efe99 0%, #0fe0eb 100%)"
@@ -57,21 +55,25 @@
 </template>
 
 <script setup lang="ts">
+import { useAppStore } from "@/stores/app";
 import MenuAnchorCloneIcon from "@/ai_modules/digital_human/static/images/home/menu_anchor_clone.svg";
 import MenuToneCloneIcon from "@/ai_modules/digital_human/static/images/home/menu_tone_clone.svg";
 import MenuAnchorListIcon from "@/ai_modules/digital_human/static/images/home/menu_anchor_list.svg";
 import MenuToneListIcon from "@/ai_modules/digital_human/static/images/home/menu_tone_list.svg";
 import MenuMontageBatchIcon from "@/ai_modules/digital_human/static/images/home/menu_montage_batch.svg";
 import MenuVideoBatchIcon from "@/ai_modules/digital_human/static/images/home/menu_video_batch.svg";
-import MenuMatrixIcon from "@/ai_modules/digital_human/static/images/home/menu_matrix.svg";
+import MenuMontagePublishRecordIcon from "@/ai_modules/digital_human/static/images/home/menu_montage_publish_record.svg";
 import MenuMontageRecordIcon from "@/ai_modules/digital_human/static/images/home/menu_montage_record.svg";
 import MenuRecordIcon from "@/ai_modules/digital_human/static/images/home/menu_record.svg";
 import MenuImgTxtIcon from "@/ai_modules/digital_human/static/images/home/menu_img_txt.svg";
 import MenuMaterialIcon from "@/ai_modules/digital_human/static/images/home/menu_material.svg";
 import MenuCopyWriteIcon from "@/ai_modules/digital_human/static/images/home/menu_copywriter.svg";
-
 import { ModeTypeEnum } from "@/ai_modules/digital_human/enums";
 import ChooseModel from "@/ai_modules/digital_human/components/choose-model/choose-model.vue";
+
+const appStore = useAppStore();
+const { config } = toRefs(appStore);
+const banner = computed(() => config.value?.digital_human.banner);
 
 const menuLists = ref<any[]>([
     {
@@ -98,7 +100,7 @@ const menuLists = ref<any[]>([
         label: "批量混剪",
         icon: MenuMontageBatchIcon,
         key: "montage_batch",
-        is_wait: true,
+        is_new: true,
     },
     {
         label: "批量视频",
@@ -107,16 +109,16 @@ const menuLists = ref<any[]>([
         is_wait: true,
     },
     {
-        label: "矩阵发布",
-        icon: MenuMatrixIcon,
-        key: "matrix",
-        is_wait: true,
+        label: "发布记录",
+        icon: MenuMontagePublishRecordIcon,
+        key: "montage_publish_record",
+        is_new: true,
     },
     {
         label: "混剪记录",
         icon: MenuMontageRecordIcon,
         key: "montage_record",
-        is_wait: true,
+        is_new: true,
     },
     {
         label: "创作记录",
@@ -145,7 +147,9 @@ const menuLists = ref<any[]>([
 ]);
 
 const handleCreateVideo = () => {
-    showChooseModel.value = true;
+    uni.$u.route({
+        url: `/ai_modules/digital_human/pages/video_create/video_create`,
+    });
 };
 
 const showChooseModel = ref(false);
@@ -179,6 +183,21 @@ const handleMenuClick = (key: string) => {
         case "record":
             uni.$u.route({
                 url: `/ai_modules/digital_human/pages/video_works/video_works`,
+            });
+            break;
+        case "montage_batch":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/montage_create/montage_create`,
+            });
+            break;
+        case "montage_record":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/montage_works/montage_works`,
+            });
+            break;
+        case "montage_publish_record":
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/montage_publish_record/montage_publish_record`,
             });
             break;
         default:

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,22 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setRunNodes(array $RunNodes) 设置节点信息
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getOptionCards() 获取选项卡
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setOptionCards(array $OptionCards) 设置选项卡
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getOutputs() 获取多气泡的输出结果
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setOutputs(array $Outputs) 设置多气泡的输出结果
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getWorkflowReleaseTime() 获取工作流发布时间，unix时间戳
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setWorkflowReleaseTime(string $WorkflowReleaseTime) 设置工作流发布时间，unix时间戳
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getPendingMessages() 获取中间消息
+ * @method void setPendingMessages(array $PendingMessages) 设置中间消息
+ * @method OptionCardIndex getOptionCardIndex() 获取选项卡索引
+ * @method void setOptionCardIndex(OptionCardIndex $OptionCardIndex) 设置选项卡索引
  */
 class WorkFlowSummary extends AbstractModel
 {
@@ -64,6 +80,34 @@ class WorkFlowSummary extends AbstractModel
     public $RunNodes;
 
     /**
+     * @var array 选项卡
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $OptionCards;
+
+    /**
+     * @var array 多气泡的输出结果
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $Outputs;
+
+    /**
+     * @var string 工作流发布时间，unix时间戳
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $WorkflowReleaseTime;
+
+    /**
+     * @var array 中间消息
+     */
+    public $PendingMessages;
+
+    /**
+     * @var OptionCardIndex 选项卡索引
+     */
+    public $OptionCardIndex;
+
+    /**
      * @param string $WorkflowId 工作流ID
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $WorkflowName 工作流名称
@@ -72,6 +116,14 @@ class WorkFlowSummary extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param array $RunNodes 节点信息
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $OptionCards 选项卡
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $Outputs 多气泡的输出结果
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $WorkflowReleaseTime 工作流发布时间，unix时间戳
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $PendingMessages 中间消息
+     * @param OptionCardIndex $OptionCardIndex 选项卡索引
      */
     function __construct()
     {
@@ -105,6 +157,27 @@ class WorkFlowSummary extends AbstractModel
                 $obj->deserialize($value);
                 array_push($this->RunNodes, $obj);
             }
+        }
+
+        if (array_key_exists("OptionCards",$param) and $param["OptionCards"] !== null) {
+            $this->OptionCards = $param["OptionCards"];
+        }
+
+        if (array_key_exists("Outputs",$param) and $param["Outputs"] !== null) {
+            $this->Outputs = $param["Outputs"];
+        }
+
+        if (array_key_exists("WorkflowReleaseTime",$param) and $param["WorkflowReleaseTime"] !== null) {
+            $this->WorkflowReleaseTime = $param["WorkflowReleaseTime"];
+        }
+
+        if (array_key_exists("PendingMessages",$param) and $param["PendingMessages"] !== null) {
+            $this->PendingMessages = $param["PendingMessages"];
+        }
+
+        if (array_key_exists("OptionCardIndex",$param) and $param["OptionCardIndex"] !== null) {
+            $this->OptionCardIndex = new OptionCardIndex();
+            $this->OptionCardIndex->deserialize($param["OptionCardIndex"]);
         }
     }
 }

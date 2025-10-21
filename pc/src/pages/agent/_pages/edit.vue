@@ -117,10 +117,10 @@ const formData = reactive<Agent>({
     optimize_s_id: "",
     search_empty_type: 1,
     search_empty_text: "",
-    top_p: 1,
-    temperature: 1,
-    presence_penalty: 0.1,
-    frequency_penalty: 0,
+    top_p: 0.9,
+    temperature: 0.6,
+    presence_penalty: 0.2,
+    frequency_penalty: 0.2,
     logprobs: 0,
     top_logprobs: 10,
     welcome_introducer: "",
@@ -133,6 +133,7 @@ const formData = reactive<Agent>({
         app_id: "",
         api_token: "",
     },
+    threshold: 0.5,
 });
 
 const formRef = ref();

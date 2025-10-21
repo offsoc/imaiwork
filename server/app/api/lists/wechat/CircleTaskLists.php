@@ -31,7 +31,7 @@ class CircleTaskLists extends BaseApiDataLists implements ListsSearchInterface
         $this->searchWhere[] = ['t.user_id', '=', $this->userId];
         return AiWechatCircleTask::alias('t')
             ->field('w.wechat_no,w.wechat_nickname,w.wechat_id,t.id,t.send_status,t.send_time,t.task_type,t.finish_time,t.content, t.attachment_type,t.attachment_content,t.comment')
-            ->join('ai_wechat w', 'w.wechat_id = w.wechat_id and w.user_id = t.user_id', 'left')
+            ->join('ai_wechat w', 'w.wechat_id = t.wechat_id and w.user_id = t.user_id')
             ->where($this->searchWhere)
             ->order('t.send_time', 'desc')
             ->limit($this->limitOffset, $this->limitLength)
@@ -54,7 +54,7 @@ class CircleTaskLists extends BaseApiDataLists implements ListsSearchInterface
         $this->searchWhere[] = ['t.user_id', '=', $this->userId];
         return AiWechatCircleTask::alias('t')
             ->field('w.wechat_no,w.wechat_nickname,w.wechat_id,t.status,t.send_time,t.finish_time')
-            ->join('ai_wechat w', 'w.wechat_id = w.wechat_id and w.user_id = t.user_id', 'left')
+            ->join('ai_wechat w', 'w.wechat_id = t.wechat_id and w.user_id = t.user_id')
             ->where($this->searchWhere)
             ->count();
     }

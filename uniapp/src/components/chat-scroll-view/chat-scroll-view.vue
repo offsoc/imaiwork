@@ -24,7 +24,7 @@
                     <slot v-else name="empty"></slot>
                 </scroll-view>
             </view>
-            <view class="w-full flex justify-center mb-2 absolute bottom-0">
+            <view class="w-full flex justify-center mb-2 absolute bottom-0" v-if="dynamicHeight == 0">
                 <view
                     class="flex items-center justify-center rounded-full px-[16rpx] h-[76rpx] w-[228rpx] border border-solid border-[#EDEDEE]"
                     @click="chatAdd()">
@@ -39,13 +39,13 @@
             }">
             <view
                 :class="{
-                    'flex-1 flex flex-col items-center justify-center': isCoze,
+                    'flex-1 flex flex-col items-center justify-center': isCoze || isStaff,
                 }">
                 <slot name="content"></slot>
             </view>
             <view class="relative z-[79] chatBottomBox">
                 <view class="flex flex-col">
-                    <view class="mb-2" v-if="currModel.id && !currAgent.id && !isCoze">
+                    <view class="mb-2" v-if="currModel.id && !currAgent.id && !isCoze && !isStaff">
                         <view
                             class="text-xs text-[#808080] bg-[#f6f6f6] rounded-[100rpx] px-4 h-[66rpx] inline-flex items-center"
                             @click="showModel = true">
@@ -55,7 +55,7 @@
                             </view>
                         </view>
                     </view>
-                    <view class="mb-2" v-if="currAgent.id && !isCoze">
+                    <view class="mb-2" v-if="currAgent.id && !isCoze && !isStaff">
                         <view
                             class="bg-white rounded-[100rpx] px-4 h-[66rpx] gap-x-1 border border-solid border-[#E9EBEC] inline-flex items-center relative"
                             @click="showAgent = true">
@@ -78,7 +78,7 @@
                         <view
                             class="flex-1 bg-white rounded-tl-[48rpx] rounded-tr-[48rpx] border border-solid border-b-0 border-[#F1F1F2] overflow-hidden relative py-[6rpx]"
                             :class="{
-                                'rounded-bl-[48rpx] rounded-br-[48rpx] !border-b': isCoze,
+                                'rounded-bl-[48rpx] rounded-br-[48rpx] !border-b': isCoze || isStaff,
                             }">
                             <view v-if="fileList.length" class="p-2 flex">
                                 <view v-for="(item, index) in fileList" :key="index">
@@ -98,6 +98,7 @@
                                     hold-keyboard
                                     placeholder-style="color: rgba(0, 0, 0, 0.2); font-size: 26rpx;"
                                     auto-height
+                                    :adjust-position="false"
                                     :placeholder="placeholder"
                                     :show-confirm-bar="false"
                                     :disable-default-padding="true"
@@ -124,7 +125,7 @@
                         </view>
                     </view>
                     <view
-                        v-if="!isCoze"
+                        v-if="!isCoze && !isStaff"
                         class="flex items-center justify-between gap-x-[12rpx] h-[100rpx] bg-[#F6F6F6] px-[12rpx] rounded-bl-[48rpx] rounded-br-[48rpx] border border-solid border-[#F1F1F2] border-t-0">
                         <view class="flex items-center gap-x-[12rpx] flex-1">
                             <view
@@ -165,7 +166,10 @@
         <view
             class="flex-shrink-0"
             :style="{
-                height: contentList.length || isCoze ? dynamicHeight + 'px' : dynamicHeight - chatBottomHeight + 'px',
+                height:
+                    contentList.length || isCoze || isStaff
+                        ? dynamicHeight + 'px'
+                        : dynamicHeight - chatBottomHeight + 'px',
             }"></view>
     </view>
     <popup-bottom
@@ -317,18 +321,26 @@
     </popup-bottom>
     <popup-bottom v-model:show="showModel" title="选择模型" height="55%">
         <template #content>
-            <view class="p-4 flex flex-col gap-y-4">
-                <view
-                    v-for="(item, index) in getAIModels"
-                    :key="index"
-                    class="border border-solid border-[#E9EBEC] rounded-[10rpx] px-4 py-3"
-                    :class="{
-                        '!border-primary text-primary font-bold': currModel.id == item.id,
-                    }"
-                    @click="handleModel(item)">
-                    {{ item.name }}
+            <scroll-view scroll-y class="h-full">
+                <view class="pb-[150rpx]">
+                    <view class="p-4 flex flex-col gap-y-4">
+                        <view
+                            v-for="(item, index) in getAIModels"
+                            :key="index"
+                            class="border border-solid border-[#E9EBEC] rounded-[10rpx] px-4 py-3 flex items-center gap-x-2"
+                            :class="{
+                                '!border-primary text-primary font-bold': currModel.id == item.id,
+                            }"
+                            @click="handleModel(item)">
+                            <image
+                                :src="item.logo"
+                                class="w-[48rpx] h-[48rpx] rounded-[12rpx]"
+                                mode="aspectFill"></image>
+                            <text class="text-xs line-clamp-1">{{ item.name }}</text>
+                        </view>
+                    </view>
                 </view>
-            </view>
+            </scroll-view>
         </template>
     </popup-bottom>
     <popup-bottom v-model:show="showAgent" title="选择智能体" height="85%" show-close-btn is-disabled-touch>
@@ -351,7 +363,7 @@
                             @click="handleAgent(item)">
                             <view class="flex-shrink-0">
                                 <image
-                                    :src="item.avatar"
+                                    :src="item.image"
                                     class="w-[108rpx] h-[108rpx] rounded-[24rpx]"
                                     mode="aspectFill">
                                 </image>
@@ -393,6 +405,7 @@ const props = withDefaults(
         isStop: boolean;
         isNetwork?: boolean;
         isCoze?: boolean;
+        isStaff?: boolean;
     }>(),
     {
         contentList: () => [],
@@ -402,6 +415,7 @@ const props = withDefaults(
         tokens: 0,
         isNetwork: true,
         isCoze: false,
+        isStaff: false,
     }
 );
 const emit = defineEmits<{
@@ -424,7 +438,9 @@ const currModel = ref<any>({
     model_sub_id: "",
 });
 
-const getAIModels = computed(() => appStore.getAiModelConfig?.channel || []);
+const getAIModels = computed(() =>
+    (appStore.getAiModelConfig?.channel || []).filter((item: any) => item.status == "1")
+);
 
 const selectedNetwork = ref(false);
 const handleNetwork = () => {
@@ -657,7 +673,9 @@ const getAgentList = async (page_no: number, page_size: number) => {
             source: 1,
         });
         agentPagingRef.value?.complete(lists);
-    } catch (error: any) {}
+    } catch (error: any) {
+        agentPagingRef.value?.complete([]);
+    }
 };
 
 watch(

@@ -110,6 +110,7 @@ class SvAccountLogic extends SvBaseLogic
     public static function updateSvAccount(array $params)
     {  Db::startTrans();
         try {
+            $params['status'] = 1;
             // 获取信息
             $account = self::accountInfo($params['account']);
             if (is_bool($account)) {
@@ -129,6 +130,7 @@ class SvAccountLogic extends SvBaseLogic
 
                 unset($params['id']);
                 $params['user_id'] = self::$uid;
+                
                 // 添加
                 $account = SvAccount::create($params);
                 $data = $account->toArray();

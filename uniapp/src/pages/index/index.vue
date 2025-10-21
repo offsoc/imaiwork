@@ -202,7 +202,7 @@ const handleQueryRecordList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.error("查询历史记录失败:", error);
+        pagingRef.value?.complete([]);
     }
 };
 
@@ -219,7 +219,7 @@ const getChatList = async () => {
             if (item.type === 1)
                 return {
                     ...item,
-                    fileList: item?.file_info ? [item.file_info] : [],
+                    fileList: item?.file_info && item.file_info.length > 0 ? item.file_info : [],
                 };
             return {
                 ...item,

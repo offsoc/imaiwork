@@ -82,11 +82,9 @@ const getPhoneNumber = async (e: any) => {
             code,
         });
         uni.hideLoading();
-
         emit("login", res);
     } catch (error: any) {
         uni.hideLoading();
-
         uni.showToast({
             title: error || "获取手机号失败",
             icon: "none",

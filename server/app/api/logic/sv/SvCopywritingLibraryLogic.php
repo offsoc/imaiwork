@@ -35,7 +35,8 @@ class SvCopywritingLibraryLogic extends SvBaseLogic
 
             $item = [
                 '1'=>'内容文案',
-                '2'=>'口播文案'
+                '2'=>'口播文案',
+                '3'=>'口播混剪文案'
             ];
             $params['name'] = $item[$params['copywriting_type']] . ' '. date('Y-m-d H:i', time());
             $jsonFields = ['title', 'described', 'oral_copy', 'extra'];

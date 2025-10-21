@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,9 @@ use TencentCloud\Common\AbstractModel;
  * @method string getStatus() 获取 客户端证书状态，默认激活状态（ACTIVE）
 ACTIVE：激活     
 INACTIVE：未激活     
-REVOKED：吊销 
-PENDING_ACTIVATION：注册待激活
  * @method void setStatus(string $Status) 设置 客户端证书状态，默认激活状态（ACTIVE）
 ACTIVE：激活     
 INACTIVE：未激活     
-REVOKED：吊销 
-PENDING_ACTIVATION：注册待激活
  */
 class RegisterDeviceCertificateRequest extends AbstractModel
 {
@@ -72,8 +68,6 @@ class RegisterDeviceCertificateRequest extends AbstractModel
      * @var string  客户端证书状态，默认激活状态（ACTIVE）
 ACTIVE：激活     
 INACTIVE：未激活     
-REVOKED：吊销 
-PENDING_ACTIVATION：注册待激活
      */
     public $Status;
 
@@ -86,8 +80,6 @@ PENDING_ACTIVATION：注册待激活
      * @param string $Status  客户端证书状态，默认激活状态（ACTIVE）
 ACTIVE：激活     
 INACTIVE：未激活     
-REVOKED：吊销 
-PENDING_ACTIVATION：注册待激活
      */
     function __construct()
     {

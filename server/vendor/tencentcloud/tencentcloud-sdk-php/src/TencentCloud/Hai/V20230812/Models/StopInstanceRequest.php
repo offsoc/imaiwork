@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ use TencentCloud\Common\AbstractModel;
 /**
  * StopInstance请求参数结构体
  *
- * @method string getInstanceId() 获取实例ID
- * @method void setInstanceId(string $InstanceId) 设置实例ID
+ * @method string getInstanceId() 获取实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
+ * @method void setInstanceId(string $InstanceId) 设置实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
  * @method string getStopMode() 获取hai实例关机的模式，目前仅支持关机不收费：
 STOP_CHARGE -- 关闭hai实例，释放计算资源，停止收取计算资源的费用。
 注意：默认值为STOP_CHARGE
@@ -34,7 +34,7 @@ STOP_CHARGE -- 关闭hai实例，释放计算资源，停止收取计算资源�
 class StopInstanceRequest extends AbstractModel
 {
     /**
-     * @var string 实例ID
+     * @var string 实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
      */
     public $InstanceId;
 
@@ -51,7 +51,7 @@ STOP_CHARGE -- 关闭hai实例，释放计算资源，停止收取计算资源�
     public $DryRun;
 
     /**
-     * @param string $InstanceId 实例ID
+     * @param string $InstanceId 实例ID。可通过[DescribeInstances](https://cloud.tencent.com/document/api/1721/101612) API获取实例ID。
      * @param string $StopMode hai实例关机的模式，目前仅支持关机不收费：
 STOP_CHARGE -- 关闭hai实例，释放计算资源，停止收取计算资源的费用。
 注意：默认值为STOP_CHARGE

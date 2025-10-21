@@ -29,14 +29,14 @@ export default defineConfig({
                 enabled: true,
             },
         }),
-        // Optimization({
-        // 	// 插件功能开关，默认为true，即开启所有功能
-        // 	enable: {
-        // 		optimization: true,
-        // 		"async-import": true,
-        // 		"async-component": true,
-        // 	},
-        // }),
+        Optimization({
+            // 插件功能开关，默认为true，即开启所有功能
+            enable: {
+                optimization: true,
+                "async-import": true,
+                "async-component": true,
+            },
+        }),
     ],
     css: {
         postcss: {

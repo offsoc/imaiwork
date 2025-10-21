@@ -136,10 +136,6 @@ const getWorkbenchData = async () => {
 
 const lists = ref<any[]>([]);
 
-const queryParams = reactive<any>({
-    name: "",
-});
-
 const pagingRef = shallowRef();
 const queryList = async (page_no: number, page_size: number) => {
     try {
@@ -149,7 +145,7 @@ const queryList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
+        pagingRef.value?.complete([]);
     }
 };
 
@@ -170,7 +166,6 @@ const handleClick = (item: any) => {
 
 const handleMore = (id: string) => {
     let itemList = ["删除"];
-    console.log(123);
     uni.showActionSheet({
         itemList,
         success: (res) => {
@@ -195,20 +190,20 @@ const handleDelete = async (id: string) => {
                     await lpAnalysisDelete({
                         id,
                     });
+                    uni.hideLoading();
                     uni.showToast({
                         title: "删除成功",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
                     pagingRef.value?.reload();
                 } catch (error: any) {
+                    uni.hideLoading();
                     uni.showToast({
                         title: error || "删除失败",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
-                } finally {
-                    uni.hideLoading();
                 }
             }
         },
@@ -229,20 +224,20 @@ const handleRetry = async (id: string) => {
                     await lpAnalysisRetry({
                         id,
                     });
+                    uni.hideLoading();
                     uni.showToast({
                         title: "重新分析成功",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
                     pagingRef.value?.reload();
                 } catch (error: any) {
+                    uni.hideLoading();
                     uni.showToast({
                         title: error || "重新分析失败",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
-                } finally {
-                    uni.hideLoading();
                 }
             }
         },

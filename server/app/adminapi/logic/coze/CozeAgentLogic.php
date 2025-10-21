@@ -153,6 +153,7 @@ class CozeAgentLogic extends BaseLogic
                 CozeWorkflow::update($workflowData);
             }
             self::$returnData = CozeAgent::where('id', $params['id'])->findOrEmpty()->toArray();
+            Db::commit();
             return true;
         } catch (\Exception $e) {
             Db::rollback();

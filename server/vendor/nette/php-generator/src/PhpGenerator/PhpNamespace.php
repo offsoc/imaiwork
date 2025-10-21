@@ -11,6 +11,8 @@ namespace Nette\PhpGenerator;
 
 use Nette;
 use Nette\InvalidStateException;
+use function strlen;
+use const ARRAY_FILTER_USE_BOTH;
 
 
 /**
@@ -165,7 +167,7 @@ final class PhpNamespace
 		uasort($this->aliases[$of], fn(string $a, string $b): int => strtr($a, '\\', ' ') <=> strtr($b, '\\', ' '));
 		return array_filter(
 			$this->aliases[$of],
-			fn($name, $alias) => strcasecmp(($this->name ? $this->name . '\\' : '') . $alias, $name),
+			fn($name, $alias) => (bool) strcasecmp(($this->name ? $this->name . '\\' : '') . $alias, $name),
 			ARRAY_FILTER_USE_BOTH,
 		);
 	}

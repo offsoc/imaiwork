@@ -54,9 +54,26 @@
                         新增行业模型
                     </el-button>
                 </router-link>
-                <el-button v-if="isImport" v-perms="['ai_assistant.model/import']" type="primary" @click="handleImport"
-                    >导入模型</el-button
-                >
+                <div>
+                    <div v-perms="['ai_assistant.model/edit']">
+                        小程是否可见
+                        <el-switch
+                            v-model="isShowRobot"
+                            inline-prompt
+                            active-value="1"
+                            inactive-value="0"
+                            active-text="是"
+                            inactive-text="否"
+                            @change="changeShowRobot" />
+                    </div>
+                    <el-button
+                        v-if="isImport"
+                        v-perms="['ai_assistant.model/import']"
+                        type="primary"
+                        @click="handleImport"
+                        >导入模型</el-button
+                    >
+                </div>
             </div>
             <el-table size="large" class="mt-4" v-loading="pager.loading" :data="pager.lists">
                 <el-table-column label="ID" prop="id" min-width="80" />
@@ -114,6 +131,7 @@
 <script lang="ts" setup>
 import { usePaging } from "@/hooks/usePaging";
 import { getRoutePath } from "@/router";
+import { saveConfig } from "@/api/app";
 import {
     getAssistantModelList,
     assistantModelStatus,
@@ -122,7 +140,19 @@ import {
     assistantModelImportCheck,
 } from "@/api/ai_assistant/model";
 import feedback from "@/utils/feedback";
+import useAppStore from "@/stores/modules/app";
 import Imports from "./components/imports.vue";
+
+const appStore = useAppStore();
+
+const isShowRobot = computed({
+    get() {
+        return appStore.config.is_robot_show;
+    },
+    set(value) {
+        appStore.config.is_robot_show = value;
+    },
+});
 
 const importsRef = shallowRef();
 
@@ -150,6 +180,15 @@ const changeStatus = async (id: any) => {
     } finally {
         getLists();
     }
+};
+
+//修改小程是否可见
+const changeShowRobot = async () => {
+    await saveConfig({
+        data: isShowRobot.value,
+        type: "assistants",
+        name: "is_robot_show",
+    });
 };
 
 //导入

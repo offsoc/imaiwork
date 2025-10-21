@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setAddress(string $Address) 设置连接地址
  * @method string getZone() 获取连接区域
  * @method void setZone(string $Zone) 设置连接区域
+ * @method string getConnectUrl() 获取访问链接，可以直接使用此链接访问 WebShell
+ * @method void setConnectUrl(string $ConnectUrl) 设置访问链接，可以直接使用此链接访问 WebShell
  * @method string getRequestId() 获取唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  * @method void setRequestId(string $RequestId) 设置唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  */
@@ -47,6 +49,11 @@ class CreateAndroidInstanceWebShellResponse extends AbstractModel
     public $Zone;
 
     /**
+     * @var string 访问链接，可以直接使用此链接访问 WebShell
+     */
+    public $ConnectUrl;
+
+    /**
      * @var string 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     public $RequestId;
@@ -55,6 +62,7 @@ class CreateAndroidInstanceWebShellResponse extends AbstractModel
      * @param string $Key 鉴权密钥
      * @param string $Address 连接地址
      * @param string $Zone 连接区域
+     * @param string $ConnectUrl 访问链接，可以直接使用此链接访问 WebShell
      * @param string $RequestId 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     function __construct()
@@ -80,6 +88,10 @@ class CreateAndroidInstanceWebShellResponse extends AbstractModel
 
         if (array_key_exists("Zone",$param) and $param["Zone"] !== null) {
             $this->Zone = $param["Zone"];
+        }
+
+        if (array_key_exists("ConnectUrl",$param) and $param["ConnectUrl"] !== null) {
+            $this->ConnectUrl = $param["ConnectUrl"];
         }
 
         if (array_key_exists("RequestId",$param) and $param["RequestId"] !== null) {

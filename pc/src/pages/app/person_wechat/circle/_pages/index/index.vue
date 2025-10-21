@@ -32,7 +32,7 @@
                             <loader />
                         </div>
                         <div
-                            v-if="currentWechat.wechat_status == 2"
+                            v-if="currentWechat && currentWechat.wechat_status == 2"
                             class="absolute w-full h-full flex items-center justify-center z-[999] bg-black/5">
                             <div class="flex flex-col items-center">
                                 <Icon name="local-icon-wifi_off" :size="50" color="#ffffff"></Icon>
@@ -68,7 +68,6 @@
 <script setup lang="ts">
 import { dayjs } from "element-plus";
 import { getWeChatLists } from "@/api/person_wechat";
-import { MaterialTypeEnum } from "@/pages/app/person_wechat/_enums";
 import CircleLists from "./circle-lists.vue";
 import CircleSend from "../../_components/circle-send.vue";
 import SidebarPanel from "../../../chat/_components/sidebar-panel.vue";
@@ -451,6 +450,7 @@ const handleSelectWeChat = (data: any) => {
     circleListsFinished.value = false;
     circleListsLoading.value = true;
     circleListsLoad.value = true;
+    circleSendForm.wechat_ids = [data.wechat_id];
     PullFriendCircleTask();
 };
 
@@ -486,7 +486,9 @@ const getWeChatListsFn = async () => {
     wechatLists.value = lists;
     if (lists && lists.length > 0) {
         currentWechat.value = lists.find((item) => item.wechat_status == 1);
-        circleSendForm.wechat_ids = [currentWechat.value.wechat_id];
+        if (currentWechat.value) {
+            circleSendForm.wechat_ids = [currentWechat.value?.wechat_id];
+        }
         lists.forEach((item, index) => {
             item.loading = true;
             if (item.wechat_status == 1) {
@@ -501,6 +503,11 @@ const getWeChatListsFn = async () => {
 };
 
 getWeChatListsFn();
+
+onUnmounted(() => {
+    wechatLists.value = [];
+    currentWechat.value = {} as any;
+});
 </script>
 
 <style scoped></style>

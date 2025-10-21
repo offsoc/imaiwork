@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ selfbuilt-db 表示自建数据库
  * @method void setDescription(string $Description) 设置任务描述，最大长度为1024个字符
  * @method string getCondition() 获取用于传入的数据源的条件，目前只支持数据库，所以目前表示数据库的名称，选择多个数据库，之间通过逗号分隔，若不选，则默认选择全部数据库
  * @method void setCondition(string $Condition) 设置用于传入的数据源的条件，目前只支持数据库，所以目前表示数据库的名称，选择多个数据库，之间通过逗号分隔，若不选，则默认选择全部数据库
- * @method array getComplianceGroupIds() 获取合规组ID列表，最多支持添加5个
- * @method void setComplianceGroupIds(array $ComplianceGroupIds) 设置合规组ID列表，最多支持添加5个
+ * @method array getComplianceGroupIds() 获取此参数必选。合规组ID列表，最多支持添加5个
+ * @method void setComplianceGroupIds(array $ComplianceGroupIds) 设置此参数必选。合规组ID列表，最多支持添加5个
  * @method string getTimingStartTime() 获取任务定时启动时间，格式如：2006-01-02 15:04:05
 当执行计划（Plan字段）为”立即“时，定时启动时间不会生效，此场景下给该字段传值不会被保存。
  * @method void setTimingStartTime(string $TimingStartTime) 设置任务定时启动时间，格式如：2006-01-02 15:04:05
@@ -68,6 +68,8 @@ selfbuilt-db 表示自建数据库
  * @method void setRows(integer $Rows) 设置抽样的条数，范围30-1000
  * @method string getGlobalOrderField() 获取抽样的排序字段
  * @method void setGlobalOrderField(string $GlobalOrderField) 设置抽样的排序字段
+ * @method string getScanRange() 获取full:全量扫描 incre:变更扫描
+ * @method void setScanRange(string $ScanRange) 设置full:全量扫描 incre:变更扫描
  */
 class CreateDSPADiscoveryTaskRequest extends AbstractModel
 {
@@ -135,7 +137,7 @@ selfbuilt-db 表示自建数据库
     public $Condition;
 
     /**
-     * @var array 合规组ID列表，最多支持添加5个
+     * @var array 此参数必选。合规组ID列表，最多支持添加5个
      */
     public $ComplianceGroupIds;
 
@@ -161,6 +163,11 @@ selfbuilt-db 表示自建数据库
     public $GlobalOrderField;
 
     /**
+     * @var string full:全量扫描 incre:变更扫描
+     */
+    public $ScanRange;
+
+    /**
      * @param string $DspaId DSPA实例ID
      * @param string $Name 任务名称，1-60个字符，仅允许输入中文、英文字母、数字、'_'、'-'，并且开头和结尾需为中文、英文字母或者数字，Name不可重复
      * @param string $DataSourceId 数据源ID
@@ -179,12 +186,13 @@ selfbuilt-db 表示自建数据库
      * @param integer $GeneralRuleSetEnable 通用规则集开关，0 关闭，1 启用
      * @param string $Description 任务描述，最大长度为1024个字符
      * @param string $Condition 用于传入的数据源的条件，目前只支持数据库，所以目前表示数据库的名称，选择多个数据库，之间通过逗号分隔，若不选，则默认选择全部数据库
-     * @param array $ComplianceGroupIds 合规组ID列表，最多支持添加5个
+     * @param array $ComplianceGroupIds 此参数必选。合规组ID列表，最多支持添加5个
      * @param string $TimingStartTime 任务定时启动时间，格式如：2006-01-02 15:04:05
 当执行计划（Plan字段）为”立即“时，定时启动时间不会生效，此场景下给该字段传值不会被保存。
      * @param string $Order random-随机，asc生序，desc降序
      * @param integer $Rows 抽样的条数，范围30-1000
      * @param string $GlobalOrderField 抽样的排序字段
+     * @param string $ScanRange full:全量扫描 incre:变更扫描
      */
     function __construct()
     {
@@ -261,6 +269,10 @@ selfbuilt-db 表示自建数据库
 
         if (array_key_exists("GlobalOrderField",$param) and $param["GlobalOrderField"] !== null) {
             $this->GlobalOrderField = $param["GlobalOrderField"];
+        }
+
+        if (array_key_exists("ScanRange",$param) and $param["ScanRange"] !== null) {
+            $this->ScanRange = $param["ScanRange"];
         }
     }
 }

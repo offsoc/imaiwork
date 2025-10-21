@@ -137,15 +137,16 @@ const handleStart = () => {
 };
 
 const generateReport = async () => {
+    uni.showLoading({
+        title: "生成中...",
+        mask: true,
+    });
     try {
-        uni.showLoading({
-            title: "生成中...",
-            mask: true,
-        });
         await lpSceneChatEnd({
             scene_id: state.id,
             analysis_id: detail.value.analysis_id,
         });
+        uni.hideLoading();
         uni.showToast({
             icon: "none",
             title: "提交成功，3秒跳转到报告页面~",
@@ -158,13 +159,12 @@ const generateReport = async () => {
             });
         }, 3000);
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             icon: "none",
             title: error || "生成失败",
-            duration: 5000,
+            duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 
@@ -188,14 +188,14 @@ const getDetail = async () => {
     try {
         const data = await lpSceneDetail({ id: state.id });
         detail.value = data;
+        uni.hideLoading();
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "获取场景详情失败",
             icon: "none",
-            duration: 2000,
+            duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,10 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setResourceConfigInfo(ResourceConfigInfo $ResourceConfigInfo) 设置pod资源配置
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getSubUin() 获取Pod所属任务的SubUin信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setSubUin(string $SubUin) 设置Pod所属任务的SubUin信息
+注意：此字段可能返回 null，表示取不到有效值。
  */
 class PodInfo extends AbstractModel
 {
@@ -84,6 +88,12 @@ class PodInfo extends AbstractModel
     public $ResourceConfigInfo;
 
     /**
+     * @var string Pod所属任务的SubUin信息
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $SubUin;
+
+    /**
      * @param string $Name pod名
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $IP pod的IP
@@ -95,6 +105,8 @@ class PodInfo extends AbstractModel
      * @param string $EndTime pod结束时间
 注意：此字段可能返回 null，表示取不到有效值。
      * @param ResourceConfigInfo $ResourceConfigInfo pod资源配置
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $SubUin Pod所属任务的SubUin信息
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
@@ -133,6 +145,10 @@ class PodInfo extends AbstractModel
         if (array_key_exists("ResourceConfigInfo",$param) and $param["ResourceConfigInfo"] !== null) {
             $this->ResourceConfigInfo = new ResourceConfigInfo();
             $this->ResourceConfigInfo->deserialize($param["ResourceConfigInfo"]);
+        }
+
+        if (array_key_exists("SubUin",$param) and $param["SubUin"] !== null) {
+            $this->SubUin = $param["SubUin"];
         }
     }
 }

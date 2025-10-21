@@ -134,10 +134,6 @@ const historyPageParams = reactive<Record<string, any>>({
     Count: 10,
 });
 
-on("open", () => {
-    getWeChatListsFn();
-});
-
 // 监听错误事件
 on("error", (error?: any) => {
     const { Code, MsgType, Content } = error;
@@ -158,6 +154,7 @@ on("error", (error?: any) => {
 // 监听消息事件
 on("message", async (data: any) => {
     const { MsgType, Content } = data;
+    console.log("MsgType", MsgType);
     // @ts-ignore
     const handlers: Record<MsgTypeEnum, Function> = {
         [MsgTypeEnum.Auth]: () => {
@@ -608,11 +605,6 @@ async function handleChangeFriend(friend: any) {
     } finally {
         friendInfoLoading.value = false;
     }
-}
-
-// 处理好友添加请求
-function handleFriendAddRequestNotice(Content: any) {
-    const { WeChatId, FriendId } = Content;
 }
 
 // 处理内容发布
@@ -1170,6 +1162,7 @@ const getWeChatListsFn = async () => {
 
 getSopGreetInfo();
 getReplyStrategyInfo();
+getWeChatListsFn();
 
 onMounted(() => {
     // @ts-ignore
@@ -1181,6 +1174,7 @@ onUnmounted(() => {
     resetBaseData();
     // @ts-ignore
     currentWechat.value = {};
+    wechatLists.value = [];
 });
 
 // 定义页面元数据

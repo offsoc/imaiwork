@@ -14,24 +14,21 @@
             </div>
             <div class="text-2xl font-bold mb-5">工作流</div>
             <!-- 表单 -->
-            <ElForm ref="formRef" :model="formData" :rules="formRules" label-position="top">
-                <ElFormItem label="应用ID" prop="app_id">
-                    <ElInput v-model="formData.app_id" placeholder="请输入应用ID" />
-                </ElFormItem>
-                <ElFormItem label="工作流ID" prop="workflow_id">
+            <el-form ref="formRef" :model="formData" :rules="formRules" label-position="top">
+                <el-form-item label="工作流ID" prop="workflow_id">
                     <ElInput v-model="formData.workflow_id" placeholder="请输入工作流ID" />
-                </ElFormItem>
-                <ElFormItem label="智能体ID" prop="bot_id">
-                    <ElInput v-model="formData.bot_id" placeholder="请输入智能体ID" />
-                </ElFormItem>
-                <ElFormItem label="授权Token" prop="api_token">
+                </el-form-item>
+
+                <el-form-item label="授权Token" prop="api_token">
                     <ElInput v-model="formData.api_token" placeholder="请输入授权Token" />
-                </ElFormItem>
-            </ElForm>
+                </el-form-item>
+            </el-form>
             <!-- 操作按钮 -->
             <div class="flex">
-                <ElButton class="!rounded-full flex-1 !h-[50px]" @click="close">取消</ElButton>
-                <ElButton type="primary" class="!rounded-full flex-1 !h-[50px]" @click="handleConfirm"> 保存 </ElButton>
+                <el-button class="!rounded-full flex-1 !h-[50px]" @click="close">取消</el-button>
+                <el-button type="primary" class="!rounded-full flex-1 !h-[50px]" @click="handleConfirm">
+                    保存
+                </el-button>
             </div>
         </div>
     </popup>

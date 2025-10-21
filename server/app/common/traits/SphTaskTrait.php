@@ -16,6 +16,7 @@ use app\common\model\user\User;
 use app\common\model\sv\SvDeviceRpa;
 
 use Predis\Client as redisClient;
+use think\cache\driver\Redis;
 
 trait SphTaskTrait
 {
@@ -70,7 +71,8 @@ trait SphTaskTrait
                 'chat_number' => $row['chat_number'],
                 'chat_interval_time' => $row['chat_interval_time'],
                 'add_type' => $row['add_type'],
-                'remark' => $row['remark'],
+                'remarks' => json_decode($row['remarks'], true),
+                'add_remark_enable' => $row['add_remark_enable'] ?? 0,
                 'add_number' => $row['add_number'],
                 'add_interval_time' => $row['add_interval_time'],
                 'greeting_content' => $row['greeting_content'],
@@ -337,22 +339,16 @@ trait SphTaskTrait
         }
     }
 
-    private static function redis(): redisClient
+    private static function redis(): Redis
     {
 
-        return new redisClient([
+        return new Redis([
             'host'        => env('redis.HOST', '127.0.0.1'),
             'port'        => env('redis.PORT', 6379),
             'password'    => env('redis.PASSWORD', '123456'),
-            'database'      => env('redis.WS_SELECT', 9),
+            'select'      => env('redis.WS_SELECT', 9),
             'timeout'     => 0,
-            'pool' => [
-                'max_connections' => 5,
-                'min_connections' => 1,
-                'wait_timeout' => 3,
-                'idle_timeout' => 60,
-                'heartbeat_interval' => 50,
-            ],
+            'persistent'  => true,
         ]);
     }
 

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ use TencentCloud\Common\AbstractModel;
 /**
  * DescribeScenes请求参数结构体
  *
- * @method array getSceneIds() 获取场景id列表
- * @method void setSceneIds(array $SceneIds) 设置场景id列表
+ * @method array getSceneIds() 获取场景id列表，单次能查询100个场景id
+ * @method void setSceneIds(array $SceneIds) 设置场景id列表，单次能查询100个场景id
  */
 class DescribeScenesRequest extends AbstractModel
 {
     /**
-     * @var array 场景id列表
+     * @var array 场景id列表，单次能查询100个场景id
      */
     public $SceneIds;
 
     /**
-     * @param array $SceneIds 场景id列表
+     * @param array $SceneIds 场景id列表，单次能查询100个场景id
      */
     function __construct()
     {

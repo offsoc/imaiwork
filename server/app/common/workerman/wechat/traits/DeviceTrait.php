@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\common\workerman\wechat\traits;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatDevice;
-
+use think\facade\Cache;
 /**
  * 设备能力
  * - 检查设备合法性
@@ -33,7 +33,15 @@ trait DeviceTrait
     protected function checkDevice(string $deviceId): bool
     {
         // 获取设备信息    
+        $cache = Cache::get('DeviceInfoCache_'.$deviceId, false);
+        if($cache) {
+            return (bool)$cache;
+        }
+
         $deviceInfo = $this->getDeviceInfo($deviceId);
+        if($deviceInfo) {
+            Cache::set('DeviceInfoCache_'.$deviceId, ($deviceInfo ? true : false), 86400);
+        }
         return $deviceInfo ? true : false;
     }
 
@@ -108,16 +116,20 @@ trait DeviceTrait
             $this->getDeviceKey($deviceId, 'status'),
             $online ? 'online' : 'offline'
         );
+        $status = 0;
         if(!$online){
-            AiWechatDevice::where('device_code', $deviceId)->update(['device_status' => 0, 'update_time' => time()]);
-            AiWechat::where('device_code', $deviceId)->update(['wechat_status' => 0, 'update_time' => time()]);
+            $status = 0;
             $this->withChannel('wechat_socket')->withLevel('info')->withTitle('updateDeviceStatus offile')->withContext([
                 'device' => $deviceId
             ])->log();
         }
         if ($online) {
+            $status = 1;
             $this->updateDeviceHeartbeat($deviceId);
         }
+
+        AiWechatDevice::where('device_code', $deviceId)->update(['device_status' => $status, 'update_time' => time()]);
+        AiWechat::where('device_code', $deviceId)->update(['wechat_status' => $status, 'update_time' => time()]);
     }
 
     /**
@@ -128,10 +140,8 @@ trait DeviceTrait
      */
     protected function updateDeviceHeartbeat(string $deviceId): void
     {
-        $this->redis()->set(
-            $this->getDeviceKey($deviceId, 'heartbeat'),
-            time()
-        );
+        $this->redis()->set($this->getDeviceKey($deviceId, 'heartbeat'),time());
+        
     }
 
     /**

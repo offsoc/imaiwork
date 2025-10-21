@@ -6,6 +6,7 @@ use app\common\workerman\rpa\BaseMessageHandler;
 use think\facade\Db;
 use app\common\workerman\rpa\WorkerEnum;
 use Workerman\Connection\TcpConnection;
+use app\common\model\sv\SvPublishSetting;
 use app\common\model\sv\SvPublishSettingAccount;
 use app\common\model\sv\SvPublishSettingDetail;
 use app\common\model\sv\SvDeviceRpa;
@@ -36,7 +37,7 @@ class CrontabHandler extends BaseMessageHandler
                 //$this->setLog('设备:'. $this->connection->deviceid .' 没有绑定账号' , 'cron');
                 return;
             }
-            
+
             // //结束时间减去当前时间大于2分钟,怎么发布
             // $end_time = strtotime($app->start_time) + ((int)$app->exec_duration * 60);
             // if ($end_time - time() < 120) {
@@ -51,6 +52,7 @@ class CrontabHandler extends BaseMessageHandler
                 ->where('ps.account', $account)
                 ->where('ps.status', 'in', [0, 5])
                 ->where('s.status', 'in', [1])
+                ->where('s.account_type', '<>', 1)
                 ->where('ps.data_type', $dataType)
                 ->where('ps.publish_time', '<=', date('Y-m-d H:i:s', time()))
                 //->where('ps.publish_time', 'between', [$st, $et])
@@ -66,7 +68,7 @@ class CrontabHandler extends BaseMessageHandler
                 //     ->findOrEmpty();
                 // if ($app->isEmpty()) {
                 //     //将执行app直接改为小红书
-                    
+
                 // }
                 $this->sendAppExec($this->connection->deviceid, 3);
                 sleep(30);
@@ -187,9 +189,16 @@ class CrontabHandler extends BaseMessageHandler
 
             $account = SvPublishSettingAccount::where('id', $publish['publish_account_id'])->findOrEmpty();
             if (!$account->isEmpty()) {
+                $count = SvPublishSettingDetail::where('publish_account_id', $detail['publish_account_id'])->where('status', 0)->count();
                 $account->save([
+                    'status' => $count > 0 ? 1 : 2,
                     'update_time' => time(),
                     'published_count' => Db::raw('published_count+1'),
+                ]);
+
+                SvPublishSetting::where('id', $detail['publish_id'])->update([
+                    'update_time' => time(),
+                    'status' => 2,
                 ]);
                 $this->setLog('发布账号数据更新成功:' . $publish['publish_account_id'], 'cron');
             } else {

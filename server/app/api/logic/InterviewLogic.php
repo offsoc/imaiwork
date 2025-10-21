@@ -446,14 +446,26 @@ class InterviewLogic extends BaseLogic
         $interview = Interview::where(['id' => $interview_id, 'user_id' => $user_id, 'status' => 0])->findOrEmpty();
         if ($interview->isEmpty())
         {
-            throw new Exception('没有面试信息或已结束!');
+            self::$returnData = [
+                'id' => $interview_id,
+                'status' => 1,
+                'end_message' => $endMessgae,
+                'message' => '没有面试信息或已结束！'
+            ];
+            return true;
         }
 
         $interviewRecord = InterviewRecord::where(['id' => $interview->interview_record_id, 'user_id' => $user_id])
         ->whereIn('status', [0, 1])->findOrEmpty();
         if ($interviewRecord->isEmpty())
         {
-            throw new Exception('没有面试信息或已结束!');
+            self::$returnData = [
+                'id' => $interview_id,
+                'status' => 1,
+                'end_message' => $endMessgae,
+                'message' => '没有面试信息或已结束！'
+            ];
+            return true;
         }
 
         $job = InterviewJob::findOrEmpty($interview->job_id);
@@ -587,7 +599,13 @@ class InterviewLogic extends BaseLogic
             }
         } else {
             // 结束了
-            throw new Exception('面试已结束!');
+            self::$returnData = [
+                'id' => $interview_id,
+                'status' => 1,
+                'end_message' => $endMessgae,
+                'message' => '面试已结束！'
+            ];
+            return true;
         }
         self::$returnData = [
             'id' => $interview_id,

@@ -292,32 +292,32 @@ const getPayWayListData = async () => {
 const payment = (() => {
     // 创建订单
     const createOrderTask = async () => {
+        uni.showLoading({
+            title: "创建订单中",
+        });
         try {
-            uni.showLoading({
-                title: "创建订单中",
-            });
             const result = await createRechargeOrder({
                 type: 1,
                 package_id: getRechargeData.value.id,
             });
+            uni.hideLoading();
             return result;
         } catch (error: any) {
+            uni.hideLoading();
             uni.showToast({
                 icon: "none",
                 title: error || "创建订单失败",
-                duration: 5000,
+                duration: 3000,
             });
             return Promise.reject(error);
-        } finally {
-            uni.hideLoading();
         }
     };
     // 调用预支付
     const prepayTask = async (data: any) => {
+        uni.showLoading({
+            title: "正在支付中",
+        });
         try {
-            uni.showLoading({
-                title: "正在支付中",
-            });
             const res = await prePay({
                 order_id: data.order_id,
                 from: payFrom,
@@ -326,14 +326,13 @@ const payment = (() => {
 
             return res;
         } catch (error: any) {
+            uni.hideLoading();
             uni.showToast({
                 title: error || "支付失败",
                 icon: "none",
-                duration: 5000,
+                duration: 3000,
             });
             return Promise.reject(error);
-        } finally {
-            uni.hideLoading();
         }
     };
 
@@ -359,13 +358,12 @@ const { isLock, lockFn: handlePay } = useLockFn(async () => {
         const res: PayStatusEnum = await payment();
         handlePayResult(res);
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "支付失败",
             icon: "none",
-            duration: 5000,
+            duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 });
 
@@ -394,7 +392,7 @@ const queryList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
+        pagingRef.value?.complete([]);
     }
 };
 

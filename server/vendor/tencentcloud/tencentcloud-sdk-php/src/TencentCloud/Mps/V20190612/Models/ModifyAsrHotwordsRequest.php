@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ use TencentCloud\Common\AbstractModel;
  * ModifyAsrHotwords请求参数结构体
  *
  * @method string getHotwordsId() 获取热词库 id 
-如果热词库是文本热词：Name 和 Content 至少填一个 
-如果热词库是：Name、FileContent 和 FileName 至少填一个 
+如果热词库是临时热词：Name 和 Content 至少填一个 
+如果热词库是文件热词：Name、FileContent 和 FileName 至少填一个 
 
  * @method void setHotwordsId(string $HotwordsId) 设置热词库 id 
-如果热词库是文本热词：Name 和 Content 至少填一个 
-如果热词库是：Name、FileContent 和 FileName 至少填一个 
+如果热词库是临时热词：Name 和 Content 至少填一个 
+如果热词库是文件热词：Name、FileContent 和 FileName 至少填一个 
 
  * @method string getName() 获取热词库名称
  * @method void setName(string $Name) 设置热词库名称
@@ -47,8 +47,8 @@ class ModifyAsrHotwordsRequest extends AbstractModel
 {
     /**
      * @var string 热词库 id 
-如果热词库是文本热词：Name 和 Content 至少填一个 
-如果热词库是：Name、FileContent 和 FileName 至少填一个 
+如果热词库是临时热词：Name 和 Content 至少填一个 
+如果热词库是文件热词：Name、FileContent 和 FileName 至少填一个 
 
      */
     public $HotwordsId;
@@ -78,8 +78,8 @@ class ModifyAsrHotwordsRequest extends AbstractModel
 
     /**
      * @param string $HotwordsId 热词库 id 
-如果热词库是文本热词：Name 和 Content 至少填一个 
-如果热词库是：Name、FileContent 和 FileName 至少填一个 
+如果热词库是临时热词：Name 和 Content 至少填一个 
+如果热词库是文件热词：Name、FileContent 和 FileName 至少填一个 
 
      * @param string $Name 热词库名称
      * @param string $Content 热词库文本

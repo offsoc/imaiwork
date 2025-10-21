@@ -129,6 +129,8 @@ export enum TokensSceneEnum {
     HUMAN_AVATAR_CHANJING = "human_avatar_chanjing",
     KNOWLEDGE_CREATE = "knowledge_create",
     AI_XHS = "ai_xhs",
+    SPH_OCR = "sph_ocr",
+    SPH_LOCAL_OCR = "sph_local_ocr",
 }
 
 // 应用类型
@@ -274,4 +276,5 @@ export const appKeyNameMap: Record<AppKeyEnum, string> = {
 export enum ModelIdEnum {
     DEEPSEEK_R1 = 4,
     GPT_4O = 2,
+    GEMINI_2_5_PRO = 11,
 }

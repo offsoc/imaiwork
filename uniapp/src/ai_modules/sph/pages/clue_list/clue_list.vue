@@ -36,7 +36,6 @@ import { getTaskClueKeywords } from "@/api/sph";
 const taskId = ref("");
 
 const dataLists = ref<any[]>([]);
-const pagingRef = ref();
 
 const getLists = async () => {
     const data = await getTaskClueKeywords({ id: taskId.value });

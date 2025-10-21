@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ use TencentCloud\Mqtt\V20240516\Models as Models;
  * @method Models\ActivateDeviceCertificateResponse ActivateDeviceCertificate(Models\ActivateDeviceCertificateRequest $req) 生效设备证书
  * @method Models\ApplyRegistrationCodeResponse ApplyRegistrationCode(Models\ApplyRegistrationCodeRequest $req) 申请ca注册码
  * @method Models\CreateAuthorizationPolicyResponse CreateAuthorizationPolicy(Models\CreateAuthorizationPolicyRequest $req) 创建MQTT实例的性能测试任务
+ * @method Models\CreateDeviceIdentityResponse CreateDeviceIdentity(Models\CreateDeviceIdentityRequest $req) 创建一机一密设备签名
  * @method Models\CreateHttpAuthenticatorResponse CreateHttpAuthenticator(Models\CreateHttpAuthenticatorRequest $req) 创建一个HTTP的认证器
- * @method Models\CreateInsPublicEndpointResponse CreateInsPublicEndpoint(Models\CreateInsPublicEndpointRequest $req) 为MQTT实例创建公网接入点
+ * @method Models\CreateInsPublicEndpointResponse CreateInsPublicEndpoint(Models\CreateInsPublicEndpointRequest $req) 为MQTT实例创建公网接入点，未开启公网的集群可调用。
  * @method Models\CreateInstanceResponse CreateInstance(Models\CreateInstanceRequest $req) 购买新的MQTT实例
  * @method Models\CreateJWKSAuthenticatorResponse CreateJWKSAuthenticator(Models\CreateJWKSAuthenticatorRequest $req) 创建一个jwks的认证
  * @method Models\CreateJWTAuthenticatorResponse CreateJWTAuthenticator(Models\CreateJWTAuthenticatorRequest $req) 创建一个jwks的认证
@@ -40,6 +41,7 @@ use TencentCloud\Mqtt\V20240516\Models as Models;
  * @method Models\DeleteAuthorizationPolicyResponse DeleteAuthorizationPolicy(Models\DeleteAuthorizationPolicyRequest $req) 删除策略规则
  * @method Models\DeleteCaCertificateResponse DeleteCaCertificate(Models\DeleteCaCertificateRequest $req) 删除Ca证书
  * @method Models\DeleteDeviceCertificateResponse DeleteDeviceCertificate(Models\DeleteDeviceCertificateRequest $req) 删除设备证书
+ * @method Models\DeleteDeviceIdentityResponse DeleteDeviceIdentity(Models\DeleteDeviceIdentityRequest $req) 删除一机一密设备签名
  * @method Models\DeleteInsPublicEndpointResponse DeleteInsPublicEndpoint(Models\DeleteInsPublicEndpointRequest $req) 删除MQTT实例的公网接入点
  * @method Models\DeleteInstanceResponse DeleteInstance(Models\DeleteInstanceRequest $req) 删除MQTT实例
  * @method Models\DeleteTopicResponse DeleteTopic(Models\DeleteTopicRequest $req) 删除MQTT主题
@@ -51,6 +53,8 @@ use TencentCloud\Mqtt\V20240516\Models as Models;
  * @method Models\DescribeClientListResponse DescribeClientList(Models\DescribeClientListRequest $req) 查询 MQTT 客户端详情
  * @method Models\DescribeDeviceCertificateResponse DescribeDeviceCertificate(Models\DescribeDeviceCertificateRequest $req) 查询设备证书详情接口
  * @method Models\DescribeDeviceCertificatesResponse DescribeDeviceCertificates(Models\DescribeDeviceCertificatesRequest $req) 分页查询设备证书
+ * @method Models\DescribeDeviceIdentitiesResponse DescribeDeviceIdentities(Models\DescribeDeviceIdentitiesRequest $req) 查询集群下设备标识列表
+ * @method Models\DescribeDeviceIdentityResponse DescribeDeviceIdentity(Models\DescribeDeviceIdentityRequest $req) 查询设备一机一密标识
  * @method Models\DescribeInsPublicEndpointsResponse DescribeInsPublicEndpoints(Models\DescribeInsPublicEndpointsRequest $req) 查询MQTT实例公网接入点
  * @method Models\DescribeInsVPCEndpointsResponse DescribeInsVPCEndpoints(Models\DescribeInsVPCEndpointsRequest $req) 查询MQTT实例公网接入点
  * @method Models\DescribeInstanceResponse DescribeInstance(Models\DescribeInstanceRequest $req) 查询实例信息
@@ -60,6 +64,8 @@ use TencentCloud\Mqtt\V20240516\Models as Models;
 3. InstanceStatus，实例状态查询，支持多选
 
 当使用TagFilters查询时，Filters参数失效。
+ * @method Models\DescribeMessageByTopicResponse DescribeMessageByTopic(Models\DescribeMessageByTopicRequest $req) 根据订阅查询消息
+ * @method Models\DescribeMessageDetailsResponse DescribeMessageDetails(Models\DescribeMessageDetailsRequest $req) 查询MQTT消息详情
  * @method Models\DescribeMessageListResponse DescribeMessageList(Models\DescribeMessageListRequest $req) 根据一级Topic查询消息列表
  * @method Models\DescribeProductSKUListResponse DescribeProductSKUList(Models\DescribeProductSKUListRequest $req) 获取产品售卖规格
  * @method Models\DescribeSharedSubscriptionLagResponse DescribeSharedSubscriptionLag(Models\DescribeSharedSubscriptionLagRequest $req) 查询共享订阅消息堆积量
@@ -71,13 +77,14 @@ use TencentCloud\Mqtt\V20240516\Models as Models;
  * @method Models\DescribeUserListResponse DescribeUserList(Models\DescribeUserListRequest $req) 查询用户列表，Filter参数使用说明如下：
 
 1. Username，用户名称模糊搜索
- * @method Models\ModifyAuthorizationPolicyResponse ModifyAuthorizationPolicy(Models\ModifyAuthorizationPolicyRequest $req) 修改策略规则
+ * @method Models\ModifyAuthorizationPolicyResponse ModifyAuthorizationPolicy(Models\ModifyAuthorizationPolicyRequest $req) 修改策略规则，可参考 [数据面授权策略说明](https://cloud.tencent.com/document/product/1778/109715)
+ * @method Models\ModifyDeviceIdentityResponse ModifyDeviceIdentity(Models\ModifyDeviceIdentityRequest $req) 修改一机一密设备签名
  * @method Models\ModifyHttpAuthenticatorResponse ModifyHttpAuthenticator(Models\ModifyHttpAuthenticatorRequest $req) 修改MQTT HTTP 认证器
  * @method Models\ModifyInsPublicEndpointResponse ModifyInsPublicEndpoint(Models\ModifyInsPublicEndpointRequest $req) 更新MQTT实例公网接入点
  * @method Models\ModifyInstanceResponse ModifyInstance(Models\ModifyInstanceRequest $req) 修改实例属性，只有运行中的集群可以调用该接口进行变更配置。
  * @method Models\ModifyInstanceCertBindingResponse ModifyInstanceCertBinding(Models\ModifyInstanceCertBindingRequest $req) 更新MQTT集群绑定证书
 参数传空，则为删除证书
- * @method Models\ModifyJWKSAuthenticatorResponse ModifyJWKSAuthenticator(Models\ModifyJWKSAuthenticatorRequest $req) 修改MQTT JWKS 认证器
+ * @method Models\ModifyJWKSAuthenticatorResponse ModifyJWKSAuthenticator(Models\ModifyJWKSAuthenticatorRequest $req) 修改MQTT JWKS 认证器，全量配置修改，需要提交完整的修改后配置。
  * @method Models\ModifyJWTAuthenticatorResponse ModifyJWTAuthenticator(Models\ModifyJWTAuthenticatorRequest $req) 修改MQTT JWKS 认证器
  * @method Models\ModifyTopicResponse ModifyTopic(Models\ModifyTopicRequest $req) 修改主题属性
  * @method Models\ModifyUserResponse ModifyUser(Models\ModifyUserRequest $req) 修改MQTT角色

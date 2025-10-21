@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +20,26 @@ use TencentCloud\Common\AbstractModel;
 /**
  * CloseSSL请求参数结构体
  *
- * @method string getInstanceId() 获取实例 ID 。只读组 ID为空时必填。
- * @method void setInstanceId(string $InstanceId) 设置实例 ID 。只读组 ID为空时必填。
- * @method string getRoGroupId() 获取只读组 ID。实例 ID为空时必填。
- * @method void setRoGroupId(string $RoGroupId) 设置只读组 ID。实例 ID为空时必填。
+ * @method string getInstanceId() 获取实例 ID。只读组 ID 为空时必填。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
+ * @method void setInstanceId(string $InstanceId) 设置实例 ID。只读组 ID 为空时必填。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
+ * @method string getRoGroupId() 获取只读组 ID。实例 ID 为空时必填。可通过 [DescribeRoGroups](https://cloud.tencent.com/document/api/236/40939) 接口获取。
+ * @method void setRoGroupId(string $RoGroupId) 设置只读组 ID。实例 ID 为空时必填。可通过 [DescribeRoGroups](https://cloud.tencent.com/document/api/236/40939) 接口获取。
  */
 class CloseSSLRequest extends AbstractModel
 {
     /**
-     * @var string 实例 ID 。只读组 ID为空时必填。
+     * @var string 实例 ID。只读组 ID 为空时必填。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
      */
     public $InstanceId;
 
     /**
-     * @var string 只读组 ID。实例 ID为空时必填。
+     * @var string 只读组 ID。实例 ID 为空时必填。可通过 [DescribeRoGroups](https://cloud.tencent.com/document/api/236/40939) 接口获取。
      */
     public $RoGroupId;
 
     /**
-     * @param string $InstanceId 实例 ID 。只读组 ID为空时必填。
-     * @param string $RoGroupId 只读组 ID。实例 ID为空时必填。
+     * @param string $InstanceId 实例 ID。只读组 ID 为空时必填。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
+     * @param string $RoGroupId 只读组 ID。实例 ID 为空时必填。可通过 [DescribeRoGroups](https://cloud.tencent.com/document/api/236/40939) 接口获取。
      */
     function __construct()
     {

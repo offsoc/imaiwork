@@ -45,11 +45,17 @@ class MessageValidator
             throw new ResponseException(ResponseCode::UNAUTHORIZED);
         }
 
+
         // 设备不合法
         if (!$this->checkDevice($deviceId)) {
-
+            $this->withChannel('wechat_socket')->withLevel('error')->withTitle('Device not found')->withContext([
+                'deviceId' => $deviceId,
+                'msg' => 'Device not found',
+            ])->log();
             throw new ResponseException(ResponseCode::DEVICE_NOT_FOUND);
         }
+
+
 
         return $deviceId;
     }
@@ -127,7 +133,7 @@ class MessageValidator
      */
     private function validateClientRequest(array $data): void
     {
-
+        return;
         // 验证Token
         if (!isset($data['AccessToken']) || !$this->verifyToken($data['DeviceId'], $data['AccessToken'], 'client')) {
 

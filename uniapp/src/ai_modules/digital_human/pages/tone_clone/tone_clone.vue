@@ -335,14 +335,14 @@ const uploadAudio = async (file: string) => {
             filePath: file,
         });
         formData.url = uri;
+        uni.hideLoading();
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "上传失败",
             icon: "none",
             duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

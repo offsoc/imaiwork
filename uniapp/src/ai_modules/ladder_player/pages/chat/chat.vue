@@ -329,6 +329,7 @@ const endPractice = async () => {
     try {
         showEndPracticePop.value = false;
         await endChat();
+        uni.hideLoading();
         uni.showToast({
             icon: "none",
             title: "提交成功，3秒跳转到报告页面~",
@@ -341,13 +342,12 @@ const endPractice = async () => {
             });
         }, 3000);
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "结束对话失败",
             icon: "none",
-            duration: 2000,
+            duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

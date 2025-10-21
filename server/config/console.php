@@ -47,6 +47,10 @@ return [
         'note_publish_cron' => 'app\common\command\NotePublishCron',
         'single:server' => 'app\common\command\SingleWorkerService',
         'sph_clues_add_wechat' => 'app\common\command\SphCluesAddWechat',
+        //闪剪视频合成
+        'shanjian_video_task' => 'app\common\command\ShanjianVideoTaskCron',
+        //手动加微信任务
+        'crawling_manual_cron' => 'app\common\command\CrawlingManualCron',
 
     ],
 

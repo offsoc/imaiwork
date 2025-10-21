@@ -57,6 +57,7 @@ export interface Agent {
         app_id: string; // 应用ID
         api_token: string; // 授权Token
     };
+    threshold: number; // 技能阈值
 }
 
 /**

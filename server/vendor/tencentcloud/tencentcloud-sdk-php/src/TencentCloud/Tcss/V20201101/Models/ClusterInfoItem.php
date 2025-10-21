@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,8 @@ use TencentCloud\Common\AbstractModel;
 卸载中: AccessedUninstalling
  * @method string getAccessedSubStatus() 获取接入失败原因
  * @method void setAccessedSubStatus(string $AccessedSubStatus) 设置接入失败原因
+ * @method string getAccessedErrorReason() 获取接入/卸载失败原因
+ * @method void setAccessedErrorReason(string $AccessedErrorReason) 设置接入/卸载失败原因
  * @method integer getNodeCount() 获取节点总数
  * @method void setNodeCount(integer $NodeCount) 设置节点总数
  * @method integer getOffLineNodeCount() 获取离线节点数
@@ -106,6 +108,8 @@ use TencentCloud\Common\AbstractModel;
 已关闭Closed/关闭中Closing/关闭失败CloseFailed/已开启Opened/开启中Opening/开启失败OpenFailed
  * @method string getClusterAuditFailedInfo() 获取集群审计开关失败信息
  * @method void setClusterAuditFailedInfo(string $ClusterAuditFailedInfo) 设置集群审计开关失败信息
+ * @method string getOwnerName() 获取所有者名称
+ * @method void setOwnerName(string $OwnerName) 设置所有者名称
  */
 class ClusterInfoItem extends AbstractModel
 {
@@ -236,6 +240,11 @@ class ClusterInfoItem extends AbstractModel
     public $AccessedSubStatus;
 
     /**
+     * @var string 接入/卸载失败原因
+     */
+    public $AccessedErrorReason;
+
+    /**
      * @var integer 节点总数
      */
     public $NodeCount;
@@ -277,6 +286,11 @@ class ClusterInfoItem extends AbstractModel
     public $ClusterAuditFailedInfo;
 
     /**
+     * @var string 所有者名称
+     */
+    public $OwnerName;
+
+    /**
      * @param string $ClusterId 集群id
      * @param string $ClusterName 集群名字
      * @param string $ClusterVersion 集群版本
@@ -311,6 +325,7 @@ class ClusterInfoItem extends AbstractModel
 接入中: AccessedInstalling
 卸载中: AccessedUninstalling
      * @param string $AccessedSubStatus 接入失败原因
+     * @param string $AccessedErrorReason 接入/卸载失败原因
      * @param integer $NodeCount 节点总数
      * @param integer $OffLineNodeCount 离线节点数
      * @param integer $UnInstallAgentNodeCount 未安装agent节点数
@@ -320,6 +335,7 @@ class ClusterInfoItem extends AbstractModel
      * @param string $ClusterAuditStatus 集群审计开关状态：
 已关闭Closed/关闭中Closing/关闭失败CloseFailed/已开启Opened/开启中Opening/开启失败OpenFailed
      * @param string $ClusterAuditFailedInfo 集群审计开关失败信息
+     * @param string $OwnerName 所有者名称
      */
     function __construct()
     {
@@ -426,6 +442,10 @@ class ClusterInfoItem extends AbstractModel
             $this->AccessedSubStatus = $param["AccessedSubStatus"];
         }
 
+        if (array_key_exists("AccessedErrorReason",$param) and $param["AccessedErrorReason"] !== null) {
+            $this->AccessedErrorReason = $param["AccessedErrorReason"];
+        }
+
         if (array_key_exists("NodeCount",$param) and $param["NodeCount"] !== null) {
             $this->NodeCount = $param["NodeCount"];
         }
@@ -456,6 +476,10 @@ class ClusterInfoItem extends AbstractModel
 
         if (array_key_exists("ClusterAuditFailedInfo",$param) and $param["ClusterAuditFailedInfo"] !== null) {
             $this->ClusterAuditFailedInfo = $param["ClusterAuditFailedInfo"];
+        }
+
+        if (array_key_exists("OwnerName",$param) and $param["OwnerName"] !== null) {
+            $this->OwnerName = $param["OwnerName"];
         }
     }
 }

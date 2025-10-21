@@ -306,7 +306,7 @@ export default class HttpRequest {
                 },
             });
             this.requestTask.onProgressUpdate(({ progress }: any) => {
-                mergeConfig.onProgress?.(progress);
+                mergeConfig.onProgress?.(progress, mergeOptions);
             });
             const { ignoreCancel } = mergeConfig;
             !ignoreCancel && requestCancel.add(options.url, this.requestTask);

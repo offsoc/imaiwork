@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="grow min-h-0 flex flex-col mt-6 bg-white rounded-lg overflow-hidden">
-            <div class="mb-4 flex items-center justify-between gap-2 p-4">
+            <div class="flex items-center justify-between gap-2 px-4 py-6">
                 <div class="text-[18px] font-bold">面试列表</div>
                 <div class="flex items-center justify-end gap-2 grow">
                     <ElRadioGroup v-model="queryParams.status" @change="getLists()">
@@ -46,6 +46,7 @@
                     stripe
                     height="100%"
                     :row-style="{ height: '60px' }"
+                    :header-cell-style="{ height: '50px' }"
                     v-loading="pager.loading">
                     <ElTableColumn
                         prop="interview_name"

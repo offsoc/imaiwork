@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ use TencentCloud\Common\AbstractModel;
 /**
  * SetUserQuota请求参数结构体
  *
- * @method string getFileSystemId() 获取文件系统 ID
- * @method void setFileSystemId(string $FileSystemId) 设置文件系统 ID
+ * @method string getFileSystemId() 获取文件系统 ID,通过[查询文件系统列表](https://cloud.tencent.com/document/api/582/38170)获取
+ * @method void setFileSystemId(string $FileSystemId) 设置文件系统 ID,通过[查询文件系统列表](https://cloud.tencent.com/document/api/582/38170)获取
  * @method string getUserType() 获取指定配额类型，包括Uid、Gid，Dir，分别代表用户配额，用户组配额，目录配额
  * @method void setUserType(string $UserType) 设置指定配额类型，包括Uid、Gid，Dir，分别代表用户配额，用户组配额，目录配额
  * @method string getUserId() 获取UID/GID信息
@@ -36,7 +36,7 @@ use TencentCloud\Common\AbstractModel;
 class SetUserQuotaRequest extends AbstractModel
 {
     /**
-     * @var string 文件系统 ID
+     * @var string 文件系统 ID,通过[查询文件系统列表](https://cloud.tencent.com/document/api/582/38170)获取
      */
     public $FileSystemId;
 
@@ -66,7 +66,7 @@ class SetUserQuotaRequest extends AbstractModel
     public $DirectoryPath;
 
     /**
-     * @param string $FileSystemId 文件系统 ID
+     * @param string $FileSystemId 文件系统 ID,通过[查询文件系统列表](https://cloud.tencent.com/document/api/582/38170)获取
      * @param string $UserType 指定配额类型，包括Uid、Gid，Dir，分别代表用户配额，用户组配额，目录配额
      * @param string $UserId UID/GID信息
      * @param integer $CapacityHardLimit 容量硬限制，单位GiB。设置范围10-10000000。

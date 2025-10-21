@@ -76,7 +76,7 @@ const isReply = ref(false);
 const isClose = ref(false);
 const isError = ref(false);
 const recorderResult = ref<any>(null);
-const { start, stop, pause, resume, authorize, recordTime, isRecording } = useRecorder(
+const { start, stop, pause, resume, authorize, recordTime } = useRecorder(
     {
         duration: 3 * 60 * 1000,
     },
@@ -85,7 +85,7 @@ const { start, stop, pause, resume, authorize, recordTime, isRecording } = useRe
             isReply.value = false;
         },
         ondata: (data: any) => {
-            const { pcmData, powerLevel, sampleRate, duration } = data;
+            const { pcmData, powerLevel, sampleRate } = data;
             if (proxy.audioCanvas) {
                 proxy.audioCanvas.input(pcmData, powerLevel, sampleRate);
             }
@@ -170,6 +170,7 @@ const upload = async () => {
             message = await getMessage(uri);
             if (message) break;
         }
+        uni.hideLoading();
         emit("success", {
             link: uri,
             duration,
@@ -177,15 +178,14 @@ const upload = async () => {
         });
         recorderResult.value = null;
         isError.value = false;
-    } catch (error) {
+    } catch (error: any) {
         isError.value = true;
-        uni.showToast({
-            title: "上传失败",
-            icon: "none",
-            duration: 2000,
-        });
-    } finally {
         uni.hideLoading();
+        uni.showToast({
+            title: error || "上传失败",
+            icon: "none",
+            duration: 3000,
+        });
     }
 };
 

@@ -128,6 +128,7 @@ class IndexLogic extends BaseLogic
         $hdList = ConfigService::get('hd', 'list', []);
 
         $indexConfig =  ConfigService::get('index', 'config', []);
+        $banner =  config('app.app_host') . '/static/images/human/banner.png';
 
         // 网址信息
         $website = [
@@ -178,7 +179,14 @@ class IndexLogic extends BaseLogic
             'share_image'   => $shareImage,
         ];
 
+        //大语言模型
+        $chatModels = ConfigService::get('chat', 'ai_model', []);
+        foreach ($chatModels['channel'] as $key=>$value){
+            $chatModels['channel'][$key]['logo'] = FileService::getFileUrl($value['logo']);
+        }
+
         return [
+            'is_robot_show' => ConfigService::get('assistants', 'is_robot_show',0),
             'copyright' => ConfigService::get('copyright', 'config',''),
 //            'domain' => FileService::getFileUrl(),
             'domain' => config('app.app_host') . '/',
@@ -196,6 +204,8 @@ class IndexLogic extends BaseLogic
                 'privacy' => ConfigService::get('digital_human', 'privacy', []),
                 'channel' => $modelList['channel'] ?? [],
                 'voice' => $modelList['voice'] ?? [],
+                'shanjian_auth' => ConfigService::get('digital_human', 'shanjian_auth', '闪剪AI'),
+                'banner' =>  FileService::getFileUrl(ConfigService::get('digital_human', 'banner', $banner)),
             ],
             'draw' => [
                 'channel' => $hdList['channel'] ?? [],
@@ -209,8 +219,8 @@ class IndexLogic extends BaseLogic
             'app_config' => ConfigService::get('app_config', 'redbook', []),
             'ai_live' =>  ConfigService::get('ai_live', 'config', []),
             'by_name'=>  self::getByName(),
-            'ai_model' => ConfigService::get('chat', 'ai_model', []),
-
+            'ai_model' => $chatModels,
+            'wechat_remarks' => ConfigService::get('add_remark', 'wechat', []),
         ];
     }
 

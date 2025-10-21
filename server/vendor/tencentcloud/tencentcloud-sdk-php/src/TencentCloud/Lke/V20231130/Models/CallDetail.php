@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,8 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setSubScene(string $SubScene) 设置筛选子场景
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getBillingTag() 获取账单明细对应的自定义tag
+ * @method void setBillingTag(string $BillingTag) 设置账单明细对应的自定义tag
  */
 class CallDetail extends AbstractModel
 {
@@ -144,6 +146,11 @@ class CallDetail extends AbstractModel
     public $SubScene;
 
     /**
+     * @var string 账单明细对应的自定义tag
+     */
+    public $BillingTag;
+
+    /**
      * @param string $Id 关联ID
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $CallTime 调用时间
@@ -168,6 +175,7 @@ class CallDetail extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $SubScene 筛选子场景
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $BillingTag 账单明细对应的自定义tag
      */
     function __construct()
     {
@@ -228,6 +236,10 @@ class CallDetail extends AbstractModel
 
         if (array_key_exists("SubScene",$param) and $param["SubScene"] !== null) {
             $this->SubScene = $param["SubScene"];
+        }
+
+        if (array_key_exists("BillingTag",$param) and $param["BillingTag"] !== null) {
+            $this->BillingTag = $param["BillingTag"];
         }
     }
 }

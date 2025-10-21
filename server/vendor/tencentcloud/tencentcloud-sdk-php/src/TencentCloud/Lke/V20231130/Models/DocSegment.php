@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setDocUrl(string $DocUrl) 设置文档链接
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getWebUrl() 获取文档的自定义链接
+ * @method void setWebUrl(string $WebUrl) 设置文档的自定义链接
+ * @method array getPageInfos() 获取页码信息
+ * @method void setPageInfos(array $PageInfos) 设置页码信息
  */
 class DocSegment extends AbstractModel
 {
@@ -124,6 +128,16 @@ class DocSegment extends AbstractModel
     public $DocUrl;
 
     /**
+     * @var string 文档的自定义链接
+     */
+    public $WebUrl;
+
+    /**
+     * @var array 页码信息
+     */
+    public $PageInfos;
+
+    /**
      * @param string $Id 片段ID
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $BusinessId 业务ID
@@ -144,6 +158,8 @@ class DocSegment extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $DocUrl 文档链接
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $WebUrl 文档的自定义链接
+     * @param array $PageInfos 页码信息
      */
     function __construct()
     {
@@ -196,6 +212,14 @@ class DocSegment extends AbstractModel
 
         if (array_key_exists("DocUrl",$param) and $param["DocUrl"] !== null) {
             $this->DocUrl = $param["DocUrl"];
+        }
+
+        if (array_key_exists("WebUrl",$param) and $param["WebUrl"] !== null) {
+            $this->WebUrl = $param["WebUrl"];
+        }
+
+        if (array_key_exists("PageInfos",$param) and $param["PageInfos"] !== null) {
+            $this->PageInfos = $param["PageInfos"];
         }
     }
 }

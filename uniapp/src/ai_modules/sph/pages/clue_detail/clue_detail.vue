@@ -42,17 +42,7 @@ const queryList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
-    }
-};
-
-const getTagClass = (status: string) => {
-    if (status === "执行中") {
-        return "bg-[#FFF0E5] text-[#FB6500]";
-    } else if (status === "已完成") {
-        return "bg-[#EAF8E5] text-[#2DBC00]";
-    } else if (status === "已暂停") {
-        return "bg-[#F6F6F6] text-[#00000080]";
+        pagingRef.value?.complete([]);
     }
 };
 

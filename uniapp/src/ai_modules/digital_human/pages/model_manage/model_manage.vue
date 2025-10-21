@@ -123,7 +123,7 @@ const queryList = async (page_no: number, page_size: number) => {
         const { lists } = await getAnchorList({ page_no, page_size, type: 0 });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        pagingRef.value?.complete(false);
+        pagingRef.value?.complete([]);
     }
 };
 
@@ -162,19 +162,19 @@ const handleDelete = (id?: number) => {
                 try {
                     await deleteAnchor({ id: id || active.value });
                     pagingRef.value?.reload();
+                    uni.hideLoading();
                     uni.showToast({
                         title: "删除成功",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
                 } catch (error: any) {
+                    uni.hideLoading();
                     uni.showToast({
                         title: error || "删除失败",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
-                } finally {
-                    uni.hideLoading();
                 }
             }
             isDelete.value = false;

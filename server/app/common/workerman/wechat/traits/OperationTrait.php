@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace app\common\workerman\wechat\traits;
 
+use think\facade\Db;
 use app\api\logic\wechat\sop\StageLogic;
 use app\common\workerman\wechat\constants\SocketType;
 use app\common\model\wechat\AiWechatDevice;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatContact;
 use app\common\model\wechat\AiWechatGreetStrategy;
+
+use app\common\model\wechat\AiWechatCircleTask;
+use app\common\model\sv\SvPublishSetting;
+use app\common\model\sv\SvPublishSettingDetail;
+use app\common\model\sv\SvPublishSettingAccount;
 use app\common\service\FileService;
 use Workerman\Connection\TcpConnection;
 
@@ -212,6 +218,83 @@ trait OperationTrait
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);
+        }
+    }
+
+
+    public function SphPostTaskOpt(string $deviceId, array $response)
+    {
+        try {
+            $data = $response['Data'];
+            if ($data['MsgType'] == 'SphPostTask') {
+                $record = SvPublishSettingDetail::where('sub_task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
+                if (!$record->isEmpty()) {
+                    $status = (int)$data['Content']['Success'] === 1 ? 1 : 2;
+                    $remark = $data['Content']['ErrMsg'] ?? '发布失败';
+
+                    $record->status = $status;
+                    $record->remark = $status === 1 ? '发布成功' : $remark;
+                    $record->update_time = time();
+                    $record->save();
+
+                    $account = SvPublishSettingAccount::where('id', $record['publish_account_id'])->findOrEmpty();
+                    if (!$account->isEmpty()) {
+                        $count = SvPublishSettingDetail::where('publish_account_id', $record['publish_account_id'])->where('status', 0)->count();
+                        $account->save([
+                            'status' => $count > 0 ? 1 : 2,
+                            'update_time' => time(),
+                            'published_count' => Db::raw('published_count+1'),
+                        ]);
+                    }
+
+                    SvPublishSetting::where('id', $record['publish_id'])->update([
+                        'update_time' => time(),
+                        'status' => 2,
+                    ]);
+
+                    $this->withChannel('wechat_socket')->withLevel('cron')->withTitle('SphPostTaskOpt Success')->withContext([
+                        'data' => $data,
+                        'msg' => '发布账号数据更新成功:' . $record['publish_account_id']
+                    ])->log();
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->withChannel('wechat_socket')->withLevel('error')->withTitle('SphPostTaskOpt Error')->withContext([
+                'data' => $response,
+                'e' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ])->log();
+        }
+    }
+
+
+    public function circlePostTaskOpt(string $deviceId, array $response)
+    {
+        try {
+            $data = $response['Data'];
+            if ($data['MsgType'] == 'PostSNSNewsTaskResultNotice') {
+                $record = AiWechatCircleTask::where('task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
+                if (!$record->isEmpty()) {
+                    $send_status = (int)$data['Content']['Success'] === 1 ? 2 : 3;
+                    $remark = $data['Content']['ErrMsg'] ?? '发布失败';
+
+                    $record->send_status = $send_status;
+                    $record->remark = $send_status === 2 ? '发布成功' : $remark;
+                    $record->update_time = time();
+                    $record->finish_time = date('Y-m-d H:i:s');
+                    $record->save();
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->withChannel('wechat_socket')->withLevel('error')->withTitle('SphPostTaskOpt Error')->withContext([
+                'data' => $response,
+                'e' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ])->log();
         }
     }
 }

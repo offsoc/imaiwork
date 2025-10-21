@@ -5,6 +5,7 @@ namespace app\common\command;
 
 use app\api\logic\wechat\CircleLogic;
 use app\api\logic\wechat\TodoLogic;
+use app\api\logic\shanjian\PublishLogic;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -26,6 +27,7 @@ class AiWechatCron extends Command
     {
         TodoLogic::pushMessageCron();
         CircleLogic::sendCircleCron();
+        PublishLogic::SphPublishCron();
         return true;
     }
 }

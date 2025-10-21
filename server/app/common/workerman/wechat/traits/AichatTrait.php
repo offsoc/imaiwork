@@ -85,7 +85,7 @@ trait AichatTrait
             $payload['userId'] = $device['user_id'];
             $isChatroom = strpos($payload['FriendId'], '@chatroom') !== false ? 1 : 0;
 
-            if ($isChatroom === 0 && $friend['takeover_mode'] == 0) {
+            if ($isChatroom === 0 && isset($friend['takeover_mode']) && $friend['takeover_mode'] == 0) {
                 $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('人工接管中')->withContext([
                     'data' => $friend,
                     'msg' => '人工接管中'
@@ -145,6 +145,7 @@ trait AichatTrait
                 'reply_strategy' => $reply,
                 'user_message' => $promat,
                 'is_chatroom' => $isChatroom,
+                'robot' => $robot->toArray(),
                 'model' => $robot['model'] ?? 'deepseek',
             ];
 
@@ -164,10 +165,11 @@ trait AichatTrait
                     ])->log();
                     $nonWorkingKey = 'non-working-wechat:' . $deviceId . 'friend:' . $payload['FriendId'];
                     $nonWorkingReplyStatus =   $this->redis()->get($nonWorkingKey);
-                    if ($nonWorkingReplyStatus){
+                    if ($nonWorkingReplyStatus) {
                         return;
                     }
-                    $this->redis()->set($nonWorkingKey, 1, 'EX',3600);
+                    $this->redis()->set($nonWorkingKey, 1, 3600);
+                    //$this->redis()->set($nonWorkingKey, 1, 'EX', 3600);
                     $request['message'] = $reply['non_working_reply'] ??  '你好，我现在休息中，请在工作时间再找我哦~';
                     $request['message_type'] = 1;
                     $this->_sendMessage($request);
@@ -180,8 +182,8 @@ trait AichatTrait
                 $ext = explode(',', $payload['Ext']);
                 if (!in_array($payload['WeChatId'], $ext)) {
                     $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('sendFriendTalkNoticeMessage')->withContext([
-                                                                                                                                     'msg' => '非@客服微信无需ai回复'
-                                                                                                                                 ])->log();
+                        'msg' => '非@客服微信无需ai回复'
+                    ])->log();
                     return;
                 }
                 $tmps = explode(" ", $promat);
@@ -775,17 +777,33 @@ trait AichatTrait
         $match = false;
         // 获取微信机器人设置的正关键词
         SvRobotKeyword::where('robot_id', $robot->id)->select()->each(function ($item) use ($request, &$match) {
-            // 模糊匹配
-            if ($item->match_type == 0) {
-                if (strpos($item->keyword, $request['message']) !== false || strpos($request['message'], $item->keyword) !== false) {
-                    $this->_parseMessage($request, $item->reply);
-                    $match = true;
-                }
-            } else {
-                $keywords = explode(';', $item->keyword);
-                if (in_array($request['message'], $keywords)) {
-                    $this->_parseMessage($request, $item->reply);
-                    $match = true;
+            $keywords = explode(';', $item->keyword);
+            foreach ($keywords as $keyword) {
+                // 模糊匹配
+                if ($item->match_type == 0) {
+                    $threshold = $request['robot']['threshold'] ?? 0.7;
+                    $matcher = new \app\common\service\FuzzyMatcherService();
+                    $matcher->setThreshold($threshold);
+                    $matcher->setKeywords([$keyword]);
+                    $resultMatch = $matcher->isMatch($request['message']);
+                    if ($resultMatch['matched']) {
+                        $this->_parseMessage($request, $item->reply);
+                        $match = true;
+                    }
+                    $matcher->destroy();
+                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('模糊匹配')->withContext([
+                        'data' => $resultMatch
+                    ])->log();
+                    // if (strpos($item->keyword, $request['message']) !== false || strpos($request['message'], $item->keyword) !== false) {
+                    //     $this->_parseMessage($request, $item->reply);
+                    //     $match = true;
+                    // }
+
+                } else {
+                    if ($request['message'] == $keyword) {
+                        $this->_parseMessage($request, $item->reply);
+                        $match = true;
+                    }
                 }
             }
         });
@@ -873,7 +891,8 @@ trait AichatTrait
         }
 
         $msgs = count($msgs) > $number_chat_rounds ? array_slice($msgs, -$number_chat_rounds) : $msgs;
-        $this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE), 'EX', 86400 * 15);
+        //$this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE), 'EX', 86400 * 15);
+        $this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE), 86400 * 15);
         return $msgs;
     }
 

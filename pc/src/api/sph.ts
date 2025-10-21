@@ -42,3 +42,38 @@ export const getTaskClue = (params: any) => {
 export const getAiKeywords = (params: any) => {
     return $request.post({ url: "/sv.tools/getSearchTerms", params });
 };
+
+// 获取手动加微任务列表
+export const getManualAddWechatList = (params: any) => {
+    return $request.get({ url: "/sv.crawlingManual/lists", params });
+};
+
+// 删除手动加微任务
+export const deleteManualAddWechat = (params: any) => {
+    return $request.post({ url: "/sv.crawlingManual/delete", params });
+};
+
+// 手动加微任务状态修改
+export const updateManualAddWechatStatus = (params: any) => {
+    return $request.post({ url: "/sv.crawlingManual/change", params });
+};
+
+// 手动加微任务详情
+export const getManualAddWechatDetail = (params: any) => {
+    return $request.get({ url: "/sv.crawlingManual/detail", params });
+};
+
+// 手动加微任务创建
+export const createManualAddWechat = (params: any) => {
+    return $request.post({ url: "/sv.crawlingManual/add", params });
+};
+
+// 手动加微任务记录
+export const getManualAddWechatRecord = (params: any) => {
+    return $request.get({ url: "/sv.crawlingManual/recordLists", params });
+};
+
+// 手动加微任务记录删除
+export const deleteManualAddWechatRecord = (params: any) => {
+    return $request.post({ url: "/sv.crawlingManual/recordDelete", params });
+};

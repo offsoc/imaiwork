@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,28 @@ use TencentCloud\Common\AbstractModel;
  *
  * @method string getTopic() 获取主题名称
  * @method void setTopic(string $Topic) 设置主题名称
- * @method string getTopicType() 获取主题类型
- * @method void setTopicType(string $TopicType) 设置主题类型
+ * @method string getTopicType() 获取主题类型，枚举值如下：
+
+- UNSPECIFIED：未指定
+- NORMAL：普通消息
+- FIFO：顺序消息
+- DELAY：延时消息
+- TRANSACTION：事务消息
+ * @method void setTopicType(string $TopicType) 设置主题类型，枚举值如下：
+
+- UNSPECIFIED：未指定
+- NORMAL：普通消息
+- FIFO：顺序消息
+- DELAY：延时消息
+- TRANSACTION：事务消息
  * @method integer getQueueNum() 获取单节点主题队列数量
  * @method void setQueueNum(integer $QueueNum) 设置单节点主题队列数量
  * @method integer getConsumerLag() 获取消费堆积
  * @method void setConsumerLag(integer $ConsumerLag) 设置消费堆积
- * @method string getSubString() 获取订阅规则
- * @method void setSubString(string $SubString) 设置订阅规则
- * @method integer getLastUpdateTime() 获取最后消费进度更新时间
- * @method void setLastUpdateTime(integer $LastUpdateTime) 设置最后消费进度更新时间
+ * @method string getSubString() 获取订阅规则，`*`表示订阅全部TAG
+ * @method void setSubString(string $SubString) 设置订阅规则，`*`表示订阅全部TAG
+ * @method integer getLastUpdateTime() 获取最后消费进度更新时间，**Unix时间戳（毫秒）**
+ * @method void setLastUpdateTime(integer $LastUpdateTime) 设置最后消费进度更新时间，**Unix时间戳（毫秒）**
  */
 class TopicConsumeStats extends AbstractModel
 {
@@ -41,7 +53,13 @@ class TopicConsumeStats extends AbstractModel
     public $Topic;
 
     /**
-     * @var string 主题类型
+     * @var string 主题类型，枚举值如下：
+
+- UNSPECIFIED：未指定
+- NORMAL：普通消息
+- FIFO：顺序消息
+- DELAY：延时消息
+- TRANSACTION：事务消息
      */
     public $TopicType;
 
@@ -56,22 +74,28 @@ class TopicConsumeStats extends AbstractModel
     public $ConsumerLag;
 
     /**
-     * @var string 订阅规则
+     * @var string 订阅规则，`*`表示订阅全部TAG
      */
     public $SubString;
 
     /**
-     * @var integer 最后消费进度更新时间
+     * @var integer 最后消费进度更新时间，**Unix时间戳（毫秒）**
      */
     public $LastUpdateTime;
 
     /**
      * @param string $Topic 主题名称
-     * @param string $TopicType 主题类型
+     * @param string $TopicType 主题类型，枚举值如下：
+
+- UNSPECIFIED：未指定
+- NORMAL：普通消息
+- FIFO：顺序消息
+- DELAY：延时消息
+- TRANSACTION：事务消息
      * @param integer $QueueNum 单节点主题队列数量
      * @param integer $ConsumerLag 消费堆积
-     * @param string $SubString 订阅规则
-     * @param integer $LastUpdateTime 最后消费进度更新时间
+     * @param string $SubString 订阅规则，`*`表示订阅全部TAG
+     * @param integer $LastUpdateTime 最后消费进度更新时间，**Unix时间戳（毫秒）**
      */
     function __construct()
     {

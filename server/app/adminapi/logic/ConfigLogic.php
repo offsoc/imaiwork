@@ -6,7 +6,7 @@ namespace app\adminapi\logic;
 
 use app\common\model\dict\DictData;
 use app\common\model\ModelConfig;
-use app\common\service\{FileService, ConfigService};
+use app\common\service\{ConfigService, FileService};
 
 /**
  * 配置类逻辑层
@@ -26,17 +26,21 @@ class ConfigLogic
 
         $modelList = ConfigService::get('model', 'list', []);
         $hdList = ConfigService::get('hd', 'list', []);
-
         $default = ConfigService::get('storage', 'default', 'local');
         $storage = ConfigService::get('storage', $default);
         $ossDomain = $storage ?  $storage['domain'].'/' : (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://'.$_SERVER['HTTP_HOST'].'/' : 'http://'.$_SERVER['HTTP_HOST']).'/';
+        $chatModels = ConfigService::get('chat', 'ai_model', []);
+        foreach ($chatModels['channel'] as $key=>$value){
+            $chatModels['channel'][$key]['logo'] = FileService::getFileUrl($value['logo']);
+        }
+        $banner =  config('app.app_host') . '/static/images/human/banner.png';
 
         //配置按模块分类，配置放到对应的模块里面，不要单独写，或者写到别的模块里面
-        $config = [
+        return [
             // 文件域名
 //            'oss_domain' => FileService::getFileUrl(),
             'oss_domain' => $ossDomain,
-
+            'is_robot_show' => ConfigService::get('assistants', 'is_robot_show',0),
             // 网站名称
             'web_name' => ConfigService::get('website', 'name'),
             // 网站图标
@@ -76,6 +80,8 @@ class ConfigLogic
                 'privacy' => ConfigService::get('digital_human', 'privacy', []),
                 'channel' => $modelList['channel'] ?? [],
                 'voice' => $modelList['voice'] ?? [],
+                'shanjian_auth' => ConfigService::get('digital_human', 'shanjian_auth', '闪剪AI'),
+                'banner' =>  FileService::getFileUrl(ConfigService::get('digital_human', 'banner', $banner)),
             ],
             'draw' => [
                 'channel' => $hdList['channel'] ?? [],
@@ -83,9 +89,9 @@ class ConfigLogic
             'app_config' => ConfigService::get('app_config', 'redbook', []),
             'ai_live' =>  ConfigService::get('ai_live', 'config', []),
             'by_name'=>  self::getByName(),
-            'ai_model' =>  ConfigService::get('chat', 'ai_model', []),
+            'ai_model' =>  $chatModels,
+            'wechat_remarks' => ConfigService::get('add_remark', 'wechat', []),
         ];
-        return $config;
     }
 
     /**

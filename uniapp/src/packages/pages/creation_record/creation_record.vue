@@ -69,7 +69,7 @@ const queryList = async (page_no: number, page_size: number) => {
         });
         pagingRef.value?.complete(lists);
     } catch (error) {
-        console.log(error);
+        pagingRef.value?.complete([]);
     }
 };
 
@@ -86,7 +86,13 @@ const handleRecord = (row: any) => {
             },
         });
     } else {
-        uni.$u.toast("相关助理已经暂停使用啦~");
+        uni.$u.route({
+            url: "/packages/pages/robot_chat/robot_chat",
+            params: {
+                id: assistant_id,
+                task_id,
+            },
+        });
     }
 };
 

@@ -16,6 +16,7 @@
                                 <ElButton text @click="getLists()"> 搜索 </ElButton>
                             </template>
                         </ElInput>
+
                         <ElButton type="primary" class="!rounded-full !h-10" @click="handleCreate">
                             <Icon name="local-icon-add_circle" color="#ffffff"></Icon>
                             <span class="ml-2">发布获客任务 </span>
@@ -115,6 +116,24 @@
                                             >导出</ElButton
                                         >
                                     </template>
+                                    <template #form-item="{ formData }">
+                                        <ElFormItem label="线索有效性：">
+                                            <ElSelect
+                                                v-model="formData.status"
+                                                class="!w-[260px] !h-10"
+                                                placeholder="请选择"
+                                                filterable
+                                                clearable
+                                                :empty-values="[undefined, null]"
+                                                :show-arrow="false">
+                                                <ElOption label="全部" value=""></ElOption>
+                                                <ElOption label="未校验" value="0"></ElOption>
+                                                <ElOption label="已通过校验" value="1"></ElOption>
+                                                <ElOption label="未通过校验" value="2"></ElOption>
+                                                <ElOption label="待执行" value="4"></ElOption>
+                                            </ElSelect>
+                                        </ElFormItem>
+                                    </template>
                                 </export-data>
                                 <ElButton
                                     class="!border-app-border-2"
@@ -159,6 +178,7 @@ const nuxtApp = useNuxtApp();
 const queryParams = reactive({
     name: "",
     page_size: 20,
+    status: "",
 });
 
 const { pager, getLists, resetPage } = usePaging({

@@ -3,7 +3,9 @@
         <el-card class="!border-none" shadow="never">
             <div class="flex gap-4">
                 <el-card class="w-[400px]" shadow="never">
-                    <div class="text-lg font-bold">OEM剩余授权名额： {{ oemInfo.authnum }} / 名</div>
+                    <div class="text-lg font-bold">
+                        OEM剩余授权名额： {{ oemInfo.useauthnum }} / {{ oemInfo.authnum }} 名
+                    </div>
                     <div class="flex justify-end mt-4">
                         <el-popover width="200">
                             <template #reference>
@@ -95,6 +97,10 @@ const showEdit = ref(false);
 const editPopupRef = ref();
 
 const handleAdd = async () => {
+    if (oemInfo.useauthnum >= oemInfo.authnum) {
+        await feedback.msgWarning("OEM剩余授权名额不足，无法进行授权");
+        return;
+    }
     showEdit.value = true;
     await nextTick();
     editPopupRef.value?.open("add");

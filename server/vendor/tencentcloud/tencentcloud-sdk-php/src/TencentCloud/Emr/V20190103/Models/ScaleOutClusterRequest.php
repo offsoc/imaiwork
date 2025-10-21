@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,10 @@ use TencentCloud\Common\AbstractModel;
  * @method void setSubnetId(string $SubnetId) 设置子网，默认是集群创建时的子网
  * @method array getScaleOutServiceConfGroupsInfo() 获取扩容指定配置组
  * @method void setScaleOutServiceConfGroupsInfo(array $ScaleOutServiceConfGroupsInfo) 设置扩容指定配置组
+ * @method NodeMark getNodeMarks() 获取节点标记信息，当前只提供给tf平台使用
+ * @method void setNodeMarks(NodeMark $NodeMarks) 设置节点标记信息，当前只提供给tf平台使用
+ * @method string getWarehouseName() 获取扩容指定计算组名称
+ * @method void setWarehouseName(string $WarehouseName) 设置扩容指定计算组名称
  */
 class ScaleOutClusterRequest extends AbstractModel
 {
@@ -182,6 +186,16 @@ class ScaleOutClusterRequest extends AbstractModel
     public $ScaleOutServiceConfGroupsInfo;
 
     /**
+     * @var NodeMark 节点标记信息，当前只提供给tf平台使用
+     */
+    public $NodeMarks;
+
+    /**
+     * @var string 扩容指定计算组名称
+     */
+    public $WarehouseName;
+
+    /**
      * @param string $InstanceChargeType 节点计费模式。取值范围：
 <li>PREPAID：预付费，即包年包月。</li>
 <li>POSTPAID_BY_HOUR：按小时后付费。</li>
@@ -208,6 +222,8 @@ class ScaleOutClusterRequest extends AbstractModel
      * @param string $Zone 实例所属的可用区，例如ap-guangzhou-1。该参数也可以通过调用[DescribeZones](https://cloud.tencent.com/document/product/213/15707) 的返回值中的Zone字段来获取。
      * @param string $SubnetId 子网，默认是集群创建时的子网
      * @param array $ScaleOutServiceConfGroupsInfo 扩容指定配置组
+     * @param NodeMark $NodeMarks 节点标记信息，当前只提供给tf平台使用
+     * @param string $WarehouseName 扩容指定计算组名称
      */
     function __construct()
     {
@@ -319,6 +335,15 @@ class ScaleOutClusterRequest extends AbstractModel
                 $obj->deserialize($value);
                 array_push($this->ScaleOutServiceConfGroupsInfo, $obj);
             }
+        }
+
+        if (array_key_exists("NodeMarks",$param) and $param["NodeMarks"] !== null) {
+            $this->NodeMarks = new NodeMark();
+            $this->NodeMarks->deserialize($param["NodeMarks"]);
+        }
+
+        if (array_key_exists("WarehouseName",$param) and $param["WarehouseName"] !== null) {
+            $this->WarehouseName = $param["WarehouseName"];
         }
     }
 }

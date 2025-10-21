@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setMaxUnbalanceQuantity(integer $MaxUnbalanceQuantity) 设置-
  * @method boolean getIsForceSchedule() 获取-
  * @method void setIsForceSchedule(boolean $IsForceSchedule) 设置-
+ * @method array getPaths() 获取-
+ * @method void setPaths(array $Paths) 设置-
  */
 class AvailableZoneScatterScheduleRule extends AbstractModel
 {
@@ -45,9 +47,15 @@ class AvailableZoneScatterScheduleRule extends AbstractModel
     public $IsForceSchedule;
 
     /**
+     * @var array -
+     */
+    public $Paths;
+
+    /**
      * @param string $ScatterDimension -
      * @param integer $MaxUnbalanceQuantity -
      * @param boolean $IsForceSchedule -
+     * @param array $Paths -
      */
     function __construct()
     {
@@ -72,6 +80,15 @@ class AvailableZoneScatterScheduleRule extends AbstractModel
 
         if (array_key_exists("IsForceSchedule",$param) and $param["IsForceSchedule"] !== null) {
             $this->IsForceSchedule = $param["IsForceSchedule"];
+        }
+
+        if (array_key_exists("Paths",$param) and $param["Paths"] !== null) {
+            $this->Paths = [];
+            foreach ($param["Paths"] as $key => $value){
+                $obj = new CommonOption();
+                $obj->deserialize($value);
+                array_push($this->Paths, $obj);
+            }
         }
     }
 }

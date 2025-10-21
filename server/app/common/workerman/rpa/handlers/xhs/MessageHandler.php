@@ -322,7 +322,7 @@ class MessageHandler extends BaseMessageHandler
                             $this->setLog('AI非工作时间' . $this->payload['deviceId'], 'msg');
                             $nonWorkingKey = 'non-working-xhs:' . $this->payload['deviceId'] . 'friend:' . $friend['friend_id'];
                             $nonWorkingReplyStatus =   $this->service->getRedis()->get($nonWorkingKey);
-                            if ($nonWorkingReplyStatus){
+                            if ($nonWorkingReplyStatus) {
                                 $this->setLog('1小时内非工作时间消息不回复:' . $this->payload['deviceId'], 'msg');
                                 $this->payload['type'] = WorkerEnum::DEFAULT_TEXT;
                                 $this->payload['reply'] = "1小时内非工作时间消息不回复";
@@ -331,7 +331,8 @@ class MessageHandler extends BaseMessageHandler
                                 $this->updatePrivateMessageStatus($account, $friend);
                                 return;
                             }
-                            $this->service->getRedis()->set($nonWorkingKey, 1, 'EX',3600);
+                            //$this->service->getRedis()->set($nonWorkingKey, 1, 'EX', 3600);
+                            $this->service->getRedis()->set($nonWorkingKey, 1, 3600);
                             $request['message']      = $nonWorkingReply;
                             $request['message_list'] = [$nonWorkingReply];
                             $this->send($request);
@@ -365,7 +366,7 @@ class MessageHandler extends BaseMessageHandler
                 }
 
                 //new step 1. 正则匹配无需回复的关键词
-                if ($reply->stop_enable == 1){
+                if ($reply->stop_enable == 1) {
                     $stop = $this->regularMatchStopAI($reply, $request);
                     if ($stop) {
                         $this->setLog('本条消息不回复:' . $this->payload['deviceId'], 'msg');
@@ -379,18 +380,18 @@ class MessageHandler extends BaseMessageHandler
                 }
 
                 //step 1. 正则匹配停止AI回复 //TODO 后续可能会加此逻辑，先保留
-//                if ($stop) {
-//                    SvSetting::where('account', $account['account'])->where('user_id', $account['user_id'])->update(['takeover_mode' => 0]);
-//                    $this->setLog('已停止ai回复:' . $this->payload['deviceId'], 'msg');
-//                    $this->payload['type'] = WorkerEnum::WEB_STOP_AI_TEXT;
-//                    $this->payload['reply'] = "已停止ai回复";
-//                    $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
-//                    $this->sendError($this->connection, $this->payload);;
-//
-//                    $this->sendErrorResponse($content, $this->payload['reply']);
-//                    $this->updatePrivateMessageStatus($account, $friend);
-//                    return;
-//                }
+                //                if ($stop) {
+                //                    SvSetting::where('account', $account['account'])->where('user_id', $account['user_id'])->update(['takeover_mode' => 0]);
+                //                    $this->setLog('已停止ai回复:' . $this->payload['deviceId'], 'msg');
+                //                    $this->payload['type'] = WorkerEnum::WEB_STOP_AI_TEXT;
+                //                    $this->payload['reply'] = "已停止ai回复";
+                //                    $this->payload['code'] = WorkerEnum::MSG_ACCOUNT_NOT_ROBOT;
+                //                    $this->sendError($this->connection, $this->payload);;
+                //
+                //                    $this->sendErrorResponse($content, $this->payload['reply']);
+                //                    $this->updatePrivateMessageStatus($account, $friend);
+                //                    return;
+                //                }
 
                 SvPrivateMessage::where('user_id', '=', $request['user_id'])
                     ->where('account', $request['account'])
@@ -787,16 +788,16 @@ class MessageHandler extends BaseMessageHandler
             if (is_array($content['replyContent'])) {
                 $content['replyContent'] = array_filter($content['replyContent']);
                 //若存在AI机器人id，查询回复策略
-                if (!empty($account['robot_id'])){
+                if (!empty($account['robot_id'])) {
                     $robot = KbRobot::where('id', $account['robot_id'])->findOrEmpty();
                     $reply = !$robot->isEmpty() ? SvReplyStrategy::where('user_id', $robot->user_id)->where('robot_id', $robot->id)->findOrEmpty() : [];
                 }
                 foreach ($content['replyContent'] as $_message) {
                     //若存在无需回复策略，过滤数据
-                    if (!empty($reply) && $reply->stop_enable == 1){
+                    if (!empty($reply) && $reply->stop_enable == 1) {
                         $data['message'] = [$_message];
                         $stop = $this->regularMatchStopAI($reply, $data);
-                        if ($stop){
+                        if ($stop) {
                             continue;
                         }
                     }
@@ -1226,10 +1227,24 @@ class MessageHandler extends BaseMessageHandler
             foreach ($keywords as $item) {
                 // 模糊匹配
                 if ($item['match_type'] == 0) {
-                    if (strpos($item['keyword'], $request['message']) !== false || strpos($request['message'], $item['keyword']) !== false) {
+                    $threshold = $request['robot']['threshold'] ?? 0.7;
+                    $matcher = new \app\common\service\FuzzyMatcherService();
+                    $matcher->setThreshold($threshold);
+                    $matcher->setKeywords([$item['keyword']]);
+                    $resultMatch = $matcher->isMatch($request['message']);
+                    if ($resultMatch['matched']) {
                         $this->parseMessage($request, $item['reply']);
                         $match = true;
                     }
+                    $this->setLog($resultMatch, 'msg');
+                    $matcher->destroy();
+
+
+                    // if (strpos($item['keyword'], $request['message']) !== false || strpos($request['message'], $item['keyword']) !== false) {
+                    //     $this->parseMessage($request, $item['reply']);
+                    //     $match = true;
+                    // }
+
                 } else {
                     $keywords = explode(';', $item['keyword']);
                     if (in_array($request['message'], $keywords)) {
@@ -1258,17 +1273,31 @@ class MessageHandler extends BaseMessageHandler
             // 获取微信机器人设置的正关键词
             SvRobotKeyword::where('robot_id', $robot->id)->select()->each(function ($item) use ($request, &$match) {
                 //$this->setLog('匹配类型:' . $item->match_type . " msg: {$request['message']},   key: {$item->keyword}   reg: " . str_contains($request['message'], $item->keyword), 'msg');
-                // 模糊匹配
-                if ((int)$item->match_type === 0) {
-                    if (strpos($item->keyword, $request['message']) !== false || strpos($request['message'], $item->keyword) !== false) {
-                        $match = $this->parseMessage($request, $item->reply);
-                        //$match = true;
-                    }
-                } else {
-                    $keywords = explode(';', $item->keyword);
-                    if (in_array($request['message'], $keywords)) {
-                        $match = $this->parseMessage($request, $item->reply);
-                        //$match = true;
+
+                $keywords = explode(';', $item->keyword);
+                foreach ($keywords as $keyword) {
+                    // 模糊匹配
+                    if ((int)$item->match_type === 0) {
+                        $matcher = new \app\common\service\FuzzyMatcherService();
+                        $matcher->setThreshold(0.7);
+                        $matcher->setKeywords([$keyword]);
+                        $resultMatch = $matcher->isMatch($request['message']);
+                        if ($resultMatch['matched']) {
+                            $match = $this->parseMessage($request, $item->reply);
+                        }
+                        $matcher->destroy();
+                        $this->setLog($resultMatch, 'msg');
+
+                        // if (strpos($item->keyword, $request['message']) !== false || strpos($request['message'], $item->keyword) !== false) {
+                        //     $match = $this->parseMessage($request, $item->reply);
+                        //     //$match = true;
+                        // }
+                    } else {
+
+                        if ($request['message'] == $keyword) {
+                            $match = $this->parseMessage($request, $item->reply);
+                            //$match = true;
+                        }
                     }
                 }
             });

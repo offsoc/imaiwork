@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setDocBizId(string $DocBizId) 设置文档ID
  * @method boolean getIsRefer() 获取是否引用链接
  * @method void setIsRefer(boolean $IsRefer) 设置是否引用链接
- * @method integer getAttrRange() 获取标签适用范围 1：全部，2：按条件
- * @method void setAttrRange(integer $AttrRange) 设置标签适用范围 1：全部，2：按条件
+ * @method integer getAttrRange() 获取标签适用范围，需要传参为1
+ * @method void setAttrRange(integer $AttrRange) 设置标签适用范围，需要传参为1
  * @method string getLoginUin() 获取登录用户主账号(集成商模式必填)
  * @method void setLoginUin(string $LoginUin) 设置登录用户主账号(集成商模式必填)
  * @method string getLoginSubAccountUin() 获取登录用户子账号(集成商模式必填)
@@ -46,10 +46,14 @@ use TencentCloud\Common\AbstractModel;
  * @method void setExpireEnd(string $ExpireEnd) 设置有效结束时间，unix时间戳，0代表永久有效
  * @method string getCateBizId() 获取分类ID
  * @method void setCateBizId(string $CateBizId) 设置分类ID
- * @method string getCustomerKnowledgeId() 获取文档的用户自定义ID
- * @method void setCustomerKnowledgeId(string $CustomerKnowledgeId) 设置文档的用户自定义ID
- * @method array getAttributeFlags() 获取文档的属性标记，0: 不做用户外部权限校验
- * @method void setAttributeFlags(array $AttributeFlags) 设置文档的属性标记，0: 不做用户外部权限校验
+ * @method boolean getIsDownload() 获取是否可下载，IsRefer为true并且ReferUrlType为0时，该值才有意义
+ * @method void setIsDownload(boolean $IsDownload) 设置是否可下载，IsRefer为true并且ReferUrlType为0时，该值才有意义
+ * @method array getModifyTypes() 获取需要修改的内容类型  0  无效 1 更新文档cos信息 2 更新文档引用信息 3 更新文档刷新频率 4 腾讯文档刷新
+ * @method void setModifyTypes(array $ModifyTypes) 设置需要修改的内容类型  0  无效 1 更新文档cos信息 2 更新文档引用信息 3 更新文档刷新频率 4 腾讯文档刷新
+ * @method UpdatePeriodInfo getUpdatePeriodInfo() 获取文档更新频率
+ * @method void setUpdatePeriodInfo(UpdatePeriodInfo $UpdatePeriodInfo) 设置文档更新频率
+ * @method string getSplitRule() 获取自定义切分规则
+ * @method void setSplitRule(string $SplitRule) 设置自定义切分规则
  */
 class ModifyDocRequest extends AbstractModel
 {
@@ -69,7 +73,7 @@ class ModifyDocRequest extends AbstractModel
     public $IsRefer;
 
     /**
-     * @var integer 标签适用范围 1：全部，2：按条件
+     * @var integer 标签适用范围，需要传参为1
      */
     public $AttrRange;
 
@@ -115,20 +119,30 @@ class ModifyDocRequest extends AbstractModel
     public $CateBizId;
 
     /**
-     * @var string 文档的用户自定义ID
+     * @var boolean 是否可下载，IsRefer为true并且ReferUrlType为0时，该值才有意义
      */
-    public $CustomerKnowledgeId;
+    public $IsDownload;
 
     /**
-     * @var array 文档的属性标记，0: 不做用户外部权限校验
+     * @var array 需要修改的内容类型  0  无效 1 更新文档cos信息 2 更新文档引用信息 3 更新文档刷新频率 4 腾讯文档刷新
      */
-    public $AttributeFlags;
+    public $ModifyTypes;
+
+    /**
+     * @var UpdatePeriodInfo 文档更新频率
+     */
+    public $UpdatePeriodInfo;
+
+    /**
+     * @var string 自定义切分规则
+     */
+    public $SplitRule;
 
     /**
      * @param string $BotBizId 应用ID
      * @param string $DocBizId 文档ID
      * @param boolean $IsRefer 是否引用链接
-     * @param integer $AttrRange 标签适用范围 1：全部，2：按条件
+     * @param integer $AttrRange 标签适用范围，需要传参为1
      * @param string $LoginUin 登录用户主账号(集成商模式必填)
      * @param string $LoginSubAccountUin 登录用户子账号(集成商模式必填)
      * @param array $AttrLabels 关联的标签
@@ -138,8 +152,10 @@ class ModifyDocRequest extends AbstractModel
      * @param string $ExpireStart 有效开始时间，unix时间戳
      * @param string $ExpireEnd 有效结束时间，unix时间戳，0代表永久有效
      * @param string $CateBizId 分类ID
-     * @param string $CustomerKnowledgeId 文档的用户自定义ID
-     * @param array $AttributeFlags 文档的属性标记，0: 不做用户外部权限校验
+     * @param boolean $IsDownload 是否可下载，IsRefer为true并且ReferUrlType为0时，该值才有意义
+     * @param array $ModifyTypes 需要修改的内容类型  0  无效 1 更新文档cos信息 2 更新文档引用信息 3 更新文档刷新频率 4 腾讯文档刷新
+     * @param UpdatePeriodInfo $UpdatePeriodInfo 文档更新频率
+     * @param string $SplitRule 自定义切分规则
      */
     function __construct()
     {
@@ -207,12 +223,21 @@ class ModifyDocRequest extends AbstractModel
             $this->CateBizId = $param["CateBizId"];
         }
 
-        if (array_key_exists("CustomerKnowledgeId",$param) and $param["CustomerKnowledgeId"] !== null) {
-            $this->CustomerKnowledgeId = $param["CustomerKnowledgeId"];
+        if (array_key_exists("IsDownload",$param) and $param["IsDownload"] !== null) {
+            $this->IsDownload = $param["IsDownload"];
         }
 
-        if (array_key_exists("AttributeFlags",$param) and $param["AttributeFlags"] !== null) {
-            $this->AttributeFlags = $param["AttributeFlags"];
+        if (array_key_exists("ModifyTypes",$param) and $param["ModifyTypes"] !== null) {
+            $this->ModifyTypes = $param["ModifyTypes"];
+        }
+
+        if (array_key_exists("UpdatePeriodInfo",$param) and $param["UpdatePeriodInfo"] !== null) {
+            $this->UpdatePeriodInfo = new UpdatePeriodInfo();
+            $this->UpdatePeriodInfo->deserialize($param["UpdatePeriodInfo"]);
+        }
+
+        if (array_key_exists("SplitRule",$param) and $param["SplitRule"] !== null) {
+            $this->SplitRule = $param["SplitRule"];
         }
     }
 }

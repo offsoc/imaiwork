@@ -210,6 +210,7 @@ const handleRemoveDevice = async (row: any) => {
     nuxtApp.$confirm({
         message: "确定要移除设备吗？此操作不可逆！",
         onConfirm: async () => {
+            feedback.loading("移除中...");
             try {
                 // 后端删除记录
                 await deleteDevice({ id: row.id, device_code: row.device_code });
@@ -219,6 +220,8 @@ const handleRemoveDevice = async (row: any) => {
                 getLists(); // 刷新列表
             } catch (error) {
                 feedback.msgError(error || "移除失败");
+            } finally {
+                feedback.closeLoading();
             }
         },
     });

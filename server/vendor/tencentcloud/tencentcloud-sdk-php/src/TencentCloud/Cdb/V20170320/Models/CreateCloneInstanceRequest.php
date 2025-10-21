@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ use TencentCloud\Common\AbstractModel;
 /**
  * CreateCloneInstance请求参数结构体
  *
- * @method string getInstanceId() 获取克隆源实例Id。
- * @method void setInstanceId(string $InstanceId) 设置克隆源实例Id。
+ * @method string getInstanceId() 获取克隆源实例 ID。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/api/236/15872) 接口获取。
+ * @method void setInstanceId(string $InstanceId) 设置克隆源实例 ID。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/api/236/15872) 接口获取。
  * @method string getSpecifiedRollbackTime() 获取如果需要克隆实例回档到指定时间，则指定该值。时间格式为：yyyy-mm-dd hh:mm:ss。
 说明：此参数和 SpecifiedBackupId 参数需要2选1进行设置。
  * @method void setSpecifiedRollbackTime(string $SpecifiedRollbackTime) 设置如果需要克隆实例回档到指定时间，则指定该值。时间格式为：yyyy-mm-dd hh:mm:ss。
@@ -30,16 +30,16 @@ use TencentCloud\Common\AbstractModel;
 说明：如果是克隆双节点、三节点实例，备份文件为物理备份，如果是克隆单节点、集群版实例，备份文件为快照备份。
  * @method void setSpecifiedBackupId(integer $SpecifiedBackupId) 设置如果需要克隆实例回档到指定备份集，则指定该值为备份文件的 Id。请使用 [查询数据备份文件列表](/document/api/236/15842)。
 说明：如果是克隆双节点、三节点实例，备份文件为物理备份，如果是克隆单节点、集群版实例，备份文件为快照备份。
- * @method string getUniqVpcId() 获取私有网络 ID，如果不传则默认选择基础网络，请使用 [查询私有网络列表](/document/api/215/15778) 。
- * @method void setUniqVpcId(string $UniqVpcId) 设置私有网络 ID，如果不传则默认选择基础网络，请使用 [查询私有网络列表](/document/api/215/15778) 。
+ * @method string getUniqVpcId() 获取私有网络 ID，请使用 [查询私有网络列表](/document/api/215/15778)。
+ * @method void setUniqVpcId(string $UniqVpcId) 设置私有网络 ID，请使用 [查询私有网络列表](/document/api/215/15778)。
  * @method string getUniqSubnetId() 获取私有网络下的子网 ID，如果设置了 UniqVpcId，则 UniqSubnetId 必填，请使用 [查询子网列表](/document/api/215/15784)。
  * @method void setUniqSubnetId(string $UniqSubnetId) 设置私有网络下的子网 ID，如果设置了 UniqVpcId，则 UniqSubnetId 必填，请使用 [查询子网列表](/document/api/215/15784)。
  * @method integer getMemory() 获取实例内存大小，单位：MB，需要不低于克隆源实例，默认和源实例相同。
  * @method void setMemory(integer $Memory) 设置实例内存大小，单位：MB，需要不低于克隆源实例，默认和源实例相同。
  * @method integer getVolume() 获取实例硬盘大小，单位：GB，需要不低于克隆源实例，默认和源实例相同。
  * @method void setVolume(integer $Volume) 设置实例硬盘大小，单位：GB，需要不低于克隆源实例，默认和源实例相同。
- * @method string getInstanceName() 获取新产生的克隆实例名称。
- * @method void setInstanceName(string $InstanceName) 设置新产生的克隆实例名称。
+ * @method string getInstanceName() 获取新产生的克隆实例名称。支持输入最大60个字符。
+ * @method void setInstanceName(string $InstanceName) 设置新产生的克隆实例名称。支持输入最大60个字符。
  * @method array getSecurityGroup() 获取安全组参数，可使用 [查询项目安全组信息](https://cloud.tencent.com/document/api/236/15850) 接口查询某个项目的安全组详情。
  * @method void setSecurityGroup(array $SecurityGroup) 设置安全组参数，可使用 [查询项目安全组信息](https://cloud.tencent.com/document/api/236/15850) 接口查询某个项目的安全组详情。
  * @method array getResourceTags() 获取实例标签信息。
@@ -72,11 +72,15 @@ use TencentCloud\Common\AbstractModel;
  * @method void setPeriod(integer $Period) 设置实例时长，PayType为PRE_PAID时必传，单位：月，可选值包括 [1,2,3,4,5,6,7,8,9,10,11,12,24,36]。
  * @method ClusterTopology getClusterTopology() 获取集群版节点拓扑配置。
  * @method void setClusterTopology(ClusterTopology $ClusterTopology) 设置集群版节点拓扑配置。
+ * @method string getSrcRegion() 获取原实例所在地域名，当传入异地备份时为必选项，例：ap-guangzhou
+ * @method void setSrcRegion(string $SrcRegion) 设置原实例所在地域名，当传入异地备份时为必选项，例：ap-guangzhou
+ * @method integer getSpecifiedSubBackupId() 获取异地数据备份id
+ * @method void setSpecifiedSubBackupId(integer $SpecifiedSubBackupId) 设置异地数据备份id
  */
 class CreateCloneInstanceRequest extends AbstractModel
 {
     /**
-     * @var string 克隆源实例Id。
+     * @var string 克隆源实例 ID。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/api/236/15872) 接口获取。
      */
     public $InstanceId;
 
@@ -93,7 +97,7 @@ class CreateCloneInstanceRequest extends AbstractModel
     public $SpecifiedBackupId;
 
     /**
-     * @var string 私有网络 ID，如果不传则默认选择基础网络，请使用 [查询私有网络列表](/document/api/215/15778) 。
+     * @var string 私有网络 ID，请使用 [查询私有网络列表](/document/api/215/15778)。
      */
     public $UniqVpcId;
 
@@ -113,7 +117,7 @@ class CreateCloneInstanceRequest extends AbstractModel
     public $Volume;
 
     /**
-     * @var string 新产生的克隆实例名称。
+     * @var string 新产生的克隆实例名称。支持输入最大60个字符。
      */
     public $InstanceName;
 
@@ -198,16 +202,26 @@ class CreateCloneInstanceRequest extends AbstractModel
     public $ClusterTopology;
 
     /**
-     * @param string $InstanceId 克隆源实例Id。
+     * @var string 原实例所在地域名，当传入异地备份时为必选项，例：ap-guangzhou
+     */
+    public $SrcRegion;
+
+    /**
+     * @var integer 异地数据备份id
+     */
+    public $SpecifiedSubBackupId;
+
+    /**
+     * @param string $InstanceId 克隆源实例 ID。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/api/236/15872) 接口获取。
      * @param string $SpecifiedRollbackTime 如果需要克隆实例回档到指定时间，则指定该值。时间格式为：yyyy-mm-dd hh:mm:ss。
 说明：此参数和 SpecifiedBackupId 参数需要2选1进行设置。
      * @param integer $SpecifiedBackupId 如果需要克隆实例回档到指定备份集，则指定该值为备份文件的 Id。请使用 [查询数据备份文件列表](/document/api/236/15842)。
 说明：如果是克隆双节点、三节点实例，备份文件为物理备份，如果是克隆单节点、集群版实例，备份文件为快照备份。
-     * @param string $UniqVpcId 私有网络 ID，如果不传则默认选择基础网络，请使用 [查询私有网络列表](/document/api/215/15778) 。
+     * @param string $UniqVpcId 私有网络 ID，请使用 [查询私有网络列表](/document/api/215/15778)。
      * @param string $UniqSubnetId 私有网络下的子网 ID，如果设置了 UniqVpcId，则 UniqSubnetId 必填，请使用 [查询子网列表](/document/api/215/15784)。
      * @param integer $Memory 实例内存大小，单位：MB，需要不低于克隆源实例，默认和源实例相同。
      * @param integer $Volume 实例硬盘大小，单位：GB，需要不低于克隆源实例，默认和源实例相同。
-     * @param string $InstanceName 新产生的克隆实例名称。
+     * @param string $InstanceName 新产生的克隆实例名称。支持输入最大60个字符。
      * @param array $SecurityGroup 安全组参数，可使用 [查询项目安全组信息](https://cloud.tencent.com/document/api/236/15850) 接口查询某个项目的安全组详情。
      * @param array $ResourceTags 实例标签信息。
      * @param integer $Cpu 实例Cpu核数，需要不低于克隆源实例，默认和源实例相同。
@@ -224,6 +238,8 @@ class CreateCloneInstanceRequest extends AbstractModel
      * @param string $PayType 付费类型，PRE_PAID：包年包月，USED_PAID：按量计费。默认为按量计费
      * @param integer $Period 实例时长，PayType为PRE_PAID时必传，单位：月，可选值包括 [1,2,3,4,5,6,7,8,9,10,11,12,24,36]。
      * @param ClusterTopology $ClusterTopology 集群版节点拓扑配置。
+     * @param string $SrcRegion 原实例所在地域名，当传入异地备份时为必选项，例：ap-guangzhou
+     * @param integer $SpecifiedSubBackupId 异地数据备份id
      */
     function __construct()
     {
@@ -338,6 +354,14 @@ class CreateCloneInstanceRequest extends AbstractModel
         if (array_key_exists("ClusterTopology",$param) and $param["ClusterTopology"] !== null) {
             $this->ClusterTopology = new ClusterTopology();
             $this->ClusterTopology->deserialize($param["ClusterTopology"]);
+        }
+
+        if (array_key_exists("SrcRegion",$param) and $param["SrcRegion"] !== null) {
+            $this->SrcRegion = $param["SrcRegion"];
+        }
+
+        if (array_key_exists("SpecifiedSubBackupId",$param) and $param["SpecifiedSubBackupId"] !== null) {
+            $this->SpecifiedSubBackupId = $param["SpecifiedSubBackupId"];
         }
     }
 }

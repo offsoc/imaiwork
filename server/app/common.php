@@ -385,7 +385,7 @@ function clogger($log_content, $log_filename = 'log'){
 function formatMarkdown(string $content): string
 {
     $content = strip_tags($content);
-    $content = preg_replace(['/#+/', '/`+/', '/\*+/', '/\|+/', '/-+/', '/\n(&gt;|\\>)/', '/^>{1}/'], '', $content);
+    $content = preg_replace(['/#+/', '/`+/', '/\*+/', '/\|+/', '/\n(&gt;|\\>)/', '/^>{1}/'], '', $content);
     $content = str_replace("\n\n", "\n", $content);
     $content = str_replace(['根据知识库内容，', '根据知识库内容', '根据提供的知识库内容，', '根据提供的知识库内容'], '', $content);
     return $content;

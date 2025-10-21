@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setWebhookUrl(string $WebhookUrl) 设置webhook接入地址
  * @method string getWebhookToken() 获取webhook接入token
  * @method void setWebhookToken(string $WebhookToken) 设置webhook接入token
+ * @method string getInstanceId() 获取tcr实例ID
+ * @method void setInstanceId(string $InstanceId) 设置tcr实例ID
  */
 class AddAssetImageRegistryRegistryDetailRequest extends AbstractModel
 {
@@ -129,6 +131,11 @@ class AddAssetImageRegistryRegistryDetailRequest extends AbstractModel
     public $WebhookToken;
 
     /**
+     * @var string tcr实例ID
+     */
+    public $InstanceId;
+
+    /**
      * @param string $Name 仓库名
      * @param string $Username 用户名
      * @param string $Password 密码
@@ -144,6 +151,7 @@ class AddAssetImageRegistryRegistryDetailRequest extends AbstractModel
      * @param integer $SyncMode 同步方式，0全量同步，1增量同步
      * @param string $WebhookUrl webhook接入地址
      * @param string $WebhookToken webhook接入token
+     * @param string $InstanceId tcr实例ID
      */
     function __construct()
     {
@@ -221,6 +229,10 @@ class AddAssetImageRegistryRegistryDetailRequest extends AbstractModel
 
         if (array_key_exists("WebhookToken",$param) and $param["WebhookToken"] !== null) {
             $this->WebhookToken = $param["WebhookToken"];
+        }
+
+        if (array_key_exists("InstanceId",$param) and $param["InstanceId"] !== null) {
+            $this->InstanceId = $param["InstanceId"];
         }
     }
 }

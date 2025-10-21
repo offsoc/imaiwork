@@ -1,1 +1,1 @@
-"use strict";const e=require("../utils/request/index.js");exports.getDeviceList=s=>e.request.get({url:"/sv.device/lists",data:s});
+"use strict";const t=require("../utils/request/index.js");exports.getDeviceList=e=>t.request.get({url:"/sv.device/lists",data:e}),exports.getPublishAccountList=e=>t.request.get({url:"/sv.account/alllists",data:e});

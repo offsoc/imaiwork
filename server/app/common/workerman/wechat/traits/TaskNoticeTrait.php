@@ -10,6 +10,7 @@ use app\common\model\sv\SvAddWechatStrategy;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatLog;
 use app\common\model\wechat\AiWechatAcceptFriendStrategy;
+use app\common\model\sv\SvCrawlingManualTaskRecord;
 
 /**
  * 通用通知特殊处理
@@ -160,6 +161,15 @@ trait TaskNoticeTrait
             ])->log();
 
             $record = SvAddWechatRecord::where('task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
+            $isSvAddWechat = true;
+            if($record->isEmpty()){
+                $record = SvCrawlingManualTaskRecord::where('exec_task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
+                $isSvAddWechat = false;
+                $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('AddFriendsTaskOpt')->withContext([
+                    'msg' => 'AddFriendsTaskOpt',
+                    'record' => $record->toArray()
+                ])->log();
+            }
             $errMsg = $data['Content']['ErrMsg'];
             if (!$record->isEmpty()) {
                 $record->status = (int)$data['Content']['Success'] === 1 ? 1 : 0;
@@ -172,17 +182,20 @@ trait TaskNoticeTrait
                             $record->status = 1;
                         }
                     ],
-                    'account_not_found' => [
-                        'keyword' => ['找不到相关账号', '用户不存在', '被搜账号状态异常'],
+                    'operation_frequent' => [
+                        'keyword' => '操作过于频繁，请稍后再试',
                         'handler' => function () use ($record) {
-                            $record->status = 0;
+                            $record->status = 4;
                         }
                     ],
                     'security_risk' => [
-                        'keyword' => '当前账号存在安全风险',
-                        'handler' => function () use ($record) {
+                        'keyword' => ['当前账号存在安全风险', '你的账号暂时无法添加朋友'],
+                        'handler' => function () use ($record, $isSvAddWechat) {
+                            $record->status = 0;
                             $this->_setColingWechat($record);
-                            $this->_resetAddFriendWechat($record);
+                            if($isSvAddWechat){
+                                $this->_resetAddFriendWechat($record);
+                            }
                         }
                     ]
                 ];

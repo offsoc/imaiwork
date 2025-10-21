@@ -39,7 +39,7 @@
                                 </template>
                             </el-collapse-item>
                             <!-- 工作流技能 -->
-                            <el-collapse-item name="2">
+                            <el-collapse-item name="2" v-if="false">
                                 <template #title>
                                     <div class="leading-5 w-full">
                                         <div class="flex items-center gap-x-2">
@@ -114,6 +114,20 @@
                                         <Icon name="el-icon-Plus" :size="12"> </Icon>
                                     </div>
                                 </template>
+                                <div class="flex items-center justify-between gap-x-6 mb-2 px-4">
+                                    <div class="flex items-center w-full gap-x-4">
+                                        <div class="flex-1">
+                                            <ElSlider v-model="formData.threshold" :min="0" :max="1" :step="0.01" />
+                                        </div>
+                                        <ElInputNumber
+                                            v-model="formData.threshold"
+                                            controls-position="right"
+                                            :min="0"
+                                            :max="1"
+                                            :step="0.01">
+                                        </ElInputNumber>
+                                    </div>
+                                </div>
                                 <div class="border border-[var(--el-border-color-lighter)] rounded-lg">
                                     <el-table
                                         v-loading="pager.loading"

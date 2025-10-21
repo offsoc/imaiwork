@@ -3,7 +3,7 @@
         class="h-full w-full bg-no-repeat relative"
         :style="{
             backgroundImage: `url(${poster})`,
-            backgroundSize: '100% 100%',
+            backgroundSize: 'cover',
             borderRadius: borderRadius + 'rpx',
         }">
         <view class="relative z-[88] w-full h-full video-box" :class="{ 'opacity-0': !isShowVideo }">
@@ -143,7 +143,6 @@ const clickProgress = async (e: any) => {
 };
 
 const clickFullScreen = () => {
-    console.log("clickFullScreen", videoContent.value);
     videoContent.value.requestFullScreen();
 };
 

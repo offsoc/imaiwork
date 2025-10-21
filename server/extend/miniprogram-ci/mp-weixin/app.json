@@ -13,6 +13,7 @@
       "root": "packages",
       "pages": [
         "pages/robot_chat/robot_chat",
+        "pages/coze_chat/coze_chat",
         "pages/recharge/recharge",
         "pages/creation_record/creation_record",
         "pages/user_balance/user_balance",
@@ -38,7 +39,18 @@
         "pages/audio_choose/audio_choose",
         "pages/model_manage/model_manage",
         "pages/ai_copywriter/ai_copywriter",
-        "pages/styles_choose/styles_choose"
+        "pages/styles_choose/styles_choose",
+        "pages/montage_create/montage_create",
+        "pages/montage_anchor_create/montage_anchor_create",
+        "pages/montage_auth_video/montage_auth_video",
+        "pages/montage_auth_camera/montage_auth_camera",
+        "pages/montage_copywriter/montage_copywriter",
+        "pages/montage_ai_copywriter/montage_ai_copywriter",
+        "pages/montage_publish/montage_publish",
+        "pages/montage_publish_record/montage_publish_record",
+        "pages/montage_publish_video/montage_publish_video",
+        "pages/account_choose/account_choose",
+        "pages/montage_works/montage_works"
       ]
     },
     {

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,32 @@ use TencentCloud\Common\AbstractModel;
  * @method boolean getPassed() 获取是否通过	
  * @method void setPassed(boolean $Passed) 设置是否通过	
  * @method string getReason() 获取健康检查返回的错误信息
-NotChecked 未执行检查， Unknown 未知错误, TopicNotImported 主题未导入, TopicNotExistsInSourceCluster 主题在源集群中不存在, TopicNotExistsInTargetCluster 主题在目标集群中不存在, ConsumerConnectedOnTarget 目标集群上存在消费者连接, SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, ConsumerGroupCountNotMatch 订阅组数量不一致, SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息,
+NotChecked 未执行检查， 
+Unknown 未知错误, 
+TopicNotImported 主题未导入,
+TopicNotExistsInSourceCluster 主题在源集群中不存在, 
+TopicNotExistsInTargetCluster 主题在目标集群中不存在, 
+ConsumerConnectedOnTarget 目标集群上存在消费者连接, 
+SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, 
+TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, 
+SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+ConsumerGroupCountNotMatch 订阅组数量不一致, 
+SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setReason(string $Reason) 设置健康检查返回的错误信息
-NotChecked 未执行检查， Unknown 未知错误, TopicNotImported 主题未导入, TopicNotExistsInSourceCluster 主题在源集群中不存在, TopicNotExistsInTargetCluster 主题在目标集群中不存在, ConsumerConnectedOnTarget 目标集群上存在消费者连接, SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, ConsumerGroupCountNotMatch 订阅组数量不一致, SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息,
+NotChecked 未执行检查， 
+Unknown 未知错误, 
+TopicNotImported 主题未导入,
+TopicNotExistsInSourceCluster 主题在源集群中不存在, 
+TopicNotExistsInTargetCluster 主题在目标集群中不存在, 
+ConsumerConnectedOnTarget 目标集群上存在消费者连接, 
+SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, 
+TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, 
+SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+ConsumerGroupCountNotMatch 订阅组数量不一致, 
+SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method array getReasonList() 获取健康检查返回的错误信息列表
 注意：此字段可能返回 null，表示取不到有效值。
@@ -44,7 +66,18 @@ class DoHealthCheckOnMigratingTopicResponse extends AbstractModel
 
     /**
      * @var string 健康检查返回的错误信息
-NotChecked 未执行检查， Unknown 未知错误, TopicNotImported 主题未导入, TopicNotExistsInSourceCluster 主题在源集群中不存在, TopicNotExistsInTargetCluster 主题在目标集群中不存在, ConsumerConnectedOnTarget 目标集群上存在消费者连接, SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, ConsumerGroupCountNotMatch 订阅组数量不一致, SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息,
+NotChecked 未执行检查， 
+Unknown 未知错误, 
+TopicNotImported 主题未导入,
+TopicNotExistsInSourceCluster 主题在源集群中不存在, 
+TopicNotExistsInTargetCluster 主题在目标集群中不存在, 
+ConsumerConnectedOnTarget 目标集群上存在消费者连接, 
+SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, 
+TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, 
+SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+ConsumerGroupCountNotMatch 订阅组数量不一致, 
+SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息。
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $Reason;
@@ -63,7 +96,18 @@ NotChecked 未执行检查， Unknown 未知错误, TopicNotImported 主题未�
     /**
      * @param boolean $Passed 是否通过	
      * @param string $Reason 健康检查返回的错误信息
-NotChecked 未执行检查， Unknown 未知错误, TopicNotImported 主题未导入, TopicNotExistsInSourceCluster 主题在源集群中不存在, TopicNotExistsInTargetCluster 主题在目标集群中不存在, ConsumerConnectedOnTarget 目标集群上存在消费者连接, SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, ConsumerGroupCountNotMatch 订阅组数量不一致, SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息,
+NotChecked 未执行检查， 
+Unknown 未知错误, 
+TopicNotImported 主题未导入,
+TopicNotExistsInSourceCluster 主题在源集群中不存在, 
+TopicNotExistsInTargetCluster 主题在目标集群中不存在, 
+ConsumerConnectedOnTarget 目标集群上存在消费者连接, 
+SourceTopicHasNewMessagesIn5Minutes 源集群主题前5分钟内有新消息写入, 
+TargetTopicHasNewMessagesIn5Minutes 目标集群主题前5分钟内有新消息写入, 
+SourceTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+TargetTopicHasNoMessagesIn5Minutes 源集群前5分钟内没有新消息写入, 
+ConsumerGroupCountNotMatch 订阅组数量不一致, 
+SourceTopicHasUnconsumedMessages 源集群主题存在未消费消息。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param array $ReasonList 健康检查返回的错误信息列表
 注意：此字段可能返回 null，表示取不到有效值。

@@ -117,7 +117,6 @@ export function useLoginWay() {
                 auth_key: authKey,
             });
             uni.hideLoading();
-
             uni.showToast({
                 icon: "none",
                 title: "扫码成功，请在PC页面查看",
@@ -131,7 +130,6 @@ export function useLoginWay() {
             }, 3000);
         } catch (error: any) {
             uni.hideLoading();
-
             uni.showToast({
                 title: error || "登录失败",
                 icon: "none",

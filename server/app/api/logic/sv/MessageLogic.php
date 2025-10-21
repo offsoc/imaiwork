@@ -210,9 +210,9 @@ class MessageLogic extends SvBaseLogic
                 return false;
             }
             Cache::store('redis')->select(env('redis.WS_SELECT', 8));
-            $account = Cache::store('redis')->get("xhs:{$device_code}:accountNo");
+            $account = Cache::store('redis')->get("xhs:device:{$device_code}:status");
 
-            self::$returnData = $account === $accountinfo['account'] ? 1 : 0;
+            self::$returnData = $account === 'online' ? 1 : 0;
             return true;
             
         } catch (\Exception $e) {

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,6 +130,22 @@ pausing
  * @method void setSlaveZoneAttr(array $SlaveZoneAttr) 设置备可用区属性
  * @method string getCynosVersionTag() 获取版本标签
  * @method void setCynosVersionTag(string $CynosVersionTag) 设置版本标签
+ * @method string getGdnId() 获取全球数据库网络唯一标识
+ * @method void setGdnId(string $GdnId) 设置全球数据库网络唯一标识
+ * @method string getGdnRole() 获取集群在全球数据网络中的角色。
+主集群- primary
+从集群 - standby
+如为空，该字段无效
+ * @method void setGdnRole(string $GdnRole) 设置集群在全球数据网络中的角色。
+主集群- primary
+从集群 - standby
+如为空，该字段无效
+ * @method integer getUsedArchiveStorage() 获取二级存储使用量，单位：G
+ * @method void setUsedArchiveStorage(integer $UsedArchiveStorage) 设置二级存储使用量，单位：G
+ * @method string getArchiveStatus() 获取归档状态，枚举值<li>normal:正常</li><li>archiving:归档中</li><li>resuming:恢复中</li><li>archived :已归档</li>
+ * @method void setArchiveStatus(string $ArchiveStatus) 设置归档状态，枚举值<li>normal:正常</li><li>archiving:归档中</li><li>resuming:恢复中</li><li>archived :已归档</li>
+ * @method integer getArchiveProgress() 获取归档进度，百分比。
+ * @method void setArchiveProgress(integer $ArchiveProgress) 设置归档进度，百分比。
  */
 class CynosdbClusterDetail extends AbstractModel
 {
@@ -393,6 +409,34 @@ pausing
     public $CynosVersionTag;
 
     /**
+     * @var string 全球数据库网络唯一标识
+     */
+    public $GdnId;
+
+    /**
+     * @var string 集群在全球数据网络中的角色。
+主集群- primary
+从集群 - standby
+如为空，该字段无效
+     */
+    public $GdnRole;
+
+    /**
+     * @var integer 二级存储使用量，单位：G
+     */
+    public $UsedArchiveStorage;
+
+    /**
+     * @var string 归档状态，枚举值<li>normal:正常</li><li>archiving:归档中</li><li>resuming:恢复中</li><li>archived :已归档</li>
+     */
+    public $ArchiveStatus;
+
+    /**
+     * @var integer 归档进度，百分比。
+     */
+    public $ArchiveProgress;
+
+    /**
      * @param string $ClusterId 集群ID
      * @param string $ClusterName 集群名称
      * @param string $Region 地域
@@ -448,6 +492,14 @@ pausing
      * @param string $NetworkType 节点网络类型
      * @param array $SlaveZoneAttr 备可用区属性
      * @param string $CynosVersionTag 版本标签
+     * @param string $GdnId 全球数据库网络唯一标识
+     * @param string $GdnRole 集群在全球数据网络中的角色。
+主集群- primary
+从集群 - standby
+如为空，该字段无效
+     * @param integer $UsedArchiveStorage 二级存储使用量，单位：G
+     * @param string $ArchiveStatus 归档状态，枚举值<li>normal:正常</li><li>archiving:归档中</li><li>resuming:恢复中</li><li>archived :已归档</li>
+     * @param integer $ArchiveProgress 归档进度，百分比。
      */
     function __construct()
     {
@@ -695,6 +747,26 @@ pausing
 
         if (array_key_exists("CynosVersionTag",$param) and $param["CynosVersionTag"] !== null) {
             $this->CynosVersionTag = $param["CynosVersionTag"];
+        }
+
+        if (array_key_exists("GdnId",$param) and $param["GdnId"] !== null) {
+            $this->GdnId = $param["GdnId"];
+        }
+
+        if (array_key_exists("GdnRole",$param) and $param["GdnRole"] !== null) {
+            $this->GdnRole = $param["GdnRole"];
+        }
+
+        if (array_key_exists("UsedArchiveStorage",$param) and $param["UsedArchiveStorage"] !== null) {
+            $this->UsedArchiveStorage = $param["UsedArchiveStorage"];
+        }
+
+        if (array_key_exists("ArchiveStatus",$param) and $param["ArchiveStatus"] !== null) {
+            $this->ArchiveStatus = $param["ArchiveStatus"];
+        }
+
+        if (array_key_exists("ArchiveProgress",$param) and $param["ArchiveProgress"] !== null) {
+            $this->ArchiveProgress = $param["ArchiveProgress"];
         }
     }
 }

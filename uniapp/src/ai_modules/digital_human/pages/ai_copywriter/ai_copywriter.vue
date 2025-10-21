@@ -106,10 +106,6 @@ const currentPrompt = ref<any>(getPromptList.value[0]);
 
 const scrollTop = ref<number>(0);
 
-const selectPrompt = (msg: string) => {
-    contentPost(msg);
-};
-
 const contentPost = async (userInput: string) => {
     if (!userInput) {
         uni.$u.toast("请输入文案");
@@ -119,24 +115,25 @@ const contentPost = async (userInput: string) => {
         uni.$u.toast("算力不足，请充值！");
         return;
     }
+    uni.showLoading({
+        title: "生成中...",
+        mask: true,
+    });
     try {
-        uni.showLoading({
-            title: "生成中...",
-            mask: true,
-        });
         const { content } = await generatePrompt({
             keywords: userInput,
             number: currentPrompt.value.length,
         });
         chatContentList.value.push(content);
+        uni.hideLoading();
     } catch (err: any) {
+        uni.hideLoading();
         uni.showToast({
             title: err || "生成失败，请重试",
             icon: "none",
             duration: 3000,
         });
     } finally {
-        uni.hideLoading();
         setTimeout(() => {
             scrollToBottom();
         }, 500);

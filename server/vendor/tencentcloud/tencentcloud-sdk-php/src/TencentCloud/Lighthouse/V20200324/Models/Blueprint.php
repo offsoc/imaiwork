@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,12 @@ use TencentCloud\Common\AbstractModel;
  * @method void setImageUrl(string $ImageUrl) 设置镜像图片 URL。
  * @method integer getRequiredSystemDiskSize() 获取镜像所需系统盘大小，单位 GB。
  * @method void setRequiredSystemDiskSize(integer $RequiredSystemDiskSize) 设置镜像所需系统盘大小，单位 GB。
- * @method string getBlueprintState() 获取镜像状态，镜镜像状态，NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
- * @method void setBlueprintState(string $BlueprintState) 设置镜像状态，镜镜像状态，NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
+ * @method string getBlueprintState() 获取镜像状态。
+可选值：
+NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
+ * @method void setBlueprintState(string $BlueprintState) 设置镜像状态。
+可选值：
+NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
  * @method string getCreatedTime() 获取创建时间。按照 ISO8601 标准表示，并且使用 UTC 时间。 
 格式为： YYYY-MM-DDThh:mm:ssZ。
 注意：此字段可能返回 null，表示取不到有效值。
@@ -70,6 +74,8 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method boolean getBlueprintShared() 获取镜像是否已共享。
  * @method void setBlueprintShared(boolean $BlueprintShared) 设置镜像是否已共享。
+ * @method array getTags() 获取镜像绑定的标签列表。
+ * @method void setTags(array $Tags) 设置镜像绑定的标签列表。
  */
 class Blueprint extends AbstractModel
 {
@@ -125,7 +131,9 @@ class Blueprint extends AbstractModel
     public $RequiredSystemDiskSize;
 
     /**
-     * @var string 镜像状态，镜镜像状态，NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
+     * @var string 镜像状态。
+可选值：
+NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
      */
     public $BlueprintState;
 
@@ -183,6 +191,11 @@ class Blueprint extends AbstractModel
     public $BlueprintShared;
 
     /**
+     * @var array 镜像绑定的标签列表。
+     */
+    public $Tags;
+
+    /**
      * @param string $BlueprintId 镜像 ID  ，是 Blueprint 的唯一标识。
      * @param string $DisplayTitle 镜像对外展示标题。
      * @param string $DisplayVersion 镜像对外展示版本。
@@ -194,7 +207,9 @@ class Blueprint extends AbstractModel
      * @param string $BlueprintType 镜像类型，如 APP_OS（应用镜像）, PURE_OS（系统镜像）, DOCKER（容器）, PRIVATE（私有镜像）, SHARED（共享镜像）, GAME_PORTAL（游戏专区镜像）。
      * @param string $ImageUrl 镜像图片 URL。
      * @param integer $RequiredSystemDiskSize 镜像所需系统盘大小，单位 GB。
-     * @param string $BlueprintState 镜像状态，镜镜像状态，NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
+     * @param string $BlueprintState 镜像状态。
+可选值：
+NORMAL（正常）、SYNCING（同步中）、OFFLINE（下线）、ISOLATED（已隔离）、CREATEFAILED（创建失败）、SYNCING_FAILED（目的地域同步失败）、ISOLATING（隔离中）、ISOLATED（已隔离）、DELETING（删除中）、DESTROYING（销毁中）。
      * @param string $CreatedTime 创建时间。按照 ISO8601 标准表示，并且使用 UTC 时间。 
 格式为： YYYY-MM-DDThh:mm:ssZ。
 注意：此字段可能返回 null，表示取不到有效值。
@@ -208,6 +223,7 @@ class Blueprint extends AbstractModel
      * @param string $DockerVersion Docker版本号。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param boolean $BlueprintShared 镜像是否已共享。
+     * @param array $Tags 镜像绑定的标签列表。
      */
     function __construct()
     {
@@ -304,6 +320,15 @@ class Blueprint extends AbstractModel
 
         if (array_key_exists("BlueprintShared",$param) and $param["BlueprintShared"] !== null) {
             $this->BlueprintShared = $param["BlueprintShared"];
+        }
+
+        if (array_key_exists("Tags",$param) and $param["Tags"] !== null) {
+            $this->Tags = [];
+            foreach ($param["Tags"] as $key => $value){
+                $obj = new Tag();
+                $obj->deserialize($value);
+                array_push($this->Tags, $obj);
+            }
         }
     }
 }

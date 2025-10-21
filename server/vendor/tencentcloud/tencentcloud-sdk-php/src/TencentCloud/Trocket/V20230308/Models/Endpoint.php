@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,20 @@ use TencentCloud\Common\AbstractModel;
 /**
  * 接入点信息
  *
- * @method string getType() 获取接入点类型，枚举值如下
-VPC: VPC;
-PUBLIC: 公网;
-INTERNAL: 支撑网;
- * @method void setType(string $Type) 设置接入点类型，枚举值如下
-VPC: VPC;
-PUBLIC: 公网;
-INTERNAL: 支撑网;
+ * @method string getType() 获取接入点类型，枚举值如下：
+
+- VPC：VPC 网络
+
+- PUBLIC：公网
+
+- INTERNAL：支撑网
+ * @method void setType(string $Type) 设置接入点类型，枚举值如下：
+
+- VPC：VPC 网络
+
+- PUBLIC：公网
+
+- INTERNAL：支撑网
  * @method string getStatus() 获取状态，
 OPEN 开启，
 CLOSE 关闭，
@@ -72,10 +78,13 @@ POSTPAID 按量付费
 class Endpoint extends AbstractModel
 {
     /**
-     * @var string 接入点类型，枚举值如下
-VPC: VPC;
-PUBLIC: 公网;
-INTERNAL: 支撑网;
+     * @var string 接入点类型，枚举值如下：
+
+- VPC：VPC 网络
+
+- PUBLIC：公网
+
+- INTERNAL：支撑网
      */
     public $Type;
 
@@ -132,10 +141,13 @@ POSTPAID 按量付费
     public $BillingFlow;
 
     /**
-     * @param string $Type 接入点类型，枚举值如下
-VPC: VPC;
-PUBLIC: 公网;
-INTERNAL: 支撑网;
+     * @param string $Type 接入点类型，枚举值如下：
+
+- VPC：VPC 网络
+
+- PUBLIC：公网
+
+- INTERNAL：支撑网
      * @param string $Status 状态，
 OPEN 开启，
 CLOSE 关闭，

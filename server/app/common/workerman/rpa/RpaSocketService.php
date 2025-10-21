@@ -6,7 +6,7 @@ namespace app\common\workerman\rpa;
 
 use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
-//use think\cache\driver\Redis;
+use think\cache\driver\Redis;
 
 use Predis\Client as redisClient;
 use think\facade\Log;
@@ -142,9 +142,11 @@ class RpaSocketService
             if (!isset($payload['deviceId'])) {
                 throw new \Exception('无效请求,设备参数不存在', WorkerEnum::INVALID_REQUEST_NOFUND_DEVICE);
             }
-            //验证设备授权是否存在
-            if (!$this->checkDevice($connection, $payload)) {
-                throw new \Exception($this->error_msg, WorkerEnum::DEVICE_NOT_FOUND);
+            if(in_array($type, [1, 'addDevice'])){
+                //验证设备授权是否存在
+                if (!$this->checkDevice($connection, $payload)) {
+                    throw new \Exception($this->error_msg, WorkerEnum::DEVICE_NOT_FOUND);
+                }
             }
 
             //判断设备初始化是否完成,未完成禁止主动获取设备相关信息
@@ -497,6 +499,7 @@ class RpaSocketService
                 $this->redis->del("xhs:device:{$deviceid}:status");
                 $this->redis->del("xhs:init:{$deviceid}");
                 $this->redis->del("xhs:getUser:{$deviceid}");
+                $this->redis->set("xhs:device:{$deviceid}:status", 'offline');
                 // $account = $this->redis->get("xhs:{$deviceid}:accountNo");
                 // $this->redis->delete("xhs:{$deviceid}:accountNo");
                 // $this->redis->delete("xhs:{$deviceid}:accountInfo:{$account}");
@@ -557,23 +560,31 @@ class RpaSocketService
     private  function _connRedis()
     {
         if ($this->redis == null) {
-            // $this->redis = new Redis([
-            //     'host'        => env('redis.HOST', '127.0.0.1'),
-            //     'port'        => env('redis.PORT', 6379),
-            //     'password'    => env('redis.PASSWORD', '123456'),
-            //     'select'      => env('redis.WS_SELECT', 8),
-            //     'timeout'     => 0,
-            // ]);
-
-            $this->redis = new redisClient([
+            $this->redis = new Redis([
                 'host'        => env('redis.HOST', '127.0.0.1'),
                 'port'        => env('redis.PORT', 6379),
                 'password'    => env('redis.PASSWORD', '123456'),
-                'database'      => env('redis.WS_SELECT', 8),
-                'timeout'     => 2,
-                'persistent' => true,   // 启用持久连接
-                'read_write_timeout' => 0, // 读写超时（0为无限）
+                'select'      => env('redis.WS_SELECT', 9),
+                'timeout'     => 0,
+                'persistent'  => true,
             ]);
+
+            // $this->redis = new redisClient([
+            //     'host'        => env('redis.HOST', '127.0.0.1'),
+            //     'port'        => env('redis.PORT', 6379),
+            //     'password'    => env('redis.PASSWORD', '123456'),
+            //     'database'      => env('redis.WS_SELECT', 8),
+            //     'persistent' => true,   // 启用持久连接
+            //     'timeout' => 2.5,           // 连接超时时间
+            //     'read_write_timeout' => 60, // 读写超时时间
+            //     'tcp_nodelay' => true,      // 禁用Nagle算法
+            //     'persistent_id' => 'my_connection', // 持久连接标识符
+            //     // 连接池配置（如果需要）
+            //     'connections' => [
+            //         'tcp'  => 'Predis\Connection\PhpiredisStreamConnection',
+            //         'unix' => 'Predis\Connection\PhpiredisSocketConnection',
+            //     ],
+            // ]);
         }
     }
 

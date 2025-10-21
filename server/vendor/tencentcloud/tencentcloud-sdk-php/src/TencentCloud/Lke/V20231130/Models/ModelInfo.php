@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,28 @@ use TencentCloud\Common\AbstractModel;
  * @method void setRoleLenLimit(integer $RoleLenLimit) 设置角色提示词输入长度限制
  * @method boolean getIsExclusive() 获取是否专属并发模型
  * @method void setIsExclusive(boolean $IsExclusive) 设置是否专属并发模型
+ * @method integer getSupportAiCallStatus() 获取模型支持智能通话效果
+ * @method void setSupportAiCallStatus(integer $SupportAiCallStatus) 设置模型支持智能通话效果
+ * @method integer getConcurrency() 获取专属并发数
+ * @method void setConcurrency(integer $Concurrency) 设置专属并发数
+ * @method array getModelTags() 获取模型标签
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setModelTags(array $ModelTags) 设置模型标签
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getModelParams() 获取模型超参定义
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setModelParams(array $ModelParams) 设置模型超参定义
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getProviderName() 获取提供商名称
+ * @method void setProviderName(string $ProviderName) 设置提供商名称
+ * @method string getProviderAliasName() 获取提供商别名
+ * @method void setProviderAliasName(string $ProviderAliasName) 设置提供商别名
+ * @method string getProviderType() 获取提供商类型 Self:提供商，Custom：自定义模型提供商，Third：第三方模型提供商
+ * @method void setProviderType(string $ProviderType) 设置提供商类型 Self:提供商，Custom：自定义模型提供商，Third：第三方模型提供商
+ * @method boolean getIsCloseModelParams() 获取是否关闭模型超参
+ * @method void setIsCloseModelParams(boolean $IsCloseModelParams) 设置是否关闭模型超参
+ * @method boolean getIsDeepThinking() 获取是否支持深度思考
+ * @method void setIsDeepThinking(boolean $IsDeepThinking) 设置是否支持深度思考
  */
 class ModelInfo extends AbstractModel
 {
@@ -173,6 +195,53 @@ class ModelInfo extends AbstractModel
     public $IsExclusive;
 
     /**
+     * @var integer 模型支持智能通话效果
+     */
+    public $SupportAiCallStatus;
+
+    /**
+     * @var integer 专属并发数
+     */
+    public $Concurrency;
+
+    /**
+     * @var array 模型标签
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $ModelTags;
+
+    /**
+     * @var array 模型超参定义
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $ModelParams;
+
+    /**
+     * @var string 提供商名称
+     */
+    public $ProviderName;
+
+    /**
+     * @var string 提供商别名
+     */
+    public $ProviderAliasName;
+
+    /**
+     * @var string 提供商类型 Self:提供商，Custom：自定义模型提供商，Third：第三方模型提供商
+     */
+    public $ProviderType;
+
+    /**
+     * @var boolean 是否关闭模型超参
+     */
+    public $IsCloseModelParams;
+
+    /**
+     * @var boolean 是否支持深度思考
+     */
+    public $IsDeepThinking;
+
+    /**
      * @param string $ModelName 模型名称
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $ModelDesc 模型描述
@@ -200,6 +269,17 @@ class ModelInfo extends AbstractModel
      * @param boolean $IsDefault 是否默认模型
      * @param integer $RoleLenLimit 角色提示词输入长度限制
      * @param boolean $IsExclusive 是否专属并发模型
+     * @param integer $SupportAiCallStatus 模型支持智能通话效果
+     * @param integer $Concurrency 专属并发数
+     * @param array $ModelTags 模型标签
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $ModelParams 模型超参定义
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $ProviderName 提供商名称
+     * @param string $ProviderAliasName 提供商别名
+     * @param string $ProviderType 提供商类型 Self:提供商，Custom：自定义模型提供商，Third：第三方模型提供商
+     * @param boolean $IsCloseModelParams 是否关闭模型超参
+     * @param boolean $IsDeepThinking 是否支持深度思考
      */
     function __construct()
     {
@@ -283,6 +363,47 @@ class ModelInfo extends AbstractModel
 
         if (array_key_exists("IsExclusive",$param) and $param["IsExclusive"] !== null) {
             $this->IsExclusive = $param["IsExclusive"];
+        }
+
+        if (array_key_exists("SupportAiCallStatus",$param) and $param["SupportAiCallStatus"] !== null) {
+            $this->SupportAiCallStatus = $param["SupportAiCallStatus"];
+        }
+
+        if (array_key_exists("Concurrency",$param) and $param["Concurrency"] !== null) {
+            $this->Concurrency = $param["Concurrency"];
+        }
+
+        if (array_key_exists("ModelTags",$param) and $param["ModelTags"] !== null) {
+            $this->ModelTags = $param["ModelTags"];
+        }
+
+        if (array_key_exists("ModelParams",$param) and $param["ModelParams"] !== null) {
+            $this->ModelParams = [];
+            foreach ($param["ModelParams"] as $key => $value){
+                $obj = new ModelParameter();
+                $obj->deserialize($value);
+                array_push($this->ModelParams, $obj);
+            }
+        }
+
+        if (array_key_exists("ProviderName",$param) and $param["ProviderName"] !== null) {
+            $this->ProviderName = $param["ProviderName"];
+        }
+
+        if (array_key_exists("ProviderAliasName",$param) and $param["ProviderAliasName"] !== null) {
+            $this->ProviderAliasName = $param["ProviderAliasName"];
+        }
+
+        if (array_key_exists("ProviderType",$param) and $param["ProviderType"] !== null) {
+            $this->ProviderType = $param["ProviderType"];
+        }
+
+        if (array_key_exists("IsCloseModelParams",$param) and $param["IsCloseModelParams"] !== null) {
+            $this->IsCloseModelParams = $param["IsCloseModelParams"];
+        }
+
+        if (array_key_exists("IsDeepThinking",$param) and $param["IsDeepThinking"] !== null) {
+            $this->IsDeepThinking = $param["IsDeepThinking"];
         }
     }
 }

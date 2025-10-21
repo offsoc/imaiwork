@@ -120,16 +120,16 @@ export const useChatStore = defineStore("chat", () => {
      * @param agent - 智能体对象。
      */
     function setAgent(agent: any) {
-        if (agentValue.value?.id && agent?.id != agentValue.value?.id) {
-            // 如果点击的是当前已选中的智能体，则取消选择并重置
-            clearChat();
-            // 重置URL，避免刷新后仍然是该智能体
-            replaceState({
-                task_id: "",
-                agent_name: "",
-                agent_id: "",
-            });
-        }
+        // if (agentValue.value?.id && agent?.id != agentValue.value?.id) {
+        //     // 如果点击的是当前已选中的智能体，则取消选择并重置
+        //     clearChat();
+        //     // 重置URL，避免刷新后仍然是该智能体
+        //     replaceState({
+        //         task_id: "",
+        //         agent_name: "",
+        //         agent_id: "",
+        //     });
+        // }
         agentValue.value = agent;
     }
 

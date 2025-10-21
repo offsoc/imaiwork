@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ use TencentCloud\Common\AbstractModel;
  *
  * @method string getRegion() 获取地域
  * @method void setRegion(string $Region) 设置地域
- * @method string getClusterType() 获取集群类型。可填入tke、eks、tkeedge、tdcc，分别代表标准集群、弹性集群、边缘集群、注册集群
- * @method void setClusterType(string $ClusterType) 设置集群类型。可填入tke、eks、tkeedge、tdcc，分别代表标准集群、弹性集群、边缘集群、注册集群
+ * @method string getClusterType() 获取集群类型。可填入tke、eks、tkeedge、tdcc、external，分别代表标准集群、弹性集群、边缘集群、注册集群 和外部集群
+ * @method void setClusterType(string $ClusterType) 设置集群类型。可填入tke、eks、tkeedge、tdcc、external，分别代表标准集群、弹性集群、边缘集群、注册集群 和外部集群
  * @method string getClusterId() 获取集群 ID
  * @method void setClusterId(string $ClusterId) 设置集群 ID
  * @method boolean getEnableExternal() 获取是否开启公网 CLB
@@ -49,7 +49,7 @@ class PrometheusClusterAgentBasic extends AbstractModel
     public $Region;
 
     /**
-     * @var string 集群类型。可填入tke、eks、tkeedge、tdcc，分别代表标准集群、弹性集群、边缘集群、注册集群
+     * @var string 集群类型。可填入tke、eks、tkeedge、tdcc、external，分别代表标准集群、弹性集群、边缘集群、注册集群 和外部集群
      */
     public $ClusterType;
 
@@ -95,7 +95,7 @@ class PrometheusClusterAgentBasic extends AbstractModel
 
     /**
      * @param string $Region 地域
-     * @param string $ClusterType 集群类型。可填入tke、eks、tkeedge、tdcc，分别代表标准集群、弹性集群、边缘集群、注册集群
+     * @param string $ClusterType 集群类型。可填入tke、eks、tkeedge、tdcc、external，分别代表标准集群、弹性集群、边缘集群、注册集群 和外部集群
      * @param string $ClusterId 集群 ID
      * @param boolean $EnableExternal 是否开启公网 CLB
      * @param PrometheusClusterAgentPodConfig $InClusterPodConfig 集群内部署组件的pod 配置

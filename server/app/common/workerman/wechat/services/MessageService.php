@@ -91,10 +91,10 @@ class MessageService
             if ($msgType !== EnumMsgType::HeartBeatReq) {
 
                 // 记录下日志
-                $this->withChannel('wechat_socket')->withLevel('info')->withTitle('Device message received')->withContext([
-                    'msgType' => EnumMsgType::name($msgType),
-                    'content' => $content,
-                ])->log();
+                // $this->withChannel('wechat_socket')->withLevel('info')->withTitle('Device message received')->withContext([
+                //     'msgType' => EnumMsgType::name($msgType),
+                //     'content' => $content,
+                // ])->log();
             }
             // 获取设备ID
             if ($msgType === EnumMsgType::DeviceAuthReq) {
@@ -110,6 +110,7 @@ class MessageService
 
                 $this->voiceToTextOpt($deviceId, $response);
                 $this->AddFriendsTaskOpt($deviceId, $response);
+                $this->SphPostTaskOpt($deviceId, $response);
             }
             if ($msgType == 1027) {
                 $this->AcceptFriendAddRequestTaskOpt($deviceId, $response);
@@ -117,6 +118,9 @@ class MessageService
 
             if ($msgType == 2029) {
                 $this->circleReplyLikeTask($deviceId, $response);
+            }
+            if ($msgType == 1073) {
+                $this->circlePostTaskOpt($deviceId, $response);
             }
 
             // 根据消息类型处理响应

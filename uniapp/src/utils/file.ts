@@ -7,32 +7,40 @@ import { ref } from "vue";
  */
 export const requestAuthorization = (scope: string): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-        uni.authorize({
-            scope: scope,
-            success: () => {
-                resolve(true); // 授权成功
-            },
-            fail: async (err) => {
-                try {
-                    const modalRes = await uni.showModal({
-                        title: "提示",
-                        content: "您关闭了权限，需要前往设置页面打开权限才能继续使用该功能。",
-                        confirmText: "去设置",
-                        cancelText: "取消",
-                    });
+        uni.getSetting({
+            success: (res: any) => {
+                if (res.authSetting[scope]) {
+                    resolve(true);
+                } else {
+                    uni.authorize({
+                        scope: scope,
+                        success: () => {
+                            resolve(true); // 授权成功
+                        },
+                        fail: async (err) => {
+                            try {
+                                const modalRes = await uni.showModal({
+                                    title: "提示",
+                                    content: "您关闭了权限，需要前往设置页面打开权限才能继续使用该功能。",
+                                    confirmText: "去设置",
+                                    cancelText: "取消",
+                                });
 
-                    if (modalRes.confirm) {
-                        const settingRes = await uni.openSetting();
-                        if (settingRes.authSetting && settingRes.authSetting[scope]) {
-                            resolve(true);
-                        } else {
-                            resolve(false);
-                        }
-                    } else {
-                        resolve(false);
-                    }
-                } catch (modalError) {
-                    reject(modalError);
+                                if (modalRes.confirm) {
+                                    const settingRes = await uni.openSetting();
+                                    if (settingRes.authSetting && settingRes.authSetting[scope]) {
+                                        resolve(true);
+                                    } else {
+                                        resolve(false);
+                                    }
+                                } else {
+                                    resolve(false);
+                                }
+                            } catch (modalError) {
+                                reject(modalError);
+                            }
+                        },
+                    });
                 }
             },
         });
@@ -65,7 +73,6 @@ export async function saveImageToPhotosAlbum(url: string) {
         downloading.value = false;
     } catch (error: any) {
         uni.hideLoading();
-        console.log(error);
         downloading.value = false;
         if (error.errMsg == "saveImageToPhotosAlbum:fail cancel") {
             uni.$u.toast("取消保存");
@@ -124,14 +131,14 @@ export async function saveVideoToPhotosAlbum(url: string) {
         uni.showToast({
             title: "保存成功",
             icon: "success",
-            duration: 2000,
+            duration: 3000,
         });
     } catch (err: any) {
         uni.hideLoading();
         uni.showToast({
             title: "保存失败",
             icon: "none",
-            duration: 2000,
+            duration: 3000,
         });
     }
 }

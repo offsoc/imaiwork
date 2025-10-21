@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,8 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setProgressDesc(string $ProgressDesc) 设置操作中描述
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method integer getContinueAlarm() 获取停止持续告警
+ * @method void setContinueAlarm(integer $ContinueAlarm) 设置停止持续告警
  */
 class JobV1 extends AbstractModel
 {
@@ -417,6 +419,11 @@ class JobV1 extends AbstractModel
     public $ProgressDesc;
 
     /**
+     * @var integer 停止持续告警
+     */
+    public $ContinueAlarm;
+
+    /**
      * @param string $JobId 作业ID
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $Region 地域
@@ -496,6 +503,7 @@ class JobV1 extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $ProgressDesc 操作中描述
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param integer $ContinueAlarm 停止持续告警
      */
     function __construct()
     {
@@ -670,6 +678,10 @@ class JobV1 extends AbstractModel
 
         if (array_key_exists("ProgressDesc",$param) and $param["ProgressDesc"] !== null) {
             $this->ProgressDesc = $param["ProgressDesc"];
+        }
+
+        if (array_key_exists("ContinueAlarm",$param) and $param["ContinueAlarm"] !== null) {
+            $this->ContinueAlarm = $param["ContinueAlarm"];
         }
     }
 }

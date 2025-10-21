@@ -119,6 +119,7 @@ class HumanLogic extends ApiLogic
                     } else {
                         $item->status = 0;
                     }
+                    $item->remark = $data['err_reason'] ?? '';
                 }
                 $item->save();
             });
@@ -176,6 +177,7 @@ class HumanLogic extends ApiLogic
                     } else {
                         $item->status = 0;
                     }
+                    $item->remark       = $data['err_msg'] ?? '';
                 }
                 $item->save();
             });
@@ -329,7 +331,7 @@ class HumanLogic extends ApiLogic
                         $item->result_url   = FileService::downloadFileBySource($data['video_url'], 'video');
                         $item->audio_url   = FileService::downloadFileBySource($data['audio_urls'][0], 'audio');
                     }
-                    $item->remark       = $data['msg'] ?? '';
+                    $item->remark = $data['msg'] ?? '';
                 }
                 if($item->status == 1 && $item->automatic_clip == 1&& $item->clip_status == 1){
                     $unit = TokenLogService::checkToken($item->user_id, 'video_clip');

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setLastStatusTimestamp(integer $LastStatusTimestamp) 设置最近一次状态时间戳
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getClientInfo() 获取客服登录的端信息
+ * @method void setClientInfo(array $ClientInfo) 设置客服登录的端信息
  */
 class StaffStatusMetrics extends AbstractModel
 {
@@ -142,6 +144,11 @@ class StaffStatusMetrics extends AbstractModel
     public $LastStatusTimestamp;
 
     /**
+     * @var array 客服登录的端信息
+     */
+    public $ClientInfo;
+
+    /**
      * @param string $Email 座席邮箱
      * @param string $Status 座席状态 free 示闲 | busy 忙碌 | rest 小休 | notReady 示忙 | afterCallWork 话后调整 | offline 离线
      * @param StaffStatusExtra $StatusExtra 座席状态补充信息
@@ -160,6 +167,7 @@ class StaffStatusMetrics extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param integer $LastStatusTimestamp 最近一次状态时间戳
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $ClientInfo 客服登录的端信息
      */
     function __construct()
     {
@@ -237,6 +245,15 @@ class StaffStatusMetrics extends AbstractModel
 
         if (array_key_exists("LastStatusTimestamp",$param) and $param["LastStatusTimestamp"] !== null) {
             $this->LastStatusTimestamp = $param["LastStatusTimestamp"];
+        }
+
+        if (array_key_exists("ClientInfo",$param) and $param["ClientInfo"] !== null) {
+            $this->ClientInfo = [];
+            foreach ($param["ClientInfo"] as $key => $value){
+                $obj = new ClientInfo();
+                $obj->deserialize($value);
+                array_push($this->ClientInfo, $obj);
+            }
         }
     }
 }

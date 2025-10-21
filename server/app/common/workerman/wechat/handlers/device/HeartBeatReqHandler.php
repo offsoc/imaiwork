@@ -44,7 +44,8 @@ class HeartBeatReqHandler extends BaseHandler
 
         // 更新心跳时间
         $this->updateDeviceHeartbeat($deviceId);
-
+        // 更新设备状态
+        $this->updateDeviceStatus($deviceId, true);
         // 发送响应
         $response = new HeartBeatMessage();
 

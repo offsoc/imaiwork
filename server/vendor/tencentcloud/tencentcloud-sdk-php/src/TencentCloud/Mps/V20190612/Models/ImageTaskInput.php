@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,12 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setEraseConfig(ImageEraseConfig $EraseConfig) 设置图片擦除配置。
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method BlindWatermarkConfig getBlindWatermarkConfig() 获取盲水印配置。
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setBlindWatermarkConfig(BlindWatermarkConfig $BlindWatermarkConfig) 设置盲水印配置。
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method BeautyConfig getBeautyConfig() 获取美颜配置。
+ * @method void setBeautyConfig(BeautyConfig $BeautyConfig) 设置美颜配置。
  */
 class ImageTaskInput extends AbstractModel
 {
@@ -54,12 +60,26 @@ class ImageTaskInput extends AbstractModel
     public $EraseConfig;
 
     /**
+     * @var BlindWatermarkConfig 盲水印配置。
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $BlindWatermarkConfig;
+
+    /**
+     * @var BeautyConfig 美颜配置。
+     */
+    public $BeautyConfig;
+
+    /**
      * @param ImageEncodeConfig $EncodeConfig 图片编码配置。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param ImageEnhanceConfig $EnhanceConfig 图片增强配置。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param ImageEraseConfig $EraseConfig 图片擦除配置。
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param BlindWatermarkConfig $BlindWatermarkConfig 盲水印配置。
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param BeautyConfig $BeautyConfig 美颜配置。
      */
     function __construct()
     {
@@ -87,6 +107,16 @@ class ImageTaskInput extends AbstractModel
         if (array_key_exists("EraseConfig",$param) and $param["EraseConfig"] !== null) {
             $this->EraseConfig = new ImageEraseConfig();
             $this->EraseConfig->deserialize($param["EraseConfig"]);
+        }
+
+        if (array_key_exists("BlindWatermarkConfig",$param) and $param["BlindWatermarkConfig"] !== null) {
+            $this->BlindWatermarkConfig = new BlindWatermarkConfig();
+            $this->BlindWatermarkConfig->deserialize($param["BlindWatermarkConfig"]);
+        }
+
+        if (array_key_exists("BeautyConfig",$param) and $param["BeautyConfig"] !== null) {
+            $this->BeautyConfig = new BeautyConfig();
+            $this->BeautyConfig->deserialize($param["BeautyConfig"]);
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ use TencentCloud\Common\AbstractModel;
  * @method ContactInfo getContactInfo() 获取联系人信息
  * @method void setContactInfo(ContactInfo $ContactInfo) 设置联系人信息
  * @method string getTemplateId() 获取模板ID
+可通过接口: [DescribeTemplateList](https://cloud.tencent.com/document/product/242/48940)
  * @method void setTemplateId(string $TemplateId) 设置模板ID
+可通过接口: [DescribeTemplateList](https://cloud.tencent.com/document/product/242/48940)
  */
 class ModifyTemplateRequest extends AbstractModel
 {
@@ -41,6 +43,7 @@ class ModifyTemplateRequest extends AbstractModel
 
     /**
      * @var string 模板ID
+可通过接口: [DescribeTemplateList](https://cloud.tencent.com/document/product/242/48940)
      */
     public $TemplateId;
 
@@ -48,6 +51,7 @@ class ModifyTemplateRequest extends AbstractModel
      * @param CertificateInfo $CertificateInfo 证件信息
      * @param ContactInfo $ContactInfo 联系人信息
      * @param string $TemplateId 模板ID
+可通过接口: [DescribeTemplateList](https://cloud.tencent.com/document/product/242/48940)
      */
     function __construct()
     {

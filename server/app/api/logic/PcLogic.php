@@ -198,8 +198,16 @@ class PcLogic extends BaseLogic
         //练练
         $lianlian = self::getLianlianConfig();
 
+        //大语言模型
+        $chatModels = ConfigService::get('chat', 'ai_model', []);
+        foreach ($chatModels['channel'] as $key=>$value){
+            $chatModels['channel'][$key]['logo'] = FileService::getFileUrl($value['logo']);
+        }
+        $banner =  config('app.app_host') . '/static/images/human/banner.png';
+
         return [
 //            'domain' => FileService::getFileUrl(),
+            'is_robot_show' => ConfigService::get('assistants', 'is_robot_show',0),
             'domain' => config('app.app_host') . '/',
             'login' => $loginConfig,
             'website' => $website,
@@ -217,6 +225,9 @@ class PcLogic extends BaseLogic
                 'privacy' => ConfigService::get('digital_human', 'privacy', []),
                 'channel' => $modelList['channel'] ?? [],
                 'voice' => $modelList['voice'] ?? [],
+                'shanjian_auth' => ConfigService::get('digital_human', 'shanjian_auth', '闪剪AI'),
+                'banner' =>  FileService::getFileUrl(ConfigService::get('digital_human', 'banner', $banner)),
+
             ],
             'card_code'                 => [
                 'is_open'   => ConfigService::get('card_code','is_open',0),
@@ -230,7 +241,8 @@ class PcLogic extends BaseLogic
             'app_config' => ConfigService::get('app_config', 'redbook', []),
             'ai_live' =>  ConfigService::get('ai_live', 'config', []),
             'by_name'=>  self::getByName(),
-            'ai_model' =>  ConfigService::get('chat', 'ai_model', []),
+            'ai_model' =>  $chatModels,
+            'wechat_remarks' => ConfigService::get('add_remark', 'wechat', []),
 
         ];
     }

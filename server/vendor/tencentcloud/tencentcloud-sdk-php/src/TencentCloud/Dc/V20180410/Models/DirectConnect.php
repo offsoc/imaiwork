@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setFaultReportContactPerson(string $FaultReportContactPerson) 设置报障联系人。
  * @method string getFaultReportContactNumber() 获取报障联系电话。
  * @method void setFaultReportContactNumber(string $FaultReportContactNumber) 设置报障联系电话。
+ * @method string getFaultReportContactEmail() 获取报障联系邮箱。
+ * @method void setFaultReportContactEmail(string $FaultReportContactEmail) 设置报障联系邮箱。
  * @method array getTagSet() 获取标签键值对
  * @method void setTagSet(array $TagSet) 设置标签键值对
  * @method string getAccessPointType() 获取物理专线的接入点类型。
@@ -106,6 +108,10 @@ use TencentCloud\Common\AbstractModel;
  * @method void setAccessPointName(string $AccessPointName) 设置物理专线的接入点名称
  * @method boolean getIsThreeArch() 获取是否三层架构
  * @method void setIsThreeArch(boolean $IsThreeArch) 设置是否三层架构
+ * @method boolean getIsMacSec() 获取是否MACsec
+ * @method void setIsMacSec(boolean $IsMacSec) 设置是否MACsec
+ * @method integer getPortSpecification() 获取端口规格(Mbps)
+ * @method void setPortSpecification(integer $PortSpecification) 设置端口规格(Mbps)
  */
 class DirectConnect extends AbstractModel
 {
@@ -228,6 +234,11 @@ class DirectConnect extends AbstractModel
     public $FaultReportContactNumber;
 
     /**
+     * @var string 报障联系邮箱。
+     */
+    public $FaultReportContactEmail;
+
+    /**
      * @var array 标签键值对
      */
     public $TagSet;
@@ -293,6 +304,16 @@ class DirectConnect extends AbstractModel
     public $IsThreeArch;
 
     /**
+     * @var boolean 是否MACsec
+     */
+    public $IsMacSec;
+
+    /**
+     * @var integer 端口规格(Mbps)
+     */
+    public $PortSpecification;
+
+    /**
      * @param string $DirectConnectId 物理专线ID。
      * @param string $DirectConnectName 物理专线的名称。
      * @param string $AccessPointId 物理专线的接入点ID。
@@ -323,6 +344,7 @@ class DirectConnect extends AbstractModel
      * @param string $ChargeType 物理专线计费类型。 NON_RECURRING_CHARGE：一次性接入费用；PREPAID_BY_YEAR：按年预付费。
      * @param string $FaultReportContactPerson 报障联系人。
      * @param string $FaultReportContactNumber 报障联系电话。
+     * @param string $FaultReportContactEmail 报障联系邮箱。
      * @param array $TagSet 标签键值对
      * @param string $AccessPointType 物理专线的接入点类型。
      * @param string $IdcCity IDC所在城市
@@ -336,6 +358,8 @@ class DirectConnect extends AbstractModel
      * @param integer $Construct 建设模式
      * @param string $AccessPointName 物理专线的接入点名称
      * @param boolean $IsThreeArch 是否三层架构
+     * @param boolean $IsMacSec 是否MACsec
+     * @param integer $PortSpecification 端口规格(Mbps)
      */
     function __construct()
     {
@@ -438,6 +462,10 @@ class DirectConnect extends AbstractModel
             $this->FaultReportContactNumber = $param["FaultReportContactNumber"];
         }
 
+        if (array_key_exists("FaultReportContactEmail",$param) and $param["FaultReportContactEmail"] !== null) {
+            $this->FaultReportContactEmail = $param["FaultReportContactEmail"];
+        }
+
         if (array_key_exists("TagSet",$param) and $param["TagSet"] !== null) {
             $this->TagSet = [];
             foreach ($param["TagSet"] as $key => $value){
@@ -493,6 +521,14 @@ class DirectConnect extends AbstractModel
 
         if (array_key_exists("IsThreeArch",$param) and $param["IsThreeArch"] !== null) {
             $this->IsThreeArch = $param["IsThreeArch"];
+        }
+
+        if (array_key_exists("IsMacSec",$param) and $param["IsMacSec"] !== null) {
+            $this->IsMacSec = $param["IsMacSec"];
+        }
+
+        if (array_key_exists("PortSpecification",$param) and $param["PortSpecification"] !== null) {
+            $this->PortSpecification = $param["PortSpecification"];
         }
     }
 }

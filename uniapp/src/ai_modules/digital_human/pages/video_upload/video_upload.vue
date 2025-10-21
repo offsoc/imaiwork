@@ -87,6 +87,7 @@
         :loading-text="loadingText"
         :is-success="isUploadSuccess"
         :progress-type="uploadProgressType"
+        :show-back="formData.model_version !== DigitalHumanModelVersionEnum.SHANJIAN"
         @cancel="handleUploadCancel"
         @back="back"
         @confirm="handelUploadConfirm"></upload-loading>
@@ -182,6 +183,10 @@ const modelUploadRequirements: Record<number, UploadRequirement> = {
     [DigitalHumanModelVersionEnum.CHANJING]: {
         resolution: createResolutionString(DigitalHumanModelVersionEnum.CHANJING),
         fileSize: uploadLimit[DigitalHumanModelVersionEnum.CHANJING].size,
+    },
+    [DigitalHumanModelVersionEnum.SHANJIAN]: {
+        resolution: createResolutionString(DigitalHumanModelVersionEnum.SHANJIAN),
+        fileSize: uploadLimit[DigitalHumanModelVersionEnum.SHANJIAN].size,
     },
 };
 
@@ -296,9 +301,13 @@ const startUpload = async () => {
             formData.height = height;
 
             formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2);
-
+            if (formData.model_version == DigitalHumanModelVersionEnum.SHANJIAN) {
+                isUploadSuccess.value = true;
+                return;
+            }
             // 开始形象克隆
             loadingText.value = "形象克隆中...";
+
             try {
                 const result = await createAnchor(formData);
                 formData.anchor_id = result.id;
@@ -310,19 +319,7 @@ const startUpload = async () => {
                 uploadProgressNum.value = 0;
                 loadingText.value = "";
 
-                // 处理不同类型的错误
-                let errorMessage = "上传失败";
-                if (error) {
-                    if (typeof error === "string") {
-                        errorMessage = error;
-                    } else if (typeof error === "object") {
-                        // 使用类型断言处理可能的错误对象
-                        const errorObj = error as { message?: string };
-                        errorMessage = errorObj.message || "上传失败";
-                    }
-                }
-
-                uni.$u.toast(errorMessage);
+                uni.$u.toast(error || "上传失败");
                 resetNavigationBarColor();
             }
         },
@@ -337,7 +334,7 @@ const startUpload = async () => {
             // 错误处理
             if (err.errMsg && err.errMsg === "chooseMedia:fail api scope is not declared in the privacy agreement") {
                 uni.$u.toast("请完善隐私协议，否则无法使用");
-            } else {
+            } else if (err.errMsg.indexOf("cancel") == -1) {
                 uni.$u.toast(err.errMsg || "上传失败");
             }
             showUploadProgress.value = false;
@@ -367,35 +364,34 @@ const handleUploadCancel = () => {
  * 处理上传确认
  */
 const handelUploadConfirm = async () => {
-    try {
-        // 导航到视频创建页面，并传递数据
-        uni.$u.route({
-            url: "/ai_modules/digital_human/pages/video_create/video_create",
-            type: "redirect",
-            params: {
-                type: ListenerTypeEnum.UPLOAD_VIDEO,
-                data: JSON.stringify(formData),
-            },
+    if (formData.model_version == DigitalHumanModelVersionEnum.SHANJIAN) {
+        uni.$emit("confirm", {
+            type: ListenerTypeEnum.MONTAGE_ANCHOR,
+            data: formData,
         });
-    } catch (error) {
-        console.error("导航到视频创建页面失败:", error);
-        uni.$u.toast("页面跳转失败，请重试");
+        uni.navigateBack();
+        return;
     }
+
+    // 导航到视频创建页面，并传递数据
+    uni.$u.route({
+        url: "/ai_modules/digital_human/pages/video_create/video_create",
+        type: "redirect",
+        params: {
+            type: ListenerTypeEnum.UPLOAD_VIDEO,
+            data: JSON.stringify(formData),
+        },
+    });
 };
 
 /**
  * 返回首页
  */
 const back = () => {
-    try {
-        uni.$u.route({
-            url: "/ai_modules/digital_human/pages/index/index",
-            type: "redirect",
-        });
-    } catch (error) {
-        console.error("返回首页失败:", error);
-        uni.$u.toast("页面跳转失败，请重试");
-    }
+    uni.$u.route({
+        url: "/ai_modules/digital_human/pages/index/index",
+        type: "redirect",
+    });
 };
 
 /**
@@ -403,14 +399,10 @@ const back = () => {
  */
 const resetNavigationBarColor = () => {
     // #ifndef H5
-    try {
-        uni.setNavigationBarColor({
-            frontColor: "#000000",
-            backgroundColor: "#F9FAFB",
-        });
-    } catch (error) {
-        console.error("重置导航栏颜色失败:", error);
-    }
+    uni.setNavigationBarColor({
+        frontColor: "#000000",
+        backgroundColor: "#F9FAFB",
+    });
     // #endif
 };
 

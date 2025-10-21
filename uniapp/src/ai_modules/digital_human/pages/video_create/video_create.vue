@@ -297,7 +297,7 @@ const rechargePopupRef = ref();
 
 // 计算属性
 const textLimit = computed(() => {
-    const limits: Record<DigitalHumanModelVersionEnum, number> = {
+    const limits: Record<DigitalHumanModelVersionEnum, number> | any = {
         [DigitalHumanModelVersionEnum.STANDARD]: 150,
         [DigitalHumanModelVersionEnum.SUPER]: 300,
         [DigitalHumanModelVersionEnum.ADVANCED]: 1000,

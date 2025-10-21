@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,12 @@ use TencentCloud\Common\AbstractModel;
  * @method void setResourceBaseType(string $ResourceBaseType) 设置类型为ComputeResource和EMR以及默认，默认为EMR,类型为EMR时,InstanceId生效,类型为ComputeResource时,使用ComputeResourceId标识
  * @method string getComputeResourceId() 获取计算资源id
  * @method void setComputeResourceId(string $ComputeResourceId) 设置计算资源id
+ * @method ComputeResourceAdvanceParams getComputeResourceAdvanceParams() 获取计算资源高级设置
+ * @method void setComputeResourceAdvanceParams(ComputeResourceAdvanceParams $ComputeResourceAdvanceParams) 设置计算资源高级设置
+ * @method NodeMark getNodeMarks() 获取节点标记信息，目前只提供tf平台使用
+ * @method void setNodeMarks(NodeMark $NodeMarks) 设置节点标记信息，目前只提供tf平台使用
+ * @method string getWarehouseName() 获取扩容指定计算组
+ * @method void setWarehouseName(string $WarehouseName) 设置扩容指定计算组
  */
 class ScaleOutInstanceRequest extends AbstractModel
 {
@@ -253,6 +259,21 @@ class ScaleOutInstanceRequest extends AbstractModel
     public $ComputeResourceId;
 
     /**
+     * @var ComputeResourceAdvanceParams 计算资源高级设置
+     */
+    public $ComputeResourceAdvanceParams;
+
+    /**
+     * @var NodeMark 节点标记信息，目前只提供tf平台使用
+     */
+    public $NodeMarks;
+
+    /**
+     * @var string 扩容指定计算组
+     */
+    public $WarehouseName;
+
+    /**
      * @param string $TimeUnit 扩容的时间单位。取值范围：
 <li>s：表示秒。PayMode取值为0时，TimeUnit只能取值为s。</li>
 <li>m：表示月份。PayMode取值为1时，TimeUnit只能取值为m。</li>
@@ -292,6 +313,9 @@ class ScaleOutInstanceRequest extends AbstractModel
      * @param integer $AutoRenew 0表示关闭自动续费，1表示开启自动续费
      * @param string $ResourceBaseType 类型为ComputeResource和EMR以及默认，默认为EMR,类型为EMR时,InstanceId生效,类型为ComputeResource时,使用ComputeResourceId标识
      * @param string $ComputeResourceId 计算资源id
+     * @param ComputeResourceAdvanceParams $ComputeResourceAdvanceParams 计算资源高级设置
+     * @param NodeMark $NodeMarks 节点标记信息，目前只提供tf平台使用
+     * @param string $WarehouseName 扩容指定计算组
      */
     function __construct()
     {
@@ -428,6 +452,20 @@ class ScaleOutInstanceRequest extends AbstractModel
 
         if (array_key_exists("ComputeResourceId",$param) and $param["ComputeResourceId"] !== null) {
             $this->ComputeResourceId = $param["ComputeResourceId"];
+        }
+
+        if (array_key_exists("ComputeResourceAdvanceParams",$param) and $param["ComputeResourceAdvanceParams"] !== null) {
+            $this->ComputeResourceAdvanceParams = new ComputeResourceAdvanceParams();
+            $this->ComputeResourceAdvanceParams->deserialize($param["ComputeResourceAdvanceParams"]);
+        }
+
+        if (array_key_exists("NodeMarks",$param) and $param["NodeMarks"] !== null) {
+            $this->NodeMarks = new NodeMark();
+            $this->NodeMarks->deserialize($param["NodeMarks"]);
+        }
+
+        if (array_key_exists("WarehouseName",$param) and $param["WarehouseName"] !== null) {
+            $this->WarehouseName = $param["WarehouseName"];
         }
     }
 }

@@ -191,7 +191,7 @@ export default defineComponent({
                 return new Promise<boolean>((resolve) => {
                     const audio = new Audio(URL.createObjectURL(rawFile));
                     audio.addEventListener("loadedmetadata", () => {
-                        const duration = Math.floor(audio.duration);
+                        const duration = audio.duration;
                         const isValid = duration >= minDuration && duration <= maxDuration;
                         if (!isValid) {
                             feedback.msgError(`上传音频时长不能小于${minDuration}秒或大于${maxDuration}秒`);
@@ -215,9 +215,9 @@ export default defineComponent({
 
                     video.addEventListener("loadedmetadata", () => {
                         const { videoWidth, duration } = video;
+                        const fileDuration = Math.floor(duration);
                         const isResolutionValid = videoWidth >= videoMinWidth && videoWidth <= videoMaxWidth;
-
-                        const isDurationValid = duration >= minDuration && duration <= maxDuration;
+                        const isDurationValid = fileDuration >= minDuration && fileDuration <= maxDuration;
 
                         if (!isResolutionValid) {
                             feedback.msgError(`上传视频分辨率不能满足${videoMinWidth}*${videoMaxWidth}`);

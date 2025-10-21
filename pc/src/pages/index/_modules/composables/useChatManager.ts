@@ -216,7 +216,7 @@ export function useChatManager() {
                 }
             );
         } catch (error: any) {
-            const errorMessage = error?.message || "消息发送失败";
+            const errorMessage = error || "消息发送失败";
             chatStore.updateLastMessage({ error: errorMessage, loading: false });
             feedback.msgError(errorMessage);
             chatStore.stopReceiving();

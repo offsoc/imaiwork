@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,10 @@ use TencentCloud\Common\AbstractModel;
  * @method void setIngressCount(integer $IngressCount) 设置Ingress数量
  * @method string getMasterIps() 获取主节点的ip列表
  * @method void setMasterIps(string $MasterIps) 设置主节点的ip列表
+ * @method string getOwnerName() 获取所有者名称
+ * @method void setOwnerName(string $OwnerName) 设置所有者名称
+ * @method string getCheckFailReason() 获取检查失败原因
+ * @method void setCheckFailReason(string $CheckFailReason) 设置检查失败原因
  * @method string getRequestId() 获取唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  * @method void setRequestId(string $RequestId) 设置唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  */
@@ -208,6 +212,16 @@ class DescribeClusterDetailResponse extends AbstractModel
     public $MasterIps;
 
     /**
+     * @var string 所有者名称
+     */
+    public $OwnerName;
+
+    /**
+     * @var string 检查失败原因
+     */
+    public $CheckFailReason;
+
+    /**
      * @var string 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     public $RequestId;
@@ -239,6 +253,8 @@ class DescribeClusterDetailResponse extends AbstractModel
      * @param integer $ServiceCount Service数量
      * @param integer $IngressCount Ingress数量
      * @param string $MasterIps 主节点的ip列表
+     * @param string $OwnerName 所有者名称
+     * @param string $CheckFailReason 检查失败原因
      * @param string $RequestId 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     function __construct()
@@ -356,6 +372,14 @@ class DescribeClusterDetailResponse extends AbstractModel
 
         if (array_key_exists("MasterIps",$param) and $param["MasterIps"] !== null) {
             $this->MasterIps = $param["MasterIps"];
+        }
+
+        if (array_key_exists("OwnerName",$param) and $param["OwnerName"] !== null) {
+            $this->OwnerName = $param["OwnerName"];
+        }
+
+        if (array_key_exists("CheckFailReason",$param) and $param["CheckFailReason"] !== null) {
+            $this->CheckFailReason = $param["CheckFailReason"];
         }
 
         if (array_key_exists("RequestId",$param) and $param["RequestId"] !== null) {

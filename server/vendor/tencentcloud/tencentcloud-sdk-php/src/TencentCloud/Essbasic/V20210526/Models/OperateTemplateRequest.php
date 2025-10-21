@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,19 @@ use TencentCloud\Common\AbstractModel;
 <li>DELETE:  删除</li>
 <li>ENABLE: 启用</li>
 <li>DISABLE: 停用</li>
+<li>COPY: 复制新建</li>
 </ul>
  * @method void setOperateType(string $OperateType) 设置操作类型，可取值如下:
 <ul>
 <li>DELETE:  删除</li>
 <li>ENABLE: 启用</li>
 <li>DISABLE: 停用</li>
+<li>COPY: 复制新建</li>
 </ul>
+ * @method string getTemplateName() 获取模板名称，长度不超过64字符。<br>
+模板复制时指定有效，若为空，则复制后模板名称为 **原模板名称_副本**。
+ * @method void setTemplateName(string $TemplateName) 设置模板名称，长度不超过64字符。<br>
+模板复制时指定有效，若为空，则复制后模板名称为 **原模板名称_副本**。
  */
 class OperateTemplateRequest extends AbstractModel
 {
@@ -76,9 +82,16 @@ class OperateTemplateRequest extends AbstractModel
 <li>DELETE:  删除</li>
 <li>ENABLE: 启用</li>
 <li>DISABLE: 停用</li>
+<li>COPY: 复制新建</li>
 </ul>
      */
     public $OperateType;
+
+    /**
+     * @var string 模板名称，长度不超过64字符。<br>
+模板复制时指定有效，若为空，则复制后模板名称为 **原模板名称_副本**。
+     */
+    public $TemplateName;
 
     /**
      * @param Agent $Agent 关于渠道应用的相关信息，包括渠道应用标识、第三方平台子客企业标识及第三方平台子客企业中的员工标识等内容，您可以参阅开发者中心所提供的 Agent 结构体以获取详细定义。
@@ -95,7 +108,10 @@ class OperateTemplateRequest extends AbstractModel
 <li>DELETE:  删除</li>
 <li>ENABLE: 启用</li>
 <li>DISABLE: 停用</li>
+<li>COPY: 复制新建</li>
 </ul>
+     * @param string $TemplateName 模板名称，长度不超过64字符。<br>
+模板复制时指定有效，若为空，则复制后模板名称为 **原模板名称_副本**。
      */
     function __construct()
     {
@@ -121,6 +137,10 @@ class OperateTemplateRequest extends AbstractModel
 
         if (array_key_exists("OperateType",$param) and $param["OperateType"] !== null) {
             $this->OperateType = $param["OperateType"];
+        }
+
+        if (array_key_exists("TemplateName",$param) and $param["TemplateName"] !== null) {
+            $this->TemplateName = $param["TemplateName"];
         }
     }
 }

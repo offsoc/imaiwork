@@ -8,7 +8,7 @@ class SvMediaMaterialValidate extends BaseValidate
 {
     protected $rule = [
         'sort' => 'number',
-        'type' => 'in:1,3',
+        'type' => 'in:0,1,3',
         'content' => 'require',
         'm_type' => 'in:1,2,6',
     ];
@@ -16,7 +16,7 @@ class SvMediaMaterialValidate extends BaseValidate
     protected $message = [
         'content.require' => '素材内容是必填项',
         'sort.number' => '排序值必须是整数',
-        'type.in' => '类型值只能是1或3',
+        'type.in' => '类型值只能是0,1,3',
         'm_type.in' => '素材类型值错误',
     ];
 

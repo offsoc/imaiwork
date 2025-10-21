@@ -46,9 +46,9 @@ class CircleLogic extends WechatBaseLogic
             {
                 $params['comment'] = json_encode($params['comment'] ? explode("##", $params['comment']) : [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 $params['attachment_content'] = json_encode($params['attachment_content'] ?: [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                $data[] = array_merge($params, ['task_id' => generate_unique_task_id(), 'wechat_id' => $wechatId, 'user_id' => self::$uid, 'create_time' => time(), 'update_time' => time()]);
+                $data[] = array_merge($params, ['task_id' => time() . rand(100, 999), 'wechat_id' => $wechatId, 'user_id' => self::$uid, 'create_time' => time(), 'update_time' => time()]);
             }
-
+            //print_r($data);die;
             // 添加
             AiWechatCircleTask::insertAll($data);
 
@@ -224,14 +224,14 @@ class CircleLogic extends WechatBaseLogic
 
                     $response = self::wxCircle($data);
 
-                    if ($response['code'] == 10000) {
-                        $item->send_status = 2;
-                        $item->finish_time = date('Y-m-d H:i');
-                        $item->save();
-                    } else {
-                        $item->send_status = 3;
-                        $item->save();
-                    }
+                    // if ($response['code'] == 10000) {
+                    //     $item->send_status = 2;
+                    //     $item->finish_time = date('Y-m-d H:i');
+                    //     $item->save();
+                    // } else {
+                    //     $item->send_status = 3;
+                    //     $item->save();
+                    // }
                     // 推送到队列
                     //Queue::later(3, 'app\common\Jobs\WechatSendCircleJob@fire', $data);
                 });

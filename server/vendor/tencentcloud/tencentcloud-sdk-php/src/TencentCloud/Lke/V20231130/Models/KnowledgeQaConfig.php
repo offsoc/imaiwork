@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,38 @@ use TencentCloud\Common\AbstractModel;
  * @method boolean getImageTextRetrieval() 获取是否开启图文检索
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setImageTextRetrieval(boolean $ImageTextRetrieval) 设置是否开启图文检索
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method AICallConfig getAiCall() 获取配置语音通话参数
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setAiCall(AICallConfig $AiCall) 设置配置语音通话参数
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getShareKnowledgeBases() 获取共享知识库关联配置
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setShareKnowledgeBases(array $ShareKnowledgeBases) 设置共享知识库关联配置
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method BackgroundImageConfig getBackgroundImage() 获取背景图相关信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setBackgroundImage(BackgroundImageConfig $BackgroundImage) 设置背景图相关信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getOpeningQuestions() 获取开场问题
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setOpeningQuestions(array $OpeningQuestions) 设置开场问题
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method boolean getLongMemoryOpen() 获取长期记忆开关
+ * @method void setLongMemoryOpen(boolean $LongMemoryOpen) 设置长期记忆开关
+ * @method integer getLongMemoryDay() 获取长期记忆时效
+ * @method void setLongMemoryDay(integer $LongMemoryDay) 设置长期记忆时效
+ * @method KnowledgeQaAgent getAgent() 获取agent配置信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setAgent(KnowledgeQaAgent $Agent) 设置agent配置信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method KnowledgeModelConfig getKnowledgeModelConfig() 获取知识库模型
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setKnowledgeModelConfig(KnowledgeModelConfig $KnowledgeModelConfig) 设置知识库模型
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method KnowledgeAdvancedConfig getKnowledgeAdvancedConfig() 获取知识库高级设置
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setKnowledgeAdvancedConfig(KnowledgeAdvancedConfig $KnowledgeAdvancedConfig) 设置知识库高级设置
 注意：此字段可能返回 null，表示取不到有效值。
  */
 class KnowledgeQaConfig extends AbstractModel
@@ -200,6 +232,58 @@ class KnowledgeQaConfig extends AbstractModel
     public $ImageTextRetrieval;
 
     /**
+     * @var AICallConfig 配置语音通话参数
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $AiCall;
+
+    /**
+     * @var array 共享知识库关联配置
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $ShareKnowledgeBases;
+
+    /**
+     * @var BackgroundImageConfig 背景图相关信息
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $BackgroundImage;
+
+    /**
+     * @var array 开场问题
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $OpeningQuestions;
+
+    /**
+     * @var boolean 长期记忆开关
+     */
+    public $LongMemoryOpen;
+
+    /**
+     * @var integer 长期记忆时效
+     */
+    public $LongMemoryDay;
+
+    /**
+     * @var KnowledgeQaAgent agent配置信息
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $Agent;
+
+    /**
+     * @var KnowledgeModelConfig 知识库模型
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $KnowledgeModelConfig;
+
+    /**
+     * @var KnowledgeAdvancedConfig 知识库高级设置
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $KnowledgeAdvancedConfig;
+
+    /**
      * @param string $Greeting 欢迎语，200字符以内
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $RoleDescription 角色描述，4000字符以内。通过填写描述，设定应用的 #角色名称、 #风格特点 及可达成的#意图。建议按照下面的模板填写，且自定义意图建议不超过5个。
@@ -239,6 +323,22 @@ class KnowledgeQaConfig extends AbstractModel
      * @param array $IntentAchievements 意图达成方式优先级
 注意：此字段可能返回 null，表示取不到有效值。
      * @param boolean $ImageTextRetrieval 是否开启图文检索
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param AICallConfig $AiCall 配置语音通话参数
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $ShareKnowledgeBases 共享知识库关联配置
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param BackgroundImageConfig $BackgroundImage 背景图相关信息
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $OpeningQuestions 开场问题
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param boolean $LongMemoryOpen 长期记忆开关
+     * @param integer $LongMemoryDay 长期记忆时效
+     * @param KnowledgeQaAgent $Agent agent配置信息
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param KnowledgeModelConfig $KnowledgeModelConfig 知识库模型
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param KnowledgeAdvancedConfig $KnowledgeAdvancedConfig 知识库高级设置
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
@@ -330,6 +430,52 @@ class KnowledgeQaConfig extends AbstractModel
 
         if (array_key_exists("ImageTextRetrieval",$param) and $param["ImageTextRetrieval"] !== null) {
             $this->ImageTextRetrieval = $param["ImageTextRetrieval"];
+        }
+
+        if (array_key_exists("AiCall",$param) and $param["AiCall"] !== null) {
+            $this->AiCall = new AICallConfig();
+            $this->AiCall->deserialize($param["AiCall"]);
+        }
+
+        if (array_key_exists("ShareKnowledgeBases",$param) and $param["ShareKnowledgeBases"] !== null) {
+            $this->ShareKnowledgeBases = [];
+            foreach ($param["ShareKnowledgeBases"] as $key => $value){
+                $obj = new ShareKnowledgeBase();
+                $obj->deserialize($value);
+                array_push($this->ShareKnowledgeBases, $obj);
+            }
+        }
+
+        if (array_key_exists("BackgroundImage",$param) and $param["BackgroundImage"] !== null) {
+            $this->BackgroundImage = new BackgroundImageConfig();
+            $this->BackgroundImage->deserialize($param["BackgroundImage"]);
+        }
+
+        if (array_key_exists("OpeningQuestions",$param) and $param["OpeningQuestions"] !== null) {
+            $this->OpeningQuestions = $param["OpeningQuestions"];
+        }
+
+        if (array_key_exists("LongMemoryOpen",$param) and $param["LongMemoryOpen"] !== null) {
+            $this->LongMemoryOpen = $param["LongMemoryOpen"];
+        }
+
+        if (array_key_exists("LongMemoryDay",$param) and $param["LongMemoryDay"] !== null) {
+            $this->LongMemoryDay = $param["LongMemoryDay"];
+        }
+
+        if (array_key_exists("Agent",$param) and $param["Agent"] !== null) {
+            $this->Agent = new KnowledgeQaAgent();
+            $this->Agent->deserialize($param["Agent"]);
+        }
+
+        if (array_key_exists("KnowledgeModelConfig",$param) and $param["KnowledgeModelConfig"] !== null) {
+            $this->KnowledgeModelConfig = new KnowledgeModelConfig();
+            $this->KnowledgeModelConfig->deserialize($param["KnowledgeModelConfig"]);
+        }
+
+        if (array_key_exists("KnowledgeAdvancedConfig",$param) and $param["KnowledgeAdvancedConfig"] !== null) {
+            $this->KnowledgeAdvancedConfig = new KnowledgeAdvancedConfig();
+            $this->KnowledgeAdvancedConfig->deserialize($param["KnowledgeAdvancedConfig"]);
         }
     }
 }

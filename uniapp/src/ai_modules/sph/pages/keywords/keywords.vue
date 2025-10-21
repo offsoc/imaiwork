@@ -46,7 +46,6 @@
 
 <script setup lang="ts">
 import { getAiKeywords } from "@/api/sph";
-import requestCancel from "@/utils/request/cancel";
 import GenLoading from "@/ai_modules/sph/components/gen-loading/gen-loading.vue";
 
 const create_type = ref("");
@@ -87,11 +86,6 @@ const handleAnalyze = async () => {
     } finally {
         showAnalyzeLoading.value = false;
     }
-};
-
-const handleCancel = () => {
-    showAnalyzeLoading.value = false;
-    requestCancel.remove("/sv.tools/getSearchTerms");
 };
 
 const handleManualSetting = (data?: any) => {

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setBandwidthLimit(float $BandwidthLimit) 设置文件系统吞吐上限，吞吐上限是根据文件系统当前已使用存储量、绑定的存储资源包以及吞吐资源包一同确定. 单位MiB/s
  * @method string getAutoSnapshotPolicyId() 获取文件系统关联的快照策略
  * @method void setAutoSnapshotPolicyId(string $AutoSnapshotPolicyId) 设置文件系统关联的快照策略
- * @method string getSnapStatus() 获取文件系统处理快照状态
- * @method void setSnapStatus(string $SnapStatus) 设置文件系统处理快照状态
+ * @method string getSnapStatus() 获取文件系统处理快照状态,snapping：快照中，normal：正常状态
+ * @method void setSnapStatus(string $SnapStatus) 设置文件系统处理快照状态,snapping：快照中，normal：正常状态
  * @method integer getCapacity() 获取文件系统容量规格上限
 单位:GiB
  * @method void setCapacity(integer $Capacity) 设置文件系统容量规格上限
@@ -90,6 +90,14 @@ Available:可用
  * @method void setAutoScaleUpRule(AutoScaleUpRule $AutoScaleUpRule) 设置文件系统自动扩容策略
  * @method string getVersion() 获取文件系统版本
  * @method void setVersion(string $Version) 设置文件系统版本
+ * @method array getExstraPerformanceInfo() 获取额外性能信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setExstraPerformanceInfo(array $ExstraPerformanceInfo) 设置额外性能信息
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getMetaType() 获取basic：标准版元数据类型
+enhanced：增项版元数据类型
+ * @method void setMetaType(string $MetaType) 设置basic：标准版元数据类型
+enhanced：增项版元数据类型
  */
 class FileSystemInfo extends AbstractModel
 {
@@ -195,7 +203,7 @@ class FileSystemInfo extends AbstractModel
     public $AutoSnapshotPolicyId;
 
     /**
-     * @var string 文件系统处理快照状态
+     * @var string 文件系统处理快照状态,snapping：快照中，normal：正常状态
      */
     public $SnapStatus;
 
@@ -233,6 +241,18 @@ Available:可用
     public $Version;
 
     /**
+     * @var array 额外性能信息
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $ExstraPerformanceInfo;
+
+    /**
+     * @var string basic：标准版元数据类型
+enhanced：增项版元数据类型
+     */
+    public $MetaType;
+
+    /**
      * @param string $CreationTime 创建时间
      * @param string $CreationToken 用户自定义名称
      * @param string $FileSystemId 文件系统 ID
@@ -258,7 +278,7 @@ Available:可用
      * @param integer $AppId 应用ID
      * @param float $BandwidthLimit 文件系统吞吐上限，吞吐上限是根据文件系统当前已使用存储量、绑定的存储资源包以及吞吐资源包一同确定. 单位MiB/s
      * @param string $AutoSnapshotPolicyId 文件系统关联的快照策略
-     * @param string $SnapStatus 文件系统处理快照状态
+     * @param string $SnapStatus 文件系统处理快照状态,snapping：快照中，normal：正常状态
      * @param integer $Capacity 文件系统容量规格上限
 单位:GiB
      * @param array $Tags 文件系统标签列表
@@ -268,6 +288,10 @@ Available:可用
      * @param TieringDetailInfo $TieringDetail 分层存储详情
      * @param AutoScaleUpRule $AutoScaleUpRule 文件系统自动扩容策略
      * @param string $Version 文件系统版本
+     * @param array $ExstraPerformanceInfo 额外性能信息
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $MetaType basic：标准版元数据类型
+enhanced：增项版元数据类型
      */
     function __construct()
     {
@@ -392,6 +416,19 @@ Available:可用
 
         if (array_key_exists("Version",$param) and $param["Version"] !== null) {
             $this->Version = $param["Version"];
+        }
+
+        if (array_key_exists("ExstraPerformanceInfo",$param) and $param["ExstraPerformanceInfo"] !== null) {
+            $this->ExstraPerformanceInfo = [];
+            foreach ($param["ExstraPerformanceInfo"] as $key => $value){
+                $obj = new ExstraPerformanceInfo();
+                $obj->deserialize($value);
+                array_push($this->ExstraPerformanceInfo, $obj);
+            }
+        }
+
+        if (array_key_exists("MetaType",$param) and $param["MetaType"] !== null) {
+            $this->MetaType = $param["MetaType"];
         }
     }
 }

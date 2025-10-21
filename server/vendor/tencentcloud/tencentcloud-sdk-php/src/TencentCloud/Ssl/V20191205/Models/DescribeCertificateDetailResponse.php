@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,18 +250,18 @@ null：用户上传证书（没有套餐类型），
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getVulnerabilityStatus() 获取漏洞扫描状态。
  * @method void setVulnerabilityStatus(string $VulnerabilityStatus) 设置漏洞扫描状态。
- * @method string getCertBeginTime() 获取证书生效时间。
+ * @method string getCertBeginTime() 获取证书生效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setCertBeginTime(string $CertBeginTime) 设置证书生效时间。
+ * @method void setCertBeginTime(string $CertBeginTime) 设置证书生效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
- * @method string getCertEndTime() 获取证书失效时间。
+ * @method string getCertEndTime() 获取证书失效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setCertEndTime(string $CertEndTime) 设置证书失效时间。
+ * @method void setCertEndTime(string $CertEndTime) 设置证书失效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getValidityPeriod() 获取证书有效期：单位（月）。
  * @method void setValidityPeriod(string $ValidityPeriod) 设置证书有效期：单位（月）。
- * @method string getInsertTime() 获取证书申请时间。
- * @method void setInsertTime(string $InsertTime) 设置证书申请时间。
+ * @method string getInsertTime() 获取证书申请时间。时区为GMT+8:00
+ * @method void setInsertTime(string $InsertTime) 设置证书申请时间。时区为GMT+8:00
  * @method string getOrderId() 获取CA订单 ID。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setOrderId(string $OrderId) 设置CA订单 ID。
@@ -340,6 +340,10 @@ null：用户上传证书（没有套餐类型），
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setCertChainInfo(array $CertChainInfo) 设置证书链信息
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method integer getDomainType() 获取证书域名类型， 1（单域名）；2（多域名）；3（泛域名）；4（多泛域名）
+ * @method void setDomainType(integer $DomainType) 设置证书域名类型， 1（单域名）；2（多域名）；3（泛域名）；4（多泛域名）
+ * @method string getCertType() 获取证书类型，DV（域名型）；OV（企业型）；EV（增强型）
+ * @method void setCertType(string $CertType) 设置证书类型，DV（域名型）；OV（企业型）；EV（增强型）
  * @method string getRequestId() 获取唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  * @method void setRequestId(string $RequestId) 设置唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  */
@@ -509,13 +513,13 @@ null：用户上传证书（没有套餐类型），
     public $VulnerabilityStatus;
 
     /**
-     * @var string 证书生效时间。
+     * @var string 证书生效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $CertBeginTime;
 
     /**
-     * @var string 证书失效时间。
+     * @var string 证书失效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $CertEndTime;
@@ -526,7 +530,7 @@ null：用户上传证书（没有套餐类型），
     public $ValidityPeriod;
 
     /**
-     * @var string 证书申请时间。
+     * @var string 证书申请时间。时区为GMT+8:00
      */
     public $InsertTime;
 
@@ -674,6 +678,16 @@ null：用户上传证书（没有套餐类型），
     public $CertChainInfo;
 
     /**
+     * @var integer 证书域名类型， 1（单域名）；2（多域名）；3（泛域名）；4（多泛域名）
+     */
+    public $DomainType;
+
+    /**
+     * @var string 证书类型，DV（域名型）；OV（企业型）；EV（增强型）
+     */
+    public $CertType;
+
+    /**
      * @var string 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     public $RequestId;
@@ -794,12 +808,12 @@ null：用户上传证书（没有套餐类型），
      * @param string $VerifyType 验证类型：DNS_AUTO = 自动DNS验证，DNS = 手动DNS验证，FILE = 文件验证，EMAIL = 邮件验证。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $VulnerabilityStatus 漏洞扫描状态。
-     * @param string $CertBeginTime 证书生效时间。
+     * @param string $CertBeginTime 证书生效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
-     * @param string $CertEndTime 证书失效时间。
+     * @param string $CertEndTime 证书失效时间。时区为GMT+8:00
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $ValidityPeriod 证书有效期：单位（月）。
-     * @param string $InsertTime 证书申请时间。
+     * @param string $InsertTime 证书申请时间。时区为GMT+8:00
      * @param string $OrderId CA订单 ID。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param CertificateExtra $CertificateExtra 证书扩展信息。
@@ -839,6 +853,8 @@ null：用户上传证书（没有套餐类型），
 注意：此字段可能返回 null，表示取不到有效值。
      * @param array $CertChainInfo 证书链信息
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param integer $DomainType 证书域名类型， 1（单域名）；2（多域名）；3（泛域名）；4（多泛域名）
+     * @param string $CertType 证书类型，DV（域名型）；OV（企业型）；EV（增强型）
      * @param string $RequestId 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     function __construct()
@@ -1039,6 +1055,14 @@ null：用户上传证书（没有套餐类型），
                 $obj->deserialize($value);
                 array_push($this->CertChainInfo, $obj);
             }
+        }
+
+        if (array_key_exists("DomainType",$param) and $param["DomainType"] !== null) {
+            $this->DomainType = $param["DomainType"];
+        }
+
+        if (array_key_exists("CertType",$param) and $param["CertType"] !== null) {
+            $this->CertType = $param["CertType"];
         }
 
         if (array_key_exists("RequestId",$param) and $param["RequestId"] !== null) {

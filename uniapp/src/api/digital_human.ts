@@ -84,3 +84,88 @@ export const createDouyinContent = (data: Record<string, any>) => {
 export const generatePrompt = (data: Record<string, any>) => {
     return request.post({ url: "/human/copywriting", data });
 };
+
+// 闪剪形象创建
+export const createShanjianAnchor = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianAnchor/add", data });
+};
+
+// 闪剪形象列表
+export const getShanjianAnchorList = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.shanjianAnchor/lists", data });
+};
+
+// 闪剪形象删除
+export const deleteShanjianAnchor = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianAnchor/delete", data });
+};
+
+// 闪剪形象详情
+export const getShanjianAnchorDetail = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.shanjianAnchor/detail", data });
+};
+
+// 闪剪口播文案生成
+export const generateShanjianPrompt = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianVideoTask/copywriting", data }, { ignoreCancel: true });
+};
+
+// 人设列表
+export const getShanjianPersonList = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.shanjianCharacterDesign/lists", data });
+};
+
+// 人设新增
+export const addShanjianPerson = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianCharacterDesign/add", data });
+};
+
+// 人设删除
+export const deleteShanjianPerson = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianCharacterDesign/delete", data });
+};
+
+// 发布创建
+export const createShanjianPublish = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.publish/add", data });
+};
+
+// 发布记录
+export const getPublishRecord = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.publish/lists", data });
+};
+
+// 发布记录详情
+export const getPublishRecordDetail = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.publish/detail", data });
+};
+
+// 发布记录删除
+export const deletePublishRecord = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.publish/delete", data });
+};
+
+// 发布记录视频列表
+export const getPublishRecordVideoList = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.publish/recordLists", data });
+};
+
+// 闪剪形象授权
+export const shanjianAnchorAuthorizedList = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.shanjianAnchor/authorizedList", data });
+};
+
+// 闪剪任务创建
+export const createShanjianTask = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianVideoSetting/add", data });
+};
+
+// 闪剪任务记录
+export const getShanjianTaskRecord = (data: Record<string, any>) => {
+    return request.get({ url: "/shanjian.shanjianVideoSetting/lists", data });
+};
+
+// 闪剪任务记录删除
+export const deleteShanjianTaskRecord = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianVideoSetting/delete", data });
+};

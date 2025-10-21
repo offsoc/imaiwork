@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ use TencentCloud\Common\AbstractModel;
  *
  * @method integer getRecordInterval() 获取录制间隔。
 单位秒，默认：1800。
-取值范围：30-7200。
+FLV、MP4取值范围： 60-43200， AAC取值范围： 60-7200 。
 此参数对 HLS 无效，当录制 HLS 时从推流到断流生成一个文件。
  * @method void setRecordInterval(integer $RecordInterval) 设置录制间隔。
 单位秒，默认：1800。
-取值范围：30-7200。
+FLV、MP4取值范围： 60-43200， AAC取值范围： 60-7200 。
 此参数对 HLS 无效，当录制 HLS 时从推流到断流生成一个文件。
  * @method integer getStorageTime() 获取录制存储时长。
 单位秒，取值范围： 0 - 1500天。
@@ -93,8 +93,10 @@ cold：低频存储。
  * @method void setClassId(integer $ClassId) 设置点播应用分类
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getCosBucketName() 获取存储至 cos 的 bucket 桶名称。
+注：CosBucketName参数值不能包含-[appid] 部分。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setCosBucketName(string $CosBucketName) 设置存储至 cos 的 bucket 桶名称。
+注：CosBucketName参数值不能包含-[appid] 部分。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getCosBucketRegion() 获取存储至 cos 的 bucket 区域。
 注意：此字段可能返回 null，表示取不到有效值。
@@ -110,7 +112,7 @@ class RecordParam extends AbstractModel
     /**
      * @var integer 录制间隔。
 单位秒，默认：1800。
-取值范围：30-7200。
+FLV、MP4取值范围： 60-43200， AAC取值范围： 60-7200 。
 此参数对 HLS 无效，当录制 HLS 时从推流到断流生成一个文件。
      */
     public $RecordInterval;
@@ -177,6 +179,7 @@ cold：低频存储。
 
     /**
      * @var string 存储至 cos 的 bucket 桶名称。
+注：CosBucketName参数值不能包含-[appid] 部分。
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $CosBucketName;
@@ -196,7 +199,7 @@ cold：低频存储。
     /**
      * @param integer $RecordInterval 录制间隔。
 单位秒，默认：1800。
-取值范围：30-7200。
+FLV、MP4取值范围： 60-43200， AAC取值范围： 60-7200 。
 此参数对 HLS 无效，当录制 HLS 时从推流到断流生成一个文件。
      * @param integer $StorageTime 录制存储时长。
 单位秒，取值范围： 0 - 1500天。
@@ -231,6 +234,7 @@ cold：低频存储。
      * @param integer $ClassId 点播应用分类
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $CosBucketName 存储至 cos 的 bucket 桶名称。
+注：CosBucketName参数值不能包含-[appid] 部分。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $CosBucketRegion 存储至 cos 的 bucket 区域。
 注意：此字段可能返回 null，表示取不到有效值。

@@ -129,6 +129,7 @@
                                     <ElImage
                                         :src="item.image || item.avatar"
                                         class="w-full h-full rounded-full"
+                                        fit="cover"
                                         lazy></ElImage>
                                 </div>
                             </div>

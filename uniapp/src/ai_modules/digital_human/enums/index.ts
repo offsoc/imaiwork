@@ -10,6 +10,8 @@ export enum DigitalHumanModelVersionEnum {
     ELITE = 6,
     // 畅镜版
     CHANJING = 7,
+    // 闪剪
+    SHANJIAN = 8,
 }
 
 // 数字人模型版本枚举映射
@@ -47,6 +49,16 @@ export enum ListenerTypeEnum {
     CHOOSE_STYLES = "choose-styles",
     // 选择背景音乐
     CHOOSE_MUSIC = "choose-music",
+    // 混剪形象
+    MONTAGE_ANCHOR = "montage-anchor",
+    // 混剪授权
+    MONTAGE_AUTH = "montage-auth",
+    // 上传授权相机
+    UPLOAD_AUTH_CAMERA = "upload-auth-camera",
+    // 混剪口播文案
+    MONTAGE_COPYWRITER = "montage-copywriter",
+    // 账号
+    CHOOSE_ACCOUNT = "choose-account",
 }
 
 // 剪辑风格

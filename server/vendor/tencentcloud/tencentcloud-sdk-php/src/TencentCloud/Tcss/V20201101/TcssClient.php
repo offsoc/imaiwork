@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ use TencentCloud\Tcss\V20201101\Models as Models;
  * @method Models\CreateAssetImageScanTaskResponse CreateAssetImageScanTask(Models\CreateAssetImageScanTaskRequest $req) 容器安全创建镜像扫描任务
  * @method Models\CreateAssetImageVirusExportJobResponse CreateAssetImageVirusExportJob(Models\CreateAssetImageVirusExportJobRequest $req) 创建本地镜像木马列表导出任务
  * @method Models\CreateCheckComponentResponse CreateCheckComponent(Models\CreateCheckComponentRequest $req) 安装检查组件，创建防护容器
+ * @method Models\CreateClusterAccessResponse CreateClusterAccess(Models\CreateClusterAccessRequest $req) 创建集群接入
  * @method Models\CreateClusterCheckTaskResponse CreateClusterCheckTask(Models\CreateClusterCheckTaskRequest $req) 创建集群检查任务，用户检查用户的集群相关风险项
  * @method Models\CreateComplianceTaskResponse CreateComplianceTask(Models\CreateComplianceTaskRequest $req) 创建合规检查任务，在资产级别触发重新检测时使用。
  * @method Models\CreateComponentExportJobResponse CreateComponentExportJob(Models\CreateComponentExportJobRequest $req) 查询本地镜像组件列表导出
@@ -322,6 +323,7 @@ use TencentCloud\Tcss\V20201101\Models as Models;
  * @method Models\ModifyAssetImageScanStopResponse ModifyAssetImageScanStop(Models\ModifyAssetImageScanStopRequest $req) 容器安全停止镜像扫描
  * @method Models\ModifyCompliancePeriodTaskResponse ModifyCompliancePeriodTask(Models\ModifyCompliancePeriodTaskRequest $req) 修改定时任务的设置，包括检测周期、开启/禁用合规基准。
  * @method Models\ModifyContainerNetStatusResponse ModifyContainerNetStatus(Models\ModifyContainerNetStatusRequest $req) 隔离容器网络状态
+ * @method Models\ModifyDefendStatusResponse ModifyDefendStatus(Models\ModifyDefendStatusRequest $req) 修改防护状态
  * @method Models\ModifyEscapeEventStatusResponse ModifyEscapeEventStatus(Models\ModifyEscapeEventStatusRequest $req) ModifyEscapeEventStatus  修改容器逃逸扫描事件状态
  * @method Models\ModifyEscapeRuleResponse ModifyEscapeRule(Models\ModifyEscapeRuleRequest $req) ModifyEscapeRule  修改容器逃逸扫描规则信息
  * @method Models\ModifyEscapeWhiteListResponse ModifyEscapeWhiteList(Models\ModifyEscapeWhiteListRequest $req) 修改逃逸白名单
@@ -331,6 +333,7 @@ use TencentCloud\Tcss\V20201101\Models as Models;
  * @method Models\ModifyK8sApiAbnormalRuleStatusResponse ModifyK8sApiAbnormalRuleStatus(Models\ModifyK8sApiAbnormalRuleStatusRequest $req) 修改k8sapi异常事件规则状态
  * @method Models\ModifyRaspRulesResponse ModifyRaspRules(Models\ModifyRaspRulesRequest $req) 编辑或者创建java内存马白名单
  * @method Models\ModifyReverseShellStatusResponse ModifyReverseShellStatus(Models\ModifyReverseShellStatusRequest $req) 修改反弹shell事件的状态信息
+ * @method Models\ModifyRiskDnsEventStatusResponse ModifyRiskDnsEventStatus(Models\ModifyRiskDnsEventStatusRequest $req) 编辑恶意请求事件状态
  * @method Models\ModifyRiskSyscallStatusResponse ModifyRiskSyscallStatus(Models\ModifyRiskSyscallStatusRequest $req) 修改高危系统调用事件的状态信息
  * @method Models\ModifySecLogCleanSettingInfoResponse ModifySecLogCleanSettingInfo(Models\ModifySecLogCleanSettingInfoRequest $req) 修改安全日志清理设置信息
  * @method Models\ModifySecLogDeliveryClsSettingResponse ModifySecLogDeliveryClsSetting(Models\ModifySecLogDeliveryClsSettingRequest $req) 更新安全日志-日志投递cls配置

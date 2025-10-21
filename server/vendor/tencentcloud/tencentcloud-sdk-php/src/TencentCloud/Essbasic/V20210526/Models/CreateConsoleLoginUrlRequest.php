@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,25 +131,15 @@ use TencentCloud\Common\AbstractModel;
  * @method void setAutoJumpBackEvent(string $AutoJumpBackEvent) 设置触发自动跳转事件，仅对EndPoint为App类型有效，可选值包括：
 <ul><li> **VERIFIED** :企业认证完成/员工认证完成后跳回原App/小程序</li></ul>
  * @method array getAuthorizationTypes() 获取可选的此企业允许的授权方式, 可以设置的方式有:
-<ul><li>1：上传授权书</li>
+<ul>
 <li>2：转法定代表人授权</li>
-<li>4：企业实名认证（信任第三方认证源）（此项有排他性, 选择后不能增添其他的方式）</li></ul>
-注:<ul>
-<li>未选择信任第三方认证源时，如果是法人进行企业激活，仅支持法人扫脸直接授权，该配置不对此法人生效`</li>
-<li>选择信任第三方认证源时，请先通过<a href="https://qian.tencent.com/developers/partnerApis/accounts/SyncProxyOrganization" target="_blank">同步企业信息</a>接口同步信息。</li>
-<li>该参数仅在企业未激活时生效</li>
+<li>5：授权书+对公打款</li>
 </ul>
  * @method void setAuthorizationTypes(array $AuthorizationTypes) 设置可选的此企业允许的授权方式, 可以设置的方式有:
-<ul><li>1：上传授权书</li>
+<ul>
 <li>2：转法定代表人授权</li>
-<li>4：企业实名认证（信任第三方认证源）（此项有排他性, 选择后不能增添其他的方式）</li></ul>
-注:<ul>
-<li>未选择信任第三方认证源时，如果是法人进行企业激活，仅支持法人扫脸直接授权，该配置不对此法人生效`</li>
-<li>选择信任第三方认证源时，请先通过<a href="https://qian.tencent.com/developers/partnerApis/accounts/SyncProxyOrganization" target="_blank">同步企业信息</a>接口同步信息。</li>
-<li>该参数仅在企业未激活时生效</li>
+<li>5：授权书+对公打款</li>
 </ul>
- * @method UserInfo getOperator() 获取暂未开放
- * @method void setOperator(UserInfo $Operator) 设置暂未开放
  * @method string getProxyOperatorIdCardNumber() 获取子客经办人身份证
 注意：`如果已同步，这里非空会更新同步的经办人身份证号，暂时只支持中国大陆居民身份证类型`。
  * @method void setProxyOperatorIdCardNumber(string $ProxyOperatorIdCardNumber) 设置子客经办人身份证
@@ -196,6 +186,16 @@ use TencentCloud\Common\AbstractModel;
 2. 认证方式AuthorizationTypes必须只能是上传授权书方式	
  * @method OrganizationAuthorizationOptions getOrganizationAuthorizationOptions() 获取企业认证时个性化能力信息
  * @method void setOrganizationAuthorizationOptions(OrganizationAuthorizationOptions $OrganizationAuthorizationOptions) 设置企业认证时个性化能力信息
+ * @method string getBankAccountNumber() 获取组织机构对公打款 账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+ * @method void setBankAccountNumber(string $BankAccountNumber) 设置组织机构对公打款 账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+ * @method UserInfo getOperator() 获取无
+ * @method void setOperator(UserInfo $Operator) 设置无
  */
 class CreateConsoleLoginUrlRequest extends AbstractModel
 {
@@ -296,22 +296,12 @@ class CreateConsoleLoginUrlRequest extends AbstractModel
 
     /**
      * @var array 可选的此企业允许的授权方式, 可以设置的方式有:
-<ul><li>1：上传授权书</li>
+<ul>
 <li>2：转法定代表人授权</li>
-<li>4：企业实名认证（信任第三方认证源）（此项有排他性, 选择后不能增添其他的方式）</li></ul>
-注:<ul>
-<li>未选择信任第三方认证源时，如果是法人进行企业激活，仅支持法人扫脸直接授权，该配置不对此法人生效`</li>
-<li>选择信任第三方认证源时，请先通过<a href="https://qian.tencent.com/developers/partnerApis/accounts/SyncProxyOrganization" target="_blank">同步企业信息</a>接口同步信息。</li>
-<li>该参数仅在企业未激活时生效</li>
+<li>5：授权书+对公打款</li>
 </ul>
      */
     public $AuthorizationTypes;
-
-    /**
-     * @var UserInfo 暂未开放
-     * @deprecated
-     */
-    public $Operator;
 
     /**
      * @var string 子客经办人身份证
@@ -373,6 +363,20 @@ class CreateConsoleLoginUrlRequest extends AbstractModel
     public $OrganizationAuthorizationOptions;
 
     /**
+     * @var string 组织机构对公打款 账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+     */
+    public $BankAccountNumber;
+
+    /**
+     * @var UserInfo 无
+     * @deprecated
+     */
+    public $Operator;
+
+    /**
      * @param Agent $Agent 关于渠道应用的相关信息，包括渠道应用标识、第三方平台子客企业标识及第三方平台子客企业中的员工标识等内容
 此接口下面信息必填。
 <ul>
@@ -429,15 +433,10 @@ class CreateConsoleLoginUrlRequest extends AbstractModel
      * @param string $AutoJumpBackEvent 触发自动跳转事件，仅对EndPoint为App类型有效，可选值包括：
 <ul><li> **VERIFIED** :企业认证完成/员工认证完成后跳回原App/小程序</li></ul>
      * @param array $AuthorizationTypes 可选的此企业允许的授权方式, 可以设置的方式有:
-<ul><li>1：上传授权书</li>
+<ul>
 <li>2：转法定代表人授权</li>
-<li>4：企业实名认证（信任第三方认证源）（此项有排他性, 选择后不能增添其他的方式）</li></ul>
-注:<ul>
-<li>未选择信任第三方认证源时，如果是法人进行企业激活，仅支持法人扫脸直接授权，该配置不对此法人生效`</li>
-<li>选择信任第三方认证源时，请先通过<a href="https://qian.tencent.com/developers/partnerApis/accounts/SyncProxyOrganization" target="_blank">同步企业信息</a>接口同步信息。</li>
-<li>该参数仅在企业未激活时生效</li>
+<li>5：授权书+对公打款</li>
 </ul>
-     * @param UserInfo $Operator 暂未开放
      * @param string $ProxyOperatorIdCardNumber 子客经办人身份证
 注意：`如果已同步，这里非空会更新同步的经办人身份证号，暂时只支持中国大陆居民身份证类型`。
      * @param string $AutoJumpUrl 认证完成跳转链接。
@@ -461,6 +460,11 @@ class CreateConsoleLoginUrlRequest extends AbstractModel
 1. 超管的信息（超管姓名，超管手机号）必须为必填参数。 
 2. 认证方式AuthorizationTypes必须只能是上传授权书方式	
      * @param OrganizationAuthorizationOptions $OrganizationAuthorizationOptions 企业认证时个性化能力信息
+     * @param string $BankAccountNumber 组织机构对公打款 账号，账户名跟企业名称一致。
+
+p.s.
+只有认证方式是授权书+对公打款时才生效。
+     * @param UserInfo $Operator 无
      */
     function __construct()
     {
@@ -520,11 +524,6 @@ class CreateConsoleLoginUrlRequest extends AbstractModel
             $this->AuthorizationTypes = $param["AuthorizationTypes"];
         }
 
-        if (array_key_exists("Operator",$param) and $param["Operator"] !== null) {
-            $this->Operator = new UserInfo();
-            $this->Operator->deserialize($param["Operator"]);
-        }
-
         if (array_key_exists("ProxyOperatorIdCardNumber",$param) and $param["ProxyOperatorIdCardNumber"] !== null) {
             $this->ProxyOperatorIdCardNumber = $param["ProxyOperatorIdCardNumber"];
         }
@@ -560,6 +559,15 @@ class CreateConsoleLoginUrlRequest extends AbstractModel
         if (array_key_exists("OrganizationAuthorizationOptions",$param) and $param["OrganizationAuthorizationOptions"] !== null) {
             $this->OrganizationAuthorizationOptions = new OrganizationAuthorizationOptions();
             $this->OrganizationAuthorizationOptions->deserialize($param["OrganizationAuthorizationOptions"]);
+        }
+
+        if (array_key_exists("BankAccountNumber",$param) and $param["BankAccountNumber"] !== null) {
+            $this->BankAccountNumber = $param["BankAccountNumber"];
+        }
+
+        if (array_key_exists("Operator",$param) and $param["Operator"] !== null) {
+            $this->Operator = new UserInfo();
+            $this->Operator->deserialize($param["Operator"]);
         }
     }
 }

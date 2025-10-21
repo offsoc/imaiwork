@@ -440,15 +440,10 @@ const { lockFn, isLock } = useLockFn(async () => {
         await uploadDefaultBackground();
     }
 
-    try {
-        const apiCall = formData.id ? cozeAgentUpdate : cozeAgentAdd;
-        await apiCall(formData);
-        feedback.msgSuccess(`${formData.id ? "编辑" : "添加"}成功`);
-        close();
-        emit("success");
-    } catch (error) {
-        feedback.msgError(error as string);
-    }
+    const apiCall = formData.id ? cozeAgentUpdate : cozeAgentAdd;
+    await apiCall(formData);
+    close();
+    emit("success");
 });
 
 // 打开弹窗（重置表单）
@@ -469,15 +464,11 @@ const close = () => {
  * @description 获取详情并填充表单
  */
 const getDetail = async (id: any) => {
-    try {
-        const res = await getCozeAgentDetail({ id });
-        setFormData(res, formData);
-        // outputs 和 inputs 是JSON字符串，需要解析
-        formData.outputs = isJson(res.outputs) ? JSON.parse(res.outputs) : [];
-        formData.inputs = isJson(res.inputs) ? JSON.parse(res.inputs) : [];
-    } catch (error) {
-        feedback.msgError("获取详情失败");
-    }
+    const res = await getCozeAgentDetail({ id });
+    setFormData(res, formData);
+    // outputs 和 inputs 是JSON字符串，需要解析
+    formData.outputs = isJson(res.outputs) ? JSON.parse(res.outputs) : [];
+    formData.inputs = isJson(res.inputs) ? JSON.parse(res.inputs) : [];
 };
 
 // 暴露方法

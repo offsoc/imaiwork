@@ -150,11 +150,6 @@ const isUploadFile = computed(() => {
     return !fileData.url;
 });
 
-// 判断是pdf还是txt
-const isPdf = computed(() => {
-    return fileData.name.endsWith(".pdf");
-});
-
 const handleUploadFile = async () => {
     if (isUploadFile.value) {
         const result = await chooseFile({
@@ -220,9 +215,8 @@ const uploadFileFn = async (file: any) => {
         // 保存简历
         await saveResumeFn();
     } catch (error: any) {
-        showToast(error || "解析失败");
-    } finally {
         uni.hideLoading();
+        showToast(error || "解析失败");
     }
 };
 
@@ -250,11 +244,12 @@ const saveResumeFn = async () => {
     try {
         await saveResume({ interview_job_id: state.id, ...formData });
         resumeStatus.value = 1;
+        uni.hideLoading();
+
         showToast("保存成功");
     } catch (error: any) {
-        showToast(error || "保存失败");
-    } finally {
         uni.hideLoading();
+        showToast(error || "保存失败");
     }
 };
 

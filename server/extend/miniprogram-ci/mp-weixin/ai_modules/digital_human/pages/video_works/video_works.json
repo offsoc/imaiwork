@@ -8,6 +8,6 @@
     "u-search": "../../../../uni_modules/vk-uview-ui/components/u-search/u-search",
     "empty": "../../../../components/empty/empty",
     "z-paging": "../../../../node-modules/z-paging/components/z-paging/z-paging",
-    "video-player": "../../components/video-player/video-player"
+    "video-preview-v2": "../../components/video-preview-v2/video-preview-v2"
   }
 }

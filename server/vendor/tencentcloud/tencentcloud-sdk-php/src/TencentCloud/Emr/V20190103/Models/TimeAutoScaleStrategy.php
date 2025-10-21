@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setGraceDownFlag(boolean $GraceDownFlag) 设置优雅缩容开关
  * @method integer getGraceDownTime() 获取优雅缩容等待时间
  * @method void setGraceDownTime(integer $GraceDownTime) 设置优雅缩容等待时间
+ * @method boolean getGraceDownProtectFlag() 获取是否开启任务保护
+ * @method void setGraceDownProtectFlag(boolean $GraceDownProtectFlag) 设置是否开启任务保护
  * @method array getTags() 获取绑定标签列表
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setTags(array $Tags) 设置绑定标签列表
@@ -76,6 +78,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setCompensateFlag(integer $CompensateFlag) 设置补偿扩容，0表示不开启，1表示开启
  * @method integer getGroupId() 获取伸缩组id
  * @method void setGroupId(integer $GroupId) 设置伸缩组id
+ * @method array getGraceDownLabel() 获取优雅缩容业务pod标签，当node不存在上述pod或超过优雅缩容时间时，缩容节点
+ * @method void setGraceDownLabel(array $GraceDownLabel) 设置优雅缩容业务pod标签，当node不存在上述pod或超过优雅缩容时间时，缩容节点
  */
 class TimeAutoScaleStrategy extends AbstractModel
 {
@@ -136,6 +140,11 @@ class TimeAutoScaleStrategy extends AbstractModel
     public $GraceDownTime;
 
     /**
+     * @var boolean 是否开启任务保护
+     */
+    public $GraceDownProtectFlag;
+
+    /**
      * @var array 绑定标签列表
 注意：此字段可能返回 null，表示取不到有效值。
      */
@@ -188,6 +197,11 @@ class TimeAutoScaleStrategy extends AbstractModel
     public $GroupId;
 
     /**
+     * @var array 优雅缩容业务pod标签，当node不存在上述pod或超过优雅缩容时间时，缩容节点
+     */
+    public $GraceDownLabel;
+
+    /**
      * @param string $StrategyName 策略名字，集群内唯一。
      * @param integer $IntervalTime 策略触发后的冷却时间，该段时间内，将不能触发弹性扩缩容。
      * @param integer $ScaleAction 扩缩容动作，1表示扩容，2表示缩容。
@@ -200,6 +214,7 @@ class TimeAutoScaleStrategy extends AbstractModel
      * @param integer $StrategyId 策略唯一ID。
      * @param boolean $GraceDownFlag 优雅缩容开关
      * @param integer $GraceDownTime 优雅缩容等待时间
+     * @param boolean $GraceDownProtectFlag 是否开启任务保护
      * @param array $Tags 绑定标签列表
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $ConfigGroupAssigned 预设配置组
@@ -216,6 +231,7 @@ class TimeAutoScaleStrategy extends AbstractModel
 注意：此字段可能返回 null，表示取不到有效值。
      * @param integer $CompensateFlag 补偿扩容，0表示不开启，1表示开启
      * @param integer $GroupId 伸缩组id
+     * @param array $GraceDownLabel 优雅缩容业务pod标签，当node不存在上述pod或超过优雅缩容时间时，缩容节点
      */
     function __construct()
     {
@@ -275,6 +291,10 @@ class TimeAutoScaleStrategy extends AbstractModel
             $this->GraceDownTime = $param["GraceDownTime"];
         }
 
+        if (array_key_exists("GraceDownProtectFlag",$param) and $param["GraceDownProtectFlag"] !== null) {
+            $this->GraceDownProtectFlag = $param["GraceDownProtectFlag"];
+        }
+
         if (array_key_exists("Tags",$param) and $param["Tags"] !== null) {
             $this->Tags = [];
             foreach ($param["Tags"] as $key => $value){
@@ -314,6 +334,15 @@ class TimeAutoScaleStrategy extends AbstractModel
 
         if (array_key_exists("GroupId",$param) and $param["GroupId"] !== null) {
             $this->GroupId = $param["GroupId"];
+        }
+
+        if (array_key_exists("GraceDownLabel",$param) and $param["GraceDownLabel"] !== null) {
+            $this->GraceDownLabel = [];
+            foreach ($param["GraceDownLabel"] as $key => $value){
+                $obj = new TkeLabel();
+                $obj->deserialize($value);
+                array_push($this->GraceDownLabel, $obj);
+            }
         }
     }
 }

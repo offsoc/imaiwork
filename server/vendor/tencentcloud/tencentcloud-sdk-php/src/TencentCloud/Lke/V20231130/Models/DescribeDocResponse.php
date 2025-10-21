@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,20 @@ use TencentCloud\Common\AbstractModel;
  * @method void setAttrLabels(array $AttrLabels) 设置标签
  * @method string getCateBizId() 获取分类ID
  * @method void setCateBizId(string $CateBizId) 设置分类ID
- * @method string getCustomerKnowledgeId() 获取文档的用户自定义ID
- * @method void setCustomerKnowledgeId(string $CustomerKnowledgeId) 设置文档的用户自定义ID
- * @method array getAttributeFlags() 获取文档的属性标记，0: 不做用户外部权限校验
- * @method void setAttributeFlags(array $AttributeFlags) 设置文档的属性标记，0: 不做用户外部权限校验
+ * @method boolean getIsDisabled() 获取文档是否停用，false:未停用，true:已停用
+ * @method void setIsDisabled(boolean $IsDisabled) 设置文档是否停用，false:未停用，true:已停用
+ * @method boolean getIsDownload() 获取是否支持下载
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setIsDownload(boolean $IsDownload) 设置是否支持下载
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getSplitRule() 获取自定义切分规则
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setSplitRule(string $SplitRule) 设置自定义切分规则
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method UpdatePeriodInfo getUpdatePeriodInfo() 获取文档更新频率
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setUpdatePeriodInfo(UpdatePeriodInfo $UpdatePeriodInfo) 设置文档更新频率
+注意：此字段可能返回 null，表示取不到有效值。
  * @method string getRequestId() 获取唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  * @method void setRequestId(string $RequestId) 设置唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
  */
@@ -198,14 +208,27 @@ class DescribeDocResponse extends AbstractModel
     public $CateBizId;
 
     /**
-     * @var string 文档的用户自定义ID
+     * @var boolean 文档是否停用，false:未停用，true:已停用
      */
-    public $CustomerKnowledgeId;
+    public $IsDisabled;
 
     /**
-     * @var array 文档的属性标记，0: 不做用户外部权限校验
+     * @var boolean 是否支持下载
+注意：此字段可能返回 null，表示取不到有效值。
      */
-    public $AttributeFlags;
+    public $IsDownload;
+
+    /**
+     * @var string 自定义切分规则
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $SplitRule;
+
+    /**
+     * @var UpdatePeriodInfo 文档更新频率
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $UpdatePeriodInfo;
 
     /**
      * @var string 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
@@ -237,8 +260,13 @@ class DescribeDocResponse extends AbstractModel
      * @param integer $AttrRange 标签适用范围 1：全部，2：按条件范围
      * @param array $AttrLabels 标签
      * @param string $CateBizId 分类ID
-     * @param string $CustomerKnowledgeId 文档的用户自定义ID
-     * @param array $AttributeFlags 文档的属性标记，0: 不做用户外部权限校验
+     * @param boolean $IsDisabled 文档是否停用，false:未停用，true:已停用
+     * @param boolean $IsDownload 是否支持下载
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $SplitRule 自定义切分规则
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param UpdatePeriodInfo $UpdatePeriodInfo 文档更新频率
+注意：此字段可能返回 null，表示取不到有效值。
      * @param string $RequestId 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
      */
     function __construct()
@@ -355,12 +383,21 @@ class DescribeDocResponse extends AbstractModel
             $this->CateBizId = $param["CateBizId"];
         }
 
-        if (array_key_exists("CustomerKnowledgeId",$param) and $param["CustomerKnowledgeId"] !== null) {
-            $this->CustomerKnowledgeId = $param["CustomerKnowledgeId"];
+        if (array_key_exists("IsDisabled",$param) and $param["IsDisabled"] !== null) {
+            $this->IsDisabled = $param["IsDisabled"];
         }
 
-        if (array_key_exists("AttributeFlags",$param) and $param["AttributeFlags"] !== null) {
-            $this->AttributeFlags = $param["AttributeFlags"];
+        if (array_key_exists("IsDownload",$param) and $param["IsDownload"] !== null) {
+            $this->IsDownload = $param["IsDownload"];
+        }
+
+        if (array_key_exists("SplitRule",$param) and $param["SplitRule"] !== null) {
+            $this->SplitRule = $param["SplitRule"];
+        }
+
+        if (array_key_exists("UpdatePeriodInfo",$param) and $param["UpdatePeriodInfo"] !== null) {
+            $this->UpdatePeriodInfo = new UpdatePeriodInfo();
+            $this->UpdatePeriodInfo->deserialize($param["UpdatePeriodInfo"]);
         }
 
         if (array_key_exists("RequestId",$param) and $param["RequestId"] !== null) {

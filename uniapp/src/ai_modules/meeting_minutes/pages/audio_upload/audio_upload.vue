@@ -193,6 +193,7 @@ const handleUploadFile = async () => {
                 translation: formData.translation == 0 ? "" : formData.translation,
             }));
             await meetingMinutesBatchCreate(params);
+            uni.hideLoading();
             uni.showToast({
                 title: "创建成功，即将返回首页",
                 icon: "none",
@@ -202,13 +203,12 @@ const handleUploadFile = async () => {
                 uni.navigateBack();
             }, 1000);
         } catch (error: any) {
+            uni.hideLoading();
             uni.showToast({
                 title: error || "创建失败",
                 icon: "none",
                 duration: 3000,
             });
-        } finally {
-            uni.hideLoading();
         }
     }, 1000);
 };

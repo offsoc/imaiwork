@@ -63,7 +63,6 @@ useHead({
             <!-- 全局弹窗组件 -->
             <LayoutAccount v-if="userStore.showLogin" />
             <LayoutSurvey v-if="appStore.showSurvey" />
-            <DownloadNotice />
         </NuxtLayout>
     </ElConfigProvider>
 </template>

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,10 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setAgent(AgentDebugInfo $Agent) 设置Agent调试信息
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getCustomVariables() 获取自定义参数
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setCustomVariables(array $CustomVariables) 设置自定义参数
+注意：此字段可能返回 null，表示取不到有效值。
  */
 class ProcedureDebugging extends AbstractModel
 {
@@ -94,6 +98,12 @@ class ProcedureDebugging extends AbstractModel
     public $Agent;
 
     /**
+     * @var array 自定义参数
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $CustomVariables;
+
+    /**
      * @param string $Content 检索query
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $System 系统prompt
@@ -107,6 +117,8 @@ class ProcedureDebugging extends AbstractModel
      * @param WorkFlowSummary $WorkFlow 工作流调试信息
 注意：此字段可能返回 null，表示取不到有效值。
      * @param AgentDebugInfo $Agent Agent调试信息
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $CustomVariables 自定义参数
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
@@ -161,6 +173,10 @@ class ProcedureDebugging extends AbstractModel
         if (array_key_exists("Agent",$param) and $param["Agent"] !== null) {
             $this->Agent = new AgentDebugInfo();
             $this->Agent->deserialize($param["Agent"]);
+        }
+
+        if (array_key_exists("CustomVariables",$param) and $param["CustomVariables"] !== null) {
+            $this->CustomVariables = $param["CustomVariables"];
         }
     }
 }

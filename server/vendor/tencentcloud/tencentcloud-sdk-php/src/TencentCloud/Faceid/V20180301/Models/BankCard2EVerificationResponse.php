@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,11 @@ use TencentCloud\Common\AbstractModel;
   '-13': '受限制的卡'。
   '-14': '密码错误次数超限'。
   '-15': '发卡行不支持此交易'。
+  '-18': '卡状态异常或卡号错误'。
 
 - 不计费结果码：
   '-2': '姓名校验不通过'。
-  '-3': '银行卡号码有误'。
+  '-3': '银行卡号格式有误'。
   '-16': '验证中心服务繁忙'。
   '-17': '验证次数超限，请次日重试'。
 
@@ -59,10 +60,11 @@ use TencentCloud\Common\AbstractModel;
   '-13': '受限制的卡'。
   '-14': '密码错误次数超限'。
   '-15': '发卡行不支持此交易'。
+  '-18': '卡状态异常或卡号错误'。
 
 - 不计费结果码：
   '-2': '姓名校验不通过'。
-  '-3': '银行卡号码有误'。
+  '-3': '银行卡号格式有误'。
   '-16': '验证中心服务繁忙'。
   '-17': '验证次数超限，请次日重试'。
 
@@ -90,10 +92,11 @@ class BankCard2EVerificationResponse extends AbstractModel
   '-13': '受限制的卡'。
   '-14': '密码错误次数超限'。
   '-15': '发卡行不支持此交易'。
+  '-18': '卡状态异常或卡号错误'。
 
 - 不计费结果码：
   '-2': '姓名校验不通过'。
-  '-3': '银行卡号码有误'。
+  '-3': '银行卡号格式有误'。
   '-16': '验证中心服务繁忙'。
   '-17': '验证次数超限，请次日重试'。
 
@@ -127,10 +130,11 @@ class BankCard2EVerificationResponse extends AbstractModel
   '-13': '受限制的卡'。
   '-14': '密码错误次数超限'。
   '-15': '发卡行不支持此交易'。
+  '-18': '卡状态异常或卡号错误'。
 
 - 不计费结果码：
   '-2': '姓名校验不通过'。
-  '-3': '银行卡号码有误'。
+  '-3': '银行卡号格式有误'。
   '-16': '验证中心服务繁忙'。
   '-17': '验证次数超限，请次日重试'。
 

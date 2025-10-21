@@ -11,6 +11,8 @@ namespace Nette\PhpGenerator;
 
 use Nette;
 use Nette\Utils\Reflection;
+use function array_diff, array_filter, array_key_exists, array_map, count, explode, file_get_contents, implode, is_object, is_subclass_of, method_exists, reset;
+use const PHP_VERSION_ID;
 
 
 /**
@@ -126,7 +128,10 @@ final class Factory
 		$class->setMethods($methods);
 
 		foreach ($from->getTraitNames() as $trait) {
-			$class->addTrait($trait, $resolutions);
+			$trait = $class->addTrait($trait);
+			foreach ($resolutions as $resolution) {
+				$trait->addResolution($resolution);
+			}
 			$resolutions = [];
 		}
 
@@ -209,7 +214,8 @@ final class Factory
 			$property = $from->getDeclaringClass()->getProperty($from->name);
 			$param = (new PromotedParameter($from->name))
 				->setVisibility($this->getVisibility($property))
-				->setReadOnly(PHP_VERSION_ID >= 80100 && $property->isReadonly());
+				->setReadOnly(PHP_VERSION_ID >= 80100 && $property->isReadonly())
+				->setFinal(PHP_VERSION_ID >= 80500 && $property->isFinal() && !$property->isPrivateSet());
 			$this->addHooks($property, $param);
 		} else {
 			$param = new Parameter($from->name);
@@ -339,6 +345,7 @@ final class Factory
 	}
 
 
+	/** @return Attribute[] */
 	private function getAttributes($from): array
 	{
 		return array_map(function ($attr) {
@@ -354,7 +361,7 @@ final class Factory
 	}
 
 
-	private function getVisibility($from): string
+	private function getVisibility(\ReflectionProperty|\ReflectionMethod|\ReflectionClassConstant $from): string
 	{
 		return $from->isPrivate()
 			? Visibility::Private

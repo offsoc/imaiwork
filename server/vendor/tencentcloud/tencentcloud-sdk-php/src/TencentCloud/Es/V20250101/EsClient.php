@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,13 @@ use TencentCloud\Es\V20250101\Models as Models;
  * @method Models\GetDocumentChunkResultResponse GetDocumentChunkResult(Models\GetDocumentChunkResultRequest $req) 获取文档切片结果
  * @method Models\GetDocumentParseResultResponse GetDocumentParseResult(Models\GetDocumentParseResultRequest $req) 本接口用于获取文档解析异步处理结果。
  * @method Models\GetTextEmbeddingResponse GetTextEmbedding(Models\GetTextEmbeddingRequest $req) Embedding是一种将高维数据映射到低维空间的技术，通常用于将非结构化数据，如文本、图像或音频转化为向量表示，使其更容易输入机器模型进行处理，并且向量之间的距离可以反映对象之间的相似性。
-本接口有单账号调用上限控制，如您有提高并发限制的需求请[联系我们](https://cloud.tencent.com/act/event/Online_service)  。
+本接口有模型维度调用上限控制，单个模型qps限制20，如您有提高并发限制的需求请[联系我们](https://cloud.tencent.com/act/event/Online_service)  。
  * @method Models\ParseDocumentResponse ParseDocument(Models\ParseDocumentRequest $req) 本服务可将各类格式文档精准转换为标准格式，满足企业知识库建设、技术文档迁移、内容平台结构化存储等需求。
 本接口有单账号调用上限控制，如您有提高并发限制的需求请[联系我们](https://cloud.tencent.com/act/event/Online_service)。
  * @method Models\ParseDocumentAsyncResponse ParseDocumentAsync(Models\ParseDocumentAsyncRequest $req) 本服务可将各类格式文档精准转换为标准格式，满足企业知识库建设、技术文档迁移、内容平台结构化存储等需求。
 本接口为异步接口，有单账号调用上限控制，如您有提高并发限制的需求请[联系我们](https://cloud.tencent.com/act/event/Online_service)  。
  * @method Models\RunRerankResponse RunRerank(Models\RunRerankRequest $req) 重排是指在 RAG 过程中，通过评估文档与查询之间的相关性，将最相关的文档放在前面，确保语言模型在生成回答时优先考虑排名靠前的上下文，提高生成结果的准确性和可信度，也可以通过这种方式进行过滤，减少大模型成本。
 本接口有单账号调用上限控制，如您有提高并发限制的需求请[联系我们](https://cloud.tencent.com/act/event/Online_service)  。
- * @method Models\WebSearchResponse WebSearch(Models\WebSearchRequest $req) WebSearch API 是一个网页搜索服务，支持多种搜索引擎，可以获取网页的标题、URL、摘要和正文内容。
  */
 
 class EsClient extends AbstractClient

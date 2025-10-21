@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,12 @@ use TencentCloud\Common\AbstractModel;
  * @method void setTkeClusterId(string $TkeClusterId) 设置资源类型（HardwareResourceType）为pod时，对应的TKE集群id
  * @method array getConfigurableServices() 获取新挂磁盘时可支持配置的服务名称列表
  * @method void setConfigurableServices(array $ConfigurableServices) 设置新挂磁盘时可支持配置的服务名称列表
+ * @method string getNodeMark() 获取节点标注信息，目前只提供给tf平台使用
+ * @method void setNodeMark(string $NodeMark) 设置节点标注信息，目前只提供给tf平台使用
+ * @method boolean getUnderwriteSetAutoRenew() 获取包销资源是否支持设置自动续费
+ * @method void setUnderwriteSetAutoRenew(boolean $UnderwriteSetAutoRenew) 设置包销资源是否支持设置自动续费
+ * @method string getGpuDesc() 获取Gpu信息
+ * @method void setGpuDesc(string $GpuDesc) 设置Gpu信息
  */
 class NodeHardwareInfo extends AbstractModel
 {
@@ -444,6 +450,21 @@ class NodeHardwareInfo extends AbstractModel
     public $ConfigurableServices;
 
     /**
+     * @var string 节点标注信息，目前只提供给tf平台使用
+     */
+    public $NodeMark;
+
+    /**
+     * @var boolean 包销资源是否支持设置自动续费
+     */
+    public $UnderwriteSetAutoRenew;
+
+    /**
+     * @var string Gpu信息
+     */
+    public $GpuDesc;
+
+    /**
      * @param integer $AppId 用户APPID
      * @param string $SerialNo 序列号
      * @param string $OrderNo 机器实例ID
@@ -508,6 +529,9 @@ class NodeHardwareInfo extends AbstractModel
      * @param boolean $TimingResource 是否是定时销毁资源
      * @param string $TkeClusterId 资源类型（HardwareResourceType）为pod时，对应的TKE集群id
      * @param array $ConfigurableServices 新挂磁盘时可支持配置的服务名称列表
+     * @param string $NodeMark 节点标注信息，目前只提供给tf平台使用
+     * @param boolean $UnderwriteSetAutoRenew 包销资源是否支持设置自动续费
+     * @param string $GpuDesc Gpu信息
      */
     function __construct()
     {
@@ -760,6 +784,18 @@ class NodeHardwareInfo extends AbstractModel
 
         if (array_key_exists("ConfigurableServices",$param) and $param["ConfigurableServices"] !== null) {
             $this->ConfigurableServices = $param["ConfigurableServices"];
+        }
+
+        if (array_key_exists("NodeMark",$param) and $param["NodeMark"] !== null) {
+            $this->NodeMark = $param["NodeMark"];
+        }
+
+        if (array_key_exists("UnderwriteSetAutoRenew",$param) and $param["UnderwriteSetAutoRenew"] !== null) {
+            $this->UnderwriteSetAutoRenew = $param["UnderwriteSetAutoRenew"];
+        }
+
+        if (array_key_exists("GpuDesc",$param) and $param["GpuDesc"] !== null) {
+            $this->GpuDesc = $param["GpuDesc"];
         }
     }
 }

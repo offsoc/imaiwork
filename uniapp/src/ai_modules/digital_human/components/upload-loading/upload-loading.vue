@@ -23,7 +23,7 @@
                                     >去制作视频</u-button
                                 >
                             </view>
-                            <view class="flex-1">
+                            <view class="flex-1" v-if="showBack">
                                 <u-button
                                     shape="circle"
                                     :custom-style="{
@@ -73,6 +73,10 @@ defineProps({
     loadingText: {
         type: String,
         default: "视频正在上传中...",
+    },
+    showBack: {
+        type: Boolean,
+        default: true,
     },
 });
 

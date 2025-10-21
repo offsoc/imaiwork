@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,31 +18,31 @@ namespace TencentCloud\Trocket\V20230308\Models;
 use TencentCloud\Common\AbstractModel;
 
 /**
- * 价格标签信息
+ * 价格标签信息，一个完整的价格标签包含计价类别和计费项标签。
  *
- * @method string getName() 获取计价名称
- * @method void setName(string $Name) 设置计价名称
- * @method integer getStep() 获取步长
+ * @method string getName() 获取计价名称（枚举值：tps：TPS基础价；stepTps：TPS步长）
+ * @method void setName(string $Name) 设置计价名称（枚举值：tps：TPS基础价；stepTps：TPS步长）
+ * @method integer getStep() 获取计费项对应的步长数
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setStep(integer $Step) 设置步长
+ * @method void setStep(integer $Step) 设置计费项对应的步长数
 注意：此字段可能返回 null，表示取不到有效值。
  */
 class PriceTag extends AbstractModel
 {
     /**
-     * @var string 计价名称
+     * @var string 计价名称（枚举值：tps：TPS基础价；stepTps：TPS步长）
      */
     public $Name;
 
     /**
-     * @var integer 步长
+     * @var integer 计费项对应的步长数
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $Step;
 
     /**
-     * @param string $Name 计价名称
-     * @param integer $Step 步长
+     * @param string $Name 计价名称（枚举值：tps：TPS基础价；stepTps：TPS步长）
+     * @param integer $Step 计费项对应的步长数
 注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()

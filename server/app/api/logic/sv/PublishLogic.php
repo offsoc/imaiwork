@@ -47,7 +47,7 @@ class PublishLogic extends SvBaseLogic
             }
             $params['video_setting_id'] = $params['video_setting_id'] ?? 0;
             //print_r($params);die;
-
+            $params['task_type'] = $params['task_type'] ?? 1;
             // 添加
             $publish = SvPublishSetting::create($params);
             if (!$publish->isEmpty()) {
@@ -507,12 +507,14 @@ class PublishLogic extends SvBaseLogic
                 ->join('sv_publish_setting ps', 'ps.id = pa.publish_id and ps.user_id = pa.user_id')
                 ->join('sv_account a', 'a.account = pa.account and a.user_id = pa.user_id')
                 ->where('pa.status', 1)
+                ->where('pa.task_type', 1)
                 //->where('pa.id', 150)
                 ->where('pa.id', 'NOT IN', function ($query) {
                     $query->name('sv_publish_setting_detail')
                         ->field('publish_account_id')
                         ->where('delete_time is null')
                         ->where('publish_account_id', '>', 0)
+                        ->where('task_type', 1)
                         ->group('publish_account_id')->select();
                 })
                 //->order('pa.id desc')
@@ -667,9 +669,9 @@ class PublishLogic extends SvBaseLogic
                 $currentDate = $startDate->format('Y-m-d');
                 // 遍历每个时间段配置
                 foreach ($timeConfig as $timeSlot) {
-                    if (strtotime("{$currentDate} {$timeSlot['end_time']}") < time()) {
-                        continue;
-                    }
+                    // if (strtotime("{$currentDate} {$timeSlot['end_time']}") < time()) {
+                    //     continue;
+                    // }
                     $periods[] = [
                         date('Y-m-d H:i:s', strtotime("{$currentDate} {$timeSlot['start_time']}")),
                         date('Y-m-d H:i:s', strtotime("{$currentDate} {$timeSlot['end_time']}"))
@@ -678,6 +680,7 @@ class PublishLogic extends SvBaseLogic
                 // 日期递增1天
                 $startDate->modify('+1 day');
             }
+            //print_r($periods);die;
             $periodCount = count($periods) > $videoCount ? count($periods) : $videoCount;
             $index = ceil($num % $periodCount);
             return isset($periods[$index]) ? $periods[$index][0] : date('Y-m-d H:i:s', strtotime($periods[0][0]) + (120 * $index)); // 默认值

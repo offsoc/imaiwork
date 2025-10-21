@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setOwnerUin(string $OwnerUin) 设置主账号 UIN
  * @method string getCreatorUin() 获取创建者 UIN
  * @method void setCreatorUin(string $CreatorUin) 设置创建者 UIN
- * @method integer getStatus() 获取集群状态, 1 未初始化,，3 初始化中，2 运行中
- * @method void setStatus(integer $Status) 设置集群状态, 1 未初始化,，3 初始化中，2 运行中
+ * @method integer getStatus() 获取集群状态, 1 未初始化,3 初始化中，2 运行中
+ * @method void setStatus(integer $Status) 设置集群状态, 1 未初始化,3 初始化中，2 运行中
  * @method string getRemark() 获取描述
  * @method void setRemark(string $Remark) 设置描述
  * @method string getCreateTime() 获取集群创建时间
@@ -184,6 +184,24 @@ use TencentCloud\Common\AbstractModel;
  * @method void setRunningCpu(float $RunningCpu) 设置运行的CPU
  * @method float getRunningMem() 获取运行的内存
  * @method void setRunningMem(float $RunningMem) 设置运行的内存
+ * @method Setats getSetats() 获取setats集群
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setSetats(Setats $Setats) 设置setats集群
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getYarns() 获取[]
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setYarns(array $Yarns) 设置[]
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method integer getDeploymentMode() 获取0 单可用区 1多可用区
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setDeploymentMode(integer $DeploymentMode) 设置0 单可用区 1多可用区
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method array getSlaveZones() 获取备可用区
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method void setSlaveZones(array $SlaveZones) 设置备可用区
+注意：此字段可能返回 null，表示取不到有效值。
+ * @method string getLogCOSBucket() 获取集群的日志cos存储
+ * @method void setLogCOSBucket(string $LogCOSBucket) 设置集群的日志cos存储
  */
 class Cluster extends AbstractModel
 {
@@ -218,7 +236,7 @@ class Cluster extends AbstractModel
     public $CreatorUin;
 
     /**
-     * @var integer 集群状态, 1 未初始化,，3 初始化中，2 运行中
+     * @var integer 集群状态, 1 未初始化,3 初始化中，2 运行中
      */
     public $Status;
 
@@ -478,13 +496,42 @@ class Cluster extends AbstractModel
     public $RunningMem;
 
     /**
+     * @var Setats setats集群
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $Setats;
+
+    /**
+     * @var array []
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $Yarns;
+
+    /**
+     * @var integer 0 单可用区 1多可用区
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $DeploymentMode;
+
+    /**
+     * @var array 备可用区
+注意：此字段可能返回 null，表示取不到有效值。
+     */
+    public $SlaveZones;
+
+    /**
+     * @var string 集群的日志cos存储
+     */
+    public $LogCOSBucket;
+
+    /**
      * @param string $ClusterId 集群 ID
      * @param string $Name 集群名称
      * @param string $Region 地域
      * @param integer $AppId 用户 AppID
      * @param string $OwnerUin 主账号 UIN
      * @param string $CreatorUin 创建者 UIN
-     * @param integer $Status 集群状态, 1 未初始化,，3 初始化中，2 运行中
+     * @param integer $Status 集群状态, 1 未初始化,3 初始化中，2 运行中
      * @param string $Remark 描述
      * @param string $CreateTime 集群创建时间
      * @param string $UpdateTime 最后一次操作集群的时间
@@ -560,6 +607,15 @@ class Cluster extends AbstractModel
      * @param float $TotalMem 总的内存
      * @param float $RunningCpu 运行的CPU
      * @param float $RunningMem 运行的内存
+     * @param Setats $Setats setats集群
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $Yarns []
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param integer $DeploymentMode 0 单可用区 1多可用区
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param array $SlaveZones 备可用区
+注意：此字段可能返回 null，表示取不到有效值。
+     * @param string $LogCOSBucket 集群的日志cos存储
      */
     function __construct()
     {
@@ -812,6 +868,37 @@ class Cluster extends AbstractModel
 
         if (array_key_exists("RunningMem",$param) and $param["RunningMem"] !== null) {
             $this->RunningMem = $param["RunningMem"];
+        }
+
+        if (array_key_exists("Setats",$param) and $param["Setats"] !== null) {
+            $this->Setats = new Setats();
+            $this->Setats->deserialize($param["Setats"]);
+        }
+
+        if (array_key_exists("Yarns",$param) and $param["Yarns"] !== null) {
+            $this->Yarns = [];
+            foreach ($param["Yarns"] as $key => $value){
+                $obj = new HadoopYarnItem();
+                $obj->deserialize($value);
+                array_push($this->Yarns, $obj);
+            }
+        }
+
+        if (array_key_exists("DeploymentMode",$param) and $param["DeploymentMode"] !== null) {
+            $this->DeploymentMode = $param["DeploymentMode"];
+        }
+
+        if (array_key_exists("SlaveZones",$param) and $param["SlaveZones"] !== null) {
+            $this->SlaveZones = [];
+            foreach ($param["SlaveZones"] as $key => $value){
+                $obj = new SlaveZone();
+                $obj->deserialize($value);
+                array_push($this->SlaveZones, $obj);
+            }
+        }
+
+        if (array_key_exists("LogCOSBucket",$param) and $param["LogCOSBucket"] !== null) {
+            $this->LogCOSBucket = $param["LogCOSBucket"];
         }
     }
 }

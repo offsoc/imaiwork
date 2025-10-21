@@ -15,14 +15,8 @@
             <div class="text-2xl font-bold mb-5">工作流</div>
             <!-- 表单 -->
             <ElForm ref="formRef" :model="formData" :rules="formRules" label-position="top">
-                <ElFormItem label="应用ID" prop="app_id">
-                    <ElInput v-model="formData.app_id" placeholder="请输入应用ID" />
-                </ElFormItem>
                 <ElFormItem label="工作流ID" prop="workflow_id">
                     <ElInput v-model="formData.workflow_id" placeholder="请输入工作流ID" />
-                </ElFormItem>
-                <ElFormItem label="智能体ID" prop="bot_id">
-                    <ElInput v-model="formData.bot_id" placeholder="请输入智能体ID" />
                 </ElFormItem>
                 <ElFormItem label="授权Token" prop="api_token">
                     <ElInput v-model="formData.api_token" placeholder="请输入授权Token" />

@@ -84,10 +84,10 @@ const formatDate = (date: string) => {
 const { copy } = useCopy();
 const handleInterviewDetail = async (item: any) => {
     if (state.user_id) {
+        uni.showLoading({
+            title: "验证中...",
+        });
         try {
-            uni.showLoading({
-                title: "验证中...",
-            });
             const {
                 type,
                 msg,
@@ -112,14 +112,20 @@ const handleInterviewDetail = async (item: any) => {
                     },
                 });
             } else {
+                uni.hideLoading();
                 uni.showToast({
                     title: msg,
                     icon: "none",
-                    duration: 2000,
+                    duration: 3000,
                 });
             }
-        } finally {
+        } catch (error: any) {
             uni.hideLoading();
+            uni.showToast({
+                title: error,
+                icon: "none",
+                duration: 3000,
+            });
         }
     } else {
         uni.showLoading({
@@ -129,15 +135,15 @@ const handleInterviewDetail = async (item: any) => {
             const { url } = await generateJobLink({
                 job_id: item.id,
             });
+            uni.hideLoading();
             copy(url);
         } catch (error) {
+            uni.hideLoading();
             uni.showToast({
                 title: "生成失败",
                 icon: "none",
                 duration: 2000,
             });
-        } finally {
-            uni.hideLoading();
         }
     }
 };

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setDataSerial(array $DataSerial) 设置数据序列
  * @method array getTags() 获取维度列表
  * @method void setTags(array $Tags) 设置维度列表
+ * @method string getMetricUnit() 获取指标数据单位
+ * @method void setMetricUnit(string $MetricUnit) 设置指标数据单位
  */
 class Line extends AbstractModel
 {
@@ -59,11 +61,17 @@ class Line extends AbstractModel
     public $Tags;
 
     /**
+     * @var string 指标数据单位
+     */
+    public $MetricUnit;
+
+    /**
      * @param string $MetricName 指标名
      * @param string $MetricNameCN 指标中文名
      * @param array $TimeSerial 时间序列
      * @param array $DataSerial 数据序列
      * @param array $Tags 维度列表
+     * @param string $MetricUnit 指标数据单位
      */
     function __construct()
     {
@@ -101,6 +109,10 @@ class Line extends AbstractModel
                 $obj->deserialize($value);
                 array_push($this->Tags, $obj);
             }
+        }
+
+        if (array_key_exists("MetricUnit",$param) and $param["MetricUnit"] !== null) {
+            $this->MetricUnit = $param["MetricUnit"];
         }
     }
 }

@@ -102,6 +102,12 @@ return [
             'json'           => false,
             'format'         => '[%s][%s] %s',
         ],
+        'shanjian' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/shanjian/',
+            'json'           => false,
+            'format'         => '[%s][%s] %s',
+        ],
         // 其它日志通道配置
     ],
 

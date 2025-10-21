@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,16 +74,19 @@ class MQTTMessageItem extends AbstractModel
 
     /**
      * @var integer 死信重发次数	
+     * @deprecated
      */
     public $DeadLetterResendTimes;
 
     /**
      * @var integer 死信重发成功次数
+     * @deprecated
      */
     public $DeadLetterResendSuccessTimes;
 
     /**
      * @var string 子topic
+     * @deprecated
      */
     public $SubTopic;
 

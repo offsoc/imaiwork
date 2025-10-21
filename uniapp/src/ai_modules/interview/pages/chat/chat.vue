@@ -90,8 +90,8 @@
     <u-popup
         v-model="showResetInterview"
         mode="center"
-        :border-radius="16"
         width="90%"
+        :border-radius="16"
         @close="showResetInterview = false">
         <view class="p-4 rounded-lg">
             <view class="text-center">
@@ -204,16 +204,16 @@ const handleResetInterviewConfirm = async () => {
     try {
         await interviewAgainFn(3, resetInterviewReason.value);
         state.record_id = "";
+        uni.hideLoading();
         resetParams();
         startChat();
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error || "重新面试失败",
             icon: "none",
             duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 
@@ -244,6 +244,7 @@ const handleContentSubmit = async () => {
             job_id: state.id,
             content: contentFeedback.value,
         });
+        uni.hideLoading();
         uni.showToast({
             title: "反馈已提交，请等待面试官的回复",
             icon: "success",
@@ -251,13 +252,12 @@ const handleContentSubmit = async () => {
         });
         toIndex();
     } catch (error: any) {
+        uni.hideLoading();
         uni.showToast({
             title: error,
             icon: "none",
             duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

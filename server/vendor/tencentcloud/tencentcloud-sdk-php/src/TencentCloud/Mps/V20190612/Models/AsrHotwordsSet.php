@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ use TencentCloud\Common\AbstractModel;
  * @method void setHotwordsId(string $HotwordsId) 设置热词库 Id
 注意：此字段可能返回 null，表示取不到有效值。
  * @method integer getStatus() 获取当前热词库状态，数值表示绑定该热词库的智能字幕模板数量。
-Status 为 0 ，表示该热词库没有被智能字幕模版引用可以删除；
+Status 为 0 ，表示该热词库没有被智能字幕模板引用可以删除；
 Status 不为 0，表示该热词库不能被删除。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setStatus(integer $Status) 设置当前热词库状态，数值表示绑定该热词库的智能字幕模板数量。
-Status 为 0 ，表示该热词库没有被智能字幕模版引用可以删除；
+Status 为 0 ，表示该热词库没有被智能字幕模板引用可以删除；
 Status 不为 0，表示该热词库不能被删除。
 注意：此字段可能返回 null，表示取不到有效值。
  * @method string getName() 获取热词库名称
@@ -69,7 +69,7 @@ class AsrHotwordsSet extends AbstractModel
 
     /**
      * @var integer 当前热词库状态，数值表示绑定该热词库的智能字幕模板数量。
-Status 为 0 ，表示该热词库没有被智能字幕模版引用可以删除；
+Status 为 0 ，表示该热词库没有被智能字幕模板引用可以删除；
 Status 不为 0，表示该热词库不能被删除。
 注意：此字段可能返回 null，表示取不到有效值。
      */
@@ -116,7 +116,7 @@ Status 不为 0，表示该热词库不能被删除。
      * @param string $HotwordsId 热词库 Id
 注意：此字段可能返回 null，表示取不到有效值。
      * @param integer $Status 当前热词库状态，数值表示绑定该热词库的智能字幕模板数量。
-Status 为 0 ，表示该热词库没有被智能字幕模版引用可以删除；
+Status 为 0 ，表示该热词库没有被智能字幕模板引用可以删除；
 Status 不为 0，表示该热词库不能被删除。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param string $Name 热词库名称

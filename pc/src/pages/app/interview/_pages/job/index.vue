@@ -117,7 +117,7 @@ import { dayjs } from "element-plus";
 import EditPop from "./_components/edit-pop.vue";
 import RpaEditPop from "./_components/rpa-edit.vue";
 
-const emit = defineEmits(["history"]);
+const router = useRouter();
 
 const { copy } = useCopy();
 const nuxtApp = useNuxtApp();
@@ -180,7 +180,10 @@ const handleRpaSetting = async (row: any) => {
 };
 
 const handleInterviewRecord = async (id: number) => {
-    emit("history", id);
+    router.replace(`/app/interview?type=2&id=${id}`);
+    setTimeout(() => {
+        window.location.reload();
+    }, 100);
 };
 
 const handleCopyLink = async (id: number) => {

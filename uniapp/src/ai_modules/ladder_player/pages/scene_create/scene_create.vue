@@ -337,7 +337,7 @@ const handleCreateScene = async () => {
         uni.showToast({
             title: `${title}成功`,
             icon: "none",
-            duration: 2000,
+            duration: 3000,
         });
         if (!formData.id) {
             uni.$u.route({
@@ -357,7 +357,7 @@ const handleCreateScene = async () => {
         uni.showToast({
             title: error || `${title}失败`,
             icon: "none",
-            duration: 2000,
+            duration: 3000,
         });
     }
 };
@@ -374,10 +374,11 @@ const handleDeleteScene = () => {
                 });
                 try {
                     await lpSceneDelete({ id: formData.id });
+                    uni.hideLoading();
                     uni.showToast({
                         title: "删除成功",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
                     setTimeout(() => {
                         uni.navigateBack({
@@ -385,13 +386,12 @@ const handleDeleteScene = () => {
                         });
                     }, 2000);
                 } catch (error: any) {
+                    uni.hideLoading();
                     uni.showToast({
                         title: error || "删除失败",
                         icon: "none",
-                        duration: 2000,
+                        duration: 3000,
                     });
-                } finally {
-                    uni.hideLoading();
                 }
             }
         },

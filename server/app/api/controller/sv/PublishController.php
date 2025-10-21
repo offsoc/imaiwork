@@ -30,7 +30,7 @@ class PublishController extends BaseApiController
     }
 
     /**
-     * @desc 添加机器人
+     * @desc 添加发布设置
      */
     public function add()
     {

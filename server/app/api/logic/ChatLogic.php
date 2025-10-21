@@ -29,6 +29,7 @@ class ChatLogic extends ApiLogic
     const COMMON_CHAT = 'common_chat'; //通用聊天
     const SCENE_CHAT = 'scene_chat'; //场景聊天
     const OPENAI_CHAT = 'openai_chat'; //openai聊天
+    const GEMINI_CHAT = 'gemini_chat'; //gemini聊天
 
     public static function generalChat(array $params)
     {
@@ -47,7 +48,7 @@ class ChatLogic extends ApiLogic
         $params['file_info'] = $params['file_info'] ?? []; //文件信息
         $params['user_id'] = self::$uid ?? 0;
         if (isset($params['model_id']) && !empty($params['model_id'])) {
-            $params['model'] = ModelsCost::where('model_id', $params['model_id'])->value('name') ?? $params['model'];
+            $params['model'] = ModelsCost::where('model_id', $params['model_id'])->value('alias') ?? $params['model'];
         }
 
         if (!empty($params['robot_id']) && empty($params['indexid']) && empty($params['kb_id'])) {
@@ -68,7 +69,7 @@ class ChatLogic extends ApiLogic
             $params['presence_penalty']  = (float)$robot['presence_penalty'];  //避免重复力度
             $params['frequency_penalty'] = (float)$robot['frequency_penalty']; //避免重复用词力度
             $params['context_num']       = $robot['context_num'];       //上下文数
-            $params['model']             = $robot['model'];             //模型
+            $params['model']             = ModelsCost::where('id', $robot['model_sub_id'])->value('alias');             //模型
 
             if (isset($params['unique_id'])) {
                 $publish_keywords = KbRobotInstruct::where('robot_id', $params['robot_id'])->select()->toArray();
@@ -306,9 +307,27 @@ class ChatLogic extends ApiLogic
             $messages = $logs;
         }
 
-
+        $gptModels = [
+            'gpt-4',
+            'gpt-4o',
+            'gpt-4o-mini',
+            'gpt-4o-2024-08-06',
+            'gpt-3.5-turbo',
+        ];
+        $geminiModels = [
+            'google/gemini-2.5-pro',
+            'google/gemini-2.5-flash',
+            'google/gemini-2.0-flash',
+            'google/gemma-3-4b-it',
+        ];
         $request['messages'] = $messages;
-        $scene = $request['model'] == 'deepseek' ? self::COMMON_CHAT : self::OPENAI_CHAT;
+        if (in_array($request['model'], $gptModels)){
+            $scene = self::OPENAI_CHAT;
+        }else if (in_array($request['model'], $geminiModels)){
+            $scene = self::GEMINI_CHAT;
+        }else{
+            $scene = self::COMMON_CHAT;
+        }
         //print_r($request);die;
         $uid = self::$uid;
         if ($uid == 0 && isset($params['unique_id'])) {
@@ -745,6 +764,7 @@ class ChatLogic extends ApiLogic
             AccountLogEnum::TOKENS_DEC_SCENE_CHAT => ['scene_chat', AccountLogEnum::TOKENS_DEC_SCENE_CHAT],
             AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT => ['knowledge_chat', AccountLogEnum::TOKENS_DEC_KNOWLEDGE_CHAT],
             AccountLogEnum::TOKENS_DEC_OPENAI_CHAT => ['openai_chat', AccountLogEnum::TOKENS_DEC_OPENAI_CHAT],
+            AccountLogEnum::TOKENS_DEC_GEMINI_CHAT => ['gemini_chat', AccountLogEnum::TOKENS_DEC_GEMINI_CHAT],
         };
 
         $unit =  TokenLogService::getTypeScore($tokenScene);
@@ -886,8 +906,9 @@ class ChatLogic extends ApiLogic
 
         [$tokenScene, $tokenCode] = match ($scene) {
             self::COMMON_CHAT => ['common_chat', AccountLogEnum::TOKENS_DEC_COMMON_CHAT],
-            self::SCENE_CHAT => ['scene_chat', AccountLogEnum::TOKENS_DEC_SCENE_CHAT],
+            self::SCENE_CHAT  => ['scene_chat', AccountLogEnum::TOKENS_DEC_SCENE_CHAT],
             self::OPENAI_CHAT => ['openai_chat', AccountLogEnum::TOKENS_DEC_OPENAI_CHAT],
+            self::GEMINI_CHAT => ['gemini_chat', AccountLogEnum::TOKENS_DEC_GEMINI_CHAT],
         };
 
         //检查用户token
@@ -904,6 +925,8 @@ class ChatLogic extends ApiLogic
             $requestService->message($request);
         } else if ($scene == self::OPENAI_CHAT) {
             $requestService->openaiMessage($request);
+        } else if ($scene == self::GEMINI_CHAT) {
+            $requestService->geminiMessage($request);
         } else {
             $requestService->sceneMessage($request);
         }

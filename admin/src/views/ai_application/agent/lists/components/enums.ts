@@ -56,6 +56,7 @@ export interface Agent {
         api_token: string; // 授权Token
     };
     cate_id: string | number; // 类目ID
+    threshold: number; // 技能阈值
 }
 
 /**

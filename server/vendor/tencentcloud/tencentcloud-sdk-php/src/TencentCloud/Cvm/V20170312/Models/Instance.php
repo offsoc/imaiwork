@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setInstanceType(string $InstanceType) 设置实例机型。
  * @method integer getCPU() 获取实例的CPU核数，单位：核。
  * @method void setCPU(integer $CPU) 设置实例的CPU核数，单位：核。
- * @method integer getMemory() 获取实例内存容量，单位：`GB`。
- * @method void setMemory(integer $Memory) 设置实例内存容量，单位：`GB`。
+ * @method integer getMemory() 获取实例内存容量，单位：`GiB`。
+ * @method void setMemory(integer $Memory) 设置实例内存容量，单位：`GiB`。
  * @method string getRestrictState() 获取实例业务状态。取值范围：<br><li>NORMAL：表示正常状态的实例</li><li>EXPIRED：表示过期的实例</li><li>PROTECTIVELY_ISOLATED：表示被安全隔离的实例。</li>
  * @method void setRestrictState(string $RestrictState) 设置实例业务状态。取值范围：<br><li>NORMAL：表示正常状态的实例</li><li>EXPIRED：表示过期的实例</li><li>PROTECTIVELY_ISOLATED：表示被安全隔离的实例。</li>
  * @method string getInstanceName() 获取实例名称。
@@ -122,6 +122,10 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method void setLatestOperationErrorMsg(string $LatestOperationErrorMsg) 设置实例的最新操作错误信息。
 注意：此字段可能返回 null，表示取不到有效值。
+ * @method Metadata getMetadata() 获取自定义metadata，本参数对应创建 CVM时指定的Metadata 信息。**注：内测中**。
+ * @method void setMetadata(Metadata $Metadata) 设置自定义metadata，本参数对应创建 CVM时指定的Metadata 信息。**注：内测中**。
+ * @method array getPublicIPv6Addresses() 获取实例绑定的公网IPv6地址。
+ * @method void setPublicIPv6Addresses(array $PublicIPv6Addresses) 设置实例绑定的公网IPv6地址。
  */
 class Instance extends AbstractModel
 {
@@ -146,7 +150,7 @@ class Instance extends AbstractModel
     public $CPU;
 
     /**
-     * @var integer 实例内存容量，单位：`GB`。
+     * @var integer 实例内存容量，单位：`GiB`。
      */
     public $Memory;
 
@@ -341,11 +345,21 @@ class Instance extends AbstractModel
     public $LatestOperationErrorMsg;
 
     /**
+     * @var Metadata 自定义metadata，本参数对应创建 CVM时指定的Metadata 信息。**注：内测中**。
+     */
+    public $Metadata;
+
+    /**
+     * @var array 实例绑定的公网IPv6地址。
+     */
+    public $PublicIPv6Addresses;
+
+    /**
      * @param Placement $Placement 实例所在的位置。
      * @param string $InstanceId 实例`ID`。
      * @param string $InstanceType 实例机型。
      * @param integer $CPU 实例的CPU核数，单位：核。
-     * @param integer $Memory 实例内存容量，单位：`GB`。
+     * @param integer $Memory 实例内存容量，单位：`GiB`。
      * @param string $RestrictState 实例业务状态。取值范围：<br><li>NORMAL：表示正常状态的实例</li><li>EXPIRED：表示过期的实例</li><li>PROTECTIVELY_ISOLATED：表示被安全隔离的实例。</li>
      * @param string $InstanceName 实例名称。
      * @param string $InstanceChargeType 实例[计费类型](https://cloud.tencent.com/document/product/213/2180)。取值范围：<br><li>PREPAID：预付费，即包年包月</li><br><li>POSTPAID_BY_HOUR：按小时后付费</li><br><li>CDHPAID：独享子机（基于专用宿主机创建，宿主机部分的资源不收费）</li><br><li>SPOTPAID：竞价付费</li><br><li>CDCPAID：专用集群付费</li>
@@ -392,6 +406,8 @@ class Instance extends AbstractModel
      * @param integer $DefaultLoginPort 默认登录端口。
      * @param string $LatestOperationErrorMsg 实例的最新操作错误信息。
 注意：此字段可能返回 null，表示取不到有效值。
+     * @param Metadata $Metadata 自定义metadata，本参数对应创建 CVM时指定的Metadata 信息。**注：内测中**。
+     * @param array $PublicIPv6Addresses 实例绑定的公网IPv6地址。
      */
     function __construct()
     {
@@ -584,6 +600,15 @@ class Instance extends AbstractModel
 
         if (array_key_exists("LatestOperationErrorMsg",$param) and $param["LatestOperationErrorMsg"] !== null) {
             $this->LatestOperationErrorMsg = $param["LatestOperationErrorMsg"];
+        }
+
+        if (array_key_exists("Metadata",$param) and $param["Metadata"] !== null) {
+            $this->Metadata = new Metadata();
+            $this->Metadata->deserialize($param["Metadata"]);
+        }
+
+        if (array_key_exists("PublicIPv6Addresses",$param) and $param["PublicIPv6Addresses"] !== null) {
+            $this->PublicIPv6Addresses = $param["PublicIPv6Addresses"];
         }
     }
 }

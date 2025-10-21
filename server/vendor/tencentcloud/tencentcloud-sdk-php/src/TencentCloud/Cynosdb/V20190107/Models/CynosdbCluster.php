@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,8 @@ deleted:已删除
  * @method void setSubnetId(string $SubnetId) 设置子网ID
  * @method string getCynosVersion() 获取cynos内核版本
  * @method void setCynosVersion(string $CynosVersion) 设置cynos内核版本
+ * @method string getCynosVersionTag() 获取cynos版本标签
+ * @method void setCynosVersionTag(string $CynosVersionTag) 设置cynos版本标签
  * @method integer getStorageLimit() 获取存储容量
  * @method void setStorageLimit(integer $StorageLimit) 设置存储容量
  * @method integer getRenewFlag() 获取续费标志
@@ -128,6 +130,10 @@ pause
  * @method void setAbility(Ability $Ability) 设置能力
  * @method array getResourcePackages() 获取实例绑定资源包信息（此处只返回存储资源包，即packageType=DISK）	
  * @method void setResourcePackages(array $ResourcePackages) 设置实例绑定资源包信息（此处只返回存储资源包，即packageType=DISK）	
+ * @method string getGdnId() 获取全球数据库唯一标识
+ * @method void setGdnId(string $GdnId) 设置全球数据库唯一标识
+ * @method string getGdnRole() 获取集群角色。主集群- primary，从集群 - standby，如果 GdnId为空，该字段无效。
+ * @method void setGdnRole(string $GdnRole) 设置集群角色。主集群- primary，从集群 - standby，如果 GdnId为空，该字段无效。
  */
 class CynosdbCluster extends AbstractModel
 {
@@ -246,6 +252,11 @@ deleted:已删除
     public $CynosVersion;
 
     /**
+     * @var string cynos版本标签
+     */
+    public $CynosVersionTag;
+
+    /**
      * @var integer 存储容量
      */
     public $StorageLimit;
@@ -358,6 +369,16 @@ pause
     public $ResourcePackages;
 
     /**
+     * @var string 全球数据库唯一标识
+     */
+    public $GdnId;
+
+    /**
+     * @var string 集群角色。主集群- primary，从集群 - standby，如果 GdnId为空，该字段无效。
+     */
+    public $GdnRole;
+
+    /**
      * @param string $Status 集群状态， 可选值如下:
 creating: 创建中
 running:运行中
@@ -388,6 +409,7 @@ deleted:已删除
      * @param string $VpcId 私有网络ID
      * @param string $SubnetId 子网ID
      * @param string $CynosVersion cynos内核版本
+     * @param string $CynosVersionTag cynos版本标签
      * @param integer $StorageLimit 存储容量
      * @param integer $RenewFlag 续费标志
      * @param string $ProcessingTask 正在处理的任务
@@ -412,6 +434,8 @@ pause
      * @param string $OrderSource 订单来源
      * @param Ability $Ability 能力
      * @param array $ResourcePackages 实例绑定资源包信息（此处只返回存储资源包，即packageType=DISK）	
+     * @param string $GdnId 全球数据库唯一标识
+     * @param string $GdnRole 集群角色。主集群- primary，从集群 - standby，如果 GdnId为空，该字段无效。
      */
     function __construct()
     {
@@ -508,6 +532,10 @@ pause
 
         if (array_key_exists("CynosVersion",$param) and $param["CynosVersion"] !== null) {
             $this->CynosVersion = $param["CynosVersion"];
+        }
+
+        if (array_key_exists("CynosVersionTag",$param) and $param["CynosVersionTag"] !== null) {
+            $this->CynosVersionTag = $param["CynosVersionTag"];
         }
 
         if (array_key_exists("StorageLimit",$param) and $param["StorageLimit"] !== null) {
@@ -617,6 +645,14 @@ pause
                 $obj->deserialize($value);
                 array_push($this->ResourcePackages, $obj);
             }
+        }
+
+        if (array_key_exists("GdnId",$param) and $param["GdnId"] !== null) {
+            $this->GdnId = $param["GdnId"];
+        }
+
+        if (array_key_exists("GdnRole",$param) and $param["GdnRole"] !== null) {
+            $this->GdnRole = $param["GdnRole"];
         }
     }
 }

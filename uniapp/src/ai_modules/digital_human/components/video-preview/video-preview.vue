@@ -10,7 +10,7 @@
                 <video-player
                     v-if="show"
                     ref="videoPlayerRef"
-                    :poster="`${config.baseUrl}static/images/dh_example_bg1.png`"
+                    :poster="poster || `${config.baseUrl}static/images/dh_example_bg1.png`"
                     :video-url="videoUrl"></video-player>
             </view>
             <view class="mt-[40rpx]">
@@ -39,10 +39,12 @@ const props = withDefaults(
         show: boolean;
         videoUrl: string;
         confirmBtnText?: string;
+        poster?: string;
     }>(),
     {
         title: "",
         show: false,
+        poster: "",
         confirmBtnText: "确定",
     }
 );
@@ -59,9 +61,10 @@ const showPopup = computed({
 });
 
 const isShowVideo = ref(true);
+
 watch(
     () => props.show,
-    (val) => {
+    async (val) => {
         if (!val) {
             setTimeout(() => {
                 isShowVideo.value = false;
@@ -69,13 +72,16 @@ watch(
             return;
         }
         isShowVideo.value = true;
+        setTimeout(() => {
+            videoPlayerRef.value?.toggleVideo();
+        }, 300);
     }
 );
 
 const videoPlayerRef = ref<InstanceType<typeof VideoPlayer>>();
 
 defineExpose({
-    playVideo: () => {
+    toggleVideo: () => {
         videoPlayerRef.value?.toggleVideo();
     },
 });

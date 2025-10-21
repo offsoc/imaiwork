@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ use TencentCloud\Common\AbstractModel;
 /**
  * StartReplication请求参数结构体
  *
- * @method string getInstanceId() 获取实例 ID。仅支持只读实例。
- * @method void setInstanceId(string $InstanceId) 设置实例 ID。仅支持只读实例。
+ * @method string getInstanceId() 获取实例 ID。仅支持只读实例。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
+ * @method void setInstanceId(string $InstanceId) 设置实例 ID。仅支持只读实例。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
  */
 class StartReplicationRequest extends AbstractModel
 {
     /**
-     * @var string 实例 ID。仅支持只读实例。
+     * @var string 实例 ID。仅支持只读实例。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
      */
     public $InstanceId;
 
     /**
-     * @param string $InstanceId 实例 ID。仅支持只读实例。
+     * @param string $InstanceId 实例 ID。仅支持只读实例。可通过 [DescribeDBInstances](https://cloud.tencent.com/document/product/236/15872) 接口获取。
      */
     function __construct()
     {

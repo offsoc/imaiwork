@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ use TencentCloud\Common\AbstractModel;
 /**
  * 查询过滤器
  *
- * @method array getNames() 获取搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
- * @method void setNames(array $Names) 设置搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
  * @method array getValues() 获取搜索字符串
  * @method void setValues(array $Values) 设置搜索字符串
+ * @method array getNames() 获取搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
+ * @method void setNames(array $Names) 设置搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
  * @method boolean getExactMatch() 获取是否精确匹配
  * @method void setExactMatch(boolean $ExactMatch) 设置是否精确匹配
  * @method string getName() 获取搜索字段
@@ -34,14 +34,14 @@ use TencentCloud\Common\AbstractModel;
 class QueryFilter extends AbstractModel
 {
     /**
-     * @var array 搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
-     */
-    public $Names;
-
-    /**
      * @var array 搜索字符串
      */
     public $Values;
+
+    /**
+     * @var array 搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
+     */
+    public $Names;
 
     /**
      * @var boolean 是否精确匹配
@@ -59,8 +59,8 @@ class QueryFilter extends AbstractModel
     public $Operator;
 
     /**
-     * @param array $Names 搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
      * @param array $Values 搜索字符串
+     * @param array $Names 搜索字段，目前支持："InstanceId", "ProjectId", "InstanceName", "Vip"
      * @param boolean $ExactMatch 是否精确匹配
      * @param string $Name 搜索字段
      * @param string $Operator 操作符
@@ -78,12 +78,12 @@ class QueryFilter extends AbstractModel
         if ($param === null) {
             return;
         }
-        if (array_key_exists("Names",$param) and $param["Names"] !== null) {
-            $this->Names = $param["Names"];
-        }
-
         if (array_key_exists("Values",$param) and $param["Values"] !== null) {
             $this->Values = $param["Values"];
+        }
+
+        if (array_key_exists("Names",$param) and $param["Names"] !== null) {
+            $this->Names = $param["Names"];
         }
 
         if (array_key_exists("ExactMatch",$param) and $param["ExactMatch"] !== null) {

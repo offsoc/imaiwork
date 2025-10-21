@@ -64,26 +64,26 @@ export default function useHandleApi(options?: any) {
             title: "确定要重新转写？",
             success: async (res) => {
                 if (res.confirm) {
+                    uni.showLoading({
+                        title: "重试中",
+                        mask: true,
+                    });
                     try {
-                        uni.showLoading({
-                            title: "重试中",
-                            mask: true,
-                        });
                         await meetingMinutesRetry({ id });
                         onSuccess?.("retry");
+                        uni.hideLoading();
                         uni.showToast({
                             title: "重试成功",
                             icon: "none",
-                            duration: 1000,
+                            duration: 3000,
                         });
                     } catch (error: any) {
+                        uni.hideLoading();
                         uni.showToast({
                             title: error || "重试失败",
                             icon: "none",
-                            duration: 1000,
+                            duration: 3000,
                         });
-                    } finally {
-                        uni.hideLoading();
                     }
                 }
             },
@@ -95,13 +95,14 @@ export default function useHandleApi(options?: any) {
                 title: "确定删除此会议纪要吗？",
                 success: async (res) => {
                     if (res.confirm) {
+                        uni.showLoading({
+                            title: "删除中",
+                            mask: true,
+                        });
                         try {
-                            uni.showLoading({
-                                title: "删除中",
-                                mask: true,
-                            });
                             await meetingMinutesDelete({ id });
                             onSuccess?.("delete");
+                            uni.hideLoading();
                             uni.showToast({
                                 title: "删除成功",
                                 icon: "none",
@@ -109,14 +110,13 @@ export default function useHandleApi(options?: any) {
                             });
                             resolve(true);
                         } catch (error: any) {
+                            uni.hideLoading();
                             uni.showToast({
                                 title: error || "删除失败",
                                 icon: "none",
                                 duration: 1000,
                             });
                             reject(error);
-                        } finally {
-                            uni.hideLoading();
                         }
                     }
                 },

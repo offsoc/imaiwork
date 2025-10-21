@@ -72,7 +72,9 @@
                             placeholder="请选择加微结果"
                             filterable
                             clearable
+                            :empty-values="[undefined, null]"
                             :show-arrow="false">
+                            <ElOption label="全部" value=""></ElOption>
                             <ElOption label="失败" value="0"></ElOption>
                             <ElOption label="成功" value="1"></ElOption>
                             <ElOption label="执行中" value="2"></ElOption>

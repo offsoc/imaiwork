@@ -160,7 +160,6 @@ const { proxy }: any = getCurrentInstance();
 
 const showPopup = ref<boolean>(false);
 
-const recorder = ref<any>(null);
 const isRecording = ref<boolean>(false);
 const isPaused = ref<boolean>(false);
 const isUploadError = ref<boolean>(false);
@@ -261,16 +260,16 @@ const stopRecord = async () => {
                         formData.name = fileName;
                         await cratedTask();
                         resolve(true);
+                        uni.hideLoading();
                     } catch (error: any) {
+                        uni.hideLoading();
                         uni.showToast({
                             title: error || "上传失败",
                             icon: "none",
-                            duration: 1000,
+                            duration: 3000,
                         });
                         isUploadError.value = true;
                         reject(false);
-                    } finally {
-                        uni.hideLoading();
                     }
                 },
                 (err: any) => {
@@ -373,10 +372,11 @@ const cratedTask = async () => {
             ...formData,
             translation: formData.translation == 0 ? "" : formData.translation,
         });
+        uni.hideLoading();
         uni.showToast({
             title: "创建成功，即将返回首页",
             icon: "none",
-            duration: 4000,
+            duration: 3000,
         });
         setTimeout(() => {
             uni.$u.route({
@@ -386,13 +386,12 @@ const cratedTask = async () => {
         }, 1000);
     } catch (error: any) {
         isUploadError.value = true;
+        uni.hideLoading();
         uni.showToast({
             title: error || "创建失败",
             icon: "none",
-            duration: 5000,
+            duration: 3000,
         });
-    } finally {
-        uni.hideLoading();
     }
 };
 

@@ -4,7 +4,7 @@ namespace app\common\service\storage\engine;
 
 use OSS\OssClient;
 use OSS\Core\OssException;
-
+use GuzzleHttp\Client;
 /**
  * 阿里云存储引擎 (OSS)
  * Class Qiniu
@@ -74,6 +74,7 @@ class Aliyun extends Server
                 $key,
                 $content
             );
+
         } catch (OssException $e) {
             $this->error = $e->getMessage();
             return false;

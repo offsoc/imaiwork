@@ -305,7 +305,7 @@ class DeviceHandler extends BaseMessageHandler
                 $worker->uidConnections[$uid]->name =  'device:' . $payload['deviceId'];
                 $worker->uidConnections[$uid]->initial = 0;
                 $worker->uidConnections[$uid]->isMsgRunning = 0;
-                $worker->uidConnections[$uid]->crontabId = Timer::add(90, function () use ($uid, $payload, $worker) {
+                $worker->uidConnections[$uid]->crontabId = Timer::add(100, function () use ($uid, $payload, $worker) {
                 $uid = $this->service->getRedis()->get("xhs:device:{$payload['deviceId']}") ?? $uid;
                     if (!isset($worker->uidConnections[$uid])) {
                         $msg = '设备不在线';
@@ -329,6 +329,7 @@ class DeviceHandler extends BaseMessageHandler
                 $worker->devices[$payload['deviceId']] = $uid;
                 $worker->appType = $payload['appType'] ?? 3;
                 $this->service->getRedis()->set("xhs:device:" . $payload['deviceId'], $uid);
+                $this->service->getRedis()->set("xhs:device:" . $payload['deviceId'] . ":status", 'online');
                 $this->service->setWorker($worker);
                 $this->registerChannelListener($this->connection, $payload['deviceId']);
                 $this->setLog('设备绑定socket连接, 设备号:' . $payload['deviceId'] . ', uid:' . $uid . ', name:' . $worker->uidConnections[$uid]->name, 'device');

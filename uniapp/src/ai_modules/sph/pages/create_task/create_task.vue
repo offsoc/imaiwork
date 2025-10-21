@@ -111,6 +111,13 @@ import { createTask } from "@/api/sph";
 import { getDeviceList as getDeviceListApi } from "@/api/device";
 import { useLockFn } from "@/hooks/useLockFn";
 import { usePaging } from "@/hooks/usePaging";
+import { useAppStore } from "@/stores/app";
+
+const appStore = useAppStore();
+
+const getWechatRemarks = computed(() => {
+    return appStore.config.wechat_remarks || [];
+});
 
 const keywordsList = ref<string[]>([]);
 
@@ -123,7 +130,7 @@ const formData = reactive({
     chat_number: 30,
     chat_interval_time: 10,
     greeting_content: "",
-    add_type: "0",
+    add_type: "1",
     remark: "",
     add_number: 15,
     add_interval_time: 10,
@@ -131,6 +138,8 @@ const formData = reactive({
     add_friends_prompt: "",
     wechat_id: "",
     wechat_reg_type: 0,
+    add_remark_enable: 1,
+    remarks: getWechatRemarks.value,
 });
 
 const { pager: devicePager, getLists: getDeviceList } = usePaging({

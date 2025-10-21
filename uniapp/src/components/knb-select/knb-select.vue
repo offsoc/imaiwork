@@ -125,7 +125,7 @@ const queryList = async (page_no: number, page_size: number) => {
         const { lists } = await (currId == 0 ? vectorKnowledgeBaseLists : knowledgeBaseLists)(params);
         pagingRef.value?.complete(lists);
     } catch (error) {
-        pagingRef.value?.complete(false);
+        pagingRef.value?.complete([]);
     }
 };
 

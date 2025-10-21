@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,33 +21,25 @@ use TencentCloud\Common\AbstractModel;
  * cos地域信息
  *
  * @method string getCosRegion() 获取cos地域
-注意：此字段可能返回 null，表示取不到有效值。
  * @method void setCosRegion(string $CosRegion) 设置cos地域
-注意：此字段可能返回 null，表示取不到有效值。
  * @method string getCosRegionName() 获取地域描述
-注意：此字段可能返回 null，表示取不到有效值。
  * @method void setCosRegionName(string $CosRegionName) 设置地域描述
-注意：此字段可能返回 null，表示取不到有效值。
  */
 class CosRegionInfo extends AbstractModel
 {
     /**
      * @var string cos地域
-注意：此字段可能返回 null，表示取不到有效值。
      */
     public $CosRegion;
 
     /**
      * @var string 地域描述
-注意：此字段可能返回 null，表示取不到有效值。
      */
     public $CosRegionName;
 
     /**
      * @param string $CosRegion cos地域
-注意：此字段可能返回 null，表示取不到有效值。
      * @param string $CosRegionName 地域描述
-注意：此字段可能返回 null，表示取不到有效值。
      */
     function __construct()
     {

@@ -1,7 +1,7 @@
 <template>
     <el-card class="!border-none" shadow="never" v-if="data.length > 0">
         <template #header>
-            <div class="font-bold">{{ title }}</div>
+            <div>{{ title }}</div>
         </template>
         <el-table :data="data">
             <el-table-column prop="name" label="名称" min-width="150">

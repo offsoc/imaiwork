@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,8 @@ use TencentCloud\Common\AbstractModel;
  * @method void setTag(array $Tag) 设置tag标签
  * @method string getSourceType() 获取关联实例类型
  * @method void setSourceType(string $SourceType) 设置关联实例类型
- * @method string getMemberId() 获取memberiD
- * @method void setMemberId(string $MemberId) 设置memberiD
+ * @method string getMemberId() 获取memberId信息
+ * @method void setMemberId(string $MemberId) 设置memberId信息
  * @method integer getCCAttack() 获取cc攻击
  * @method void setCCAttack(integer $CCAttack) 设置cc攻击
  * @method integer getWebAttack() 获取web攻击
@@ -252,7 +252,7 @@ class DomainAssetVO extends AbstractModel
     public $SourceType;
 
     /**
-     * @var string memberiD
+     * @var string memberId信息
      */
     public $MemberId;
 
@@ -327,7 +327,7 @@ class DomainAssetVO extends AbstractModel
      * @param integer $WebContentRisk 内容风险
      * @param array $Tag tag标签
      * @param string $SourceType 关联实例类型
-     * @param string $MemberId memberiD
+     * @param string $MemberId memberId信息
      * @param integer $CCAttack cc攻击
      * @param integer $WebAttack web攻击
      * @param integer $ServiceRisk 风险服务暴露数量

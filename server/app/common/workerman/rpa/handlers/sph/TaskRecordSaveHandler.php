@@ -96,6 +96,8 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                     'ocr_type' => 3,
                 ];
             }
+            // $crawlContent = explode("关注\n", $content['crawl_content']);
+            // $content['crawl_content'] = $crawlContent[0] ?? $content['crawl_content'];
 
             if (empty(trim($content['crawl_content']))) {
                 $this->setLog('获客内容为空,忽略', 'task_record');
@@ -161,7 +163,8 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                 'clue_type' => empty($reg_content) ? 0 : (preg_match('/1[3-9]\d{9}/', implode(',', $reg_content)) ? 2 : 1),
                 'address' => $content['address'] ?? '',
                 'sub_task_id' => $sub_task_id,
-                'tokens' => $task->ocr_type == 1 ? ($isExist ? 0 : $points) : 0,
+                //'tokens' => $task->ocr_type == 1 ? ($isExist ? 0 : $points) : 0,
+                'tokens' => $isExist ? 0 : $points,
                 'hash' => $hash,
                 'exec_time' => date('Y-m-d H:i:s'),
                 'create_time' => time()
@@ -173,11 +176,9 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $task->update_time = time();
             $task->save();
 
-            if($task->ocr_type == 1) {
-                if (!$isExist) {
-                    User::userTokensChange($userId, $points);
-                    AccountLogLogic::recordUserTokensLog(true, $userId, $tokenCode, $points, $sub_task_id, $extra);
-                }
+            if (!$isExist) {
+                User::userTokensChange($userId, $points);
+                AccountLogLogic::recordUserTokensLog(true, $userId, $tokenCode, $points, $sub_task_id, $extra);
             }
 
             $result['msg'] = '获客内容上报成功';
@@ -393,7 +394,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                         'status' => $status,
                         'channel' => 4,
                         'exec_type' => $payload['exec_type'] ?? 2,
-                        'task_id' => time() . rand(100, 9999),
+                        'task_id' => time() . rand(100, 999),
                         'crawling_task_id' => $task->id,
                         'create_time' => time()
                     ];

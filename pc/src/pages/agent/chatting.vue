@@ -43,9 +43,6 @@ import CozeFlowChat from "./_components/chatting/coze-flow-chat.vue";
  * @summary 动态加载不同类型的智能体聊天组件，实现逻辑分离。
  */
 
-const router = useRouter();
-const route = useRoute();
-
 // 使用统一的管理器
 const {
     agentId,

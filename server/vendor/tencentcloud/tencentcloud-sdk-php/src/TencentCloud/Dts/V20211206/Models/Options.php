@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+ * Copyright (c) 2017-2025 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ use TencentCloud\Common\AbstractModel;
 /**
  * 数据同步中的选项
  *
- * @method string getInitType() 获取同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)
- * @method void setInitType(string $InitType) 设置同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)
+ * @method string getInitType() 获取同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)；mongodb链路只支持全量数据初始化或仅增量。
+ * @method void setInitType(string $InitType) 设置同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)；mongodb链路只支持全量数据初始化或仅增量。
  * @method string getDealOfExistSameTable() 获取同名表的处理，ReportErrorAfterCheck(前置校验并报错，默认)、ExecuteAfterIgnore(忽略并继续执行)
  * @method void setDealOfExistSameTable(string $DealOfExistSameTable) 设置同名表的处理，ReportErrorAfterCheck(前置校验并报错，默认)、ExecuteAfterIgnore(忽略并继续执行)
  * @method string getConflictHandleType() 获取冲突处理选项，ReportError(报错，默认为该值)、Ignore(忽略)、Cover(覆盖)、ConditionCover(条件覆盖)
@@ -34,9 +34,9 @@ use TencentCloud\Common\AbstractModel;
 注意：此字段可能返回 null，表示取不到有效值。
  * @method ConflictHandleOption getConflictHandleOption() 获取冲突处理的详细选项，如条件覆盖中的条件行和条件操作
  * @method void setConflictHandleOption(ConflictHandleOption $ConflictHandleOption) 设置冲突处理的详细选项，如条件覆盖中的条件行和条件操作
- * @method array getDdlOptions() 获取DDL同步选项，具体描述要同步那些DDL
+ * @method array getDdlOptions() 获取DDL同步选项，具体描述要同步哪些DDL
 注意：此字段可能返回 null，表示取不到有效值。
- * @method void setDdlOptions(array $DdlOptions) 设置DDL同步选项，具体描述要同步那些DDL
+ * @method void setDdlOptions(array $DdlOptions) 设置DDL同步选项，具体描述要同步哪些DDL
 注意：此字段可能返回 null，表示取不到有效值。
  * @method KafkaOption getKafkaOption() 获取kafka同步选项
  * @method void setKafkaOption(KafkaOption $KafkaOption) 设置kafka同步选项
@@ -54,7 +54,7 @@ use TencentCloud\Common\AbstractModel;
 class Options extends AbstractModel
 {
     /**
-     * @var string 同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)
+     * @var string 同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)；mongodb链路只支持全量数据初始化或仅增量。
      */
     public $InitType;
 
@@ -85,7 +85,7 @@ class Options extends AbstractModel
     public $ConflictHandleOption;
 
     /**
-     * @var array DDL同步选项，具体描述要同步那些DDL
+     * @var array DDL同步选项，具体描述要同步哪些DDL
 注意：此字段可能返回 null，表示取不到有效值。
      */
     public $DdlOptions;
@@ -121,14 +121,14 @@ class Options extends AbstractModel
     public $FilterCheckpoint;
 
     /**
-     * @param string $InitType 同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)
+     * @param string $InitType 同步初始化选项，Data(全量数据初始化)、Structure(结构初始化)、Full(全量数据且结构初始化，默认)、None(仅增量)；mongodb链路只支持全量数据初始化或仅增量。
      * @param string $DealOfExistSameTable 同名表的处理，ReportErrorAfterCheck(前置校验并报错，默认)、ExecuteAfterIgnore(忽略并继续执行)
      * @param string $ConflictHandleType 冲突处理选项，ReportError(报错，默认为该值)、Ignore(忽略)、Cover(覆盖)、ConditionCover(条件覆盖)
      * @param boolean $AddAdditionalColumn 是否添加附加列
      * @param array $OpTypes 所要同步的DML和DDL的选项，Insert(插入操作)、Update(更新操作)、Delete(删除操作)、DDL(结构同步)， PartialDDL(自定义,和DdlOptions一起配合使用)。注意，这里至少需要包含DML中的一种。
 注意：此字段可能返回 null，表示取不到有效值。
      * @param ConflictHandleOption $ConflictHandleOption 冲突处理的详细选项，如条件覆盖中的条件行和条件操作
-     * @param array $DdlOptions DDL同步选项，具体描述要同步那些DDL
+     * @param array $DdlOptions DDL同步选项，具体描述要同步哪些DDL
 注意：此字段可能返回 null，表示取不到有效值。
      * @param KafkaOption $KafkaOption kafka同步选项
      * @param RateLimitOption $RateLimitOption 任务限速信息
