@@ -224,7 +224,7 @@ const handleDeleteCopywriter = (index: number) => {
 };
 
 const useContent = () => {
-    uni.$emit("confirm", {
+    uni.$emit("confirm-v2", {
         type: ListenerTypeEnum.AI_COPYWRITER,
         data: { copywriterList: chatContentList.value.map((item) => ({ title: item.title, content: item.content })) },
     });

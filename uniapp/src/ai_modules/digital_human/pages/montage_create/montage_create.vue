@@ -998,13 +998,10 @@ const getAnchorList = async () => {
 
 onLoad(() => {
     getAnchorList();
-});
-
-onShow(() => {
-    uni.$once("confirm", (res: any) => {
+    uni.$on("confirm-v2", (res: any) => {
         const { type, data } = res;
-        if (type === ListenerTypeEnum.MONTAGE_ANCHOR) {
-            if (data.length == 0) return;
+        if (type === ListenerTypeEnum.CHOOSE_MONTAGE_ANCHOR) {
+            if (!data) return;
             anchorLists.value = anchorLists.value.concat(data);
         }
         if (type === ListenerTypeEnum.MONTAGE_COPYWRITER || type === ListenerTypeEnum.AI_COPYWRITER) {

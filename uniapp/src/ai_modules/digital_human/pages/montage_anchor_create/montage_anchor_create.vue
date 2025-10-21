@@ -314,11 +314,9 @@ const handleCreateAnchor = async () => {
 
 const handleCreateStatus = () => {
     if (isSuccess.value) {
-        uni.$emit("confirm", {
-            type: ListenerTypeEnum.MONTAGE_ANCHOR,
-            data: {
-                detail: detail.value,
-            },
+        uni.$emit("confirm-v2", {
+            type: ListenerTypeEnum.CHOOSE_MONTAGE_ANCHOR,
+            data: detail.value,
         });
         uni.navigateBack();
     } else {

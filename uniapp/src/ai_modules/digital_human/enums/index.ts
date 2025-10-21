@@ -51,6 +51,8 @@ export enum ListenerTypeEnum {
     CHOOSE_MUSIC = "choose-music",
     // 混剪形象
     MONTAGE_ANCHOR = "montage-anchor",
+    // 选择混剪形象
+    CHOOSE_MONTAGE_ANCHOR = "choose-montage-anchor",
     // 混剪授权
     MONTAGE_AUTH = "montage-auth",
     // 上传授权相机

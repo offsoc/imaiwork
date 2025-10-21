@@ -37,7 +37,7 @@ const formData = reactive({
 });
 
 const back = () => {
-    uni.$emit("confirm", {
+    uni.$emit("confirm-v2", {
         type: ListenerTypeEnum.MONTAGE_COPYWRITER,
         data: {
             copywriterList: formData.title && formData.content ? [formData] : [],
