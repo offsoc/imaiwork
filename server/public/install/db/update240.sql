@@ -1,6 +1,6 @@
 
 
-CREATE TABLE IF NOT EXISTS`la_shanjian_clip_template` (
+CREATE TABLE IF NOT EXISTS `la_shanjian_clip_template` (
 `id` varchar(40) NOT NULL COMMENT 'Mongo风格主键',
 `name` varchar(128) NOT NULL DEFAULT '' COMMENT '模板名称',
 `cover_url` varchar(255) NOT NULL DEFAULT '' COMMENT '封面图URL',
@@ -81,7 +81,7 @@ INSERT INTO `la_shanjian_clip_template` (`id`, `name`, `cover_url`, `scene`, `de
 INSERT INTO `la_shanjian_clip_template` (`id`, `name`, `cover_url`, `scene`, `demo_url`, `create_time`, `update_time`) VALUES ('68bab05f49c0ae002fc0caec', '翻转红白', 'https://img-vidflow.oss-cn-beijing.aliyuncs.com/video_style/2025/09/05/19/5b210880ab1ac96ae5ed9909f0163f62.webp', 'virtualman', 'https://vod-vidflow.oss-cn-beijing.aliyuncs.com/video_style/2025/09/05/17/64fcf16b663cef003412171492fbb6f5.mp4', 1757756773, 1757756773);
 INSERT INTO `la_shanjian_clip_template` (`id`, `name`, `cover_url`, `scene`, `demo_url`, `create_time`, `update_time`) VALUES ('68b6d13accd8300033ca0c54', '高级黄红', 'https://img-vidflow.oss-cn-beijing.aliyuncs.com/video_style/2025/09/03/11/f9009b612fe5037a27bdb3ae6b406012.webp', 'virtualman', 'https://vod-vidflow.oss-cn-beijing.aliyuncs.com/video_style/2025/09/03/11/2284dfd05858f8b0d22e8c5d7c57c326.mp4', 1757756773, 1757756773);
 
-CREATE TABLE IF NOT EXISTS`la_shanjian_character_design` (
+CREATE TABLE IF NOT EXISTS `la_shanjian_character_design` (
 `id` int(11) NOT NULL AUTO_INCREMENT,
 `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户id',
 `name` varchar(255) NOT NULL DEFAULT '' COMMENT '名称',
@@ -117,7 +117,7 @@ ADD INDEX(`account_type`) USING BTREE,
 ADD INDEX(`status`) USING BTREE;
 
 
-CREATE TABLE IF NOT EXISTS`la_shanjian_video_task` (
+CREATE TABLE IF NOT EXISTS `la_shanjian_video_task` (
 `id` int(11) NOT NULL AUTO_INCREMENT,
 `name` varchar(200) NOT NULL DEFAULT '' COMMENT '名称',
 `pic` varchar(255) NOT NULL DEFAULT '' COMMENT '封面',
@@ -155,7 +155,7 @@ INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `descr
 INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ('human_video_shanjian', 5032, '算力/秒', 'AI智能口播混剪视频合成', 2.00, '', 1, 1740799252, 1740799252);
 INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ('sph_local_ocr', 11004, '算力/次', '本地OCR', 1.00, '本地ocr识别，1次/算力', 1, NULL, NULL);
 
-CREATE TABLE IF NOT EXISTS`la_shanjian_anchor` (
+CREATE TABLE IF NOT EXISTS `la_shanjian_anchor` (
 `id` int(11) NOT NULL AUTO_INCREMENT,
 `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户id',
 `name` varchar(50) NOT NULL DEFAULT '' COMMENT '标题',
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS`la_shanjian_anchor` (
 PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='闪剪数字人形象表';
 
-CREATE TABLE IF NOT EXISTS`la_shanjian_video_setting` (
+CREATE TABLE IF NOT EXISTS `la_shanjian_video_setting` (
 `id` int(11) NOT NULL AUTO_INCREMENT,
 `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户id',
 `name` varchar(50) NOT NULL DEFAULT '' COMMENT '名称',
@@ -202,7 +202,7 @@ PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='视频设置表';
 
 
-CREATE TABLE IF NOT EXISTS`la_sv_crawling_manual_task` (
+CREATE TABLE IF NOT EXISTS `la_sv_crawling_manual_task` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) DEFAULT '0',
   `name` varchar(255) DEFAULT NULL COMMENT '任务名称',
