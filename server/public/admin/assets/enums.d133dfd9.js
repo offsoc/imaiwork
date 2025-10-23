@@ -1,0 +1,1 @@
+var a=(r=>(r[r.AGENT=0]="AGENT",r[r.COZE_AGENT=1]="COZE_AGENT",r[r.COZE_FLOW=2]="COZE_FLOW",r))(a||{}),N=(r=>(r[r.AGENT=1]="AGENT",r[r.FLOW=2]="FLOW",r))(N||{}),O=(r=>(r.INPUT="input",r.TEXTAREA="textarea",r.NUMBER="number",r.FILE="file",r))(O||{});export{a as A,N as C,O as F};
