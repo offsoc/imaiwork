@@ -72,6 +72,7 @@
                         ref="sendContainerRef"
                         :type="PushTypeEnum.TASK"
                         :task-id="detail?.id"
+                        :push-day="detail?.push_day"
                         @back="back"
                         @success="getDetail(detail?.id)" />
                 </div>

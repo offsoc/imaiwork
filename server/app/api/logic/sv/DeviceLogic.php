@@ -21,12 +21,10 @@ class DeviceLogic extends SvBaseLogic
 {
 
     protected static array  $appMaps = [
-
+        1 => '视频号',
         3 => '小红书',
-        4 => '视频号',
-        5 => '抖音',
-        6 => '快手',
-        7 => 'BOSS直聘'
+        4 => '抖音',
+        5 => '快手'
     ];
     /**
      * @desc 添加设备
@@ -67,10 +65,10 @@ class DeviceLogic extends SvBaseLogic
     {
         SvDeviceRpa::where('device_code', $data['device_code'])->select()->delete();
         $maps = array(
+            ['app_icon' => '', 'app_type' => 1, 'app_name' => '视频号', 'exec_duration' => 200, 'is_enable' => 1, 'weight' => 1],
             ['app_icon' => '', 'app_type' => 3, 'app_name' => '小红书', 'exec_duration' => 200, 'is_enable' => 1, 'weight' => 0],
-            ['app_icon' => '', 'app_type' => 4, 'app_name' => '视频号', 'exec_duration' => 200, 'is_enable' => 1, 'weight' => 1],
-            ['app_icon' => '', 'app_type' => 5, 'app_name' => '抖音', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 2],
-            ['app_icon' => '', 'app_type' => 6, 'app_name' => '快手', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 3],
+            ['app_icon' => '', 'app_type' => 4, 'app_name' => '抖音', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 2],
+            ['app_icon' => '', 'app_type' => 5, 'app_name' => '快手', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 3],
         );
         foreach ($maps as &$item) {
             $item['device_code'] = $data['device_code'];

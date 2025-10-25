@@ -116,6 +116,7 @@ class RecallKnow
             $item['answer'] = get_file_domain($item['answer']);
             $item['character'] = mb_strlen($item['question']) + mb_strlen($item['answer']);
             $item['annex'] = json_decode($item['annex'], true);
+            $item['emb_score'] = number_format($item['full_score'], 5);
             $item['file'] = [
                 'id'   => $item['fd_id'],
                 'name' => $files[$item['fd_id']]??''

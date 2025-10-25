@@ -63,7 +63,7 @@ trait AiCircleTrait
                 $circles = $data['Content']['Circles'];
                 foreach ($circles as $circle) {
                     $PublishTime = $circle['PublishTime'];
-                    if (date('d', time()) != date('d', (int)$PublishTime)) {
+                    if (date('Ymd', time()) != date('Ymd', (int)$PublishTime)) {
                         continue;
                     }
                     $difftime = (time() - (int)$PublishTime) / 60;

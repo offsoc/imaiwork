@@ -22,7 +22,7 @@
                         boxShadow: ' 0px 3px 12px 0px rgba(0, 0, 0, 0.12)',
                         fontSize: '26rpx',
                     }"
-                    @click="emit('confirm')"
+                    @click="confirm"
                     >{{ confirmBtnText }}</u-button
                 >
             </view>
@@ -79,6 +79,11 @@ watch(
 );
 
 const videoPlayerRef = ref<InstanceType<typeof VideoPlayer>>();
+
+const confirm = () => {
+    emit("confirm");
+    showPopup.value = false;
+};
 
 defineExpose({
     toggleVideo: () => {

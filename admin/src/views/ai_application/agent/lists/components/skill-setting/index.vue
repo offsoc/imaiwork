@@ -116,6 +116,7 @@
                                 </template>
                                 <div class="flex items-center justify-between gap-x-6 mb-2 px-4">
                                     <div class="flex items-center w-full gap-x-4">
+                                        <div>模糊匹配阈值</div>
                                         <div class="flex-1">
                                             <ElSlider v-model="formData.threshold" :min="0" :max="1" :step="0.01" />
                                         </div>

@@ -674,7 +674,7 @@ class KbTeachLogic extends BaseLogic
                 $returnList[$key]['emb_model_id'] = 3;
                 $returnList[$key]['question'] = $val['question'];
                 $returnList[$key]['answer'] = $val['answer'];
-                $returnList[$key]['score'] = $val['emb_score'];
+                $returnList[$key]['score'] = $val['emb_score'] ?? 0;
                 $file = (new KbKnowFiles())->where(['id' => $val['fd_id']])->findOrEmpty()->toArray();
                 $returnList[$key]['source_path'] = $file ? FileService::getFileUrl($file['file']) : '';
                 $returnList[$key]['source'] = $file ? $file['name'] : '';

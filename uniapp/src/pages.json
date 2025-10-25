@@ -722,6 +722,17 @@
 					}
 				}
 			]
+		},
+		{
+			"root": "ai_modules/device",
+			"pages": [
+				{
+					"path": "pages/task_calendar/task_calendar",
+					"style": {
+						"navigationBarTitleText": "任务日历"
+					}
+				}
+			]
 		}
 	],
 	"globalStyle": {

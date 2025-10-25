@@ -97,6 +97,12 @@
         "pages/clue_list/clue_list",
         "pages/clue_detail/clue_detail"
       ]
+    },
+    {
+      "root": "ai_modules/device",
+      "pages": [
+        "pages/task_calendar/task_calendar"
+      ]
     }
   ],
   "window": {

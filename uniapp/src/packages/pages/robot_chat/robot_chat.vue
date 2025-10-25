@@ -142,6 +142,10 @@ const chatPostParams = reactive<any>({
 });
 
 const getSliderParams = (data: any) => {
+    if (userTokens.value <= 0) {
+        rechargePopupRef.value?.open();
+        return;
+    }
     fileLists.value = data.file || [];
     contentPost();
 };

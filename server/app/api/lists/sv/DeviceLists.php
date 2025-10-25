@@ -59,10 +59,10 @@ class DeviceLists extends BaseApiDataLists implements ListsSearchInterface
     private  function addDeviceRpa(SvDevice $device)
     {
         $maps = array(
+            ['app_icon' => '', 'app_type' => 1, 'app_name' => '视频号', 'exec_duration' => 200, 'is_enable' => 1, 'weight' => 1],
             ['app_icon' => '', 'app_type' => 3, 'app_name' => '小红书', 'exec_duration' => 200, 'is_enable' => 1, 'weight' => 0],
-            ['app_icon' => '', 'app_type' => 4, 'app_name' => '视频号', 'exec_duration' => 200, 'is_enable' => 1, 'weight' => 1],
-            ['app_icon' => '', 'app_type' => 5, 'app_name' => '抖音', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 2],
-            ['app_icon' => '', 'app_type' => 6, 'app_name' => '快手', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 3],
+            ['app_icon' => '', 'app_type' => 4, 'app_name' => '抖音', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 2],
+            ['app_icon' => '', 'app_type' => 5, 'app_name' => '快手', 'exec_duration' => 200, 'is_enable' => 0, 'weight' => 3],
         );
 
         $appCount = SvDeviceRpa::where('device_code', $device->device_code)->count();

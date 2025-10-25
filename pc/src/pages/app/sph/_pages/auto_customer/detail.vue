@@ -49,6 +49,24 @@
                         <template #trigger>
                             <ElButton type="primary" class="!rounded-full !h-10 w-[98px]">导出</ElButton>
                         </template>
+                        <template #form-item="{ formData }">
+                            <ElFormItem label="线索有效性：">
+                                <ElSelect
+                                    v-model="formData.status"
+                                    class="!w-[260px] !h-10"
+                                    placeholder="请选择"
+                                    filterable
+                                    clearable
+                                    :empty-values="[undefined, null]"
+                                    :show-arrow="false">
+                                    <ElOption label="全部" value=""></ElOption>
+                                    <ElOption label="未校验" value="0"></ElOption>
+                                    <ElOption label="已通过校验" value="1"></ElOption>
+                                    <ElOption label="未通过校验" value="2"></ElOption>
+                                    <ElOption label="待执行" value="4"></ElOption>
+                                </ElSelect>
+                            </ElFormItem>
+                        </template>
                     </export-data>
                 </div>
             </div>

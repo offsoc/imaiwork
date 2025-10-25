@@ -32,12 +32,20 @@ trait TaskNoticeTrait
      */
     public function voiceToTextOpt(string $deviceId, array $response): void
     {
-        $statusKey = "device:{$deviceId}:voiceToText";
-        $isVoiceToText = $this->redis()->get($statusKey);
-        if ($isVoiceToText == 1 && $response['Data']['MsgType'] == 'VoiceTransTextTask') {
-            $_content = $response['Data']['Content'];
-            $key = "device:{$deviceId}:voice:{$_content['WeChatId']}:taskid:{$_content['TaskId']}";
-            $this->redis()->setex($key, 30, $_content['ErrMsg']);
+        
+        if($response['Data']['MsgType'] == 'VoiceTransTextTask'){
+            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('VoiceTransTextTask')->withContext([
+                'msg' => '语音转文字任务已存在',
+                'data' => $response
+            ])->log();
+
+            $statusKey = "device:{$deviceId}:voiceToText";
+            $isVoiceToText = $this->redis()->get($statusKey);
+            if ($isVoiceToText == 1) {
+                $_content = $response['Data']['Content'];
+                $key = "device:{$deviceId}:voice:{$_content['WeChatId']}:taskid:{$_content['TaskId']}";
+                $this->redis()->set($key, $_content['ErrMsg']);
+            }
         }
     }
 

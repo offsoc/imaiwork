@@ -284,6 +284,7 @@ trait AichatTrait
                         Timer::del($timerid);
 
                         $this->redis()->del($statusKey, 1);
+                        $this->redis()->del($key, 1);
                         if (!empty($text)) {
                             $text = rtrim($text, '。');
                             $historyMsg[] = array(
@@ -753,8 +754,9 @@ trait AichatTrait
                         "Thumb" => FileService::getFileUrl($item['content']['pic'] ?? ''),
                         "AppId" => $item['content']['appid'] ?? '',
                         "Icon" =>  FileService::getFileUrl($item['content']['pic'] ?? ''),
-                        'version' => 48,
-                    ], JSON_UNESCAPED_UNICODE);
+                        "Type" => 33,
+                        "TypeStr" => ['小程序']
+                    ]);
                     $request['message_type'] = 13;
                     break;
                 case 5: //文件

@@ -79,6 +79,7 @@ class PublishLogic extends BaseLogic
             $return['accounts'] = json_decode($return['accounts'], true);
             $return['count'] = SvPublishSettingAccount::where('publish_id', $publish['id'])->sum('count');
             $return['published_count'] = SvPublishSettingDetail::where('publish_id', $publish['id'])->where('status', 'in', [1, 2])->count();
+            
             self::$returnData = $return;
             return true;
         } catch (\Exception $e) {

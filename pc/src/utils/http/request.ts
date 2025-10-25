@@ -300,7 +300,7 @@ export class Request {
             const method = RequestMethodsEnum.POST;
             const requestParams = options.params || {};
             // 使用传入的requestKey或生成新的requestKey
-            const requestKey = params.requestKey || CancelTokenManager.generateRequestKey(url, method);
+            const requestKey = params.requestKey || CancelTokenManager.generateRequestKey(url, method, requestParams);
 
             // 创建一个可以取消XHR请求的控制器
             const controller = {
@@ -325,7 +325,7 @@ export class Request {
         // 生成请求唯一标识
         const url = `${mergeOptions.baseURL || ""}${mergeOptions.requestOptions.apiPrefix}${mergeOptions.url}`;
         const method = mergeOptions.method || "GET";
-        this.requestKey = CancelTokenManager.generateRequestKey(url, method);
+        this.requestKey = CancelTokenManager.generateRequestKey(url, method, fetchOptions.params || {});
 
         // 注册到取消令牌管理器
         cancelTokenManager.addRequest(this.requestKey, this.controller);

@@ -27,6 +27,7 @@ class ShanjianVideoTaskCron extends Command
     protected function execute(Input $input, Output $output)
     {
         ShanjianVideoSettingLogic::check();
+        ShanjianVideoTaskLogic::check();
         ShanjianVideoTaskLogic::compositeVideoCron();
         return true;
     }

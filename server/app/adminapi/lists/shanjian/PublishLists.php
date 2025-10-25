@@ -50,13 +50,21 @@ class PublishLists extends BaseAdminDataLists implements ListsSearchInterface
             ->each(function ($item) {
                 $last = SvPublishSettingAccount::where('publish_id', $item['id'])->order('publish_end', 'desc')->limit(1)->find();
                 $item['publish_end'] = !empty($last) ? $last['publish_end'] : '';
-                $item['publish_cycle'] = ceil((strtotime($item['publish_end'].' 23:59:59') - strtotime($item['publish_start'].' 00:00:00')) / 86400);
+                $item['publish_cycle'] = ceil((strtotime($item['publish_end'] . ' 23:59:59') - strtotime($item['publish_start'] . ' 00:00:00')) / 86400);
 
                 $item['count'] = SvPublishSettingAccount::where('publish_id', $item['id'])->sum('count');
-                $item['published_count'] = SvPublishSettingDetail::where('publish_id', $item['id'])->where('status', 1)->count();
+                $item['published_count'] = SvPublishSettingDetail::where('publish_id', $item['id'])->where('status', 'in', [1, 2])->count();
+
+                if ((int)$item['published_count'] > (int)$item['count']) {
+                    $item['count'] = $item['published_count'];
+                    if ($item->status === 2) {
+                        $item->status = 3;
+                        $item->save();
+                    }
+                }
 
                 $times = SvPublishSettingDetail::where('publish_id', $item['id'])->where('status', 'in', [0, 3])->column('publish_time');
-                $item['times'] = array_map(function($time){
+                $item['times'] = array_map(function ($time) {
                     return date('h:i A', strtotime($time));
                 }, $times);
                 $item['accounts'] = json_decode($item['accounts'], true);

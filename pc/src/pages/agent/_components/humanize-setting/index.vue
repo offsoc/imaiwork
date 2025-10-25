@@ -9,8 +9,8 @@
                             v-for="(item, index) in defaultTypes"
                             :key="index"
                             class="px-[9px] h-[32px] flex items-center gap-x-2 rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.1)] cursor-pointer text-xs font-bold"
-                            :class="{ '!border-primary text-primary': activeType == item.key }"
-                            @click="handleChangeType(item.key)">
+                            :class="{ '!border-primary text-primary': formData.mode_type == item.type }"
+                            @click="handleChangeType(item.type)">
                             <Icon :name="item.icon" :size="16" />
                             <span>{{ item.label }}</span>
                         </div>
@@ -119,20 +119,18 @@
 
 <script setup lang="ts">
 import { ModelIdEnum } from "@/enums/appEnums";
-import { Agent } from "../../_enums";
+import { Agent, ModeTypeEnum } from "../../_enums";
 
 // 使用 defineModel 实现与父组件的双向绑定
 const formData = defineModel<Agent>("modelValue");
 
 // 提供默认类型对应的参数值
 const defaultTypes = [
-    { key: "balance", label: "平衡模式", icon: "local-icon-slider_circle" },
-    { key: "precise", label: "精准模式", icon: "local-icon-location" },
-    { key: "creative", label: "创意模式", icon: "local-icon-tool_magic" },
-    { key: "custom", label: "自定义", icon: "local-icon-edit2" },
+    { type: ModeTypeEnum.BALANCE, label: "平衡模式", icon: "local-icon-slider_circle" },
+    { type: ModeTypeEnum.PRECISE, label: "精准模式", icon: "local-icon-location" },
+    { type: ModeTypeEnum.CREATIVE, label: "创意模式", icon: "local-icon-tool_magic" },
+    { type: ModeTypeEnum.CUSTOM, label: "自定义", icon: "local-icon-edit2" },
 ];
-
-const activeType = ref("balance");
 
 const getMaxTemperature = computed(() => {
     if (formData.value.model_id == ModelIdEnum.GPT_4O) {
@@ -141,27 +139,27 @@ const getMaxTemperature = computed(() => {
     return 1;
 });
 
-const handleChangeType = (key: string) => {
-    activeType.value = key;
-    if (key == "balance") {
+const handleChangeType = (type: ModeTypeEnum) => {
+    formData.value.mode_type = type;
+    if (type == ModeTypeEnum.BALANCE) {
         formData.value.top_p = 0.9;
         formData.value.temperature = 0.6;
         formData.value.presence_penalty = 0.2;
         formData.value.frequency_penalty = 0.2;
     }
-    if (key == "precise") {
+    if (type == ModeTypeEnum.PRECISE) {
         formData.value.top_p = 0.8;
         formData.value.temperature = 0.3;
         formData.value.presence_penalty = 0;
         formData.value.frequency_penalty = 0;
     }
-    if (key == "creative") {
+    if (type == ModeTypeEnum.CREATIVE) {
         formData.value.top_p = 1;
         formData.value.temperature = 0.9;
         formData.value.presence_penalty = 0.5;
         formData.value.frequency_penalty = 0.3;
     }
-    if (key == "custom") {
+    if (type == ModeTypeEnum.CUSTOM) {
         formData.value.top_p = formData.value.top_p;
         formData.value.temperature = formData.value.temperature;
         formData.value.presence_penalty = formData.value.presence_penalty;

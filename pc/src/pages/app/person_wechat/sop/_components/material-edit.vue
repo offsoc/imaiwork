@@ -45,6 +45,10 @@
 <script setup lang="ts">
 import AddContent from "../../_components/add-content.vue";
 import dayjs from "dayjs";
+
+const props = defineProps<{
+    pushDay: string;
+}>();
 const emit = defineEmits<{
     (e: "close"): void;
     (e: "success", data: any): void;
@@ -88,13 +92,18 @@ const save = async () => {
         const inputTime = now.hour(hours).minute(minutes).second(0).millisecond(0);
         return inputTime.isBefore(now);
     }
-
     // 示例用法
     if (!formData.time) {
         feedback.msgError("请选择时间");
         return;
-    } else if (!isEdit.value && formData.time.order_day == 0 && isTimeBeforeNow(formData.time.push_time)) {
-        feedback.msgError("请选择的时间大于当前时间");
+    } else if (
+        !isEdit.value &&
+        formData.time.order_day == 0 &&
+        isTimeBeforeNow(formData.time.push_time) &&
+        props.pushDay &&
+        props.pushDay == dayjs().format("YYYY-MM-DD")
+    ) {
+        feedback.msgError("请选择的时间小于当前时间");
         return;
     } else if (formData.content.length === 0) {
         feedback.msgError("请添加内容");

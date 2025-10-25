@@ -405,7 +405,6 @@ const handleChatClose = () => {
 const watchFile = () => {
     uni.$on("chooseFile", (data: FileInfo[]) => {
         fileList.value = data;
-        uni.$off("chooseFile");
     });
 };
 
@@ -425,7 +424,6 @@ const init = async (options?: Record<string, any>) => {
 
 // 生命周期钩子
 onMounted(() => {
-    watchFile();
     const { safeArea } = uni.$u.sys();
     safeAreaTop.value = safeArea.top;
 });
@@ -436,6 +434,7 @@ onLoad((options?: Record<string, any>) => {
         getChatList();
     }
     init(options);
+    watchFile();
 });
 
 onShow(() => {

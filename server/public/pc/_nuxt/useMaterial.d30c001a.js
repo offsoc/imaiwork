@@ -1,0 +1,1 @@
+import{e as n,f as l,h as o,i as s}from"./redbook.f03a8b74.js";import{dk as p}from"./entry.d9d53b29.js";function d(){const a=async t=>await n({id:t}),i=async t=>await l(t),e=p(async t=>{await s(t)},1e3);return{getCopywritingMaterialDetail:a,addCopywritingMaterial:i,updateCopywritingMaterial:e,deleteCopywritingMaterial:async t=>{await o({id:t})}}}export{d as default};

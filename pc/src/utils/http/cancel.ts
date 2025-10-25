@@ -98,7 +98,7 @@ export class CancelTokenManager {
      * @param method 请求方法
      * @returns 请求的唯一标识
      */
-    public static generateRequestKey(url: string, method: string): string {
+    public static generateRequestKey(url: string, method: string, params: any): string {
         return `${method}:${url}:${Date.now()}`;
     }
 

@@ -20,7 +20,7 @@
                     placeholder="粘贴你的口文案或者输入内容"
                     type="textarea"
                     height="400"
-                    maxlength="2000"
+                    maxlength="500"
                     placeholder-style="color: #C0C3C4;"
                     :auto-height="false" />
                 <view class="text-right mt-4 text-[#C0C3C4]"> {{ formData.content.length }}/2000 </view>

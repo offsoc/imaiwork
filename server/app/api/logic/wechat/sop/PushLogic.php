@@ -12,7 +12,6 @@ use app\common\model\wechat\sop\AiWechatSopPushLog;
 use app\common\model\wechat\sop\AiWechatSopPushMember;
 use app\common\model\wechat\sop\AiWechatSopPushTime;
 use app\common\model\wechat\sop\AiWechatSopSubStage;
-use GuzzleHttp\Promise\Is;
 use think\facade\Db;
 
 class PushLogic extends ApiLogic
@@ -80,6 +79,12 @@ class PushLogic extends ApiLogic
                     }
                     $push->flow_id = $params['flow_id'];
                     $push->stage_id = $params['stage_id'];
+                }
+            }
+            if (isset($params['push_day']) && isset($params['type']) && $params['type'] == 4){
+                if ($params['push_day'] != $push->push_day){
+                    AiWechatSopPushTime::destroy(['push_id' => $push['id']]);
+                    AiWechatSopPushContent::destroy(['push_id' => $push['id']]);
                 }
             }
             if (isset($params['push_name'])) {

@@ -49,7 +49,7 @@
 import { getAgentDetail, updateAgent, addAgent } from "@/api/agent";
 import { KnbTypeEnum } from "@/pages/knowledge_base/_enums";
 import { useDebounceFn } from "@vueuse/core";
-import { Agent } from "../_enums";
+import { Agent, ModeTypeEnum } from "../_enums";
 import BaseSetting from "../_components/base-setting/index.vue";
 import KnbSetting from "../_components/knb-setting/index.vue";
 import HumanizeSetting from "../_components/humanize-setting/index.vue";
@@ -134,6 +134,7 @@ const formData = reactive<Agent>({
         api_token: "",
     },
     threshold: 0.5,
+    mode_type: ModeTypeEnum.BALANCE,
 });
 
 const formRef = ref();

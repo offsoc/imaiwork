@@ -56,6 +56,7 @@
     <material-edit
         v-if="showMaterialEdit"
         ref="materialEditRef"
+        :push-day="pushDay"
         @success="handleMaterialSuccess"
         @close="showMaterialEdit = false" />
 </template>
@@ -76,6 +77,7 @@ import { PushTypeEnum } from "../_enums";
 const props = defineProps<{
     type: PushTypeEnum;
     taskId: number | string;
+    pushDay: string;
 }>();
 
 const emit = defineEmits<{

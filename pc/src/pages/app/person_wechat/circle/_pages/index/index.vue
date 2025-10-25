@@ -120,6 +120,10 @@ const isLiked = ref(false);
 const { wechatLists, currentWechat, actionType, onHandleEvent } = useHandle();
 const { on, send } = useWeChatWs();
 
+on("open", () => {
+    wechatAutoLogin();
+});
+
 // =================================================================================================
 // 工具函数
 // =================================================================================================
@@ -484,12 +488,15 @@ const handlePreviewVideo = async (url: string) => {
 const getWeChatListsFn = async () => {
     const { lists } = await getWeChatLists({ page_type: 0 });
     wechatLists.value = lists;
-    if (lists && lists.length > 0) {
-        currentWechat.value = lists.find((item) => item.wechat_status == 1);
+};
+
+const wechatAutoLogin = async () => {
+    if (wechatLists.value && wechatLists.value.length > 0) {
+        currentWechat.value = wechatLists.value.find((item) => item.wechat_status == 1);
         if (currentWechat.value) {
             circleSendForm.wechat_ids = [currentWechat.value?.wechat_id];
         }
-        lists.forEach((item, index) => {
+        wechatLists.value.forEach((item) => {
             item.loading = true;
             if (item.wechat_status == 1) {
                 triggerTask(MsgTypeEnum.Auth, {

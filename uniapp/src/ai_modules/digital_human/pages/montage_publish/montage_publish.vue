@@ -160,6 +160,7 @@ const formData = reactive<{
     media_type: number;
     data_type: number;
     task_type: number;
+    scene: number; // 1: 创建任务 2: 发布任务
 }>({
     name: `混剪自动发布任务-${uni.$u.timeFormat(new Date(), "yyyymmdd hhMM")}`,
     accounts: [],
@@ -169,6 +170,7 @@ const formData = reactive<{
     media_type: 1,
     data_type: 0,
     task_type: 2,
+    scene: 1,
 });
 
 const timeErrorIndex = ref<number[]>([]);
@@ -273,6 +275,7 @@ const handleBackHome = () => {
 
 onLoad((options: any) => {
     formData.video_ids = isJson(options.task_id) ? JSON.parse(options.task_id) : options.task_id;
+    formData.scene = options.scene;
 });
 
 onShow(() => {

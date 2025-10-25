@@ -152,7 +152,7 @@
                                         v-model="item.content"
                                         type="textarea"
                                         placeholder-style="color: #7C7E80; "
-                                        maxlength="2000"></u-input>
+                                        maxlength="500"></u-input>
                                 </view>
                                 <view
                                     class="absolute right-2 top-2 rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
@@ -207,75 +207,80 @@
                     </scroll-view>
                 </view>
             </view>
-            <view v-if="step === 5" class="grow min-h-0">
-                <scroll-view scroll-y class="h-full">
-                    <view class="px-4">
-                        <view>
-                            <view class="flex items-center justify-between">
-                                <text class="font-bold text-[32rpx]">数字人形象</text>
-                                <view class="flex items-center gap-x-2" @click="handleStep(1)">
-                                    <view class="text-[#494949]">
-                                        共<text class="text-[#00B862] font-bold text-[32rpx] mx-1">{{
-                                            formData.anchorLists.length
-                                        }}</text
-                                        >个形象
+            <view v-if="step === 5" class="h-full flex flex-col">
+                <view class="grow min-h-0">
+                    <scroll-view scroll-y class="h-full">
+                        <view class="px-4">
+                            <view>
+                                <view class="flex items-center justify-between">
+                                    <text class="font-bold text-[32rpx]">数字人形象</text>
+                                    <view class="flex items-center gap-x-2" @click="handleStep(1)">
+                                        <view class="text-[#494949]">
+                                            共<text class="text-[#00B862] font-bold text-[32rpx] mx-1">{{
+                                                formData.anchorLists.length
+                                            }}</text
+                                            >个形象
+                                        </view>
+                                        <u-icon name="arrow-right" color="#C5CACA"></u-icon>
+                                    </view>
+                                </view>
+                                <scroll-view scroll-x class="mt-[36rpx]">
+                                    <view class="flex gap-x-[24rpx]">
+                                        <view
+                                            v-for="(item, index) in formData.anchorLists"
+                                            :key="index"
+                                            class="flex-shrink-0 w-[167rpx] h-[224rpx] rounded-[24rpx]">
+                                            <image
+                                                :src="item.pic"
+                                                class="w-full h-full rounded-[24rpx]"
+                                                mode="aspectFill"></image>
+                                        </view>
+                                    </view>
+                                </scroll-view>
+                            </view>
+                            <view class="flex items-center justify-between gap-x-4 mt-[48rpx]">
+                                <view class="font-bold text-[32rpx] flex-shrink-0">填写身份</view>
+                                <view class="flex items-center" @click="handleStep(2)">
+                                    <view class="text-[#00B862] line-clamp-1 min-w-[150rpx] text-end">{{
+                                        formData.name
+                                    }}</view>
+                                    <view class="w-[1rpx] h-[24rpx] bg-[#C6CACC] mx-2"></view>
+                                    <view class="line-clamp-1 text-[#00B862]">
+                                        {{ formData.introduction }}
                                     </view>
                                     <u-icon name="arrow-right" color="#C5CACA"></u-icon>
                                 </view>
                             </view>
-                            <scroll-view scroll-x class="mt-[36rpx]">
-                                <view class="flex gap-x-[24rpx]">
-                                    <view
-                                        v-for="(item, index) in formData.anchorLists"
-                                        :key="index"
-                                        class="flex-shrink-0 w-[167rpx] h-[224rpx] rounded-[24rpx]">
-                                        <image
-                                            :src="item.pic"
-                                            class="w-full h-full rounded-[24rpx]"
-                                            mode="aspectFill"></image>
+                            <view class="flex items-center justify-between gap-x-4 mt-[48rpx]">
+                                <view class="font-bold text-[32rpx] flex-shrink-0">口播文案</view>
+                                <view class="flex items-center gap-x-2" @click="handleStep(3)">
+                                    <view class="text-[#494949]">
+                                        共<text class="text-[#00B862] font-bold text-[32rpx] mx-1">{{
+                                            formData.copywriterList.length
+                                        }}</text
+                                        >条
                                     </view>
+                                    <u-icon name="arrow-right" color="#C5CACA"></u-icon>
                                 </view>
-                            </scroll-view>
-                        </view>
-                        <view class="flex items-center justify-between gap-x-4 mt-[48rpx]">
-                            <view class="font-bold text-[32rpx] flex-shrink-0">填写身份</view>
-                            <view class="flex items-center" @click="handleStep(2)">
-                                <view class="text-[#00B862] line-clamp-1 min-w-[150rpx] text-end">{{
-                                    formData.name
-                                }}</view>
-                                <view class="w-[1rpx] h-[24rpx] bg-[#C6CACC] mx-2"></view>
-                                <view class="line-clamp-1 text-[#00B862]">
-                                    {{ formData.introduction }}
+                            </view>
+                            <view class="flex items-center justify-between gap-x-4 mt-[48rpx]">
+                                <view class="font-bold text-[32rpx] flex-shrink-0">素材内容</view>
+                                <view class="flex items-center gap-x-2" @click="handleStep(4)">
+                                    <view class="text-[#494949]">
+                                        共<text class="text-[#00B862] font-bold text-[32rpx] mx-1">{{
+                                            formData.materialList.length
+                                        }}</text
+                                        >条
+                                    </view>
+                                    <u-icon name="arrow-right" color="#C5CACA"></u-icon>
                                 </view>
-                                <u-icon name="arrow-right" color="#C5CACA"></u-icon>
                             </view>
                         </view>
-                        <view class="flex items-center justify-between gap-x-4 mt-[48rpx]">
-                            <view class="font-bold text-[32rpx] flex-shrink-0">口播文案</view>
-                            <view class="flex items-center gap-x-2" @click="handleStep(3)">
-                                <view class="text-[#494949]">
-                                    共<text class="text-[#00B862] font-bold text-[32rpx] mx-1">{{
-                                        formData.copywriterList.length
-                                    }}</text
-                                    >条
-                                </view>
-                                <u-icon name="arrow-right" color="#C5CACA"></u-icon>
-                            </view>
-                        </view>
-                        <view class="flex items-center justify-between gap-x-4 mt-[48rpx]">
-                            <view class="font-bold text-[32rpx] flex-shrink-0">素材内容</view>
-                            <view class="flex items-center gap-x-2" @click="handleStep(4)">
-                                <view class="text-[#494949]">
-                                    共<text class="text-[#00B862] font-bold text-[32rpx] mx-1">{{
-                                        formData.materialList.length
-                                    }}</text
-                                    >条
-                                </view>
-                                <u-icon name="arrow-right" color="#C5CACA"></u-icon>
-                            </view>
-                        </view>
-                    </view>
-                </scroll-view>
+                    </scroll-view>
+                </view>
+                <view class="text-center text-[#B8B8B8] text-[24rpx] my-4 flex-shrink-0">
+                    - 生成的视频数量由文案数量控制 -
+                </view>
             </view>
         </view>
         <view class="bg-white shadow-[0_0_0_1rpx_rgba(0,0,0,0.05)] flex-shrink-0 pb-5">
@@ -312,7 +317,7 @@
                     <view
                         class="rounded-[16rpx] w-[456rpx] h-[100rpx] bg-black text-white font-bold flex items-center justify-center shadow-[0_12rpx_24rpx_0_rgba(0,0,0,0.12)]"
                         @click="handleCreateVideo">
-                        生成视频（{{ formData.anchorLists.length }}个）
+                        生成视频（{{ formData.copywriterList.length }}个）
                     </view>
                 </template>
             </view>
@@ -979,6 +984,7 @@ const toPublish = () => {
         url: "/ai_modules/digital_human/pages/montage_publish/montage_publish",
         params: {
             task_id: JSON.stringify([createResult.value.id]),
+            scene: 1,
         },
     });
 };

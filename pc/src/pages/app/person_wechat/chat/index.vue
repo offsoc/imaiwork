@@ -134,6 +134,10 @@ const historyPageParams = reactive<Record<string, any>>({
     Count: 10,
 });
 
+on("open", () => {
+    getWeChatListsFn();
+});
+
 // 监听错误事件
 on("error", (error?: any) => {
     const { Code, MsgType, Content } = error;
@@ -154,7 +158,6 @@ on("error", (error?: any) => {
 // 监听消息事件
 on("message", async (data: any) => {
     const { MsgType, Content } = data;
-    console.log("MsgType", MsgType);
     // @ts-ignore
     const handlers: Record<MsgTypeEnum, Function> = {
         [MsgTypeEnum.Auth]: () => {
@@ -895,7 +898,6 @@ const triggerTask = (taskType: MsgTypeEnum, params?: Record<string, any>) => {
             };
         }
     }
-
     send({
         MsgType: msgType,
         Content: content,
@@ -1162,7 +1164,6 @@ const getWeChatListsFn = async () => {
 
 getSopGreetInfo();
 getReplyStrategyInfo();
-getWeChatListsFn();
 
 onMounted(() => {
     // @ts-ignore

@@ -6,7 +6,6 @@ namespace app\api\logic\wechat\sop;
 use app\api\logic\ApiLogic;
 use app\common\model\wechat\sop\AiWechatSopPush;
 use app\common\model\wechat\sop\AiWechatSopPushTime;
-use think\facade\Db;
 
 class PushTimeLogic extends ApiLogic
 {
@@ -116,7 +115,7 @@ class PushTimeLogic extends ApiLogic
         }
 
         // 添加未删除条件
-        $searchWhere = [['delete_time', 'null', null], ['push_id', '=', $push_id]];
+        $searchWhere = [['push_id', '=', $push_id]];
 
         // 构建基本查询
         $query = AiWechatSopPushTime::where($searchWhere)

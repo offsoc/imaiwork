@@ -78,6 +78,7 @@
                         ref="sendContainerRef"
                         :type="PushTypeEnum.AUTO_SOP"
                         :task-id="detail?.id"
+                        :push-day="detail?.push_day"
                         @back="back"
                         @success="handleSendContainerSuccess" />
                     <send-way v-if="stepKey == StepKey.TYPE" ref="sendWayRef" @success="getDetail(detail?.id)" />

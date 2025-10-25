@@ -178,8 +178,8 @@ trait OperationTrait
                         // "Type" => 33,
                         // "TypeStr" => ['小程序'],
                         // 'disForward' => 0,
-                        'version' => 48,
-                    ], JSON_UNESCAPED_UNICODE);
+                        //'version' => 48,
+                    ]);
                     $message['message_type'] = 13;
                     break;
                 case 5: //文件

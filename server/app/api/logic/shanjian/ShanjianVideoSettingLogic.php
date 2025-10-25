@@ -51,9 +51,10 @@ class ShanjianVideoSettingLogic extends ApiLogic
                     $params[$field] = json_encode([]);
                 }
             }
+            $copywriting =   $decodedData['copywriting'] ?? [];
             $anchor =   $decodedData['anchor'] ?? [];
             $params['status'] = 1;
-            $params['video_count'] = count(  $anchor);
+            $params['video_count'] = count(  $copywriting);
             // 开始事务
             Db::startTrans();
             try {
@@ -219,13 +220,29 @@ class ShanjianVideoSettingLogic extends ApiLogic
         if (count($anchorData) == 0){
             throw new \Exception("形象不能为空");
         }
+
+        foreach ($anchorData as $data){
+            if (!array_key_exists('anchor_id', $data) || trim($data['anchor_id']) === '') {
+                throw new \Exception("形象不存在");
+            }
+        }
+
         if (count($voiceData) == 0){
             throw new \Exception("音色不能为空");
+        }
+        foreach ($voiceData as $data){
+            if (!array_key_exists('voice_id', $data) || trim($data['voice_id']) === '') {
+                throw new \Exception("音色还没有生成");
+            }
         }
         if (count($copywritingData) == 0){
             throw new \Exception("文案不能为空");
         }
-
+        foreach ($copywritingData as $data){
+            if (!array_key_exists('content', $data) || trim($data['content']) === '') {
+                throw new \Exception("文案不能为空");
+            }
+        }
 
         if (count($materialData) < 3){
             throw new \Exception("素材不能少于三条");
@@ -247,7 +264,6 @@ class ShanjianVideoSettingLogic extends ApiLogic
             }else{
                 $clip_id =  $clipData[$i % count($clipData)]['clip_template_id'] ??  $clip_template_id[$clip];
             }
-
             $taskItem = [
                 'name' => ($params['name'] ?? '视频设置'.date('YmdHi')) . '_' . ($i + 1),
                 'pic' => $anchorData[$i % count($anchorData)]['pic'] ?? '',

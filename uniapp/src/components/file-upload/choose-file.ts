@@ -1,6 +1,6 @@
 const ERR_MSG_FAIL = "chooseFile:fail";
 interface BaseOptions {
-    type: "file" | "image" | "video";
+    type: "file" | "image" | "video" | "all";
 }
 type ChooseFileOptions = UniApp.ChooseFileOptions;
 type ChooseMediaOption = UniApp.ChooseMediaOption;
@@ -171,8 +171,8 @@ const normalizeFileData = (files: any) => {
         uuid: files.uuid,
         extname: extname || "",
         fileType: files.fileType,
-        path: files.tempFilePath,
-        url: files.tempFilePath,
+        path: files.tempFilePath || files.path,
+        url: files.tempFilePath || files.path,
         size: files.size,
         progress: 0,
         status: "ready",

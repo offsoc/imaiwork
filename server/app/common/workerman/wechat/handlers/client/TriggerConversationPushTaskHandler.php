@@ -61,9 +61,9 @@ class TriggerConversationPushTaskHandler extends BaseHandler
 
         $request->setWeChatId($data['WeChatId']);
 
-        if (isset($data['StartTime'])) {
-            $request->setStartTime($data['StartTime']);
-        }
+        // if (isset($data['StartTime'])) {
+        //     $request->setStartTime($data['StartTime']);
+        // }
 
         if (isset($data['EndTime'])) {
             $request->setEndTime($data['EndTime']);
@@ -77,9 +77,9 @@ class TriggerConversationPushTaskHandler extends BaseHandler
             $request->setTaskId($data['TaskId']);
         }
 
-        if (isset($data['Limit'])) {
-            $request->setLimit($data['Limit']);
-        }
+        // if (isset($data['Limit'])) {
+        //     $request->setLimit($data['Limit']);
+        // }
 
         if (isset($data['Offset'])) {
             $request->setOffset($data['Offset']);

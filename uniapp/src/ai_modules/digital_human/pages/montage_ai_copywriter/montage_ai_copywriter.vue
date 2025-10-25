@@ -94,7 +94,7 @@
                                         v-model="item.content"
                                         type="textarea"
                                         placeholder-style="color: #7C7E80; "
-                                        maxlength="2000"></u-input>
+                                        maxlength="500"></u-input>
                                 </view>
                                 <view
                                     class="absolute right-2 top-2 rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
@@ -150,7 +150,7 @@ const textLimit = ref<number>(150);
 const chatContentList = ref<any[]>([]);
 
 const promptList = [
-    { id: 1, name: "长", length: 800 },
+    { id: 1, name: "长", length: 500 },
     { id: 2, name: "中", length: 300 },
     { id: 3, name: "短", length: 150 },
 ];

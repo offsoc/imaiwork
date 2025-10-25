@@ -428,4 +428,32 @@ class ShanjianVideoTaskLogic extends ApiLogic
             Log::channel('shanjian')->info('批量处理视频任务失败' . $e->getMessage());
         }
     }
+
+
+    public static function check(){
+
+        try {
+            ShanjianVideoTask::where('status',1)
+                ->where('create_time', '<=', strtotime('-5 minutes'))
+                ->select()->each(function ($item) {
+                    $params = [
+                        'taskId' => $item->result_id,
+                        'task_id' => $item->task_id,
+                    ];
+                    $response =  \app\common\service\ToolsService::Shanjian()->status($params);
+                    if (isset($response['code']) && $response['code'] != 10000){
+                        $message = $response['message']  ?? '任务失败';
+                        $item->status = 2;
+                        $item->remark = $message;
+                        $item->save();
+                    }
+
+                });
+
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+
+    }
 }

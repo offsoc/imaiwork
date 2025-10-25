@@ -41,7 +41,7 @@ class AllAccountLists extends BaseApiDataLists implements ListsSearchInterface
                     ->alias('sa')
                     ->where('sa.user_id', $this->userId)
                     ->join('sv_device sd', 'sd.device_code = sa.device_code and sa.user_id = sa.user_id')
-                    ->field('sa.id, sa.user_id, sa.device_code, sa.account, sa.account_no, sa.nickname, sa.avatar, sa.status,sd.device_model, sd.sdk_version, "3" as type');
+                    ->field('sa.id, sa.user_id, sa.device_code, sa.account, sa.account_no, sa.nickname, sa.avatar, sa.status,sd.device_model, sd.sdk_version, sa.type');
             })->buildSql();
 
         return Db::table($subQuery . 'A')

@@ -190,6 +190,7 @@ class PublishLogic extends SvBaseLogic
                     'count' => $account['count'],
                     'published_count' => 0,
                     'status' => 1,
+                    'scene' => $params['scene'],
                     'created_time' => time(),
                 ]);
             }
@@ -720,6 +721,7 @@ class PublishLogic extends SvBaseLogic
                         'account' => $account['account'],
                         'account_type' => $account['account_type'],
                         'device_code' => $account['device_code'],
+                        'scene' => $account['scene'],
                         'material_id' => 0,
                         'material_type' => 1,
                         'material_url' => '',
@@ -732,17 +734,18 @@ class PublishLogic extends SvBaseLogic
                         'sub_task_id' => '',
                         'platform' => $account['account_type'],
                         'status' => 2,
-                        'remark' => '发布时间为空',
+                        'remark' => '发布记录生成失败',
                         'publish_time' => date('Y-m-d H:i:s', time()),
                         'create_time' => time(),
                         'task_type' => 2
                     ]);
-                    SvPublishSettingAccount::where('id', $account['id'])->update(['task_status' => 2, 'status' => 2, 'publish_end' => date('Y-m-d', time()), 'update_time' => time()]);
+                    SvPublishSettingAccount::where('id', $account['id'])->update(['status' => 2, 'publish_end' => date('Y-m-d', time()), 'update_time' => time()]);
                     SvPublishSetting::where('id', $account['publish_id'])->update(['status' => 3, 'publish_end' => date('Y-m-d', time()), 'update_time' => time()]);
                     continue;
                 }
                 //$mediaCount = count($medias);
                 $endTime = max(array_column($medias, 'publish_time'));
+                $status = 2;
                 foreach ($medias as $media) {
                     $detail = SvPublishSettingDetail::where('publish_id', $account['publish_id'])
                         ->where('publish_account_id', $account['id'])
@@ -767,6 +770,7 @@ class PublishLogic extends SvBaseLogic
                             'material_tag' => $media['topic'],
                             'pic' => $media['pic'],
                             'poi' => $media['poi'],
+                            'scene' => $account['scene'],
                             'material_subtitle' => $media['material_subtitle'],
                             'task_id' => $media['task_id'],
                             'sub_task_id' => $media['sub_task_id'],
@@ -778,11 +782,14 @@ class PublishLogic extends SvBaseLogic
                             'task_type' => 2
                         ]);
                         array_push($videoIds, $media['id']);
+                        $status = 1;
                     }
                 }
                 //print_r($insertData);die;
                 SvPublishSettingAccount::where('id', $account['id'])->update([
                     'publish_end' => date('Y-m-d', strtotime($endTime)),
+                    'status' => $status,
+                    'update_time' => time()
                 ]);
             }
             //print_r($insertData);die;
@@ -843,9 +850,10 @@ class PublishLogic extends SvBaseLogic
                 }
                 if ($count < $account['count']) {
                     //判断新生成的视频是否记录到发布任务中
+                    $status = (int)$account['scene'] === 1 ? [2, 3] : [3];
                     $newVideoids = ShanjianVideoTask::where('video_setting_id', 'in', $_ids)
                         ->where('id', 'not in', $usedVideoIds[$account['account_type']])
-                        ->where('status', 'in', [2, 3])
+                        ->where('status', 'in', $status)
                         ->column('id');
                     //为空则返回false
                     if (empty($newVideoids)) {
@@ -868,12 +876,13 @@ class PublishLogic extends SvBaseLogic
         if (empty($video_ids)) {
             return [];
         }
+        $status = (int)$account['scene'] === 1 ? [2, 3] : [3];
         $medias = ShanjianVideoSetting::alias('vs')
             ->field('vt.*')
             ->join('shanjian_video_task vt', 'vs.id = vt.video_setting_id')
             ->where('vs.id', 'in', $video_ids)
             ->where('vt.id', 'NOT IN', $usedVideoIds[$account['account_type']])
-            ->where('vt.status', 'in', [2, 3])
+            ->where('vt.status', 'in', $status)
             ->limit($account['count'])
             ->select()->toArray();
         //print_r(Db::getLastSql());die;
@@ -909,7 +918,7 @@ class PublishLogic extends SvBaseLogic
                     'material_title' => $media['status'] == 2 ? '' : $response['data']['title'], // 循环匹配title
                     'material_subtitle' => $media['status'] == 2 ? '' : $response['data']['content'],
                     'material_status' => $media['status'] == 2 ? 2 : 0, // 2失败 0待发布
-                    'material_remark' => $media['status'] == 2 ? $media['remark'] : '',
+                    'material_remark' => $media['remark'],
                     'pic' => $media['pic'],
                     'topic' => '',
                     'material_type' => $account['media_type'],
@@ -953,6 +962,9 @@ class PublishLogic extends SvBaseLogic
         $startDate = $account['publish_start'];
         for ($i = 0; $i < ceil($account['count'] / $account['publish_frep']); $i++) {
             foreach ($timeConfig as $time) {
+                if(strpos($time, '-') !== false){
+                    $time = explode('-', $time)[0];
+                }
                 $publishTime = date('Y-m-d H:i:s', strtotime("{$startDate} {$time}"));
                 if (strtotime($publishTime) <= strtotime($maxTime)) {
                     continue;
@@ -986,6 +998,7 @@ class PublishLogic extends SvBaseLogic
     public static function SphPublishCron()
     {
         try {
+            
             $publishes = SvPublishSettingDetail::alias('ps')
                 ->field('ps.*')
                 ->join('sv_publish_setting ss', 'ps.publish_id = ss.id')
@@ -999,6 +1012,7 @@ class PublishLogic extends SvBaseLogic
                 ->order('ps.publish_time asc')
                 ->limit(10)
                 ->select()->toArray();
+            print_r('视频号发布：' . count($publishes));
             foreach ($publishes as $publish) {
                 sleep(1);
                 $interval_find = \app\common\model\wechat\AiWechatLog::where('user_id', $publish['user_id'])

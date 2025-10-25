@@ -444,6 +444,12 @@ const getAIModels = computed(() =>
 
 const selectedNetwork = ref(false);
 const handleNetwork = () => {
+    if (!isLogin.value) {
+        uni.$u.route({
+            url: "/pages/login/login",
+        });
+        return;
+    }
     selectedNetwork.value = !selectedNetwork.value;
     emit("update:network", selectedNetwork.value);
 };
@@ -464,6 +470,7 @@ const isSendDisabled = computed(() => {
 });
 
 const handleFileUpload = () => {
+    checkLogin();
     uni.$u.route({
         url: "/packages/pages/choose_file/choose_file",
         params: {
@@ -530,12 +537,7 @@ const changeHumanizeParams = (event: any, key: string, step: number) => {
 };
 
 const handleSetting = () => {
-    if (!isLogin.value) {
-        uni.$u.route({
-            url: "/pages/login/login",
-        });
-        return;
-    }
+    checkLogin();
     getChatConfig();
     showHumanize.value = true;
 };
@@ -587,12 +589,7 @@ const handleInputFocus = () => {
 };
 
 const contentPost = () => {
-    if (!isLogin) {
-        uni.$u.route({
-            url: "/pages/login/login",
-        });
-        return;
-    }
+    checkLogin();
     if (userInput.value.replace(/(^\s*)|(\s*$)/g, "") == "" && fileList.value.length == 0) {
         uni.$u.toast("输入为空");
         return;
@@ -614,6 +611,15 @@ const chatAdd = () => {
 
 const chatClose = () => {
     emit("close");
+};
+
+const checkLogin = () => {
+    if (!isLogin.value) {
+        uni.$u.route({
+            url: "/pages/login/login",
+        });
+        return;
+    }
 };
 
 const { proxy }: any = getCurrentInstance();

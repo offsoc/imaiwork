@@ -29,7 +29,7 @@ import SkillSetting from "./components/skill-setting/index.vue";
 import ReplySetting from "./components/reply-setting/index.vue";
 import { useLockFn } from "@/hooks/useLockFn";
 import { setFormData } from "@/utils/util";
-import type { Agent } from "./components/enums";
+import { ModeTypeEnum, type Agent } from "./components/enums";
 import { KnbTypeEnum } from "@/enums/appEnums";
 
 enum TabName {
@@ -127,6 +127,7 @@ const formData = reactive<Agent>({
         api_token: "",
     },
     threshold: 0.5,
+    mode_type: ModeTypeEnum.CUSTOM,
 });
 const formRef = ref();
 

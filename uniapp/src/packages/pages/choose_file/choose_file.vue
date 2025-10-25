@@ -53,7 +53,7 @@ const fileLimit = ref<number>(1);
 const sumImage = ref<number>(0);
 const fileLists = ref<any[]>([]);
 
-const accept = [".html", ".xml", ".doc", ".docx", ".txt", ".pdf", ".csv", ".xlsx"];
+const accept = ["html", "xml", "doc", "docx", "txt", "pdf", "csv", "xlsx"];
 
 const openFile = async (type: string) => {
     if (fileLists.value.length >= fileLimit.value) {

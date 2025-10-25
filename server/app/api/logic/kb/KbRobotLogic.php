@@ -47,7 +47,7 @@ class KbRobotLogic extends BaseLogic
     {
         $modelKbRobot = new KbRobot();
         $detail = $modelKbRobot
-            ->field('id,user_id,cate_id,kb_type,kb_ids,icons,image,bg_image,name,intro,roles_prompt,model,model_id,model_sub_id,search_mode,search_tokens,search_similar,ranking_status,ranking_score,context_num,is_public,is_enable,optimize_ask,optimize_model,top_p,presence_penalty,frequency_penalty,logprobs,top_logprobs,search_empty_type,search_empty_text,welcome_introducer,copyright')
+            ->field('id,user_id,cate_id,kb_type,kb_ids,icons,image,bg_image,name,intro,roles_prompt,model,model_id,model_sub_id,search_mode,search_tokens,search_similar,ranking_status,ranking_score,context_num,is_public,is_enable,optimize_ask,optimize_model,top_p,presence_penalty,frequency_penalty,logprobs,top_logprobs,search_empty_type,search_empty_text,welcome_introducer,copyright,mode_type')
             ->field('threshold')
             ->where(['id' => $id])
             ->findOrEmpty()
@@ -360,6 +360,7 @@ class KbRobotLogic extends BaseLogic
                 'top_logprobs'       => $post['top_logprobs'] ?? 0,
                 //模糊匹配阈值
                 'threshold'          => floatval($post['threshold'] ?? 0.7),
+                'mode_type'          => $post['mode_type'] ?? 1,
             ], ['id'=>intval($post['id'])]);
 
             // 自定义菜单

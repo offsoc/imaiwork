@@ -57,6 +57,14 @@ export interface Agent {
     };
     cate_id: string | number; // 类目ID
     threshold: number; // 技能阈值
+    mode_type: ModeTypeEnum; // 1=自定义,2=平衡模式,3=精准模式,4=创意模式
+}
+
+export enum ModeTypeEnum {
+    CUSTOM = 1,
+    BALANCE = 2,
+    PRECISE = 3,
+    CREATIVE = 4,
 }
 
 /**

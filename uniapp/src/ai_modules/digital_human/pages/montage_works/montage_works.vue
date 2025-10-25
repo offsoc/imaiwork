@@ -274,6 +274,7 @@ const toPublishTask = () => {
         url: "/ai_modules/digital_human/pages/montage_publish/montage_publish",
         params: {
             task_id: JSON.stringify(selectedLists.value.map((item) => item.id)),
+            scene: 2,
         },
     });
     isChoose.value = false;
