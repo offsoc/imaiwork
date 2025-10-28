@@ -32,8 +32,6 @@ class PublishLogic extends SvBaseLogic
      */
     public static function add(array $params)
     {
-
-        // 启动事务
         Db::startTrans();
         try {
             $params['user_id'] = self::$uid;
@@ -896,7 +894,7 @@ class PublishLogic extends SvBaseLogic
         // 合并后的新数组
         $mergedArray = [];
         foreach ($medias as $key => $media) {
-            if(!isset($times[$key])){
+            if (!isset($times[$key])) {
                 continue;
             }
             //获取发布内容和标题
@@ -962,7 +960,7 @@ class PublishLogic extends SvBaseLogic
         $startDate = $account['publish_start'];
         for ($i = 0; $i < ceil($account['count'] / $account['publish_frep']); $i++) {
             foreach ($timeConfig as $time) {
-                if(strpos($time, '-') !== false){
+                if (strpos($time, '-') !== false) {
                     $time = explode('-', $time)[0];
                 }
                 $publishTime = date('Y-m-d H:i:s', strtotime("{$startDate} {$time}"));
@@ -998,7 +996,7 @@ class PublishLogic extends SvBaseLogic
     public static function SphPublishCron()
     {
         try {
-            
+
             $publishes = SvPublishSettingDetail::alias('ps')
                 ->field('ps.*')
                 ->join('sv_publish_setting ss', 'ps.publish_id = ss.id')
