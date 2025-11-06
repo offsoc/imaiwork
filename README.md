@@ -181,3 +181,6 @@
 ![输入图片说明](WechatIMG305.jpg)
 ![输入图片说明](WechatIMG306.jpg)
 ![输入图片说明](WechatIMG308.jpg)
+
+![Star走势图](https://starchart.cc/username/repo.svg)
+
