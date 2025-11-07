@@ -182,7 +182,7 @@ class IndexLogic extends BaseLogic
         //大语言模型
         $chatModels = ConfigService::get('chat', 'ai_model', []);
         foreach ($chatModels['channel'] as $key=>$value){
-            $chatModels['channel'][$key]['logo'] = FileService::getFileUrl($value['logo']);
+            $chatModels['channel'][$key]['logo'] = isset($value['logo']) ? FileService::getFileUrl($value['logo']) : '';
         }
 
         return [
