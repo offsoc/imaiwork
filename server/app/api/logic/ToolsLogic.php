@@ -14,8 +14,11 @@ use app\common\{enum\notice\NoticeEnum,
     model\sv\SvVideoTask,
     model\tools\ToolsLog,
     model\user\User,
+    service\ConfigService,
     service\FileService,
-    service\tools\Stability};
+    service\tools\Stability,
+    service\TranscodingAliyunService
+};
 use think\facade\Config;
 use think\facade\Db;
 
@@ -103,39 +106,36 @@ class ToolsLogic extends BaseLogic
     }
 
 
-    public static function getSearchTerms($params){
+    public static function getSearchTerms($params)
+    {
         try {
             // 验证必要参数
             if (!isset($params['targetCount']) || !isset($params['keyword'])) {
                 throw new \Exception('缺少必要参数:生成数量或生成内容');
             }
-            $targetCount = (int)$params['targetCount'];
-            if ($targetCount % 10 !== 0){
-                throw new \Exception('生成数量必须是10的倍数');
-            }
-            $num = $targetCount / 10;
-            $unit = TokenLogService::checkToken($params['user_id'], 'sph_add_friends');
+            $num = (int)$params['targetCount'];
+            $unit = TokenLogService::checkToken($params['user_id'], 'sph_search_terms');
             $tokenCode = AccountLogEnum::TOKENS_DEC_SPH_SEARCH_TERMS;
             $res = \app\common\service\ToolsService::Sv()->getSearchTerms($params);
             if ($res['code'] == 10000) {
-                $points = round($num * $unit,2);
-                if ($points > 0){
+                $points = round($num * $unit, 2);
+                if ($points > 0) {
                     //token扣除
                     User::userTokensChange($params['user_id'], $points);
                     $task_id = generate_unique_task_id();
                     //记录日志
                     AccountLogLogic::recordUserTokensLog(true, $params['user_id'], $tokenCode, $points, $task_id);
-                }else{
+                } else {
                     self::setError('扣费有问题');
                     return false;
                 }
-                if (isset($res['data']['content']) && count($res['data']['content']) >0){
+                if (isset($res['data']['content']) && count($res['data']['content']) > 0) {
                     self::$returnData = $res['data']['content'];
-                }else{
+                } else {
                     self::setError('生成失败');
                     return false;
                 }
-            }else{
+            } else {
                 self::setError('生成失败2');
                 return false;
             }
@@ -148,9 +148,10 @@ class ToolsLogic extends BaseLogic
     }
 
 
-    public static function getPrompt($request){
+    public static function getPrompt($request)
+    {
         //查询是否存在
-        $ChatPrompt =  $prompt = ChatPrompt::select();
+        $ChatPrompt = $prompt = ChatPrompt::select();
         if ($prompt->isEmpty()) {
             self::setError('提示词不存在');
             return false;
@@ -164,7 +165,8 @@ class ToolsLogic extends BaseLogic
         }
     }
 
-    public static function clip(){
+    public static function clip()
+    {
         try {
             $response = \app\common\service\ToolsService::Auth()->clipNotice();
             self::$returnData = $response;
@@ -174,4 +176,57 @@ class ToolsLogic extends BaseLogic
             return false;
         }
     }
+
+
+    public static function transcoding($request)
+    {
+        try {
+            $config = [
+                'default' => ConfigService::get('storage', 'default', 'local'),
+                'engine' => ConfigService::get('storage') ?? ['local' => []],
+            ];
+            if ($config['default'] != 'aliyun') {
+                self::setError('目前转码只支持阿里云');
+                return false;
+            }
+            $Aliyun = new TranscodingAliyunService($config['engine']['aliyun']);
+            $response = $Aliyun->main($request);
+            if(!$response['code']){
+                self::setError($response['message']);
+                return false;
+            }
+            self::$returnData['jobid'] = $response['jobid'];
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function searchTranscoding($request)
+    {
+        try {
+            $config = [
+                'default' => ConfigService::get('storage', 'default', 'local'),
+                'engine' => ConfigService::get('storage') ?? ['local' => []],
+            ];
+            if ($config['default'] != 'aliyun') {
+                self::setError('目前转码只支持阿里云');
+                return false;
+            }
+            $Aliyun = new TranscodingAliyunService($config['engine']['aliyun']);
+            $response = $Aliyun->search($request);
+            if(!$response['code']){
+                self::setError($response['message']);
+                return false;
+            }
+            self::$returnData =$response;
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
+
 }

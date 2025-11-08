@@ -148,4 +148,9 @@ class RecallKnow
             ["k" => 60, "list" => $fullTextResults],
         ]);
     }
+
+    public static function destroy(): void
+    {
+        JiebaService::destroy();
+    }
 }

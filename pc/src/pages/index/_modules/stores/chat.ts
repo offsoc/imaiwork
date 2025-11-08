@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
+interface Detail {
+    logo: string;
+    name: string;
+}
+
 // 定义单条聊天消息的接口，确保数据结构的类型安全。
 export interface ChatMessage {
     type: 1 | 2; // 消息类型: 1 代表用户, 2 代表机器人
@@ -35,6 +40,15 @@ export interface ChatFile {
 export const useChatStore = defineStore("chat", () => {
     // --- State ---
 
+    /**
+     * @type {Record<string, {logo: string, name: string}>}
+     * @description 记录详情
+     * 包含记录的logo、name等信息
+     */
+    const detail = reactive<Detail>({
+        logo: "",
+        name: "",
+    });
     /**
      * @description 当前会话的任务ID (task_id)。
      * 如果为空字符串，表示是一个新的会话。
@@ -105,6 +119,14 @@ export const useChatStore = defineStore("chat", () => {
     });
 
     // --- Actions ---
+
+    /**
+     * @description 设置记录详情。
+     * @param detail - 记录详情。
+     */
+    function setDetail(data: Detail) {
+        Object.assign(detail, data);
+    }
 
     /**
      * @description 设置当前会话的 task_id。
@@ -203,6 +225,7 @@ export const useChatStore = defineStore("chat", () => {
 
     return {
         // State
+        detail,
         taskId,
         agentValue,
         chatContentList,
@@ -214,6 +237,7 @@ export const useChatStore = defineStore("chat", () => {
         fileLists,
         extraParams,
         // Actions
+        setDetail,
         setTaskId,
         setAgent,
         addMessage,

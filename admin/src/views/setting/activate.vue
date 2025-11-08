@@ -12,11 +12,6 @@
                 <div>
                     <div class="text-xl font-medium mb-[20px]">配置信息</div>
                     <div>
-                        <el-form-item label="联系网站">
-                            <a class="text-primary hover:underline" href="https://sq.imai.work" target="_blank"
-                                >https://sq.imai.work</a
-                            >
-                        </el-form-item>
                         <el-form-item label="授权账号" prop="cdkey">
                             <div>
                                 <el-input v-model="formData.cdkey" class="w-[380px]" />

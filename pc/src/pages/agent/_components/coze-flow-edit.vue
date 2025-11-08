@@ -34,10 +34,10 @@
             <div class="p-8">
                 <div class="text-lg font-bold">新增Coze工作流</div>
                 <div class="text-xs text-[#0000004d] mt-2">快速搭建对话式智能体</div>
-                <ElForm ref="formRef" :model="formData" :rules="rules" label-position="top" class="mt-6">
+                <ElForm ref="formRef" :model="formData" :rules="rules" label-position="top">
                     <div class="flex w-full gap-x-4">
                         <!-- 左侧基础信息 -->
-                        <div class="w-[351px] flex-shrink-0">
+                        <div class="w-[351px] flex-shrink-0 pt-6">
                             <ElFormItem label="智能体名称" prop="name">
                                 <ElInput v-model="formData.name" class="!h-10" placeholder="请输入名称" />
                             </ElFormItem>
@@ -62,152 +62,154 @@
                         <!-- 右侧输入输出配置 -->
                         <div class="flex-1">
                             <ElScrollbar>
-                                <!-- 输入配置 -->
-                                <ElFormItem label="输入配置（每个字段值不能重复）" prop="inputs" class="relative">
-                                    <div class="absolute right-0 -top-[35px]">
-                                        <ElButton
-                                            type="primary"
-                                            size="small"
-                                            @click="handleAddRow(formData.inputs, 'inputs', { required: 'true' })">
-                                            新增
-                                        </ElButton>
-                                    </div>
-                                    <div class="w-full border border-[var(--el-border-color)] rounded-lg">
-                                        <ElTable
-                                            ref="inputTableRef"
-                                            class="inout-table"
-                                            :data="formData.inputs"
-                                            stripe
-                                            max-height="200px"
-                                            :row-style="{ height: '40px' }"
-                                            :header-cell-style="{ height: '40px' }"
-                                            v-draggable="draggableInputOptions">
-                                            <ElTableColumn width="50px">
-                                                <template #default>
-                                                    <div class="move-icon cursor-move">
-                                                        <Icon name="el-icon-Rank" />
-                                                    </div>
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="名称">
-                                                <template #default="{ row }">
-                                                    <ElInput
-                                                        v-model="row.name"
-                                                        placeholder="请输入"
-                                                        clearable
-                                                        maxlength="30" />
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="类型">
-                                                <template #default="{ row }">
-                                                    <ElSelect v-model="row.type" placeholder="请选择">
-                                                        <ElOption
-                                                            v-for="item in formFieldSelect"
-                                                            :label="item"
-                                                            :value="item"
-                                                            :key="item"></ElOption>
-                                                    </ElSelect>
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="字段值">
-                                                <template #default="{ row }">
-                                                    <ElInput
-                                                        v-model="row.fields"
-                                                        placeholder="请输入"
-                                                        clearable
-                                                        maxlength="30" />
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="是否必填">
-                                                <template #default="{ row }">
-                                                    <ElRadioGroup v-model="row.required">
-                                                        <ElRadio value="true">是</ElRadio>
-                                                        <ElRadio value="false">否</ElRadio>
-                                                    </ElRadioGroup>
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="操作" width="80px">
-                                                <template #default="{ $index }">
-                                                    <ElButton
-                                                        type="danger"
-                                                        size="small"
-                                                        @click="handleDeleteRow(formData.inputs, $index)">
-                                                        删除
-                                                    </ElButton>
-                                                </template>
-                                            </ElTableColumn>
-                                        </ElTable>
-                                    </div>
-                                </ElFormItem>
+                                <div class="pt-6">
+                                    <!-- 输入配置 -->
+                                    <ElFormItem label="输入配置（每个字段值不能重复）" prop="inputs" class="relative">
+                                        <div class="absolute right-0 -top-[35px]">
+                                            <ElButton
+                                                type="primary"
+                                                size="small"
+                                                @click="handleAddRow(formData.inputs, 'inputs', { required: 'true' })">
+                                                新增
+                                            </ElButton>
+                                        </div>
+                                        <div class="w-full border border-[var(--el-border-color)] rounded-lg">
+                                            <ElTable
+                                                ref="inputTableRef"
+                                                class="inout-table"
+                                                :data="formData.inputs"
+                                                stripe
+                                                max-height="200px"
+                                                :row-style="{ height: '40px' }"
+                                                :header-cell-style="{ height: '40px' }"
+                                                v-draggable="draggableInputOptions">
+                                                <ElTableColumn width="50px">
+                                                    <template #default>
+                                                        <div class="move-icon cursor-move">
+                                                            <Icon name="el-icon-Rank" />
+                                                        </div>
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="名称">
+                                                    <template #default="{ row }">
+                                                        <ElInput
+                                                            v-model="row.name"
+                                                            placeholder="请输入"
+                                                            clearable
+                                                            maxlength="30" />
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="类型">
+                                                    <template #default="{ row }">
+                                                        <ElSelect v-model="row.type" placeholder="请选择">
+                                                            <ElOption
+                                                                v-for="item in formFieldSelect"
+                                                                :label="item"
+                                                                :value="item"
+                                                                :key="item"></ElOption>
+                                                        </ElSelect>
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="字段值">
+                                                    <template #default="{ row }">
+                                                        <ElInput
+                                                            v-model="row.fields"
+                                                            placeholder="请输入"
+                                                            clearable
+                                                            maxlength="30" />
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="是否必填">
+                                                    <template #default="{ row }">
+                                                        <ElRadioGroup v-model="row.required">
+                                                            <ElRadio value="true">是</ElRadio>
+                                                            <ElRadio value="false">否</ElRadio>
+                                                        </ElRadioGroup>
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="操作" width="80px">
+                                                    <template #default="{ $index }">
+                                                        <ElButton
+                                                            type="danger"
+                                                            size="small"
+                                                            @click="handleDeleteRow(formData.inputs, $index)">
+                                                            删除
+                                                        </ElButton>
+                                                    </template>
+                                                </ElTableColumn>
+                                            </ElTable>
+                                        </div>
+                                    </ElFormItem>
 
-                                <!-- 输出配置 -->
-                                <ElFormItem label="输出配置（每个字段值不能重复）" prop="outputs" class="relative">
-                                    <div class="flex items-center justify-between w-full">
-                                        <ElButton
-                                            type="primary"
-                                            size="small"
-                                            @click="handleAddRow(formData.outputs, 'outputs')">
-                                            新增
-                                        </ElButton>
-                                    </div>
-                                    <div class="mt-3 w-full border border-[var(--el-border-color)] rounded-lg">
-                                        <ElTable
-                                            ref="outputTableRef"
-                                            :data="formData.outputs"
-                                            stripe
-                                            max-height="200px"
-                                            :row-style="{ height: '40px' }"
-                                            :header-cell-style="{ height: '40px' }"
-                                            v-draggable="draggableOutputOptions">
-                                            <ElTableColumn width="50px">
-                                                <template #default>
-                                                    <div class="move-icon cursor-move">
-                                                        <Icon name="el-icon-Rank" />
-                                                    </div>
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="名称">
-                                                <template #default="{ row }">
-                                                    <ElInput
-                                                        v-model="row.name"
-                                                        placeholder="请输入"
-                                                        clearable
-                                                        maxlength="30" />
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="类型">
-                                                <template #default="{ row }">
-                                                    <ElSelect v-model="row.type" placeholder="请选择">
-                                                        <ElOption
-                                                            v-for="item in formFieldSelect"
-                                                            :label="item"
-                                                            :value="item"
-                                                            :key="item"></ElOption>
-                                                    </ElSelect>
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="字段值">
-                                                <template #default="{ row }">
-                                                    <ElInput
-                                                        v-model="row.fields"
-                                                        placeholder="请输入"
-                                                        clearable
-                                                        maxlength="30" />
-                                                </template>
-                                            </ElTableColumn>
-                                            <ElTableColumn label="操作" width="80px">
-                                                <template #default="{ $index }">
-                                                    <ElButton
-                                                        type="danger"
-                                                        size="small"
-                                                        @click="handleDeleteRow(formData.outputs, $index)">
-                                                        删除
-                                                    </ElButton>
-                                                </template>
-                                            </ElTableColumn>
-                                        </ElTable>
-                                    </div>
-                                </ElFormItem>
+                                    <!-- 输出配置 -->
+                                    <ElFormItem label="输出配置（每个字段值不能重复）" prop="outputs" class="relative">
+                                        <div class="flex items-center justify-between w-full">
+                                            <ElButton
+                                                type="primary"
+                                                size="small"
+                                                @click="handleAddRow(formData.outputs, 'outputs')">
+                                                新增
+                                            </ElButton>
+                                        </div>
+                                        <div class="mt-3 w-full border border-[var(--el-border-color)] rounded-lg">
+                                            <ElTable
+                                                ref="outputTableRef"
+                                                :data="formData.outputs"
+                                                stripe
+                                                max-height="200px"
+                                                :row-style="{ height: '40px' }"
+                                                :header-cell-style="{ height: '40px' }"
+                                                v-draggable="draggableOutputOptions">
+                                                <ElTableColumn width="50px">
+                                                    <template #default>
+                                                        <div class="move-icon cursor-move">
+                                                            <Icon name="el-icon-Rank" />
+                                                        </div>
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="名称">
+                                                    <template #default="{ row }">
+                                                        <ElInput
+                                                            v-model="row.name"
+                                                            placeholder="请输入"
+                                                            clearable
+                                                            maxlength="30" />
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="类型">
+                                                    <template #default="{ row }">
+                                                        <ElSelect v-model="row.type" placeholder="请选择">
+                                                            <ElOption
+                                                                v-for="item in formFieldSelect"
+                                                                :label="item"
+                                                                :value="item"
+                                                                :key="item"></ElOption>
+                                                        </ElSelect>
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="字段值">
+                                                    <template #default="{ row }">
+                                                        <ElInput
+                                                            v-model="row.fields"
+                                                            placeholder="请输入"
+                                                            clearable
+                                                            maxlength="30" />
+                                                    </template>
+                                                </ElTableColumn>
+                                                <ElTableColumn label="操作" width="80px">
+                                                    <template #default="{ $index }">
+                                                        <ElButton
+                                                            type="danger"
+                                                            size="small"
+                                                            @click="handleDeleteRow(formData.outputs, $index)">
+                                                            删除
+                                                        </ElButton>
+                                                    </template>
+                                                </ElTableColumn>
+                                            </ElTable>
+                                        </div>
+                                    </ElFormItem>
+                                </div>
                             </ElScrollbar>
                         </div>
                     </div>

@@ -9,6 +9,7 @@ use app\common\logic\AccountLogLogic;
 use app\common\model\shanjian\ShanjianAnchor;
 use app\common\model\user\User;
 use app\common\model\user\UserTokensLog;
+use app\common\service\ConfigService;
 use app\common\service\FileService;
 use think\exception\HttpResponseException;
 use think\facade\Log;
@@ -29,7 +30,7 @@ class ShanjianAnchorLogic extends ApiLogic
             $param['user_id'] = self::$uid;
             $param['videoUrl'] = $params['anchor_url'] ?? "";
             $param['authVideoUrl'] = $params['authorized_url'] ?? "";
-            $param['authText'] = $params['auth_text'] ?? '闪剪AI';
+            $param['authText'] =  ConfigService::get('digital_human', 'shanjian_auth', '闪剪AI');
             $scene = self::SHANJIAN_AVATAR;
             $response = self::requestUrl($param, $scene, self::$uid, $task_id);
             Log::channel('shanjian')->write('闪剪形象'.json_encode($response,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));

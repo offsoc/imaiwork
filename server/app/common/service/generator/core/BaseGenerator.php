@@ -397,7 +397,7 @@ abstract class BaseGenerator
      */
     public function getAuthorContent()
     {
-        return empty($this->tableData['author']) ? 'imaiwork' : $this->tableData['author'];
+        return empty($this->tableData['author']) ? '' : $this->tableData['author'];
     }
 
 

@@ -384,7 +384,7 @@ class StrategyLogic extends WechatBaseLogic
             return false;
         }
     }
-    
+
 
     /**
      * @desc 朋友圈点赞策略
@@ -448,24 +448,58 @@ class StrategyLogic extends WechatBaseLogic
     public static function execCircleReplyLikeStrategy()
     {
         echo '自动微信朋友圈点赞评论';
-        $strategys = AiWechatCircleReplyLikeStrategy::select()->toArray();
+        $where = [];
+
+        \think\facade\Cache::store('redis')->select(env('redis.WX_SELECT', 8));
+        $key = "circle_reply_max_strategy";
+        $reply_ids = \think\facade\Cache::store('redis')->sMembers($key);
+
+        $key = "circle_like_max_strategy";
+        $like_ids = \think\facade\Cache::store('redis')->sMembers($key);
+
+        $intersect = array_intersect($reply_ids, $like_ids);
+        if (!empty($intersect)) {
+            $where[] = ['id', 'not in', $intersect];
+        }
+
+        $strategys = AiWechatCircleReplyLikeStrategy::where($where)->select()->toArray();
         if (empty($strategys)) {
             return true;
         }
 
         foreach ($strategys as $key => $strategy) {
-            
-            $tagids = array_values(array_unique(array_merge($strategy['reply_tag_ids'], $strategy['like_tag_ids'])));
+
+            if ($strategy['is_enable_reply'] == 0 && $strategy['is_enable_like'] == 0) {
+                continue;
+            }
+
+            $wechat = \app\common\model\wechat\AiWechat::where('user_id', $strategy['user_id'])->findOrEmpty();
+            if ($wechat->isEmpty()) {
+                continue;
+            }
+
+            $reply_tag_ids = [];
+            if ($strategy['is_enable_reply'] !== 0) {
+                $reply_tag_ids = $strategy['reply_tag_ids'];
+            }
+            $like_tag_ids = [];
+            if ($strategy['is_enable_like'] !== 0) {
+                $like_tag_ids = $strategy['like_tag_ids'];
+            }
+            $tagids = array_values(array_unique(array_merge($reply_tag_ids, $like_tag_ids)));
             $friend_tagids = AiWechatFriendTag::where('tag_id', 'in', $tagids)->group('friend_id')->column('friend_id');
 
             $where = [];
-            if(!empty($friend_tagids)){
+            if (!empty($friend_tagids)) {
                 $where[] = ['c.friend_id', 'in', $friend_tagids];
             }
             $friends = AiWechatContact::alias('c')
+                ->field('c.*, w.wechat_id, w.device_code')
                 ->join('ai_wechat w', 'w.wechat_id = c.wechat_id', 'left')
                 ->where('w.user_id', $strategy['user_id'])
                 ->where($where)
+                ->limit(10)
+                ->order('c.update_time', 'asc')
                 ->select()->toArray();
 
             foreach ($friends as $key => $friend) {
@@ -475,7 +509,10 @@ class StrategyLogic extends WechatBaseLogic
                 $content = \app\common\workerman\wechat\handlers\client\PullFriendCircleTaskHandler::handle([
                     'WeChatId' => $friend['wechat_id'],
                     'FriendId' => $friend['friend_id'],
+                    'StartTime' => time(),
+                    'RefTime' => strtotime(date('Y-m-d 00:00:00', time())),
                     'RefSnsId' => 0,
+                    'Count' => 20,
                     'TaskId' => time(),
                 ]);
 
@@ -493,10 +530,9 @@ class StrategyLogic extends WechatBaseLogic
                 ChannelClient::publish($channel, [
                     'data' => $data
                 ]);
+                AiWechatContact::where('id', $friend['id'])->update(['update_time' => time()]);
             }
-
         }
         return false;
     }
-
 }

@@ -307,7 +307,7 @@
                                 </div>
                                 <div class="mt-3">
                                     <div class="flex items-center justify-between">
-                                        <div class="text-white mb-3">加好友备注内容</div>
+                                        <div class="text-white mb-3">加好友验证内容</div>
                                         <ElSwitch
                                             v-model="formData.add_remark_enable"
                                             style="--el-switch-off-color: #333333"

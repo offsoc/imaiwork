@@ -43,7 +43,7 @@
             </div>
             <div class="mt-4">
                 <ElButton type="primary" class="!rounded-full w-full !h-[50px]" :loading="isLock" @click="lockFn"
-                    >立即生成</ElButton
+                    >立即生成(消耗{{ getTokens }}算力)</ElButton
                 >
             </div>
         </div>
@@ -51,8 +51,10 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "@/stores/user";
 import { getAiKeywords } from "@/api/sph";
 import { CreateTypeEnum } from "@/pages/app/sph/_enums";
+import { TokensSceneEnum } from "@/enums/appEnums";
 
 const props = defineProps({
     type: {
@@ -62,6 +64,12 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "success"]);
+
+const userStore = useUserStore();
+const getTokens = computed(() => {
+    const score = userStore.getTokenByScene(TokensSceneEnum.SPH_AI_CLUE)?.score;
+    return score * formData.targetCount;
+});
 
 const popupRef = ref();
 
@@ -81,6 +89,10 @@ const close = () => {
 };
 
 const { lockFn, isLock } = useLockFn(async () => {
+    if (userStore.userTokens <= getTokens.value) {
+        feedback.msgPowerInsufficient();
+        return;
+    }
     if (!formData.keyword) {
         feedback.msgWarning("请输入您想获取的线索方向");
         return;
@@ -90,6 +102,7 @@ const { lockFn, isLock } = useLockFn(async () => {
         if (data && data.length > 0) {
             data = data.filter((item: any) => item.indexOf("=") == -1).map((item: any) => item.trim());
         }
+        userStore.getUser();
         emit("success", data);
         close();
     } catch (error) {

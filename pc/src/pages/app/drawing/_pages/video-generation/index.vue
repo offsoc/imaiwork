@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import { dayjs, ElScrollbar } from "element-plus";
+import { useUserStore } from "@/stores/user";
 import {
     drawingTextToVideo,
     drawingImageToVideo,
@@ -26,7 +27,7 @@ import useDrawingTask from "../../_hooks/useDrawingTask";
 import ResultContent from "../../_components/result-content.vue";
 
 const { onEvent, setFormData } = useCreateForm();
-
+const userStore = useUserStore();
 const resultLists = ref<any[]>([]);
 const isAllTasksCompleted = ref(false);
 
@@ -83,6 +84,7 @@ onEvent("update:formData", async (data: any) => {
                 },
             });
         }
+        userStore.getUser();
     } catch (error) {
         resultData.video = resultData.video.map((item) => ({
             ...item,

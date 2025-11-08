@@ -145,8 +145,16 @@ trait AiCircleTrait
                     'wechat_id' => $wechatid,
                     'friend_id' => $circle['WeChatId'],
                 ])->log();
+
+                $key = "circle_reply_max_strategy";
+                $this->setRedisStrategy($key, $strategy->id);
                 return;
             }
+
+            if (empty($circle['Content']['Text'])) {
+                return;
+            }
+
             $replyContent = $this->createReplyContent($circle, $device->user_id, $strategy);
             if (empty($replyContent)) {
                 $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Reply Log')->withContext([
@@ -159,6 +167,15 @@ trait AiCircleTrait
                 ])->log();
                 return;
             }
+
+            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Reply Log')->withContext([
+                'replyContent' => $replyContent,
+                'CircleId' => $circle['CircleId'],
+                'wechat_id' => $wechatid,
+                'friend_id' => $circle['WeChatId'],
+                'strategy_id' => $strategy->id,
+    
+            ])->log();
 
             $this->execReplyCircle($deviceId, $wechatid, $circle, $replyContent);
 
@@ -200,6 +217,7 @@ trait AiCircleTrait
                     $bindFind = \app\common\model\knowledge\Knowledge::where('id', $bind['kid'])->limit(1)->find();
                     if (empty($bindFind)) {
                         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('createReplyContent')->withContext([
+                            'type' => 'rag',
                             'msg' => '挂载知识库不存在',
                             'user_id' => $user_id,
                             'strategy' => $strategy->id,
@@ -219,6 +237,7 @@ trait AiCircleTrait
                     $bindFind = \app\common\model\kb\KbKnow::where('id', $bind['kid'])->limit(1)->find();
                     if (empty($bindFind)) {
                         $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('createReplyContent')->withContext([
+                            'type' => 'vector',
                             'msg' => '挂载知识库不存在',
                             'user_id' => $user_id,
                             'strategy' => $strategy->id,
@@ -230,6 +249,7 @@ trait AiCircleTrait
                     }
                 }
             }
+
 
 
             $messages = array(
@@ -244,6 +264,10 @@ trait AiCircleTrait
 
             );
 
+            $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('Messages List:')->withContext([
+                'response' => $messages
+            ])->log();
+
             if (!empty($knowledge) || $robot->kb_type == 2) {
                 [$chatStatus, $response] = \app\api\logic\KnowledgeLogic::socketChat([
                     'message' => $circle['Content']['Text'],
@@ -257,7 +281,7 @@ trait AiCircleTrait
                     'robot' => $robot->toArray(),
                 ]);
                 if ($chatStatus === false) {
-                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('队列请求知识库失败:')->withContext([
+                    $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('队列请求知识库失败:')->withContext([
                         'response' => $response
                     ])->log();
                     return '';
@@ -284,7 +308,7 @@ trait AiCircleTrait
                     $replyContent = $this->handleResponse($response, $request);
                 } else {
                     // 重试
-                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('chat 错误')->withContext([
+                    $this->withChannel('wechat_socket')->withLevel('notice')->withTitle('chat 错误')->withContext([
                         'response' => $response,
                         'request' => $request,
                     ])->log();
@@ -395,6 +419,8 @@ trait AiCircleTrait
                     'wechat_id' => $wechatid,
                     'friend_id' => $circle['WeChatId'],
                 ])->log();
+                $key = "circle_like_max_strategy";
+                $this->setRedisStrategy($key, $strategy->id);
                 return;
             }
 
@@ -470,7 +496,7 @@ trait AiCircleTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
-            \Channel\Client::connect('127.0.0.1', 2206);    
+            \Channel\Client::connect('127.0.0.1', 2206);
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);
@@ -480,5 +506,14 @@ trait AiCircleTrait
                 'error' => $e->__toString()
             ])->log();
         }
+    }
+
+    private function setRedisStrategy(string $key, int $strategy_id): void
+    {
+        \think\facade\Cache::store('redis')->select(env('redis.WX_SELECT', 8));
+        \think\facade\Cache::store('redis')->sAdd($key, $strategy_id);
+        // 设置过期时间为到次日凌晨的剩余秒数
+        $expireTime = strtotime(date('Y-m-d 23:59:59', time())) - time() + 1; // +1确保跨天
+        \think\facade\Cache::store('redis')->expire($key, $expireTime);
     }
 }

@@ -334,7 +334,7 @@ const startUpload = async () => {
             // 错误处理
             if (err.errMsg && err.errMsg === "chooseMedia:fail api scope is not declared in the privacy agreement") {
                 uni.$u.toast("请完善隐私协议，否则无法使用");
-            } else if (err.errMsg.indexOf("cancel") == -1) {
+            } else if (err && err.errMsg && err.errMsg.indexOf("cancel") == -1) {
                 uni.$u.toast(err.errMsg || "上传失败");
             }
             showUploadProgress.value = false;

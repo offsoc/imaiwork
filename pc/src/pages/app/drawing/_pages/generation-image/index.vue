@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "@/stores/user";
 import { dayjs, ElScrollbar } from "element-plus";
 import {
     drawingTextToImage,
@@ -29,6 +30,7 @@ enum FormTypeEnum {
     IMAGE2IMAGE = drawTypeEnumMap[DrawTypeEnum.IMAGE2IMAGE],
 }
 
+const userStore = useUserStore();
 const { onEvent, setFormData } = useCreateForm();
 
 const resultLists = ref<any[]>([]);
@@ -110,6 +112,7 @@ onEvent("update:formData", async (data: any) => {
                 });
             }
         }
+        userStore.getUser();
     } catch (error) {
         resultData.images = resultData.images.map((item) => ({
             ...item,

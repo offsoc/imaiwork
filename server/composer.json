@@ -56,7 +56,8 @@
         "symfony/browser-kit": "*",
         "symfony/css-selector": "*",
         "fukuball/jieba-php": "*",
-        "overtrue/pinyin": "^5.3"
+        "overtrue/pinyin": "^5.3",
+        "alibabacloud/mts-20140618": "2.1.0"
     },
     "require-dev": {
         "symfony/var-dumper": ">=4.2",

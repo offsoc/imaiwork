@@ -127,12 +127,12 @@ const getIcon = (type: string) => {
 
 // 判断是否选中
 const isChooseAccount = (item: any) => {
-    return chooseAccount.value.some((account) => account.id === item.id);
+    return chooseAccount.value.some((account) => account.account === item.account);
 };
 
 const handleChooseAccount = (item: any) => {
     if (isChooseAccount(item)) {
-        chooseAccount.value = chooseAccount.value.filter((account) => account.id !== item.id);
+        chooseAccount.value = chooseAccount.value.filter((account) => account.account !== item.account);
     } else {
         chooseAccount.value.push(item);
     }

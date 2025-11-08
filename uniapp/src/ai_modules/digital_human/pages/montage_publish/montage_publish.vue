@@ -276,16 +276,12 @@ const handleBackHome = () => {
 onLoad((options: any) => {
     formData.video_ids = isJson(options.task_id) ? JSON.parse(options.task_id) : options.task_id;
     formData.scene = options.scene;
-});
-
-onShow(() => {
     uni.$on("confirm", (result: any) => {
         const { type, data } = result;
         if (type === ListenerTypeEnum.CHOOSE_ACCOUNT) {
             if (data.length == 0) return;
             formData.accounts = data.map((item: any) => ({ account: item.account, type: item.type, id: item.id }));
         }
-        uni.$off("confirm");
     });
 });
 </script>

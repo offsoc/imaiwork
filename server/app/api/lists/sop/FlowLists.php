@@ -44,7 +44,8 @@ class FlowLists extends BaseApiDataLists implements ListsSearchInterface
        
         $baseQuery = AiWechatSopFlow::field('id,flow_name,status,create_time,update_time')
             ->where($this->searchWhere)
-            ->order('id', 'desc');
+            ->order('id', 'desc')
+            ->limit($this->limitOffset, $this->limitLength);
 
         if ($type == 1) {
             $result = $baseQuery->select()->toArray();

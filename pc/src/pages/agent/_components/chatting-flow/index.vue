@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-full flex">
         <!-- 左侧表单区域 -->
-        <div class="basis-[40%] border-r-[1px] border-[#0000000d] py-4 flex flex-col">
+        <div class="w-[350px] flex-shrink-0 border-r-[1px] border-[#0000000d] py-4 flex flex-col">
             <div class="grow min-h-0">
                 <ElScrollbar>
                     <div class="px-4">
@@ -38,11 +38,16 @@
                                         <ElInput v-model="formData[field.fields]" type="number" placeholder="请输入" />
                                     </template>
                                     <!-- 文件上传 -->
-                                    <template v-if="field.type === FormFieldTypeEnum.FILE">
+                                    <template
+                                        v-if="
+                                            field.type === FormFieldTypeEnum.VIDEO ||
+                                            field.type === FormFieldTypeEnum.IMAGE ||
+                                            field.type === FormFieldTypeEnum.FILE
+                                        ">
                                         <upload
                                             class="w-full"
                                             drag
-                                            type="file"
+                                            :type="field.type"
                                             list-type="text"
                                             :limit="1"
                                             :max-size="500"
@@ -90,17 +95,44 @@
                                         color="#000000"
                                         size="small"
                                         v-if="getOutputParams[key]?.type == FormFieldTypeEnum.FILE"
-                                        @click="download(value, getOutputParams[key]?.name)">
+                                        @click="downloadFile(value, getOutputParams[key]?.name)">
                                         下载
                                     </ElButton>
                                     <ElButton v-else color="#000000" size="small" @click="copy(value)">复制</ElButton>
                                 </div>
-                                <div class="py-4 px-[14px]">
-                                    <span
-                                        class="text-primary hover:underline cursor-pointer"
-                                        @click="handleResult(value)">
-                                        {{ value }}
-                                    </span>
+                                <div class="py-4 px-[14px] flex flex-col gap-2">
+                                    <div v-for="(item, index) in formatValue(value)" :key="index">
+                                        <template
+                                            v-if="
+                                                [FormFieldTypeEnum.VIDEO, FormFieldTypeEnum.IMAGE].includes(
+                                                    getOutputParams[key]?.type
+                                                )
+                                            ">
+                                            <video
+                                                v-if="getOutputParams[key]?.type == FormFieldTypeEnum.VIDEO"
+                                                :src="item"
+                                                class="w-full max-h-[200px] rounded-[10px]"
+                                                controls />
+                                            <ElImage
+                                                v-if="getOutputParams[key]?.type == FormFieldTypeEnum.IMAGE"
+                                                :src="item"
+                                                fit="cover"
+                                                class="w-full rounded-[10px]"
+                                                :preview-src-list="[item]"
+                                                preview-teleported />
+                                            <div class="flex justify-end mt-2" v-if="item">
+                                                <ElButton
+                                                    color="#000000"
+                                                    size="small"
+                                                    @click="downloadFile(item, getOutputParams[key]?.name || '')"
+                                                    >下载</ElButton
+                                                >
+                                            </div>
+                                        </template>
+                                        <template v-else>
+                                            <span class="break-all">{{ item }}</span>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -180,6 +212,11 @@ const getOutputParams = computed(() => {
     });
     return outputObj;
 });
+
+const formatValue = (value: any) => {
+    if (!value) return [];
+    return isArray(value) ? value : [value];
+};
 
 /**
  * @description 文件上传成功回调

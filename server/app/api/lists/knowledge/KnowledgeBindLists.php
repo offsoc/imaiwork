@@ -21,7 +21,7 @@ class KnowledgeBindLists extends BaseDataLists implements ListsSearchInterface
     /**
      * @notes 设置搜索条件
      * @return \string[][]
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function setSearch(): array
@@ -38,7 +38,7 @@ class KnowledgeBindLists extends BaseDataLists implements ListsSearchInterface
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function lists(): array
@@ -55,7 +55,7 @@ class KnowledgeBindLists extends BaseDataLists implements ListsSearchInterface
     /**
      * @notes 获取数量
      * @return int
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function count(): int

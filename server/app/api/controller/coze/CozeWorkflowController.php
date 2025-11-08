@@ -14,6 +14,8 @@ class CozeWorkflowController extends BaseApiController
 {
     public function run()
     {
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', 0);
         try {
             $params = $this->request->post();
             $workflow = new CozeWorkflowLogic();

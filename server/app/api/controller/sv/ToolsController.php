@@ -30,4 +30,13 @@ class ToolsController extends BaseApiController
     }
 
 
+    public function transcoding(){
+        $params = $this->request->post();
+        return ToolsLogic::transcoding($params) ? $this->success(data: ToolsLogic::getReturnData()) : $this->fail(ToolsLogic::getError());
+    }
+
+    public function searchTranscoding(){
+        $params = $this->request->post();
+        return ToolsLogic::searchTranscoding($params) ? $this->success(data: ToolsLogic::getReturnData()) : $this->fail(ToolsLogic::getError());
+    }
 }

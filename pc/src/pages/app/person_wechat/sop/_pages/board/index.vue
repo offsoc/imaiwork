@@ -155,6 +155,9 @@ import AddFriend from "../../../_components/add-friend.vue";
 import UserDetailPanel from "../../../_components/user-detail-panel.vue";
 import BoardHandle from "./_components/board-handle.vue";
 import useTask from "../../_hooks/useTask";
+import useHandle from "../../../_hooks/useHandle";
+
+const { currentWechat, currentFriend, friendInfo } = useHandle();
 
 const queryParams = reactive({
     wechat_id: "",
@@ -245,6 +248,16 @@ const userDetailRef = shallowRef<InstanceType<typeof UserDetailPanel>>();
 const showUserDetail = ref(false);
 
 const openUserDetail = async (item: any) => {
+    currentFriend.value = {
+        UserName: item.friend_id,
+    };
+    currentWechat.value = {
+        ...wechatLists.value.find((item) => item.wechat_id == queryParams.wechat_id),
+    };
+    friendInfo.value = {
+        ...friendInfo.value,
+        ...item,
+    };
     showUserDetail.value = true;
     await nextTick();
     userDetailRef.value?.open();

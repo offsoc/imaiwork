@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "@/stores/user";
 import { dayjs, ElScrollbar } from "element-plus";
 import { drawingGoods } from "@/api/drawing";
 import { drawTypeEnumMap, DrawTypeEnum } from "../../_enums";
@@ -22,9 +23,9 @@ import ResultContent from "../../_components/result-content.vue";
 enum FormTypeEnum {
     GOODS_IMAGE = drawTypeEnumMap[DrawTypeEnum.GOODS_IMAGE],
 }
+const userStore = useUserStore();
 
 const { onEvent, setFormData } = useCreateForm();
-
 const resultLists = ref<any[]>([]);
 const isAllTasksCompleted = ref(false);
 
@@ -64,6 +65,7 @@ onEvent("update:formData", async (data: any) => {
                 resultData.images = data;
             },
         });
+        userStore.getUser();
     } catch (error) {
         resultData.images = resultData.images.map((item) => ({
             ...item,

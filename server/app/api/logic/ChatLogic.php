@@ -672,11 +672,17 @@ class ChatLogic extends ApiLogic
     public static function deleteChat(array $params): bool
     {
         try {
-            if ($params['robot_id']) {
-                $chat_type = [9006, 1001];
+            if ($params['robot_id'] && !isset($params['task_id'])) {
+                $chat_type = [9006, 1001, 1003, 1004];
                 ChatLog::where(['robot_id' => $params['robot_id'], 'user_id' => self::$uid])->whereIn('chat_type', $chat_type)->select()->delete();
             } else {
-                ChatLog::where('task_id', $params['task_id'])->where('user_id', self::$uid)->select()->delete();
+                if (is_numeric($params['task_id'])){
+                    $task_id = ChatLog::where('id',$params['task_id'])->value('task_id');
+                    ChatLog::where('task_id', $task_id)->where('user_id', self::$uid)->select()->delete();
+                }
+                if (is_string($params['task_id'])){
+                    ChatLog::where('task_id', $params['task_id'])->where('user_id', self::$uid)->select()->delete();
+                }
             }
             return true;
         } catch (\Throwable $e) {

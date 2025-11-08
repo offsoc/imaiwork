@@ -21,6 +21,7 @@ class PushContentLists extends BaseApiDataLists
     {
         return AiWechatSopPushContent::where('delete_time', 'null')
             ->order('id', 'desc')
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
     }

@@ -26,7 +26,7 @@ function create_password(string $plaintext, string $salt): string
  */
 function create_token(string $extra = ''): string
 {
-    $salt = env('project.unique_identification', 'imaiwork');
+    $salt = env('project.unique_identification', '1234');
     $encryptSalt = md5($salt . uniqid());
     return md5($salt . $extra . time() . $encryptSalt);
 }

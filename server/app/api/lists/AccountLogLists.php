@@ -73,11 +73,20 @@ class AccountLogLists extends BaseApiDataLists
     public function lists(): array
     {
         $model = $this->params['type'] == 'tokens' ? (new UserTokensLog()) : (new UserAccountLog());
-        $lists = $model::where($this->queryWhere())
-            ->order('id', 'desc')
+        $lists = $model::where($this->queryWhere());
+        if( $this->params['action'] == 2){
+            $lists = $lists ->whereOr(function ($q) {
+                $q->where([
+                    ['user_id', '=',  $this->userId],
+                    ['change_type', '=', AccountLogEnum::TOKENS_DEC_AI_INTERVIEW_CHAT],
+                ]);
+            });
+        }
+
+
+        $lists = $lists ->order('id', 'desc')
             ->limit($this->limitOffset, $this->limitLength)
-            ->select()
-            ->toArray();
+            ->select()->toArray();
 
         foreach ($lists as &$item) {
             $item['type_desc'] = $item['remark'];
@@ -102,6 +111,16 @@ class AccountLogLists extends BaseApiDataLists
     public function count(): int
     {
         $model = $this->params['type'] == 'tokens' ? (new UserTokensLog()) : (new UserAccountLog());
-        return $model::where($this->queryWhere())->count();
+        $model = $model::where($this->queryWhere());
+        if( $this->params['action'] == 2){
+            $model = $model ->whereOr(function ($q) {
+                $q->where([
+                    ['user_id', '=',  $this->userId],
+                    ['change_type', '=', AccountLogEnum::TOKENS_DEC_AI_INTERVIEW_CHAT],
+                ]);
+            });
+        }
+        $model = $model->count();
+        return $model;
     }
 }

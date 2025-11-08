@@ -184,7 +184,23 @@ class IndexLogic extends BaseLogic
         foreach ($chatModels['channel'] as $key=>$value){
             $chatModels['channel'][$key]['logo'] = isset($value['logo']) ? FileService::getFileUrl($value['logo']) : '';
         }
+        $transcoding = true;
+        $config = [
+            'default' => ConfigService::get('storage', 'default', 'local'),
+            'engine' => ConfigService::get('storage') ?? ['local' => []],
+        ];
 
+        if ($config['default'] != 'aliyun') {
+            $transcoding = false;
+        }else{
+            $aliyun = $config['engine']['aliyun'];
+            if (!isset($aliyun['PipelineId']) || !isset($aliyun['Location']) || !isset($aliyun['TemplateId'])) {
+                $transcoding = false;
+            }
+            if (empty($aliyun['PipelineId']) || empty($aliyun['Location']) || empty($aliyun['TemplateId'])) {
+                $transcoding = false;
+            }
+        }
         return [
             'is_robot_show' => ConfigService::get('assistants', 'is_robot_show',0),
             'copyright' => ConfigService::get('copyright', 'config',''),
@@ -194,6 +210,7 @@ class IndexLogic extends BaseLogic
             'tabbar' => $tabbar,
             'login' => $loginConfig,
             'website' => $website,
+            'is_oss_transcode' => $transcoding,
             'webPage' => $webPage,
             'index_config' => $indexConfig,
             'version' => $version,

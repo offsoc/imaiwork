@@ -91,10 +91,6 @@
                         <div class="mt-4 font-bold text-lg">
                             {{ item.title }}
                         </div>
-                        <div class="bg-[#F8F9FA] rounded-xl flex items-center gap-2 px-[6px] py-[2px] mt-3">
-                            <img class="rounded-full w-4 h-4 object-cover" :src="getAiModelIcon(item.model)" />
-                            <span class="font-bold text-xs">{{ item.model }}</span>
-                        </div>
                         <div class="mt-4 text-[#9C9C9E] text-xs text-center h-[40px]">
                             {{ item.desc }}
                         </div>
@@ -135,7 +131,7 @@
                             </div>
                             <div class="px-3 mt-10 w-full">
                                 <div class="text-[14px] text-center line-clamp-1 font-bold">{{ item.name }}</div>
-                                <div class="my-3 line-clamp-2 text-center text-[#737373] break-all">
+                                <div class="h-[40px] line-clamp-2 text-center text-[#737373] break-all my-3">
                                     {{ item.intro || item.introduced }}
                                 </div>
                             </div>

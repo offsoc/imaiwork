@@ -7,6 +7,8 @@ interface Options {
     resolution?: number[];
     duration?: number[];
     extension?: any[];
+    maxDuration?: number; // 最大时长，单位秒
+    sizeType?: Array<"compressed" | "original">;
     onSuccess?: (res: any) => void;
     onProgress?: (res: any) => void;
     onError?: (e: any) => void;
@@ -73,6 +75,8 @@ export const useUpload = (options: Options) => {
         resolution = [640, 2048],
         duration = [15, 60],
         extension = ["mp4", "mov"],
+        maxDuration = 10,
+        sizeType = ["original"],
         onSuccess,
         onError,
         onProgress,
@@ -94,6 +98,8 @@ export const useUpload = (options: Options) => {
                 camera: "front",
                 sourceType: ["album"],
                 extension,
+                maxDuration,
+                sizeType,
             });
             chooseFileCallback(filesResult);
         } catch (error) {
@@ -104,7 +110,6 @@ export const useUpload = (options: Options) => {
     const chooseFileCallback = async (filesResult: ChooseResult) => {
         const { tempFiles } = filesResult;
         const file = tempFiles[0];
-        // 判断是否大于100M
         const fileSize = file.size;
         const fileWidth = file.width;
         const fileHeight = file.height;
@@ -136,28 +141,29 @@ export const useUpload = (options: Options) => {
             });
             return;
         }
-        await uploadImageFn(file.thumbTempFilePath);
-        await uploadVideo(file.tempFilePath);
-        onSuccess?.(uploadResult);
+        try {
+            await uploadImageFn(file.thumbTempFilePath);
+            await uploadVideo(file.tempFilePath);
+            onSuccess?.(uploadResult);
+        } catch (error) {
+            onError?.({
+                type: "video",
+                error: error,
+            });
+        }
     };
 
     const uploadVideo = async (file: string) => {
-        try {
-            const { uri }: any = await uploadFile(
-                "video",
-                {
-                    filePath: file,
-                },
-                (e) => {
-                    onProgress?.({ type: "video", progress: e });
-                }
-            );
-            uploadResult.url = uri;
-        } catch (error) {
-            onError?.(error);
-            if (error == "uploadFile:fail abort") return;
-            uni.$u.toast("上传失败");
-        }
+        const { uri }: any = await uploadFile(
+            "video",
+            {
+                filePath: file,
+            },
+            (e) => {
+                onProgress?.({ type: "video", progress: e });
+            }
+        );
+        uploadResult.url = uri;
     };
 
     const uploadImageFn = async (file: string) => {

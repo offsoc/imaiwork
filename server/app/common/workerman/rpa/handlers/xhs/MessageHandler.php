@@ -606,9 +606,7 @@ class MessageHandler extends BaseMessageHandler
                 $pattern = '/(?:[a-zA-Z][a-zA-Z0-9_-]{5,19}|1[3-9]\d{9})/';
 
                 $replyContent = $payload['replyContent'];
-                $blacklist = array(
-                    'imaiwork'
-                );
+                $blacklist = array();
 
                 $isInWechat = false;
                 foreach ($replyContent  as $key => $content) {

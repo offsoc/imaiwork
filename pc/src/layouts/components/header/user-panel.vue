@@ -62,10 +62,7 @@
                             <div class="icon">
                                 <Icon name="local-icon-color_switch"></Icon>
                             </div>
-                            <div class="font-bold">颜色主题</div>
-                        </div>
-                        <div>
-                            <ElSwitch disabled />
+                            <div class="font-bold">政策协议</div>
                         </div>
                     </div>
                 </div>

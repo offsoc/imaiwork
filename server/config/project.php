@@ -1,21 +1,21 @@
 <?php
 return [
     // 系统版本号
-    'version'               => '2.4.1',
+    'version'               => '2.4.2',
 
     // 官网
     'website'               => [
-        'name'        => env('project.web_name', 'IMAI.WORK'), // 网站名称
-        'url'         => env('project.web_url', 'imai.work'), // 网站地址
-        'domain'      => env('project.domain', 'https://imai.work'), // 网站域名
+        'name'        => env('project.web_name', ''), // 网站名称
+        'url'         => env('project.web_url', ''), // 网站地址
+        'domain'      => env('project.domain', ''), // 网站域名
         'login_image' => 'resource/image/adminapi/default/login_image.png',
         'web_logo'    => 'resource/image/adminapi/default/web_logo.jpg', // 网站logo
         'web_favicon' => 'resource/image/adminapi/default/web_favicon.ico', // 网站图标
-        'shop_name'   => 'IMAI.WORK', // 商城名称
+        'shop_name'   => 'AI获客系统', // 商城名称
         'shop_logo'   => 'resource/image/adminapi/default/shop_logo.png', // 商城图标
         'pc_logo'     => 'resource/image/adminapi/default/pc_logo.png', // pc_logo
         'pc_ico'      => 'resource/image/adminapi/default/web_favicon.ico', // pc_ico
-        'pc_title'    => 'IMAI.WORK', // PC网站标题
+        'pc_title'    => 'AI获客系统', // PC网站标题
         'h5_favicon'  => 'resource/image/adminapi/default/web_favicon.ico', // 网站图标
     ],
 
@@ -30,7 +30,7 @@ return [
     ],
 
     // 唯一标识，密码盐、路径加密等
-    'unique_identification' => env('project.unique_identification', 'imaiwork'),
+    'unique_identification' => env('project.unique_identification', '1234'),
 
     // 后台管理员token（登录令牌）配置
     'admin_token'           => [

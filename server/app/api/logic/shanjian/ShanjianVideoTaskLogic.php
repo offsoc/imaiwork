@@ -377,6 +377,9 @@ class ShanjianVideoTaskLogic extends ApiLogic
                             "audioUrl"=> $task->music_url,
                             "volume"=>1
                           ],
+                        ],
+                        'processRules'=>[
+                            "watermarkShow"=> false,
                         ]
                     ], $scene, $task->user_id, $task->task_id);
                     Log::channel('shanjian')->write('合成视频'.json_encode($response));

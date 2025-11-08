@@ -16,7 +16,7 @@
                 <view class="flex items-center gap-2">
                     <view
                         class="leading-[0] w-[64rpx] h-[64rpx] p-[6rpx] rounded-[10rpx] border border-solid border-[#E5E6F3] bg-white flex-shrink-0">
-                        <image :src="detail.avatar" class="w-full h-full"></image>
+                        <image :src="detail.avatar" class="w-full h-full rounded-[10rpx]"></image>
                     </view>
                     <view>
                         <view class="font-bold text-[28rpx] line-clamp-1">{{ detail.name }}</view>
@@ -75,9 +75,9 @@
             </chat-scroll-view>
         </view>
         <view v-if="agentType == 2" class="grow min-h-0 flex flex-col">
-            <view class="grow min-h-0 p-4">
+            <view class="grow min-h-0">
                 <scroll-view scroll-y class="h-full">
-                    <view class="flex flex-col gap-4" v-if="!flowResult">
+                    <view class="flex flex-col gap-4 p-4" v-if="!flowResult">
                         <view v-for="(item, index) in getFormItem" :key="index">
                             <view class="mb-4">
                                 <text class="text-[#FF3C26]">*</text>
@@ -106,43 +106,68 @@
                                     :placeholder="item.message"
                                     type="number" />
                             </view>
-                            <view v-if="item.type === FormFieldTypeEnum.FILE">
+                            <view
+                                v-if="
+                                    [FormFieldTypeEnum.VIDEO, FormFieldTypeEnum.IMAGE, FormFieldTypeEnum.FILE].includes(
+                                        item.type
+                                    )
+                                ">
                                 <file-upload
                                     file-type="all"
                                     @update:modelValue="handleFileUpload($event, item.fields)" />
                             </view>
                         </view>
                     </view>
-                    <view v-else>
-                        <view>
+                    <view v-else class="flex flex-col gap-4 p-4">
+                        <view
+                            v-for="(value, key) in flowResult"
+                            :key="key"
+                            class="border border-solid border-[#0000000d] rounded-xl">
                             <view
-                                v-for="(value, key) in flowResult"
-                                :key="key"
-                                class="border border-solid border-[#0000000d] rounded-xl">
-                                <view
-                                    class="flex items-center justify-between px-[30rpx] h-[104rpx] border-[0] border-b-[1rpx] border-solid border-[#0000000d]">
-                                    <view class="flex items-center gap-x-3">
-                                        <view>{{ getOutputParams[key]?.name || "-" }}</view>
-                                        <view class="px-2 py-[2px] bg-[#F2F2F2] rounded">
-                                            {{ getOutputParams[key]?.type }}
-                                        </view>
+                                class="flex items-center justify-between px-[30rpx] h-[104rpx] border-[0] border-b-[1rpx] border-solid border-[#0000000d]">
+                                <view class="flex items-center gap-x-3">
+                                    <view>{{ getOutputParams[key]?.name || "-" }}</view>
+                                    <view class="px-2 py-[2px] bg-[#F2F2F2] rounded">
+                                        {{ getOutputParams[key]?.type }}
                                     </view>
-                                    <view
-                                        v-if="getOutputParams[key]?.type == FormFieldTypeEnum.FILE"
-                                        class="bg-[#000000] text-white text-[22rpx] w-[116rpx] h-[46rpx] rounded-[12rpx] flex items-center justify-center">
-                                        下载
-                                    </view>
-                                    <view
-                                        v-else
-                                        class="bg-[#000000] text-white text-[22rpx] w-[116rpx] h-[46rpx] rounded-[12rpx] flex items-center justify-center"
-                                        @click="copy(value)"
-                                        >复制</view
-                                    >
                                 </view>
-                                <view class="py-4 px-[14px]">
-                                    <view class="text-primary hover:underline cursor-pointer">
-                                        {{ value }}
-                                    </view>
+                                <view
+                                    class="bg-[#000000] text-white text-[22rpx] w-[116rpx] h-[46rpx] rounded-[12rpx] flex items-center justify-center"
+                                    @click="copy(value)"
+                                    >复制</view
+                                >
+                            </view>
+                            <view class="py-4 px-[14px] flex flex-col gap-2">
+                                <view v-for="(item, index) in formatValue(value)" :key="index">
+                                    <template
+                                        v-if="
+                                            [FormFieldTypeEnum.VIDEO, FormFieldTypeEnum.IMAGE].includes(
+                                                getOutputParams[key]?.type
+                                            )
+                                        ">
+                                        <video
+                                            v-if="getOutputParams[key]?.type == FormFieldTypeEnum.VIDEO"
+                                            :src="item"
+                                            class="w-full max-h-[200px] rounded-[20rpx]"
+                                            controls />
+                                        <image
+                                            v-if="getOutputParams[key]?.type == FormFieldTypeEnum.IMAGE"
+                                            :src="item"
+                                            class="w-full rounded-[20rpx]"
+                                            mode="widthFix"
+                                            show-menu-by-longpress="true"
+                                            @click="previewImage(item)" />
+                                        <view class="flex justify-end mt-2" v-if="item">
+                                            <view
+                                                class="bg-[#000000] text-white text-[22rpx] w-[116rpx] h-[46rpx] rounded-[12rpx] flex items-center justify-center"
+                                                @click="download(item, getOutputParams[key])"
+                                                >下载</view
+                                            >
+                                        </view>
+                                    </template>
+                                    <template v-else>
+                                        <text class="break-all">{{ item }}</text>
+                                    </template>
                                 </view>
                             </view>
                         </view>
@@ -194,7 +219,7 @@
                                 class="bg-white rounded-[24rpx] p-[24rpx]"
                                 :key="index"
                                 @click="handleRecord(item)">
-                                <view class="line-clamp-3 text-[26rpx]">
+                                <view class="text-[26rpx] break-all">
                                     {{ item.content }}
                                 </view>
                                 <view class="my-3">
@@ -241,6 +266,7 @@ import { isJson, setFormData } from "@/utils/util";
 import { useCopy } from "@/hooks/useCopy";
 import requestCancel from "@/utils/request/cancel";
 import { RequestCodeEnum } from "@/enums/requestEnums";
+import { saveImageToPhotosAlbum, saveVideoToPhotosAlbum } from "@/utils/file";
 
 // 聊天状态枚举
 enum CozeChattingStatus {
@@ -257,6 +283,8 @@ enum FormFieldTypeEnum {
     INPUT = "input",
     TEXTAREA = "textarea",
     NUMBER = "number",
+    VIDEO = "video",
+    IMAGE = "image",
     FILE = "file",
 }
 
@@ -330,6 +358,8 @@ const detail = reactive<AgentDetail>({
 const formFlowData = ref<Record<string, string>>({});
 const ruleFlow = ref<Record<string, { required: boolean; message: string }>>({});
 const isStream = computed(() => detail.stream == 1);
+
+const isImageError = ref(false);
 
 /**
  * 从详情生成表单项
@@ -420,14 +450,17 @@ const handleRecord = async (item: BaseMessage) => {
     if (agentType.value == 1) {
         conversationId.value = item.conversation_id;
         await getChatList();
-        showHistory.value = false;
     } else if (agentType.value == 2) {
-        await cozeAgentChatRecord({
+        const { lists } = await cozeAgentChatRecord({
             bot_id: detail.coze_id,
             type: 2, // Coze工作流类型
             conversation_id: item.conversation_id,
         });
+        if (lists.length) {
+            flowResult.value = JSON.parse(lists[0].content);
+        }
     }
+    showHistory.value = false;
 };
 
 /**
@@ -818,6 +851,35 @@ const handleChatClose = () => {
     if (chatContentList.value.length > 0 && isStopChat.value) {
         chatContentList.value[chatContentList.value.length - 1].loading = false;
     }
+};
+
+/**
+ * 预览图片
+ */
+const previewImage = (url: string) => {
+    uni.previewImage({
+        urls: [url],
+    });
+};
+
+/**
+ * 下载文件
+ */
+
+const download = (url: string, params: any) => {
+    if (params.type == FormFieldTypeEnum.VIDEO) {
+        saveVideoToPhotosAlbum(url);
+    } else {
+        saveImageToPhotosAlbum(url);
+    }
+};
+
+/**
+ * 格式化值
+ */
+const formatValue = (value: any) => {
+    if (!value) return [];
+    return Array.isArray(value) ? value : [value];
 };
 
 /**

@@ -48,7 +48,7 @@ class WorkermanServie extends Command
             // 在这里放心的实例化worker,
             $rpaWorker = new Worker('websocket://0.0.0.0:2345');
             $rpaWorker->count = 1;
-            $rpaWorker->name = 'ImaiworkRpaService';
+            $rpaWorker->name = 'AiRpaService';
             $service = new \app\common\workerman\rpa\RpaSocketService($rpaWorker);
             $rpaWorker->onWorkerStart = array($service, 'onWorkerStart');
             $rpaWorker->onConnect     = array($service, 'onConnect');
@@ -58,7 +58,7 @@ class WorkermanServie extends Command
 
             $worker = new Worker('websocket://0.0.0.0:2347');
             $worker->count = 4;
-            $worker->name = 'ImaiworkWechatService';
+            $worker->name = 'AiWechatService';
             $service = new \app\common\workerman\wechat\WechatSocketService();
             $worker->onWorkerStart = array($service, 'onWorkerStart');
             $worker->onConnect     = array($service, 'onConnect');
@@ -69,7 +69,7 @@ class WorkermanServie extends Command
             // //设备socket
             $tcpWorker = new Worker('tcp://0.0.0.0:6489');
             $tcpWorker->count = 4;
-            $tcpWorker->name = 'ImaiworkWechatService';
+            $tcpWorker->name = 'AiWechatService';
             $deviceService = new \app\common\workerman\wechat\DeviceSocketService();
             $tcpWorker->onWorkerStart = array($deviceService, 'onWorkerStart');
             $tcpWorker->onConnect     = array($deviceService, 'onConnect');

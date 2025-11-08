@@ -32,6 +32,8 @@ class PublishLogic extends SvBaseLogic
      */
     public static function add(array $params)
     {
+
+        // 启动事务
         Db::startTrans();
         try {
             $params['user_id'] = self::$uid;
@@ -188,7 +190,7 @@ class PublishLogic extends SvBaseLogic
                     'count' => $account['count'],
                     'published_count' => 0,
                     'status' => 1,
-                    'scene' => $params['scene'],
+                    'scene' => $params['scene'] ?? 1,
                     'created_time' => time(),
                 ]);
             }
@@ -678,7 +680,9 @@ class PublishLogic extends SvBaseLogic
 
     public static function setPublishDetail()
     {
-        //print_r('执行发布记录拉取任务');
+        print_r("\n执行发布记录拉取任务\n");
+        \think\facade\Log::channel('publish')->write("\n-------------------------------\n");
+        \think\facade\Log::channel('publish')->write("执行发布记录拉取任务");
         try {
             $accounts = SvPublishSettingAccount::alias('pa')
                 ->field('pa.*, ps.time_config, ps.publish_frep')
@@ -687,7 +691,7 @@ class PublishLogic extends SvBaseLogic
                 ->where('pa.task_type', 2)
                 ->where('ps.status', 'in', [1, 2])
                 ->select()->toArray();
-
+            \think\facade\Log::channel('publish')->write(Db::getLastSql());
             //print_r(Db::getLastSql());die;
             // print_r("count: " . count($accounts));
             $insertData = [];
@@ -699,6 +703,7 @@ class PublishLogic extends SvBaseLogic
             }
 
             foreach ($accounts as $key => $account) {
+                \think\facade\Log::channel('publish')->write("account: " . json_encode($account, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
                 // 遍历发布账号数据
                 // 1 获取已经生成的发布数量与设置的视频数量是否一致
                 // 2 如果视频任务都已经完成了，并且生成的发布数量仍少于预计的数量，则将该任务状态设置为待发布状态
@@ -709,7 +714,8 @@ class PublishLogic extends SvBaseLogic
                 }
 
                 $medias = self::_getMedias($account, $usedVideoIds);
-                if (empty($medias)) {
+                if (empty($medias) && (int)$account['scene'] === 1) {
+                    \think\facade\Log::channel('publish')->write("medias 为空");
                     array_push($insertData, [
                         'publish_id' => $account['publish_id'],
                         'publish_account_id' => $account['id'],
@@ -742,7 +748,8 @@ class PublishLogic extends SvBaseLogic
                     continue;
                 }
                 //$mediaCount = count($medias);
-                $endTime = max(array_column($medias, 'publish_time'));
+                $publishTimes = array_column($medias, 'publish_time');
+                $endTime = !empty($publishTimes) ? max($publishTimes) : '';
                 $status = 2;
                 foreach ($medias as $media) {
                     $detail = SvPublishSettingDetail::where('publish_id', $account['publish_id'])
@@ -789,6 +796,7 @@ class PublishLogic extends SvBaseLogic
                     'status' => $status,
                     'update_time' => time()
                 ]);
+                SvPublishSetting::where('id', $account['publish_id'])->update(['status' => 2, 'publish_end' => date('Y-m-d', time()), 'update_time' => time()]);
             }
             //print_r($insertData);die;
             if (!empty($insertData)) {
@@ -799,8 +807,7 @@ class PublishLogic extends SvBaseLogic
             self::$returnData = $insertData;
             return true;
         } catch (\Exception $e) {
-            print_r($e->__toString());
-            die;
+            \think\facade\Log::channel('publish')->write("发布失败，异常信息：" . $e->__toString());
             return false;
         }
     }
@@ -872,6 +879,7 @@ class PublishLogic extends SvBaseLogic
     {
         $video_ids = json_decode($account['video_ids'], true);
         if (empty($video_ids)) {
+            \think\facade\Log::channel('publish')->write("video_ids 为空");
             return [];
         }
         $status = (int)$account['scene'] === 1 ? [2, 3] : [3];
@@ -888,13 +896,14 @@ class PublishLogic extends SvBaseLogic
 
         $times = self::getTimes($account);
         if (empty($times)) {
+            \think\facade\Log::channel('publish')->write("times 为空");
             return [];
         }
         //print_r($times);die;
         // 合并后的新数组
         $mergedArray = [];
         foreach ($medias as $key => $media) {
-            if (!isset($times[$key])) {
+            if(!isset($times[$key])){
                 continue;
             }
             //获取发布内容和标题
@@ -960,7 +969,7 @@ class PublishLogic extends SvBaseLogic
         $startDate = $account['publish_start'];
         for ($i = 0; $i < ceil($account['count'] / $account['publish_frep']); $i++) {
             foreach ($timeConfig as $time) {
-                if (strpos($time, '-') !== false) {
+                if(strpos($time, '-') !== false){
                     $time = explode('-', $time)[0];
                 }
                 $publishTime = date('Y-m-d H:i:s', strtotime("{$startDate} {$time}"));
@@ -996,7 +1005,7 @@ class PublishLogic extends SvBaseLogic
     public static function SphPublishCron()
     {
         try {
-
+            
             $publishes = SvPublishSettingDetail::alias('ps')
                 ->field('ps.*')
                 ->join('sv_publish_setting ss', 'ps.publish_id = ss.id')
@@ -1010,7 +1019,7 @@ class PublishLogic extends SvBaseLogic
                 ->order('ps.publish_time asc')
                 ->limit(10)
                 ->select()->toArray();
-            print_r('视频号发布：' . count($publishes));
+            print_r("\n视频号发布：" . count($publishes));
             foreach ($publishes as $publish) {
                 sleep(1);
                 $interval_find = \app\common\model\wechat\AiWechatLog::where('user_id', $publish['user_id'])

@@ -318,6 +318,7 @@ export class Request {
      */
     request(fetchOptions: FetchOptions, requestOptions?: Partial<RequestOptions>): Promise<any> {
         this.controller = new AbortController();
+
         let mergeOptions = merge({}, this.fetchOptions, fetchOptions);
         mergeOptions.signal = this.controller.signal;
         mergeOptions.requestOptions = merge({}, this.requestOptions, requestOptions);
@@ -334,6 +335,7 @@ export class Request {
         if (requestInterceptorsHook && isFunction(requestInterceptorsHook)) {
             mergeOptions = requestInterceptorsHook(mergeOptions);
         }
+
         return new Promise((resolve, reject) => {
             return this.fetchInstance
                 .raw(mergeOptions.url, mergeOptions)

@@ -158,7 +158,7 @@
                                     </view>
                                     <view class="mt-[24rpx]">
                                         <view class="flex items-center justify-between">
-                                            <view>加好友备注内容：</view>
+                                            <view>加好友验证内容：</view>
                                             <u-switch
                                                 :model-value="formData.add_remark_enable"
                                                 :size="32"

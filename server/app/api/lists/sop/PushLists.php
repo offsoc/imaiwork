@@ -38,6 +38,7 @@ class PushLists  extends BaseApiDataLists implements ListsSearchInterface
       
         return AiWechatSopPush::where($this->searchWhere)
             ->order('id', 'desc')
+            ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->toArray();
     }

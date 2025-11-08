@@ -48,7 +48,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             $params['implementation_keywords_number'] = $keywordCount;
             $params['keywords'] = json_encode($params['keywords'], JSON_UNESCAPED_UNICODE);
             $params['device_codes'] = json_encode(array_values($device_codes), JSON_UNESCAPED_UNICODE);
-            $params['name'] = date('mdHis', time()) . '视频号获客任务';
+            //$params['name'] = date('mdHis', time()) . '视频号获客任务';
             $params['status'] = 1;
             $params['type'] = 4;
             $params['ocr_type'] = $params['ocr_type'] ?? 1;
@@ -445,7 +445,7 @@ class CrawlingTaskLogic extends SvBaseLogic
 
     public static function sphCluesAddWechat()
     {
-        print_r('获客加微');
+        print_r("\n获客加微\n");
         try {
             $records = SvAddWechatRecord::alias('r')
                 ->field('r.*, t.add_number, t.add_interval_time, t.add_friends_prompt, t.add_remark_enable, t.remarks, t.wechat_id, t.wechat_reg_type')

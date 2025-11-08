@@ -17,7 +17,8 @@ class CrawlingTaskLists extends BaseApiDataLists implements ListsSearchInterface
     public function setSearch(): array
     {
         return [
-            '='      => ['user_id', 'type', 'status'],
+            '='      => ['user_id', 'type'],
+            'in'     => ['status'],
             '%like%' => ['name', 'device_code', 'keywords'],
         ];
     }

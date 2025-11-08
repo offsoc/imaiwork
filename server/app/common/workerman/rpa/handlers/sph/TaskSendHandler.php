@@ -42,7 +42,7 @@ class TaskSendHandler extends BaseMessageHandler
             'exec_number' => 99,
             'is_chat' => 1,
             'chat_frep' => 10,
-            'greet_content' => '您好,我是IMAI',
+            'greet_content' => '您好,我是AI',
             'status' => 0,
             'tokens' => 0,
             'create_time' => time(),

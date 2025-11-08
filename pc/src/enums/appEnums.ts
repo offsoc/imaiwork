@@ -131,6 +131,7 @@ export enum TokensSceneEnum {
     AI_XHS = "ai_xhs",
     SPH_OCR = "sph_ocr",
     SPH_LOCAL_OCR = "sph_local_ocr",
+    SPH_AI_CLUE = "sph_search_terms",
 }
 
 // 应用类型

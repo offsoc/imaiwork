@@ -39,8 +39,6 @@
                                                 >{{ uploadLimitData.videoMinDuration }}-{{
                                                     uploadLimitData.videoMaxDuration
                                                 }}秒</text
-                                            >，超出时长自动采用前<text class="text-[#7E8085]"
-                                                >{{ uploadLimitData.videoMaxDuration }}秒</text
                                             ></view
                                         >
                                     </view>
@@ -151,16 +149,22 @@
 </template>
 
 <script setup lang="ts">
+import { getVideoTranscodeResult, videoTranscode } from "@/api/app";
 import { createShanjianAnchor, getShanjianAnchorDetail } from "@/api/digital_human";
 import { DigitalHumanModelVersionEnum, ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
+import { useUserStore } from "@/stores/user";
+import { useAppStore } from "@/stores/app";
 import { uploadLimit, useUpload } from "@/ai_modules/digital_human/hooks/useUpload";
 import { requestAuthorization } from "@/utils/file";
 import usePolling from "@/hooks/usePolling";
-import { useUserStore } from "@/stores/user";
+
 import { TokensSceneEnum } from "@/enums/appEnums";
 
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
+const appStore = useAppStore();
+
+const isOssTranscode = computed(() => appStore.config.is_oss_transcode);
 
 const anchorData = reactive<any>({
     name: "",
@@ -232,33 +236,71 @@ const handleUploadAuthVideo = () => {
     });
 };
 
-const handleUploadAuthVideoAlbum = () => {
-    uni.showLoading({
-        title: "视频上传中",
-        mask: true,
+// 视频转码
+const handleVideoTranscode = async (url: string) => {
+    return new Promise(async (resolve: any, reject: any) => {
+        try {
+            const data = await videoTranscode({
+                video_url: url,
+            });
+            const { start, end } = usePolling(async () => {
+                try {
+                    const result = await getVideoTranscodeResult({
+                        jobid: data.jobid,
+                    });
+                    if (result.state == "TranscodeSuccess") {
+                        end();
+                        resolve(true);
+                    } else if (result.state == "TranscodeFail" || result.state == "TranscodeCancelled") {
+                        end();
+                        resolve(false);
+                    }
+                } catch (error: any) {
+                    end();
+                    resolve(false);
+                }
+            }, {});
+            await start();
+        } catch (error: any) {
+            resolve(false);
+        }
     });
+};
+
+const handleUploadAuthVideoAlbum = () => {
     const { upload } = useUpload({
         duration: [1, 120],
-        onSuccess: (res: any) => {
+        onProgress: (res: any) => {
+            uni.showLoading({
+                title: "视频上传中",
+                mask: true,
+            });
+        },
+        onSuccess: async (res: any) => {
             uni.hideLoading();
             uni.showToast({
                 title: "视频上传成功",
                 icon: "none",
                 duration: 3000,
             });
-            authData.url = res.url;
+
             authData.pic = res.pic;
             authData.name = res.name;
+            authData.url = res.url;
         },
         onError: (err: any) => {
+            const { type, error } = err;
             uni.hideLoading();
-            uni.showToast({
-                title: err || "视频上传失败",
-                icon: "none",
-                duration: 3000,
-            });
+            if (type == "video") {
+                uni.showToast({
+                    title: error || "视频上传失败",
+                    icon: "none",
+                    duration: 3000,
+                });
+            }
         },
     });
+
     upload();
 };
 
@@ -267,10 +309,34 @@ const handleCreateAnchor = async () => {
         rechargePopupRef.value?.open();
         return;
     }
+
+    if (!anchorData.url) {
+        uni.showToast({
+            title: "请上传形象视频",
+            icon: "none",
+            duration: 3000,
+        });
+        return;
+    } else if (!authData.url) {
+        uni.showToast({
+            title: "请上传授权视频",
+            icon: "none",
+            duration: 3000,
+        });
+        return;
+    }
+
     uni.showLoading({
-        title: "创建形象中",
+        title: "创建形象中...",
         mask: true,
     });
+
+    if (isOssTranscode.value) {
+        try {
+            Promise.allSettled([await handleVideoTranscode(anchorData.url), await handleVideoTranscode(authData.url)]);
+        } catch (error: any) {}
+    }
+
     try {
         const res = await createShanjianAnchor({
             name: "",
@@ -297,11 +363,6 @@ const handleCreateAnchor = async () => {
             }
         }, {});
         await start();
-        // uni.showToast({
-        //     title: "创建形象成功",
-        //     icon: "none",
-        //     duration: 3000,
-        // });
     } catch (error: any) {
         uni.hideLoading();
         uni.showToast({
@@ -340,7 +401,7 @@ const getAuthData = (data: any) => {
     authData.url = data.url;
 };
 
-onShow(() => {
+onLoad(() => {
     uni.$on("confirm", (result: any) => {
         const { type, data } = result;
         if (type === ListenerTypeEnum.MONTAGE_ANCHOR) {
@@ -349,7 +410,6 @@ onShow(() => {
         if (type === ListenerTypeEnum.MONTAGE_AUTH || type === ListenerTypeEnum.UPLOAD_AUTH_CAMERA) {
             getAuthData(data);
         }
-        uni.$off("confirm");
     });
 });
 </script>

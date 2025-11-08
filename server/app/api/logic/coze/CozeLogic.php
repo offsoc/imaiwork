@@ -40,7 +40,7 @@ class CozeLogic extends ApiLogic
     {
 
         try {
-            $client = new Client(['timeout' => 6000, 'verify' => false, 'http_errors' => false]);
+            $client = new Client(['timeout' => 0, 'verify' => false, 'http_errors' => false]);
             $rsp = $client->post($this->url . $uri, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->pat,

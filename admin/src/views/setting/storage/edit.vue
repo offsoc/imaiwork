@@ -1,7 +1,7 @@
 <template>
     <div class="edit-popup">
         <popup ref="popupRef" title="设置存储" :async="true" width="550px" @confirm="handleSubmit" @close="handleClose">
-            <el-form ref="formRef" :model="formData" label-width="120px" :rules="formRules">
+            <el-form ref="formRef" :model="formData" label-width="160px" :rules="formRules">
                 <el-form-item label="存储方式" prop="engine">
                     <div>
                         <el-radio-group :model-value="1">
@@ -33,6 +33,17 @@
                     <el-form-item v-if="formData.engine == StorageEnum.QCLOUD" label="REGION" prop="region">
                         <el-input v-model="formData.region" placeholder="请输入region" clearable />
                     </el-form-item>
+                    <template v-if="formData.engine == StorageEnum.ALIYUN">
+                        <el-form-item label="PipelineId(管道ID)" prop="PipelineId">
+                            <el-input v-model="formData.PipelineId" placeholder="请输入PipelineId" clearable />
+                        </el-form-item>
+                        <el-form-item label="Location(位置)" prop="Location">
+                            <el-input v-model="formData.Location" placeholder="请输入Location" clearable />
+                        </el-form-item>
+                        <el-form-item label="TemplateId(模板ID)" prop="TemplateId">
+                            <el-input v-model="formData.TemplateId" placeholder="请输入TemplateId" clearable />
+                        </el-form-item>
+                    </template>
                 </div>
                 <el-form-item label="状态" prop="status">
                     <el-radio-group v-model="formData.status">
@@ -67,6 +78,9 @@ const formData = reactive({
     domain: "",
     region: "", // 腾讯云需要
     status: 0,
+    PipelineId: "",
+    Location: "",
+    TemplateId: "",
 });
 
 const storageArr = [

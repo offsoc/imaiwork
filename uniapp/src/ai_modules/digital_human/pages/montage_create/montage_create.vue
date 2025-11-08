@@ -550,14 +550,19 @@ import {
 } from "@/api/digital_human";
 import { addMaterialLibrary, deleteMaterialLibrary } from "@/api/material";
 import { useUserStore } from "@/stores/user";
-import { uploadFile } from "@/api/app";
+import { useAppStore } from "@/stores/app";
+import { getVideoTranscodeResult, uploadFile, videoTranscode } from "@/api/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { chooseFile } from "@/components/file-upload/choose-file";
 import { ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
 import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
+import usePolling from "@/hooks/usePolling";
 
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
+const appStore = useAppStore();
+
+const isOssTranscode = computed(() => appStore.config.is_oss_transcode);
 
 const steps = ref([
     { step: 1, title: "选形象" },
@@ -794,11 +799,44 @@ const progressCallback = (progress: number, options: { tempFilePath: string }) =
         (material) => material.tempFilePath === options.tempFilePath
     );
     if (targetIndex !== -1) {
-        uploadMaterialList.value[targetIndex] = {
-            ...uploadMaterialList.value[targetIndex],
+        const newList = [...uploadMaterialList.value];
+        newList[targetIndex] = {
+            ...newList[targetIndex],
             progress: progress,
         };
+        uploadMaterialList.value = newList;
     }
+};
+
+// 视频转码
+const handleVideoTranscode = async (url: string) => {
+    return new Promise(async (resolve: any, reject: any) => {
+        try {
+            const data = await videoTranscode({
+                video_url: url,
+            });
+            const { start, end } = usePolling(async () => {
+                try {
+                    const result = await getVideoTranscodeResult({
+                        jobid: data.jobid,
+                    });
+                    if (result.state == "TranscodeSuccess") {
+                        end();
+                        resolve(true);
+                    } else if (result.state == "TranscodeFail" || result.state == "TranscodeCancelled") {
+                        end();
+                        resolve(false);
+                    }
+                } catch (error: any) {
+                    end();
+                    resolve(false);
+                }
+            }, {});
+            await start();
+        } catch (error: any) {
+            resolve(false);
+        }
+    });
 };
 
 /**
@@ -811,6 +849,8 @@ const uploadAndProcessFiles = async (fileType: "image" | "video") => {
         const { tempFiles } = await chooseFile({
             type: fileType,
             count: 9,
+            sourceType: ["album"],
+            sizeType: ["original"],
             extension: isImage ? ["jpg", "png"] : [],
         });
 
@@ -854,35 +894,69 @@ const uploadAndProcessFiles = async (fileType: "image" | "video") => {
             }
         }
         if (fileList.length === 0) {
-            uni.$u.toast(`所选${isImage ? "图片" : "视频"}素材均不符合条件，可以放弃原图模式，重新上传`);
+            uni.$u.toast(`所选${isImage ? "图片" : "视频"}素材均不符合条件，重新上传`);
             return;
         }
 
         uploadMaterialList.value = fileList.map((file: any) => ({ ...file, progress: 0 }));
         showUploadProgress.value = true;
 
+        const uploadedFilesData = [];
         for (const item of uploadMaterialList.value) {
             const coverRes: any = isImage ? null : await uploadFile("image", { filePath: item.thumbTempFilePath });
             const fileRes: any = await uploadFile(fileType, { filePath: item.tempFilePath }, (progress) =>
                 progressCallback(progress, item)
             );
+            uploadedFilesData.push({ item, coverRes: isImage ? fileRes : coverRes, fileRes });
+        }
 
-            const addRes = await addMaterialLibrary({
-                name: item.name,
-                size: item.size,
-                type: 0,
-                sort: 0,
-                m_type: isImage ? 1 : 2,
-                content: fileRes.uri,
-                duration: item.duration || 0,
-            });
+        async function handleAddMaterial(result: any) {
+            try {
+                const { item, coverRes, fileRes } = result;
+                const addRes = await addMaterialLibrary({
+                    name: item.name,
+                    size: item.size,
+                    type: 0,
+                    sort: 0,
+                    m_type: 2,
+                    content: fileRes.uri,
+                    duration: item.duration || 0,
+                });
 
-            formData.materialList.push({
-                url: fileRes.uri,
-                type: fileType,
-                pic: isImage ? fileRes.uri : coverRes.uri,
-                id: addRes.id,
-            });
+                formData.materialList.push({
+                    url: fileRes.uri,
+                    type: fileType,
+                    pic: coverRes.uri,
+                    id: addRes.id,
+                });
+            } catch (error) {
+                console.error("添加素材失败:", error);
+            }
+        }
+
+        if (fileType === "video") {
+            for (const [index, data] of uploadedFilesData.entries()) {
+                const { fileRes } = data;
+                if (isOssTranscode.value) {
+                    uni.showLoading({
+                        title: `转码中(${index + 1}/${uploadedFilesData.length})...`,
+                        mask: true,
+                    });
+                    try {
+                        await handleVideoTranscode(fileRes.uri);
+                        uni.hideLoading();
+                    } catch (error) {
+                        uni.hideLoading();
+                        showUploadProgress.value = false;
+                    }
+                }
+                await handleAddMaterial(data);
+            }
+            uni.hideLoading();
+        } else {
+            for (const data of uploadedFilesData) {
+                await handleAddMaterial(data);
+            }
         }
 
         if (uploadMaterialList.value.every((item) => item.progress === 100)) {
@@ -902,7 +976,9 @@ const handleUploadMaterial = () => {
         itemList: ["选择图片素材", "选择视频素材"],
         success: (res) => {
             if (res.tapIndex === 0) uploadAndProcessFiles("image");
-            else if (res.tapIndex === 1) uploadAndProcessFiles("video");
+            else if (res.tapIndex === 1) {
+                uploadAndProcessFiles("video");
+            }
         },
     });
 };

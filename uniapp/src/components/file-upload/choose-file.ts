@@ -35,6 +35,7 @@ function chooseImage(opts: ChooseMediaOption) {
     return new Promise<ChooseResult>((resolve, reject) => {
         uni.chooseMedia({
             count,
+            mediaType: ["image"],
             sizeType,
             sourceType,
             success(res: ChooseMediaSuccessCallbackResult) {
@@ -56,7 +57,7 @@ function chooseImage(opts: ChooseMediaOption) {
 }
 
 function chooseVideo(opts: ChooseMediaOption) {
-    const { count, camera, maxDuration, sourceType } = opts;
+    const { count, camera, maxDuration, sourceType, sizeType } = opts;
     return new Promise<ChooseResult>((resolve, reject) => {
         uni.chooseMedia({
             count,
@@ -64,6 +65,7 @@ function chooseVideo(opts: ChooseMediaOption) {
             camera,
             maxDuration,
             sourceType,
+            sizeType,
             success(res) {
                 resolve(normalizeFileRes(res as ChooseResult, "video"));
             },

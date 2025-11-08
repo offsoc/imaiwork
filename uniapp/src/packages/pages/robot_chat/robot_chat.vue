@@ -17,7 +17,7 @@
                 <view class="flex items-center gap-2">
                     <view
                         class="leading-[0] w-[64rpx] h-[64rpx] p-[6rpx] rounded-[10rpx] border border-solid border-[#E5E6F3] bg-white flex-shrink-0">
-                        <image :src="detail.logo" class="w-full h-full"></image>
+                        <image :src="detail.logo" class="w-full h-full rounded-[10rpx]"></image>
                     </view>
                     <view>
                         <view class="font-bold text-[28rpx] line-clamp-1">{{ detail.name }}</view>

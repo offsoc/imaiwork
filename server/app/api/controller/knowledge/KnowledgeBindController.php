@@ -23,7 +23,7 @@ class KnowledgeBindController extends BaseCommonAdminController
     /**
      * @notes 获取列表
      * @return \think\response\Json
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function lists()
@@ -35,7 +35,7 @@ class KnowledgeBindController extends BaseCommonAdminController
     /**
      * @notes 添加
      * @return \think\response\Json
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function add()
@@ -52,7 +52,7 @@ class KnowledgeBindController extends BaseCommonAdminController
     /**
      * @notes 编辑
      * @return \think\response\Json
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function edit()
@@ -69,7 +69,7 @@ class KnowledgeBindController extends BaseCommonAdminController
     /**
      * @notes 删除
      * @return \think\response\Json
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function delete()
@@ -83,7 +83,7 @@ class KnowledgeBindController extends BaseCommonAdminController
     /**
      * @notes 获取详情
      * @return \think\response\Json
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function detail()

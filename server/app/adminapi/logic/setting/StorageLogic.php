@@ -156,6 +156,9 @@ class StorageLogic extends BaseLogic
                 break;
             case 'aliyun':
                 ConfigService::set('storage', 'aliyun', [
+                    'PipelineId' => $params['PipelineId'] ?? '',
+                    'Location' => $params['Location'] ?? '',
+                    'TemplateId' => $params['TemplateId'] ?? '',
                     'bucket' => $params['bucket'] ?? '',
                     'access_key' => $params['access_key'] ?? '',
                     'secret_key' => $params['secret_key'] ?? '',

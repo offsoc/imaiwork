@@ -268,6 +268,7 @@ const loading = ref(true);
 const open = async () => {
     show.value = true;
     loading.value = true;
+
     todoParams.friend_id = currentFriend.value.UserName;
     todoParams.wechat_id = currentWechat.value.wechat_id;
     try {
@@ -312,8 +313,8 @@ defineExpose({
 
 <style lang="scss">
 .user-detail-panel {
-    background-color: transparent;
-    box-shadow: none;
+    background-color: transparent !important;
+    box-shadow: none !important;
     .el-drawer__header {
         display: none;
     }

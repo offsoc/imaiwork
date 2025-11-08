@@ -240,9 +240,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $wechatPattern = '/[a-zA-Z][a-zA-Z0-9_-]{5,19}/';
             $phonePattern = '/1[3-9]\d{9}/';
             $pattern = '/(?:[a-zA-Z][a-zA-Z0-9_-]{5,19}|1[3-9]\d{9})/';
-            $blacklist = array(
-                'imaiwork'
-            );
+            $blacklist = array();
             $addWechat = array();
             $checkArray = ["加vx", "加VX", "加v", "加V", "加wx", "加WX", "+wx", "+WX", "+vx", "+VX", "vx:", "VX:", "vx：", "VX：", "+v", "+V", "V:", "V：", "v:", "v："];
             // if (!$this->containsAnyWithFilter($crawlContent, $checkArray)) {
@@ -315,9 +313,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $phonePattern = '/1[3-9]\d{9}/';
             $pattern = '/(?:[a-zA-Z][a-zA-Z0-9_-]{5,19}|1[3-9]\d{9})/';
 
-            $blacklist = array(
-                'imaiwork'
-            );
+            $blacklist = array();
 
             $isInWechat = false;
             $checkArray = ["加vx", "加VX", "加v", "加V", "加wx", "加WX", "+wx", "+WX", "+vx", "+VX", "vx:", "VX:", "vx：", "VX：", "+v", "+V", "V:", "V：", "v:", "v："];

@@ -86,3 +86,18 @@ export function getScenePrompt() {
 export function getClipConfig() {
     return request.get({ url: "/tools/clip" });
 }
+
+// 视频转码
+export function videoTranscode(data: any) {
+    return request.post({ url: "/sv.tools/transcoding", data });
+}
+
+// 查询视频转码结果
+export function getVideoTranscodeResult(data: any) {
+    return request.post(
+        { url: "/sv.tools/searchTranscoding", data },
+        {
+            ignoreCancel: true,
+        }
+    );
+}

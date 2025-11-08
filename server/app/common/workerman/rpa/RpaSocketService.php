@@ -47,6 +47,7 @@ class RpaSocketService
         $this->worker->log = array();
         $this->worker->appType = ''; //应用类型
         date_default_timezone_set('PRC');
+        ini_set('memory_limit', '1024M');
 
         $this->_connRedis();
     }
@@ -142,7 +143,7 @@ class RpaSocketService
             if (!isset($payload['deviceId'])) {
                 throw new \Exception('无效请求,设备参数不存在', WorkerEnum::INVALID_REQUEST_NOFUND_DEVICE);
             }
-            if(in_array($type, [1, 'addDevice'])){
+            if (in_array($type, [1, 'addDevice'])) {
                 //验证设备授权是否存在
                 if (!$this->checkDevice($connection, $payload)) {
                     throw new \Exception($this->error_msg, WorkerEnum::DEVICE_NOT_FOUND);
@@ -199,9 +200,9 @@ class RpaSocketService
     public function onConnect(TcpConnection $connection)
     {
         try {
-
+            $connection->maxSendBufferSize = 1024 * 1024 * 2;
+            $connection->maxPackageSize = 1024 * 1024 * 10;
             $connection->onWebSocketConnect = function ($connection, $http_header) {
-
                 $this->setLog('新请求header:' . $http_header);
                 // 存客户端与websocket的映射，唯一连接标识（！！！关键）
                 if (!isset($connection->uid)) {

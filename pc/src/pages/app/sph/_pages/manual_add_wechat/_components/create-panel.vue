@@ -155,7 +155,7 @@
                             </div>
                             <div class="mt-3">
                                 <div class="flex items-center justify-between mb-3">
-                                    <div class="text-white">加好友备注内容</div>
+                                    <div class="text-white">加好友验证内容</div>
                                     <ElSwitch
                                         v-model="formData.add_remark_enable"
                                         style="--el-switch-off-color: #333333"
@@ -326,7 +326,7 @@ const getTaskList = async (query?: string) => {
     const { lists } = await getTaskListApi({
         page: 1,
         page_size: 20,
-        status: 4,
+        status: "3,4",
         name: query,
     });
     taskList.value = lists;

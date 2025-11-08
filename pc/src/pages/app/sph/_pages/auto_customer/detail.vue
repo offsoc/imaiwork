@@ -44,7 +44,7 @@
                     <Icon name="el-icon-ArrowLeft" color="#ffffff"></Icon>
                     <div class="text-white">返回</div>
                 </div>
-                <div class="flex items-center gap-1" v-if="detail?.status == 3 || detail?.status == 4">
+                <div class="flex items-center gap-1" v-if="detail?.status && detail?.status != 0">
                     <export-data :params="queryParams" :fetch-fun="getTaskClue" :export-fun="getTaskClue">
                         <template #trigger>
                             <ElButton type="primary" class="!rounded-full !h-10 w-[98px]">导出</ElButton>

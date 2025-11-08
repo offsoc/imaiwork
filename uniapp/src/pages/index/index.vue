@@ -219,7 +219,11 @@ const getChatList = async () => {
             if (item.type === 1)
                 return {
                     ...item,
-                    fileList: item?.file_info && item.file_info.length > 0 ? item.file_info : [],
+                    fileList: item?.file_info
+                        ? Array.isArray(item.file_info)
+                            ? item.file_info
+                            : [item.file_info]
+                        : [],
                 };
             return {
                 ...item,
@@ -229,6 +233,8 @@ const getChatList = async () => {
         });
 
         chatContentList.value = transformData;
+        console.log("chatContentList", chatContentList.value);
+
         await nextTick();
         chattingRef.value.scrollToBottom();
     } catch (err) {

@@ -1,6 +1,6 @@
 {
     "name": "imai.work",
-    "version": "2.4.1",
+    "version": "2.4.2",
     "license": "MIT",
     "scripts": {
         "init": "node initialize.js",

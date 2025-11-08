@@ -24,6 +24,13 @@
         "miniprogram": {
             "list": [
                 {
+                    "name": "ai_modules/digital_human/pages/montage_create/montage_create",
+                    "pathName": "ai_modules/digital_human/pages/montage_create/montage_create",
+                    "query": "",
+                    "launchMode": "default",
+                    "scene": null
+                },
+                {
                     "name": "ai_modules/interview/pages/interview_detail/interview_detail",
                     "pathName": "ai_modules/interview/pages/interview_detail/interview_detail",
                     "query": "id=108",

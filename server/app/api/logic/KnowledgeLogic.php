@@ -1593,7 +1593,7 @@ class KnowledgeLogic extends ApiLogic
             }
             return true;
         } catch (\Throwable $e) {
-            clogger($e->__toString());
+//            clogger($e->__toString());
             if ($params['scene'] !== 'socket') {
                 message($e->getMessage());
             } else {
@@ -1851,7 +1851,7 @@ class KnowledgeLogic extends ApiLogic
                 // 根据用户提示词检索
                 $response = \app\common\service\ToolsService::Knowledge()->retrievePrompt($request);
             }
-            //clogger($vector);
+//            clogger($vector);
 
             // 拼接切片内容
             if ((isset($response['code']) && (int)$response['code'] === 10000) || $vector != '') {

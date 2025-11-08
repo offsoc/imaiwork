@@ -628,7 +628,7 @@ class KbTeachLogic extends BaseLogic
             $question       = $post['question'];
             $searchMode     = $post['search_mode'] ?? 'similar';
             $searchTokens   = $post['search_tokens'] ?? 8000;
-            $searchSimilar  = intval($post['search_similar'] ?? 0);
+            $searchSimilar  = $post['search_similar'] ?? 0.5;
             $rankingStatus  = $post['ranking_status'] ?? 0;
             $rankingScore   = $post['ranking_score'] ?? 0.5;
             $rankingModel   = $post['ranking_model'] ?? '';
@@ -669,6 +669,9 @@ class KbTeachLogic extends BaseLogic
             $pgList = RecallUtils::filterMaxTokens($results, $searchTokens);
             $returnList = [];
             foreach ($pgList as $key => $val) {
+                if (!isset($val['emb_score']) || $val['emb_score'] < $searchSimilar){
+                    continue;
+                }
                 $returnList[$key]['uuid'] = $val['uuid'];
                 $returnList[$key]['fd_id'] = $val['fd_id'];
                 $returnList[$key]['emb_model_id'] = 3;

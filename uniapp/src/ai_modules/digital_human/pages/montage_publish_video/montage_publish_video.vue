@@ -82,6 +82,11 @@
                                 </view>
                             </view>
                         </view>
+                        <view
+                            v-if="item.status === 2 && item.remark"
+                            class="text-[#F63E2F] text-xs mt-[16rpx] break-all">
+                            失败原因：{{ item.remark }}
+                        </view>
                     </view>
                 </view>
                 <template #empty>

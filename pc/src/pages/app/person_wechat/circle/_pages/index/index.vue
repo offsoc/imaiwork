@@ -121,7 +121,7 @@ const { wechatLists, currentWechat, actionType, onHandleEvent } = useHandle();
 const { on, send } = useWeChatWs();
 
 on("open", () => {
-    wechatAutoLogin();
+    getWeChatListsFn();
 });
 
 // =================================================================================================
@@ -488,6 +488,7 @@ const handlePreviewVideo = async (url: string) => {
 const getWeChatListsFn = async () => {
     const { lists } = await getWeChatLists({ page_type: 0 });
     wechatLists.value = lists;
+    wechatAutoLogin();
 };
 
 const wechatAutoLogin = async () => {
@@ -508,8 +509,6 @@ const wechatAutoLogin = async () => {
         });
     }
 };
-
-getWeChatListsFn();
 
 onUnmounted(() => {
     wechatLists.value = [];

@@ -36,7 +36,7 @@ class KnowledgeBindValidate extends BaseValidate
     /**
      * @notes 添加场景
      * @return KnowledgeBindValidate
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function sceneAdd()
@@ -48,7 +48,7 @@ class KnowledgeBindValidate extends BaseValidate
     /**
      * @notes 编辑场景
      * @return KnowledgeBindValidate
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function sceneEdit()
@@ -60,7 +60,7 @@ class KnowledgeBindValidate extends BaseValidate
     /**
      * @notes 删除场景
      * @return KnowledgeBindValidate
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function sceneDelete()
@@ -72,7 +72,7 @@ class KnowledgeBindValidate extends BaseValidate
     /**
      * @notes 详情场景
      * @return KnowledgeBindValidate
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public function sceneDetail()

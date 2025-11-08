@@ -103,5 +103,7 @@ export enum FormFieldTypeEnum {
     INPUT = "input",
     TEXTAREA = "textarea",
     NUMBER = "number",
+    VIDEO = "video",
+    IMAGE = "image",
     FILE = "file",
 }

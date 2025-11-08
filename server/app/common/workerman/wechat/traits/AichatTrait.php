@@ -460,7 +460,11 @@ trait AichatTrait
                 }
             }
 
-            $history = implode("\n", array_column($logs, 'content'));
+            $history = '';
+            foreach ($logs as $log){
+                $history .= "\n " . $log['role'] . ': ' . $log['content'] . '。';
+            }
+//            $history = implode("\n", array_column($logs, 'content'));
             $keyword = str_replace(
                 ['角色设定', '用户发送的内容', '历史对话上下文', '相关知识库检索结果'],
                 [$robot->roles_prompt, $request['message'], $history, empty($knowledge) ? '' : '相关知识库检索结果'],
@@ -549,7 +553,6 @@ trait AichatTrait
                     'scene' => '个微聊天',
                     'model' => $payload['model'],
                     'robot' => $payload['robot'],
-
                     'temperature' => $payload['request']['temperature'] ?? 1.0,
                     'top_p'       => $payload['request']['top_p'] ?? 0.5,
                     'presence_penalty' => $payload['request']['presence_penalty'] ?? 0.2,
@@ -581,7 +584,6 @@ trait AichatTrait
                 }
             }
         } else {
-
             $reply = $log->reply;
         }
 
@@ -589,6 +591,7 @@ trait AichatTrait
         if ($payload['reply_strategy']['paragraph_enable'] == 1) {
             $replies = explode("\n", formatMarkdown($reply));
             foreach ($replies as $reply) {
+                $reply = preg_replace('/^[^a-zA-Z0-9\p{Han}]*/u', '', $reply);
                 $this->_sendMessage([
                     'wechat_id'      => $payload['wechat_id'],
                     'friend_id'      => $payload['friend_id'],
@@ -618,6 +621,11 @@ trait AichatTrait
                 'user_id'        => $payload['user_id'],
             ]);
         }
+
+        //TODO 添加AI回复记录
+        $payload['user_message'] = $reply;
+        $payload['message_type'] = $payload['request']['message_type'];
+        $this->setFriendHistoryMsg($payload,true);
     }
 
     private function _handleResponse(array $response, array $request)
@@ -871,8 +879,7 @@ trait AichatTrait
 
     private function setFriendHistoryMsg(array $payload, bool $isSend = false)
     {
-        $reply = $payload['reply_strategy'];
-        $number_chat_rounds = $reply['number_chat_rounds'] == 0 ? 1 : $reply['number_chat_rounds'];
+        $number_chat_rounds = max($payload['robot']['context_num'] ?? 1, 1);
         $key = $this->getDeviceKey($payload['device_code'], 'friendHistory:' . $payload['friend_id']);
         $json = $this->redis()->get($key);
         $role = $isSend ? 'assistant' : 'user';
@@ -892,8 +899,10 @@ trait AichatTrait
             ]);
         }
 
-        $msgs = count($msgs) > $number_chat_rounds ? array_slice($msgs, -$number_chat_rounds) : $msgs;
-        //$this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE), 'EX', 86400 * 15);
+        if (!$isSend){
+            $msgs = (count($msgs) / 2) > $number_chat_rounds ? array_slice($msgs, -($number_chat_rounds * 2 - 1)) : $msgs;
+        }
+
         $this->redis()->set($key, json_encode($msgs, JSON_UNESCAPED_UNICODE), 86400 * 15);
         return $msgs;
     }

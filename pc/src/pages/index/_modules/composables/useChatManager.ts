@@ -126,7 +126,6 @@ export function useChatManager() {
                 task_id: taskId.value,
                 assistant_id: 0,
             });
-
             const historyMessages: ChatMessage[] =
                 data?.map(
                     (item: any): ChatMessage =>
@@ -134,13 +133,17 @@ export function useChatManager() {
                             ? {
                                   ...item,
                                   form_avatar: userInfo.value.avatar,
-                                  fileList: item?.file_info ? [item.file_info] : [],
+                                  fileList: item?.file_info
+                                      ? Array.isArray(item.file_info)
+                                          ? item.file_info
+                                          : [item.file_info]
+                                      : [],
                               }
                             : {
                                   ...item,
                                   is_reasoning_finished: true,
                                   // [FIX] 恢复原始的属性访问方式
-                                  form_avatar: chatConfig.logo,
+                                  form_avatar: chatStore.detail.logo,
                                   consume_tokens: item.tokens_info,
                               }
                 ) ?? [];
@@ -176,7 +179,7 @@ export function useChatManager() {
         const botMessage: ChatMessage = {
             type: 2,
             loading: true,
-            form_avatar: chatConfig.value?.logo,
+            form_avatar: chatStore.detail.logo,
             is_reasoning_finished: isDeep.value,
             error: "",
             reply: "",

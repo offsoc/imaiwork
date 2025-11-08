@@ -832,22 +832,22 @@ class KbKnowLogic extends BaseLogic
             throw new Exception('机器人信息错误');
         }
         $kb_ids = explode(',', $robot['kb_ids']);
-
+        $kbIds = [];
             $modelKbKnow = new KbKnow();
             foreach ($kb_ids as $kb_id) {
                 $know = $modelKbKnow->where(['id'=>$kb_id])->findOrEmpty()->toArray();
                 if (!$know) {
                     throw new Exception('知识库不存在了!');
                 }
+                $kbIds[] = intval($kb_id);
             }
             // 接收参数
-            $kbIds = $kb_ids;
             $question       = $content;
             $searchMode     = $robot['search_mode'] ?? 'similar';
-            $searchTokens   = $robot['search_tokens'] ?? 8000;
-            $searchSimilar  = $robot['search_similar'] ?? 0.5;
-            $rankingStatus  = $robot['ranking_status'] ?? 0;
-            $rankingScore   = $robot['ranking_score'] ?? 0.5;
+            $searchTokens   = $robot['search_tokens'] ?? 3000;
+            $searchSimilar  = isset($robot['search_similar']) ? (float)sprintf("%.1f", $robot['search_similar']) : 0.5;
+            $rankingStatus  = 0;
+            $rankingScore   = isset($robot['ranking_score']) ? (float)sprintf("%.1f", $robot['ranking_score']) : 0.5;
             $embModels      = '3:3';
 
             $questions = [$question];
@@ -883,8 +883,11 @@ class KbKnowLogic extends BaseLogic
 
             $searchContent = '对"'.$content.'"进行知识库检索'."\n";
             $num = 1;
-            foreach ($pgList as $val) {
 
+            foreach ($pgList as $val) {
+                if (!isset($val['emb_score']) || $val['emb_score'] < $searchSimilar){
+                    continue;
+                }
                 $searchContent .= '知识库检索出的内容'.$num.":".$val['question']." \n";
                 if (!empty($val['answer'])){
                     $searchContent .= '你的第'.$num.'参考回复是:'.$val['answer']."。\n";
@@ -894,6 +897,8 @@ class KbKnowLogic extends BaseLogic
 
                 $num++;
             }
+            $searchContent .= '知识库检索完毕。';
+            RecallKnow::destroy();
             return $searchContent;
     }
 
@@ -968,6 +973,8 @@ class KbKnowLogic extends BaseLogic
 
             $num++;
         }
+        $searchContent .= '知识库检索完毕。';
+        RecallKnow::destroy();
         return $searchContent;
     }
 }

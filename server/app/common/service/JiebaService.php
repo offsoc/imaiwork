@@ -1524,7 +1524,7 @@ class JiebaService
     public static function initJieba(): void
     {
         ini_set('memory_limit', '512M');
-        Jieba::init();
+        Jieba::init(['dict' => 'small']);
         Finalseg::init();
     }
 
@@ -1580,5 +1580,11 @@ class JiebaService
         $parts = array_filter(array_map('trim', explode('&', $processed)));
         $uniqueParts = array_unique($parts);
         return implode($symbol, $uniqueParts);
+    }
+
+    public static function destroy(): void
+    {
+        Jieba::destroy();
+        Finalseg::destroy();
     }
 }

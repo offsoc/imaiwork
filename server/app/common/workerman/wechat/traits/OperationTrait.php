@@ -259,7 +259,7 @@ trait OperationTrait
                 }
             }
         } catch (\Throwable $e) {
-            $this->withChannel('wechat_socket')->withLevel('error')->withTitle('SphPostTaskOpt Error')->withContext([
+            $this->withChannel('wechat_socket')->withLevel('cron')->withTitle('SphPostTaskOpt Error')->withContext([
                 'data' => $response,
                 'e' => $e->getMessage(),
                 'file' => $e->getFile(),

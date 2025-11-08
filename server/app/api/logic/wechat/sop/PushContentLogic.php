@@ -5,6 +5,7 @@ namespace app\api\logic\wechat\sop;
 
 use app\api\logic\ApiLogic;
 use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatContact;
 use app\common\model\wechat\sop\AiWechatSopPushContent;
 use app\common\model\wechat\sop\AiWechatSopPushLog;
 use app\common\model\wechat\sop\AiWechatSopPushMember;
@@ -260,17 +261,26 @@ class PushContentLogic extends ApiLogic
 
             foreach ($contents as $content) {
                 $where = [];
-                if ($content['type'] == 1){
+                // 1-流程推送,2-阶段推送,3-生日推送,4-节日推送
+                if (in_array($content['type'], [1,3,4])){
                     $where[] = ['flow_id','=',(int)$content['flow_id']];
                 }else{
                     $where[] = ['flow_id','=',(int)$content['flow_id']];
-                    $where[] = ['stage_id','=',$content['stage_id']];
+                    $where[] = ['stage_id','=',(int)$content['stage_id']];
                 }
 
                 $members = AiWechatSopPushMember::where($where)->select();
                 if (!$members->isEmpty()) {
                     $members = $members->toArray();
                     foreach ($members as $member) {
+                        if ($content['type'] == 3){
+                            $birthday = AiWechatContact::where('wechat_id', $member['wechat_id'])
+                                                       ->where('friend_id', $member['friend_id'])
+                                                       ->value('birth_date');
+                            if (!str_contains($birthday, date('m-d'))){
+                                continue;
+                            }
+                        }
                         $responses = [];
                         $content['content'] = json_decode($content['content'], true);
                         foreach ($content['content'] as $item) {

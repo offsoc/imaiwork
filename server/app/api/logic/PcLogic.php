@@ -204,13 +204,30 @@ class PcLogic extends BaseLogic
             $chatModels['channel'][$key]['logo'] = isset($value['logo']) ? FileService::getFileUrl($value['logo']) : '';
         }
         $banner =  config('app.app_host') . '/static/images/human/banner.png';
+        $transcoding = true;
+        $config = [
+            'default' => ConfigService::get('storage', 'default', 'local'),
+            'engine' => ConfigService::get('storage') ?? ['local' => []],
+        ];
 
+        if ($config['default'] != 'aliyun') {
+            $transcoding = false;
+        }else{
+            $aliyun = $config['engine']['aliyun'];
+            if (!isset($aliyun['PipelineId']) || !isset($aliyun['Location']) || !isset($aliyun['TemplateId'])) {
+                $transcoding = false;
+            }
+            if (empty($aliyun['PipelineId']) || empty($aliyun['Location']) || empty($aliyun['TemplateId'])) {
+                $transcoding = false;
+            }
+        }
         return [
 //            'domain' => FileService::getFileUrl(),
             'is_robot_show' => ConfigService::get('assistants', 'is_robot_show',0),
             'domain' => config('app.app_host') . '/',
             'login' => $loginConfig,
             'website' => $website,
+            'is_oss_transcode' => $transcoding,
             'version' => $version,
             'copyright' => $copyright,
             'admin_url' => request()->domain() . '/admin',

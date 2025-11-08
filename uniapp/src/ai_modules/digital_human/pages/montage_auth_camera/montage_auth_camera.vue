@@ -1,6 +1,7 @@
 <template>
     <view class="h-screen relative">
         <camera
+            v-if="showCamera"
             device-position="front"
             flash="off"
             class="w-full h-full"
@@ -34,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { getVideoTranscodeResult, videoTranscode } from "@/api/app";
 import { uploadFile } from "@/api/app";
 import { formatAudioTime } from "@/utils/util";
 import { ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
@@ -47,7 +49,7 @@ const duration = ref(0);
 const maxDuration = ref(3 * 60); // 分钟
 let timer = ref();
 let cameraContext = ref<any>();
-
+const showCamera = ref(true);
 const handleUploadAuthCamera = () => {
     loading.value = false;
     cameraContext.value = uni.createCameraContext();
@@ -77,6 +79,7 @@ const startCountdown = () => {
 
 // 停止录制
 const stopCountdown = async () => {
+    if (!showCamera.value) return;
     //判断录制时间不能小于5秒
     if (duration.value < 5) {
         uni.showToast({
@@ -87,6 +90,7 @@ const stopCountdown = async () => {
         return;
     }
     clearInterval(timer.value);
+
     uni.showLoading({
         title: "正在结束录制...",
         mask: true,
@@ -148,7 +152,9 @@ const handleError = (err: any) => {
     });
 };
 
-onHide(() => {
+onUnload(() => {
+    showCamera.value = false;
+    clearInterval(timer.value);
     uni.hideLoading();
 });
 </script>

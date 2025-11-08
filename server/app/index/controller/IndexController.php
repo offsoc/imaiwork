@@ -16,7 +16,7 @@ class IndexController extends BaseController
      * @author 段誉
      * @date 2022/10/27 18:12
      */
-    public function index($name = '你好,imai')
+    public function index($name = '你好,ai')
     {
         $template = app()->getRootPath() . 'public/pc/index.html';
         $request = new Request();

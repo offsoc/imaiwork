@@ -22,7 +22,7 @@ class KnowledgeBindLogic extends BaseLogic
      * @notes 添加
      * @param array $params
      * @return bool
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public static function add(array $params): bool
@@ -52,7 +52,7 @@ class KnowledgeBindLogic extends BaseLogic
      * @notes 编辑
      * @param array $params
      * @return bool
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public static function edit(array $params): bool
@@ -82,7 +82,7 @@ class KnowledgeBindLogic extends BaseLogic
      * @notes 删除
      * @param array $params
      * @return bool
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public static function delete(array $params): bool
@@ -95,7 +95,7 @@ class KnowledgeBindLogic extends BaseLogic
      * @notes 获取详情
      * @param $params
      * @return array
-     * @author imaiwork
+     * @author my
      * @date 2025/04/18 16:19
      */
     public static function detail($params): array

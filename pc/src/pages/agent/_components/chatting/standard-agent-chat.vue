@@ -52,10 +52,12 @@ const onContentPost = async (content: string) => {
     await sendMessage(content, false, () => {
         // 如果是新对话，通知父组件
         if (isNewConversation) {
-            emit("new-conversation", {
-                task_id: chatStore.taskId,
-                title: content,
-            });
+            setTimeout(() => {
+                emit("new-conversation", {
+                    task_id: chatStore.taskId,
+                    title: content,
+                });
+            }, 500);
         }
     });
 };
@@ -87,11 +89,13 @@ watch(
             id: props.agentId,
             name: props.agentName || "",
         });
+        chatStore.setDetail({
+            logo: newVal.image,
+            name: newVal.name,
+        });
+        initialize();
     }
 );
-onMounted(() => {
-    initialize();
-});
 
 onUnmounted(() => {
     chatStore.clearChat();

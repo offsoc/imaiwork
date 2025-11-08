@@ -125,6 +125,7 @@ const showAddKeywordPopup = ref(false);
 const keyword = ref("");
 
 const formData = reactive({
+    name: uni.$u.timeFormat(new Date(), "yyyymmddHHss") + "视频号获客任务",
     crawl_type: "",
     chat_type: "0",
     chat_number: 30,
@@ -139,6 +140,7 @@ const formData = reactive({
     wechat_id: "",
     wechat_reg_type: 0,
     add_remark_enable: 1,
+    ocr_type: 1,
     remarks: getWechatRemarks.value,
 });
 

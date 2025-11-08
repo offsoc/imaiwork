@@ -84,7 +84,7 @@
                         </template>
                     </ElTableColumn>
                     <ElTableColumn prop="create_time" label="创建时间" width="180"></ElTableColumn>
-                    <ElTableColumn label="操作" width="240" fixed="right" align="right">
+                    <ElTableColumn label="操作" width="280" fixed="right" align="right">
                         <template #default="{ row }">
                             <div class="flex justify-end items-center">
                                 <ElButton
@@ -110,7 +110,7 @@
                                     }"
                                     :fetch-fun="getTaskClue"
                                     :export-fun="getTaskClue"
-                                    v-if="row.status == 3 || row.status == 4">
+                                    v-if="row.status != 0">
                                     <template #trigger>
                                         <ElButton class="!border-app-border-2" color="#181818" size="small"
                                             >导出</ElButton

@@ -8,7 +8,6 @@ use app\common\model\interview\InterviewCv;
 use app\common\model\interview\InterviewDialog;
 use app\common\model\interview\InterviewJob;
 use app\common\model\interview\InterviewRecord;
-use app\common\service\wechat\WeChatMnpService;
 use app\common\service\wechat\WeChatUrllinkService;
 
 class InterviewLogic extends BaseLogic
@@ -55,7 +54,7 @@ class InterviewLogic extends BaseLogic
                 throw new \Exception('面试会话不存在');
             }
 
-            $cv = InterviewCv::where('user_id', $interviewRecord['user_id'])->findOrEmpty()->toArray();
+            $cv = InterviewCv::where('user_id', $interviewRecord['user_id'])->where('interview_job_id',$interviewRecord['job_id'])->findOrEmpty()->toArray();
             if (empty($cv)) {
                 throw new \Exception('简历不存在');
             }

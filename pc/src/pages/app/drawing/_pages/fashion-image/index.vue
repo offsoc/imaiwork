@@ -34,6 +34,7 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "@/stores/user";
 import { dayjs, ElScrollbar } from "element-plus";
 import { drawingFitting } from "@/api/drawing";
 import { drawTypeEnumMap, DrawTypeEnum, FashionImageTypeEnum } from "../../_enums";
@@ -45,6 +46,7 @@ enum FormTypeEnum {
     FASHION_IMAGE = drawTypeEnumMap[DrawTypeEnum.FASHION_IMAGE],
 }
 
+const userStore = useUserStore();
 const { onEvent, setFormData } = useCreateForm();
 
 const resultLists = ref<any[]>([]);
@@ -85,6 +87,7 @@ onEvent("update:formData", async (data: any) => {
                 resultData.images = data;
             },
         });
+        userStore.getUser();
     } catch (error) {
         resultData.images = resultData.images.map((item) => ({
             ...item,

@@ -62,7 +62,7 @@ class CozeChatLogic extends CozeLogic
         }
         if (isset($data['data'])) {
             foreach ($data['data'] as $key => &$value) {
-               if (isset($value['type']) && $value['type'] == 'verbose'){
+               if (isset($value['type']) && in_array($value['type'],['function_call', 'tool_output','verbose']) ){
                  unset($data['data'][$key]);
                }
             }
@@ -149,7 +149,7 @@ class CozeChatLogic extends CozeLogic
                 $logid = $resp['detail']['logid'] ?? '';
                 foreach ($resp['data'] as $key => &$value) {
 //                    clogger(json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-                    if (isset($value['type']) && $value['type'] == 'verbose'){
+                    if (isset($value['type']) && in_array($value['type'],['function_call', 'tool_output','verbose'])){
                         unset($resp['data'][$key]);
                         continue;
                     }

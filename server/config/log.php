@@ -108,6 +108,12 @@ return [
             'json'           => false,
             'format'         => '[%s][%s] %s',
         ],
+        'publish' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/publish/',
+            'json'           => false,
+            'format'         => '[%s][%s] %s',
+        ],
         // 其它日志通道配置
     ],
 

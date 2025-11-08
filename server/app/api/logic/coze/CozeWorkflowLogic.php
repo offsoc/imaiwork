@@ -5,6 +5,7 @@ namespace app\api\logic\coze;
 use app\common\model\coze\CozeAgent;
 use app\common\model\coze\CozeLog;
 use app\common\model\coze\CozeWorkflow;
+use app\common\service\FileService;
 use think\facade\Log;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
@@ -43,15 +44,60 @@ class CozeWorkflowLogic extends CozeLogic
             if (!$flow) {
                 throw new \Exception('工作流不存在' );
             }
+            $output = $flow['outputs']?? [];
             $params['agent'] = $agent;
 
             $data = $this->workflowrun($agent['coze_id'], $params);
             if ($data['code'] != 0){
                 throw new \Exception(  $data['msg'] );
             }
+            $add = [];
             if (isset($data['data'])) {
                 $logid = $data['detail']['logid'] ?? '';
                 $usage = $data['usage'] ?? '';
+                $content = json_decode($data['data'],true);
+                // 根据 outputs 配置与 $content 的字段进行匹配，返回相应的 type
+                $outputConfigs = [];
+                if (is_string($output) && $output !== '') {
+                    $decoded = json_decode($output, true);
+                    if (is_array($decoded)) {
+                        $outputConfigs = $decoded;
+                    }
+                } elseif (is_array($output)) {
+                    $outputConfigs = $output;
+                }
+
+                $matchedTypes = [];
+                if (is_array($content) && is_array($outputConfigs)) {
+                    foreach ($outputConfigs as $cfg) {
+                        $fieldKey = $cfg['fields'] ?? '';
+                        if ($fieldKey !== '' && array_key_exists($fieldKey, $content)) {
+                            $matchedTypes[$fieldKey] = $cfg['type'] ?? null;
+                            $value = $content[$cfg['fields']];
+                            switch ($cfg['type']) {
+                                case 'image':
+                                case 'video':
+                                case 'audio':
+                                    unset($content[$cfg['fields']]);
+                                    if (is_array($value)){
+                                       foreach ($value as $v){
+
+                                           $url = FileService::downloadFileBySource($v,$cfg['type']);
+                                           if ($url){
+                                               $content[$cfg['fields']][] = FileService::getFileUrl($url);
+                                           }
+                                       }
+                                    }else{
+                                        $url = FileService::downloadFileBySource($value,$cfg['type']);
+                                        if ($url){
+                                            $content[$cfg['fields']] = FileService::getFileUrl($url);
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
 
                 $add[] =[
                     'conversation_id' => $logid,
@@ -60,7 +106,7 @@ class CozeWorkflowLogic extends CozeLogic
                     'bot_id'          => $agent['coze_id'],
                     'user_id'         => self::$uid,          // 业务侧用户
                     'role'            => 'workflow',     // assistant / user
-                    'content'         => $data['data'],
+                    'content'         => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                     'create_time'         => $value['created_at'] ?? time(),
                     'update_time'         => $value['updated_at'] ?? time(),
                     'status'          => 'running' ,
@@ -78,8 +124,8 @@ class CozeWorkflowLogic extends CozeLogic
             if (count($add) > 0){
                 CozeLog::insertAll($add);
             }
-            $date = json_decode($data['data'], true);
-            self::$returnData = $date;
+
+            self::$returnData = $content;
             return true;
         } catch (\Exception $e) {
             throw new \Exception(   $e->getMessage() );

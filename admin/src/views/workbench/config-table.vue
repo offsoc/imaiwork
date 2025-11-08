@@ -17,7 +17,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="设置价格" min-width="200">
+            <el-table-column label="用户价格" min-width="200">
                 <template #default="{ row }">
                     <el-tag type="primary">{{ row.unit }}</el-tag>
                 </template>

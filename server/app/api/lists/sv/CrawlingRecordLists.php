@@ -34,15 +34,28 @@ class CrawlingRecordLists extends BaseApiDataLists implements ListsSearchInterfa
     {
         $this->searchWhere[] = ['task_id', '=', $this->request->get('task_id', 0)];
         $this->searchWhere[] = ['reg_content', 'not in', ['', null]];
-        $list = SvCrawlingRecord::where($this->searchWhere)
-            ->order(['id' => 'desc'])
+
+        $this->searchWhere[] = ['task_id', '=', $this->request->get('task_id', 0)];
+        $this->searchWhere[] = ['hash', 'not in', ['', null]];
+        
+        // print_r(SvCrawlingRecord::field('*, max(exec_time) as exec_time')->where($this->searchWhere)
+        //     ->order('exec_time', 'desc')
+        //     ->limit($this->limitOffset, $this->limitLength)
+        //     ->group('task_id, exec_keyword,reg_content')
+        //     ->fetchSql(true)
+        //     ->select());die;
+        
+        $list = SvCrawlingRecord::field('*, max(exec_time) as exectime')->withoutField('exec_time')->where($this->searchWhere)
+            ->order('exectime', 'desc')
             ->limit($this->limitOffset, $this->limitLength)
-            ->group('reg_content')
+            ->group('task_id, exec_keyword,reg_content')
             ->select()
             ->each(function ($item) {
                 $item['device_model'] = SvDevice::where('device_code', $item['device_code'])->value('device_model');
                 $item['clue_type_name'] = $this->clueType[$item['clue_type']];
                 $item['image'] = FileService::getFileUrl($item['image']);
+                $item['exec_time'] = $item['exectime'];
+                $item['create_time'] = $item['exectime'];
             })
             ->toArray();
         return $list;

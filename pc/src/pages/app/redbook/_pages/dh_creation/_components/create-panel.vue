@@ -250,6 +250,7 @@
                                             <span class="text-[#ffffffcc]"> 选择已有音色 </span>
                                         </div>
                                         <upload
+                                            v-if="formData.model_version == DigitalHumanModelVersionEnum.CHANJING"
                                             class="w-full"
                                             show-progress
                                             type="audio"

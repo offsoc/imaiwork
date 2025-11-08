@@ -11,11 +11,9 @@
                 <div class="flex flex-col gap-y-3">
                     <div>
                         <span class="text-[#ffffff80]">添加频率：</span>
-                        <span class="text-[#ffffffcc]">相隔15分钟添加1个微信号</span>
-                    </div>
-                    <div>
-                        <span class="text-[#ffffff80]">每日限制：</span>
-                        <span class="text-[#ffffffcc]">每个号每日限制加30个好友</span>
+                        <span class="text-[#ffffffcc]"
+                            >相隔{{ detail?.add_interval_time }}分钟添加{{ detail?.add_number }}个微信号</span
+                        >
                     </div>
                     <div>
                         <span class="text-[#ffffff80]">微信数量：</span>

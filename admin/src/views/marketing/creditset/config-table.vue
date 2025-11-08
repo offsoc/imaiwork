@@ -17,7 +17,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="score" label="价格" width="300">
+            <el-table-column prop="score" label="用户价格" width="300">
                 <template #default="{ row }">
                     <el-input v-model="row.score" type="number" v-number-input="{ decimal: 2 }" :min="0" :step="2">
                         <template #append>
