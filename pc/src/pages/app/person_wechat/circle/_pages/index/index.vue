@@ -244,7 +244,7 @@ function handleAuth(Content: any) {
         if (item.device_code === DeviceId && item.wechat_id === WeChatId) {
             item.accessToken = AccessToken;
             item.loading = false;
-            currentWechat.value = item;
+            // currentWechat.value = item;
         }
     });
 

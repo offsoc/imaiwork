@@ -94,7 +94,9 @@
                                         v-model="item.content"
                                         type="textarea"
                                         placeholder-style="color: #7C7E80; "
-                                        maxlength="500"></u-input>
+                                        maxlength="500"
+                                        :auto-height="false"></u-input>
+                                    <view class="mt-2 text-[#B2B2B2] text-end"> {{ item.content.length }} / 500 </view>
                                 </view>
                                 <view
                                     class="absolute right-2 top-2 rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
