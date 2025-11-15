@@ -11,7 +11,7 @@ use app\common\model\wechat\AiWechatDevice;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatContact;
 use app\common\model\wechat\AiWechatGreetStrategy;
-
+use app\common\model\sv\SvDeviceTask;
 use app\common\model\wechat\AiWechatCircleTask;
 use app\common\model\sv\SvPublishSetting;
 use app\common\model\sv\SvPublishSettingDetail;
@@ -179,7 +179,7 @@ trait OperationTrait
                         // "TypeStr" => ['小程序'],
                         // 'disForward' => 0,
                         //'version' => 48,
-                    ]);
+                    ], JSON_UNESCAPED_UNICODE);
                     $message['message_type'] = 13;
                     break;
                 case 5: //文件
@@ -227,7 +227,7 @@ trait OperationTrait
         try {
             $data = $response['Data'];
             if ($data['MsgType'] == 'SphPostTask') {
-                $record = SvPublishSettingDetail::where('sub_task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
+                $record = SvPublishSettingDetail::where('account_type', 1)->where('sub_task_id', $data['Content']['TaskId'])->limit(1)->findOrEmpty();
                 if (!$record->isEmpty()) {
                     $status = (int)$data['Content']['Success'] === 1 ? 1 : 2;
                     $remark = $data['Content']['ErrMsg'] ?? '发布失败';
@@ -246,6 +246,12 @@ trait OperationTrait
                             'published_count' => Db::raw('published_count+1'),
                         ]);
                     }
+
+                    SvDeviceTask::where('sub_task_id', $record['id'])->where('device_code', $record['device_code'])->where('task_type', 1)->update([
+                        'status' => $status === 1 ? 2 : 3,
+                        'remark' => $remark,
+                        'update_time' => time(),
+                    ]);
 
                     SvPublishSetting::where('id', $record['publish_id'])->update([
                         'update_time' => time(),

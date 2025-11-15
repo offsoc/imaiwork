@@ -227,6 +227,16 @@ trait TaskNoticeTrait
                     $wechat->update_time = time();
                     $wechat->save();
                 }
+
+                if($record->status === 1){
+                    AiWechatLog::create([
+                        'user_id'   => $record['user_id'],
+                        'wechat_id' => $record['wechat_id'],
+                        'friend_id' => $record['reg_wechat'],
+                        'log_type'      => AiWechatLog::TYPE_THROUGH_FRIEND,
+                        'create_time' => time()
+                    ]);
+                }
             }
         }
     }

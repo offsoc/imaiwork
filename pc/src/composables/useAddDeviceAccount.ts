@@ -68,7 +68,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
     // 事件监听
     onEvent("success", async (data: any) => {
         const { type, content, deviceId, appType } = data;
-        let msg = "";
+        const msg = content.msg || "";
         switch (type) {
             case DeviceCmdEnum.ADD_DEVICE:
                 addDeviceParams.value = {
@@ -80,6 +80,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                 try {
                     feedback.loading("添加中...");
                     await addDeviceApi(addDeviceParams.value);
+                    feedback.msgSuccess("添加设备成功");
                     options.onSuccess?.({ msg: "添加成功", type, data });
                 } catch (error) {
                     options.onError?.({
@@ -120,6 +121,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                             showAddDevice.value = false;
                             eventAction.value = null;
                             progressValue.value = 100;
+                            feedback.msgSuccess("添加账号成功");
                             options.onSuccess?.({
                                 msg: "添加账号成功",
                                 type,
@@ -148,13 +150,13 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
                             }
                             eventAction.value = null;
                             progressValue.value = 100;
+                            feedback.msgSuccess("更新成功");
                             options.onSuccess?.({
                                 msg: "更新成功",
                                 type,
                                 data,
                             });
                         } catch (error) {
-                            console.log(error);
                             options.onError?.({
                                 error,
                                 type,
@@ -220,7 +222,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
         }
 
         const startTime = Date.now();
-        const duration = 10 * 1000;
+        const duration = 15 * 1000;
         const updateInterval = 300;
         const maxIncrementPerInterval = 2; // 限制每次最大增量
 

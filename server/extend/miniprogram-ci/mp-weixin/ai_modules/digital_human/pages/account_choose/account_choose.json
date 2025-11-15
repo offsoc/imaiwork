@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "账号选择",
-  "usingComponents": {
-    "empty": "../../../../components/empty/empty",
-    "z-paging": "../../../../node-modules/z-paging/components/z-paging/z-paging"
-  }
-}

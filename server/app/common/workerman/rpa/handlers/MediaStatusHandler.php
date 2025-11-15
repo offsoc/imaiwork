@@ -5,7 +5,11 @@ namespace app\common\workerman\rpa\handlers;
 use app\common\workerman\rpa\BaseMessageHandler;
 use Workerman\Connection\TcpConnection;
 use app\common\model\sv\SvPublishSettingDetail;
+use app\common\model\sv\SvDeviceTask;
 use app\common\workerman\rpa\WorkerEnum;
+use app\common\enum\DeviceEnum;
+
+
 
 class MediaStatusHandler extends BaseMessageHandler
 {
@@ -31,17 +35,26 @@ class MediaStatusHandler extends BaseMessageHandler
             $status = $content['status'] ?? 0;
 
             $media = SvPublishSettingDetail::where('id', $mediaId)->findOrEmpty();
-            if ($media->isEmpty()) {
-                $this->setLog('发布数据不存在:' . $mediaId, 'cron');
-                return;
+            if (!$media->isEmpty()) {
+                $media->status = $status;
+                $media->remark = $content['msg'] ?? '';
+                $media->update_time = time();
+                $media->exec_time = time();
+                $media->save();
             }
 
-            $media->save([
-                'status' => $status,
-                'remark' => $content['msg'] ?? '',
-                'update_time' => time(),
-                'exec_time' => time()
-            ]);
+            // 主任务状态修改
+            $task = SvDeviceTask::where('sub_task_id', $media->publish_account_id)
+                ->where('sub_data_id', $media->id)
+                ->where('device_code', $media->device_code)
+                ->where('account', $media->account)
+                ->findOrEmpty();
+            if (!$task->isEmpty()) {
+                $task->status = (int)$status === 2 ? DeviceEnum::TASK_STATUS_FAILED : DeviceEnum::TASK_STATUS_FINISHED;
+                $task->remark = $content['msg'] ?? '';
+                $task->update_time = time();
+                $task->save();
+            }
             $this->payload['reply'] = '发布数据状态已更新';
             $this->sendResponse($this->uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {

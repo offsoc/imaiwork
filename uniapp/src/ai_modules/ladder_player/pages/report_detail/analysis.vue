@@ -98,8 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import PieChat from "../../components/pie-chat/pie-chat.vue";
 import { getRect } from "@/utils/util";
+import { useAppStore } from "@/stores/app";
+import PieChat from "../../components/pie-chat/pie-chat.vue";
 
 const props = defineProps({
     detail: {
@@ -107,6 +108,8 @@ const props = defineProps({
         default: () => ({}),
     },
 });
+
+const appStore = useAppStore();
 
 const stickyTop = ref(0);
 const offsetTop = ref(0);
@@ -229,6 +232,17 @@ watch(
         }
     },
     { immediate: true }
+);
+
+watch(
+    () => appStore.getLadderConfig.directions,
+    (val) => {
+        indicator.value.forEach((item, index) => {
+            if (val[index]) {
+                item.name = val[index];
+            }
+        });
+    }
 );
 
 onMounted(() => {

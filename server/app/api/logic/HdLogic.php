@@ -204,16 +204,17 @@ class HdLogic extends ApiLogic
 
         // 组装数据
         foreach ($params['persons'] as $item) {
-            $request['persons'][] = self::imageToStream($item);
+            $request['persons'][] = $item;
         }
         if (!empty($params['lower_clothes'])) {
-            $request['lower_clothes'] = self::imageToStream($params['lower_clothes']);
+            $request['lower_clothes'] = $params['lower_clothes'];
         }
         if (!empty($params['upper_clothes'])) {
-            $request['upper_clothes'] = self::imageToStream($params['upper_clothes']);
+            $request['upper_clothes'] = $params['upper_clothes'];
         }
 
         $request['img_count'] = $params['img_count'] ?? 1;
+        $request['models'] = 'bailian';
 
         $response = self::requestUrl($request, self::HD_AI_TRY, self::$uid);
 
@@ -221,7 +222,7 @@ class HdLogic extends ApiLogic
             throw new \Exception('提交ai试衣生图任务错误');
         }
 
-        self::saveLog(2, $response['request_id'], $params, $response['task_id'], $response['sub_task_ids']);
+        self::saveLog(2, $response['request_id'], $params, $response['task_id'], $response['sub_task_ids'] ?? '');
         self::$returnData = ['result' => $response];
         return true;
     }
@@ -741,7 +742,7 @@ class HdLogic extends ApiLogic
 
         $sub_task_ids[0] = $response['sub_task_ids'] ?? '';
         //豆包文生图
-        self::saveLog($type, $response['request_id'], $params, $response['task_id'], $sub_task_ids, 1, 3, $response['image_urls']);
+        self::saveLog($type, $response['request_id']??'', $params, $response['task_id']??'', $sub_task_ids, 1, 3, $response['image_urls']);
         self::$returnData = ['result' => $response];
         return true;
     }
@@ -753,9 +754,9 @@ class HdLogic extends ApiLogic
             TokenLogService::checkToken(self::$uid, $scene);
             $response = self::requestUrl($params, $scene, self::$uid);
 
-            $sub_task_ids[0] = $response['sub_task_ids'] ?? $response['task_id'];
+            $sub_task_ids[0] = $response['sub_task_ids'] ?? '';
 
-            self::saveLog(4, $response['request_id'], $params, $response['task_id'], $sub_task_ids, 1, 3);
+            self::saveLog(4, $response['request_id']??'', $params, $response['task_id']??'', $sub_task_ids, 1, 3, $response['image_urls']);
             self::$returnData = ['result' => $response];
             return true;
         } catch (\Throwable $th) {

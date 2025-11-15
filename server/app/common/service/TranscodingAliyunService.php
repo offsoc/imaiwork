@@ -35,11 +35,14 @@ class TranscodingAliyunService {
         ]);
 
         $credClient = new Credential($credConfig);
+        $str = $this->config['Location'];
+        $prefix = 'oss-';
+        $regin = str_replace($prefix, '', $str); // 移除前缀
         $config = new Config([
             // 使用 credential 配置凭证
             'credential' => $credClient,
             // 产品服务域名
-            'endpoint' => 'mts.cn-beijing.aliyuncs.com'
+            'endpoint' => 'mts.'.$regin.'.aliyuncs.com'
         ]);
         return new Mts($config);
     }

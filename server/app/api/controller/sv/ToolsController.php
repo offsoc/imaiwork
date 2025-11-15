@@ -29,6 +29,11 @@ class ToolsController extends BaseApiController
         return ToolsLogic::getSearchTerms($params) ? $this->success(data: ToolsLogic::getReturnData()) : $this->fail(ToolsLogic::getError());
     }
 
+    public function getMatrixCopywriting(){
+        $params = $this->request->post();
+        $params['user_id'] = $this->userId;
+        return ToolsLogic::getMatrixCopywriting($params) ? $this->success(data: ToolsLogic::getReturnData()) : $this->fail(ToolsLogic::getError());
+    }
 
     public function transcoding(){
         $params = $this->request->post();

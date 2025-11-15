@@ -1,6 +1,6 @@
 {
-    "name": "imai.work",
-    "version": "2.4.2",
+    "name": "pc",
+    "version": "2.5.0",
     "private": true,
     "license": "MIT",
     "scripts": {

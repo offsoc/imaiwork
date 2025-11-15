@@ -253,18 +253,22 @@ class HdController extends BaseApiController
      */
     public function txt2volcimg()
     {
-        $params = $this->request->post();
+        try {
+            $params = $this->request->post();
 
-        if (isset($params['model']) && (int)$params['model'] === 3) {
-            $result = HdLogic::text2img($params);
-        } else {
-            $result = HdLogic::txt2volcimg($params);
-            
+            if (isset($params['model']) && (int)$params['model'] === 3) {
+                $result = HdLogic::text2img($params);
+            } else {
+                $result = HdLogic::txt2volcimg($params);
+
+            }
+            if ($result) {
+                return $this->data(HdLogic::getReturnData());
+            }
+            return $this->data([HdLogic::getError()]);
+        } catch (HttpResponseException $e) {
+            return $this->data($e->getResponse()->getData() ?? []);
         }
-        if ($result) {
-            return $this->data(HdLogic::getReturnData());
-        }
-        return $this->data(HdLogic::getError());
     }
 
 
@@ -276,9 +280,9 @@ class HdController extends BaseApiController
             if ($result) {
                 return $this->data(HdLogic::getReturnData());
             }
-            return $this->data(HdLogic::getError());
+            return $this->data([HdLogic::getError()]);
         } catch (HttpResponseException $e) {
-            return $this->data($e->getResponse()->getData()['msg'] ?? '');
+            return $this->data($e->getResponse()->getData() ?? []);
         }
     }
 }

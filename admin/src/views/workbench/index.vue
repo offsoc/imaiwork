@@ -388,7 +388,7 @@ const getSphConfig = computed(() => {
 });
 
 const getOtherConfig = computed(() => {
-    return workbenchData.tokens_lists.filter((item: any) => ["video_clip"].includes(item.scene));
+    return workbenchData.tokens_lists.filter((item: any) => ["video_clip", "matrix_copywriting"].includes(item.scene));
 });
 
 const refreshData = async () => {

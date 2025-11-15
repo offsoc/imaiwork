@@ -73,7 +73,7 @@ class PrivateMessageHandler extends BaseMessageHandler
                     'messageId' => $uid,
                     'deviceId' => $device,
                     'type' => WorkerEnum::TO_RAP_PRIVATE_MESSAGE_LIST,
-                    'appVersion' => '1.0',
+                    'appVersion' => WorkerEnum::APP_VERSION,
                     'appType' => 3,
                     'reply' => [
                         'type' => WorkerEnum::TO_RAP_PRIVATE_MESSAGE_LIST,
@@ -155,7 +155,7 @@ class PrivateMessageHandler extends BaseMessageHandler
                     'type' => WorkerEnum::WEB_PRIVATE_MESSAGE_LIST_TEXT,
                     'appType' => 3,
                     'deviceId' => $this->payload['deviceId'],
-                    'appVersion' => $this->payload['appVersion'],
+                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'reply' => $content
                 );
                 $this->sendResponse($uid,  $message,  $message['reply']);

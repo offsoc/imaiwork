@@ -51,6 +51,10 @@ return [
         'shanjian_video_task' => 'app\common\command\ShanjianVideoTaskCron',
         //手动加微信任务
         'crawling_manual_cron' => 'app\common\command\CrawlingManualCron',
+        //设备任务调度
+        'task:scheduler' => 'app\common\command\DeviceTaskScheduler',
+        //替换cron表达式
+        'replace_cron' => 'app\common\command\ReplaceCron',
 
     ],
 

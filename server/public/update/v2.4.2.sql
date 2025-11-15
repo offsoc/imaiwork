@@ -46,3 +46,6 @@ DELETE FROM `la_model_config` WHERE `scene` = 'sph_search_terms' ;
 INSERT INTO `la_model_config` ( `scene`, `code`, `unit`, `name`, `score`, `description`, `status`, `create_time`, `update_time`) VALUES ( 'sph_search_terms', 10003, '算力/条', '视频号检索关键词', 0.1, '每条消耗0.1算力', 1, 1740799252, 1740799252);
 
 UPDATE `la_model_config` SET  `code` = 7003 WHERE `scene` = 'interview_chat';
+
+
+INSERT INTO `la_dev_crontab` (`name`, `type`, `system`, `remark`, `command`, `params`, `status`, `expression`, `error`, `last_time`, `time`, `max_time`, `create_time`, `update_time`) VALUES ('替换标识', 1, 0, '', 'replace_cron', '', 1, '* * * * *', '', 1762526643, '0.01', '0.01', 1762526557, 1762526701);

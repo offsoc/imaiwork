@@ -34,6 +34,7 @@ const getTheme = computed<Theme>(() => {
         case AppKeyEnum.DRAWING:
         case AppKeyEnum.REDBOOK:
         case AppKeyEnum.SPH:
+        case AppKeyEnum.MATRIX:
             return {
                 iconColor: "#ffffff",
                 iconBgColor: "rgba(255,255,255,0.1)",

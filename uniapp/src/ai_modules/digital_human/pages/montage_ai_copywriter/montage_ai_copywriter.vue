@@ -1,7 +1,7 @@
 <template>
     <view class="h-screen dh-bg flex flex-col">
         <u-navbar
-            title="生成文案"
+            title="AI文案生成"
             title-bold
             :is-fixed="false"
             :border-bottom="false"
@@ -16,7 +16,7 @@
                             <text>您想生成的主题大纲</text>
                         </view>
                         <view class="mt-4 px-4 py-[16rpx] bg-white rounded-[16rpx]">
-                            <u-input
+                            <textarea
                                 v-model="contentVal"
                                 focus
                                 type="textarea"
@@ -32,7 +32,7 @@
                             <text class="text-[#FF3C26]">*</text>
                             <text> 口播文案的字数</text>
                         </view>
-                        <view class="flex items-center gap-[36rpx] mt-[32rpx]">
+                        <view class="flex items-center gap-[36rpx] mt-[28rpx]">
                             <view
                                 v-for="item in getPromptList"
                                 :key="item.id"
@@ -46,7 +46,7 @@
                             <text class="text-[#FF3C26]">*</text>
                             <text> 生成的口播文案数量</text>
                         </view>
-                        <view class="flex items-center gap-[36rpx] mt-[32rpx]">
+                        <view class="flex items-center gap-[36rpx] mt-[28rpx]">
                             <view
                                 v-for="(item, index) in promptNumList"
                                 :key="item"
@@ -70,20 +70,20 @@
                                 </view>
                                 <view class="mt-4">
                                     <view class="flex flex-col gap-3">
-                                        <view class="w-full h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
-                                        <view class="w-[70%] h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
-                                        <view class="w-[50%] h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-full h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-[70%] h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-[50%] h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
                                     </view>
                                     <view class="flex flex-col gap-3 mt-6">
-                                        <view class="w-full h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
-                                        <view class="w-[70%] h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
-                                        <view class="w-[50%] h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
-                                        <view class="w-[70%] h-[32rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-full h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-[70%] h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-[50%] h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
+                                        <view class="w-[70%] h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
                                     </view>
                                 </view>
                             </view>
                             <template v-else>
-                                <view class="text-[32rpx] font-bold mr-4">
+                                <view class="text-[28rpx] font-bold mr-4">
                                     <u-input
                                         v-model="item.title"
                                         placeholder-style="color: #7C7E80; "
@@ -182,6 +182,10 @@ const getToken = computed(() => {
 });
 
 const contentPost = async (userInput: string) => {
+    if (!userInput.trim()) {
+        uni.$u.toast("请输入文案");
+        return;
+    }
     if (userTokens.value <= getToken.value || !isGenerated.value) return;
 
     try {
@@ -226,9 +230,17 @@ const handleDeleteCopywriter = (index: number) => {
 };
 
 const useContent = () => {
-    uni.$emit("confirm-v2", {
+    if (!isGenerated.value) {
+        uni.$u.toast("文案在生成中...");
+        return;
+    }
+    uni.$emit("confirm", {
         type: ListenerTypeEnum.AI_COPYWRITER,
-        data: { copywriterList: chatContentList.value.map((item) => ({ title: item.title, content: item.content })) },
+        data: {
+            copywriterList: chatContentList.value
+                .filter((item) => item.title)
+                .map((item) => ({ title: item.title, content: item.content })),
+        },
     });
     chatContentList.value = [];
     uni.navigateBack();

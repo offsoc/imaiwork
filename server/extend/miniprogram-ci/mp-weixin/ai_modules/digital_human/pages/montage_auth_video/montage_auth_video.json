@@ -5,6 +5,6 @@
   "usingComponents": {
     "empty": "../../../../components/empty/empty",
     "z-paging": "../../../../node-modules/z-paging/components/z-paging/z-paging",
-    "video-preview": "../../components/video-preview/video-preview"
+    "video-preview": "../../../../components/video-preview/video-preview"
   }
 }

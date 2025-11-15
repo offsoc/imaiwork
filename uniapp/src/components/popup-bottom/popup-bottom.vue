@@ -5,6 +5,7 @@
         :height="height"
         :border-radius="borderRadius"
         :closeable="false"
+        :z-index="zIndex"
         @touchstart="handleTouchStart"
         @touchend="handleTouchEnd">
         <view class="h-full flex flex-col" :class="customClass" :style="customStyle">
@@ -68,6 +69,10 @@ const props = defineProps({
     showCloseBtn: {
         type: Boolean,
         default: false,
+    },
+    zIndex: {
+        type: Number,
+        default: 1000,
     },
 });
 const emit = defineEmits(["update:show", "close"]);

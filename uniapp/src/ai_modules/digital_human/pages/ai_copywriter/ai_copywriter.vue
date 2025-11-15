@@ -82,7 +82,6 @@ import { aiTemplateCopywriter } from "../../config/copywriter";
 import { ListenerTypeEnum } from "../../enums";
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
-const getChatToken = userStore.getTokenByScene(TokensSceneEnum.CHAT)?.score;
 
 const useCopywriter = () => {
     contentVal.value = aiTemplateCopywriter[0 % aiTemplateCopywriter.length];
@@ -107,7 +106,7 @@ const currentPrompt = ref<any>(getPromptList.value[0]);
 const scrollTop = ref<number>(0);
 
 const contentPost = async (userInput: string) => {
-    if (!userInput) {
+    if (!userInput.trim()) {
         uni.$u.toast("请输入文案");
         return;
     }

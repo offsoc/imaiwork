@@ -14,6 +14,7 @@
                                 <div class="flex-1">
                                     <el-input
                                         v-model="formData.directions[index]"
+                                        maxlength="7"
                                         :placeholder="`请输入分析考察方向${index + 1}`" />
                                 </div>
                             </div>

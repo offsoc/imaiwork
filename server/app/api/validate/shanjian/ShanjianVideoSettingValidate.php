@@ -45,6 +45,12 @@ class ShanjianVideoSettingValidate extends BaseValidate
         return $this->only(['id', 'name', 'status', 'video_count', 'anchor', 'voice', 'title', 'character_design', 'material', 'clip', 'music']);
     }
 
+    // 更新名称场景
+    public function sceneUpdateName()
+    {
+        return $this->only(['id', 'name']);
+    }
+
     // 详情场景
     public function sceneDetail()
     {

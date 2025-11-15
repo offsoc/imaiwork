@@ -61,8 +61,8 @@ onEvent("update:formData", async (data: any) => {
                 status: 0,
                 error: false,
             });
-            const { result } =
-                type == FormTypeEnum.TXT2IMAGE ? await drawingTextToImage(params) : await drawingImageToImage(params);
+            const apiCall = type == FormTypeEnum.TXT2IMAGE ? drawingTextToImage : drawingImageToImage;
+            const { result } = await apiCall(params);
 
             const { processDrawingTask } = useDrawingTask({
                 type,
@@ -74,9 +74,10 @@ onEvent("update:formData", async (data: any) => {
                     resultData.images = data;
                 },
             });
-        } else if (model == ModelEnum.GENERAL) {
+        } else if (model == ModelEnum.GENERAL || model == ModelEnum.SEEDREAM) {
             resultData.images = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
-            const { result } = await drawingTextToImageVolc(params);
+            const apiCall = type == FormTypeEnum.TXT2IMAGE ? drawingTextToImageVolc : drawingImageToImageVolc;
+            const { result } = await apiCall(params);
             resultData.images = [result.image_urls].map((item) => ({
                 url: item,
                 loading: false,
@@ -84,33 +85,6 @@ onEvent("update:formData", async (data: any) => {
                 status: 1,
                 error: false,
             }));
-        } else if (model == ModelEnum.SEEDREAM) {
-            resultData.images = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
-
-            if (type == FormTypeEnum.TXT2IMAGE) {
-                const { result } = await drawingTextToImageVolc(params);
-                resultData.images = [result.image_urls].map((item) => ({
-                    url: item,
-                    loading: false,
-                    progress: 100,
-                    status: 1,
-                    error: false,
-                }));
-            }
-            if (type == FormTypeEnum.IMAGE2IMAGE) {
-                const { result } = await drawingImageToImageVolc(params);
-                const { processDrawingTask } = useDrawingTask({
-                    type: 7,
-                    model,
-                    task_id: result.task_id,
-                    dataLists: resultData.images,
-                });
-                await processDrawingTask({
-                    callback: (data) => {
-                        resultData.images = data;
-                    },
-                });
-            }
         }
         userStore.getUser();
     } catch (error) {

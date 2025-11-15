@@ -69,7 +69,7 @@ class SvAccountLists extends BaseApiDataLists implements ListsSearchInterface
                 }
 
                 // 请求在线状态
-                $result = MessageLogic::getOnlineStatus($item['account'], $item['device_code']);
+                $result = MessageLogic::getOnlineStatus($item['account'], $item['device_code'], $item['type']);
                 if ($result) {
                     $item['status'] = MessageLogic::getReturnData();
                     $item->status = $item['status'];

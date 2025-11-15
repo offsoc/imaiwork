@@ -1,4 +1,5 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers;
 
 use app\common\workerman\rpa\BaseMessageHandler;
@@ -26,7 +27,7 @@ class DeviceAppStartExecHandler extends BaseMessageHandler
 
             $this->sendResponse($uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'app_exec'); 
+            $this->setLog('异常信息' . $e, 'app_exec');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::DEVICE_EXEC_APP_ERROR_CODE;
             $this->payload['type'] = 91;
@@ -47,7 +48,7 @@ class DeviceAppStartExecHandler extends BaseMessageHandler
                 throw new \Exception('设备rpa配置不存在');
             }
 
-            if((string)$find->device_code !== (string)$content['deviceId']){
+            if ((string)$find->device_code !== (string)$content['deviceId']) {
                 throw new \Exception('设备号不一致');
             }
             // if((int)$find->app_type !== (int)$content['appType']){
@@ -75,7 +76,7 @@ class DeviceAppStartExecHandler extends BaseMessageHandler
 
             ];
         } catch (\Throwable $e) {
-            $this->setLog('异常信息'. $e, 'app_exec'); 
+            $this->setLog('异常信息' . $e, 'app_exec');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::DEVICE_EXEC_APP_ERROR_CODE;
             $this->payload['type'] = 91;
@@ -87,5 +88,4 @@ class DeviceAppStartExecHandler extends BaseMessageHandler
             $this->sendError($this->connection,  $this->payload);
         }
     }
-
 }

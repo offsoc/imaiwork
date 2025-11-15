@@ -48,7 +48,7 @@ class WechatSocketService
 
         // 每1秒执行一次
         $time_interval = 10;
-        $timerid = \Workerman\Lib\Timer::add($time_interval, function(){
+        $timerid = \Workerman\Timer::add($time_interval, function(){
             $key = 'push:device:*';
             $keys = $this->redis()->keys($key);
             if (empty($keys)) {
@@ -82,9 +82,9 @@ class WechatSocketService
 
             }
         });
-        \Workerman\Lib\Timer::del($timerid);
+        \Workerman\Timer::del($timerid);
         // 心跳保活（每5分钟）
-        \Workerman\Lib\Timer::add(300, function() {
+        \Workerman\Timer::add(300, function() {
             \think\facade\Db::connect('mysql')->query('select 1');
         });
     }

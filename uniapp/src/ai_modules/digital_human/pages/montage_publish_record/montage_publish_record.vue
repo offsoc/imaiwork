@@ -77,7 +77,7 @@
                         </view>
                         <view class="basis-1/4">
                             <view class="circle-container w-[198rpx] h-[198rpx]" v-if="item.status !== 3">
-                                <CircleProgress
+                                <circle-progress
                                     :percent="
                                         isNaN((item.published_count / item.count) * 100)
                                             ? 0
@@ -93,7 +93,7 @@
                                             >剩余{{ item.count - item.published_count }}条</view
                                         >
                                     </template>
-                                </CircleProgress>
+                                </circle-progress>
                             </view>
                             <view
                                 v-else
@@ -120,7 +120,6 @@
 
 <script setup lang="ts">
 import { getPublishRecord, deletePublishRecord } from "@/api/digital_human";
-import CircleProgress from "../../components/circle-progress/circle-progress.vue";
 const searchValue = ref("");
 const dataLists = ref<any[]>([]);
 

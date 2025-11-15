@@ -87,9 +87,15 @@ import { usePaging } from "@/hooks/usePaging";
 import TaskCard from "@/ai_modules/sph/components/task-card/task-card.vue";
 import TaskEdit from "@/ai_modules/sph/components/task-edit/task-edit.vue";
 enum TabKey {
-    VIDEO = "video",
-    ACCOUNT = "account",
+    VIDEO = 2,
+    ACCOUNT = 3,
 }
+
+const headerStyle = reactive({
+    iconColor: "#ffffff",
+    titleColor: "#ffffff",
+    background: "transparent",
+});
 
 const { pager, getLists } = usePaging({
     fetchFun: getTaskList,
@@ -98,7 +104,7 @@ const { pager, getLists } = usePaging({
 
 const handleTabClick = (key: TabKey) => {
     uni.navigateTo({
-        url: `/ai_modules/sph/pages/keywords/keywords?type=${key}`,
+        url: `/ai_modules/sph/pages/create_task/create_task?type=${key}`,
     });
 };
 
@@ -140,18 +146,8 @@ const checkTaskStatus = async () => {
 
 onShow(checkTaskStatus);
 
-onHide(() => {
+onUnload(() => {
     clearTimeout(timer);
-});
-
-onBeforeUnmount(() => {
-    clearTimeout(timer);
-});
-
-const headerStyle = reactive({
-    iconColor: "#ffffff",
-    titleColor: "#ffffff",
-    background: "transparent",
 });
 
 onPageScroll((e) => {

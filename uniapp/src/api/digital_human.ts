@@ -169,3 +169,8 @@ export const getShanjianTaskRecord = (data: Record<string, any>) => {
 export const deleteShanjianTaskRecord = (data: Record<string, any>) => {
     return request.post({ url: "/shanjian.shanjianVideoSetting/delete", data });
 };
+
+// 闪剪任务名称修改
+export const updateShanjianTaskName = (data: Record<string, any>) => {
+    return request.post({ url: "/shanjian.shanjianVideoSetting/updateName", data });
+};

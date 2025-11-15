@@ -37,9 +37,7 @@
                             class="rounded-full bg-[#ffffff33] w-[68rpx] h-[68rpx]"
                             style="backdrop-filter: blur(5px)"
                             @click="handlePlay(item.clip_video_url || item.video_url)">
-                            <image
-                                src="@/ai_modules/digital_human/static/icons/play3.svg"
-                                class="w-full h-full"></image>
+                            <image src="/static/images/icons/play.svg" class="w-full h-full"></image>
                         </view>
                     </view>
                     <slot name="content"></slot>

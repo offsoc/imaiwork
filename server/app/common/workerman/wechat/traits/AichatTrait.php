@@ -28,7 +28,7 @@ use Channel\Client as ChannelClient;
 use Google\Protobuf\Any;
 use Jubo\JuLiao\IM\Wx\Proto\TransportMessage;
 use Workerman\Connection\TcpConnection;
-use Workerman\Lib\Timer;
+use Workerman\Timer;
 
 /**
  * ai聊天
@@ -670,7 +670,6 @@ trait AichatTrait
             'WeChatId' => $request['wechat_id'],
             'FriendId' => $request['friend_id'],
             'TaskId' => time(),
-            //'ContentType' => $request['message_type'] != 2 ? 22 : $request['message_type'],
             'ContentType' => $message_type,
             'Remark' => $request['MsgSvrId'] ?? '',
             'MsgId' => time(),
@@ -683,7 +682,6 @@ trait AichatTrait
             'WeChatId' => $request['wechat_id'],
             'FriendId' => $request['friend_id'],
             'TaskId' => time(),
-            //'ContentType' => $request['message_type'] != 2 ? 22 : $request['message_type'],
             'ContentType' => $message_type,
             'Remark' => $request['MsgSvrId'] ?? '',
             'MsgId' => time(),
@@ -692,8 +690,9 @@ trait AichatTrait
             'user_message' => $request['user_message'] ?? '',
         ])->log();
 
-        $this->setFriendTagStrategy($request);
-        //$this->setFriendHistoryMsg($request, true);
+        if (!$request['is_chatroom']){
+            $this->setFriendTagStrategy($request);
+        }
 
         //AI回复：sop判断流程阶段
         StageLogic::sopStagetrigger([

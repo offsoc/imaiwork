@@ -129,22 +129,11 @@
                                                 class="rounded-full w-[108rpx] h-[108rpx] flex-shrink-0"
                                                 mode="aspectFill"></image>
                                             <view class="">
-                                                <view>
-                                                    <text class="font-bold mt-1">{{ item.name }}</text>
-                                                </view>
-                                                <view class="inline-block">
-                                                    <view
-                                                        class="bg-[#F8F9FA] rounded-[24rpx] flex items-center gap-1 mt-[20rpx] px-1.5 py-1">
-                                                        <u-icon
-                                                            name="/static/images/icons/deepseek.svg"
-                                                            :size="24"></u-icon>
-                                                        <text class="text-[20rpx] font-bold">deepseek-v3</text>
-                                                    </view>
+                                                <text class="font-bold mt-1 line-clamp-1">{{ item.name }}</text>
+                                                <view class="text-[20rpx] mt-1 text-[#9C9C9E] line-clamp-2">
+                                                    {{ item.description }}
                                                 </view>
                                             </view>
-                                        </view>
-                                        <view class="text-[20rpx] mt-3 text-[#9C9C9E] line-clamp-1">
-                                            {{ item.description }}
                                         </view>
                                     </view>
                                 </view>

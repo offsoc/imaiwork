@@ -20,8 +20,16 @@ abstract class BaseMessageHandler
 
     protected array $platform = array(
         1 => '个微',
-        2 => '抖音',
-        3 => '小红书'
+        3 => '小红书',
+        4 => '抖音',
+        5 => '快手',
+    );
+
+    protected array $PlatformTypeEn = array(
+        1 => 'sph',
+        3 => 'xhs',
+        4 => 'dy',
+        5 => 'ks',
     );
 
     public function __construct(RpaSocketService $service)
@@ -65,7 +73,7 @@ abstract class BaseMessageHandler
                 'type' =>  $payload['type'] ?? 'error',
                 'messageId' => $payload['messageId'] ?? 0,
                 'deviceId' => $payload['deviceId'] ?? '',
-                'appVersion' => $payload['appVersion'] ?? ''
+                'appVersion' => $payload['appVersion'] ?? WorkerEnum::APP_VERSION,
             );
             $this->setLog($payload, 'send');
             $this->setLog($connection->clientType, 'send');
@@ -105,6 +113,8 @@ abstract class BaseMessageHandler
             if (empty($connection)) {
                 return false;
             }
+            return true;
+            
             if ($connection->isMsgRunning == 1) {
                 return false;
             } else {
@@ -114,68 +124,7 @@ abstract class BaseMessageHandler
             $this->setLog('checkDeviceStatus' . $e, 'error');
         }
     }
-
-    protected function postRequest($url = '', $param = '')
-    {
-        if (empty($url) || empty($param)) {
-            return false;
-        }
-
-        try {
-            $postUrl = $url;
-            $curlPost = $param;
-            $ch = curl_init(); //初始化curl
-            curl_setopt($ch, CURLOPT_URL, $postUrl); //抓取指定网页
-            curl_setopt($ch, CURLOPT_HEADER, 0); //设置header
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //    将curl_exec()获取的信息以文件流的形式返回，而不是直接输出
-            curl_setopt($ch, CURLOPT_POST, 1); //post提交方式
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost); //全部数据使用HTTP协议中的"POST"操作来发送。要发送文件，在文件名前面加上@前缀并使用完整路径。这个参数可以通过urlencoded后的字符串类似'para1=val1&para2=val2&...'或使用一个以字段名为键值，字段数据为值的数组。如果value是一个数组，Content-Type头将会被设置成multipart/form-data
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            //curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($curlPost)); // 设置POST字段
-
-            $header = array('Accept:application/json', 'charset=UTF-8'); //需要urlencode处理的
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header); // 应用HTTP头
-
-            $data = curl_exec($ch); //运行curl
-            if (curl_errno($ch)) {
-                $this->setLog("Error: " . curl_error($ch));
-                return false;
-            }
-            curl_close($ch); // 关闭一个cURL会话
-            $this->setLog($data);
-            return $data;
-        } catch (\Throwable $th) {
-            $this->setLog($th);
-            return false;
-        }
-    }
-
-
-    protected function getRequest($url = '', $param = '')
-    {
-        //初始化
-        $ch = curl_init();
-        //设置选项，包括URL
-        //$url = $url.'?'.http_bulid_query($data);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 关闭对证书的校验
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); // 不验证证书中是否设置了域名
-
-        $header = array('Accept:application/json', 'charset=UTF-8'); //需要urlencode处理的
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header); // 应用HTTP头
-        $data = curl_exec($ch); //运行curl
-        if (curl_errno($ch)) {
-            $this->setLog(json_encode(curl_error($ch)));
-            return false;
-        }
-        curl_close($ch); // 关闭一个cURL会话
-        //$this->setLog(json_encode($data));
-        return $data;
-    }
-
+    
     public function base64ToImage($item)
     {
         if (!trim($item['avatar'])) {

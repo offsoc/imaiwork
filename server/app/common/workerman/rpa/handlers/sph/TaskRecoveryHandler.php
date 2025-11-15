@@ -1,4 +1,5 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers\sph;
 
 use Workerman\Connection\TcpConnection;
@@ -20,7 +21,7 @@ class TaskRecoveryHandler extends BaseMessageHandler
             $this->payload['reply'] = $this->recoveryTask($content['task_id']);
             $this->sendResponse($uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'task_recovery'); 
+            $this->setLog('异常信息' . $e, 'task_recovery');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::SPH_RECOVERY_ERROR_CODE;
             $this->payload['type'] = 'error';
@@ -28,7 +29,8 @@ class TaskRecoveryHandler extends BaseMessageHandler
         }
     }
 
-    private function recoveryTask(string $task_id){
+    private function recoveryTask(string $task_id)
+    {
         return [
             'deviceId' => $this->payload['deviceId'],
             'task_id' => $task_id,

@@ -97,7 +97,7 @@ const agentLists = ref<any[]>([]);
 const agentLoading = ref(false);
 const getAgentFn = async (query?: string) => {
     agentLoading.value = true;
-    const data = await getAgentList({ keyword: query });
+    const data = await getAgentList({ keyword: query, source: 1 });
     agentLists.value = data.lists;
     agentLoading.value = false;
 };
@@ -127,21 +127,13 @@ const { lockFn: lockConfirm, isLock } = useLockFn(handleConfirm);
 
 const getDetail = async (wechat_id: string) => {
     const data = await getWeChatAi({ wechat_id });
-    setFormData(data);
+    setFormData(data, formData);
 };
 
-const setFormData = async (data: Record<any, any>) => {
-    for (const key in formData) {
-        if (data[key] != null && data[key] != undefined) {
-            //@ts-ignore
-            formData[key] = data[key];
-        }
-    }
-};
 defineExpose({
     open,
     getDetail,
-    setFormData,
+    setFormData: (data: any) => setFormData(data, formData),
 });
 </script>
 

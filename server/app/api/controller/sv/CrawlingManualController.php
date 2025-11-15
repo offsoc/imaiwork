@@ -103,4 +103,17 @@ class CrawlingManualController extends BaseApiController
             return $this->fail($e->getResponse()->getData()['msg'] ?? '');
         }
     }
+
+    public function subtasks(){
+        try {
+            $params = $this->request->post();
+            $result = CrawlingManualLogic::subtasks($params);
+            if ($result) {
+                return $this->data(CrawlingManualLogic::getReturnData());
+            }
+            return $this->fail(CrawlingManualLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
 }

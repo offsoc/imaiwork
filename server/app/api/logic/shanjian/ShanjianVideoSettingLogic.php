@@ -136,6 +136,26 @@ class ShanjianVideoSettingLogic extends ApiLogic
         }
     }
 
+    public static function updateName(array $params):bool
+    {
+        try {
+            $find = ShanjianVideoSetting::where('id', $params['id'])->where('user_id', self::$uid)->findOrEmpty();
+
+            if ($find->isEmpty()) {
+                self::setError('视频设置不存在');
+                return false;
+            }
+            $find->name = $params['name'];
+            $find->update_time = time();
+            $find->save();
+            self::$returnData = $find->refresh()->toArray();    
+            return true;
+        } catch (\Throwable $th) {
+            self::setError($th->getMessage());
+            return false;
+        }
+    }
+
     /**
      * 获取闪剪视频设置详情
      * @param int $id
@@ -304,6 +324,7 @@ class ShanjianVideoSettingLogic extends ApiLogic
                 ->where('create_time', '<=', strtotime('-1440 minutes'))
                 ->select()->each(function ($item) {
 
+                    $item->success_num = ShanjianVideoTask::where('video_setting_id', $item->id)->where('status', 3)->count();
                     if ($item->success_num > 0 ){
                         $update['error_num'] = $item->video_count - $item->success_num;
                         $update['status'] = 3;
@@ -311,7 +332,6 @@ class ShanjianVideoSettingLogic extends ApiLogic
                         $update['error_num'] = $item->video_count;
                         $update['status'] = 3;
                     };
-
                     ShanjianVideoSetting::where('id',$item->id)->update($update);
 
                 });

@@ -31,6 +31,9 @@ class ShanjianVideoSettingLists extends BaseAdminDataLists implements ListsSearc
             ->limit($this->limitOffset, $this->limitLength)
             ->select()->each(function ($item) {
                 $item['video_token'] = ShanjianVideoTask::where('video_setting_id', $item->id)->sum('video_token');
+                if ($item['video_token'] > 0) {
+                    $item['video_token'] = sprintf('%.2f',   $item['video_token']);
+                }
             })
             ->toArray();
         return $list;

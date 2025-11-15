@@ -6,18 +6,6 @@
                 <text class="line-clamp-2">{{ item.name }}</text>
                 <u-icon name="edit-pen" size="24" color="#00000080"></u-icon>
             </view>
-            <view class="flex-shrink-0">
-                <view
-                    class="px-[28rpx] py-[10rpx] rounded flex items-center gap-1"
-                    :class="getTagClass(item.status)"
-                    @click.stop="handleChangeStatus(item)">
-                    {{ statusMap[item.status] }}
-                    <u-icon
-                        :name="item.status == 2 ? 'play-right' : 'pause'"
-                        :size="22"
-                        v-if="[1, 2].includes(parseInt(item.status))"></u-icon>
-                </view>
-            </view>
         </view>
         <view class="px-[32rpx] py-[36rpx]">
             <view class="flex items-center justify-between">
@@ -36,9 +24,6 @@
             <view class="flex justify-between items-center gap-x-2 mt-[20rpx]">
                 <view class="text-[#0000004d]">当前获客数：{{ item.crawl_number || 0 }}</view>
                 <view class="text-[#0000004d]">{{ item.create_time }}</view>
-            </view>
-            <view class="flex justify-end mt-4" v-if="item.status == 1">
-                <view class="text-primary text-[20rpx]" @click.stop="handleException(item)">任务有异常？点击这里</view>
             </view>
         </view>
     </view>

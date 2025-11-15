@@ -49,10 +49,11 @@
                     </ElTableColumn>
                     <ElTableColumn prop="sdk_version" label="当前SDK版本" show-overflow-tooltip />
                     <ElTableColumn prop="device_code" label="设备码" show-overflow-tooltip />
-                    <ElTableColumn prop="name" label="设备状态">
+                    <ElTableColumn label="设备状态">
                         <template #default="{ row }">
-                            <ElTag v-if="row.status === 1" type="success" :disable-transitions="false">在线</ElTag>
-                            <ElTag v-else type="danger" :disable-transitions="false">离线</ElTag>
+                            <ElTag v-if="row.status == 1" type="success" :disable-transitions="true">在线</ElTag>
+                            <ElTag v-else-if="row.status == 2" type="primary" :disable-transitions="true">工作中</ElTag>
+                            <ElTag v-else type="danger" :disable-transitions="true">离线</ElTag>
                         </template>
                     </ElTableColumn>
                     <ElTableColumn prop="create_time" label="绑定时间" width="180" show-overflow-tooltip />
@@ -75,18 +76,27 @@
                                     </div>
                                     <div
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleRefreshData(row)">
+                                        @click="handleRefreshData(row, AppTypeEnum.XHS)">
                                         <span class="flex items-center justify-center">
                                             <Icon name="el-icon-Refresh"></Icon>
                                         </span>
-                                        <span>更新数据</span>
+                                        <span>更新小红书</span>
                                     </div>
                                     <div
-                                        v-if="false"
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
-                                        @click="handleConfigRPA(row.device_code)">
-                                        <Icon name="el-icon-Setting"></Icon>
-                                        <span>配置RPA</span>
+                                        @click="handleRefreshData(row, AppTypeEnum.DOUYIN)">
+                                        <span class="flex items-center justify-center">
+                                            <Icon name="el-icon-Refresh"></Icon>
+                                        </span>
+                                        <span>更新抖音</span>
+                                    </div>
+                                    <div
+                                        class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
+                                        @click="handleRefreshData(row, AppTypeEnum.KUAISHOU)">
+                                        <span class="flex items-center justify-center">
+                                            <Icon name="el-icon-Refresh"></Icon>
+                                        </span>
+                                        <span>更新快手</span>
                                     </div>
                                     <div
                                         class="px-2 py-1 hover:bg-primary-light-9 rounded-lg cursor-pointer flex items-center gap-2"
@@ -110,17 +120,17 @@
             </div>
         </div>
     </div>
-    <rpa-setting ref="rpaSettingRef" v-if="showRpaSetting" @close="showRpaSetting = false" />
     <device-add
         ref="addDeviceRef"
         v-if="showAddDevice"
         :bind-loading="addDeviceLoading"
         @close="showAddDevice = false"
-        @confirm="confirmAddDevice" />
+        @confirm="getLists" />
     <device-progress
         v-if="showProgress"
         :progress-value="progressValue"
         :progress-error="progressError"
+        :step="deviceStep"
         @close="showProgress = false"
         @retry="retryAddDevice" />
 </template>
@@ -128,7 +138,6 @@
 <script setup lang="ts">
 import { getDeviceList, deleteDevice } from "@/api/device";
 import { AppTypeEnum, DeviceCmdCodeEnum, DeviceCmdEnum, ToolEnumMap, ToolEnum } from "@/enums/appEnums";
-import RpaSetting from "./_components/rpa-setting.vue";
 import DeviceAdd from "./_components/device-add.vue";
 import DeviceProgress from "./_components/device-progress.vue";
 
@@ -140,6 +149,7 @@ const { pager, getLists } = usePaging({
 
 const showProgress = ref(false);
 const progressError = ref(false);
+const deviceStep = ref("");
 
 const { isConnected, onEvent, send } = useDeviceWs();
 
@@ -149,8 +159,11 @@ const { showAddDevice, addDeviceLoading, progressValue, refreshAccount, handleAd
         onEvent,
         onSuccess: (res) => {
             const { msg, type } = res;
-            if (msg) feedback.msgSuccess(msg);
             switch (type) {
+                case DeviceCmdEnum.ADD_DEVICE:
+                case DeviceCmdEnum.DEVICE_ONLINE:
+                    getLists();
+                    break;
                 case DeviceCmdEnum.GET_USER_INFO:
                     addDeviceId.value = "";
                     progressError.value = false;
@@ -158,8 +171,13 @@ const { showAddDevice, addDeviceLoading, progressValue, refreshAccount, handleAd
                     showProgress.value = false;
                     getLists();
                     break;
-                default:
-                    getLists();
+                case DeviceCmdEnum.APP_EXEC:
+                case DeviceCmdEnum.OPEN_APP:
+                case DeviceCmdEnum.OPEN_PERSON_CENTER:
+                case DeviceCmdEnum.GET_ACCOUNT_INFO:
+                case DeviceCmdEnum.DATA_SEND:
+                case DeviceCmdEnum.GET_ACCOUNT_INFO_COMPLETE:
+                    deviceStep.value = msg;
                     break;
             }
         },
@@ -167,38 +185,33 @@ const { showAddDevice, addDeviceLoading, progressValue, refreshAccount, handleAd
             progressError.value = true;
             progressValue.value = 0;
             const { code, error, type } = err;
-            if (code != DeviceCmdCodeEnum.CONNECT_ERROR && type != DeviceCmdEnum.BIND_WS) {
-                feedback.msgError(error);
+            if (code == DeviceCmdCodeEnum.DEVICE_OFFLINE) {
                 getLists();
             }
         },
     });
 
 const addDeviceId = ref("");
+const currAppType = ref();
 
 const retryAddDevice = () => {
     progressError.value = false;
-    handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
-};
-
-const confirmAddDevice = (deviceId: string) => {
-    addDeviceId.value = deviceId;
-    progressError.value = false;
-    handleAddDeviceConfirm(deviceId);
+    handleRefreshAccount(currDevice.value, currAppType.value);
 };
 
 const currDevice = ref(null);
-const handleRefreshData = (row: any) => {
+const handleRefreshData = (row: any, appType: AppTypeEnum) => {
     currDevice.value = row.device_code;
-    refreshAccount.value = row.account;
+    refreshAccount.value = row.accounts;
     showProgress.value = true;
-    handleRefreshAccount(currDevice.value, AppTypeEnum.REDBOOK);
+    currAppType.value = appType;
+    handleRefreshAccount(currDevice.value, appType);
 };
 
 const handleAccountDetail = (row: any) => {
-    const { account, device_code, device_model, id } = row;
+    const { accounts, device_code, device_model, id } = row;
     // 默认跳转小红书
-    const accountData = account.find((item: any) => item.type == AppTypeEnum.REDBOOK);
+    const accountData = accounts.find((item: any) => item.type == AppTypeEnum.XHS);
     if (accountData) {
         router.push({
             path: `/device/${id}`,
@@ -209,16 +222,8 @@ const handleAccountDetail = (row: any) => {
             },
         });
     } else {
-        handleRefreshData(row);
+        handleRefreshData(row, AppTypeEnum.XHS);
     }
-};
-
-const rpaSettingRef = ref<InstanceType<typeof RpaSetting>>();
-const showRpaSetting = ref(false);
-const handleConfigRPA = async (device_code: string) => {
-    showRpaSetting.value = true;
-    await nextTick();
-    rpaSettingRef.value?.open(device_code);
 };
 
 const addDeviceRef = ref<InstanceType<typeof DeviceAdd>>();

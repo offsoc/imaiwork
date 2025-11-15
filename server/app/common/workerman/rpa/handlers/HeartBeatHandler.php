@@ -1,8 +1,10 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers;
 
 use app\common\workerman\rpa\BaseMessageHandler;
 use Workerman\Connection\TcpConnection;
+
 class HeartBeatHandler extends BaseMessageHandler
 {
     protected $HEARTBEAT_TIME = '3600';
@@ -10,16 +12,16 @@ class HeartBeatHandler extends BaseMessageHandler
     {
         return;
         try {
-            
+
             $time_now = time();
             $worker = $this->service->getWorker();
-            if(isset($worker->uidConnections[$uid])){
+            if (isset($worker->uidConnections[$uid])) {
                 if (empty($worker->uidConnections[$uid]->lastMessageTime)) {
                     $worker->uidConnections[$uid]->lastMessageTime = $time_now;
                     return;
                 }
                 $diff_time = $time_now - $worker->uidConnections[$uid]->lastMessageTime;
-                
+
                 $message = array(
                     'type' => 'pong'
                 );
@@ -27,12 +29,10 @@ class HeartBeatHandler extends BaseMessageHandler
                 // 上次通讯时间间隔大于心跳间隔，则认为客户端已经下线，关闭连接
                 if ($time_now - $worker->uidConnections[$uid]->lastMessageTime > $this->HEARTBEAT_TIME) {
                     $worker->uidConnections[$uid]->close();
-                
                 }
             }
-        }catch (\Exception $e) {
-            $this->setLog('handle'. $e, 'error');
+        } catch (\Exception $e) {
+            $this->setLog('handle' . $e, 'error');
         }
-        
     }
 }

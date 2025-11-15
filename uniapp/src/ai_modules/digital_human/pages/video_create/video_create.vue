@@ -230,7 +230,6 @@ import Cache from "@/utils/cache";
 import { ModeTypeEnum, CreateTypeEnum, ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
 import { DigitalHumanModelVersionEnum, ClipStyleEnum } from "../../enums";
 import { createVideoCopywriter } from "../../config/copywriter";
-import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 import SelectAnchor from "@/ai_modules/digital_human/components/choose-anchor/choose-anchor.vue";
 import ChooseTone from "@/ai_modules/digital_human/components/choose-tone/choose-tone.vue";
 import ChooseModel from "@/ai_modules/digital_human/components/choose-model/choose-model.vue";
@@ -370,7 +369,9 @@ const handleChooseAnchor = (data: AnchorItem) => {
 
 // 模型相关方法
 const openModel = () => {
-    showChooseModel.value = true;
+    uni.$u.route({
+        url: `/ai_modules/digital_human/pages/video_upload/video_upload?model_version=${DigitalHumanModelVersionEnum.CHANJING}&type=${ModeTypeEnum.ANCHOR}`,
+    });
 };
 
 const handleChooseModel = (id: string) => {
@@ -455,7 +456,6 @@ const startCreate = () => {
     }
     createPanelRef.value?.confirm();
 };
-
 const confirmCreate = async () => {
     const closeAgreement = Cache.get(DH_CREATE_AGREEMENT_KEY);
     if (!closeAgreement) {
@@ -470,7 +470,7 @@ const confirmCreate = async () => {
         });
         const voice_id = formData.voice_id == "-1" ? undefined : formData.voice_id;
         await createTask({
-            name: uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2),
+            name: uni.$u.timeFormat(Date.now(), "yyyymmddhhMM"),
             msg: formData.msg,
             pic: formData.pic,
             video_url: formData.video_url,
@@ -534,27 +534,6 @@ const goHome = () => {
 };
 
 // 生命周期钩子
-onShow(() => {
-    uni.$on("confirm", (result: any) => {
-        const { type, data } = result;
-        if (type === ListenerTypeEnum.AI_COPYWRITER) {
-            formData.msg = data.content;
-            if (formData.msg.length > textLimit.value) {
-                formData.msg = formData.msg.slice(0, textLimit.value);
-            }
-        }
-        if (type === ListenerTypeEnum.CHOOSE_STYLES) {
-            // formData.styles = data;
-        }
-        if (type === ListenerTypeEnum.CHOOSE_MUSIC) {
-            formData.music_url = data.url;
-            formData.music_name = data.name;
-        }
-        uni.$off("confirm");
-    });
-    getClipConfigData();
-});
-
 onLoad((options: any) => {
     const { type, data } = options;
     if (type === ListenerTypeEnum.UPLOAD_VIDEO) {
@@ -591,6 +570,24 @@ onLoad((options: any) => {
     } else {
         getModelLists();
     }
+    uni.$on("confirm", (result: any) => {
+        const { type, data } = result;
+        if (type === ListenerTypeEnum.AI_COPYWRITER) {
+            formData.msg = data.content;
+            if (formData.msg.length > textLimit.value) {
+                formData.msg = formData.msg.slice(0, textLimit.value);
+            }
+        }
+        if (type === ListenerTypeEnum.CHOOSE_STYLES) {
+            // formData.styles = data;
+        }
+        if (type === ListenerTypeEnum.CHOOSE_MUSIC) {
+            formData.music_url = data.url;
+            formData.music_name = data.name;
+        }
+        uni.$off("confirm");
+    });
+    getClipConfigData();
 });
 </script>
 

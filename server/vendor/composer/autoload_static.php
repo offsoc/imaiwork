@@ -41,7 +41,6 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
     public static $prefixLengthsPsr4 = array (
         't' => 
         array (
-            'think\\worker\\' => 13,
             'think\\view\\driver\\' => 18,
             'think\\trace\\' => 12,
             'think\\swoole\\' => 13,
@@ -155,7 +154,6 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
             'GuzzleHttp\\Command\\' => 19,
             'GuzzleHttp\\' => 11,
             'Google\\Protobuf\\' => 16,
-            'GatewayWorker\\' => 14,
             'GPBMetadata\\Google\\Protobuf\\' => 28,
             'GPBMetadata\\' => 12,
         ),
@@ -165,6 +163,7 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         ),
         'E' => 
         array (
+            'Endroid\\QrCode\\' => 15,
             'EasyWeChat\\' => 11,
         ),
         'D' => 
@@ -172,6 +171,7 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
             'DfaFilter\\' => 10,
             'Darabonba\\OpenApi\\' => 18,
             'Darabonba\\GatewaySpi\\' => 21,
+            'DASPRiD\\Enum\\' => 13,
         ),
         'C' => 
         array (
@@ -184,6 +184,7 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'B' => 
         array (
             'Brick\\Math\\' => 11,
+            'BaconQrCode\\' => 12,
         ),
         'A' => 
         array (
@@ -202,10 +203,6 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
     );
 
     public static $prefixDirsPsr4 = array (
-        'think\\worker\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/topthink/think-worker/src',
-        ),
         'think\\view\\driver\\' => 
         array (
             0 => __DIR__ . '/..' . '/topthink/think-view/src',
@@ -500,10 +497,6 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         array (
             0 => __DIR__ . '/..' . '/google/protobuf/src/Google/Protobuf',
         ),
-        'GatewayWorker\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/workerman/gateway-worker/src',
-        ),
         'GPBMetadata\\Google\\Protobuf\\' => 
         array (
             0 => __DIR__ . '/..' . '/google/protobuf/src/GPBMetadata/Google/Protobuf',
@@ -515,6 +508,10 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'Fukuball\\Jieba\\' => 
         array (
             0 => __DIR__ . '/..' . '/fukuball/jieba-php/src/class',
+        ),
+        'Endroid\\QrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/endroid/qr-code/src',
         ),
         'EasyWeChat\\' => 
         array (
@@ -531,6 +528,10 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'Darabonba\\GatewaySpi\\' => 
         array (
             0 => __DIR__ . '/..' . '/alibabacloud/gateway-spi/src',
+        ),
+        'DASPRiD\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dasprid/enum/src',
         ),
         'Cron\\' => 
         array (
@@ -555,6 +556,10 @@ class ComposerStaticInita5ec56001d7c77c0b4f384dd302764b5
         'Brick\\Math\\' => 
         array (
             0 => __DIR__ . '/..' . '/brick/math/src',
+        ),
+        'BaconQrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
         'Alipay\\EasySDK\\' => 
         array (

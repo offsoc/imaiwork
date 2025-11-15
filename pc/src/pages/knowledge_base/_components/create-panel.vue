@@ -52,7 +52,7 @@ const tokensValue = computed(() => {
 });
 
 const isRag = computed(() => {
-    return route.query.type == KnTypeEnum.RAG;
+    return formData.type == KnTypeEnum.RAG;
 });
 
 const formData = reactive<CreateFormData>({

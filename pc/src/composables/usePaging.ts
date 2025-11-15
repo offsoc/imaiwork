@@ -38,7 +38,7 @@ export function usePaging(options: Options) {
                 const lists = res?.lists || res?.list || res || [];
                 if (isScroll) {
                     pager.lists = isConcat ? pager.lists.concat(lists) : lists;
-                    pager.isLoad = !(lists.length < (params.page_size || size)) || lists.length === 0;
+                    pager.isLoad = !(lists.length < (params.page_size || size));
                 } else {
                     pager.lists = lists;
                 }

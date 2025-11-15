@@ -182,7 +182,7 @@ export function useChatAreaManager(options: UseChatAreaOptions) {
      */
     const getAgentList = async () => {
         try {
-            const { lists } = await getAgentListApi({ page_size: 1500 });
+            const { lists } = await getAgentListApi({ page_size: 1500, source: 1 });
             agentList.value = lists.map((item) => ({ name: item.name, id: item.id }));
         } catch (error) {
             console.error("获取智能体列表失败:", error);

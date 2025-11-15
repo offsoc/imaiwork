@@ -8,7 +8,6 @@ use app\common\model\wechat\sop\AiWechatSopFlow;
 use app\common\model\wechat\sop\AiWechatSopPushLog;
 use app\common\model\wechat\sop\AiWechatSopPushMember;
 use app\common\model\wechat\sop\AiWechatSopSubStage;
-use think\facade\Db;
 
 class IndexLogic extends ApiLogic
 {
@@ -161,7 +160,11 @@ class IndexLogic extends ApiLogic
             }
             self::$returnData = [
                 "lists"       => $logs,
-                "count"       => count($logs),
+                "count"       => AiWechatSopPushLog::alias('l')
+                                                   ->join('ai_wechat_sop_push_member m', 'l.member_id = m.id')
+                                                   ->where('l.push_id', $params['push_id'])
+                                                   ->where($where)
+                                                   ->count(),
                 "page_no"     => $page_no,
                 "page_size"   => $page_size,
                 'success_num' => $success_num,

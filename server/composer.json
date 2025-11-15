@@ -46,8 +46,6 @@
         "tencentcloud/tencentcloud-sdk-php": "^3.0",
         "phpoffice/phpword": "^1.2",
         "topthink/think-swoole": "^4.1",
-        "topthink/think-worker": "^4.0",
-        "workerman/channel": "1.0.6",
         "predis/predis": "^3.0",
         "google/protobuf": "^4.31",
         "guzzlehttp/guzzle": "^7.9",
@@ -57,7 +55,10 @@
         "symfony/css-selector": "*",
         "fukuball/jieba-php": "*",
         "overtrue/pinyin": "^5.3",
-        "alibabacloud/mts-20140618": "2.1.0"
+        "endroid/qr-code": "^4.8",
+        "alibabacloud/mts-20140618": "2.1.0",
+        "workerman/workerman": "^4.2",
+        "workerman/channel": "^1.2"
     },
     "require-dev": {
         "symfony/var-dumper": ">=4.2",

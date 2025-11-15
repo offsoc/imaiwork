@@ -131,7 +131,7 @@ const getSphConfig = computed(() => {
 });
 
 const getOtherConfig = computed(() => {
-    return tableData.value.filter((item) => ["video_clip"].includes(item.scene));
+    return tableData.value.filter((item) => ["video_clip", "matrix_copywriting"].includes(item.scene));
 });
 
 const getConfig = async () => {

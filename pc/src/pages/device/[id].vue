@@ -113,10 +113,21 @@
                                     </div>
                                 </template>
                             </ElTableColumn>
-                            <ElTableColumn label="名片数量" prop="business_card" min-width="100" />
-                            <ElTableColumn label="粉丝数量" prop="fans" min-width="100" />
-                            <ElTableColumn label="点赞数量" prop="thumbup_collect" min-width="100" />
-                            <ElTableColumn label="关注数量" prop="followers" min-width="100" />
+                            <ElTableColumn label="粉丝数量" prop="fans" min-width="100">
+                                <template #default="{ row }">
+                                    <div>{{ row.fans || "-" }}</div>
+                                </template>
+                            </ElTableColumn>
+                            <ElTableColumn label="点赞数量" prop="thumbup_collect" min-width="100">
+                                <template #default="{ row }">
+                                    <div>{{ row.thumbup_collect || "-" }}</div>
+                                </template>
+                            </ElTableColumn>
+                            <ElTableColumn label="关注数量" prop="followers" min-width="100">
+                                <template #default="{ row }">
+                                    <div>{{ row.followers || "-" }}</div>
+                                </template>
+                            </ElTableColumn>
                             <ElTableColumn label="更新时间" prop="create_time" width="180" />
                             <ElTableColumn label="操作" width="120px" fixed="right">
                                 <template #default="{ row }">
@@ -175,6 +186,7 @@
         v-if="showProgress"
         :progress-value="progressValue"
         :progress-error="progressError"
+        :step="deviceStep"
         @close="showProgress = false"
         @retry="retryAddAccount" />
 </template>
@@ -197,6 +209,8 @@ const deviceLists = ref<any[]>([]);
 const addDeviceRef = ref<any>(null);
 const showProgress = ref(false);
 const progressError = ref(false);
+const deviceStep = ref("");
+
 // 获取当前设备信息
 const getCurrentDevice = computed(() => {
     return deviceLists.value.find((item) => item.device_code === queryParams.device_code);
@@ -221,7 +235,6 @@ const {
     onEvent,
     onSuccess: (res) => {
         const { msg, type, data } = res;
-        if (msg) feedback.msgSuccess(msg);
         switch (type) {
             case DeviceCmdEnum.GET_USER_INFO:
                 showProgress.value = false;
@@ -229,6 +242,13 @@ const {
                 break;
             case DeviceCmdEnum.GET_BUSINESS_CARD:
                 handleAddBusinessCard(data.content);
+                break;
+            case DeviceCmdEnum.OPEN_APP:
+            case DeviceCmdEnum.OPEN_PERSON_CENTER:
+            case DeviceCmdEnum.GET_ACCOUNT_INFO:
+            case DeviceCmdEnum.DATA_SEND:
+            case DeviceCmdEnum.GET_ACCOUNT_INFO_COMPLETE:
+                deviceStep.value = msg;
                 break;
             default:
                 progressError.value = false;
@@ -298,7 +318,10 @@ const openAddDevice = async () => {
 };
 
 const handleChangeSocialPlatform = (type: AppTypeEnum) => {
+    progressError.value = false;
     currentSocialPlatform.value = type;
+    queryParams.type = type;
+    resetPage();
 };
 
 const changeDevice = (deviceCode: string) => {
@@ -307,13 +330,13 @@ const changeDevice = (deviceCode: string) => {
 };
 
 const queryParams = reactive({
-    type: AppTypeEnum.REDBOOK,
+    type: AppTypeEnum.XHS,
     name: "",
     account: "",
     device_code: "",
 });
 
-const { pager, getLists, resetParams } = usePaging({
+const { pager, getLists, resetParams, resetPage } = usePaging({
     fetchFun: getAccountList,
     params: queryParams,
 });
@@ -322,7 +345,7 @@ const handleRowClick = (row: any) => {
     router.push({
         path: "/app/service",
         query: {
-            type: AppTypeEnum.REDBOOK,
+            type: AppTypeEnum.XHS,
         },
     });
 };
@@ -346,7 +369,7 @@ const handleRefreshData = (row: any) => {
             type: row.type,
         },
     ];
-    handleRefreshAccount(row.device_code, AppTypeEnum.REDBOOK);
+    handleRefreshAccount(row.device_code, row.type);
 };
 
 const retryAddAccount = () => {

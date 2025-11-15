@@ -9,7 +9,7 @@ interface Options {
 }
 let pollingDict: any = {};
 
-export default function usePolling(fun: any, options: Options) {
+export default function usePolling(fun: any, options: Options = {}) {
     const { key, time = 2000, totalTime, count, callback = () => false } = options;
 
     let timer: any = null;

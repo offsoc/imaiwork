@@ -190,17 +190,31 @@ class IndexLogic extends BaseLogic
             'engine' => ConfigService::get('storage') ?? ['local' => []],
         ];
 
-        if ($config['default'] != 'aliyun') {
-            $transcoding = false;
-        }else{
-            $aliyun = $config['engine']['aliyun'];
-            if (!isset($aliyun['PipelineId']) || !isset($aliyun['Location']) || !isset($aliyun['TemplateId'])) {
+        switch ($config['default']) {
+            case 'aliyun':
+                $aliyun = $config['engine']['aliyun'];
+                if (!isset($aliyun['PipelineId']) || !isset($aliyun['Location']) || !isset($aliyun['TemplateId'])) {
+                    $transcoding = false;
+                }
+                if (empty($aliyun['PipelineId']) || empty($aliyun['Location']) || empty($aliyun['TemplateId'])) {
+                    $transcoding = false;
+                }
+                break;
+            case 'qcloud':
+                $qcloud = $config['engine']['qcloud'];
+                if (!isset($qcloud['TemplateId'])) {
+                    $transcoding = false;
+                }
+                if (empty($qcloud['TemplateId'])) {
+                    $transcoding = false;
+                }
+                break;
+            default:
                 $transcoding = false;
+                break;
             }
-            if (empty($aliyun['PipelineId']) || empty($aliyun['Location']) || empty($aliyun['TemplateId'])) {
-                $transcoding = false;
-            }
-        }
+
+
         return [
             'is_robot_show' => ConfigService::get('assistants', 'is_robot_show',0),
             'copyright' => ConfigService::get('copyright', 'config',''),

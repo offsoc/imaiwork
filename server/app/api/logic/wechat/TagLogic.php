@@ -2,10 +2,9 @@
 
 namespace app\api\logic\wechat;
 
-use app\common\model\wechat\AiWechatTagStrategy;
 use app\common\model\wechat\AiWechatFriendTag;
-use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatTag;
+use app\common\model\wechat\AiWechatTagStrategy;
 use think\facade\Db;
 
 /**
@@ -22,13 +21,16 @@ class TagLogic extends WechatBaseLogic
      * @param array $friendIds 好友ID集合
      * @return bool
      */
-    public static function tagFriends(array $tagIds, array $friendIds)
+    public static function tagFriends(array $tagIds, array $friendIds, string $wechatId)
     {
         Db::startTrans();
         try {
+            if (!$wechatId){
+                self::setError('微信不存在');
+                return false;
+            }
             $tagIds = array_unique($tagIds);
             $friendIds = array_unique($friendIds);
-            $wechatId = AiWechat::where('user_id', self::$uid)->value('wechat_id', '');
 
             // 移除标签
             if (!$tagIds) {

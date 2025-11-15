@@ -29,7 +29,7 @@
                             filterable
                             clearable
                             :show-arrow="false">
-                            <ElOption label="小红书" :value="AppTypeEnum.REDBOOK"></ElOption>
+                            <ElOption label="小红书" :value="AppTypeEnum.XHS"></ElOption>
                             <ElOption label="视频号" :value="AppTypeEnum.SPH"></ElOption>
                         </ElSelect>
                     </ElFormItem>
@@ -118,7 +118,9 @@
                     <ElTableColumn prop="original_message" label="匹配内容" min-width="200" show-overflow-tooltip>
                     </ElTableColumn>
                     <ElTableColumn prop="reg_wechat" label="提取内容" min-width="160"></ElTableColumn>
-                    <ElTableColumn prop="wechat_name" label="添加微信" min-width="120"> </ElTableColumn>
+                    <ElTableColumn prop="wechat_name" label="添加微信" min-width="120">
+                        <template #default="{ row }">{{ row.wechat_name || "-" }}</template>
+                    </ElTableColumn>
                     <ElTableColumn prop="result" label="加好友结果" min-width="120" show-overflow-tooltip>
                     </ElTableColumn>
                     <ElTableColumn prop="create_time" label="创建时间" width="180"></ElTableColumn>
@@ -203,9 +205,9 @@ const { optionsData } = useDictOptions<{
 const getAppTypeName = (account_type: number) => {
     const types = {
         [AppTypeEnum.SPH]: "视频号",
-        [AppTypeEnum.REDBOOK]: "小红书",
+        [AppTypeEnum.XHS]: "小红书",
     };
-    return types[account_type];
+    return types[account_type] || "-";
 };
 
 const handleRetry = (id: string) => {

@@ -260,7 +260,7 @@ $uni-border-3: #e5e5e5;
 }
 
 .uni-select {
-    font-size: 28rpx;
+    font-size: 26rpx;
     border: 1px solid $uni-border-3;
     box-sizing: border-box;
     padding: 0 20rpx;
@@ -433,7 +433,7 @@ $uni-border-3: #e5e5e5;
 
 .uni-select__input-placeholder {
     color: $uni-base-color;
-    font-size: 28rpx;
+    font-size: 26rpx;
 }
 
 .uni-select--mask {

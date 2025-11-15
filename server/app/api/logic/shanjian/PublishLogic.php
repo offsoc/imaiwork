@@ -9,11 +9,14 @@ use app\common\model\sv\SvPublishSettingAccount;
 use app\common\model\sv\SvPublishSettingDetail;
 use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvDevice;
+
+use app\common\model\sv\SvDeviceTask;
 use app\common\service\FileService;
 use app\common\model\sv\SvDeviceRpa;
 use app\common\model\wechat\AiWechat;
 use app\common\model\shanjian\ShanjianVideoSetting;
 use app\common\model\shanjian\ShanjianVideoTask;
+use app\common\enum\DeviceEnum;
 use Channel\Client as ChannelClient;
 
 /**
@@ -38,6 +41,9 @@ class PublishLogic extends SvBaseLogic
         try {
             $params['user_id'] = self::$uid;
 
+            self::checkPublishTime($params);
+
+
             if (isset($params['accounts']) && is_array($params['accounts'])) {
                 $params['accounts'] = json_encode($params['accounts'], JSON_UNESCAPED_UNICODE);
             }
@@ -53,9 +59,11 @@ class PublishLogic extends SvBaseLogic
             $params['publish_frep'] = $params['publish_frep'] ?? 2;
             $params['publish_start'] = date('Y-m-d', time());
             $params['type'] = 0;
+
             if (isset($params['time_config']) && is_array($params['time_config'])) {
                 $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
             }
+            //print_r($params);die;
             // 添加
             $publish = SvPublishSetting::create($params);
             if (!$publish->isEmpty()) {
@@ -83,10 +91,8 @@ class PublishLogic extends SvBaseLogic
             self::$returnData = $publish->toArray();
             return true;
         } catch (\Exception $e) {
-            //print_r($e->__toString());die;
             // 回滚事务
             Db::rollback();
-            //            clogger($e);
             self::setError($e->getMessage());
             return false;
         }
@@ -142,37 +148,110 @@ class PublishLogic extends SvBaseLogic
         }
     }
 
+    private static function checkPublishTime($params)
+    {
+        try {
+            $accounts = $params['accounts'] ?? [];
+            $video_ids = $params['video_ids'];
+            $mediaCount = 0;
+            if ($params['scene'] == 1) {
+                $mediaSettings = ShanjianVideoSetting::where('id', 'in', $video_ids)->where('user_id', self::$uid)->select()->toArray();
+                if (empty($mediaSettings)) {
+                    return;
+                }
+                $mediaCount = array_sum(array_column($mediaSettings, 'video_count'));
+            } else {
+                $status = (int)$params['scene'] === 1 ? [2, 3] : [3];
+                $mediaCount = ShanjianVideoSetting::alias('vs')
+                    ->field('vt.*')
+                    ->join('shanjian_video_task vt', 'vs.id = vt.video_setting_id')
+                    ->where('vs.id', 'in', $video_ids)
+                    ->where('vt.status', 'in', $status)
+                    ->count();
+            }
+            // 实现媒体分配逻辑
+            $allocatedAccounts = self::allocateMediaToAccounts($accounts, null, $mediaCount);
+            //print_r($allocatedAccounts);die;
+            foreach ($allocatedAccounts as $account) {
+                if ($account['count'] == 0) {
+                    continue;
+                }
+                $days = ceil($account['count'] / $params['publish_frep']);
+                $times = \app\api\logic\device\TaskLogic::getTimes($params['time_config'], date('Y-m-d', time()), $days);
+                //print_r($times);die;
+                // if ($account['type'] == 1) {
+                //     $find = AiWechat::where('wechat_id', $account['account'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
+                //     $account = array_merge($account, $find);
+                // } else {
+                //     $find = SvAccount::where('account', $account['account'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
+                //     $account = array_merge($account, $find);
+                // }
+
+                $find = SvAccount::where('account', $account['account'])->where('type', $account['type'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
+                $account = array_merge($account, $find);
+                //print_r($times);die;
+                foreach ($times as $time) {
+                    list($isOverlap, $lap) = \app\api\logic\device\TaskLogic::isTaskTimeOverlapping($account['device_code'], DeviceEnum::TASK_TYPE_PUBLISH, $time['start_time'], $time['end_time'], self::$uid);
+                    if (!$isOverlap) {
+                        $timeMsg = "【" . date('Y-m-d H:i', $lap['start_time']) . "-" . date('Y-m-d H:i', $lap['end_time']) . "】";
+                        $msg = "您在{$timeMsg}的【" . DeviceEnum::getAccountTypeDesc($lap['account_type']) . DeviceEnum::getTaskTypeDesc($lap['task_type'])  . "】与当前所选时间冲突";
+                        throw new \Exception($msg);
+                    }
+                }
+            }
+        } catch (\Throwable $th) {
+            throw new \Exception($th->getMessage());
+        }
+    }
     private static function batchPushlishAccount($publish, $params)
     {
         try {
-            $insertData = [];
             $time_config = json_decode($params['time_config'], true);
             $accounts = json_decode($params['accounts'], true);
             $accountTypes = array_count_values(array_column($accounts, 'type'));
             $video_ids = json_decode($params['video_ids'], true);
-            $mediaSettings = ShanjianVideoSetting::where('id', 'in', $video_ids)->where('user_id', self::$uid)->select()->toArray();
-            if (empty($mediaSettings)) {
-                return;
+
+            $mediaCount = 0;
+            if ($params['scene'] == 1) {
+                $mediaSettings = ShanjianVideoSetting::where('id', 'in', $video_ids)->where('user_id', self::$uid)->select()->toArray();
+                if (empty($mediaSettings)) {
+                    return;
+                }
+                $mediaCount = array_sum(array_column($mediaSettings, 'video_count'));
+            } else {
+                $status = (int)$params['scene'] === 1 ? [2, 3] : [3];
+                $mediaCount = ShanjianVideoSetting::alias('vs')
+                    ->field('vt.*')
+                    ->join('shanjian_video_task vt', 'vs.id = vt.video_setting_id')
+                    ->where('vs.id', 'in', $video_ids)
+                    ->where('vt.status', 'in', $status)
+                    ->count();
             }
-            $mediaCount = array_sum(array_column($mediaSettings, 'video_count'));
             // 实现媒体分配逻辑
             $allocatedAccounts = self::allocateMediaToAccounts($accounts, $accountTypes, $mediaCount);
 
-            $nextPublishTime =  date('Y-m-d H:i:s', strtotime($params['publish_start'] . ' ' . $time_config[0]));
-            //print_r($nextPublishTime);die;
+            $tmpTime = strpos($time_config[0], '-') !== false ? explode('-', $time_config[0])[0] : $time_config[0];
+            $nextPublishTime = date('Y-m-d H:i:s', strtotime($params['publish_start'] . ' ' . $tmpTime));
+            //print_r($allocatedAccounts);die;
+            $allTaskInstall = [];
             foreach ($allocatedAccounts as $key => $account) {
                 if ($account['count'] == 0) {
                     continue;
                 }
-                if ($account['type'] == 1) {
-                    $find = AiWechat::where('wechat_id', $account['account'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
-                    $account = array_merge($account, $find);
-                } elseif ($account['type'] == 3) {
-                    $find = SvAccount::where('account', $account['account'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
-                    $account = array_merge($account, $find);
-                }
 
-                array_push($insertData, [
+                $days = ceil($account['count'] / $params['publish_frep']);
+                $times = \app\api\logic\device\TaskLogic::getTimes($time_config, date('Y-m-d', time()), $days);
+                //print_r($times);die;
+                // if ($account['type'] == 1) {
+                //     $find = AiWechat::where('wechat_id', $account['account'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
+                //     $account = array_merge($account, $find);
+                // } else {
+                //     $find = SvAccount::where('account', $account['account'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
+                //     $account = array_merge($account, $find);
+                // }
+                $find = SvAccount::where('account', $account['account'])->where('type', $account['type'])->where('user_id', self::$uid)->limit(1)->find()->toArray();
+                $account = array_merge($account, $find);
+                $pubAccount =  SvPublishSettingAccount::create([
                     'publish_id' => $publish->id,
                     'user_id' => self::$uid,
                     'task_type' => 2,
@@ -193,12 +272,39 @@ class PublishLogic extends SvBaseLogic
                     'scene' => $params['scene'] ?? 1,
                     'created_time' => time(),
                 ]);
+                $num = 1;
+                foreach ($times as $tk => $time) {
+                    if ($num > $account['count']) {
+                        break;
+                    }
+                    $num ++;
+                    list($isOverlap, $lap) = \app\api\logic\device\TaskLogic::isTaskTimeOverlapping($account['device_code'], DeviceEnum::TASK_TYPE_PUBLISH, $time['start_time'], $time['end_time'], self::$uid);
+                    if (!$isOverlap) {
+                        $timeMsg = "【" . date('Y-m-d H:i', $lap['start_time']) . "-" . date('Y-m-d H:i', $lap['end_time']) . "】";
+                        $msg = "您在{$timeMsg}的【" . DeviceEnum::getAccountTypeDesc($lap['account_type']) . DeviceEnum::getTaskTypeDesc($lap['task_type'])  . "】与当前所选时间冲突";
+                        throw new \Exception($msg);
+                    }
+
+                    array_push($allTaskInstall, [
+                        'user_id' => self::$uid,
+                        'device_code' => $pubAccount->device_code,
+                        'task_type' => DeviceEnum::TASK_TYPE_PUBLISH,
+                        'account' => $account['account'],
+                        'account_type' => $account['type'],
+                        'task_name' => '设备闪剪发布任务',
+                        'status' => 0,
+                        'day' => date('Y-m-d', $time['start_time']),
+                        'start_time' => $time['start_time'],
+                        'end_time' => $time['end_time'],
+                        'sub_task_id' => $pubAccount->id,
+                        'source' => DeviceEnum::TASK_SOURCE_PUBLISH, //sv_publish_setting_account
+                        'create_time' => time(),
+                    ]);
+                }
             }
-            //print_r($insertData);die;
-            $model = new SvPublishSettingAccount();
-            $model->saveAll($insertData);
+            //print_r($allTaskInstall);die;
+            \app\api\logic\device\TaskLogic::add($allTaskInstall);
         } catch (\Throwable $th) {
-            //print_r($th->__toString());die;
             throw new \Exception($th->getMessage(), $th->getCode());
         }
     }
@@ -370,12 +476,37 @@ class PublishLogic extends SvBaseLogic
     {
         $record = SvPublishSettingDetail::field('*')
             ->where('id', $params['id'])
-            ->where('user_id', self::$uid)
+            //->where('user_id', self::$uid)
             ->findOrEmpty();
+            //print_r($record->toArray());die;
         if ($record->isEmpty()) {
             self::setError('任务记录不存在');
             return false;
         }
+
+        $task = SvDeviceTask::where('device_code', $record['device_code'])
+            ->where('task_type', 1)
+            ->where('account', $record['account'])
+            ->where('account_type', $record['account_type'])
+            ->where('start_time', '<=', strtotime($record['publish_time']))
+            ->where('end_time', '>=', strtotime($record['publish_time']))
+            ->fetchSql(false)
+            ->findOrEmpty();
+        //print_r($task->toArray());die;
+        if(!$task->isEmpty()){
+            $data = SvPublishSettingDetail::where('device_code', $record['device_code'])
+                ->where('account', $record['account'])
+                ->where('account_type', $record['account_type'])
+                ->where('publish_time', '>=', $task['start_time'])
+                ->where('publish_time', '<=', $task['end_time'])
+                ->findOrEmpty();
+            if($data->isEmpty()){
+                $task->delete();
+            }
+        }
+
+
+
         $record->delete();
 
         return true;
@@ -683,6 +814,7 @@ class PublishLogic extends SvBaseLogic
         print_r("\n执行发布记录拉取任务\n");
         \think\facade\Log::channel('publish')->write("\n-------------------------------\n");
         \think\facade\Log::channel('publish')->write("执行发布记录拉取任务");
+        ini_set('max_execution_time', 0);
         try {
             $accounts = SvPublishSettingAccount::alias('pa')
                 ->field('pa.*, ps.time_config, ps.publish_frep')
@@ -692,8 +824,6 @@ class PublishLogic extends SvBaseLogic
                 ->where('ps.status', 'in', [1, 2])
                 ->select()->toArray();
             \think\facade\Log::channel('publish')->write(Db::getLastSql());
-            //print_r(Db::getLastSql());die;
-            // print_r("count: " . count($accounts));
             $insertData = [];
             $videoIds = [];
             $accountTypes = array_count_values(array_column($accounts, 'account_type'));
@@ -703,7 +833,7 @@ class PublishLogic extends SvBaseLogic
             }
 
             foreach ($accounts as $key => $account) {
-                \think\facade\Log::channel('publish')->write("account: " . json_encode($account, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+                \think\facade\Log::channel('publish')->write("account: " . json_encode($account, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
                 // 遍历发布账号数据
                 // 1 获取已经生成的发布数量与设置的视频数量是否一致
                 // 2 如果视频任务都已经完成了，并且生成的发布数量仍少于预计的数量，则将该任务状态设置为待发布状态
@@ -713,7 +843,11 @@ class PublishLogic extends SvBaseLogic
                     continue;
                 }
 
-                $medias = self::_getMedias($account, $usedVideoIds);
+                list($mediaStatus, $medias) = self::_getMedias($account, $usedVideoIds);
+                if($mediaStatus === false){
+                    continue;
+                }
+                //print_r($medias);die;
                 if (empty($medias) && (int)$account['scene'] === 1) {
                     \think\facade\Log::channel('publish')->write("medias 为空");
                     array_push($insertData, [
@@ -798,11 +932,13 @@ class PublishLogic extends SvBaseLogic
                 ]);
                 SvPublishSetting::where('id', $account['publish_id'])->update(['status' => 2, 'publish_end' => date('Y-m-d', time()), 'update_time' => time()]);
             }
-            //print_r($insertData);die;
             if (!empty($insertData)) {
                 $model = new SvPublishSettingDetail();
                 $model->saveAll($insertData);
             }
+
+            sleep(2);
+            self::_checkPublishTime(array_column($accounts, 'id'));
 
             self::$returnData = $insertData;
             return true;
@@ -810,6 +946,28 @@ class PublishLogic extends SvBaseLogic
             \think\facade\Log::channel('publish')->write("发布失败，异常信息：" . $e->__toString());
             return false;
         }
+    }
+
+    private static function _checkPublishTime(array $accountIds)
+    {
+        //根据生成的发布记录删除主任务多余的时间区间
+        $items = SvPublishSettingDetail::where('publish_account_id', 'in', $accountIds)->select()->toArray();
+        $ids = [];
+        foreach ($items as $item) {
+            $task = \app\common\model\sv\SvDeviceTask::field('*')
+                ->where('sub_task_id', $item['publish_account_id'])
+                ->where('account', $item['account'])
+                ->where('account_type', $item['account_type'])
+                ->where('device_code', $item['device_code'])
+                ->where('task_type', 1)
+                ->where('start_time', '<=', strtotime($item['publish_time']))
+                ->where('end_time', '>', strtotime($item['publish_time']))
+                ->findOrEmpty();
+            if (!$task->isEmpty()) {
+                $ids[] = $task['id'];
+            }
+        }
+        \app\common\model\sv\SvDeviceTask::where('id', 'not in', $ids)->where('sub_task_id', 'in', $accountIds)->select()->delete();
     }
 
     /**
@@ -822,7 +980,6 @@ class PublishLogic extends SvBaseLogic
         //原视频任务状态
         $_ids = json_decode($account['video_ids'], true);
         $settingStatus = ShanjianVideoSetting::where('id', 'in', $_ids)->group('status')->column('status');
-        //print_r($settingStatus);die;
         //提取同任务同账号类型中已经生成的待发布视频id
         $video_ids = SvPublishSettingDetail::where('publish_id', $account['publish_id'])
             //->where('publish_account_id', $account['id'])
@@ -841,9 +998,14 @@ class PublishLogic extends SvBaseLogic
             ->where('account_type', $account['account_type'])
             ->where('task_type', 2)
             ->count();
-
         //如果有视频任务状态为0或1或2则返回false
         if (in_array(0, $settingStatus) || in_array(1, $settingStatus) || in_array(2, $settingStatus)) {
+            if ($count == $account['count']) {
+                    SvPublishSettingAccount::where('id', $account['id'])->update([
+                        'task_status' => 2,
+                    ]);
+                    return true;
+                }
             return false;
         } else {
             if (count($settingStatus) == 1 && array_sum($settingStatus) == 3) {
@@ -877,80 +1039,87 @@ class PublishLogic extends SvBaseLogic
 
     private static function _getMedias(array $account, array &$usedVideoIds)
     {
-        $video_ids = json_decode($account['video_ids'], true);
-        if (empty($video_ids)) {
-            \think\facade\Log::channel('publish')->write("video_ids 为空");
-            return [];
-        }
-        $status = (int)$account['scene'] === 1 ? [2, 3] : [3];
-        $medias = ShanjianVideoSetting::alias('vs')
-            ->field('vt.*')
-            ->join('shanjian_video_task vt', 'vs.id = vt.video_setting_id')
-            ->where('vs.id', 'in', $video_ids)
-            ->where('vt.id', 'NOT IN', $usedVideoIds[$account['account_type']])
-            ->where('vt.status', 'in', $status)
-            ->limit($account['count'])
-            ->select()->toArray();
-        //print_r(Db::getLastSql());die;
-        //print_r($medias);die;
-
-        $times = self::getTimes($account);
-        if (empty($times)) {
-            \think\facade\Log::channel('publish')->write("times 为空");
-            return [];
-        }
-        //print_r($times);die;
-        // 合并后的新数组
-        $mergedArray = [];
-        foreach ($medias as $key => $media) {
-            if(!isset($times[$key])){
-                continue;
+        try {
+            $video_ids = json_decode($account['video_ids'], true);
+            if (empty($video_ids)) {
+                return [true, []];
             }
-            //获取发布内容和标题
-            $task_id = generate_unique_task_id();
-            $response = [
-                'code' => 10000,
-            ];
-            if ($media['status'] === 3) {
-                $response = \app\common\service\ToolsService::Sv()->getPublishContent([
-                    'keywords' => $media['msg'],
-                    'task_id' => $task_id,
-                    'user_id' => $account['user_id'],
-                ]);
+            $status = (int)$account['scene'] === 1 ? [2, 3] : [3];
+            $medias = ShanjianVideoSetting::alias('vs')
+                ->field('vt.*')
+                ->join('shanjian_video_task vt', 'vs.id = vt.video_setting_id')
+                ->where('vs.id', 'in', $video_ids)
+                ->where('vt.id', 'NOT IN', $usedVideoIds[$account['account_type']])
+                ->where('vt.status', 'in', $status)
+                ->limit($account['count'])
+                ->select()->toArray();
+
+
+            $timeDict = self::getTimes($account);
+            $times = $timeDict[$account['account_type']] ?? [];
+            if (empty($timeDict)) {
+                \think\facade\Log::channel('publish')->write("times 为空");
+                return [true, []];
             }
 
-            if ((int)$response['code'] === 10000) {
-                $mergedArray[] = [
-                    'material_url' => $media['status'] == 2 ? '' : FileService::getFileUrl($media['video_result_url']),
-                    'material_title' => $media['status'] == 2 ? '' : $response['data']['title'], // 循环匹配title
-                    'material_subtitle' => $media['status'] == 2 ? '' : $response['data']['content'],
-                    'material_status' => $media['status'] == 2 ? 2 : 0, // 2失败 0待发布
-                    'material_remark' => $media['remark'],
-                    'pic' => $media['pic'],
-                    'topic' => '',
-                    'material_type' => $account['media_type'],
-                    'publish_time' => $times[$key],
-                    'poi' => $account['poi'],
-                    'id' => $account['id'],
-                    'video_setting_id' => $media['video_setting_id'],
-                    'media_id' => $media['id'],
-                    'publish_id' => $account['publish_id'],
-                    'publish_account_id' => $account['id'],
-                    'user_id' => $account['user_id'],
-                    'account' => $account['account'],
-                    'account_type' => $account['account_type'],
-                    'device_code' => $account['device_code'],
-                    'task_id' => $task_id,
-                    'sub_task_id' => time() . ($key + 100),
-
+            // 合并后的新数组
+            $mergedArray = [];
+            foreach ($medias as $key => $media) {
+                if (!isset($times[$key])) {
+                    continue;
+                }
+                //获取发布内容和标题
+                $task_id = generate_unique_task_id();
+                $response = [
+                    'code' => 10000,
                 ];
-                array_push($usedVideoIds[$account['account_type']], $media['id']);
                 if ($media['status'] === 3) {
-                    self::execDeduction($account['user_id'], $task_id);
+                    $response = \app\common\service\ToolsService::Sv()->getPublishContent([
+                        'keywords' => $media['msg'],
+                        'task_id' => $task_id,
+                        'user_id' => $account['user_id'],
+                    ]);
+                }
+
+                if ((int)$response['code'] === 10000) {
+                    $mergedArray[] = [
+                        'material_url' => $media['status'] == 2 ? '' : FileService::getFileUrl($media['video_result_url']),
+                        'material_title' => $media['status'] == 2 ? '' : $response['data']['title'], // 循环匹配title
+                        'material_subtitle' => $media['status'] == 2 ? '' : $response['data']['content'],
+                        'material_status' => $media['status'] == 2 ? 2 : 0, // 2失败 0待发布
+                        'material_remark' => $media['remark'],
+                        'pic' => $media['pic'],
+                        'topic' => '',
+                        'material_type' => $account['media_type'],
+                        'publish_time' => $times[$key],
+                        'poi' => $account['poi'],
+                        'id' => $account['id'],
+                        'video_setting_id' => $media['video_setting_id'],
+                        'media_id' => $media['id'],
+                        'publish_id' => $account['publish_id'],
+                        'publish_account_id' => $account['id'],
+                        'user_id' => $account['user_id'],
+                        'account' => $account['account'],
+                        'account_type' => $account['account_type'],
+                        'device_code' => $account['device_code'],
+                        'task_id' => $task_id,
+                        'sub_task_id' => time() . ($key + 100),
+
+                    ];
+                    array_push($usedVideoIds[$account['account_type']], $media['id']);
+                    if ($media['status'] === 3) {
+                        self::execDeduction($account['user_id'], $task_id);
+                    }
                 }
             }
+            return [true, $mergedArray];
+        } catch (\Throwable $th) {
+            //throw $th;
+            \think\facade\Log::channel('publish')->write("获取发布媒体数据失败：" . $th->__toString());
+            throw new  \Exception($th->getMessage(), $th->getCode());
         }
-        return $mergedArray;
+
+        return [false, []];
     }
 
     private static function getTimes(array $account)
@@ -964,27 +1133,53 @@ class PublishLogic extends SvBaseLogic
             ->value('publish_time');
 
         //print_r($maxTime);die;
-        $times = [];
+        $times = array(
+            1 => [], //视频号
+            3 => [], //小红书
+            4 => [], //抖音
+            5 => [], //快手
+        );
         $timeConfig = json_decode($account['time_config'], true);
+        //print_r($timeConfig);die;
         $startDate = $account['publish_start'];
         for ($i = 0; $i < ceil($account['count'] / $account['publish_frep']); $i++) {
             foreach ($timeConfig as $time) {
-                if(strpos($time, '-') !== false){
-                    $time = explode('-', $time)[0];
-                }
-                $publishTime = date('Y-m-d H:i:s', strtotime("{$startDate} {$time}"));
-                if (strtotime($publishTime) <= strtotime($maxTime)) {
+                if (strpos($time, '-') === false) {
                     continue;
                 }
+                $tmps = explode('-', $time);
+                $st = strtotime(date('Y-m-d H:i:s', strtotime("{$startDate} {$tmps[0]}")));
+                $et = strtotime(date('Y-m-d H:i:s', strtotime("{$startDate} {$tmps[1]}")));
+                $interval = floor(($et - $st) / 4);
 
-                if (strtotime($publishTime) <= time()) {
-                    continue;
+                $xhsPublishTime = date('Y-m-d H:i:s', $st + 60 + ($interval * 0));
+                $dyPublishTime = date('Y-m-d H:i:s', $st + 60 + ($interval * 1));
+                $ksPublishTime = date('Y-m-d H:i:s', $st + 60 + ($interval * 2));
+                $vtPublishTime = date('Y-m-d H:i:s', $st + 60 + ($interval * 3));
+                if (strtotime($vtPublishTime) > $et) {
+                    $vtPublishTime = date('Y-m-d H:i:s', $st + ($interval * 3));
                 }
 
-                $times[] = $publishTime;
+                if (strtotime($xhsPublishTime) <= strtotime($maxTime) || strtotime($xhsPublishTime) <= time()) {
+                    continue;
+                }
+                if (strtotime($dyPublishTime) <= strtotime($maxTime) || strtotime($dyPublishTime) <= time()) {
+                    continue;
+                }
+                if (strtotime($ksPublishTime) <= strtotime($maxTime) || strtotime($ksPublishTime) <= time()) {
+                    continue;
+                }
+                if (strtotime($vtPublishTime) <= strtotime($maxTime) || strtotime($vtPublishTime) <= time()) {
+                    continue;
+                }
+                $times[3][] = $xhsPublishTime;
+                $times[4][] = $dyPublishTime;
+                $times[5][] = $ksPublishTime;
+                $times[1][] = $vtPublishTime;
             }
             $startDate = date('Y-m-d', strtotime("{$startDate} +1 day"));
         }
+
         return $times;
     }
 
@@ -1005,7 +1200,7 @@ class PublishLogic extends SvBaseLogic
     public static function SphPublishCron()
     {
         try {
-            
+
             $publishes = SvPublishSettingDetail::alias('ps')
                 ->field('ps.*')
                 ->join('sv_publish_setting ss', 'ps.publish_id = ss.id')
@@ -1018,9 +1213,9 @@ class PublishLogic extends SvBaseLogic
                 ->where('ps.publish_time', '<=', date('Y-m-d H:i:s', time()))
                 ->order('ps.publish_time asc')
                 ->limit(10)
-                ->select()->toArray();
-            print_r("\n视频号发布：" . count($publishes));
-            foreach ($publishes as $publish) {
+                ->select();
+            print_r('视频号发布：' . count($publishes));
+            foreach ($publishes as $key => $publish) {
                 sleep(1);
                 $interval_find = \app\common\model\wechat\AiWechatLog::where('user_id', $publish['user_id'])
                     ->where('log_type', \app\common\model\wechat\AiWechatLog::TYPE_SPH_POST)
@@ -1033,6 +1228,7 @@ class PublishLogic extends SvBaseLogic
                     print_r('间隔时间未到');
                     continue;
                 }
+                $taskid = $publish['sub_task_id'] == '' ? (time() . ($key + 100)) : $publish['sub_task_id'];
                 $payload = [
                     'WeChatId' => $publish['account'],
                     'Content' => $publish['material_subtitle'],
@@ -1044,6 +1240,8 @@ class PublishLogic extends SvBaseLogic
                     'TaskId' => $publish['sub_task_id'],
                     'Poi' => [],
                 ];
+                $publish->sub_task_id = $taskid;
+                $publish->save();
                 //print_r($payload);
                 // 3. 构建消息发送请求
                 $content = \app\common\workerman\wechat\handlers\client\SphPostTaskHandler::handle($payload);

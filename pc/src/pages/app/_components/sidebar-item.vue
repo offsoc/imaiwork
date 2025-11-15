@@ -75,9 +75,13 @@ const route = useRoute();
 const isActive = computed(() => props.sidebarIndex === props.item.type);
 
 const isBlack = computed(() => {
-    return [AppKeyEnum.DIGITAL_HUMAN, AppKeyEnum.DRAWING, AppKeyEnum.REDBOOK, AppKeyEnum.SPH].includes(
-        route.meta.key as AppKeyEnum
-    );
+    return [
+        AppKeyEnum.DIGITAL_HUMAN,
+        AppKeyEnum.DRAWING,
+        AppKeyEnum.REDBOOK,
+        AppKeyEnum.SPH,
+        AppKeyEnum.MATRIX,
+    ].includes(route.meta.key as AppKeyEnum);
 });
 
 const getIconColor = computed(() => {

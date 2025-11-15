@@ -27,7 +27,7 @@ class AiWechatCron extends Command
     {
         TodoLogic::pushMessageCron();
         CircleLogic::sendCircleCron();
-        PublishLogic::SphPublishCron();
+        //PublishLogic::SphPublishCron();
         return true;
     }
 }

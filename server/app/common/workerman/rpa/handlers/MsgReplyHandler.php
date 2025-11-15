@@ -67,8 +67,8 @@ class MsgReplyHandler extends BaseMessageHandler
                 $this->sendResponse($this->uid, $this->payload, $this->payload['reply']);
                 return;
             }
-            $this->connection->isMsgRunning = 1;
-            $this->worker->uidConnections[$device_uid]->isMsgRunning = 1;
+            $this->connection->isMsgRunning = 0;
+            $this->worker->uidConnections[$device_uid]->isMsgRunning = 0;
             $this->service->setWorker($this->worker);
 
             $this->payload['reply'] = '已被设置为回复消息状态';
@@ -141,7 +141,7 @@ class MsgReplyHandler extends BaseMessageHandler
                     'type' => $content['type'],
                     'appType' => $content['appType'] ?? 3,
                     'deviceId' => $content['deviceId'],
-                    'appVersion' => $content['appVersion'] ?? '1.0.0',
+                    'appVersion' => $content['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
                 );

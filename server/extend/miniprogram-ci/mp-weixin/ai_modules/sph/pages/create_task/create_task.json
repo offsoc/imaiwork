@@ -6,8 +6,14 @@
   "usingComponents": {
     "u-navbar": "../../../../uni_modules/vk-uview-ui/components/u-navbar/u-navbar",
     "u-icon": "../../../../uni_modules/vk-uview-ui/components/u-icon/u-icon",
-    "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
+    "u-radio": "../../../../uni_modules/vk-uview-ui/components/u-radio/u-radio",
+    "u-radio-group": "../../../../uni_modules/vk-uview-ui/components/u-radio-group/u-radio-group",
+    "u-switch": "../../../../uni_modules/vk-uview-ui/components/u-switch/u-switch",
+    "data-select": "../../../../components/data-select/data-select",
     "u-input": "../../../../uni_modules/vk-uview-ui/components/u-input/u-input",
-    "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup"
+    "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
+    "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup",
+    "u-line": "../../../../uni_modules/vk-uview-ui/components/u-line/u-line",
+    "confirm-dialog": "../../../../components/confirm-dialog/confirm-dialog"
   }
 }

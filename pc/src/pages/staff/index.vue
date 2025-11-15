@@ -157,12 +157,6 @@ import { getAgentCategoryList, getCommonAgentList, getCommonCozeAgentList } from
 import { CozeTypeEnum } from "@/pages/agent/_enums";
 
 // 导入本地资源
-import OpenAiIcon from "@/assets/images/openai.png";
-import DeepSeekIcon from "@/assets/images/deepseek.png";
-import DouBaoIcon from "@/assets/images/doubao.png";
-import HuoShanIcon from "@/assets/images/huoshan.png";
-import RPAIcon from "@/assets/images/rpa.png";
-import TongYiIcon from "@/assets/images/tongyi.png";
 import AgentBg from "@/assets/images/agent_bg.png";
 import RedbookIcon from "@/assets/images/app/redbook.png";
 import SphIcon from "@/assets/images/app/sph.png";
@@ -173,19 +167,6 @@ import AppIntro from "../app/_components/app-intro.vue";
 import AppLive from "../app/_components/app-live.vue";
 
 // --- 枚举定义 ---
-
-// AI模型枚举
-enum AI_MODEL {
-    GPT_4o = "OpenAI-4o",
-    DEEPSEEK_R3 = "Deepseek-R3",
-    DEEPSEEK_V1 = "Deepseek-V1",
-    TONGYI_QW3 = "Tongyi-Qwen3",
-    TONGYI_VIDEO = "Tongyi-video",
-    AI_RPA = "AiPhone-RPA",
-    DOUBAO_1_5PRO = "Doubao-1.5pro",
-    SEEDANCE_1_0PRO = "Seedance-1.0pro",
-    SEEDREAM_2_0PRO = "Seedream-2.0pro",
-}
 
 // 员工类型/分类枚举
 enum STAFF_TYPE {
@@ -258,25 +239,21 @@ const aiStaffCateLists = [
                 key: AppKeyEnum.LADDER_PLAYER,
                 title: appKeyNameMap[AppKeyEnum.LADDER_PLAYER],
                 desc: "为员工量身定制销售口话术训练方案",
-                model: AI_MODEL.GPT_4o,
             },
             {
                 key: AppKeyEnum.INTERVIEW,
                 title: appKeyNameMap[AppKeyEnum.INTERVIEW],
                 desc: "轻松筛选优质人才",
-                model: AI_MODEL.DEEPSEEK_R3,
             },
             {
                 key: AppKeyEnum.MEETING_MINUTES,
                 title: appKeyNameMap[AppKeyEnum.MEETING_MINUTES],
                 desc: "一键生成会议纪要",
-                model: AI_MODEL.TONGYI_QW3,
             },
             {
                 key: AppKeyEnum.MIND_MAP,
                 title: appKeyNameMap[AppKeyEnum.MIND_MAP],
                 desc: "快速打破思维惯性",
-                model: AI_MODEL.DEEPSEEK_V1,
             },
         ],
     },
@@ -289,25 +266,21 @@ const aiStaffCateLists = [
                 key: AppKeyEnum.DIGITAL_HUMAN,
                 title: appKeyNameMap[AppKeyEnum.DIGITAL_HUMAN],
                 desc: "创造数字分身",
-                model: AI_MODEL.GPT_4o,
             },
             {
                 key: AppKeyEnum.SERVICE,
                 title: appKeyNameMap[AppKeyEnum.SERVICE],
                 desc: "大幅提升销售转化效率",
-                model: AI_MODEL.AI_RPA,
             },
             {
                 key: AppKeyEnum.LIVE,
                 title: appKeyNameMap[AppKeyEnum.LIVE],
                 desc: "无需人工值守",
-                model: AI_MODEL.TONGYI_QW3,
             },
             {
                 key: AppKeyEnum.AI_MIX,
                 title: appKeyNameMap[AppKeyEnum.AI_MIX],
                 desc: "快速创作视频",
-                model: AI_MODEL.TONGYI_VIDEO,
                 disabled: true,
             },
         ],
@@ -321,31 +294,26 @@ const aiStaffCateLists = [
                 key: AppKeyEnum.DRAW_GOODS,
                 title: appKeyNameMap[AppKeyEnum.DRAW_GOODS],
                 desc: "提升店铺转化",
-                model: AI_MODEL.DOUBAO_1_5PRO,
             },
             {
                 key: AppKeyEnum.DRAW_POSTER,
                 title: appKeyNameMap[AppKeyEnum.DRAW_POSTER],
                 desc: "轻松设计营销海报",
-                model: AI_MODEL.DOUBAO_1_5PRO,
             },
             {
                 key: AppKeyEnum.DRAW_FASHION,
                 title: appKeyNameMap[AppKeyEnum.DRAW_FASHION],
                 desc: "自动生成服装平铺模特图",
-                model: AI_MODEL.DOUBAO_1_5PRO,
             },
             {
                 key: AppKeyEnum.DRAW_VIDEO,
                 title: appKeyNameMap[AppKeyEnum.DRAW_VIDEO],
                 desc: "文本一键生成高质量视频",
-                model: AI_MODEL.SEEDANCE_1_0PRO,
             },
             {
                 key: AppKeyEnum.DRAW_IMAGE,
                 title: appKeyNameMap[AppKeyEnum.DRAW_IMAGE],
                 desc: "创造您的专属视觉画面",
-                model: AI_MODEL.SEEDREAM_2_0PRO,
             },
         ],
     },
@@ -358,14 +326,12 @@ const aiStaffCateLists = [
                 key: AppKeyEnum.CONTRACT,
                 title: appKeyNameMap[AppKeyEnum.CONTRACT],
                 desc: "因智能而卓越",
-                model: AI_MODEL.TONGYI_QW3,
                 disabled: true,
             },
             {
                 key: AppKeyEnum.TAX,
                 title: appKeyNameMap[AppKeyEnum.TAX],
                 desc: "提供基于法规判例的专业回答",
-                model: AI_MODEL.TONGYI_QW3,
                 disabled: true,
             },
         ],
@@ -384,7 +350,7 @@ const customerAcquisitionCards = computed(() => [
         action: () => handleStart(AppKeyEnum.SPH),
     },
     {
-        type: "redbook",
+        type: "matrix",
         class: "customer-card redbook-card",
         image: RedbookIcon,
         title: "小红书获客",
@@ -404,23 +370,10 @@ const customerAcquisitionCards = computed(() => [
     },
 ]);
 
-// AI模型图标映射
-const aiModelIcons: Record<string, string> = {
-    [AI_MODEL.TONGYI_QW3]: TongYiIcon,
-    [AI_MODEL.TONGYI_VIDEO]: TongYiIcon,
-    [AI_MODEL.DEEPSEEK_R3]: DeepSeekIcon,
-    [AI_MODEL.DEEPSEEK_V1]: DeepSeekIcon,
-    [AI_MODEL.GPT_4o]: OpenAiIcon,
-    [AI_MODEL.DOUBAO_1_5PRO]: DouBaoIcon,
-    [AI_MODEL.AI_RPA]: RPAIcon,
-    [AI_MODEL.SEEDANCE_1_0PRO]: HuoShanIcon,
-    [AI_MODEL.SEEDREAM_2_0PRO]: HuoShanIcon,
-};
-
 // App路由映射
 const appRoutes: Record<string, string> = {
     [AppKeyEnum.SPH]: `/app/${AppKeyEnum.SPH}`,
-    [AppKeyEnum.REDBOOK]: `/app/${AppKeyEnum.REDBOOK}`,
+    [AppKeyEnum.REDBOOK]: `/app/matrix?type=1`,
     [AppKeyEnum.DIGITAL_HUMAN]: `/app/${AppKeyEnum.DIGITAL_HUMAN}`,
     [AppKeyEnum.DRAW_IMAGE]: `/app/${AppKeyEnum.DRAWING}?type=1`,
     [AppKeyEnum.DRAW_FASHION]: `/app/${AppKeyEnum.DRAWING}?type=3`,
@@ -466,14 +419,6 @@ const currentStaffList = computed(() => {
  */
 const getCateImage = (key: AppKeyEnum) => {
     return appImageData[key]?.src || "";
-};
-
-/**
- * 获取AI模型对应的图标
- * @param key AI模型枚举值
- */
-const getAiModelIcon = (key: string) => {
-    return aiModelIcons[key] || "";
 };
 
 /**

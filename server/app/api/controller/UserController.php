@@ -175,4 +175,36 @@ class UserController extends BaseApiController
         $list = array_values($list);
         return $this->success(data: $list, show: 0);
     }
+
+    /**
+     * 获取用户设备绑定二维码
+     * @return Json
+     * @author L
+     * @data 2025/11/4 10:00
+     */
+    public function getDeviceBindCode(): Json
+    {
+        $params['user_id'] = $this->userId;
+        $res = UserLogic::getDeviceBindCode($params);
+        if ($res) {
+            return $this->success(data: UserLogic::getReturnData());
+        }
+        return $this->fail(UserLogic::getError());
+    }
+
+    /**
+     * 获取用户设备绑定状态
+     * @return Json
+     * @author L
+     * @data 2025/11/4 18:00
+     */
+    public function getDeviceBindStatus(): Json
+    {
+        $params['user_id'] = $this->userId;
+        $res = UserLogic::getDeviceBindStatus($params);
+        if ($res) {
+            return $this->success(data: UserLogic::getReturnData());
+        }
+        return $this->fail(UserLogic::getError());
+    }
 }

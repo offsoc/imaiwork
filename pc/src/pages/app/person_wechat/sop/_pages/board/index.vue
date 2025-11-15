@@ -39,44 +39,51 @@
                         v-for="({ members, sub_stage_name }, index) in boardLists"
                         :key="index"
                         class="rounded-md border border-[#E0E0E0] w-[243px] flex flex-col flex-shrink-0 overflow-hidden">
-                        <div class="h-[4px] bg-[#E0E0E0]">
-                            <div
-                                class="h-full"
-                                :style="{
-                                    width: `${((index + 1) / boardLists.length) * 100}%`,
-                                    backgroundColor: 'var(--color-primary)',
-                                }"></div>
-                        </div>
-                        <div class="h-[72px] flex items-center justify-between border-b border-primary-light-8 px-4">
-                            <div class="flex items-center gap-2">
-                                <Icon name="el-icon-LocationFilled" color="var(--color-primary)" :size="20"></Icon>
-                                <span class="text-[#5E656E] text-lg">{{ sub_stage_name }}</span>
+                        <div class="flex-shrink-0">
+                            <div class="h-[4px] bg-[#E0E0E0]">
+                                <div
+                                    class="h-full"
+                                    :style="{
+                                        width: `${((index + 1) / boardLists.length) * 100}%`,
+                                        backgroundColor: 'var(--color-primary)',
+                                    }"></div>
                             </div>
-                            <ElPopover trigger="click" :show-arrow="false" popper-class="!w-[290px] !rounded-lg !p-0">
-                                <div class="py-2">
-                                    <div class="flex flex-col">
-                                        <div
-                                            v-for="option in handleOptions"
-                                            :key="option.value"
-                                            class="flex items-center gap-2 h-9 px-4 cursor-pointer hover:bg-primary-light-9 hover:text-primary"
-                                            :class="{
-                                                'bg-primary-light-8 text-primary': selectedMap[index] === option.value,
-                                            }"
-                                            @click="handleOptionClick(option.value, index)">
-                                            {{ option.label }}
+                            <div
+                                class="h-[72px] flex items-center justify-between border-b border-primary-light-8 px-4">
+                                <div class="flex items-center gap-2">
+                                    <Icon name="el-icon-LocationFilled" color="var(--color-primary)" :size="20"></Icon>
+                                    <span class="text-[#5E656E] text-lg">{{ sub_stage_name }}</span>
+                                </div>
+                                <ElPopover
+                                    trigger="click"
+                                    :show-arrow="false"
+                                    popper-class="!w-[290px] !rounded-lg !p-0">
+                                    <div class="py-2">
+                                        <div class="flex flex-col">
+                                            <div
+                                                v-for="option in handleOptions"
+                                                :key="option.value"
+                                                class="flex items-center gap-2 h-9 px-4 cursor-pointer hover:bg-primary-light-9 hover:text-primary"
+                                                :class="{
+                                                    'bg-primary-light-8 text-primary':
+                                                        selectedMap[index] === option.value,
+                                                }"
+                                                @click="handleOptionClick(option.value, index)">
+                                                {{ option.label }}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <template #reference>
-                                    <ElButton type="primary" link>操作</ElButton>
-                                </template>
-                            </ElPopover>
-                        </div>
-                        <div
-                            class="flex items-center justify-center gap-x-4 bg-primary-light-9 p-2 rounded-md mx-2 mt-6 cursor-pointer"
-                            @click="handleAddUser(index)">
-                            <Icon name="local-icon-add_box_fill" color="var(--color-primary)" :size="20"></Icon>
-                            <span class="text-primary">添加用户</span>
+                                    <template #reference>
+                                        <ElButton type="primary" link>操作</ElButton>
+                                    </template>
+                                </ElPopover>
+                            </div>
+                            <div
+                                class="flex items-center justify-center gap-x-4 bg-primary-light-9 p-2 rounded-md mx-2 mt-6 cursor-pointer"
+                                @click="handleAddUser(index)">
+                                <Icon name="local-icon-add_box_fill" color="var(--color-primary)" :size="20"></Icon>
+                                <span class="text-primary">添加用户</span>
+                            </div>
                         </div>
                         <div class="min-h-0 grow">
                             <ElScrollbar>

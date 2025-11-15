@@ -25,6 +25,40 @@ const userStore = useUserStore();
 const resultLists = ref<any[]>([]);
 const isAllTasksCompleted = ref(false);
 
+const handleHidreamaiTask = async (params: any, resultData: any) => {
+    resultData.images = new Array(parseInt(params.img_count)).fill({
+        url: "",
+        loading: true,
+        progress: 0,
+        status: 0,
+        error: false,
+    });
+    const { result } = await drawingTextToImage(params);
+
+    const { processDrawingTask } = useDrawingTask({
+        type: drawTypeEnumMap[DrawTypeEnum.TXT2IMAGE],
+        task_id: result.task_id,
+        dataLists: resultData.images,
+    });
+    await processDrawingTask({
+        callback: (data) => {
+            resultData.images = data;
+        },
+    });
+};
+
+const handleVolcTask = async (params: any, resultData: any) => {
+    resultData.images = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
+    const { result } = await drawingTextToImageVolc(params);
+    resultData.images = [result.image_urls].map((item) => ({
+        url: item,
+        loading: false,
+        progress: 100,
+        status: 1,
+        error: false,
+    }));
+};
+
 onEvent("update:formData", async (data: any) => {
     if (isAllTasksCompleted.value) {
         feedback.msgWarning("请等待上一次任务完成");
@@ -37,40 +71,20 @@ onEvent("update:formData", async (data: any) => {
         prompt: params.poster_description,
         images: [] as ResultItem[],
         formData: data,
-        tags: [model_name, params.poster_type, params.poster_color, params.poster_title, params.poster_subtitle],
+        tags: [
+            model_name,
+            params.poster_type,
+            params.poster_color,
+            params.poster_title,
+            params.poster_subtitle,
+        ],
     });
     resultLists.value.unshift(resultData);
     try {
         if (model == ModelEnum.HIDREAMAI) {
-            resultData.images = new Array(parseInt(params.img_count)).fill({
-                url: "",
-                loading: true,
-                progress: 0,
-                status: 0,
-                error: false,
-            });
-            const { result } = await drawingTextToImage(params);
-
-            const { processDrawingTask } = useDrawingTask({
-                type: drawTypeEnumMap[DrawTypeEnum.TXT2IMAGE],
-                task_id: result.task_id,
-                dataLists: resultData.images,
-            });
-            await processDrawingTask({
-                callback: (data) => {
-                    resultData.images = data;
-                },
-            });
+            await handleHidreamaiTask(params, resultData);
         } else if (model == ModelEnum.GENERAL || model == ModelEnum.SEEDREAM) {
-            resultData.images = [{ url: "", loading: true, progress: 0, status: 0, error: false }];
-            const { result } = await drawingTextToImageVolc(params);
-            resultData.images = [result.image_urls].map((item) => ({
-                url: item,
-                loading: false,
-                progress: 100,
-                status: 1,
-                error: false,
-            }));
+            await handleVolcTask(params, resultData);
         }
         userStore.getUser();
     } catch (error) {

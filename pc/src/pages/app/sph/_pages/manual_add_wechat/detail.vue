@@ -66,7 +66,7 @@
                             </div>
                         </template>
                     </ElTableColumn>
-                    <ElTableColumn prop="create_time" label="执行时间" width="180"></ElTableColumn>
+                    <ElTableColumn prop="exec_time" label="执行时间" width="180"></ElTableColumn>
                     <ElTableColumn label="操作" width="80" fixed="right" align="right">
                         <template #default="{ row }">
                             <ElButton type="danger" link @click="handleDelete(row.id)">删除</ElButton>

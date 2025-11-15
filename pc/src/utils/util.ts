@@ -302,7 +302,7 @@ export const getVideoFirstFrame = (
         quality?: number;
         frameTime?: number;
     } = {}
-): Promise<{ file: Blob; width: number; height: number }> => {
+): Promise<{ file: Blob; width: number; height: number; duration: number }> => {
     const { width = 443, quality = 0.7, frameTime = 0.5 } = options;
 
     return new Promise((resolve) => {
@@ -357,6 +357,7 @@ export const getVideoFirstFrame = (
                             file: fileResult,
                             width: video.videoWidth,
                             height: video.videoHeight,
+                            duration: video.duration,
                         });
                     } catch (error) {
                         console.error("获取视频首帧失败:", error);

@@ -67,7 +67,6 @@
                                 </ElSelect>
                             </div>
                         </div>
-
                         <div>
                             <div class="text-[#ffffff80] mb-3">检索关键词</div>
                             <div class="keyword-content">
@@ -112,6 +111,61 @@
                                         @click="handleAddKeyword('manual')"
                                         >手动添加</ElButton
                                     >
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[#ffffff80] mb-3">时间设置</div>
+                            <div class="bg-app-bg-3 rounded-xl shadow-[0_0_0_1px_var(--app-border-color-2)] p-4">
+                                <div class="text-white">自动加好友设置</div>
+                                <div class="mt-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <div
+                                            v-for="(item, index) in [1, 3, 5, 10, 30]"
+                                            :key="index"
+                                            class="cursor-pointer rounded-md px-4 py-2 border border-app-border-2 text-white hover:bg-app-bg-1"
+                                            :class="[
+                                                formData.task_frep == item && currentFrequency != 5 ? 'bg-primary' : '',
+                                            ]"
+                                            @click="handleFrequency(item, index)">
+                                            {{ item }}天
+                                        </div>
+                                        <div
+                                            class="cursor-pointer rounded-md px-4 py-2 border border-app-border-2 text-white"
+                                            :class="[currentFrequency == 5 ? 'bg-primary' : '']"
+                                            @click="currentFrequency = 5">
+                                            自定义
+                                        </div>
+                                    </div>
+                                    <div class="mt-2" v-if="currentFrequency == 5">
+                                        <ElDatePicker
+                                            v-model="formData.custom_date"
+                                            type="dates"
+                                            placeholder="请选择自定义日期"
+                                            format="MM-DD"
+                                            value-format="YYYY-MM-DD"
+                                            popper-class="dark-date-picker-popper"
+                                            :disabled-date="disabledDate" />
+                                    </div>
+                                </div>
+                                <div class="text-white mt-4">每日执行时间</div>
+                                <div class="mt-4">
+                                    <ElTimePicker
+                                        v-model="formData.time_config"
+                                        type="time"
+                                        is-range
+                                        start-placeholder="请选择开始时间"
+                                        end-placeholder="请选择结束时间"
+                                        format="HH:mm"
+                                        value-format="HH:mm"
+                                        popper-class="dark-select-popper"
+                                        :show-arrow="false" />
+                                </div>
+                                <div v-if="taskErrorMsg" class="mt-2">
+                                    <div>任务冲突</div>
+                                    <view class="text-[#FF2442] mt-1 text-xs">
+                                        {{ taskErrorMsg }}
+                                    </view>
                                 </div>
                             </div>
                         </div>
@@ -278,13 +332,13 @@
                                                     <ElInput
                                                         v-model="formData.add_number"
                                                         v-number-input="{
-                                                            min: 0,
+                                                            min: 1,
                                                             max: 99,
                                                         }"
                                                         type="number"
                                                         class="!h-11" />
                                                 </div>
-                                                <span class="text-[#ffffff80]">次</span>
+                                                <span class="text-[#ffffff80]">条</span>
                                             </div>
                                         </div>
                                         <div class="flex-1">
@@ -294,7 +348,7 @@
                                                     <ElInput
                                                         v-model="formData.add_interval_time"
                                                         v-number-input="{
-                                                            min: 0,
+                                                            min: 1,
                                                             max: 999,
                                                         }"
                                                         type="number"
@@ -337,7 +391,7 @@
                                     <div v-if="formData.add_remark_enable == 1">
                                         <div class="flex flex-wrap gap-2">
                                             <div
-                                                v-for="(item, index) in getWechatRemarks"
+                                                v-for="(item, index) in formData.remarks"
                                                 :key="index"
                                                 class="cursor-pointer hover:bg-app-bg-1 transition-all duration-300 border border-app-border-2 rounded-md px-4 py-2 flex items-center"
                                                 @click="handleEditRemark(item, index)">
@@ -392,17 +446,15 @@
 
 <script setup lang="ts">
 import { createTask } from "@/api/sph";
-import { getDeviceList } from "@/api/device";
-import { getWeChatLists } from "@/api/person_wechat";
 import dayjs from "dayjs";
 import { AppTypeEnum, TokensSceneEnum } from "@/enums/appEnums";
 import { CreateTypeEnum } from "@/pages/app/sph/_enums";
-import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import AiAddKeyword from "./ai-add-keyword.vue";
 import AiAddFriend from "./ai-add-friend.vue";
 import AiPrivateChat from "./ai-private-chat.vue";
 import RemarkPop from "@/pages/app/sph/_components/remark-pop.vue";
+import { useCreateTask } from "../../../_hooks/useCreateTask";
 const emit = defineEmits(["back"]);
 
 interface FormData {
@@ -426,13 +478,15 @@ interface FormData {
     ocr_type: 1 | 2;
     add_remark_enable: 0 | 1;
     remarks: any[];
+    task_frep: number;
+    custom_date: string[];
+    time_config: string[];
 }
 enum GreetingContentSettingTypeEnum {
     ADD_FRIEND = "add_friend",
     PRIVATE_CHAT = "private_chat",
 }
 
-const appStore = useAppStore();
 const userStore = useUserStore();
 
 const getOCRCloudToken = computed(() => {
@@ -443,12 +497,8 @@ const getOCRLocalToken = computed(() => {
     return userStore.getTokenByScene(TokensSceneEnum.SPH_LOCAL_OCR)?.score;
 });
 
-const getWechatRemarks = computed(() => {
-    return appStore.config.wechat_remarks || [];
-});
-
 const formData = reactive<FormData>({
-    name: dayjs().format("MMDDHHmmss") + "视频号获客任务",
+    name: `视频号获客任务${dayjs().format("YYYYMMDDHHmmss")}`,
     device_codes: [],
     type: [4],
     keywords: [""],
@@ -467,24 +517,36 @@ const formData = reactive<FormData>({
     wechat_reg_type: 0,
     ocr_type: 1,
     add_remark_enable: 1,
-    remarks: getWechatRemarks.value || [],
+    remarks: [],
+    task_frep: 1,
+    custom_date: [],
+    time_config: ["", ""],
 });
 
-const { optionsData: deviceOptions } = useDictOptions<{
-    deviceLists: any[];
-    wechatLists: any[];
-}>({
-    deviceLists: {
-        api: getDeviceList,
-        params: { page_size: 1000 },
-        transformData: (data) => data.lists,
+const taskErrorMsg = ref("");
+
+const {
+    getWechatRemarks,
+    deviceOptions,
+    currentFrequency,
+    disabledDate,
+    handleFrequency,
+    isAddRemarkGen,
+    remarkPopupRef,
+    handleAddRemark,
+    handleAddRemarkConfirm,
+    handleEditRemark,
+    handleDeleteRemark,
+    checkTimeConfig,
+} = useCreateTask(formData);
+
+watch(
+    getWechatRemarks,
+    (val) => {
+        formData.remarks = [...(val || [])];
     },
-    wechatLists: {
-        api: getWeChatLists,
-        params: { page_size: 1000 },
-        transformData: (data) => data.lists,
-    },
-});
+    { immediate: true }
+);
 
 const crawlTypeOptions = [
     {
@@ -554,37 +616,6 @@ const handleAddPrivateChatSuccess = (content: string) => {
     formData.private_message_prompt = content;
 };
 
-const isAddRemarkGen = ref(false);
-const remarkPopupRef = shallowRef<InstanceType<typeof RemarkPop>>();
-const editRemarkIndex = ref(-1);
-
-const handleAddRemark = async () => {
-    isAddRemarkGen.value = true;
-    await nextTick();
-    remarkPopupRef.value?.open();
-};
-
-const handleAddRemarkConfirm = (remark: string) => {
-    if (editRemarkIndex.value == -1) {
-        formData.remarks.push(remark);
-    } else {
-        formData.remarks[editRemarkIndex.value] = remark;
-    }
-    editRemarkIndex.value = -1;
-    isAddRemarkGen.value = false;
-};
-
-const handleEditRemark = async (item: string, index: number) => {
-    isAddRemarkGen.value = true;
-    editRemarkIndex.value = index;
-    await nextTick();
-    remarkPopupRef.value?.open(item);
-};
-
-const handleDeleteRemark = (index: number) => {
-    formData.remarks.splice(index, 1);
-};
-
 const { lockFn, isLock } = useLockFn(async () => {
     if (!formData.name) {
         feedback.msgWarning("请输入任务名称");
@@ -598,8 +629,12 @@ const { lockFn, isLock } = useLockFn(async () => {
     } else if (formData.add_type == "1" && formData.wechat_id.length == 0) {
         feedback.msgWarning("请选择加微微信");
         return;
-    }
-    if (formData.add_remark_enable == 1 && formData.remarks.length == 0) {
+    } else if (currentFrequency.value == 5 && formData.custom_date.length == 0) {
+        feedback.msgWarning("请选择自定义日期");
+        return;
+    } else if (!checkTimeConfig()) {
+        return;
+    } else if (formData.add_remark_enable == 1 && formData.remarks.length == 0) {
         feedback.msgWarning("请输入加好友备注内容");
         return;
     }
@@ -607,11 +642,13 @@ const { lockFn, isLock } = useLockFn(async () => {
         await createTask({
             ...formData,
             keywords: formData.keywords.filter((item) => item),
+            time_config: [`${formData.time_config[0]}-${formData.time_config[1]}`],
             type: [AppTypeEnum.SPH],
         });
         feedback.msgSuccess("创建成功");
         emit("back");
     } catch (error: any) {
+        taskErrorMsg.value = error;
         feedback.msgError(error);
     }
 });

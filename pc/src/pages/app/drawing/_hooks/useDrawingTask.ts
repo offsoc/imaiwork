@@ -90,12 +90,7 @@ export default function useDrawingTask({
             if (drawType == "image") {
                 const res = await drawingImageStatus(params);
                 const { result } = res.result; // 直接解构 result
-                if (
-                    !result ||
-                    !result.sub_task_results ||
-                    result.sub_task_results.length === 0 ||
-                    !result.sub_task_ids
-                ) {
+                if (!result || !result.sub_task_results || result.sub_task_results.length === 0) {
                     console.warn("API 响应缺少 'result' 或 'sub_task_results'。", res);
                     // 根据预期行为，你可能希望抛出错误或返回 false。
                     // 返回 false 以便在出现间歇性问题时继续轮询。

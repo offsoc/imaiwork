@@ -198,7 +198,7 @@ class MessageLogic extends SvBaseLogic
 
         try {
             // 获取账号信息
-            $accountinfo = self::accountInfo($account);
+            $accountinfo = self::accountInfo($account, false, $type);
             if (is_bool($accountinfo)) {
                 return false;
             }

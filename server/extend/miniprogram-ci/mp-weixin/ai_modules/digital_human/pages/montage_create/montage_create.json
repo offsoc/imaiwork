@@ -11,8 +11,7 @@
     "z-paging": "../../../../node-modules/z-paging/components/z-paging/z-paging",
     "popup-bottom": "../../../../components/popup-bottom/popup-bottom",
     "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup",
-    "u-line-progress": "../../../../uni_modules/vk-uview-ui/components/u-line-progress/u-line-progress",
-    "recharge-popup": "../../../../components/recharge-popup/recharge-popup",
-    "video-preview": "../../components/video-preview/video-preview"
+    "upload-progress": "../../../../components/upload-progress/upload-progress",
+    "recharge-popup": "../../../../components/recharge-popup/recharge-popup"
   }
 }

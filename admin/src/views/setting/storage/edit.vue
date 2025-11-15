@@ -33,17 +33,24 @@
                     <el-form-item v-if="formData.engine == StorageEnum.QCLOUD" label="REGION" prop="region">
                         <el-input v-model="formData.region" placeholder="请输入region" clearable />
                     </el-form-item>
-                    <template v-if="formData.engine == StorageEnum.ALIYUN">
-                        <el-form-item label="PipelineId(管道ID)" prop="PipelineId">
-                            <el-input v-model="formData.PipelineId" placeholder="请输入PipelineId" clearable />
-                        </el-form-item>
-                        <el-form-item label="Location(位置)" prop="Location">
-                            <el-input v-model="formData.Location" placeholder="请输入Location" clearable />
-                        </el-form-item>
-                        <el-form-item label="TemplateId(模板ID)" prop="TemplateId">
-                            <el-input v-model="formData.TemplateId" placeholder="请输入TemplateId" clearable />
-                        </el-form-item>
-                    </template>
+                    <el-form-item
+                        label="PipelineId(管道ID)"
+                        prop="PipelineId"
+                        v-if="[StorageEnum.ALIYUN, StorageEnum.QINIU].includes(formData.engine)">
+                        <el-input v-model="formData.PipelineId" placeholder="请输入PipelineId" clearable />
+                    </el-form-item>
+                    <el-form-item
+                        label="Location(位置)"
+                        prop="Location"
+                        v-if="[StorageEnum.ALIYUN].includes(formData.engine)">
+                        <el-input v-model="formData.Location" placeholder="请输入Location" clearable />
+                    </el-form-item>
+                    <el-form-item
+                        label="TemplateId(模板ID)"
+                        prop="TemplateId"
+                        v-if="[StorageEnum.ALIYUN, StorageEnum.QCLOUD].includes(formData.engine)">
+                        <el-input v-model="formData.TemplateId" placeholder="请输入TemplateId" clearable />
+                    </el-form-item>
                 </div>
                 <el-form-item label="状态" prop="status">
                     <el-radio-group v-model="formData.status">
@@ -70,7 +77,7 @@ enum StorageEnum {
 const emit = defineEmits(["success"]);
 const formRef = shallowRef<FormInstance>();
 const popupRef = shallowRef<InstanceType<typeof Popup>>();
-const formData = reactive({
+const formData = reactive<any>({
     engine: "",
     bucket: "",
     access_key: "",

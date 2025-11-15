@@ -122,37 +122,34 @@
                 </view>
             </view>
             <view v-if="step === 3" class="h-full flex flex-col">
-                <view class="bg-white rounded-[16rpx] p-4 shadow-[0rpx_6rpx_12rpx_0_rgba(0,0,0,0.03)] mx-4">
-                    <view class="h-[300rpx] text-[#7C7E80]" @click="handleShowCopywriter">
-                        粘贴你的文案或者输入内容
+                <view class="flex items-center gap-x-2 px-4">
+                    <view
+                        class="flex-1 flex items-center justify-center gap-x-2 bg-white h-[100rpx] rounded-[10rpx]"
+                        @click="handleShowCopywriter">
+                        <image src="/static/images/icons/edit.svg" class="w-[32rpx] h-[32rpx]"></image>
+                        <text class="font-bold text-[32rpx]">手动输入</text>
                     </view>
-                    <view class="mt-[28rpx] flex justify-end">
-                        <view
-                            class="flex items-center gap-x-1 bg-[#F1F1F1] px-2 py-1 rounded-[8rpx]"
-                            @click="handleShowAI">
-                            <image
-                                src="@/ai_modules/digital_human/static/icons/star2.svg"
-                                class="w-[24rpx] h-[24rpx]"></image>
-                            <text class="text-xs">AI生成文案</text>
-                        </view>
-                    </view>
+                    <navigator
+                        url="/ai_modules/digital_human/pages/montage_ai_copywriter/montage_ai_copywriter"
+                        hover-class="none"
+                        class="flex-1 h-[100rpx] flex items-center justify-center gap-x-2 bg-black rounded-[10rpx]">
+                        <image src="/static/images/common/magic_white.png" class="w-[32rpx] h-[32rpx]"></image>
+                        <text class="text-white font-bold text-[32rpx]">AI生成</text>
+                    </navigator>
                 </view>
                 <view class="grow min-h-0 mt-4">
                     <scroll-view scroll-y class="h-full">
                         <view class="px-4 flex flex-col gap-4 pb-4">
-                            <view v-for="(item, index) in formData.copywriterList" :key="index" class="copywriter-item">
+                            <view
+                                v-for="(item, index) in formData.copywriterList"
+                                :key="index"
+                                class="copywriter-item"
+                                @click="handleSelectCopywriter(index)">
                                 <view class="text-[32rpx] font-bold mr-4">
-                                    <u-input
-                                        v-model="item.title"
-                                        placeholder-style="color: #7C7E80; "
-                                        maxlength="30"></u-input>
+                                    {{ item.title }}
                                 </view>
                                 <view class="mt-[28rpx]">
-                                    <u-input
-                                        v-model="item.content"
-                                        type="textarea"
-                                        placeholder-style="color: #7C7E80; "
-                                        maxlength="500"></u-input>
+                                    {{ item.content }}
                                 </view>
                                 <view
                                     class="absolute right-2 top-2 rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
@@ -368,16 +365,12 @@
             <view class="mt-[48rpx]">
                 <view class="flex items-center gap-x-1">
                     <text class="text-[#FF3C26]">*</text>
-                    <text
-                        >视频素材时长范围：{{ videoDuration[0] }}s-{{ videoDuration[1] }}s；{{
-                            videoSize / 1024 / 1024
-                        }}MB内</text
-                    >
+                    <text>视频素材时长范围：{{ videoDuration[0] }}s-{{ videoDuration[1] }}s；{{ videoSize }}MB内</text>
                 </view>
                 <view class="flex items-center gap-x-1 mt-[32rpx]">
                     <text class="text-[#FF3C26]">*</text>
                     <text
-                        >图片素材支持jpg、png格式；{{ imageSize / 1024 / 1024 }}MB内，分辨率不超过{{
+                        >图片素材支持{{ imageAccept.join("、") }}格式；{{ imageSize }}MB内，分辨率不超过{{
                             imageResolution[0]
                         }}*{{ imageResolution[1] }}</text
                     >
@@ -405,46 +398,7 @@
             </view>
         </view>
     </u-popup>
-    <u-popup v-model="showUploadProgress" mode="center" border-radius="24" width="90%" :mask-close-able="false">
-        <view class="bg-white rounded-[24rpx] p-[48rpx]">
-            <view class="font-bold text-center">上传进度</view>
-            <view class="mt-[48rpx]">
-                <view class="">
-                    <view class="flex items-center justify-between">
-                        <view>第{{ getTotalUploadProgress }}个素材上传中...</view>
-                        <view class="text-[#515357] font-bold text-[32rpx]"> {{ getCurrentUploadProgress }}% </view>
-                    </view>
-                    <view class="mt-[16rpx]">
-                        <u-line-progress
-                            :striped="true"
-                            :percent="getCurrentUploadProgress"
-                            :height="16"
-                            :striped-active="true"
-                            active-color="#0065FB"
-                            inactive-color="#CDE0FC"></u-line-progress>
-                    </view>
-                </view>
-                <view class="mt-[24rpx]">
-                    <view class="flex items-center justify-between">
-                        <view>总体进度</view>
-                        <view class="text-[#515357] font-bold text-[32rpx]">
-                            {{ getTotalUploadProgress }}/{{ uploadMaterialList.length }}
-                        </view>
-                    </view>
-                    <view class="mt-[16rpx]">
-                        <u-line-progress
-                            :striped="true"
-                            :percent="parseInt(((getTotalUploadProgress / uploadMaterialList.length) * 100).toFixed(2))"
-                            :height="16"
-                            :striped-active="true"
-                            active-color="#0065FB"
-                            inactive-color="#CDE0FC"></u-line-progress>
-                    </view>
-                </view>
-            </view>
-            <view class="text-center mt-[48rpx] text-[#9999997F] text-[26rpx]"> 请勿熄屏或切换应用 </view>
-        </view>
-    </u-popup>
+    <upload-progress v-model="showUploadProgress" :upload-list="uploadMaterialList" />
     <video-preview
         ref="videoPreviewRef"
         v-model:show="showVideoPreview"
@@ -555,7 +509,6 @@ import { getVideoTranscodeResult, uploadFile, videoTranscode } from "@/api/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { chooseFile } from "@/components/file-upload/choose-file";
 import { ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
-import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 import usePolling from "@/hooks/usePolling";
 
 const userStore = useUserStore();
@@ -596,14 +549,19 @@ const showHistory = ref(false);
 const isHistoryPerson = ref(false);
 const pagingHistoryRef = ref<any>(null);
 
+// 选中的文案索引
+const selectedCopywriterIndex = ref(-1);
+
 // 上传素材提示显示
 const showUploadTip = ref(false);
+// 图片上传格式
+const imageAccept = ["webp", "jpg", "png"];
 // 图片上传大小
-const imageSize = 20 * 1024 * 1024;
+const imageSize = 20;
 // 图片分辨率
 const imageResolution = [2000, 2000];
 // 视频上传大小
-const videoSize = 200 * 1024 * 1024;
+const videoSize = 200;
 // 视频时长
 const videoDuration = [1, 60];
 
@@ -611,7 +569,7 @@ const videoDuration = [1, 60];
 const uploadMaterialList = ref<any[]>([]);
 // 上传素材进度
 const showUploadProgress = ref(false);
-const videoPreviewRef = ref<InstanceType<typeof VideoPreview> | null>(null);
+const videoPreviewRef = shallowRef(null);
 const showVideoPreview = ref(false);
 // 视频预览数据
 const videoPreview = reactive({
@@ -647,27 +605,6 @@ const canStepProceed = (stepNumber: number) => {
 
 // 计算当前步骤是否可以点击“下一步”
 const canNext = computed(() => canStepProceed(step.value));
-
-// 获取当前上传进度
-const getCurrentUploadProgress = computed(() => {
-    // 如果没有上传列表，返回0
-    if (!uploadMaterialList.value.length) {
-        return 0;
-    }
-
-    // 获取当前正在上传的文件的进度
-    const currentFile = uploadMaterialList.value.find((item) => item.progress < 100);
-    // 如果都完成了，返回100，否则返回当前文件的进度
-    return currentFile ? currentFile.progress : 100;
-});
-
-// 获取总体进度
-const getTotalUploadProgress = computed(() => {
-    if (uploadMaterialList.value.every((item) => item.progress === 100)) {
-        return uploadMaterialList.value.length;
-    }
-    return (uploadMaterialList.value.findIndex((item) => item.progress !== 100) || 0) + 1;
-});
 
 const getTokenByScene = (key: string) => userStore.getTokenByScene(key);
 
@@ -773,15 +710,18 @@ const handleDeleteHistory = async (id: number) => {
     }
 };
 
-const handleShowAI = () => {
-    uni.$u.route({
-        url: "/ai_modules/digital_human/pages/montage_ai_copywriter/montage_ai_copywriter",
-    });
+const handleSelectCopywriter = (index: number) => {
+    selectedCopywriterIndex.value = index;
+    const selectedCopywriter = formData.copywriterList[index];
+    handleShowCopywriter(selectedCopywriter);
 };
 
-const handleShowCopywriter = () => {
+const handleShowCopywriter = (data?: any) => {
     uni.$u.route({
         url: "/ai_modules/digital_human/pages/montage_copywriter/montage_copywriter",
+        params: {
+            data: data ? JSON.stringify(data) : "",
+        },
     });
 };
 
@@ -844,14 +784,13 @@ const handleVideoTranscode = async (url: string) => {
  * @param fileType - 文件类型 'image' 或 'video'
  */
 const uploadAndProcessFiles = async (fileType: "image" | "video") => {
+    uploadMaterialList.value = [];
     try {
         const isImage = fileType === "image";
         const { tempFiles } = await chooseFile({
             type: fileType,
             count: 9,
             sourceType: ["album"],
-            sizeType: ["original"],
-            extension: isImage ? ["jpg", "png"] : [],
         });
 
         // 先过滤图片
@@ -868,12 +807,17 @@ const uploadAndProcessFiles = async (fileType: "image" | "video") => {
                     const { width, height } = await uni.getImageInfo({
                         src: file.tempFilePath,
                     });
+                    console.log('file.name.split(".").pop()', file.name.split(".").pop());
+                    if (!imageAccept.includes(file.name.split(".").pop())) {
+                        uni.$u.toast(`图片格式必须是${imageAccept.join("、")}`);
+                        continue;
+                    }
                     if (width > imageResolution[0] || height > imageResolution[1]) {
                         uni.$u.toast(`图片分辨率不能超过${imageResolution[0]}*${imageResolution[1]}`);
                         continue;
                     }
-                    if (file.size > imageSize) {
-                        uni.$u.toast(`图片大小不能超过${imageSize / 1024 / 1024}M`);
+                    if (file.size > imageSize * 1024 * 1024) {
+                        uni.$u.toast(`图片大小不能超过${imageSize}M`);
                         continue;
                     }
                     fileList.push(file);
@@ -886,8 +830,8 @@ const uploadAndProcessFiles = async (fileType: "image" | "video") => {
                     uni.$u.toast(`视频时长不能超过${videoDuration[1]}秒`);
                     continue;
                 }
-                if (file.size > videoSize) {
-                    uni.$u.toast(`视频大小不能超过${videoSize / 1024 / 1024}M`);
+                if (file.size > videoSize * 1024 * 1024) {
+                    uni.$u.toast(`视频大小不能超过${videoSize}M`);
                     continue;
                 }
                 fileList.push(file);
@@ -1080,7 +1024,7 @@ const getAnchorList = async () => {
 
 onLoad(() => {
     getAnchorList();
-    uni.$on("confirm-v2", (res: any) => {
+    uni.$on("confirm", (res: any) => {
         const { type, data } = res;
         if (type === ListenerTypeEnum.CHOOSE_MONTAGE_ANCHOR) {
             if (!data) return;

@@ -132,12 +132,16 @@ export enum TokensSceneEnum {
     SPH_OCR = "sph_ocr",
     SPH_LOCAL_OCR = "sph_local_ocr",
     SPH_AI_CLUE = "sph_search_terms",
+    KEYWORD_TO_COPYWRITING = "keyword_to_copywriting",
 }
 
 // 应用类型
 export enum AppTypeEnum {
-    REDBOOK = 3,
-    SPH = 4,
+    SPH = 1,
+    WECHAT = 1,
+    XHS = 3,
+    DOUYIN = 4,
+    KUAISHOU = 5,
 }
 
 // 设备指令类型
@@ -148,12 +152,28 @@ export enum DeviceCmdEnum {
     CHECK_INIT = "initCheck",
     // 初始化完成
     INIT_COMPLETE = "initComplete",
+    // 设备在线
+    DEVICE_ONLINE = "deviceOnline",
+    // 设备离线
+    DEVICE_OFFLINE = "deviceOffline",
     // 添加设备
     ADD_DEVICE = "addDevice",
     // 获取用户信息
     GET_USER_INFO = "getUserInfo",
     // 获取名片
     GET_BUSINESS_CARD = "getCards",
+    // 处理指令
+    APP_EXEC = "appExec",
+    // 打开app
+    OPEN_APP = "appOpen",
+    // 打开个人中心
+    OPEN_PERSON_CENTER = "appPersonalCenter",
+    // 获取账号信息
+    GET_ACCOUNT_INFO = "appInfo",
+    // 数据发送
+    DATA_SEND = "appDataSend",
+    // 获取账号信息完成
+    GET_ACCOUNT_INFO_COMPLETE = "appCompleted",
 }
 
 // 设备指令返回码
@@ -177,7 +197,9 @@ export enum DeviceCmdCodeEnum {
     // 无效请求
     INVALID_REQUEST = 4004,
     // 设备已断开，请重新启动设备
-    DEVICE_DISCONNECTED = 4005,
+    DEVICE_OFFLINE = 4005,
+    // 设备已上线
+    DEVICE_ONLINE = 2006,
     // 获取卡片错误
     GET_CARD_ERROR = 4006,
     // 缺少用户信息
@@ -198,7 +220,7 @@ export enum DeviceCmdCodeEnum {
 export const DeviceWsMessage = {
     [DeviceCmdCodeEnum.CONNECT_ERROR]: "连接失败，请检查网络连接",
     [DeviceCmdCodeEnum.PUSH_MESSAGE_ERROR]: "推送消息异常，请检查网络连接",
-    [DeviceCmdCodeEnum.DEVICE_DISCONNECTED]: "设备已断开，请重新启动设备",
+    [DeviceCmdCodeEnum.DEVICE_OFFLINE]: "设备已断开，请重新启动设备",
     [DeviceCmdCodeEnum.PARSE_ERROR]: "消息解析失败",
     [DeviceCmdCodeEnum.API_ERROR]: "接口异常",
     [DeviceCmdCodeEnum.INVALID_REQUEST]: "无效请求",
@@ -240,6 +262,7 @@ export enum AppKeyEnum {
     DRAW_FASHION = "draw_fashion",
     DRAW_VIDEO = "draw_video",
     DRAW_IMAGE = "draw_image",
+    MATRIX = "matrix",
 }
 
 export const appKeyNameMap: Record<AppKeyEnum, string> = {
@@ -271,6 +294,7 @@ export const appKeyNameMap: Record<AppKeyEnum, string> = {
     [AppKeyEnum.DRAW_FASHION]: "AI服饰图",
     [AppKeyEnum.DRAW_VIDEO]: "AI视频",
     [AppKeyEnum.DRAW_IMAGE]: "AI智能生图",
+    [AppKeyEnum.MATRIX]: "矩阵发布",
 };
 
 // 模型ID

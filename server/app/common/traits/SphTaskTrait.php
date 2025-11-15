@@ -14,6 +14,10 @@ use app\api\logic\service\TokenLogService;
 use app\common\logic\AccountLogLogic;
 use app\common\model\user\User;
 use app\common\model\sv\SvDeviceRpa;
+use app\common\model\sv\SvDeviceTask;
+use app\common\enum\DeviceEnum;
+
+
 
 use Predis\Client as redisClient;
 use think\cache\driver\Redis;
@@ -70,6 +74,33 @@ trait SphTaskTrait
                     throw new \Exception($msg);
                 }
 
+
+
+
+            // self::sendAppExec($row, 1);
+            // usleep(200 * 1000); //200毫秒
+            $task = [
+                'id' => $row['id'],
+                'task_id' => $task_id,
+                'platform' => self::getPlatform((int)$row['type']),
+                'device_code' => $row['device_code'],
+                'keywords' => json_decode($row['keywords'], true),
+                'exec_number' => 10000,
+                'is_chat' => $row['chat_type'],
+                'chat_number' => $row['chat_number'],
+                'chat_interval_time' => $row['chat_interval_time'],
+                'add_type' => $row['add_type'],
+                'remarks' => json_decode($row['remarks'], true),
+                'add_remark_enable' => $row['add_remark_enable'] ?? 0,
+                'add_number' => $row['add_number'],
+                'add_interval_time' => $row['add_interval_time'],
+                'greeting_content' => $row['greeting_content'],
+                //'greeting_content' => self::createGreetingContents($row, $row['user_id']),
+                'status' => 0,
+                'ocr_type' => $row['ocr_type'],
+                'crawl_type' => $row['crawl_type'],
+                'create_time' => $row['create_time'],
+            ];
                 self::sendAppExec($row, 4);
                 usleep(200 * 1000); //200毫秒
                 $task = [
@@ -94,6 +125,16 @@ trait SphTaskTrait
                     'crawl_type' => $row['crawl_type'],
                     'create_time' => $row['create_time'],
                 ];
+
+            $data = array(
+                'type' => 20,
+                'appType' => 1,
+                'content' => json_encode($task, JSON_UNESCAPED_UNICODE),
+                'deviceId' => $row['device_code'],
+                'appVersion' => '2.1.1',
+                'messageId' => 0,
+            );
+            self::setLog($data);
 
                 $data = array(
                     'type' => 20,
@@ -126,9 +167,95 @@ trait SphTaskTrait
         }
     }
 
-    private static function sendAppExec($row, $appType)
+
+    public static function sphCronSend(SvDeviceTask $dtask): void
     {
-        $app = SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', $appType)->findOrEmpty();
+        $task = SvCrawlingTask::where('id', $dtask->sub_task_id)->findOrEmpty();
+        if ($task->isEmpty()) {
+            throw new \Exception('任务不存在');
+        }
+
+        $find = SvCrawlingTask::alias('ct')
+            ->field('*')
+            ->join('sv_crawling_task_device_bind b', 'ct.id = b.task_id and b.exec_keyword = ""')
+            ->where('ct.id', $task->id)
+            ->where('b.device_code', $dtask->device_code)
+            ->where('ct.status', 'in', [0, 1])
+            ->fetchSql(false)
+            ->findOrEmpty();
+        if ($find->isEmpty()) {
+            throw new \Exception('暂时没有需要执行的设备');
+        }
+        ChannelClient::connect('127.0.0.1', 2206);
+        $_deviceTaskStatus = self::redis()->get("xhs:device:{$find->device_code}:taskStatus");
+        if (!empty($_deviceTaskStatus)) {
+            $deviceTaskStatus = json_decode(($_deviceTaskStatus), true);
+            if (is_null($deviceTaskStatus)) {
+                $deviceTaskStatus = json_decode(unserialize($_deviceTaskStatus), true);
+            }
+            if (is_array($deviceTaskStatus) && $deviceTaskStatus['taskStatus'] == 'running') {
+                $datetime = date('Y-m-d H:i:s', strtotime($deviceTaskStatus['time']) + (int)$deviceTaskStatus['duration']);
+                $msg = "设备正在执行小红书任务，请在【{$datetime}】秒后重试";
+                $time = strtotime($deviceTaskStatus['time']) + (int)$deviceTaskStatus['duration'];
+                if (time() < $time) {
+                    throw new \Exception($msg);
+                }
+            }
+        }
+            // self::sendAppExec($find, 1);
+            // usleep(200 * 1000); //200毫秒
+            $task = [
+                'id' => $find['id'],
+                'task_id' => $task->id,
+                'platform' => self::getPlatform((int)$find['type']),
+                'device_code' => $find['device_code'],
+                'keywords' => json_decode($find['keywords'], true),
+                'exec_number' => 10000,
+                'is_chat' => $find['chat_type'],
+                'chat_number' => $find['chat_number'],
+                'chat_interval_time' => $find['chat_interval_time'],
+                'add_type' => $find['add_type'],
+                'remarks' => json_decode($find['remarks'], true),
+                'add_remark_enable' => $find['add_remark_enable'] ?? 0,
+                'add_number' => $find['add_number'],
+                'add_interval_time' => $find['add_interval_time'],
+                'greeting_content' => $find['greeting_content'],
+                //'greeting_content' => self::createGreetingContents($row, $row['user_id']),
+                'status' => 0,
+                'ocr_type' => $find['ocr_type'],
+                'crawl_type' => $find['crawl_type'],
+                'create_time' => $find['create_time'],
+            ];
+
+            $data = array(
+                'type' => 20,
+                'appType' => 1,
+                'content' => json_encode($task, JSON_UNESCAPED_UNICODE),
+                'deviceId' => $find['device_code'],
+                'appVersion' => '2.1.1',
+                'messageId' => 0,
+            );
+            self::setLog($data);
+
+            $channel = "device.{$find['device_code']}.message";
+            ChannelClient::publish($channel, [
+                'data' => json_encode($data)
+            ]);
+            //SvCrawlingTaskDeviceBind::where('task_id', $task_id)->where('device_code', $row['device_code'])->update(['status' => 0, 'update_time' => time()]);
+
+            self::redis()->set("xhs:device:{$find['device_code']}:taskStatus", json_encode([
+                'taskStatus' => 'standby',
+                'taskType' => 'setSph',
+                'msg' => '执行视频号',
+                'duration' => 0,
+                'time' => date('Y-m-d H:i:s', time()),
+                'scene' => 'sph'
+            ], JSON_UNESCAPED_UNICODE));
+    }
+
+    private static function sendAppExec($find, $appType)
+    {
+        $app = SvDeviceRpa::where('device_code', $find['device_code'])->where('app_type', $appType)->findOrEmpty();
         if ($app->isEmpty()) {
             throw new \Exception('当前设备未绑定app');
         }
@@ -137,22 +264,22 @@ trait SphTaskTrait
             "type" => 90, //执行那个app指令
             "appType" => $appType,
             "content" => json_encode([
-                "deviceId" => $row['device_code'],
+                "deviceId" => $find['device_code'],
                 "appType" => $appType,
                 'msg' => '视频号',
                 'task_id' => $app->id
             ], JSON_UNESCAPED_UNICODE),
-            "deviceId" => $row['device_code'],
+            "deviceId" => $find['device_code'],
             "appVersion" => "2.1.2"
         ];
 
-        $channel = "device.{$row['device_code']}.message";
+        $channel = "device.{$find['device_code']}.message";
         ChannelClient::publish($channel, [
             'data' => json_encode($payload)
         ]);
 
-        SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', '<>', $appType)->update(['status' => 0, 'update_time' => time()]);
-        SvDeviceRpa::where('device_code', $row['device_code'])->where('app_type', $appType)->update([
+        SvDeviceRpa::where('device_code', $find['device_code'])->where('app_type', '<>', $appType)->update(['status' => 0, 'update_time' => time()]);
+        SvDeviceRpa::where('device_code', $find['device_code'])->where('app_type', $appType)->update([
             'status' => 1,
             'update_time' => time(),
             'start_time' => date('Y-m-d H:i:s', time()),
@@ -173,7 +300,7 @@ trait SphTaskTrait
         foreach ($deviceIds as $_deviceId) {
             $data = array(
                 'type' => 22,
-                'appType' => 4,
+                'appType' => 1,
                 'content' => json_encode(array(
                     'task_id' => $task_id,
                     'deviceId' => $_deviceId,
@@ -206,7 +333,7 @@ trait SphTaskTrait
         foreach ($deviceIds as $_deviceId) {
             $data = array(
                 'type' => 23,
-                'appType' => 4,
+                'appType' => 1,
                 'content' => json_encode(array(
                     'task_id' => $task_id,
                     'deviceId' => $_deviceId,
@@ -239,7 +366,7 @@ trait SphTaskTrait
         foreach ($deviceIds as $_deviceId) {
             $data = array(
                 'type' => 24,
-                'appType' => 4,
+                'appType' => 1,
                 'content' => json_encode(array(
                     'task_id' => $task_id,
                     'deviceId' => $_deviceId,
@@ -256,18 +383,16 @@ trait SphTaskTrait
                 'data' => json_encode($data)
             ]);
             SvCrawlingTaskDeviceBind::where('task_id', $task_id)->where('device_code', $_deviceId)->select()->delete();
+            SvDeviceTask::where('sub_task_id', $task_id)->where('device_code', $_deviceId)->where('task_type', 4)->select()->delete();
         }
+
         $find->delete();
     }
 
     private static function getPlatform(int $type): string
     {
-        $maps = array(
-            3 => '小红书',
-            4 => '视频号',
 
-        );
-        return $maps[$type] ?? '视频号';
+        return DeviceEnum::getAccountTypeDesc($type);
     }
 
     private static function createGreetingContents(array $task, int $user_id): array

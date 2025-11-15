@@ -14,6 +14,8 @@ use app\common\model\interview\InterviewJob;
 use app\common\model\interview\InterviewRecord;
 use app\common\model\ModelConfig;
 use app\common\model\user\User;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use PhpOffice\PhpWord\IOFactory;
 use think\Exception;
 use think\facade\Db;
@@ -22,7 +24,6 @@ use think\facade\Queue;
 
 class InterviewLogic extends BaseLogic
 {
-
     /**
      * @desc 我的岗位
      * @param array $params
@@ -429,7 +430,7 @@ class InterviewLogic extends BaseLogic
                 return true;
             }
 
-            throw new \Exception('数据错误');
+            throw new \Exception('本轮面试已结束');
         } catch (\Exception $e) {
             Db::rollback(); // 回滚事务
             throw new Exception($e->getMessage());
@@ -504,14 +505,24 @@ class InterviewLogic extends BaseLogic
         $attentionArray = json_decode($job->attention, true);
         $attentionCount = count($attentionArray);   // 关注点个数
 
-
         // 检测是否已结束
         $chatTypeEnd = self::chatType($dialogCount + 1, $attentionCount);
 
+        // coze工作流判断是否结束
+        if ($chatTypeEnd != 0){
+            $body = ['input'=>$curDialog->answer];
+            $res = self::request($body);
+            if ($res){
+                $chatTypeEnd = 0;
+            }
+        }
+
         if ($chatTypeEnd == 0)
         {
+            log::error('面试分析');
             // 访问通义获取评分和面试评价
-            Queue::push('app\common\Jobs\EndInterviewJob@handle',  $interview->id);
+            $res = Queue::push('app\common\Jobs\EndInterviewJob@handle',  $interview->id);
+            log::error('面试分析'.$res);
 
             $interview->end_time = time();
             $interview->status = Interview::STATUS_ANALYZE;
@@ -1114,5 +1125,41 @@ HR关注点：应急处理能力
         ]);
 
         return $interview;
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    private static function request($params): bool
+    {
+        $interviewService = \app\common\service\ToolsService::Interview();
+        $url              = $interviewService::URL;
+        $workflow_id      = $interviewService::WORKFLOW_ID;
+        $body             = [
+            'workflow_id' => $workflow_id,
+            'parameters'  => $params,
+        ];
+        $request          = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $interviewService::TOKEN,
+                'Content-Type'  => 'application/json',
+            ],
+            'json'    => $body
+        ];
+        $client           = new Client(['timeout' => 6000, 'verify' => false]);
+        $rsp              = $client->post($url, $request);
+        $contents         = $rsp->getBody()->getContents();
+        $data             = json_decode($contents, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return false;
+        }
+        if (($data['code'] ?? -1) !== 0) {
+            return false;
+        }
+        $data['data'] = json_decode($data['data'], true);
+        if ($data['data']['continue'] == 1) {
+            return true;
+        }
+        return false;
     }
 }

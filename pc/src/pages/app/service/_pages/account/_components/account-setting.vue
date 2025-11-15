@@ -21,7 +21,7 @@
             </div>
             <div class="grow min-h-0 mt-4">
                 <BaseSetting v-if="activeTab === 'base-setting'"></BaseSetting>
-                <PublishSetting v-if="activeTab === 'publish-setting'"></PublishSetting>
+                <!-- <PublishSetting v-if="activeTab === 'publish-setting'"></PublishSetting> -->
                 <AutoAddWechatSetting v-if="activeTab === 'auto-add-wechat'"></AutoAddWechatSetting>
             </div>
         </div>
@@ -43,11 +43,11 @@ const tabs = [
         name: "base-setting",
         icon: "local-icon-setting",
     },
-    {
-        label: "名片推送设置",
-        name: "publish-setting",
-        icon: "local-icon-id_card",
-    },
+    // {
+    //     label: "名片推送设置",
+    //     name: "publish-setting",
+    //     icon: "local-icon-id_card",
+    // },
     {
         label: "自动加微信设置",
         name: "auto-add-wechat",

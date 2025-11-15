@@ -28,7 +28,7 @@ class ConfigLogic
         $hdList = ConfigService::get('hd', 'list', []);
         $default = ConfigService::get('storage', 'default', 'local');
         $storage = ConfigService::get('storage', $default);
-        $ossDomain = $storage ?  $storage['domain'].'/' : (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://'.$_SERVER['HTTP_HOST'].'/' : 'http://'.$_SERVER['HTTP_HOST']).'/';
+        $ossDomain = $storage ?  $storage['domain'].'/' : (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://'.$_SERVER['HTTP_HOST'] : 'http://'.$_SERVER['HTTP_HOST']).'/';
         $chatModels = ConfigService::get('chat', 'ai_model', []);
         foreach ($chatModels['channel'] as $key=>$value){
             $chatModels['channel'][$key]['logo'] = isset($value['logo']) ? FileService::getFileUrl($value['logo']) : '';

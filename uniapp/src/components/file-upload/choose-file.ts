@@ -47,7 +47,11 @@ function chooseImage(opts: ChooseMediaOption) {
                 };
                 resolve(normalizeFileRes(normalizedRes, "image"));
             },
-            fail(res) {
+            fail(res: any) {
+                if (res?.errno === 112) {
+                    uni.$u.toast("请到对应小程序后台完善用户隐私保护指引");
+                    return;
+                }
                 reject({
                     errMsg: res.errMsg.replace("chooseImage:fail", ERR_MSG_FAIL),
                 });
@@ -69,7 +73,10 @@ function chooseVideo(opts: ChooseMediaOption) {
             success(res) {
                 resolve(normalizeFileRes(res as ChooseResult, "video"));
             },
-            fail(res) {
+            fail(res: any) {
+                if (res?.errno === 112) {
+                    uni.$u.toast("请到对应小程序后台完善用户隐私保护指引");
+                }
                 reject({
                     errMsg: res.errMsg.replace("chooseVideo:fail", ERR_MSG_FAIL),
                 });
@@ -99,7 +106,7 @@ function chooseAll(opts: ChooseFileOptions) {
             },
             fail(res) {
                 if (res.errno == 112) {
-                    uni.$u.toast("请到微信小程序后台完善用户隐私保护指引");
+                    uni.$u.toast("请到对应小程序后台完善用户隐私保护指引");
                 }
                 reject({
                     errMsg: res.errMsg.replace("chooseFile:fail", ERR_MSG_FAIL),
@@ -117,8 +124,11 @@ function normalizeFileRes(res: ChooseResult, fileType?: BaseOptions["type"]) {
         if (fileType) {
             item.fileType = fileType;
         }
+        if (!item.tempFilePath) {
+            item.tempFilePath = item.path;
+        }
     });
-    if (!res.tempFilePaths) {
+    if (!res.tempFilePaths || res.tempFilePaths.length === 0) {
         res.tempFilePaths = res.tempFiles.map((file) => file.tempFilePath);
     }
     return res;

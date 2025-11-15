@@ -68,7 +68,7 @@ import MenuRecordIcon from "@/ai_modules/digital_human/static/images/home/menu_r
 import MenuImgTxtIcon from "@/ai_modules/digital_human/static/images/home/menu_img_txt.svg";
 import MenuMaterialIcon from "@/ai_modules/digital_human/static/images/home/menu_material.svg";
 import MenuCopyWriteIcon from "@/ai_modules/digital_human/static/images/home/menu_copywriter.svg";
-import { ModeTypeEnum } from "@/ai_modules/digital_human/enums";
+import { ModeTypeEnum, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
 import ChooseModel from "@/ai_modules/digital_human/components/choose-model/choose-model.vue";
 
 const appStore = useAppStore();
@@ -163,7 +163,9 @@ const handleChooseModel = (id: string) => {
 const handleMenuClick = (key: string) => {
     switch (key) {
         case "anchor_clone":
-            showChooseModel.value = true;
+            uni.$u.route({
+                url: `/ai_modules/digital_human/pages/video_upload/video_upload?type=${ModeTypeEnum.ANCHOR}&model_version=${DigitalHumanModelVersionEnum.CHANJING}`,
+            });
             break;
         case "tone_clone":
             uni.$u.route({

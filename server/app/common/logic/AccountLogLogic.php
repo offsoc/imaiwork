@@ -94,7 +94,6 @@ class AccountLogLogic extends BaseLogic
     public static function recordUserTokensLog(bool $success, int $userId, int $changeType, float $tokens, $source_sn = '', $extra = []): void
     {
         $remark = AccountLogEnum::getChangeTypeDesc($changeType);
-
         //运行失败。token恢复
         if (!$success) {
             $remark = str_replace('减少算力', '请求失败恢复算力', $remark);

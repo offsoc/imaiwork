@@ -4,9 +4,9 @@
 namespace app\api\controller\wechat;
 
 use app\api\controller\BaseApiController;
-use app\api\logic\wechat\TagLogic;
-use app\api\lists\wechat\TagLists;
 use app\api\lists\wechat\TagFriendLists;
+use app\api\lists\wechat\TagLists;
+use app\api\logic\wechat\TagLogic;
 
 /**
  * TagController
@@ -42,13 +42,14 @@ class TagController extends BaseApiController
     {
         $tagIds = $this->request->post('tag_ids', []);
         $friendIds = $this->request->post('friend_ids', []);
+        $wechatId = $this->request->post('wechat_id','');
 
         if (empty($friendIds))
         {
             return $this->fail('好友ID集合不能为空');
         }
 
-        $result = TagLogic::tagFriends($tagIds, $friendIds);
+        $result = TagLogic::tagFriends($tagIds, $friendIds, $wechatId);
         if ($result)
         {
             return $this->success(data: TagLogic::getReturnData());

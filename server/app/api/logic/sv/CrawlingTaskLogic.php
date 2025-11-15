@@ -2,6 +2,7 @@
 
 namespace app\api\logic\sv;
 
+use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvCrawlingRecord;
 use app\common\model\sv\SvCrawlingTask;
 use app\common\model\sv\SvCrawlingTaskDeviceBind;
@@ -18,6 +19,8 @@ use app\common\model\sv\SvDevice;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatLog;
 use app\common\model\ChatPrompt;
+use app\common\enum\DeviceEnum;
+use app\common\model\sv\SvDeviceTask;
 
 /**
  * CrawlingTaskLogic
@@ -48,9 +51,9 @@ class CrawlingTaskLogic extends SvBaseLogic
             $params['implementation_keywords_number'] = $keywordCount;
             $params['keywords'] = json_encode($params['keywords'], JSON_UNESCAPED_UNICODE);
             $params['device_codes'] = json_encode(array_values($device_codes), JSON_UNESCAPED_UNICODE);
-            //$params['name'] = date('mdHis', time()) . '视频号获客任务';
-            $params['status'] = 1;
-            $params['type'] = 4;
+            $params['name'] =  $params['name'] ?? '视频号获客任务' . date('mdHis', time()) ;
+            $params['status'] = 0;
+            $params['type'] = 1;
             $params['ocr_type'] = $params['ocr_type'] ?? 1;
 
             if (isset($params['wechat_id']) && is_string($params['wechat_id'])) {
@@ -69,24 +72,55 @@ class CrawlingTaskLogic extends SvBaseLogic
             }
             $params['remarks'] = json_encode($params['remarks'], JSON_UNESCAPED_UNICODE);
 
-            $task = SvCrawlingTask::create($params);
-            //将关键词平均分配给设备
-            $devices = CrawlingTaskLogic::distributeKeywords($keywords, $device_codes, $keywordCount, $deviceCount);
-            $arr = [];
-            foreach ($devices as $device => $val) {
-                $arr[] = [
-                    'user_id'     => self::$uid,
-                    'task_id'     => $task->id,
-                    'device_code' => $device,
-                    'keywords'    => json_encode($val, JSON_UNESCAPED_UNICODE),
-                    'create_time' => time(),
-                    'update_time' => time(),
-                    'status'      => 1,
-
-                ];
+            if (!isset($params['time_config']) || empty($params['time_config'])) {
+                throw new \Exception('请配置任务执行时间区间');
             }
-            if (!empty($arr)) {
-                $bindResult = SvCrawlingTaskDeviceBind::insertAll($arr);
+
+            $devices = CrawlingTaskLogic::distributeKeywords($keywords, $device_codes, $keywordCount, $deviceCount);
+            $times = \app\api\logic\device\TaskLogic::getTimes($params['time_config'], date('Y-m-d', time()), $params['task_frep'], $params['custom_date']);
+            $arrDeviceData = [];
+            $allTaskInstall = [];
+            $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
+            foreach ($times as $key => $time) {
+                $params['start_time'] = $time['start_time'];
+                $params['end_time'] = $time['end_time'];
+                $task = SvCrawlingTask::create($params);
+                //将关键词平均分配给设备
+                foreach ($devices as $device => $val) {
+                    list($isOverlap, $lap) = \app\api\logic\device\TaskLogic::isTaskTimeOverlapping($device, DeviceEnum::TASK_TYPE_ACTIVE, $time['start_time'], $time['end_time'], self::$uid);
+                    if (!$isOverlap) {
+                        $timeMsg = "【" . date('Y-m-d H:i', $lap['start_time']) . "-" . date('Y-m-d H:i', $lap['end_time']) . "】";
+                        $msg = "您在{$timeMsg}的【" . DeviceEnum::getAccountTypeDesc($lap['account_type']) . DeviceEnum::getTaskTypeDesc($lap['task_type'])  . "】与当前所选时间冲突";
+                        throw new \Exception($msg);
+                    }
+                    $arrDeviceData[] = [
+                        'user_id'     => self::$uid,
+                        'task_id'     => $task->id,
+                        'device_code' => $device,
+                        'keywords'    => json_encode($val, JSON_UNESCAPED_UNICODE),
+                        'create_time' => time(),
+                        'update_time' => time(),
+                        'status'      => 1,
+                    ];
+                    array_push($allTaskInstall, [
+                        'user_id' => self::$uid,
+                        'device_code' => $device,
+                        'task_type' => DeviceEnum::TASK_TYPE_CLUES,
+                        'account' => self::getSphAccount($device),
+                        'account_type' => 1,
+                        'task_name' => '视频号自动获客任务',
+                        'status' => 0,
+                        'day' => date('Y-m-d',$task->start_time),
+                        'start_time' => $task->start_time,
+                        'end_time' => $task->end_time,
+                        'sub_task_id' => $task->id,
+                        'source' => DeviceEnum::TASK_SOURCE_CLUES,//sv_crawling_task
+                        'create_time' => time(),
+                    ]);
+                }
+            }
+            if (!empty($arrDeviceData)) {
+                $bindResult = SvCrawlingTaskDeviceBind::insertAll($arrDeviceData);
                 if (!$bindResult) {
                     throw new \Exception('设备任务绑定失败');
                 }
@@ -97,7 +131,10 @@ class CrawlingTaskLogic extends SvBaseLogic
             $result['keywords'] = json_decode($result['keywords'], JSON_UNESCAPED_UNICODE);
 
             self::setOldTaskStatus($task->id);
-            self::sphSend($task->id);
+
+            \app\api\logic\device\TaskLogic::add($allTaskInstall);
+
+            //self::sphSend($task->id);
             Db::commit();
             self::$returnData = $result;
             return true;
@@ -112,8 +149,25 @@ class CrawlingTaskLogic extends SvBaseLogic
     {
         SvCrawlingTask::where('id', '<', $task_id)->where('status', 'in', [0, 1, 2])->where('user_id', self::$uid)->update(['status' => 3, 'update_time' => time()]);
         SvCrawlingTaskDeviceBind::where('task_id', '<', $task_id)->where('status', 'in', [0, 1, 2])->where('user_id', self::$uid)->update(['status' => 3, 'update_time' => time()]);
+        SvDeviceTask::where('sub_task_id', '<', $task_id)
+            ->where('task_type', DeviceEnum::TASK_TYPE_CLUES)
+            ->where('status', 'in', [0, 1])
+            ->where('user_id', self::$uid)
+            ->update(['status' => 4, 'update_time' => time()]);
     }
 
+    private static function getSphAccount(string $device_code)
+    {
+        $find = AiWechat::where('device_code', '=', function($query) use ($device_code){
+            $query->name('sv_device')->where('device_code', $device_code)->field('wechat_device_code');
+        })->where('user_id', self::$uid)->findOrEmpty();
+        if( !$find->isEmpty()){
+            return $find->wechat_id ;
+        }
+
+         $find = SvAccount::where('device_code',  $device_code)->where('type',1)->where('user_id', self::$uid)->findOrEmpty();
+        return $find->isEmpty() ? '' : $find->account;
+    }
     /**
      * 获取爬取任务详情
      */
@@ -137,6 +191,54 @@ class CrawlingTaskLogic extends SvBaseLogic
             return false;
         }
     }
+    public static function subtasks(array $params)
+    {
+        try {
+            $task = SvCrawlingTask::where('id', $params['id'])->where('user_id', self::$uid)->findOrEmpty()->toArray();
+            if (!$task) {
+                self::setError('爬取任务不存在');
+                return false;
+            }
+             $info= $task;
+            $bind = SvCrawlingTaskDeviceBind::where('task_id', $params['id'])->where('device_code', $params['device_code'])->findOrEmpty()->toArray();
+            if (!$bind) {
+                self::setError('子任务不存在');
+                return false;
+            }
+            if ($info['type'] == 1){
+                $where = [
+                    'sd.device_code'=> $params['device_code'],
+                ];
+                $info['account_info'] = SvDevice::alias('sd')->field('ai.*,sd.wechat_device_code,sd.device_name,sd.device_model')->where($where)
+                    ->join('ai_wechat ai', 'ai.device_code = sd.wechat_device_code', 'LEFT')
+                    ->findOrEmpty()->toArray();
+                $info['device_info'] = [
+                    'device_name' => $info['account_info']['device_name'] ?? '',
+                    'device_model' => $info['account_info']['device_model'] ?? '',
+                ];
+            }else{
+                $where = [
+                    'device_code'=> $info['device_code'],
+                    'account' => $info['account']
+                ];
+                $info['account_info'] = SvAccount::where($where)->findOrEmpty()->toArray();
+                $info['device_info'] =  SvDevice::where('device_code', $params['device_code'])->field('sd.device_name,sd.device_model')->findOrEmpty()->toArray();
+
+            }
+            $info['task_name'] = $params['task_name'];
+            $info['task_category'] = $params['task_category'];
+            $bind['keywords'] = json_decode($bind['keywords'], JSON_UNESCAPED_UNICODE);
+            $info['start_time'] = date('H:i',$info['start_time']);
+            $info['end_time'] = date('H:i',$info['end_time']);
+            $info['info'] = $bind;
+            self::$returnData = $info;
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * 更新爬取任务
@@ -313,6 +415,7 @@ class CrawlingTaskLogic extends SvBaseLogic
     public static function ocr(array $params = [])
     {
         try {
+            \think\facade\Log::channel('device')->write("ocr " . json_encode($params, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
             $find = SvDevice::where('device_code', $params['device_code'])->findOrEmpty();
             if ($find->isEmpty()) {
                 self::setError('设备不存在');
@@ -358,6 +461,7 @@ class CrawlingTaskLogic extends SvBaseLogic
     public static function localOcr(array $params = [])
     {
         try {
+            \think\facade\Log::channel('device')->write("localOcr " . json_encode($params, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
             $find = SvDevice::where('device_code', $params['device_code'])->findOrEmpty();
             if ($find->isEmpty()) {
                 self::setError('设备不存在');
@@ -449,26 +553,40 @@ class CrawlingTaskLogic extends SvBaseLogic
         try {
             $records = SvAddWechatRecord::alias('r')
                 ->field('r.*, t.add_number, t.add_interval_time, t.add_friends_prompt, t.add_remark_enable, t.remarks, t.wechat_id, t.wechat_reg_type')
-                ->join('sv_crawling_task t', 'r.crawling_task_id = t.id')
+                ->join('sv_crawling_task t', 'r.crawling_task_id = t.id and t.delete_time is null')
                 ->where('t.add_type', 1)
-                ->where('r.channel', 4)
+                ->where('r.channel', 1)
                 ->where('r.status', 'in', [3, 4, 5])
                 ->where('t.wechat_id', 'not in', ['', null]) // 过滤掉wechat_id为空的记录
-                ->where('t.status', 'in', [1, 2]) // 过滤掉已完成、已暂停、已删除的任务
+                //->where('t.status', 'in', [1, 2]) // 过滤掉已完成、已暂停、已删除的任务
                 ->whereRaw('t.exec_add_count > t.completed_add_count') // 过滤掉已执行加微次数大于等于注册类型的记录
                 ->limit(100)
-                ->order('r.create_time', 'asc')
+                ->order('r.id', 'desc')
                 ->select()
                 ->toArray();
-            //print_r(Db::getLastSql());die;
+
+            // $records = SvCrawlingTask::alias('t')
+            //     ->field('r.*, t.add_number, t.add_interval_time, t.add_friends_prompt, t.add_remark_enable, t.remarks, t.wechat_id, t.wechat_reg_type')
+            //     ->join('sv_add_wechat_record r', 'r.crawling_task_id = t.id')
+            //     ->where('t.add_type', 1)
+            //     ->where('r.channel', 4)
+            //     ->where('r.status', 'in', [3, 4, 5])
+            //     ->where('t.wechat_id', 'not in', ['', null]) // 过滤掉wechat_id为空的记录
+            //     ->where('t.status', 'in', [1, 2]) // 过滤掉已完成、已暂停、已删除的任务
+            //     ->whereRaw('t.exec_add_count > t.completed_add_count') // 过滤掉已执行加微次数大于等于注册类型的记录
+            //     ->limit(100)
+            //     ->order('r.create_time', 'asc')
+            //     ->select()
+            //     ->toArray();
             if (empty($records)) {
-                //self::setLog('线索加微记录不存在', 'add_wechat');
+                self::setLog(Db::getLastSql(), 'add_wechat');
                 return false;
             }
             //print_r(Db::getLastSql());die;
             foreach ($records as $record) {
                 $task = SvCrawlingTask::where('id', $record['crawling_task_id'])->findOrEmpty();
                 if ($task->isEmpty()) {
+                    self::setLog(Db::getLastSql(), 'add_wechat');
                     self::setLog('线索任务不存在', 'add_wechat');
                     continue;
                 }
@@ -550,7 +668,7 @@ class CrawlingTaskLogic extends SvBaseLogic
                 foreach ($wechat_ids as $wechat_id) {
                     //计算微信加微间隔
                     $interval_find = AiWechatLog::where('user_id', $record['user_id'])
-                        ->where('log_type', 0)
+                        ->where('log_type', AiWechatLog::TYPE_ACCEPT_FRIEND)
                         ->where('wechat_id', $wechat_id)
                         ->where('create_time', '>', (time() - ((int)$record['add_interval_time'] * 60)))
                         ->order('id', 'desc')
@@ -561,7 +679,7 @@ class CrawlingTaskLogic extends SvBaseLogic
                     }
 
                     $addCount = AiWechatLog::where('user_id', $record['user_id'])
-                        ->where('log_type', 0)
+                        ->where('log_type', AiWechatLog::TYPE_ACCEPT_FRIEND)
                         ->where('wechat_id', $wechat_id)
                         ->where('create_time', 'between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))])
                         ->count();
@@ -739,7 +857,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             AiWechatLog::create([
                 'user_id' => $wechat->user_id,
                 'wechat_id' => $wechat->wechat_id,
-                'log_type' => 0,
+                'log_type' => AiWechatLog::TYPE_ACCEPT_FRIEND,
                 'friend_id' => $payload['Phones'],
                 'create_time' => time()
             ]);

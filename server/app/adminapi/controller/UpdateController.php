@@ -73,10 +73,6 @@ class UpdateController extends BaseAdminController
         $version['update_time']     = date('Y-m-d H:i:s');
 
         ConfigService::set('website', 'version', $version);
-
-        $env = file_get_contents(root_path() . '.env');
-        $env = str_replace('[IMAIWORK]', '[PROJECT_KEY]', $env);
-        file_put_contents(root_path() . '.env', $env);
         return $this->success('success');
     }
 }

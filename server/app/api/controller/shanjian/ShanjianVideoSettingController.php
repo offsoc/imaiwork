@@ -32,9 +32,9 @@ class ShanjianVideoSettingController extends BaseApiController
     {
         try {
             $params = (new ShanjianVideoSettingValidate())->post()->goCheck('add');
-            
+
             $result = ShanjianVideoSettingLogic::add($params);
-            
+
             if ($result) {
                 return $this->data(ShanjianVideoSettingLogic::getReturnData());
             }
@@ -69,6 +69,20 @@ class ShanjianVideoSettingController extends BaseApiController
         try {
             $params = (new ShanjianVideoSettingValidate())->post()->goCheck('update');
             $result = ShanjianVideoSettingLogic::update($params);
+            if ($result) {
+                return $this->data(ShanjianVideoSettingLogic::getReturnData());
+            }
+            return $this->fail(ShanjianVideoSettingLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
+
+    public function updateName()
+    {
+        try {
+            $params = (new ShanjianVideoSettingValidate())->post()->goCheck('updateName');
+            $result = ShanjianVideoSettingLogic::updateName($params);
             if ($result) {
                 return $this->data(ShanjianVideoSettingLogic::getReturnData());
             }

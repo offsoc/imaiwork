@@ -13,6 +13,7 @@ use app\common\model\sv\SvPublishSettingDetail;
 use app\common\service\FileService;
 use app\common\model\sv\SvDeviceRpa;
 use Channel\Client as ChannelClient;
+use app\common\enum\DeviceEnum;
 
 /**
  * PublishLogic
@@ -131,7 +132,6 @@ class PublishLogic extends SvBaseLogic
             if (is_array($params['publish_json'])) {
                 $params['publish_json'] = json_encode($params['publish_json'], JSON_UNESCAPED_UNICODE);
             }
-            //print_r($params);die;
 
             // 更新
             SvPublishSetting::where('id', $publish->id)->update($params);
@@ -165,14 +165,43 @@ class PublishLogic extends SvBaseLogic
             }
             $publishJson = json_decode($params['publish_json'], true);
 
+            $days = ceil((strtotime($params['publish_end']) - strtotime($params['publish_start'])) / 86400);
+            $time_config = array_map(function ($item) {
+                $tmp = $item['start_time'] . '-' . $item['end_time'];
+                return $tmp;
+            }, json_decode($params['time_config'], true));
+            $times = \app\api\logic\device\TaskLogic::getTimes($time_config, date('Y-m-d', time()), $days);
+            //print_r($times);die;
 
             $nextPublishTime = $params['date_type'] == 1 ? (!empty($publishJson) ? $publishJson[0]['publish_time'] : '') : '';
             //print_r($publishJson);die;
+            $allTaskInstall = [];
+            $deviceTaskName = $params['media_type'] === 2 ? '图文发布任务' : '视频发布任务';
             foreach ($accounts as $key => $account) {
                 $account = SvAccount::where('account', $account)->where('user_id', self::$uid)->limit(1)->find();
+
+
                 //print_r($account);die;
                 $nextPublishTime = $nextPublishTime != '' ? $nextPublishTime : self::_getPublishTime($publish,  $mediaSetting['media_count'], $key);
-                array_push($insertData, [
+                // array_push($insertData, [
+                //     'publish_id' => $publish->id,
+                //     'user_id' => self::$uid,
+                //     'name' => $params['name'],
+                //     'account' => $account['account'],
+                //     'account_type' => $account['type'],
+                //     'device_code' => $account['device_code'],
+                //     'video_setting_id' => $params['video_setting_id'],
+                //     'poi' => $params['poi'],
+                //     'media_type' => $params['media_type'],
+                //     'publish_start' => $params['publish_start'] ?? null,
+                //     'publish_end' => $params['publish_end'] ?? null,
+                //     'next_publish_time' => $nextPublishTime, //视频发布时间
+                //     'count' => $mediaCount,
+                //     'published_count' => 0,
+                //     'status' => 1,
+                //     'created_time' => time(),
+                // ]);
+                $pubAccount =  SvPublishSettingAccount::create([
                     'publish_id' => $publish->id,
                     'user_id' => self::$uid,
                     'name' => $params['name'],
@@ -190,10 +219,40 @@ class PublishLogic extends SvBaseLogic
                     'status' => 1,
                     'created_time' => time(),
                 ]);
+                $num = 1;
+                foreach ($times as $tk => $time) {
+                    if ($num > $account['count']) {
+                        break;
+                    }
+                    $num ++;
+                    list($isOverlap, $lap) = \app\api\logic\device\TaskLogic::isTaskTimeOverlapping($account['device_code'], DeviceEnum::TASK_TYPE_PUBLISH, $time['start_time'], $time['end_time'], self::$uid);
+                    if (!$isOverlap) {
+                        $timeMsg = "【" . date('Y-m-d H:i', $lap['start_time']) . "-" . date('Y-m-d H:i', $lap['end_time']) . "】";
+                        $msg = "您在{$timeMsg}的【" . DeviceEnum::getAccountTypeDesc($lap['account_type']) . DeviceEnum::getTaskTypeDesc($lap['task_type'])  . "】与当前所选时间冲突";
+                        throw new \Exception($msg);
+                    }
+                    
+                    array_push($allTaskInstall, [
+                        'user_id' => self::$uid,
+                        'device_code' => $pubAccount->device_code,
+                        'task_type' => DeviceEnum::TASK_TYPE_PUBLISH,
+                        'account' => $account['account'],
+                        'account_type' => $account['type'],
+                        'task_name' => '小红书' . $deviceTaskName,
+                        'status' => 0,
+                        'day' => date('Y-m-d', $time['start_time']),
+                        'start_time' => $time['start_time'],
+                        'end_time' => $time['end_time'],
+                        'sub_task_id' => $pubAccount->id,
+                        'source' => DeviceEnum::TASK_SOURCE_PUBLISH, //sv_publish_setting_account
+                        'create_time' => time(),
+                    ]);
+                }
             }
+            \app\api\logic\device\TaskLogic::add($allTaskInstall);
             //print_r($insertData);die;
-            $model = new SvPublishSettingAccount();
-            $model->saveAll($insertData);
+            // $model = new SvPublishSettingAccount();
+            // $model->saveAll($insertData);
         } catch (\Throwable $th) {
             //print_r($th->__toString());die;
             throw new \Exception($th->getMessage(), $th->getCode());
@@ -503,7 +562,7 @@ class PublishLogic extends SvBaseLogic
             $accounts = SvPublishSettingAccount::alias('pa')
                 ->field('pa.*, ps.publish_start, ps.publish_end, ps.time_config, a.device_code as devicecode')
                 ->field('vs.id as media_id, vs.media_count, vs.media_url, vs.media_type, vs.title as media_title, vs.subtitle as media_subtitle, ps.date_type, ps.publish_json')
-                ->join('sv_media_setting vs', 'vs.id = pa.video_setting_id and vs.user_id = pa.user_id and vs.media_type = vs.media_type')
+                ->join('sv_media_setting vs', 'vs.id = pa.video_setting_id and vs.user_id = pa.user_id and vs.media_type = pa.media_type')
                 ->join('sv_publish_setting ps', 'ps.id = pa.publish_id and ps.user_id = pa.user_id')
                 ->join('sv_account a', 'a.account = pa.account and a.user_id = pa.user_id')
                 ->where('pa.status', 1)
@@ -569,6 +628,9 @@ class PublishLogic extends SvBaseLogic
                 $model->saveAll($insertData);
             }
 
+            sleep(2);
+            self::_checkPublishTime(array_column($accounts, 'id'));
+
             self::$returnData = $insertData;
             return true;
         } catch (\Exception $e) {
@@ -576,6 +638,28 @@ class PublishLogic extends SvBaseLogic
             die;
             return false;
         }
+    }
+
+    private static function _checkPublishTime(array $accountIds)
+    {
+        //根据生成的发布记录删除主任务多余的时间区间
+        $items = SvPublishSettingDetail::where('publish_account_id', 'in', $accountIds)->select()->toArray();
+        $ids = [];
+        foreach ($items as $item) {
+            $task = \app\common\model\sv\SvDeviceTask::field('*')
+                ->where('sub_task_id', $item['publish_account_id'])
+                ->where('account', $item['account'])
+                ->where('account_type', $item['account_type'])
+                ->where('device_code', $item['device_code'])
+                ->where('task_type', 1)
+                ->where('start_time', '<=', strtotime($item['publish_time']))
+                ->where('end_time', '>', strtotime($item['publish_time']))
+                ->findOrEmpty();
+            if (!$task->isEmpty()) {
+                $ids[] = $task['id'];
+            }
+        }
+        \app\common\model\sv\SvDeviceTask::where('id', 'not in', $ids)->where('sub_task_id', 'in', $accountIds)->select()->delete();
     }
 
     private static function _getMaterialUrl($media)

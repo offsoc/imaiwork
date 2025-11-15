@@ -10,6 +10,9 @@ use app\common\model\sv\SvAddWechatRecord;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatLog;
+use app\common\enum\DeviceEnum;
+use app\common\model\sv\SvDevice;
+use app\common\model\sv\SvDeviceTask;
 
 /**
  * CrawlingManualLogic
@@ -24,13 +27,28 @@ class CrawlingManualLogic extends SvBaseLogic
     {
         try {
             Db::startTrans();
-            //code...
-            $params['name'] = date('mdHis', time()) . '批量新增线索任务';
+            $devices = SvDevice::where('device_code', 'in', $params['device_codes'])->select()->toArray();
+            //$wechats = AiWechat::where('wechat_id', 'in', $params['wechat_id'])->select()->toArray();
+            $times = \app\api\logic\device\TaskLogic::getTimes($params['time_config'], date('Y-m-d', time()), $params['task_frep'], $params['custom_date']);
+            foreach($devices as $device){
+                foreach($times as $time){
+                    list($isOverlap, $lap) = \app\api\logic\device\TaskLogic::isTaskTimeOverlapping($device['device_code'], DeviceEnum::TASK_TYPE_FRIENDS, $time['start_time'], $time['end_time'], self::$uid);
+                    if (!$isOverlap) {
+                        $timeMsg = "【" . date('Y-m-d H:i', $lap['start_time']) . "-" . date('Y-m-d H:i', $lap['end_time']) . "】";
+                        $msg = "您在{$timeMsg}的【" . DeviceEnum::getAccountTypeDesc($lap['account_type']) . DeviceEnum::getTaskTypeDesc($lap['task_type'])  . "】与当前所选时间冲突";
+                        throw new \Exception($msg);
+                    }
+                }
+            }
+
+            $params['name'] =  $params['name'] ??  '批量新增线索任务' . date('mdHis', time()) ;
             $params['crawling_task_ids'] = json_encode($params['crawling_task_ids'], JSON_UNESCAPED_UNICODE);
             $params['remarks'] = json_encode($params['remarks'], JSON_UNESCAPED_UNICODE);
             $params['wechat_id'] = implode(',', $params['wechat_id']);
+            $params['device_codes'] = json_encode($params['device_codes'], JSON_UNESCAPED_UNICODE);
             $params['user_id'] = self::$uid;
-            //print_r($params);die;
+            $params['time_config'] = json_encode($params['time_config'], JSON_UNESCAPED_UNICODE);
+            $params['custom_date'] = json_encode($params['custom_date'], JSON_UNESCAPED_UNICODE);
             $task = SvCrawlingManualTask::create($params);
             $recordData = array();
             if ($params['source'] == 1) {
@@ -43,7 +61,27 @@ class CrawlingManualLogic extends SvBaseLogic
                 $task->exec_add_count = count($recordData);
                 $task->save();
             }
-
+            $allTaskInstall = array();
+            foreach($devices as $device){
+                foreach($times as $time){
+                    array_push($allTaskInstall, [
+                        'user_id' => self::$uid,
+                        'device_code' => $device['device_code'],
+                        'task_type' => DeviceEnum::TASK_TYPE_FRIENDS,
+                        'account' => is_null($device['wechat_device_code']) ? '' : self::getWechatAccount($device['wechat_device_code']),
+                        'account_type' => 1,
+                        'task_name' => '设备自动加微任务',
+                        'status' => 0,
+                        'day' => date('Y-m-d',$time['start_time']),
+                        'start_time' => $time['start_time'],
+                        'end_time' => $time['end_time'],
+                        'sub_task_id' => $task->id,
+                        'source' => DeviceEnum::TASK_SOURCE_FRIENDS,//sv_crawling_manual_task
+                        'create_time' => time(),
+                    ]);
+                }
+            }
+            \app\api\logic\device\TaskLogic::add($allTaskInstall);
             Db::commit();
             self::$returnData = $task->toArray();
             return true;
@@ -52,6 +90,18 @@ class CrawlingManualLogic extends SvBaseLogic
             self::setError($th->getMessage());
             return false;
         }
+    }
+
+    private static function getWechatAccount(string $device_code)
+    {
+        if($device_code == ''){
+            return '';
+        }
+        $wechat = AiWechat::where('device_code', $device_code)->findOrEmpty();
+        if ($wechat->isEmpty()) {
+            return '';
+        }
+        return $wechat->wechat_id;
     }
 
     private static function _getRecordByFile(string $fileurl, SvCrawlingManualTask $task)
@@ -187,6 +237,7 @@ class CrawlingManualLogic extends SvBaseLogic
                 self::setError('任务不存在');
                 return false;
             }
+            SvDeviceTask::where('sub_task_id', $params['id'])->where('task_type', DeviceEnum::TASK_TYPE_FRIENDS)->select()->delete();
             // 先删除记录
             SvCrawlingManualTaskRecord::where('task_id', $params['id'])->select()->delete();
             $find->delete();
@@ -464,4 +515,41 @@ class CrawlingManualLogic extends SvBaseLogic
         }
         \think\facade\Log::channel($type)->write($content);
     }
+
+
+    public static function subtasks(array $params)
+    {
+        try {
+            $task = SvCrawlingManualTask::where('id', $params['id'])->where('user_id', self::$uid)->findOrEmpty()->toArray();
+            if (!$task) {
+                self::setError('加好友任务不存在');
+                return false;
+            }
+            $info= $task;
+            $record= SvCrawlingManualTaskRecord::where('task_id', $params['id'])->select()->toArray();
+            if (!$record) {
+                self::setError('子任务不存在');
+                return false;
+            }
+            var_dump($record);
+            $where = [
+                'wechat_no' => $record[0]['wechat_no']
+            ];
+            $info['account_info'] = AiWechat::where($where)->findOrEmpty()->toArray();
+
+            dd($info);
+            $info['task_name'] = $params['task_name'];
+            $info['task_category'] = $params['task_category'];
+            $bind['keywords'] = json_decode($bind['keywords'], JSON_UNESCAPED_UNICODE);
+            $info['start_time'] = date('H:i',$info['start_time']);
+            $info['end_time'] = date('H:i',$info['end_time']);
+            $info['info'] = $bind;
+            self::$returnData = $info;
+            return true;
+        } catch (\Exception $e) {
+            self::setError($e->getMessage());
+            return false;
+        }
+    }
+
 }

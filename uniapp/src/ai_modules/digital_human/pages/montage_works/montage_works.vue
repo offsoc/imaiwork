@@ -35,7 +35,16 @@
                         <view class="absolute w-full h-full z-[22]" v-if="isChoose" @click="handleChoose(item)"></view>
                         <view class="flex justify-between items-center">
                             <view>
-                                <view class="font-bold"> {{ item.name }} </view>
+                                <view class="flex items-center gap-x-2 mr-4">
+                                    <view class="line-clamp-1 break-all font-bold text-[30rpx]">
+                                        {{ item.name }}
+                                    </view>
+                                    <view class="p-1" @click="handleEdit(index)">
+                                        <image
+                                            src="/static/images/icons/edit_pen.svg"
+                                            class="w-[32rpx] h-[32rpx]"></image>
+                                    </view>
+                                </view>
                                 <view class="text-[#0000007F] mt-[12rpx]">
                                     {{ item.create_time }}
                                 </view>
@@ -78,9 +87,7 @@
                                             class="rounded-full bg-[#ffffff33] w-[48rpx] h-[48rpx]"
                                             style="backdrop-filter: blur(5px)"
                                             @click="handlePlay(res)">
-                                            <image
-                                                src="@/ai_modules/digital_human/static/icons/play3.svg"
-                                                class="w-full h-full"></image>
+                                            <image src="/static/images/icons/play.svg" class="w-full h-full"></image>
                                         </view>
                                     </view>
                                 </template>
@@ -160,10 +167,34 @@
         :video-url="playItem.url"
         :poster="playItem.pic"
         @update:show="showVideoPreview = false"></video-preview-v2>
+    <u-popup v-model="shoeEditPopup" mode="center" width="90%" :border-radius="20">
+        <view class="p-4 bg-white rounded-[20rpx]">
+            <view class="text-[30rpx] font-bold text-center mt-2">编辑名称</view>
+            <view class="mt-[48rpx] bg-[#F3F3F3] px-4 py-2 rounded-[16rpx]">
+                <u-input
+                    v-model="newName"
+                    placeholder="请输入名称"
+                    maxlength="30"
+                    placeholder-style="color: #0000004d; font-size: 26rpx;" />
+            </view>
+            <view class="flex items-center gap-x-5 mt-[56rpx]">
+                <view
+                    class="flex-1 h-[90rpx] flex items-center justify-center rounded-[12rpx] bg-[#F3F3F3] font-bold text-[#000000b3]"
+                    @click="shoeEditPopup = false">
+                    取消
+                </view>
+                <view
+                    class="flex-1 h-[90rpx] flex items-center justify-center rounded-[12rpx] bg-black font-bold text-white"
+                    @click="handleEditConfirm"
+                    >确定</view
+                >
+            </view>
+        </view>
+    </u-popup>
 </template>
 
 <script setup lang="ts">
-import { getShanjianTaskRecord, deleteShanjianTaskRecord } from "@/api/digital_human";
+import { getShanjianTaskRecord, deleteShanjianTaskRecord, updateShanjianTaskName } from "@/api/digital_human";
 import VideoPreviewV2 from "@/ai_modules/digital_human/components/video-preview-v2/video-preview-v2.vue";
 
 const dataLists = ref<any[]>([]);
@@ -174,6 +205,10 @@ const searchValue = ref("");
 const isChoose = ref(false);
 
 const selectedLists = ref<any[]>([]);
+
+const shoeEditPopup = ref(false);
+const editIndex = ref(-1);
+const newName = ref("");
 
 const handleSearch = (value: string) => {
     pagingRef.value?.reload();
@@ -279,6 +314,43 @@ const toPublishTask = () => {
     });
     isChoose.value = false;
     selectedLists.value = [];
+};
+
+const handleEdit = (index: number) => {
+    editIndex.value = index;
+    newName.value = dataLists.value[index].name;
+    shoeEditPopup.value = true;
+};
+
+const handleEditConfirm = async () => {
+    if (!newName.value) {
+        uni.$u.toast("请输入名称");
+        return;
+    }
+    shoeEditPopup.value = false;
+    uni.showLoading({
+        title: "修改中...",
+        mask: true,
+    });
+    try {
+        await updateShanjianTaskName({
+            id: dataLists.value[editIndex.value].id,
+            name: newName.value,
+        });
+        uni.hideLoading();
+        uni.showToast({
+            title: "修改成功",
+            icon: "none",
+            duration: 3000,
+        });
+        dataLists.value[editIndex.value].name = newName.value;
+    } catch (error: any) {
+        uni.showToast({
+            title: error || "修改失败",
+            icon: "none",
+            duration: 3000,
+        });
+    }
 };
 </script>
 

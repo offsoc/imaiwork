@@ -84,25 +84,9 @@
                         </template>
                     </ElTableColumn>
                     <ElTableColumn prop="create_time" label="创建时间" width="180"></ElTableColumn>
-                    <ElTableColumn label="操作" width="280" fixed="right" align="right">
+                    <ElTableColumn label="操作" width="180" fixed="right" align="right">
                         <template #default="{ row }">
                             <div class="flex justify-end items-center">
-                                <ElButton
-                                    class="!border-app-border-2"
-                                    color="#181818"
-                                    size="small"
-                                    v-if="row.status == 1 || row.status == 2"
-                                    @click.stop="changeStatus(row)"
-                                    >{{ row.status == 1 ? "暂停" : "继续" }}</ElButton
-                                >
-                                <ElButton
-                                    v-if="row.status == 1"
-                                    class="!border-app-border-2"
-                                    color="#181818"
-                                    size="small"
-                                    @click.stop="handleRetry(row)"
-                                    >重试</ElButton
-                                >
                                 <export-data
                                     class="mx-3"
                                     :params="{
@@ -220,24 +204,6 @@ const handleDetail = (row: any) => {
     replaceState({
         is_detail: 1,
         id: row.id,
-    });
-};
-
-const handleRetry = (row: any) => {
-    nuxtApp.$confirm({
-        title: "任务异常情况",
-        message: "提醒：重新启动只会启动异常设备<br /><br />1. 设备启动未执行任务<br />2. 设备断开重连<br />",
-        confirmButtonText: "重新启动",
-        theme: "dark",
-        onConfirm: async () => {
-            try {
-                await retryTask({ id: row.id });
-                feedback.msgSuccess("重试成功");
-                getLists();
-            } catch (error) {
-                feedback.msgError(error || "重试失败");
-            }
-        },
     });
 };
 

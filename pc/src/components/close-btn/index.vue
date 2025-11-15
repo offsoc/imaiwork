@@ -20,7 +20,7 @@ const props = withDefaults(
 
 const themeClass = computed(() => {
     return props.theme === ThemeEnum.DARK
-        ? "bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)]"
+        ? "bg-[var(--app-bg-color-2)] hover:bg-[var(--app-bg-color-1)]"
         : "bg-[rgba(223,223,223,0.3)] hover:bg-[rgba(223,223,223,0.6)]";
 });
 </script>

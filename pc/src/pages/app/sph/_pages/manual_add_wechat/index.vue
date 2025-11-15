@@ -76,14 +76,6 @@
                         <template #default="{ row }">
                             <div class="flex justify-end items-center">
                                 <ElButton
-                                    v-if="row.status == 1 || row.status == 2"
-                                    class="!border-app-border-2"
-                                    color="#181818"
-                                    size="small"
-                                    @click="handleChangeStatus(row)"
-                                    >{{ row.status == 1 ? "继续" : "暂停" }}</ElButton
-                                >
-                                <ElButton
                                     class="!border-app-border-2"
                                     color="#181818"
                                     size="small"

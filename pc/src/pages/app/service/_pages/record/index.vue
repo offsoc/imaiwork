@@ -51,9 +51,17 @@
                 <ElTableColumn prop="device_code" label="设备码" width="180"></ElTableColumn>
                 <ElTableColumn prop="account" label="来源账号" width="150"></ElTableColumn>
                 <ElTableColumn prop="user_account" label="小红书用户信息" min-width="180"></ElTableColumn>
-                <ElTableColumn prop="original_message" label="私信内容" min-width="180"></ElTableColumn>
+                <ElTableColumn
+                    prop="original_message"
+                    label="私信内容"
+                    min-width="180"
+                    show-overflow-tooltip></ElTableColumn>
                 <ElTableColumn prop="reg_wechat" label="匹配微信号" min-width="180"></ElTableColumn>
-                <ElTableColumn prop="wechat_name" label="执行微信" min-width="160"></ElTableColumn>
+                <ElTableColumn prop="wechat_name" label="执行微信" min-width="160">
+                    <template #default="{ row }">
+                        {{ row.wechat_name || "-" }}
+                    </template>
+                </ElTableColumn>
                 <ElTableColumn label="执行动作" width="120">
                     <template #default="{ row }">
                         <div>自动添加</div>

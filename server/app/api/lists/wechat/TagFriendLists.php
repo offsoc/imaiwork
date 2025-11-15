@@ -4,10 +4,9 @@ namespace app\api\lists\wechat;
 
 use app\api\lists\BaseApiDataLists;
 use app\common\lists\ListsSearchInterface;
-use app\common\model\wechat\AiWechatTag;
-use app\common\model\wechat\AiWechatContact;
-use app\common\model\wechat\AiWechatFriendTag;
 use app\common\model\wechat\AiWechat;
+use app\common\model\wechat\AiWechatContact;
+use app\common\model\wechat\AiWechatTag;
 
 /**
  * 标签好友列表
@@ -33,8 +32,7 @@ class TagFriendLists extends BaseApiDataLists implements ListsSearchInterface
     public function lists(): array
     {
         // 获取微信ID
-        $wechatId = AiWechat::where('user_id', $this->userId)->value('wechat_id', '');
-        $wechatId = !empty($this->request->get('wechat_id')) ? $this->request->get('wechat_id') : $wechatId;
+        $wechatId = $this->request->get('wechat_id');
 
         // 获取标签ID
         if ($tagIds = $this->request->get('tag_ids'))

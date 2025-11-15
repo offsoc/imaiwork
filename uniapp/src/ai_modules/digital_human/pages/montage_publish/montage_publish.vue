@@ -36,7 +36,7 @@
                                 <view class="mt-[12rpx]">
                                     <view class="border-[0] border-b-[1rpx] border-solid border-[#EDEDED] py-1">
                                         <navigator
-                                            :url="`/ai_modules/digital_human/pages/account_choose/account_choose?account=${JSON.stringify(
+                                            :url="`/ai_modules/device/pages/account_choose/account_choose?account=${JSON.stringify(
                                                 formData.accounts
                                             )}`"
                                             class="flex items-center justify-between h-[70rpx]"
@@ -76,45 +76,81 @@
                             <text class="text-[#FF3C26] text-[32rpx]">*</text>
                             <text class="font-bold">发布时间</text>
                         </view>
+                        <view class="mb-[28rpx]">
+                            <u-notice-bar
+                                mode="vertical"
+                                padding="20rpx 0"
+                                border-radius="8"
+                                font-size="24rpx"
+                                :autoplay="false"
+                                :volume-icon="false"
+                                :list="[`发布的间隔时间必须大于${timeInterval}分钟`]"></u-notice-bar>
+                        </view>
                         <view
                             class="mt-4 rounded-[16rpx] px-4 py-[28rpx] bg-white shadow-[0_12rpx_24rpx_0_rgba(0,0,0,0.03)]">
-                            <view class="mb-[28rpx]">
-                                <u-notice-bar
-                                    mode="vertical"
-                                    padding="20rpx 0"
-                                    border-radius="8"
-                                    :autoplay="false"
-                                    :volume-icon="false"
-                                    :list="['发布的间隔时间必须大于15分钟']"></u-notice-bar>
-                            </view>
                             <view class="flex flex-col gap-y-[28rpx]">
                                 <view v-for="(item, index) in formData.time_config" :key="index">
-                                    <view class="text-[#7C7E80]">每天第{{ index + 1 }}个视频发布时间</view>
-                                    <view class="mt-[12rpx]">
+                                    <view class="text-[#7C7E80]">每天第{{ index + 1 }}个任务发布时间</view>
+                                    <view class="mt-[12rpx] flex items-center gap-x-4">
                                         <view
-                                            class="border-[0] border-b-[1rpx] border-solid border-[#EDEDED] py-1 h-[70rpx] flex items-center justify-between"
-                                            :class="{ 'border-[#FF3C26]': timeErrorIndex.includes(index) }">
+                                            class="border-[0] border-b-[1rpx] border-solid border-[#EDEDED] py-1 flex-1">
                                             <picker
                                                 mode="time"
                                                 class="w-full"
-                                                :value="item"
-                                                @change="changeTime($event, index)">
-                                                <view
-                                                    :class="[
-                                                        timeErrorIndex.includes(index)
-                                                            ? 'text-[#FF3C26] font-bold'
-                                                            : item
-                                                            ? 'text-[#00B862] font-bold'
-                                                            : 'text-[#00000033]',
-                                                    ]">
-                                                    {{ item || "未选择" }}
+                                                :value="item.start_time"
+                                                @change="handleStartTimeChange($event, index)">
+                                                <view class="flex items-center justify-between h-[70rpx]">
+                                                    <text
+                                                        :class="[
+                                                            timeErrors[index]?.start_time
+                                                                ? 'text-[#FF3C26] font-bold'
+                                                                : item.start_time
+                                                                ? 'text-[#00B862] font-bold'
+                                                                : 'text-[#00000033]',
+                                                        ]"
+                                                        >{{ item.start_time || "开始时间" }}</text
+                                                    >
+                                                    <u-icon name="arrow-right" size="24" color="#00000033"></u-icon>
                                                 </view>
                                             </picker>
-                                            <u-icon name="arrow-right" size="24" color="#00000033"></u-icon>
+                                        </view>
+                                        <view class="text-[#7C7E80]">至</view>
+                                        <view
+                                            class="border-[0] border-b-[1rpx] border-solid border-[#EDEDED] py-1 flex-1">
+                                            <picker
+                                                mode="time"
+                                                class="w-full"
+                                                :value="item.end_time"
+                                                :disabled="!item.end_time"
+                                                @click="handleEndTimeClick(index)"
+                                                @change="handleEndTimeChange($event, index)">
+                                                <view class="flex items-center justify-between h-[70rpx]">
+                                                    <text
+                                                        :class="[
+                                                            timeErrors[index]?.end_time
+                                                                ? 'text-[#FF3C26] font-bold'
+                                                                : item.end_time
+                                                                ? 'text-[#00B862] font-bold'
+                                                                : 'text-[#00000033]',
+                                                        ]"
+                                                        >{{ item.end_time || "结束时间" }}</text
+                                                    >
+                                                    <u-icon name="arrow-right" size="24" color="#00000033"></u-icon>
+                                                </view>
+                                            </picker>
                                         </view>
                                     </view>
                                 </view>
+                                <view v-if="Object.keys(timeErrors).length > 0" class="mt-2 text-[#FF3C26]">
+                                    时间配置存在冲突
+                                </view>
                             </view>
+                        </view>
+                    </view>
+                    <view v-if="taskErrorMsg" class="mt-5">
+                        <view>任务冲突</view>
+                        <view class="text-[#FF2442] mt-[20rpx] text-xs">
+                            {{ taskErrorMsg }}
                         </view>
                     </view>
                 </view>
@@ -123,7 +159,7 @@
         <view class="flex-shrink-0 pb-5 pt-2">
             <view class="flex items-center justify-between px-4 gap-[48rpx]">
                 <view
-                    class="flex-1 flex items-center justify-center text-white rounded-[8rpx] h-[100rpx]"
+                    class="flex-1 flex items-center justify-center text-white rounded-[20rpx] h-[100rpx] font-bold"
                     :class="[canCreateTask ? 'bg-black' : 'bg-[#787878CC]']"
                     @click="createTask">
                     立即创建任务
@@ -148,32 +184,44 @@
 
 <script setup lang="ts">
 import { createShanjianPublish } from "@/api/digital_human";
-import { ListenerTypeEnum } from "../../enums";
 import { isJson } from "@/utils/util";
+import { ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
 
 const formData = reactive<{
     name: string;
     accounts: any[];
     publish_frep: number;
     video_ids: any[];
-    time_config: string[];
+    time_config: any[];
     media_type: number;
     data_type: number;
     task_type: number;
     scene: number; // 1: 创建任务 2: 发布任务
 }>({
-    name: `混剪自动发布任务-${uni.$u.timeFormat(new Date(), "yyyymmdd hhMM")}`,
+    name: `混剪自动发布任务${uni.$u.timeFormat(new Date(), "yyyymmddhhMM")}`,
     accounts: [],
     publish_frep: 2,
     video_ids: [],
-    time_config: ["09:00", "09:15"],
+    time_config: [
+        {
+            start_time: "09:00",
+            end_time: "09:30",
+        },
+        {
+            start_time: "09:30",
+            end_time: "10:30",
+        },
+    ],
     media_type: 1,
     data_type: 0,
     task_type: 2,
     scene: 1,
 });
 
-const timeErrorIndex = ref<number[]>([]);
+const timeInterval = 30;
+const taskErrorMsg = ref<string>("");
+// 时间错误
+const timeErrors = ref<any>({});
 
 const showCreate = ref(false);
 
@@ -184,79 +232,135 @@ const canCreateTask = computed(() => {
 
 const handleFrequency = (item: number) => {
     if (item == formData.publish_frep) return;
-    if (item == 5 || item == 10) {
-        uni.$u.toast("建议选择更小的发布频率，如2条、3条");
-    }
     formData.publish_frep = item;
     // 这里每次更改频率，都要重新生成时间
     formData.time_config = Array.from({ length: item }, (_, index) => {
         const baseTime = new Date();
+        // 要使用当前早上九点的时分秒
         baseTime.setHours(9, 0, 0);
-        return uni.$u.timeFormat(new Date(baseTime.getTime() + index * 15 * 60 * 1000), "hh:MM");
+        const startTime = new Date(baseTime.getTime() + index * timeInterval * 60 * 1000);
+        const endTime = new Date(startTime.getTime() + timeInterval * 60 * 1000);
+        return {
+            start_time: uni.$u.timeFormat(startTime, "hh:MM"),
+            end_time: uni.$u.timeFormat(endTime, "hh:MM"),
+        };
     });
+    timeErrors.value = {};
 };
 
-const changeTime = (event: any, index: number) => {
-    formData.time_config[index] = event.detail.value;
-
-    // 要判断time是否有间隔小于十五分钟的
-    const { valid, errorIndexes } = checkMinGap(formData.time_config, 15);
-    if (!valid) {
-        uni.$u.toast(`发布的间隔时间必须大于${15}分钟`);
-        timeErrorIndex.value = errorIndexes || [];
+const handleEndTimeClick = (index: number) => {
+    const data = formData.time_config[index];
+    if (!data.start_time) {
+        uni.$u.toast("请先选择开始时间");
         return;
     }
-    timeErrorIndex.value = [];
 };
 
-function checkMinGap(arr: any[], minGapMinutes = 15) {
-    // 过滤掉没有时间的项
-    const validItems = arr.filter((item) => item.time);
-    if (validItems.length <= 1) {
-        return { valid: true };
+const handleStartTimeChange = (e: any, index: number) => {
+    const { value } = e.detail;
+    const data = formData.time_config[index];
+    // 判断时间不能小于当前时间
+    const endTime = new Date(`2000/01/01 ${value}`);
+
+    data.start_time = value;
+    endTime.setMinutes(endTime.getMinutes() + 30);
+    data.end_time = uni.$u.timeFormat(endTime, "hh:MM");
+    const { errors } = validateSchedule(formData.time_config);
+
+    timeErrors.value = errors;
+};
+
+const handleEndTimeChange = (e: any, index: number) => {
+    const { value } = e.detail;
+    const data = formData.time_config[index];
+    // 这里需要判断结束时间是否大于开始时间，并且要大于开始
+    if (value <= data.start_time) {
+        uni.$u.toast("结束时间不能小于开始时间");
+        return;
     }
+    const startTIme = new Date(`2000/01/01 ${data.start_time}`);
+    const endTime = new Date(`2000/01/01 ${value}`);
+    if (endTime.getTime() - startTIme.getTime() < 30 * 60 * 1000) {
+        uni.$u.toast(`结束时间不能小于开始时间${timeInterval}分钟`);
+        return;
+    }
+    data.end_time = value;
+    const { errors } = validateSchedule(formData.time_config);
+    timeErrors.value = errors;
+};
 
-    // 生成带原始索引的数组并按时间排序
-    const indexed = validItems
-        .map((item, idx) => ({
-            time: item.time,
-            originalIndex: arr.indexOf(item),
-        }))
-        .sort((a, b) => {
-            const timeA = new Date(`2000/01/01 ${a.time}`).getTime();
-            const timeB = new Date(`2000/01/01 ${b.time}`).getTime();
-            return timeA - timeB;
-        });
+function validateSchedule(list: any[]) {
+    const toMin = (t: any) => {
+        if (!t) return NaN;
+        const [h, m] = (t || "").split(":").map(Number);
+        return h * 60 + m;
+    };
 
-    // 检查相邻时间间隔
-    for (let i = 1; i < indexed.length; i++) {
-        const prevTime = new Date(`2000/01/01 ${indexed[i - 1].time}`).getTime();
-        const currTime = new Date(`2000/01/01 ${indexed[i].time}`).getTime();
-        const gap = (currTime - prevTime) / (1000 * 60);
+    const schedule = list.map((item) => ({
+        start_time: item.start_time,
+        end_time: item.end_time,
+        s: toMin(item.start_time),
+        e: toMin(item.end_time),
+    }));
 
-        if (gap < minGapMinutes) {
-            return {
-                valid: false,
-                errorIndexes: [indexed[i - 1].originalIndex, indexed[i].originalIndex],
-                gapMinutes: gap,
-            };
+    const errors = schedule.reduce((acc, cur, i, arr) => {
+        const addError = (index: number, field: "start_time" | "end_time") => {
+            if (!acc[index]) acc[index] = { start_time: false, end_time: false };
+            acc[index][field] = true;
+        };
+
+        if (cur.start_time == null || cur.start_time === "") {
+            addError(i, "start_time");
         }
-    }
+        if (cur.end_time == null || cur.end_time === "") {
+            addError(i, "end_time");
+        }
 
-    return { valid: true };
+        if (isNaN(cur.s) || isNaN(cur.e)) {
+            return acc;
+        }
+
+        if (cur.s >= cur.e) {
+            addError(i, "start_time");
+            addError(i, "end_time");
+        }
+
+        if (i > 0) {
+            const prev = arr[i - 1];
+            if (!isNaN(prev.e) && cur.s < prev.e) {
+                addError(i - 1, "end_time");
+                addError(i, "start_time");
+            }
+        }
+
+        return acc;
+    }, {} as { [key: number]: { start_time: boolean; end_time: boolean } });
+
+    const isValid = Object.keys(errors).length === 0;
+    return { valid: isValid, errors };
 }
 
 const createTask = async () => {
-    if (!canCreateTask.value) return;
+    if (!formData.name) {
+        uni.$u.toast("请输入任务名称");
+        return;
+    } else if (!canCreateTask.value) {
+        uni.$u.toast("请选择发布账号");
+        return;
+    }
     uni.showLoading({
         title: "创建中...",
         mask: true,
     });
     try {
-        await createShanjianPublish(formData);
+        await createShanjianPublish({
+            ...formData,
+            time_config: formData.time_config.map((item) => `${item.start_time}-${item.end_time}`),
+        });
         showCreate.value = true;
         uni.hideLoading();
     } catch (error: any) {
+        taskErrorMsg.value = error;
         uni.hideLoading();
         uni.showToast({
             title: error || "创建失败",

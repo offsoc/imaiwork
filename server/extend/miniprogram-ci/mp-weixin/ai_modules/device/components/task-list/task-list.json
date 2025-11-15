@@ -1,0 +1,12 @@
+{
+  "component": true,
+  "usingComponents": {
+    "confirm-dialog": "../../../../components/confirm-dialog/confirm-dialog",
+    "empty": "../../../../components/empty/empty",
+    "popup-bottom": "../../../../components/popup-bottom/popup-bottom",
+    "video-preview": "../../../../components/video-preview/video-preview",
+    "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
+    "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup",
+    "task-card": "../task-card/task-card"
+  }
+}

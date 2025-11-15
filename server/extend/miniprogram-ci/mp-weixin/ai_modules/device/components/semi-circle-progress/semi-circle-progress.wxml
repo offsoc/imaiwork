@@ -1,0 +1,1 @@
+<view class="progress-container data-v-0306fa85" style="{{'width:' + g + ';' + ('height:' + h)}}"><block wx:if="{{r0}}"><canvas class="data-v-0306fa85" canvas-id="{{a}}" id="{{b}}" style="{{'width:' + c + ';' + ('height:' + d)}}" width="{{e}}" height="{{f}}"></canvas></block><view class="content data-v-0306fa85"><slot></slot></view></view>

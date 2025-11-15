@@ -1,4 +1,5 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers\sph;
 
 use Workerman\Connection\TcpConnection;
@@ -17,13 +18,13 @@ class TaskPauseHandler extends BaseMessageHandler
             $this->payload = $payload;
             $this->userId = $content['userId'] ?? 0;
             $this->connection = $connection;
-            
+
 
             $this->payload['reply'] = $this->pauseTask($content['task_id']);
 
             $this->sendResponse($uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'task_paused'); 
+            $this->setLog('异常信息' . $e, 'task_paused');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::SPH_PAUSE_ERROR_CODE;
             $this->payload['type'] = 'error';
@@ -31,7 +32,8 @@ class TaskPauseHandler extends BaseMessageHandler
         }
     }
 
-    private function pauseTask(string $task_id){
+    private function pauseTask(string $task_id)
+    {
         return [
             'deviceId' => $this->payload['deviceId'],
             'task_id' => $task_id,
@@ -40,5 +42,4 @@ class TaskPauseHandler extends BaseMessageHandler
             'msg' => '暂停成功',
         ];
     }
-
 }

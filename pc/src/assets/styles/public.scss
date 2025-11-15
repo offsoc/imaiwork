@@ -200,6 +200,7 @@ input:-webkit-autofill:active {
 .dark-select-popper {
     background-color: var(--app-bg-color-2) !important;
     border-color: var(--app-border-color-1) !important;
+
     .el-select__wrapper {
         min-height: 40px;
         background-color: var(--app-bg-color-2);
@@ -246,6 +247,38 @@ input:-webkit-autofill:active {
     .el-popper__arrow {
         &::before {
             display: none;
+        }
+    }
+    .el-picker-panel {
+        border-radius: 12px;
+        background-color: var(--app-bg-color-2);
+        border .el-time-panel__content:before {
+            border-color: var(--app-border-color-1);
+        }
+        .el-time-range-picker__body {
+            border-color: var(--app-border-color-1);
+        }
+        .el-time-range-picker__header {
+            color: var(--color-white);
+        }
+        .el-time-spinner {
+            .el-time-spinner__item {
+                color: var(--color-white);
+            }
+            .el-time-spinner__item.is-active:not(.is-disabled) {
+                color: var(--color-primary);
+            }
+            .el-time-spinner__item:hover:not(.is-disabled):not(.is-active) {
+                background-color: var(--app-bg-color-1);
+            }
+        }
+        .el-time-panel__footer {
+            border-color: var(--app-border-color-1);
+        }
+        .el-time-panel__btn {
+            &.cancel {
+                color: var(--color-white);
+            }
         }
     }
 }

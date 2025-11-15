@@ -74,6 +74,15 @@
 			}
 		},
 		{
+			"path": "pages/phone/phone",
+			"style": {
+				"navigationBarTitleText": "AI手机",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": false,
+				"disableScroll": true
+			}
+		},
+		{
 			"path": "uni_modules/vk-uview-ui/components/u-avatar-cropper/u-avatar-cropper",
 			"style": {
 				"navigationBarTitleText": "头像裁剪",
@@ -216,6 +225,15 @@
 					"path": "pages/choose_file/choose_file",
 					"style": {
 						"navigationBarTitleText": "选择文件"
+					}
+				},
+				{
+					"path": "pages/rpa_code/rpa_code",
+					"style": {
+						"navigationBarTitleText": "设备绑定码"
+					},
+					"meta": {
+						"auth": true
 					}
 				}
 			]
@@ -423,12 +441,6 @@
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
-					}
-				},
-				{
-					"path": "pages/account_choose/account_choose",
-					"style": {
-						"navigationBarTitleText": "账号选择"
 					}
 				},
 				{
@@ -720,6 +732,13 @@
 						"enablePullDownRefresh": false,
 						"disableScroll": true
 					}
+				},
+				{
+					"path": "pages/task_ai_clue/task_ai_clue",
+					"style": {
+						"navigationBarTitleText": "AI生成线索词",
+						"navigationStyle": "custom"
+					}
 				}
 			]
 		},
@@ -729,7 +748,107 @@
 				{
 					"path": "pages/task_calendar/task_calendar",
 					"style": {
-						"navigationBarTitleText": "任务日历"
+						"navigationBarTitleText": "任务日历",
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/task_calendar_full/task_calendar_full",
+					"style": {
+						"navigationBarTitleText": "完整日历",
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/detail/detail",
+					"style": {
+						"navigationBarTitleText": "设备详情",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "pages/platform_detail/platform_detail",
+					"style": {
+						"navigationBarTitleText": "平台详情",
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/choose_task_type/choose_task_type",
+					"style": {
+						"navigationBarTitleText": "任务类型"
+					}
+				},
+				{
+					"path": "pages/account_choose/account_choose",
+					"style": {
+						"navigationBarTitleText": "账号选择"
+					}
+				},
+				{
+					"path": "pages/custom_date/custom_date",
+					"style": {
+						"navigationBarTitleText": "自定义日期"
+					}
+				},
+				{
+					"path": "pages/create_task/create_task",
+					"style": {
+						"navigationBarTitleText": "创建任务",
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/create_private_take/create_private_take",
+					"style": {
+						"navigationBarTitleText": "私聊接管"
+					}
+				},
+				{
+					"path": "pages/create_account_building/create_account_building",
+					"style": {
+						"navigationBarTitleText": "养号"
+					}
+				},
+				{
+					"path": "pages/task_img_group/task_img_group",
+					"style": {
+						"navigationBarTitleText": "编辑图组"
+					}
+				},
+				{
+					"path": "pages/task_copywriter/task_copywriter",
+					"style": {
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/task_ai_copywriter/task_ai_copywriter",
+					"style": {
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "pages/create_add_wechat/create_add_wechat",
+					"style": {
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "pages/wechat_clue/wechat_clue",
+					"style": {
+						"navigationBarTitleText": "获客线索"
+					}
+				},
+				{
+					"path": "pages/device_choose/device_choose",
+					"style": {
+						"navigationBarTitleText": "设备选择"
 					}
 				}
 			]

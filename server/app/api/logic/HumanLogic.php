@@ -343,6 +343,7 @@ class HumanLogic extends ApiLogic
                         'music_url' => $item->music_url,
                         'music_type' => $item->music_type,
                         'result_url' => $result_url,
+                        'msg' => $item->msg,
                         'type' => 1,
                     ];
 

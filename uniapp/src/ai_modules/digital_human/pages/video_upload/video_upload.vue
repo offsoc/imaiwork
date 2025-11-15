@@ -300,7 +300,7 @@ const startUpload = async () => {
             formData.width = width;
             formData.height = height;
 
-            formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM").substring(2);
+            formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM");
             if (formData.model_version == DigitalHumanModelVersionEnum.SHANJIAN) {
                 isUploadSuccess.value = true;
                 return;

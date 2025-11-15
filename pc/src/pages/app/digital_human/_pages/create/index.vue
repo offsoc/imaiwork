@@ -439,7 +439,7 @@ const nameInputRef = shallowRef<InstanceType<typeof ElInput>>();
 
 const formData = reactive<Record<string, any>>({
     url: "",
-    name: dayjs().format("YYYYMMDDHHmm").substring(2),
+    name: dayjs().format("YYYYMMDDHHmmss").substring(2),
     anchor_name: "",
     anchor_id: "",
     pic: "",

@@ -36,24 +36,6 @@ trait CacheTrait
     protected function redis()
     {
         if (self::$redisInstance === null) {
-            // self::$redisInstance = new RedisClient([
-            //     'scheme' => 'tcp',
-            //     'host'        => env('redis.HOST', '127.0.0.1'),
-            //     'port'        => env('redis.PORT', 6379),
-            //     'password'    => env('redis.PASSWORD', '123456'),
-            //     'database'    => env('redis.WX_SELECT', 9),
-            //     'persistent' => true,   // 启用持久连接
-            //     'timeout' => 0,           // 连接超时时间
-            //     'read_write_timeout' => 0, // 读写超时时间
-            //     // 'tcp_nodelay' => true,      // 禁用Nagle算法
-            //     // 'persistent_id' => 'my_connection', // 持久连接标识符
-            //     // // 连接池配置（如果需要）
-            //     // 'connections' => [
-            //     //     'tcp'  => 'Predis\Connection\PhpiredisStreamConnection',
-            //     //     'unix' => 'Predis\Connection\PhpiredisSocketConnection',
-            //     // ],
-            // ]);
-
             self::$redisInstance = new Redis([
                 'host'        => env('redis.HOST', '127.0.0.1'),
                 'port'        => env('redis.PORT', 6379),

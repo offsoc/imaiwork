@@ -21,7 +21,7 @@ class CrawlingManualCron extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        CrawlingManualLogic::crawlingManualTaskCron();
+        //CrawlingManualLogic::crawlingManualTaskCron();
         return true;
     }
 }

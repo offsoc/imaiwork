@@ -1136,6 +1136,7 @@ class SvVideoTaskLogic extends SvBaseLogic
                         'clip_type' => $item->clip_type,
                         'music_url' => $item->music_url,
                         'music_type' => $item->music_type,
+                        'msg' => $item->msg,
                         'result_url' => $result_url,
                         'type' => 2,
                     ];

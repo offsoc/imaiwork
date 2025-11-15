@@ -1,4 +1,5 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers\sph;
 
 use Workerman\Connection\TcpConnection;
@@ -21,7 +22,7 @@ class TaskDeleteHandler extends BaseMessageHandler
 
             $this->sendResponse($uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'task_delete'); 
+            $this->setLog('异常信息' . $e, 'task_delete');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::SPH_DELETE_ERROR_CODE;
             $this->payload['type'] = 'error';
@@ -29,7 +30,8 @@ class TaskDeleteHandler extends BaseMessageHandler
         }
     }
 
-    private function deleteTask(string $task_id){
+    private function deleteTask(string $task_id)
+    {
         return [
             'deviceId' => $this->payload['deviceId'],
             'task_id' => $task_id,
@@ -38,5 +40,4 @@ class TaskDeleteHandler extends BaseMessageHandler
             'msg' => '删除成功',
         ];
     }
-
 }

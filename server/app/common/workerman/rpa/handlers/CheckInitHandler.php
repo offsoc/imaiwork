@@ -34,7 +34,7 @@ class CheckInitHandler extends BaseMessageHandler
                 'messageId' => $uid,
                 'type' => WorkerEnum::WEB_INIT_CHECK_TEXT,
                 'deviceId' =>  $this->payload['deviceId'],
-                'appVersion' => $this->payload['appVersion'],
+                'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                 'appType' => $this->payload['appType'] ?? 3,
                 'reply' => [
                     'type' =>  WorkerEnum::WEB_INIT_CHECK_TEXT,

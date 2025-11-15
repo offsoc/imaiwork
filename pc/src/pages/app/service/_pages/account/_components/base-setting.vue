@@ -73,7 +73,7 @@ const agentLists = ref<any[]>([]);
 const agentLoading = ref(false);
 const getAgentFn = async (query?: string) => {
     agentLoading.value = true;
-    const data = await getAgentList({ keyword: query });
+    const data = await getAgentList({ keyword: query, source: 1 });
     agentLists.value = data.lists;
     agentLoading.value = false;
 };

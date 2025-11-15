@@ -76,9 +76,10 @@
                         <template v-else-if="row.status == 4">
                             <el-tag type="info">已暂停</el-tag>
                         </template>
+                        <template v-else>-</template>
                     </template>
                 </el-table-column>
-                <el-table-column label="发布周期" prop="name" min-width="80">
+                <el-table-column label="发布周期" prop="name" min-width="100">
                     <template #default="{ row }">
                         <span>{{ row.publish_cycle }}天</span>
                     </template>

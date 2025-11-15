@@ -32,7 +32,8 @@ class CrontabHandler extends BaseMessageHandler
             $this->connection = $connection;
             //定时任务发布内容
             //查询在线的设备
-            $account = $this->service->getRedis()->get("xhs:{$this->connection->deviceid}:accountNo");
+            $platformType = $this->PlatformTypeEn[$this->payload['appType'] ?? 3] ?? 'xhs';
+            $account = $this->service->getRedis()->get("xhs:{$this->connection->deviceid}:{$platformType}:accountNo");
             if (empty($account)) {
                 //$this->setLog('设备:'. $this->connection->deviceid .' 没有绑定账号' , 'cron');
                 return;
@@ -70,8 +71,8 @@ class CrontabHandler extends BaseMessageHandler
                 //     //将执行app直接改为小红书
 
                 // }
-                $this->sendAppExec($this->connection->deviceid, 3);
-                sleep(30);
+                // $this->sendAppExec($this->connection->deviceid, 3);
+                // sleep(30);
                 $this->service->getRedis()->set("xhs:device:" . $this->connection->deviceid . ":taskStatus", json_encode([
                     'taskStatus' => 'running',
                     'taskType' => 'setCrontab',
@@ -93,7 +94,7 @@ class CrontabHandler extends BaseMessageHandler
                     'messageId' => $this->connection->messageid ?? '',
                     'type' => 5,
                     'deviceId' => $this->connection->deviceid ?? '',
-                    'appVersion' => $this->connection->appversion ?? '',
+                    'appVersion' => $this->connection->appversion ?? WorkerEnum::APP_VERSION,
                     'worker' => array(
                         'id' => $this->connection->id
                     ),
@@ -152,7 +153,7 @@ class CrontabHandler extends BaseMessageHandler
                     'task_id' => $app->id
                 ],
                 "deviceId" => $deviceid,
-                "appVersion" => "2.1.2"
+                "appVersion" => WorkerEnum::APP_VERSION,
             ];
 
             $this->sendResponse($this->connection->uid, $payload, $payload['reply']);

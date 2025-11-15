@@ -111,7 +111,6 @@
 <script setup lang="ts">
 import { getAnchorList, deleteAnchor } from "@/api/digital_human";
 import VideoItem from "@/ai_modules/digital_human/components/video-item/video-item.vue";
-import videoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 import { ListenerTypeEnum } from "../../enums";
 
 const dataLists = ref<any[]>([]);

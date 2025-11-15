@@ -52,22 +52,35 @@
                             </template>
                         </ElTableColumn>
                         <ElTableColumn prop="device_code" label="所属设备" />
-                        <ElTableColumn prop="robot_name" label="接管机器人" />
+                        <ElTableColumn prop="robot_name" label="接管机器人">
+                            <template #default="{ row }">
+                                <div>{{ row.robot_name || "-" }}</div>
+                            </template>
+                        </ElTableColumn>
                         <ElTableColumn label="接管类型" width="80">
                             <template #default="{ row }"> 私聊 </template>
                         </ElTableColumn>
                         <ElTableColumn prop="name" label="接管状态">
                             <template #default="{ row }">
                                 <ElSwitch
+                                    v-if="row.type == AppTypeEnum.XHS"
                                     v-model="row.open_ai"
                                     :active-value="1"
                                     :inactive-value="0"
                                     @change="changeOpenAi(row)" />
+                                <div v-else>-</div>
                             </template>
                         </ElTableColumn>
                         <ElTableColumn prop="name" label="操作" width="100px" fixed="right">
                             <template #default="{ row }">
-                                <ElButton link type="primary" @click="handleEdit(row)"> 配置 </ElButton>
+                                <ElButton
+                                    v-if="row.type == AppTypeEnum.XHS"
+                                    link
+                                    type="primary"
+                                    @click="handleEdit(row)">
+                                    配置
+                                </ElButton>
+                                <div v-else>-</div>
                             </template>
                         </ElTableColumn>
                         <template #empty>

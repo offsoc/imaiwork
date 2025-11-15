@@ -62,9 +62,7 @@
                                         class="rounded-full bg-[#ffffff33] w-[48rpx] h-[48rpx]"
                                         style="backdrop-filter: blur(5px)"
                                         @click="handlePlay(item)">
-                                        <image
-                                            src="@/ai_modules/digital_human/static/icons/play3.svg"
-                                            class="w-full h-full"></image>
+                                        <image src="/static/images/icons/play.svg" class="w-full h-full"></image>
                                     </view>
                                 </view>
                                 <view

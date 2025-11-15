@@ -85,7 +85,7 @@ class CardHandler extends BaseMessageHandler
                     'messageId' => $uid,
                     'deviceId' => $device,
                     'type' => WorkerEnum::TO_RPA_SEND_CARD,
-                    'appVersion' => '1.0',
+                    'appVersion' => WorkerEnum::APP_VERSION,
                     'appType' => $this->payload['appType'] ?? 3,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => [
@@ -101,7 +101,7 @@ class CardHandler extends BaseMessageHandler
                     'type' => WorkerEnum::WEB_SEND_CARD_TEXT,
                     'appType' => $this->payload['appType'] ?? 3,
                     'deviceId' => $this->payload['deviceId'],
-                    'appVersion' => $this->payload['appVersion'],
+                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => [
                         'type' => WorkerEnum::WEB_SEND_CARD_TEXT,
@@ -165,7 +165,7 @@ class CardHandler extends BaseMessageHandler
                         'messageId' => $uid,
                         'deviceId' => $device,
                         'type' => WorkerEnum::TO_RPA_CARDS,
-                        'appVersion' => '1.0',
+                        'appVersion' => WorkerEnum::APP_VERSION,
                         'appType' => $this->payload['appType'] ?? 3,
                         'code' => WorkerEnum::SUCCESS_CODE,
                         'reply' => [
@@ -208,7 +208,7 @@ class CardHandler extends BaseMessageHandler
                     'type' => WorkerEnum::WEB_CARDS_TEXT,
                     'appType' => $this->payload['appType'] ?? 3,
                     'deviceId' => $this->payload['deviceId'],
-                    'appVersion' => $this->payload['appVersion'],
+                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => $content
                 );
@@ -238,7 +238,7 @@ class CardHandler extends BaseMessageHandler
                     'type' => $content['type'],
                     'appType' => $this->payload['appType'] ?? 3,
                     'deviceId' => $this->payload['deviceId'],
-                    'appVersion' => $this->payload['appVersion'],
+                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => $content['reply']
                 );

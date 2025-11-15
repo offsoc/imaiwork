@@ -17,13 +17,13 @@
             <view class="mt-4">
                 <u-input
                     v-model="formData.content"
-                    placeholder="粘贴你的口文案或者输入内容"
+                    placeholder="粘贴你的口播文案或者输入内容"
                     type="textarea"
                     height="400"
                     maxlength="500"
                     placeholder-style="color: #C0C3C4;"
                     :auto-height="false" />
-                <view class="text-right mt-4 text-[#C0C3C4]"> {{ formData.content.length }}/2000 </view>
+                <view class="text-right mt-4 text-[#C0C3C4]"> {{ formData.content?.length }}/2000 </view>
             </view>
         </view>
     </view>
@@ -37,14 +37,34 @@ const formData = reactive({
 });
 
 const back = () => {
-    uni.$emit("confirm-v2", {
+    if (!formData.title && !formData.content) {
+        uni.navigateBack();
+        return;
+    }
+    if (!formData.title) {
+        uni.$u.toast("请输入标题");
+        return;
+    } else if (!formData.content) {
+        uni.$u.toast("请输入口播内容");
+        return;
+    }
+
+    uni.$emit("confirm", {
         type: ListenerTypeEnum.MONTAGE_COPYWRITER,
         data: {
-            copywriterList: formData.title && formData.content ? [formData] : [],
+            copywriterList: [formData],
         },
     });
     uni.navigateBack();
 };
+
+onLoad((options: any) => {
+    if (options.data) {
+        const data = JSON.parse(options.data);
+        formData.title = data.title;
+        formData.content = data.content;
+    }
+});
 </script>
 
 <style scoped></style>

@@ -5,7 +5,7 @@ namespace app\common\workerman\rpa\handlers;
 use app\common\workerman\rpa\BaseMessageHandler;
 use Workerman\Connection\TcpConnection;
 use app\common\workerman\rpa\WorkerEnum;
-use Workerman\Lib\Timer;
+use Workerman\Timer;
 use app\common\model\sv\SvDevice;
 use app\common\model\sv\SvPublishSettingDetail;
 use app\common\model\sv\SvReplyStrategy;
@@ -129,7 +129,7 @@ class CompletedHandler extends BaseMessageHandler
                     'type' => $content['type'],
                     'appType' => $content['appType'] ?? 3,
                     'deviceId' => $content['deviceId'],
-                    'appVersion' => $content['appVersion'] ?? '1.0.0',
+                    'appVersion' => $content['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
                 );

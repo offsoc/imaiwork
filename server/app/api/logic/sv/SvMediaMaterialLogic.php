@@ -15,6 +15,7 @@ class SvMediaMaterialLogic extends SvBaseLogic
                 'user_id' => self::$uid,
                 'content' =>  $params['content'],
                 'name' =>  $params['name'],
+                'pic' =>  $params['pic'] ?? '',
                 'sort' => $params['sort'] ?? 0,
                 'create_time' => time(),
                 'm_type'=> $params['m_type'],
@@ -44,7 +45,7 @@ class SvMediaMaterialLogic extends SvBaseLogic
             }
             $data['name'] = $params['name'];
             $data['id'] = $params['id'];
-
+            $data['pic'] = $params['pic'] ?? '';
             $material->update($data);
             self::$returnData = $material->refresh()->toArray();
             return true;

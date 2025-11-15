@@ -8,6 +8,7 @@ class WorkerEnum
     public const WS_WEB_TYPE = 'WEB_WOKER';
     public const WS_CLIENT_TYPE = 'webUser';
     public const WS_DEVICE_TYPE = 'device';
+    public const APP_VERSION = '2.4.01';
 
     public const ERROR_CODE = 400;
     public const SUCCESS_CODE = 200;
@@ -22,6 +23,34 @@ class WorkerEnum
     public const RPA_NEW_PRIVATE_MESSAGE = 8; #最新私信消息
     public const RPA_TASK_EXEC_STATUS = 9; #任务执行状态
     public const RPA_CARD_INFO = 10; #卡片信息
+    public const RPA_DEVICE_INIT = 11; #设备初始化
+    public const RPA_MSG_REPLY_STATUS = 12; #正在回复消息状态
+    public const RPA_MSG_REPLY_COMPLETED = 13; #回复消息完成
+    public const RPA_MEDIA_STATUS = 14; #图文视频发布状态更新
+
+    public const RPA_SPH_TASK_SEND = 20;//任务发送
+    public const RPA_SPH_TASK_RECORD_SAVE = 21; #任务记录保存
+    public const RPA_SPH_TASK_PAUSE = 22; #任务暂停
+    public const RPA_SPH_TASK_RESUME = 23; #任务恢复
+    public const RPA_SPH_TASK_CANCEL = 24; #任务取消
+    public const RPA_SPH_TASK_COMPLETED = 25; #任务完成
+    public const RPA_SPH_TASK_RECEIVEW  = 26; #任务接收
+
+    public const RPA_TAKE_OVER_TASK_SEND = 30;//接管任务发送
+    public const RPA_TAKE_OVER_TASK_COMPLETED = 31; #接管任务完成
+    public const RPA_TAKE_OVER_TASK_RESULT_SAVE = 32; #接管任务结果保存
+
+    public const RPA_ACTIVE_TASK_SEND = 40;//养号任务发送
+    public const RPA_ACTIVE_TASK_COMPLETED = 41; #养号任务完成
+    public const RPA_ACTIVE_TASK_RESULT_SAVE = 42; #养号任务结果保存
+
+    public const RPA_ADD_WECHAT_TASK_SEND = 50;//加微信任务发送
+
+    public const RPA_DEVICE_APP_EXEC_SEND = 90; #设备应用执行发送
+    public const RPA_DEVICE_APP_EXEC = 91; #设备应用执行
+    public const RPA_GET_WECHAT_DEVICE_CODE = 92; #获取微信设备验证码
+
+
 
     public const TO_RPA_DEVICE_INFO = 601; #获取设备信息
     public const TO_RAP_USER_INFO = 602; #获取用户信息
@@ -31,16 +60,28 @@ class WorkerEnum
     public const TO_RPA_SEND_CARD = 611; #发送卡片信息
     public const TO_RPA_SEND_MESSAGE = 6;
 
+    public const RPA_GET_ACCOUNT_APP_SEND = 701; #正在发送指令
+    public const RPA_GET_ACCOUNT_APP_EXEC = 702; #手机正在处理指令 appExec
+    public const RPA_GET_ACCOUNT_APP_OPEN = 703; #正在打开小红书 appOpen
+    public const RPA_GET_ACCOUNT_APP_PERSONAL_CENTER = 704; #正在切换到个人中心 appPersonalCenter
+    public const RPA_GET_ACCOUNT_APP_INFO = 705; #正在获取账号信息 appInfo
+    public const RPA_GET_ACCOUNT_APP_DATA_SEND = 706; #正在等待数据返回 appDataSend
+    public const RPA_GET_ACCOUNT_APP_COMPLETED = 707; #获取账号信息已完成 appCompleted
+
+
+
+
     # web指令
-    public const WEB_SOCKET_STATUS = 20; # web ws身份
-    public const WEB_USER_INFO = 21; # 用户信息
-    public const WEB_SEND_PRIVATE_MESSAGE = 22; #发送私信消息
-    public const WEB_PRIVATE_MESSAGE_LIST = 23; #私信列表
-    public const WEB_RECEIVE_PRIVATE_MESSAGE = 24; #接收私信
-    public const WEB_BIND_DEVICE = 25;#绑定设备
-    public const WEB_CARDS = 26; #名片列表
-    public const WEB_POST_STATUS_LIST = 27; #名片列表
-    public const WEB_SEND_CARD = 28; #web端发送卡片消息
+    public const WEB_SOCKET_STATUS = 80; # web ws身份
+    public const WEB_GET_USER_INFO = 81; # 用户信息
+    public const WEB_SEND_PRIVATE_MESSAGE = 82; #发送私信消息
+    public const WEB_PRIVATE_MESSAGE_LIST = 83; #私信列表
+    public const WEB_RECEIVE_PRIVATE_MESSAGE = 84; #接收私信
+    public const WEB_BIND_DEVICE = 85;#绑定设备
+    public const WEB_CARDS = 86; #名片列表
+    public const WEB_POST_STATUS_LIST = 87; #名片列表
+    public const WEB_SEND_CARD = 88; #web端发送卡片消息
+    
     
     
 
@@ -49,6 +90,7 @@ class WorkerEnum
     public const SEND_CARD_OK = 2003; #发送名片成功
     public const MSG_REPLY_RUNNING = 2004; #设备正在回复消息中
     public const MSG_REPLY_COMPLETED = 2005; #设备回复消息完成
+    public const DEVICE_ONLINE = 2006; #设备已连接
 
     public const INVALID_REQUEST = 4004; #无效请求
     public const DEVICE_OFFLINE = 4005; #设备断开
@@ -95,6 +137,18 @@ class WorkerEnum
     public const SPH_RECEIVED_ERROR_CODE = 4044;//任务接收异常;
     public const DEVICE_EXEC_OTHER_APP_ERROR_CODE = 4045;//正在执行其他app;
 
+    public const RPA_APP_OPEN_FAIL = 4046;//打开app失败;
+    public const RPA_APP_PERSONAL_CENTER_FAIL = 4047;//打开个人中心失败;
+    public const RPA_APP_USERINFO_BEFORE_FAIL = 4048;//获取账号信息失败;
+    public const RPA_APP_COMPLETED_FAIL = 4049;//获取账号信息失败;
+    public const RPA_APP_DATA_SEND_FAIL = 4050;//数据发送失败;
+    public const RPA_APP_EXEC_FAIL = 4051;//手机处理指令失败;
+    public const RPA_APP_INFO_FAIL = 4052;//获取信息失败;
+    public const RPA_APP_SEND_FAIL = 4053;//正在发送数据失败;
+    public const WEB_GET_WECHAT_USER_INFO_FAIL = 4054;//获取微账号信息失败;
+
+
+
 
 
 
@@ -103,7 +157,7 @@ class WorkerEnum
     #指令映射
     public const WEB_SOCKET_STATUS_TEXT = 'bindSocket';
     public const WEB_BIND_DEVICE_TEXT = 'addDevice';
-    public const WEB_USER_INFO_TEXT = 'getUserInfo';
+    public const WEB_GET_USER_INFO_TEXT = 'getUserInfo';
     public const WEB_SEND_PRIVATE_MESSAGE_TEXT = 'sendPrivateMessage';
     public const WEB_PRIVATE_MESSAGE_LIST_TEXT = 'getPrivateMessageList';
     public const WEB_RECEIVE_PRIVATE_MESSAGE_TEXT = 'receivePrivateMessage';
@@ -113,9 +167,11 @@ class WorkerEnum
     public const WEB_INIT_CHECK_TEXT = 'initCheck';
     public const WEB_INVALID_REQUEST_TEXT = 'invalidRequest';
     public const WEB_DEVICE_OFFLINE_TEXT = 'deviceOffline';
+    public const WEB_DEVICE_ONLINE_TEXT = 'deviceOnline';
     public const DEFAULT_TEXT = 'default';
     public const WEB_SEND_CARD_TEXT = 'sendCard';
     public const WEB_STOP_AI_TEXT ='stopAi';
+    
     /**
      * 指令描述
      */
@@ -125,7 +181,7 @@ class WorkerEnum
         "initComplete" => self::DEVICE_INIT_OK,
         "bindSocket" => self::WEB_SOCKET_STATUS,
         "addDevice" => self::WEB_BIND_DEVICE,
-        'getUserInfo' => self::WEB_USER_INFO,
+        'getUserInfo' => self::WEB_GET_USER_INFO,
         'sendPrivateMessage' => self::WEB_SEND_PRIVATE_MESSAGE,
         'getPrivateMessageList' => self::WEB_PRIVATE_MESSAGE_LIST,
         'receivePrivateMessage' => self::WEB_RECEIVE_PRIVATE_MESSAGE,
@@ -149,7 +205,7 @@ class WorkerEnum
         self::DEVICE_INIT_OK => '设备初始化完成',
         self::WEB_SOCKET_STATUS => '绑定socket',
         self::WEB_BIND_DEVICE => '绑定设备',
-        self::WEB_USER_INFO => '用户信息',
+        self::WEB_GET_USER_INFO => '用户信息',
         self::WEB_SEND_PRIVATE_MESSAGE => '发送私信消息',
         self::WEB_PRIVATE_MESSAGE_LIST => '私信列表',
         self::WEB_RECEIVE_PRIVATE_MESSAGE => '接收私信',
@@ -189,6 +245,7 @@ class WorkerEnum
         self::DEVICE_INVALID_REQUEST => '设备参数无效',
         self::WEB_USER_INVALID_REQUEST => '用户参数无效',
         self::WEB_GET_USER_INFO_FAIL => '获取账号信息失败,请重新获取',
+        self::WEB_GET_WECHAT_USER_INFO_FAIL => '获取微账号信息失败,请先绑定个微,再重新获取',
         self::SPH_STATUS_ERROR_CODE => '视频号任务状态异常',
         self::SPH_DELETE_ERROR_CODE => '视频号任务删除异常',
         self::SPH_PAUSE_ERROR_CODE => '视频号任务暂停异常',
@@ -199,6 +256,14 @@ class WorkerEnum
         self::DEVICE_EXEC_APP_ERROR_CODE => '设备执行应用异常',
         self::SPH_RECEIVED_ERROR_CODE => '视频号任务接收异常',
         self::DEVICE_EXEC_OTHER_APP_ERROR_CODE => '正在执行其他app',
+        self::RPA_APP_OPEN_FAIL => '打开app失败',
+        self::RPA_APP_PERSONAL_CENTER_FAIL => '打开个人中心失败',
+        self::RPA_APP_USERINFO_BEFORE_FAIL => '获取账号信息失败',
+        self::RPA_APP_COMPLETED_FAIL => '获取账号信息失败',
+        self::RPA_APP_DATA_SEND_FAIL => '数据发送失败',
+        self::RPA_APP_EXEC_FAIL => '手机处理指令失败',
+        self::RPA_APP_INFO_FAIL => '正在获取信息失败',
+        self::RPA_APP_SEND_FAIL => '正在发送数据失败',
 
     ];
     /**
@@ -208,4 +273,20 @@ class WorkerEnum
     {
         return self::$messages[$code] ?? '未知错误';
     }
+
+    public static function getAccountTypeDesc($type, $flag = false)
+    {
+        $desc = [
+            0 => '未知',
+            1 => '视频号',
+            3 => '小红书',
+            4 => '抖音',
+            5 => '快手',
+        ];
+        if ($flag) {
+            return $desc;
+        }
+        return $desc[$type] ?? '';
+    }
+
 }

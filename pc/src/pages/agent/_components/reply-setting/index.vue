@@ -160,7 +160,6 @@
 
 <script setup lang="ts">
 import { saveReplyStrategy, getReplyStrategy } from "@/api/agent";
-import { validateSchedule } from "@/pages/app/redbook/_components/utils";
 import dayjs from "dayjs";
 
 /**
@@ -285,6 +284,42 @@ const handleConfirm = async () => {
         feedback.msgError((error as string) || "保存失败");
     }
 };
+
+function validateSchedule(list) {
+    const toMin = (t) => {
+        const [h, m] = (t || "").split(":").map(Number);
+        return h * 60 + m;
+    };
+
+    for (let i = 0; i < list.length; i++) {
+        const cur = list[i];
+
+        // 1. 空值检查
+        if (!cur || cur.start_time == null || cur.start_time === "" || cur.end_time == null || cur.end_time === "") {
+            return { valid: false, errorType: "选择时间不能为空", indexes: [i] };
+        }
+
+        const s = toMin(cur.start_time);
+        const e = toMin(cur.end_time);
+
+        // 2. 自己倒序
+        if (s >= e) {
+            return { valid: false, errorType: "选择时间冲突", indexes: [i] };
+        }
+
+        // 3. 与上一段比较
+        if (i > 0) {
+            const prev = list[i - 1];
+            const pe = toMin(prev.end_time);
+
+            if (s < pe) {
+                // 重叠 / 顺序错误
+                return { valid: false, errorType: "选择时间冲突", indexes: [i - 1, i] };
+            }
+        }
+    }
+    return { valid: true, indexes: [] };
+}
 
 // 使用 useLockFn 防止重复提交
 const { lockFn: lockSubmit, isLock: isLockSubmit } = useLockFn(handleConfirm);

@@ -112,7 +112,7 @@ class TriggerValidate extends BaseValidate
             
             $exists = Db::name('ai_wechat_sop_stage_trigger')->where($where)->find();
             if ($exists) {
-                return '该阶段下已存在相同的聊天触发条件';
+                return '该触发条件已存在于其它阶段！';
             }
         }
 

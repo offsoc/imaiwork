@@ -148,6 +148,9 @@ class StorageLogic extends BaseLogic
                 break;
             case 'qiniu':
                 ConfigService::set('storage', 'qiniu', [
+                    'PipelineId' => $params['PipelineId'] ?? '',
+                    'Location' => $params['Location'] ?? '',
+                    'TemplateId' => $params['TemplateId'] ?? '',
                     'bucket' => $params['bucket'] ?? '',
                     'access_key' => $params['access_key'] ?? '',
                     'secret_key' => $params['secret_key'] ?? '',
@@ -172,6 +175,7 @@ class StorageLogic extends BaseLogic
                     'access_key' => $params['access_key'] ?? '',
                     'secret_key' => $params['secret_key'] ?? '',
                     'domain' => $params['domain'] ?? '',
+                    'TemplateId' => $params['TemplateId'] ?? '',
                 ]);
                 break;
         }

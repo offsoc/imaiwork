@@ -320,3 +320,26 @@ export const isJson = (value: string) => {
         return false;
     }
 };
+
+/**
+ * 格式化数字
+ * 需求：
+ * 1. 如果数字小于10000，则直接显示数字
+ * 2. 如果数字大于10000，则显示10000+
+ * 3. 如果数字大于100000000，则显示1亿+
+ * 4. 如果数字大于10000000000，则显示10亿+
+ * 5. 如果数字大于1000000000000，则显示100亿+
+ * 6. 如果数字大于100000000000000，则显示1000亿+
+ * 7. 如果数字大于10000000000000000，则显示10000亿+
+ * @param num 数字
+ * @returns 格式化后的数字
+ */
+export const formatNumberToWanOrYi = (num: number) => {
+    if (num < 10000) return num;
+    if (num < 100000000) return `${(num / 10000).toFixed(1)}万`;
+    if (num < 10000000000) return `${(num / 100000000).toFixed(1)}亿`;
+    if (num < 1000000000000) return `${(num / 10000000000).toFixed(1)}亿`;
+    if (num < 100000000000000) return `${(num / 1000000000000).toFixed(1)}亿`;
+    if (num < 10000000000000000) return `${(num / 100000000000000).toFixed(1)}亿`;
+    return `${(num / 10000000000000000).toFixed(1)}亿`;
+};

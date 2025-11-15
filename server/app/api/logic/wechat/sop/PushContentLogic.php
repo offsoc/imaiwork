@@ -261,6 +261,7 @@ class PushContentLogic extends ApiLogic
 
             foreach ($contents as $content) {
                 $where = [];
+                $items = json_decode($content['content'], true);
                 // 1-流程推送,2-阶段推送,3-生日推送,4-节日推送
                 if (in_array($content['type'], [1,3,4])){
                     $where[] = ['flow_id','=',(int)$content['flow_id']];
@@ -282,8 +283,7 @@ class PushContentLogic extends ApiLogic
                             }
                         }
                         $responses = [];
-                        $content['content'] = json_decode($content['content'], true);
-                        foreach ($content['content'] as $item) {
+                        foreach ($items as $item) {
                             $item = self::format_content($item);
                             $responses[] = self::wxPush([
                                                             'wechat_id'    => $member['wechat_id'],
@@ -314,7 +314,7 @@ class PushContentLogic extends ApiLogic
                                 'user_id'        => $member['user_id'],
                                 'push_id'        => $content['push_id'],
                                 'content_id'     => $content['content_id'],
-                                'content'        => json_encode($content['content']),
+                                'content'        => $content['content'],
                                 'push_real_day'  => $content['push_real_day'],
                                 'push_real_time' => $content['push_time'],
                                 'status'         => 1,

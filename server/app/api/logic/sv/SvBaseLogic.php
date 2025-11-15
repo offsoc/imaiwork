@@ -29,9 +29,9 @@ class SvBaseLogic extends ApiLogic
      * @param string $account
      * @return bool|SvAccount
      */
-    protected static function accountInfo(string $account, bool $check = true): bool|SvAccount
+    protected static function accountInfo(string $account, bool $check = true, int $accountType = 3): bool|SvAccount
     {
-        $account = SvAccount::where('account', $account)->when($check, function ($query) {
+        $account = SvAccount::where('account', $account)->where('type', $accountType)->when($check, function ($query) {
             $query->where('user_id', self::$uid);
         })->findOrEmpty();
         if ($account->isEmpty()) {

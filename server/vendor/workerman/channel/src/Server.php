@@ -1,6 +1,7 @@
 <?php
 namespace Channel;
 
+use Workerman\Protocols\Frame;
 use Workerman\Worker;
 
 /**
@@ -20,14 +21,23 @@ class Server
      */
     protected $_queues = array();
 
+    private $ip;
+
     /**
      * Construct.
-     * @param string $ip
-     * @param int $port
+     * @param string $ip Bind ip address or unix domain socket.
+     * Bind unix domain socket use 'unix:///tmp/channel.sock'
+     * @param int $port Tcp port to bind, only used when listen on tcp.
      */
     public function __construct($ip = '0.0.0.0', $port = 2206)
     {
-        $worker = new Worker("frame://$ip:$port");
+        if (strpos($ip, 'unix:') === false) {
+            $worker = new Worker("frame://$ip:$port");
+        } else {
+            $worker = new Worker($ip);
+            $worker->protocol = Frame::class;
+        }
+        $this->ip = $ip;
         $worker->count = 1;
         $worker->name = 'ChannelServer';
         $worker->channels = array();
@@ -104,10 +114,26 @@ class Server
                     if (empty($worker->channels[$channel])) {
                         continue;
                     }
-                    $buffer = serialize(array('type' => 'event', 'channel' => $channel, 'data' => $data['data']))."\n";
+                    $buffer = serialize(array('type' => 'event', 'channel' => $channel, 'data' => $data['data']));
                     foreach ($worker->channels[$channel] as $connection) {
                         $connection->send($buffer);
                     }
+                }
+                break;
+            case 'publishLoop':
+                //choose one subscriber from the list
+                foreach ($data['channels'] as $channel) {
+                    if (empty($worker->channels[$channel])) {
+                        continue;
+                    }
+                    $buffer = serialize(array('type' => 'event', 'channel' => $channel, 'data' => $data['data']));
+
+                    //这是要点，每次取出一个元素，如果取不到，说明已经到最后，重置到第一个
+                    $connection = next($worker->channels[$channel]);
+                    if( $connection == false ){
+                        $connection = reset($worker->channels[$channel]);
+                    }
+                    $connection->send($buffer);
                 }
                 break;
             case 'watch':

@@ -6,7 +6,7 @@
                 v-if="progressValue < 100">
                 <template v-if="!progressError">
                     <div class="text-primary text-lg mt-8">请耐心等待</div>
-                    <div class="text-primary text-[24px] font-bold mt-3">正在获取账号信息中...</div>
+                    <div class="text-primary text-[24px] font-bold mt-3">{{ step || "正在获取账号信息中..." }}</div>
                     <div class="w-full mt-4">
                         <ElProgress :percentage="progressValue" :stroke-width="10" striped striped-flow />
                     </div>
@@ -46,6 +46,7 @@
 const props = defineProps<{
     progressValue: number;
     progressError: boolean;
+    step: string;
 }>();
 
 const emit = defineEmits<{

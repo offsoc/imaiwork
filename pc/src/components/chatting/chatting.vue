@@ -52,8 +52,8 @@
                     ? 'flex-1 flex flex-col items-center justify-center -mt-[var(--nav-height)]'
                     : 'flex-none mt-2',
             ]">
-            <slot name="content" v-if="contentList.length == 0"></slot>
-            <div class="w-full mt-6">
+            <slot name="content" v-if="contentList.length == 0" class="mb-6"></slot>
+            <div class="w-full">
                 <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto mb-4 relative">
                     <div class="flex flex-col">
                         <slot name="chat-area-top" />

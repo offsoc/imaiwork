@@ -1,6 +1,6 @@
 {
-    "name": "imai.work",
-    "version": "2.4.2",
+    "name": "uni-app",
+    "version": "2.5.0",
     "scripts": {
         "init": "node initialize.js",
         "dev": "node scripts/develop.js",

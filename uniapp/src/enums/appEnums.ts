@@ -109,6 +109,8 @@ export enum TokensSceneEnum {
     SHANJIAN_COPYWRITING_CREATE = "shanjian_copywriting_create",
     SPH_OCR = "sph_ocr",
     SPH_LOCAL_OCR = "sph_local_ocr",
+    MATRIX_COPYWRITER = "matrix_copywriting",
+    SPH_AI_CLUE = "sph_search_terms",
 }
 
 export enum KnbTypeEnum {
@@ -121,7 +123,99 @@ export enum ModelIdEnum {
     GPT_4O = 2,
 }
 
+// 1微信视频号 3小红书 4抖音 5快手
 export enum AppTypeEnum {
     SPH = 1,
+    WECHAT = 1,
     XHS = 3,
+    DOUYIN = 4,
+    KUAISHOU = 5,
 }
+
+// 设备指令类型
+export enum DeviceCmdEnum {
+    // 绑定Ws
+    BIND_WS = "bindSocket",
+    // 检查初始化
+    CHECK_INIT = "initCheck",
+    // 初始化完成
+    INIT_COMPLETE = "initComplete",
+    // 添加设备
+    ADD_DEVICE = "addDevice",
+    // 获取用户信息
+    GET_USER_INFO = "getUserInfo",
+    // 获取名片
+    GET_BUSINESS_CARD = "getCards",
+    // 处理指令
+    APP_EXEC = "appExec",
+    // 打开app
+    OPEN_APP = "appOpen",
+    // 打开个人中心
+    OPEN_PERSON_CENTER = "appPersonalCenter",
+    // 获取账号信息
+    GET_ACCOUNT_INFO = "appInfo",
+    // 数据发送
+    DATA_SEND = "appDataSend",
+    // 获取账号信息完成
+    GET_ACCOUNT_INFO_COMPLETE = "appCompleted",
+}
+
+// 设备指令返回码
+export enum DeviceCmdCodeEnum {
+    // 成功
+    SUCCESS = 200,
+    // 失败
+    FAIL = 400,
+    // ws连接失败
+    CONNECT_ERROR = 1000,
+    // ws推送消息异常
+    PUSH_MESSAGE_ERROR = 1001,
+    // 消息解析失败
+    PARSE_ERROR = 1002,
+    // 初始化完成
+    INIT_COMPLETE = 2001,
+    // 初始化检查
+    CHECK_INIT = 2002,
+    // 接口异常
+    API_ERROR = 3000,
+    // 无效请求
+    INVALID_REQUEST = 4004,
+    // 设备已断开，请重新启动设备
+    DEVICE_DISCONNECTED = 4005,
+    // 获取卡片错误
+    GET_CARD_ERROR = 4006,
+    // 缺少用户信息
+    MISSING_USER_INFO = 4007,
+    // 无效请求，设备参数不存在
+    INVALID_REQUEST_DEVICE_PARAM = 4010,
+    // 设备初始化未完成
+    DEVICE_INIT_NOT_COMPLETE = 4011,
+    // 设备指令异常
+    DEVICE_CMD_ERROR = 4012,
+    // 设备不存在
+    DEVICE_NOT_EXIST = 4013,
+    // 设备已绑定
+    DEVICE_ALREADY_BOUND = 4015,
+    OPEN_APP_ERROR = 4046,
+    OPEN_PERSON_CENTER_ERROR = 4047,
+    GET_ACCOUNT_INFO_ERROR = 4052,
+    DATA_SEND_ERROR = 4050,
+    GET_ACCOUNT_INFO_COMPLETE_ERROR = 4049,
+}
+
+// ws错误消息
+export const DeviceWsMessage = {
+    [DeviceCmdCodeEnum.CONNECT_ERROR]: "连接失败，请检查网络连接",
+    [DeviceCmdCodeEnum.PUSH_MESSAGE_ERROR]: "推送消息异常，请检查网络连接",
+    [DeviceCmdCodeEnum.DEVICE_DISCONNECTED]: "设备已断开，请重新启动设备",
+    [DeviceCmdCodeEnum.PARSE_ERROR]: "消息解析失败",
+    [DeviceCmdCodeEnum.API_ERROR]: "接口异常",
+    [DeviceCmdCodeEnum.INVALID_REQUEST]: "无效请求",
+    [DeviceCmdCodeEnum.GET_CARD_ERROR]: "获取卡片错误",
+    [DeviceCmdCodeEnum.MISSING_USER_INFO]: "缺少用户信息",
+    [DeviceCmdCodeEnum.INVALID_REQUEST_DEVICE_PARAM]: "无效请求，设备参数不存在",
+    [DeviceCmdCodeEnum.DEVICE_INIT_NOT_COMPLETE]: "设备初始化未完成",
+    [DeviceCmdCodeEnum.DEVICE_CMD_ERROR]: "设备指令异常",
+    [DeviceCmdCodeEnum.DEVICE_NOT_EXIST]: "设备不存在",
+    [DeviceCmdCodeEnum.DEVICE_ALREADY_BOUND]: "设备已绑定",
+};

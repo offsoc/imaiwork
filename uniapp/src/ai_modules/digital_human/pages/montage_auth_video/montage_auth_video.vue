@@ -52,7 +52,6 @@
 <script setup lang="ts">
 import { shanjianAnchorAuthorizedList } from "@/api/digital_human";
 import { ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
-import VideoPreview from "@/ai_modules/digital_human/components/video-preview/video-preview.vue";
 
 const dataList = ref<any[]>([]);
 const pagingRef = ref<any>(null);

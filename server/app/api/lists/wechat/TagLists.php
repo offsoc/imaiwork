@@ -5,8 +5,6 @@ namespace app\api\lists\wechat;
 use app\api\lists\BaseApiDataLists;
 use app\common\lists\ListsSearchInterface;
 use app\common\model\wechat\AiWechatTag;
-use app\common\model\wechat\AiWechatContact;
-use app\common\model\wechat\AiWechat;
 
 /**
  * 标签列表及统计
@@ -34,7 +32,7 @@ class TagLists extends BaseApiDataLists implements ListsSearchInterface
         $this->searchWhere[] = ['user_id', '=', $this->userId];
 
         // 获取微信ID
-        $wechatId = AiWechat::where('user_id', $this->userId)->value('wechat_id', '');
+        $wechatId = $this->request->get('wechat_id');
 
         // 获取标签列表
         $tagList = AiWechatTag::where('user_id', $this->userId)

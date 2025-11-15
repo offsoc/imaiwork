@@ -66,7 +66,7 @@ class InteractiveMessageHandler extends BaseMessageHandler
                 'messageId' => $uid,
                 'deviceId' => $this->payload['deviceId'],
                 'type' => WorkerEnum::TO_RAP_POST_STATUS_LIST,
-                'appVersion' => '1.0',
+                'appVersion' => WorkerEnum::APP_VERSION,
                 'appType' => $this->payload['appType'] ?? 3,
                 'code' => WorkerEnum::SUCCESS_CODE,
                 'reply' => [

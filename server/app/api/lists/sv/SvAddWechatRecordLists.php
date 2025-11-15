@@ -20,7 +20,7 @@ class SvAddWechatRecordLists extends BaseApiDataLists implements ListsSearchInte
 {
     private array $channel = array(
         3 => '小红书',
-        2 => '视频号',
+        1 => '视频号',
     );
 
     public function setSearch(): array

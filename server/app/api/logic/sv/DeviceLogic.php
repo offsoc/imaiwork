@@ -44,6 +44,12 @@ class DeviceLogic extends SvBaseLogic
 
             $params['user_id'] = self::$uid;
 
+            \think\facade\Cache::store('redis')->select(env('redis.WS_SELECT', 8));
+            $wechatCode = \think\facade\Cache::store('redis')->get("xhs:device:{$params['device_code']}:wechat_code");
+            if ($wechatCode) {
+                $params['wechat_device_code'] = $wechatCode;
+            }
+
             // 添加设备  
             $device = SvDevice::create($params);
 
@@ -200,7 +206,7 @@ class DeviceLogic extends SvBaseLogic
     public static function execDeviceRpaCron()
     {
         //只允许在线设备
-        $devices = SvDeviceRpa::field('device_code')->where('device_code', 'in', function($query){
+        $devices = SvDeviceRpa::field('device_code')->where('device_code', 'in', function ($query) {
             $query->name('sv_device')->where('status', 1)->field('device_code');
         })->where('is_enable', 1)->group('device_code')->select()->toArray();
 
@@ -214,10 +220,10 @@ class DeviceLogic extends SvBaseLogic
                 if ($endTime > time()) {
                     //未过期
                     continue;
-                } 
+                }
                 //发送过期消息
                 self::sendNextExecApp($running, true);
-            }else{
+            } else {
                 //没有正在执行的设备
                 $running = SvDeviceRpa::where('device_code', $device['device_code'])
                     ->where('status', '=', 0)
@@ -238,19 +244,19 @@ class DeviceLogic extends SvBaseLogic
                 ->where('status', 0)
                 ->order('start_time asc, weight asc')
                 ->findOrEmpty();
-        }else{
+        } else {
             $appinfo = $running;
         }
 
         if ($appinfo->isEmpty()) {
             return;
         }
-        
+
         $payload = [
             "messageId" => 2,
             "type" => 90, //执行那个app指令
             "appType" => $appinfo->app_type,
-            "content" => json_encode( [
+            "content" => json_encode([
                 "deviceId" => $appinfo->device_code,
                 "appType" => $appinfo->app_type,
                 'msg' => self::$appMaps[$appinfo->app_type],

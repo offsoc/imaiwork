@@ -142,6 +142,7 @@ const { pager, getLists, resetPage } = usePaging({
 const contentRef = ref<HTMLElement>();
 
 const handleTabClick = (tab: any) => {
+    if (currentTab.value == tab.paneName) return;
     currentTab.value = tab.paneName as KnTypeEnum;
     resetPage();
 };

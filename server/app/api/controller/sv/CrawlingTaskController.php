@@ -207,4 +207,17 @@ class CrawlingTaskController extends BaseApiController
         }
         return $this->fail(CrawlingTaskLogic::getError());
     }
+
+    public function subtasks(){
+        try {
+            $params = $this->request->post();
+            $result = CrawlingTaskLogic::subtasks($params);
+            if ($result) {
+                return $this->data(CrawlingTaskLogic::getReturnData());
+            }
+            return $this->fail(CrawlingTaskLogic::getError());
+        } catch (HttpResponseException $e) {
+            return $this->fail($e->getResponse()->getData()['msg'] ?? '');
+        }
+    }
 }

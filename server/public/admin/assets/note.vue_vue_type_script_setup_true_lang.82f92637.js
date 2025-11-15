@@ -1,1 +1,0 @@
-import{U as s}from"./element-plus.09e738c5.js";import{d as c,o as e,c as o,F as r}from"./@vue.b0c8b5fa.js";const _={class:"h-full"},p=["innerHTML"],d=c({__name:"note",props:{content:{}},setup(a){return(n,l)=>{const t=s;return e(),o("div",_,[n.content?(e(),o("div",{key:0,innerHTML:n.content},null,8,p)):(e(),r(t,{key:1}))])}}});export{d as _};

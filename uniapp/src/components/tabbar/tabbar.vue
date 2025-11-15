@@ -9,19 +9,19 @@
 </template>
 
 <script lang="ts" setup>
-import { useAppStore } from "@/stores/app";
 import { useNavigationBarTitleStore } from "@/stores/navigationBarTitle";
 import { navigateTo } from "@/utils/util";
 import { useRoute } from "uniapp-router-next";
-import ChatIcon from "@/static/images/tabbar/chat.svg";
-import ChatSelectedIcon from "@/static/images/tabbar/chat_s.svg";
-import AssistantIcon from "@/static/images/tabbar/assistant.svg";
-import AssistantSelectedIcon from "@/static/images/tabbar/assistant_s.svg";
-import StaffIcon from "@/static/images/tabbar/staff.svg";
-import StaffSelectedIcon from "@/static/images/tabbar/staff_s.svg";
-import MeIcon from "@/static/images/tabbar/me.svg";
-import MeSelectedIcon from "@/static/images/tabbar/me_s.svg";
-const appStore = useAppStore();
+import ChatIcon from "@/static/images/tabbar/chat.png";
+import ChatSelectedIcon from "@/static/images/tabbar/chat_s.png";
+import AgentIcon from "@/static/images/tabbar/agent.png";
+import AgentSelectedIcon from "@/static/images/tabbar/agent_s.png";
+import StaffIcon from "@/static/images/tabbar/staff.png";
+import StaffSelectedIcon from "@/static/images/tabbar/staff_s.png";
+import PhoneIcon from "@/static/images/tabbar/phone.png";
+import PhoneSelectedIcon from "@/static/images/tabbar/phone_s.png";
+import MeIcon from "@/static/images/tabbar/me.png";
+import MeSelectedIcon from "@/static/images/tabbar/me_s.png";
 const route = useRoute();
 const navigationBarTitleStore = useNavigationBarTitleStore();
 const tabbarList = computed(() => {
@@ -29,15 +29,15 @@ const tabbarList = computed(() => {
         {
             iconPath: ChatIcon,
             selectedIconPath: ChatSelectedIcon,
-            text: "聊天",
+            text: "AI聊天",
             link: {
                 path: "/pages/index/index",
             },
         },
         {
-            iconPath: AssistantIcon,
-            selectedIconPath: AssistantSelectedIcon,
-            text: "AI助理",
+            iconPath: AgentIcon,
+            selectedIconPath: AgentSelectedIcon,
+            text: "智能体",
             link: {
                 path: "/pages/agent/agent",
             },
@@ -48,6 +48,14 @@ const tabbarList = computed(() => {
             text: "AI员工",
             link: {
                 path: "/pages/staff/staff",
+            },
+        },
+        {
+            iconPath: PhoneIcon,
+            selectedIconPath: PhoneSelectedIcon,
+            text: "AI手机",
+            link: {
+                path: "/pages/phone/phone",
             },
         },
         {

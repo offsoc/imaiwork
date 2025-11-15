@@ -43,7 +43,7 @@
                                     src="@/ai_modules/digital_human/static/images/common/user_tone.svg"></image>
                             </view>
                             <view class="flex-1 text-[26rpx]">
-                                {{ item.name }}
+                                <text class="line-clamp-1 break-all">{{ item.name }}</text>
                             </view>
                             <view
                                 class="flex-shrink-0 px-[24rpx] h-[60rpx] flex items-center justify-center rounded-full text-[26rpx] bg-[#F2F2F2] text-[#A9A9A9]">
@@ -111,7 +111,7 @@ const dataLists = ref<any[]>([]);
 const queryParams = reactive<any>({
     name: "",
     model_version: props.modelVersion,
-    status: "",
+    status: 1,
     builtin: 1,
 });
 const queryList = async (page_no: number, page_size: number) => {

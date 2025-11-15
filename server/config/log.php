@@ -64,7 +64,7 @@ return [
             'format'         => '[%s][%s] %s',
             'apart_level'   =>  [
                 'error', 'info', 'send', 'device', 'user', 'msg', 'msg_list', 'card', 'cron', 'bind', 'init', 'note', 'post',
-                'task_delete', 'task_paused', 'task_recovery', 'task_send', 'task_record','channel'
+                'task_delete', 'task_paused', 'task_recovery', 'task_send', 'task_record','channel', 'ws'
             ],
         ],
         'wechat_socket' => [
@@ -95,6 +95,14 @@ return [
             'path'           => app()->getRootPath() . '/runtime/log/crontab/',
             'json'           => false,
             'format'         => '[%s][%s] %s',
+        ],
+        'device' => [
+            'type'           => 'File',
+            'path'           => app()->getRootPath() . '/runtime/log/device/',
+            'json'           => false,
+            'time_format'    => 'Y-m-d H:i:s',
+            'format'         => '[%s][%s] %s',
+            'apart_level'   =>  ['error', 'info', 'warning', 'publish', 'clues', 'add_wechat', 'active', 'take_over'],
         ],
         'clip' => [
             'type'           => 'File',

@@ -12,6 +12,8 @@ use app\common\model\ChatPrompt;
 use app\common\model\kb\KbRobot;
 use app\common\model\sv\SvAccount;
 use app\common\model\sv\SvAccountContact;
+use app\common\model\sv\SvAccountLog;
+
 use app\common\model\sv\SvAccountKeyword;
 use app\common\model\sv\SvAddWechatRecord;
 use app\common\model\sv\SvAddWechatStrategy;
@@ -25,7 +27,7 @@ use app\common\workerman\rpa\BaseMessageHandler;
 use app\common\workerman\rpa\WorkerEnum;
 use think\facade\Db;
 use Workerman\Connection\TcpConnection;
-use Workerman\Lib\Timer;
+use Workerman\Timer;
 
 class MessageHandler extends BaseMessageHandler
 {
@@ -147,7 +149,7 @@ class MessageHandler extends BaseMessageHandler
                         'messageId' => $uid,
                         'deviceId' => $device,
                         'type' => WorkerEnum::TO_RPA_SEND_MESSAGE,
-                        'appVersion' => '1.0',
+                        'appVersion' => WorkerEnum::APP_VERSION,
                         'appType' => 3,
                         'code' => WorkerEnum::SUCCESS_CODE,
                         'reply' => [
@@ -181,7 +183,8 @@ class MessageHandler extends BaseMessageHandler
         $this->setLog('收到的私信消息:' . $this->payload['deviceId'], 'msg');
         $this->setLog($content, 'msg');
         try {
-            $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:accountNo");
+            $platformType = $this->PlatformTypeEn[$this->payload['appType'] ?? 3] ?? 'xhs';
+            $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:{$platformType}:accountNo");
             if (empty($accountNo)) {
                 $this->setLog('设备未更新账号信息,请先更新账号信息', 'msg');
                 $accountNo = '';
@@ -237,7 +240,7 @@ class MessageHandler extends BaseMessageHandler
 
             //1 查询私信用户信息是否存在,不存在则创建,并讲私信消息记录
             $friend = $this->getFriendInfo($account, $content);
-            $this->addMessage($account, $friend, $content);
+            $newMsgIds = $this->addMessage($account, $friend, $content);
             //2 检查账号是否开启了ai,未开启则将消息推送到客户端
             if ($account->takeover_mode == 1) {
                 //3 开启了ai回复
@@ -248,7 +251,7 @@ class MessageHandler extends BaseMessageHandler
                     $this->sendError($this->connection, $this->payload);;
 
                     $this->sendErrorResponse($content, $this->payload['reply']);
-                    $this->updatePrivateMessageStatus($account, $friend);
+                    $this->updatePrivateMessageStatus($account, $friend, $this->payload['reply']);
                     return;
                 }
 
@@ -261,7 +264,7 @@ class MessageHandler extends BaseMessageHandler
                     $this->sendError($this->connection, $this->payload);;
 
                     $this->sendErrorResponse($content, $this->payload['reply']);
-                    $this->updatePrivateMessageStatus($account, $friend);
+                    $this->updatePrivateMessageStatus($account, $friend, $this->payload['reply']);
                     return;
                 }
                 $this->setLog('机器人:', 'msg');
@@ -301,6 +304,7 @@ class MessageHandler extends BaseMessageHandler
                     'message_type' => $content['message_type'] ?? 1,
                     'model' => $robot->model ?? 'deepseek',
                     'robot' => $robot->toArray(),
+                    'newMsgIds' => $newMsgIds,
                 ];
                 $keys = $this->checkCradKeyword($account, $request);
                 $request['message'] = empty($keys) ? $content['replyContent'] : $keys;
@@ -336,7 +340,7 @@ class MessageHandler extends BaseMessageHandler
                             $request['message']      = $nonWorkingReply;
                             $request['message_list'] = [$nonWorkingReply];
                             $this->send($request);
-                            $this->updatePrivateMessageStatus($account, $friend);
+                            $this->updatePrivateMessageStatus($account, $friend, $nonWorkingReply);
                             return;
                         }
                     }
@@ -349,7 +353,7 @@ class MessageHandler extends BaseMessageHandler
                     $request['message_list'] = [$reply->image_reply];
                     $request['message_type'] = 1;
                     $this->send($request);
-                    $this->updatePrivateMessageStatus($account, $friend);
+                    $this->updatePrivateMessageStatus($account, $friend, $reply->image_reply);
                     return;
                 }
 
@@ -360,7 +364,7 @@ class MessageHandler extends BaseMessageHandler
                         $request['message']  = $reply->bottom_reply;
                         $request['message_list'] = [$reply->bottom_reply];
                         $this->send($request);
-                        $this->updatePrivateMessageStatus($account, $friend);
+                        $this->updatePrivateMessageStatus($account, $friend, $reply->bottom_reply);
                         return;
                     }
                 }
@@ -406,6 +410,7 @@ class MessageHandler extends BaseMessageHandler
                     $messages = SvPrivateMessage::where('user_id', $request['user_id'])
                         ->where('account', $request['account'])
                         ->where('friend_id', $request['friend_id'])
+                        ->where('id', 'in', $newMsgIds)
                         ->where('is_reply', 0)
                         ->where('create_time', 'between', [time() - 600, time()])
                         ->order('create_time asc')
@@ -421,7 +426,7 @@ class MessageHandler extends BaseMessageHandler
                             if ($this->connection->multipleType) {
                                 array_push($this->connection->replyMessage,  $reply->image_reply);
                             }
-                            $this->updatePrivateMessageStatus($account, $friend);
+                            $this->updatePrivateMessageStatus($account, $friend, $reply->image_reply);  
                             continue;
                         }
 
@@ -470,7 +475,8 @@ class MessageHandler extends BaseMessageHandler
                             'message_list' => $this->connection->replyMessage,
                             'message_type' => 1,
                             'friend_id' => $request['friend_id'],
-                            'payload' => $request['payload']
+                            'payload' => $request['payload'],
+                            'newMsgIds' => $request['newMsgIds'],
                         );
                         $this->send($sendData);
                     }
@@ -567,7 +573,7 @@ class MessageHandler extends BaseMessageHandler
                 $this->setLog('未接管,直接推送', 'msg');
 
                 $this->sendErrorResponse($content, 'AI未接管,直接推送');
-                $this->updatePrivateMessageStatus($account, $friend);
+                $this->updatePrivateMessageStatus($account, $friend, 'AI未接管,直接推送');
             }
         } catch (\Exception $e) {
             $this->setLog('_updatePrivateMessage回复私信异常' . $e, 'msg');
@@ -582,7 +588,8 @@ class MessageHandler extends BaseMessageHandler
     {
         try {
             $this->setLog('----------autoAddWechatOperation-----------', 'msg');
-            $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:accountNo");
+            $platformType = $this->PlatformTypeEn[$this->payload['appType'] ?? 3] ?? 'xhs';
+            $accountNo = $this->service->getRedis()->get("xhs:{$this->payload['deviceId']}:{$platformType}:accountNo");
             if (empty($accountNo)) {
                 $this->setLog('设备未更新账号信息,请先更新账号信息', 'msg');
                 return;
@@ -763,7 +770,7 @@ class MessageHandler extends BaseMessageHandler
         }
     }
 
-    private function updatePrivateMessageStatus($account, $friend)
+    private function updatePrivateMessageStatus($account, $friend, $message_content = '')
     {
         try {
             SvPrivateMessage::where('user_id', $account['user_id'])
@@ -772,7 +779,8 @@ class MessageHandler extends BaseMessageHandler
                 ->where('is_reply', 0)
                 ->update([
                     'is_reply' => 1,
-                    'update_time' => time()
+                    'update_time' => time(),
+                    'reply_content' => $message_content,
                 ]);
         } catch (\Exception $e) {
             $this->setLog('updatePrivateMessageStatus' . $e, 'error');
@@ -783,6 +791,7 @@ class MessageHandler extends BaseMessageHandler
     {
         try {
             $content['replyTime'] = $content['replyTime'] == '刚刚' ? date('Y-m-d H:i:s', time()) : $content['replyTime'];
+            $ids = [];
             if (is_array($content['replyContent'])) {
                 $content['replyContent'] = array_filter($content['replyContent']);
                 //若存在AI机器人id，查询回复策略
@@ -812,6 +821,7 @@ class MessageHandler extends BaseMessageHandler
                         'new_message_count' => 1,
                         'create_time' => time()
                     ]);
+                    array_push($ids, $result->id);
                 }
             } else {
                 $result = SvPrivateMessage::create([
@@ -827,10 +837,13 @@ class MessageHandler extends BaseMessageHandler
                     'new_message_count' => 1,
                     'create_time' => time()
                 ]);
+                array_push($ids, $result->id);
             }
+            return $ids;
         } catch (\Exception $e) {
             $this->setLog('addMessage' . $e, 'error');
         }
+        return $ids;
     }
 
     private function getFriendInfo($account, $content)
@@ -974,6 +987,7 @@ class MessageHandler extends BaseMessageHandler
                 'frequency_penalty' => $modelSetting['frequency_penalty'] ?? 0.3, //避免重复用词力度
                 'max_tokens' => $modelSetting['max_tokens'] ?? 4096, //token上限
                 'context_num' => $modelSetting['context_num'] ?? 5, //上下文数
+                'newMsgIds' => $request['newMsgIds'],
             ];
 
             // 任务数据
@@ -1082,7 +1096,8 @@ class MessageHandler extends BaseMessageHandler
                 'message_list' => formatMarkdown($reply),
                 'message_type' => 1,
                 'friend_id' => $this->friendId,
-                'payload' => $this->request['payload']
+                'payload' => $this->request['payload'],
+                'newMsgIds' => $this->request['newMsgIds'],
             );
             if ($this->connection->multipleType) {
                 array_push($this->connection->replyMessage, $reply);
@@ -1409,21 +1424,24 @@ class MessageHandler extends BaseMessageHandler
     private function addReplyMessage(array $request)
     {
         try {
-            $content = json_encode($request['message_list'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            SvPrivateMessage::create([
-                'user_id' => $request['user']['user_id'],
-                'device_code' => $request['device_code'],
-                'account' => $request['account'],
-                'type' => 3,
-                'friend_id' => $request['friend_id'],
-                'replay_type' => $request['content']['replyObject'] ?? '',
-                'author_name' => $request['user']['nickname'],
-                'message_content' => $content,
-                'message_timer' => date('Y-m-d H:i:s', time()),
-                'new_message_count' => 1,
-                'create_time' => time(),
-                'is_reply' => 1
-            ]);
+            //$content = json_encode($request['message_list'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $messages = SvPrivateMessage::where('id', 'in', $request['newMsgIds'])->select();
+            foreach ($messages as $mk => $message) {
+                $message->is_reply = 1;
+                $message->reply_content = $request['message_list'][$mk] ?? '';
+                $message->reply_time = date('Y-m-d H:i:s', time());
+                $message->save();
+
+                // 记录日志
+                SvAccountLog::create([
+                    'user_id' => $message->user_id,
+                    'account' => $message->account,
+                    'account_type' => $message->type,
+                    'friend_id' => $message->author_name,
+                    'log_type' => SvAccountLog::TYPE_MESSAGE_REPLY,
+                    'create_time' => time(),
+                ]);
+            }
         } catch (\Exception $e) {
             $this->setLog($e, 'msg');
         }
@@ -1498,7 +1516,7 @@ class MessageHandler extends BaseMessageHandler
                     'type' => $content['type'],
                     'appType' => 3,
                     'deviceId' => $account['device_code'],
-                    'appVersion' => $this->payload['appVersion'],
+                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => WorkerEnum::SUCCESS_CODE,
                     'reply' => $content
                 );

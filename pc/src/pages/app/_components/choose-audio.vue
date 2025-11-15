@@ -102,7 +102,7 @@
 import { getMaterialMusicList } from "@/api/material";
 import { getMaterialLibraryList } from "@/api/redbook";
 import Popup from "@/components/popup/index.vue";
-import { MaterialTypeEnum } from "@/pages/app/redbook/_enums/index";
+import { MaterialTypeEnum } from "~/pages/app/matrix/_enums/index";
 
 const props = withDefaults(
     defineProps<{

@@ -67,7 +67,7 @@ class ShanjianVideoTaskController extends BaseApiController
             $val = cache($key);
             if ($val) {
                 echo 1;
-                die;
+               return false;
             }
             cache($key, 1, 20);
 

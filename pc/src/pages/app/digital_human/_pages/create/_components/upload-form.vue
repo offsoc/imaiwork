@@ -216,7 +216,7 @@ const modelChannel = computed(() => {
 
 const formData = reactive<any>({
     model_version: DigitalHumanModelVersionEnum.STANDARD,
-    anchor_name: dayjs().format("YYYYMMDDHHmm").substring(2),
+    anchor_name: dayjs().format("YYYYMMDDHHmmss").substring(2),
     width: "",
     height: "",
     pic: "",

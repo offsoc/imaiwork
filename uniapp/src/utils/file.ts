@@ -69,6 +69,7 @@ export async function saveImageToPhotosAlbum(url: string) {
         uni.showToast({
             title: "保存成功",
             icon: "success",
+            duration: 3000,
         });
         downloading.value = false;
     } catch (error: any) {
@@ -105,18 +106,26 @@ export async function saveImageToPhotosAlbum(url: string) {
             }
             return;
         }
-        uni.$u.toast(error.errMsg || "保存失败");
+        if (error.errno == 112) {
+            uni.$u.toast("请到对应小程序后台完善用户隐私保护指引");
+            return;
+        }
+        uni.showToast({
+            title: error.errMsg || "保存失败",
+            icon: "success",
+            duration: 3000,
+        });
     }
     //#endif
 }
 
 export async function saveVideoToPhotosAlbum(url: string) {
     try {
-        const isAuthorized = await requestAuthorization("scope.writePhotosAlbum");
-        if (!isAuthorized) {
-            uni.$u.toast("您关闭了权限，请前往设置打开权限");
-            return;
-        }
+        // const isAuthorized = await requestAuthorization("scope.writePhotosAlbum");
+        // if (!isAuthorized) {
+        //     uni.$u.toast("您关闭了权限，请前往设置打开权限");
+        //     return;
+        // }
 
         uni.showLoading({ title: "下载中" });
 
@@ -133,10 +142,47 @@ export async function saveVideoToPhotosAlbum(url: string) {
             icon: "success",
             duration: 3000,
         });
-    } catch (err: any) {
+    } catch (error: any) {
+        console.log(error);
+        if (error.errMsg == "saveVideoToPhotosAlbum:fail cancel") {
+            uni.$u.toast("取消保存");
+            return;
+        }
+        if (error.errMsg == "downloadFile:fail fail:timeout") {
+            uni.$u.toast("下载视频超时，请重新下载");
+            return;
+        }
+        if (error.errMsg == "saveVideoToPhotosAlbum:fail auth deny") {
+            const res: UniApp.ShowModalRes = await uni.showModal({
+                title: "提示",
+                content: "您关闭了权限，请前往设置打开权限",
+            });
+            if (res.confirm) {
+                const setting = await uni.openSetting();
+                if (setting.authSetting["scope.writePhotosAlbum"]) {
+                    uni.showModal({
+                        title: "提示",
+                        content: "获取权限成功,再次保存视频即可成功",
+                        showCancel: false,
+                    });
+                } else {
+                    uni.showModal({
+                        title: "提示",
+                        content: "获取权限失败，无法保存到相册",
+                        showCancel: false,
+                    });
+                }
+            }
+            return;
+        }
+        if (error.errno == 112) {
+            uni.$u.toast("请到对应小程序后台完善用户隐私保护指引");
+            return;
+        }
+
         uni.hideLoading();
         uni.showToast({
-            title: "保存失败",
+            title: error.errMsg || "保存失败",
             icon: "none",
             duration: 3000,
         });

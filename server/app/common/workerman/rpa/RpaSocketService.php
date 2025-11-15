@@ -7,15 +7,10 @@ namespace app\common\workerman\rpa;
 use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
 use think\cache\driver\Redis;
-
-use Predis\Client as redisClient;
 use think\facade\Log;
-use Workerman\Lib\Timer;
+use Workerman\Timer;
 use app\common\model\sv\SvDevice;
-use app\common\model\sv\SvDeviceRpa;
-
 use app\common\model\sv\SvAccount;
-use app\common\model\sv\SvSocketCommand;
 use app\common\workerman\rpa\WorkerEnum;
 use Channel\Client as ChannelClient;
 
@@ -37,17 +32,15 @@ class RpaSocketService
     protected $redis = null;
     protected $error_msg = '';
     protected $isWriteLog = true; //是否写入日志;
+    public $uidConnections = array(); // 存储连接信息
     //protected $log = array();
     public function __construct(Worker $object)
     {
         $this->worker = $object;
-
-        $this->worker->uidConnections = array(); //用户链接池 存储映射
-        $this->worker->devices = array(); //设备链接池 存储映射
-        $this->worker->log = array();
-        $this->worker->appType = ''; //应用类型
         date_default_timezone_set('PRC');
+        // 只做基础初始化，进程级别的初始化移至onWorkerStart
         ini_set('memory_limit', '1024M');
+        set_time_limit(0);
 
         $this->_connRedis();
     }
@@ -55,7 +48,8 @@ class RpaSocketService
 
     public function onMessage(TcpConnection $connection, $data)
     {
-        $connection->lastMessageTime = time(); //更新消息时间避免,断开
+        // 更新消息时间避免断开
+        $connection->lastMessageTime = time();
         //客户端与后端消息链接唯一标识
         $this->setLog('新消息:' . $data);
 
@@ -71,38 +65,55 @@ class RpaSocketService
             }
             if ($uid) {
                 $handler = match ($type) {
-                    1 => new \app\common\workerman\rpa\handlers\DeviceHandler($this), #获取设备信息、状态
-                    2 => new \app\common\workerman\rpa\handlers\xhs\UserHandler($this), #小红书用户信息
-                    3 => new \app\common\workerman\rpa\handlers\xhs\PrivateMessageHandler($this), #私信列表信息
-                    4 => new \app\common\workerman\rpa\handlers\xhs\InteractiveMessageHandler($this), #已发布内容状态、收藏、点赞
-                    7 => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #发送私信消息
-                    10 => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #发送卡片
-                    8 => new \app\common\workerman\rpa\handlers\xhs\MessageHandler($this), #最新私信消息
-                    9 => new \app\common\workerman\rpa\handlers\TaskHandler($this), #任务执行状态回复
-                    11 => new \app\common\workerman\rpa\handlers\CompletedHandler($this), #设备初始化完成
-                    12 => new \app\common\workerman\rpa\handlers\MsgReplyHandler($this), #正在回复消息状态
-                    13 => new \app\common\workerman\rpa\handlers\MsgReplyHandler($this), #设备回复消息完成
-                    14 => new \app\common\workerman\rpa\handlers\MediaStatusHandler($this), #图文视频发布状态更新
-                    'bindSocket' => new \app\common\workerman\rpa\handlers\WebWorkerHandler($this), #web端绑定socket
-                    'addDevice' => new \app\common\workerman\rpa\handlers\DeviceHandler($this), #web端添加设备
-                    'getUserInfo' => new \app\common\workerman\rpa\handlers\xhs\UserHandler($this), #web端获取设备账号信息
-                    'getPrivateMessageList' => new \app\common\workerman\rpa\handlers\xhs\PrivateMessageHandler($this), #web端获取私信列表
-                    'sendPrivateMessage' => new \app\common\workerman\rpa\handlers\xhs\MessageHandler($this), #最新私信消息
-                    'getCards' => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #web端获取名片列表
-                    'getPostList' => new \app\common\workerman\rpa\handlers\xhs\InteractiveMessageHandler($this), #已发布内容状态、收藏、点赞
-                    'initCheck' => new \app\common\workerman\rpa\handlers\CheckInitHandler($this), #设备初始化检测
-                    'sendCard' => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #web端获取名片列表
                     'ping' => new \app\common\workerman\rpa\handlers\HeartBeatHandler($this), #心跳
 
-                    20 => new \app\common\workerman\rpa\handlers\sph\TaskSendHandler($this), #任务发送
-                    21 => new \app\common\workerman\rpa\handlers\sph\TaskRecordSaveHandler($this), #任务记录保存
-                    22 => new \app\common\workerman\rpa\handlers\sph\TaskPauseHandler($this), #任务暂停
-                    23 => new \app\common\workerman\rpa\handlers\sph\TaskRecoveryHandler($this), #任务恢复
-                    24 => new \app\common\workerman\rpa\handlers\sph\TaskDeleteHandler($this), #任务删除
-                    25 => new \app\common\workerman\rpa\handlers\sph\TaskCompletedHandler($this), #任务完成
-                    26 => new \app\common\workerman\rpa\handlers\sph\TaskReceivedHandler($this), #任务接收
+                    WorkerEnum::RPA_DEVICE_INFO => new \app\common\workerman\rpa\handlers\DeviceHandler($this), #获取设备信息、状态
+                    WorkerEnum::RPA_USER_INFO => new \app\common\workerman\rpa\handlers\xhs\UserHandler($this), #小红书用户信息
+                    WorkerEnum::RPA_PRIVATE_MESSAGE => new \app\common\workerman\rpa\handlers\xhs\PrivateMessageHandler($this), #私信列表信息
+                    WorkerEnum::RPA_PUBLISHED_POST_STATUS => new \app\common\workerman\rpa\handlers\xhs\InteractiveMessageHandler($this), #已发布内容状态、收藏、点赞
+                    WorkerEnum::RPA_SEND_CARD_STATUS => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #发送私信消息
+                    WorkerEnum::RPA_CARD_INFO => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #发送卡片
+                    WorkerEnum::RPA_NEW_PRIVATE_MESSAGE => new \app\common\workerman\rpa\handlers\xhs\MessageHandler($this), #最新私信消息
+                    WorkerEnum::RPA_TASK_EXEC_STATUS => new \app\common\workerman\rpa\handlers\TaskHandler($this), #任务执行状态回复
+                    WorkerEnum::RPA_DEVICE_INIT => new \app\common\workerman\rpa\handlers\CompletedHandler($this), #设备初始化完成
+                    WorkerEnum::RPA_MSG_REPLY_STATUS => new \app\common\workerman\rpa\handlers\MsgReplyHandler($this), #正在回复消息状态
+                    WorkerEnum::RPA_MSG_REPLY_COMPLETED => new \app\common\workerman\rpa\handlers\MsgReplyHandler($this), #设备回复消息完成
+                    WorkerEnum::RPA_MEDIA_STATUS => new \app\common\workerman\rpa\handlers\MediaStatusHandler($this), #图文视频发布状态更新
 
-                    91 => new \app\common\workerman\rpa\handlers\DeviceAppStartExecHandler($this), #设备应用执行
+                    WorkerEnum::WEB_SOCKET_STATUS_TEXT => new \app\common\workerman\rpa\handlers\WebWorkerHandler($this), #web端绑定socket
+                    WorkerEnum::WEB_BIND_DEVICE_TEXT => new \app\common\workerman\rpa\handlers\DeviceHandler($this), #web端添加设备
+                    WorkerEnum::WEB_GET_USER_INFO_TEXT => new \app\common\workerman\rpa\handlers\xhs\UserHandler($this), #web端获取设备账号信息
+                    WorkerEnum::WEB_PRIVATE_MESSAGE_LIST_TEXT => new \app\common\workerman\rpa\handlers\xhs\PrivateMessageHandler($this), #web端获取私信列表
+                    WorkerEnum::WEB_SEND_PRIVATE_MESSAGE_TEXT => new \app\common\workerman\rpa\handlers\xhs\MessageHandler($this), #最新私信消息
+                    WorkerEnum::WEB_CARDS_TEXT => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #web端获取名片列表
+                    WorkerEnum::WEB_POST_STATUS_LIST_TEXT => new \app\common\workerman\rpa\handlers\xhs\InteractiveMessageHandler($this), #已发布内容状态、收藏、点赞
+                    WorkerEnum::WEB_INIT_CHECK_TEXT => new \app\common\workerman\rpa\handlers\CheckInitHandler($this), #设备初始化检测
+                    WorkerEnum::WEB_SEND_CARD_TEXT => new \app\common\workerman\rpa\handlers\xhs\CardHandler($this), #web端获取名片列表
+
+                    WorkerEnum::RPA_SPH_TASK_SEND => new \app\common\workerman\rpa\handlers\sph\TaskSendHandler($this), #任务发送
+                    WorkerEnum::RPA_SPH_TASK_RECORD_SAVE => new \app\common\workerman\rpa\handlers\sph\TaskRecordSaveHandler($this), #任务记录保存
+                    WorkerEnum::RPA_SPH_TASK_PAUSE => new \app\common\workerman\rpa\handlers\sph\TaskPauseHandler($this), #任务暂停
+                    WorkerEnum::RPA_SPH_TASK_RESUME => new \app\common\workerman\rpa\handlers\sph\TaskRecoveryHandler($this), #任务恢复
+                    WorkerEnum::RPA_SPH_TASK_CANCEL => new \app\common\workerman\rpa\handlers\sph\TaskDeleteHandler($this), #任务删除
+                    WorkerEnum::RPA_SPH_TASK_COMPLETED => new \app\common\workerman\rpa\handlers\sph\TaskCompletedHandler($this), #任务完成
+                    WorkerEnum::RPA_SPH_TASK_RECEIVEW => new \app\common\workerman\rpa\handlers\sph\TaskReceivedHandler($this), #任务接收
+
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_SEND => new \app\common\workerman\rpa\handlers\device\AppSendHandler($this), #正在发送指令
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_EXEC => new \app\common\workerman\rpa\handlers\device\AppExecHandler($this), #手机正在处理指令
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_OPEN => new \app\common\workerman\rpa\handlers\device\AppOpenHandler($this), #打开app
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_PERSONAL_CENTER => new \app\common\workerman\rpa\handlers\device\AppPersonalCenterHandler($this), #打开个人中心
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_INFO => new \app\common\workerman\rpa\handlers\device\AppInfoHandler($this), #获取账号信息
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_DATA_SEND => new \app\common\workerman\rpa\handlers\device\AppDataSendHandler($this), #正在等待数据返回
+                    WorkerEnum::RPA_GET_ACCOUNT_APP_COMPLETED => new \app\common\workerman\rpa\handlers\device\AppCompletedHandler($this), #应用执行完成
+
+
+
+                    WorkerEnum::RPA_TAKE_OVER_TASK_RESULT_SAVE => new \app\common\workerman\rpa\handlers\TakeOverTaskResultSaveHandler($this), #接管任务结果保存
+
+                    WorkerEnum::RPA_ACTIVE_TASK_RESULT_SAVE => new \app\common\workerman\rpa\handlers\ActiveTaskResultSaveHandler($this), #活动任务结果保存
+
+                    WorkerEnum::RPA_DEVICE_APP_EXEC => new \app\common\workerman\rpa\handlers\DeviceAppStartExecHandler($this), #设备应用执行
+                    WorkerEnum::RPA_GET_WECHAT_DEVICE_CODE => new \app\common\workerman\rpa\handlers\GetWechatDeviceCodeHandler($this), #获取微信设备验证码
 
                     // ...其他case对应的handler...
                     default => new \app\common\workerman\rpa\handlers\DefaultHandler($this)
@@ -200,8 +211,10 @@ class RpaSocketService
     public function onConnect(TcpConnection $connection)
     {
         try {
-            $connection->maxSendBufferSize = 1024 * 1024 * 2;
+            $connection->maxSendBufferSize = 1024 * 1024 * 10;
             $connection->maxPackageSize = 1024 * 1024 * 10;
+            // 初始化连接的最后通信时间
+            $connection->lastMessageTime = time();
             $connection->onWebSocketConnect = function ($connection, $http_header) {
                 $this->setLog('新请求header:' . $http_header);
                 // 存客户端与websocket的映射，唯一连接标识（！！！关键）
@@ -210,7 +223,7 @@ class RpaSocketService
                     $connection->lastMessageTime = time(); //更新消息时间避免,断开
                     $connection->deviceid = '';
                     $connection->apptype = '';
-                    $connection->appversion = '';
+                    $connection->appversion = WorkerEnum::APP_VERSION;
                     $connection->messageid = 0;
                     $connection->userid = 0;
                     $connection->messageCount = 0;
@@ -222,7 +235,6 @@ class RpaSocketService
                     $connection->testCrontabId = '';
                     $connection->isMsgRunning = 0;
                     $this->worker->uidConnections[$connection->uid] = $connection;
-
                     //$this->redis->set("xhs:connection:" . $connection->uid, $this->worker->id);
                     $this->setLog('新socket链接:' . $connection->uid);
                     return;
@@ -240,13 +252,24 @@ class RpaSocketService
     public function onClose(TcpConnection $connection)
     {
         try {
-            $this->setLog('socket链接断开:' . ($connection->uid ?? '') . ' name:' . ($connection->name ?? ''));
+            // 收集连接信息用于日志
+            $ip = $connection->getRemoteIp();
+            $uid = isset($connection->uid) ? $connection->uid : 'unknown';
+            $name = isset($connection->name) ? $connection->name : '';
+            $reason = isset($connection->closeReason) ? $connection->closeReason : '正常关闭';
+
+            // 详细的关闭日志
+            $this->setLog('连接关闭 [IP:' . $ip . ', UID:' . $uid . ', 名称:' . $name . ', 原因:' . $reason . ']', 'info');
+
             //代表用户下线，清除用户信息
             if (isset($connection->uid)) {
                 $this->_unBind($connection->uid);
             }
+
+            // 清理连接相关的所有属性
+            unset($connection->uid, $connection->lastMessageTime, $connection->deviceid, $connection->closeReason);
         } catch (\Exception $e) {
-            $this->setLog($e, 'error');
+            $this->setLog('处理连接关闭时发生异常: ' . $e->getMessage(), 'error');
         }
     }
 
@@ -259,36 +282,104 @@ class RpaSocketService
     public function onError(TcpConnection $connection, $code, $msg)
     {
         try {
-            $msg = array(
+            // 获取客户端IP和其他连接信息
+            $clientIp = $connection->getRemoteIp();
+            $clientPort = $connection->getRemotePort();
+
+            // 构建详细的错误信息
+            $errorInfo = array(
                 'code' => $code,
-                'msg' => $msg,
-                'uid' => $connection->uid
+                'error_message' => $msg,
+                'client_ip' => $clientIp,
+                'client_port' => $clientPort,
+                'uid' => $connection->uid ?? 'unknown',
+                'connection_status' => $connection->getStatus(),
+                'time' => date('Y-m-d H:i:s')
             );
-            $this->setLog('错误信息: ' . json_encode($msg, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), 'error');
+
+            // 根据错误码提供更具体的错误描述
+            $errorDesc = $this->getErrorDescription($code);
+            $errorInfo['error_description'] = $errorDesc;
+
+            $this->setLog('WebSocket连接错误: ' . json_encode($errorInfo, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), 'error');
         } catch (\Exception $e) {
             $this->setLog($e, 'error');
         }
+    }
 
-        // 关闭异常连接
-        if ($connection->getStatus() === TcpConnection::STATUS_ESTABLISHED) {
-            $connection->close();
-        }
+    /**
+     * 根据错误码获取详细的错误描述
+     * @param int $code 错误码
+     * @return string 错误描述
+     */
+    private function getErrorDescription(int $code): string
+    {
+        $errorDescriptions = [
+            1001 => '连接被对端关闭',
+            1002 => '协议错误',
+            1003 => '收到了不支持的数据类型',
+            1005 => '连接关闭时没有状态码',
+            1006 => '连接异常关闭',
+            1007 => '数据格式错误',
+            1008 => '消息内容违反策略',
+            1009 => '消息过大',
+            1010 => '客户端需要扩展',
+            1011 => '服务端内部错误',
+            1012 => '服务重启',
+            1013 => '临时故障',
+            1014 => 'TLS握手失败',
+            1015 => 'TLS握手失败',
+        ];
+
+        return $errorDescriptions[$code] ?? '未知错误';
     }
 
     /**
      * 每个进程启动
      * @param $worker
      */
-    public function onWorkerStart($worker) {}
+    public function onWorkerStart($worker)
+    {
+        // 记录进程ID
+        $this->worker = $worker;
+        $this->setLog("Worker[{$worker->id}] 进程启动, PID: " . getmypid(), 'info');
+
+        // 初始化进程级别的连接池
+        $this->worker->uidConnections = array();
+        $this->worker->devices = array();
+
+        // 重新连接Redis
+        $this->_connRedis();
+
+        // 添加心跳检测定时器
+        // Timer::add(10, function () use ($worker) {
+        //     $timeNow = time();
+        //     foreach ($worker->connections as $connection) {
+        //         if (isset($connection->lastMessageTime) && $timeNow - $connection->lastMessageTime > $this->HEARTBEAT_TIME) {
+        //             $connection->close();
+        //         }
+        //     }
+        // });
+    }
 
     public function onWorkerReload($worker)
     {
 
-        //每10秒检查一下客户端是否还连着服务端。超时未相应也会主动关闭与客户端的连接
-        // foreach($worker->connections as $connection){
-        //     $connection->send('worker reloading');
-        // }
         $this->setLog('onWorkerReload', 'error');
+    }
+
+    public function onBufferFull(TcpConnection $connection)
+    {
+        $this->setLog('缓冲区已满，不能发送', 'error');
+    }
+
+    public function onBufferDrain(TcpConnection $connection)
+    {
+        // 缓冲区清空时的处理，可以在这里重置
+        $connection->sendBufferSize = 0;
+        $connection->maxSendBufferSize = 1024 * 1024 * 10; // 恢复默认值
+
+        $this->setLog('缓冲区清空，并继续发送', 'error');
     }
 
     public function sendSuccess($uid, $payload)
@@ -317,7 +408,7 @@ class RpaSocketService
                 'type' => $payload['type'] ?? 'error',
                 'messageId' => $uid,
                 'deviceId' => $payload['deviceId'] ?? '',
-                'appVersion' => $payload['appVersion'] ?? ''
+                'appVersion' => $payload['appVersion'] ?? WorkerEnum::APP_VERSION,
             );
             $this->send($uid, $payload);
         } catch (\Exception $e) {
@@ -340,7 +431,7 @@ class RpaSocketService
                     'type' => $content['type'],
                     'appType' => $content['appType'] ?? 3,
                     'deviceId' => $content['deviceId'],
-                    'appVersion' => $content['appVersion'] ?? '1.0.0',
+                    'appVersion' => $content['appVersion'] ?? WorkerEnum::APP_VERSION,
                     'code' => $content['code'],
                     'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
                 );
@@ -363,7 +454,7 @@ class RpaSocketService
                 'type' => $payload['type'],
                 'content' => !is_array($payload['reply']) ? $payload['reply'] : json_encode($payload['reply'],  JSON_UNESCAPED_UNICODE),
                 'deviceId' => $payload['deviceId'] ?? '',
-                'appVersion' => $payload['appVersion'] ?? '',
+                'appVersion' => $payload['appVersion'] ?? WorkerEnum::APP_VERSION,
                 'code' => $payload['code'] ?? WorkerEnum::SUCCESS_CODE,
                 'action' => 'send'
             );
@@ -396,6 +487,7 @@ class RpaSocketService
             }
         } catch (\Exception $e) {
             $this->setLog('send:' . $e, 'error');
+            $this->setLog($payload, 'error');
             return false;
         }
         $this->setLog("\n\n---------------------------");
@@ -434,54 +526,6 @@ class RpaSocketService
             }
         } catch (\Exception $e) {
             $this->setLog('checkDevice:' . $e, 'error');
-            return false;
-        }
-    }
-
-    private function checkDeviceStatus($payload)
-    {
-        try {
-            if (isset($this->worker->devices[$payload['deviceId']])) {
-                $uid = $this->worker->devices[$payload['deviceId']];
-                $connection = $this->worker->uidConnections[$uid] ?? null;
-                if (empty($connection)) {
-                    $this->setLog('链接未找到:' . $uid, 'error');
-                    return false;
-                }
-
-                $this->setLog('checkDeviceStatus:' . $uid, 'info');
-                $this->setLog('initial:' . $connection->initial, 'info');
-                // if($connection->clientType == 'device'){
-                //     return true;
-                // }
-                if ($connection->initial == 0) {
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        } catch (\Exception $e) {
-            $this->setLog('checkDevice:' . $e, 'error');
-            return false;
-        }
-    }
-
-
-    private function addCommand($uid, $payload)
-    {
-        try {
-            if ($payload['type'] !== 'ping') {
-                SvSocketCommand::create([
-                    'platform' => '小红书',
-                    'type' => WorkerEnum::DESC[$payload['type']] ?? $payload['type'],
-                    'device_code' => $payload['deviceId'] ?? '',
-                    'action' => $payload['action'] ?? 'receiving',
-                    'msg' => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
-                    'create_time' => date('Y-m-d H:i:s', time())
-                ]);
-            }
-        } catch (\Exception $e) {
-            $this->setLog('addCommand:' . $e, 'error');
             return false;
         }
     }
@@ -569,23 +613,6 @@ class RpaSocketService
                 'timeout'     => 0,
                 'persistent'  => true,
             ]);
-
-            // $this->redis = new redisClient([
-            //     'host'        => env('redis.HOST', '127.0.0.1'),
-            //     'port'        => env('redis.PORT', 6379),
-            //     'password'    => env('redis.PASSWORD', '123456'),
-            //     'database'      => env('redis.WS_SELECT', 8),
-            //     'persistent' => true,   // 启用持久连接
-            //     'timeout' => 2.5,           // 连接超时时间
-            //     'read_write_timeout' => 60, // 读写超时时间
-            //     'tcp_nodelay' => true,      // 禁用Nagle算法
-            //     'persistent_id' => 'my_connection', // 持久连接标识符
-            //     // 连接池配置（如果需要）
-            //     'connections' => [
-            //         'tcp'  => 'Predis\Connection\PhpiredisStreamConnection',
-            //         'unix' => 'Predis\Connection\PhpiredisSocketConnection',
-            //     ],
-            // ]);
         }
     }
 
@@ -600,11 +627,21 @@ class RpaSocketService
     {
         return $this->worker;
     }
-
     public function setWorker($worker)
     {
         $this->worker = $worker;
     }
+
+    public function getConnections()
+    {
+        return $this->uidConnections;
+    }
+
+    public function setConnections($connections)
+    {
+        $this->uidConnections = $connections;
+    }
+
     public function isWriteLog()
     {
         return $this->isWriteLog;
@@ -612,43 +649,5 @@ class RpaSocketService
     public function getRedis()
     {
         return $this->redis;
-    }
-
-    protected function postRequest($url = '', $param = '')
-    {
-        if (empty($url) || empty($param)) {
-            return false;
-        }
-
-        try {
-            $postUrl = $url;
-            $curlPost = $param;
-            $ch = curl_init(); //初始化curl
-            curl_setopt($ch, CURLOPT_URL, $postUrl); //抓取指定网页
-            curl_setopt($ch, CURLOPT_HEADER, 0); //设置header
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //    将curl_exec()获取的信息以文件流的形式返回，而不是直接输出
-            curl_setopt($ch, CURLOPT_POST, 1); //post提交方式
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost); //全部数据使用HTTP协议中的"POST"操作来发送。要发送文件，在文件名前面加上@前缀并使用完整路径。这个参数可以通过urlencoded后的字符串类似'para1=val1&para2=val2&...'或使用一个以字段名为键值，字段数据为值的数组。如果value是一个数组，Content-Type头将会被设置成multipart/form-data
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            //curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($curlPost)); // 设置POST字段
-
-            $header = array('Accept:application/json', 'charset=UTF-8'); //需要urlencode处理的
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header); // 应用HTTP头
-
-            $data = curl_exec($ch); //运行curl
-            if (curl_errno($ch)) {
-                $this->setLog("Error: " . curl_error($ch));
-                //throw new \Exception(curl_error($ch));
-                return false;
-            }
-            curl_close($ch); // 关闭一个cURL会话
-            $this->setLog($data);
-            return $data;
-        } catch (\Throwable $th) {
-            //throw $th;
-            $this->setLog($th, 'error');
-            return false;
-        }
     }
 }

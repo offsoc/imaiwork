@@ -1,4 +1,5 @@
 <?php
+
 namespace app\common\workerman\rpa\handlers\sph;
 
 use Workerman\Connection\TcpConnection;
@@ -22,7 +23,7 @@ class TaskReceivedHandler extends BaseMessageHandler
 
             $this->sendResponse($uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'task_received'); 
+            $this->setLog('异常信息' . $e, 'task_received');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::SPH_RECEIVED_ERROR_CODE;
             $this->payload['type'] = 26;
@@ -35,7 +36,8 @@ class TaskReceivedHandler extends BaseMessageHandler
         }
     }
 
-    private function updateTaskDeviceStatus(array $content){
+    private function updateTaskDeviceStatus(array $content)
+    {
         try {
             //更新任务设备绑定表
             SvCrawlingTaskDeviceBind::where('task_id',  $content['task_id'])->where('device_code', $content['deviceId'])->update([
@@ -43,7 +45,7 @@ class TaskReceivedHandler extends BaseMessageHandler
                 'update_time' => time(),
             ]);
             SvCrawlingTask::where('id', $content['task_id'])->update(['status' => 1, 'update_time' => time()]);
-            
+
             return [
                 'deviceId' => $this->payload['deviceId'],
                 'task_id' =>  $content['task_id'],
@@ -52,7 +54,7 @@ class TaskReceivedHandler extends BaseMessageHandler
                 'msg' => '任务接收,设备状态已设置为待执行',
             ];
         } catch (\Exception $e) {
-            $this->setLog('异常信息'. $e, 'task_received'); 
+            $this->setLog('异常信息' . $e, 'task_received');
             $this->payload['reply'] = $e->getMessage();
             $this->payload['code'] =  WorkerEnum::SPH_RECEIVED_ERROR_CODE;
             $this->payload['type'] = 26;
@@ -63,7 +65,5 @@ class TaskReceivedHandler extends BaseMessageHandler
             ];
             $this->sendError($this->connection,  $this->payload);
         }
-        
     }
-
 }

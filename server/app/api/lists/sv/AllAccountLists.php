@@ -10,6 +10,8 @@ use app\common\model\wechat\AiWechat;
 use app\api\logic\sv\MessageLogic;
 use think\facade\Db;
 
+use app\common\model\kb\KbRobot;
+
 /**
  * 列表
  * Class AllAccountLists
@@ -32,46 +34,35 @@ class AllAccountLists extends BaseApiDataLists implements ListsSearchInterface
     public function lists(): array
     {
         $this->searchWhere[] = ['w.user_id', '=', $this->userId];
-        $subQuery = AiWechat::alias('w')
-            ->where('w.user_id', $this->userId)
-            ->field('w.id, w.user_id, w.device_code, w.wechat_id as account, w.wechat_no as account_no, w.wechat_nickname as nickname, w.wechat_avatar as avatar, w.wechat_status as status,wd.device_model, wd.sdk_version,"1" as type')
-            ->join('ai_wechat_device wd', 'wd.device_code = w.device_code and wd.user_id = w.user_id')
-            ->union(function ($query) {
-                $query->name('sv_account')
-                    ->alias('sa')
-                    ->where('sa.user_id', $this->userId)
-                    ->join('sv_device sd', 'sd.device_code = sa.device_code and sa.user_id = sa.user_id')
-                    ->field('sa.id, sa.user_id, sa.device_code, sa.account, sa.account_no, sa.nickname, sa.avatar, sa.status,sd.device_model, sd.sdk_version, sa.type');
-            })->buildSql();
 
-        return Db::table($subQuery . 'A')
-            ->when($this->request->get('type', ''), function ($query) {
-                $query->where('type', $this->request->get('type', ''));
-            })
+        return SvAccount::alias('w')
+            ->field('w.user_id,w.id,w.device_code,w.account,w.nickname,w.avatar,w.status,w.create_time,w.update_time,w.extra,w.type,
+                    s.takeover_mode,s.open_ai,s.sort,s.remark,s.takeover_range_mode, s.takeover_type,s.robot_id, d.device_name,d.device_model')
+            ->join('sv_device d', 'd.device_code = w.device_code', 'left')
+            ->leftJoin('sv_setting s', 's.account = w.account')
+            ->where($this->searchWhere)
+            ->order('w.id', 'desc')
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
-                if ($item['type'] == 3) {
-                    // 请求在线状态
-                    $result = MessageLogic::getOnlineStatus($item['account'], $item['device_code']);
-                    if ($result) {
-                        $item['status'] = MessageLogic::getReturnData();
-                        SvAccount::where('id', $item['id'])->update([
-                            'status' => $item['status'],
-                            'update_time' => time(),
-                        ]);
-                    }
+                $item['device_name'] = is_null($item['device_name']) ? $item['device_model'] : $item['device_name'];
+                if (empty($item['takeover_mode'])) {
+                    $item['takeover_mode'] = 0;
+                }
 
+                if (empty($item['robot_id'])) {
+                    $item['robot_id'] = 0;
+                }
+
+                $item['robot_name'] = KbRobot::where('id', $item['robot_id'])->where('user_id', $this->userId)->value('name', '');
+
+                if (!empty($item['extra'])) {
+                    $extraArray = json_decode($item['extra'], true);
                 } else {
-                    // 请求在线状态
-                    $result = \app\api\logic\wechat\MessageLogic::getOnlineStatus($item['account'], $item['device_code']);
-                    if ($result) {
-                        $item['status'] = \app\api\logic\wechat\MessageLogic::getReturnData();
-                        AiWechat::where('id', $item['id'])->update([
-                            'wechat_status' => $item['status'],
-                            'update_time' => time(),
-                        ]);
-                    }
+                    $extraArray = [];
+                }
+                foreach ($extraArray  as $key => $v) {
+                    $item[$key] = $v;
                 }
 
                 return $item;
@@ -87,17 +78,11 @@ class AllAccountLists extends BaseApiDataLists implements ListsSearchInterface
     public function count(): int
     {
         $this->searchWhere[] = ['w.user_id', '=', $this->userId];
-        $subQuery = AiWechat::alias('w')
-            ->where('w.user_id', $this->userId)
-            ->field('w.id, w.user_id, "1" as type')
-            ->union(function ($query) {
-                $query->name('sv_account')
-                    ->where('user_id', $this->userId)
-                    ->field('id, user_id, type');
-            })->buildSql();
-        return Db::table($subQuery . 'A')
-            ->when($this->request->get('type', ''), function ($query) {
-                $query->where('type', $this->request->get('type', ''));
-            })->count();
+        return  SvAccount::alias('w')
+            ->field('w.user_id,w.id,w.device_code,w.account,w.nickname,w.avatar,w.status,w.create_time,w.update_time,w.extra,w.type,
+                    s.takeover_mode,s.open_ai,s.sort,s.remark,s.takeover_range_mode, s.takeover_type,s.robot_id')
+            ->join('sv_device d', 'd.device_code = w.device_code', 'left')
+            ->leftJoin('sv_setting s', 's.account = w.account')
+            ->where($this->searchWhere)->count();
     }
 }

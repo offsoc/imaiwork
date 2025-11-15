@@ -106,9 +106,6 @@
             </div>
         </el-card>
     </div>
-    <el-dialog v-model="showVideo" width="740px" title="视频预览">
-        <video-player ref="playerRef" :src="videoUrl" width="100%" height="450px" />
-    </el-dialog>
 </template>
 <script lang="ts" setup>
 import { getMontageCreateRecord, deleteMontageCreateRecord } from "@/api/ai_application/digital_human/montage";
@@ -130,14 +127,6 @@ const { pager, getLists, resetPage, resetParams } = usePaging({
 });
 
 const tableRef = ref<InstanceType<typeof ElTable>>();
-
-const showVideo = ref(false);
-const videoUrl = ref("");
-const handlePlay = async (row: any) => {
-    const { url } = row;
-    showVideo.value = true;
-    videoUrl.value = url;
-};
 
 const multipleSelection = ref<any[]>([]);
 

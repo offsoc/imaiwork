@@ -223,6 +223,7 @@ class AccountLogEnum
     const TOKENS_DEC_COZE_TEXT= 10102;
     const TOKENS_DEC_COZE_PUBLISH_CONTENT_GENERATED= 10103;
 
+    const TOKENS_DEC_MATRIX_COPYWRITING = 10104;
 
 
     /**
@@ -305,6 +306,7 @@ class AccountLogEnum
         self::TOKENS_DEC_COZE_WORKFLOW,
         self::TOKENS_DEC_COZE_TEXT,
         self::TOKENS_DEC_COZE_PUBLISH_CONTENT_GENERATED,
+        self::TOKENS_DEC_MATRIX_COPYWRITING,
     ];
 
 
@@ -450,6 +452,7 @@ class AccountLogEnum
             self::TOKENS_DEC_COZE_WORKFLOW         => 'Coze智能体工作流减少算力',
             self::TOKENS_DEC_COZE_TEXT             => '口播混剪视频文案生成减少算力',
             self::TOKENS_DEC_COZE_PUBLISH_CONTENT_GENERATED => 'Coze发布内容生成减少算力',
+            self::TOKENS_DEC_MATRIX_COPYWRITING => '矩阵文案生成减少算力',
         ];
         if ($flag) {
             return $desc;

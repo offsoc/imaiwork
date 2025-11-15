@@ -439,6 +439,17 @@ class ShanjianVideoTaskLogic extends ApiLogic
             ShanjianVideoTask::where('status',1)
                 ->where('create_time', '<=', strtotime('-5 minutes'))
                 ->select()->each(function ($item) {
+
+                    $ShanjianVideoSetting = ShanjianVideoSetting::where('id', $item->video_setting_id)->whereIn('status',[1,2])->findOrEmpty();
+                    if ($ShanjianVideoSetting->isEmpty()) {
+                        $item->status = 2;
+                        $item->remark = '任务已超时';
+                        $item->save();
+                    }
+                    $num = $ShanjianVideoSetting['video_count'] - $ShanjianVideoSetting['success_num'] -  $ShanjianVideoSetting['error_num'] ;
+                    $status = $num == 1 ? 3 : 2;
+
+
                     $params = [
                         'taskId' => $item->result_id,
                         'task_id' => $item->task_id,
@@ -448,6 +459,55 @@ class ShanjianVideoTaskLogic extends ApiLogic
                         $message = $response['message']  ?? '任务失败';
                         $item->status = 2;
                         $item->remark = $message;
+                        $item->save();
+                    }
+                    if (isset($response['code']) && $response['code'] == 10000 &&isset($response['data']['status'])){
+
+                        $data = $response['data'];
+                        switch ($response['data']['status']) {
+                            case 'failed':
+                                $item->status = 2;
+                                $item->remark = $data['errorMessage'] ?? '处理失败';
+                                $error_num =  $ShanjianVideoSetting['error_num'] +1 ;
+                                $updata = [
+                                    'id'=>$ShanjianVideoSetting['id'],
+                                    'status' => $status,
+                                    'error_num'=>$error_num
+                                ];
+                                $ShanjianVideoSetting->save($updata);
+                                break;
+                            case 'succeed':
+                                $item->status = 3;
+                                if (isset($data['result']['videoUrl'])) {
+                                    $duration = $data['result']['duration'];
+                                    $video_result_url = FileService::downloadFileBySource($data['result']['videoUrl'], 'video');
+                                    $old = $data['result']['videoUrl']??'没有';
+                                    $urldata = [
+                                        'old'=>$old,
+                                        'new'=>$video_result_url
+                                    ];
+                                    Log::channel('shanjian')->write('获取视频链接'.json_encode($urldata,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+                                    $item->video_result_url = $video_result_url;
+                                    $unit = TokenLogService::checkToken($item->user_id, 'human_video_shanjian');
+                                    $points = round($duration * $unit,2);
+                                    $extra = ['扣费项目' => '口播混剪视频生成：视频时长'.$duration, '算力单价' => $unit, '实际消耗算力' => $points];
+                                    $item->video_token = $points;
+                                    User::userTokensChange($item->user_id, $points);
+
+                                    //记录日志
+                                    AccountLogLogic::recordUserTokensLog(true, $item->user_id, AccountLogEnum::TOKENS_DEC_HUMAN_VIDEO_SHANJIAN, $points, $item->task_id, $extra);
+                                }
+                                $success_num =  $ShanjianVideoSetting['success_num'] +1 ;
+                                $updata = [
+                                    'id'=>$ShanjianVideoSetting['id'],
+                                    'status' => $status,
+                                    'success_num'=>$success_num
+                                ];
+                                $ShanjianVideoSetting->save($updata);
+                                break;
+                        }
+                        $item->update_time = time();
                         $item->save();
                     }
 

@@ -145,25 +145,25 @@ button::after {
     @apply rounded-full px-[28rpx] py-[8rpx] text-white  shadow-[0px_6px_12px_0px_rgba(0,0,0,0.24)] text-xs;
     backdrop-filter: blur(6px);
     &-1 {
-        background: linear-gradient(180deg, rgba(26, 247, 207, 0.5) 0%, rgba(0, 101, 251, 0.5) 100%);
+        background: linear-gradient(180deg, #1af7cf50 0%, #0065fb50 100%);
     }
     &-2 {
-        background: linear-gradient(180deg, rgba(202, 255, 177, 0.5) 0%, rgba(59, 184, 64, 0.5) 100%);
+        background: linear-gradient(180deg, #caffb150 0%, #3bb84050 100%);
     }
     &-4 {
-        background: linear-gradient(180deg, rgba(255, 252, 171, 0.5) 0%, rgba(255, 98, 216, 0.5) 100%);
+        background: linear-gradient(180deg, #fffcaa80 0%, #ff62d880 100%);
     }
     &-6 {
-        background: linear-gradient(180deg, rgba(77, 246, 255, 0.5) 0%, rgba(136, 26, 187, 0.5) 100%);
+        background: linear-gradient(180deg, #4df6ff80 0%, #881abbc0 100%);
     }
     &-7 {
-        background: linear-gradient(180deg, rgba(252, 98, 71, 0.5) 0%, rgba(252, 98, 71, 0.8) 100%);
+        background: linear-gradient(180deg, #fc624780 0%, #fc6247cc 100%);
     }
 }
 .dh-version-name {
     @apply w-[136rpx] h-[48rpx] flex items-center justify-center text-white text-xs rounded-full;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #ffffff33;
+    background: #ffffff1a;
     backdrop-filter: blur(6px);
 }
 
@@ -171,18 +171,22 @@ button::after {
     background: linear-gradient(132.98deg, #dbf9fc 0%, #f7fcff 40%);
 }
 
+.device-bg {
+    background: linear-gradient(180deg, rgba(220, 234, 252, 1) 0%, rgba(243, 244, 251, 1) 100%);
+}
+
 .form-ipt {
     @apply h-[100rpx] bg-[#F9FAFB] flex items-center rounded-[48rpx] px-4 border border-solid border-[transparent];
 
     &.is-focus {
-        box-shadow: 0px 0px 0px 2px rgba(0, 101, 251, 0.2);
+        box-shadow: 0px 0px 0px 2px #0065fb33;
         border-color: $u-type-primary !important;
         background: rgba(0, 101, 251, 0.03);
     }
     &.is-error {
         border-color: $u-type-error !important;
-        box-shadow: 0px 0px 0px 2px rgba(251, 0, 0, 0.2);
-        background: rgba(251, 0, 0, 0.03);
+        box-shadow: 0px 0px 0px 2px #fb000033;
+        background: #fb000008;
     }
 }
 

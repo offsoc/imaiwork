@@ -1,314 +1,144 @@
 <template>
-    <view class="task-calendar-container">
-        <view class="task-calendar">
-            <view class="calendar-header">
-                <view class="header-left">
-                    <view class="month-year">{{ currentYear }}年 {{ currentMonth }}月</view>
-                    <view class="back-to-today" @click="backToToday">今天</view>
-                </view>
-                <view class="arrow-group">
-                    <view class="arrow" @click="prevMonth">
-                        <view class="arrow-icon arrow-left"></view>
+    <view class="h-screen flex flex-col device-bg">
+        <u-navbar
+            title="任务日历"
+            title-bold
+            :border-bottom="false"
+            :background="{
+                background: 'transparent',
+            }">
+        </u-navbar>
+        <view class="bg-white px-2">
+            <calendar-simple v-model="taskDay" @change="handleSelectDate" />
+        </view>
+        <view class="px-[26rpx] mt-[24rpx]">
+            <view class="bg-white rounded-[20rpx] px-[34rpx] py-[20rpx] flex justify-between gap-x-4">
+                <view>
+                    <view class="font-bold text-[30rpx]">今日任务</view>
+                    <view class="mt-[48rpx]">
+                        <text class="text-[34rpx] font-bold">{{ statistics.completed + statistics.failure }}</text
+                        ><text class="text-[#0000004d]"> / {{ statistics.all }}</text>
                     </view>
-                    <view class="arrow" @click="nextMonth">
-                        <view class="arrow-icon arrow-right"></view>
+                    <view class="mt-5">
+                        <navigator
+                            url="/ai_modules/device/pages/choose_task_type/choose_task_type"
+                            hover-class="none"
+                            class="w-[200rpx] h-[70rpx] rounded-full bg-black text-white font-bold text-[28rpx] flex items-center justify-center gap-x-1">
+                            <u-icon name="plus" size="24"></u-icon>
+                            新增任务
+                        </navigator>
+                    </view>
+                </view>
+                <view class="">
+                    <view class="mt-4">
+                        <semi-circle-progress :progress="getProgress" :size="120" :strokeWidth="8">
+                            <view class="text-[34rpx] font-bold text-primary">{{ getProgress }}%</view>
+                        </semi-circle-progress>
+                    </view>
+                    <view class="grid grid-cols-2 gap-3 mt-5">
+                        <view class="flex items-center gap-x-1 text-[20rpx]">
+                            <text class="w-[6rpx] h-[6rpx] rounded-full bg-[#0000004d]"></text>
+                            <text class="text-[18rpx] text-[#0000004d]">总任务:</text>
+                            <text class="text-[20rpx]">{{ formatNumberToWanOrYi(statistics.all) }}</text>
+                        </view>
+                        <view class="flex items-center gap-x-1 text-[20rpx]">
+                            <text class="w-[6rpx] h-[6rpx] rounded-full bg-[#0000004d]"></text>
+                            <text class="text-[18rpx] text-[#0000004d]">已完成:</text>
+                            <text class="text-[20rpx]">{{ formatNumberToWanOrYi(statistics.completed) }}</text>
+                        </view>
+                        <view class="flex items-center gap-x-1 text-[20rpx]">
+                            <text class="w-[6rpx] h-[6rpx] rounded-full bg-[#0000004d]"></text>
+                            <text class="text-[18rpx] text-[#0000004d]">待开始:</text>
+                            <text class="text-[20rpx]">{{ formatNumberToWanOrYi(statistics.waiting) }}</text>
+                        </view>
+                        <view class="flex items-center gap-x-1 text-[20rpx]">
+                            <text class="w-[6rpx] h-[6rpx] rounded-full bg-[#0000004d]"></text>
+                            <text class="text-[18rpx] text-[#0000004d]">已失败:</text>
+                            <text class="text-[20rpx]">{{ formatNumberToWanOrYi(statistics.failure) }}</text>
+                        </view>
                     </view>
                 </view>
             </view>
-            <view class="calendar-weekdays">
-                <view class="weekday" v-for="day in weekDays" :key="day">{{ day }}</view>
-            </view>
-            <view class="calendar-grid">
-                <view
-                    class="grid-item"
-                    :class="{
-                        'not-current-month': !day.isCurrentMonth,
-                        selected: day.date === selectedDate,
-                        today: day.isToday,
-                    }"
-                    v-for="(day, index) in days"
-                    :key="index"
-                    @click="selectDate(day)">
-                    <view class="day-number">{{ day.day }}</view>
+        </view>
+        <view class="mt-5 px-[26rpx] text-[30rpx] font-bold">任务列表({{ taskList.length }})</view>
+        <view class="grow min-h-0 px-[26rpx] mt-5">
+            <z-paging ref="pagingRef" v-model="taskList" :fixed="false" @query="queryTaskList">
+                <view>
+                    <task-list :list="taskList" @delete="refreshTaskList" @update-name="refreshTaskList" />
                 </view>
-            </view>
+                <template #empty>
+                    <empty />
+                </template>
+            </z-paging>
         </view>
     </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { getDeviceTaskCalendarStatistics, getDeviceTaskCalendarList } from "@/api/device";
+import { formatNumberToWanOrYi } from "@/utils/util";
+import CalendarSimple from "@/ai_modules/device/components/calendar-simple/calendar-simple.vue";
+import SemiCircleProgress from "@/ai_modules/device/components/semi-circle-progress/semi-circle-progress.vue";
+import TaskList from "@/ai_modules/device/components/task-list/task-list.vue";
 
-interface Day {
-    date: string;
-    day: number;
-    isCurrentMonth: boolean;
-    isToday: boolean;
-}
+const statistics = reactive<any>({
+    all: 0,
+    all_completed: 0,
+    completed: 0,
+    failure: 0,
+    interrupt: 0,
+    execution: 0,
+    waiting: 0,
+});
 
-const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
-const days = ref<Day[]>([]);
-const currentYear = ref(new Date().getFullYear());
-const currentMonth = ref(new Date().getMonth() + 1);
-const selectedDate = ref("");
+const taskDay = ref(uni.$u.timeFormat(new Date(), "yyyy-mm-dd"));
 
-const generateCalendar = (year: number, month: number) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+const pagingRef = ref<any>(null);
+const taskList = ref<any[]>([]);
 
-    const date = new Date(year, month - 1, 1);
-    const firstDay = date.getDay();
-    const daysInMonth = new Date(year, month, 0).getDate();
+const getStatistics = async () => {
+    const data = await getDeviceTaskCalendarStatistics({
+        day: taskDay.value,
+    });
+    statistics.all = data.all;
+    statistics.all_completed = data.all_completed;
+    statistics.completed = data.completed;
+    statistics.failure = data.failure;
+    statistics.interrupt = data.interrupt;
+    statistics.execution = data.execution;
+    statistics.waiting = data.waiting;
+};
 
-    const calendarDays: Day[] = [];
-
-    const prevMonthEndDate = new Date(year, month - 1, 0);
-    const prevMonthLastDay = prevMonthEndDate.getDate();
-    const prevMonthYear = prevMonthEndDate.getFullYear();
-    const prevMonth = prevMonthEndDate.getMonth() + 1;
-    for (let i = firstDay; i > 0; i--) {
-        const day = prevMonthLastDay - i + 1;
-        calendarDays.push({
-            date: `${prevMonthYear}-${prevMonth}-${day}`,
-            day: day,
-            isCurrentMonth: false,
-            isToday: false,
+const queryTaskList = async (page: number, pageSize: number) => {
+    try {
+        const { lists } = await getDeviceTaskCalendarList({
+            page_no: page,
+            page_size: pageSize,
+            day: taskDay.value,
         });
-    }
-
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dateStr = `${year}-${month}-${i}`;
-        const isToday = dateStr === todayDate;
-        calendarDays.push({
-            date: dateStr,
-            day: i,
-            isCurrentMonth: true,
-            isToday: isToday,
-        });
-    }
-
-    const gridCells = 35;
-    if (calendarDays.length < gridCells) {
-        const nextMonthStartDate = new Date(year, month, 1);
-        const nextMonthYear = nextMonthStartDate.getFullYear();
-        const nextMonth = nextMonthStartDate.getMonth() + 1;
-        let nextDay = 1;
-        while (calendarDays.length < gridCells) {
-            calendarDays.push({
-                date: `${nextMonthYear}-${nextMonth}-${nextDay}`,
-                day: nextDay,
-                isCurrentMonth: false,
-                isToday: false,
-            });
-            nextDay++;
-        }
-    }
-
-    days.value = calendarDays;
-};
-
-const selectDate = (day: Day) => {
-    selectedDate.value = day.date;
-    if (!day.isCurrentMonth) {
-        const [year, month] = day.date.split("-").map(Number);
-        currentYear.value = year;
-        currentMonth.value = month;
-        generateCalendar(currentYear.value, currentMonth.value);
+        pagingRef.value.complete(lists);
+    } catch (error) {
+        pagingRef.value?.complete([]);
     }
 };
 
-const prevMonth = () => {
-    currentMonth.value--;
-    if (currentMonth.value < 1) {
-        currentMonth.value = 12;
-        currentYear.value--;
-    }
-    generateCalendar(currentYear.value, currentMonth.value);
+const refreshTaskList = () => {
+    pagingRef.value?.reload();
 };
 
-const nextMonth = () => {
-    currentMonth.value++;
-    if (currentMonth.value > 12) {
-        currentMonth.value = 1;
-        currentYear.value++;
-    }
-    generateCalendar(currentYear.value, currentMonth.value);
+const handleSelectDate = (date: string) => {
+    getStatistics();
+    pagingRef.value?.reload();
 };
 
-const backToToday = () => {
-    const today = new Date();
-    currentYear.value = today.getFullYear();
-    currentMonth.value = today.getMonth() + 1;
-    selectedDate.value = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-    generateCalendar(currentYear.value, currentMonth.value);
-};
+const getProgress = computed(() => {
+    if (statistics.all === 0) return 0;
+    return Math.round(((statistics.completed + statistics.failure) / statistics.all) * 100);
+});
 
-onMounted(() => {
-    const today = new Date();
-    currentYear.value = today.getFullYear();
-    currentMonth.value = today.getMonth() + 1;
-    selectedDate.value = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-    generateCalendar(currentYear.value, currentMonth.value);
+onShow(() => {
+    getStatistics();
 });
 </script>
 
-<style scoped>
-.task-calendar-container {
-    background-color: #f4f6f9;
-    padding: 20rpx;
-    min-height: 100vh;
-}
-
-.task-calendar {
-    background-color: #ffffff;
-    border-radius: 24rpx;
-    padding: 30rpx;
-    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.05);
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30rpx;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.back-to-today {
-    margin-left: 20rpx;
-    padding: 8rpx 20rpx;
-    background-color: #f0f2f5;
-    color: #606266;
-    border-radius: 30rpx;
-    font-size: 24rpx;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.back-to-today:hover {
-    background-color: #e4e7ed;
-}
-
-.month-year {
-    font-size: 40rpx;
-    font-weight: 600;
-    color: #2c3e50;
-}
-
-.arrow-group {
-    display: flex;
-    align-items: center;
-}
-
-.arrow {
-    width: 60rpx;
-    height: 60rpx;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: background-color 0.3s;
-}
-
-.arrow:hover {
-    background-color: #f0f0f0;
-}
-
-.arrow-icon {
-    width: 16rpx;
-    height: 16rpx;
-    border-style: solid;
-    border-color: #2c3e50;
-    border-width: 0 4rpx 4rpx 0;
-}
-
-.arrow-left {
-    transform: rotate(135deg);
-}
-
-.arrow-right {
-    transform: rotate(-45deg);
-}
-
-.calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 20rpx;
-}
-
-.weekday {
-    text-align: center;
-    font-size: 28rpx;
-    font-weight: 500;
-    color: #909399;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10rpx;
-}
-
-.grid-item {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 80rpx;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.day-number {
-    font-size: 30rpx;
-    font-weight: 500;
-    color: #606266;
-}
-
-.not-current-month .day-number {
-    color: #c0c4cc;
-}
-
-.grid-item:hover:not(.selected) {
-    background-color: #f2f6fc;
-}
-
-.today .day-number {
-    color: #409eff;
-    font-weight: 600;
-}
-
-.today:before {
-    content: "";
-    position: absolute;
-    bottom: 10rpx;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 8rpx;
-    height: 8rpx;
-    border-radius: 50%;
-    background-color: #409eff;
-}
-
-.selected {
-    background-color: #409eff;
-    color: #fff;
-    box-shadow: 0 4rpx 12rpx rgba(64, 158, 255, 0.4);
-}
-
-.selected .day-number {
-    color: #fff;
-}
-
-.selected.today:before {
-    background-color: #fff;
-}
-</style>
+<style scoped></style>

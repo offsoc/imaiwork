@@ -11,7 +11,7 @@
             </view>
             <view class="flex items-center gap-x-2 break-all">
                 <image v-if="item.clue_type == 2" src="/static/images/icons/phone.svg" class="w-4 h-6" />
-                <image v-else-if="item.clue_type == 1" src="/static/images/icons/wechat.svg" class="w-4 h-6" />
+                <image v-else-if="item.clue_type == 1" src="/static/images/icons/weixin.svg" class="w-4 h-6" />
                 <text @click.stop="handleClue(item)" class="flex-1 line-clamp-1">
                     {{ item.reg_content }}
                 </text>

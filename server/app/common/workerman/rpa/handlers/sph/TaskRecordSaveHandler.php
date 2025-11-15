@@ -9,7 +9,7 @@ use app\common\model\sv\SvAddWechatRecord;
 use app\common\model\sv\SvAddWechatStrategy;
 use app\common\model\wechat\AiWechat;
 use app\common\model\wechat\AiWechatLog;
-use Workerman\Lib\Timer;
+use Workerman\Timer;
 use think\facade\Db;
 use app\api\logic\service\TokenLogService;
 use app\common\enum\user\AccountLogEnum;
@@ -70,7 +70,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $this->connection = $connection;
 
             $this->payload['reply'] = $this->addTaskRecord($content);
-            $this->sendResponse($uid, $this->payload, $this->payload['reply']);
+            //$this->sendResponse($uid, $this->payload, $this->payload['reply']);
         } catch (\Exception $e) {
             $this->setLog('异常信息' . $e, 'task_record');
             $this->payload['reply'] = $e->getMessage();
@@ -184,6 +184,8 @@ class TaskRecordSaveHandler extends BaseMessageHandler
             $result['msg'] = '获客内容上报成功';
             $result['ocr_type'] = 1;
             $this->payload['type'] = 27;
+
+            unset($this->payload, $content);
             return $result;
         } catch (\Throwable $e) {
             $this->setLog('异常信息' . $e, 'task_record');
@@ -355,10 +357,10 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                     //查询当前设备该微信号执行记录
                     $recordCount = SvAddWechatRecord::where('user_id', $userid)
                         ->where('device_code', $device_code)
-                        ->where('account_type', 4)
+                        ->where('account_type', 1)
                         ->where('reg_wechat', $userWechatNo)
                         //->where('status', 0)
-                        ->where('channel', 4)
+                        ->where('channel', 1)
                         ->count();
                     $this->setLog($recordCount, 'task_record');
                     if ($recordCount >= 5) {
@@ -368,8 +370,8 @@ class TaskRecordSaveHandler extends BaseMessageHandler
 
                     $exist = SvAddWechatRecord::where('user_id', $userid)
                         ->where('device_code', $device_code)
-                        ->where('account_type', 4)
-                        ->where('channel', 4)
+                        ->where('account_type', 1)
+                        ->where('channel', 1)
                         ->where('crawling_task_id', $task->id)
                         ->where('reg_wechat', $userWechatNo)
                         ->findOrEmpty();
@@ -382,13 +384,13 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                         'user_id' => $userid,
                         'device_code' => $device_code,
                         'account' => $payload['account'] ?? ($payload['username'] ?? ''),
-                        'account_type'  => 4,
+                        'account_type'  => 1,
                         'user_account' => $payload['username'],
                         'original_message' => $payload['crawl_content'],
                         'reg_wechat' => $userWechatNo,
                         'action' => 1,
                         'status' => $status,
-                        'channel' => 4,
+                        'channel' => 1,
                         'exec_type' => $payload['exec_type'] ?? 2,
                         'task_id' => time() . rand(100, 999),
                         'crawling_task_id' => $task->id,
@@ -400,6 +402,7 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                         $response = \app\common\service\ToolsService::Sv()->validateStrings([
                             "strings" => [$userWechatNo],
                         ]);
+                        $this->setLog($response, 'task_record');
                         if (isset($response['code']) && (int)$response['code'] !== 10000) {
                             $this->setLog($userWechatNo . '该账号不是有效的微信号,忽略', 'task_record');
                             $this->setLog($response, 'task_record');
@@ -408,84 +411,6 @@ class TaskRecordSaveHandler extends BaseMessageHandler
                     }
                     $addWechat[] = $userWechatNo;
                     SvAddWechatRecord::create($record);
-
-                    // $timer =  Timer::add(3, function () use ($userWechatNo, $record, &$addWechat, &$timer) {
-                    //     $response = \app\common\service\ToolsService::Sv()->queryResult([
-                    //         "string" => $userWechatNo,
-                    //     ]);
-                    //     if((int)$response['code'] === 10000){
-                    //         $addWechat[] = $userWechatNo;
-                    //         SvAddWechatRecord::create($record);
-                    //     }
-                    //     Timer::del($timer);
-                    // });
-
-
-
-                    // $useWechat = [];
-                    // foreach ($wechat_ids as $wechat_id) {
-                    //     //计算微信加微间隔
-                    //     $interval_find = AiWechatLog::where('user_id', $userid)
-                    //         ->where('log_type', 0)
-                    //         ->where('wechat_id', $wechat_id)
-                    //         ->where('create_time', '>', (time() - ((int)$task->add_interval_time * 60)))
-                    //         ->order('id', 'desc')
-                    //         ->findOrEmpty();
-                    //     if (!$interval_find->isEmpty()) {
-                    //         $this->setLog('当前微信' . $wechat_id . '加微间隔未到', 'task_record');
-                    //         continue;
-                    //     }
-
-                    //     $addCount = AiWechatLog::where('user_id', $userid)
-                    //         ->where('log_type', 0)
-                    //         ->where('wechat_id', $wechat_id)
-                    //         ->where('create_time', 'between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))])
-                    //         ->count();
-                    //     if ($addCount >= $task->add_number) {
-                    //         $this->setLog('当前微信' . $wechat_id . '今日加微信次数已到', 'task_record');
-                    //         continue;
-                    //     }
-
-                    //     array_push($useWechat, $wechat_id);
-                    // }
-
-                    // if (empty($useWechat)) {
-                    //     $this->setLog('当前无可以使用的微信账号', 'task_record');
-                    //     $record['status'] = 0;
-                    //     $record['result'] = '当前暂无可以使用的微信账号';
-                    //     SvAddWechatRecord::create($record);
-                    //     continue;
-                    // }
-
-                    // $currentTime = time(); // 获取当前时间戳
-                    // $coolingThreshold = $currentTime - 7200; // 2小时前的时间戳（7200秒）
-                    // $wechat = AiWechat::field('*')
-                    //     ->where('wechat_id', 'in', $useWechat)
-                    //     // ->where(function ($query) use ($coolingThreshold) {
-                    //     //     $query->where('is_cooling', 0)->whereOr('cooling_time', '<', $coolingThreshold);
-                    //     // })
-                    //     ->order('update_time asc')->limit(1)->findOrEmpty();
-
-                    // $this->setLog(Db::getLastSql(), 'task_record');
-
-                    // if (!$wechat->isEmpty()) {
-                    //     $this->setLog($wechat, 'task_record');
-                    //     $record['wechat_no'] = $wechat['wechat_id'];
-                    //     $record['wechat_name'] = $wechat['wechat_nickname'];
-                    //     $this->setLog($record, 'task_record');
-
-                    //     $this->sendChannelAddWechatMessage([
-                    //         'WechatId' => $wechat['wechat_id'],
-                    //         'DeviceCode' => $wechat['device_code'],
-                    //         'Phones' => $userWechatNo,
-                    //         'message' => $this->createGreetingMessage($task, $userid), //ai生成打招呼消息
-                    //     ], $wechat, $record);
-                    // } else {
-                    //     $record['status'] = 3;
-                    //     $record['result'] = '冷却中，等待后可继续添加';
-                    //     SvAddWechatRecord::create($record);
-                    //     $this->setLog('冷却中，等待后可继续添加', 'task_record');
-                    // }
                 }
             }
             if ($addWechat) {

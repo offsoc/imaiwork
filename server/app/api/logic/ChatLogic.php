@@ -315,10 +315,10 @@ class ChatLogic extends ApiLogic
             'gpt-3.5-turbo',
         ];
         $geminiModels = [
-            'google/gemini-2.5-pro',
-            'google/gemini-2.5-flash',
-            'google/gemini-2.0-flash',
-            'google/gemma-3-4b-it',
+            'gemini-2.5-pro',
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemma-3-4b-it',
         ];
         $request['messages'] = $messages;
         if (in_array($request['model'], $gptModels)){

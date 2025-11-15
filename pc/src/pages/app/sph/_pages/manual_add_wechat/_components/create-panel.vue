@@ -19,6 +19,16 @@
                     <div class="text-[20px] font-bold text-white">创建新的自动加好友任务</div>
                     <div class="mt-6 flex flex-col gap-y-3">
                         <div>
+                            <div class="text-[#ffffff80] mb-3">任务名称</div>
+                            <ElInput
+                                v-model="formData.name"
+                                placeholder="请输入任务名称"
+                                class="!h-11"
+                                maxlength="30"
+                                show-word-limit
+                                clearable />
+                        </div>
+                        <div>
                             <div class="text-[#ffffff80] mb-3">线索来源</div>
                             <div>
                                 <ElRadioGroup v-model="formData.source">
@@ -31,6 +41,7 @@
                                 </ElRadioGroup>
                             </div>
                         </div>
+
                         <template v-if="formData.source == 1">
                             <div>
                                 <div class="flex items-center justify-between mb-3">
@@ -45,6 +56,7 @@
                                     show-file-list
                                     accept=".csv,.xlsx"
                                     drag
+                                    :max-size="20"
                                     :limit="1"
                                     @success="handleUploadSuccess"
                                     @remove="formData.fileurl = ''">
@@ -82,6 +94,83 @@
                                 </ElSelect>
                             </div>
                         </template>
+                        <div>
+                            <div class="text-[#ffffff80] mb-3">执行设备</div>
+                            <div>
+                                <ElSelect
+                                    v-model="formData.device_codes"
+                                    placeholder="请选择执行设备"
+                                    class="!h-11"
+                                    multiple
+                                    filterable
+                                    clearable
+                                    collapse-tags
+                                    collapse-tags-tooltip
+                                    popper-class="dark-select-popper"
+                                    :show-arrow="false">
+                                    <ElOption
+                                        v-for="item in deviceOptions.deviceLists"
+                                        :label="item.device_code"
+                                        :value="item.device_code"
+                                        :key="item.device_code"></ElOption>
+                                </ElSelect>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[#ffffff80] mb-3">时间设置</div>
+                            <div class="bg-app-bg-3 rounded-xl shadow-[0_0_0_1px_var(--app-border-color-2)] p-4">
+                                <div class="text-white">自动加好友设置</div>
+                                <div class="mt-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <div
+                                            v-for="(item, index) in [1, 3, 5, 10, 30]"
+                                            :key="index"
+                                            class="cursor-pointer rounded-md px-4 py-2 border border-app-border-2 text-white hover:bg-app-bg-1"
+                                            :class="[
+                                                formData.task_frep == item && currentFrequency != 5 ? 'bg-primary' : '',
+                                            ]"
+                                            @click="handleFrequency(item, index)">
+                                            {{ item }}天
+                                        </div>
+                                        <div
+                                            class="cursor-pointer rounded-md px-4 py-2 border border-app-border-2 text-white"
+                                            :class="[currentFrequency == 5 ? 'bg-primary' : '']"
+                                            @click="currentFrequency = 5">
+                                            自定义
+                                        </div>
+                                    </div>
+                                    <div class="mt-2" v-if="currentFrequency == 5">
+                                        <ElDatePicker
+                                            v-model="formData.custom_date"
+                                            type="dates"
+                                            placeholder="请选择自定义日期"
+                                            format="MM-DD"
+                                            value-format="YYYY-MM-DD"
+                                            popper-class="dark-date-picker-popper"
+                                            :disabled-date="disabledDate" />
+                                    </div>
+                                </div>
+                                <div class="text-white mt-4">每日执行时间</div>
+                                <div class="mt-4">
+                                    <ElTimePicker
+                                        v-model="formData.time_config"
+                                        type="time"
+                                        is-range
+                                        start-placeholder="请选择开始时间"
+                                        end-placeholder="请选择结束时间"
+                                        format="HH:mm"
+                                        value-format="HH:mm"
+                                        popper-class="dark-select-popper"
+                                        :show-arrow="false" />
+                                </div>
+                                <div v-if="taskErrorMsg" class="mt-2">
+                                    <div>任务冲突</div>
+                                    <view class="text-[#FF2442] mt-1 text-xs">
+                                        {{ taskErrorMsg }}
+                                    </view>
+                                </div>
+                            </div>
+                        </div>
                         <div class="bg-app-bg-3 rounded-xl shadow-[0_0_0_1px_var(--app-border-color-2)] p-4 mt-4">
                             <div class="text-white">自动加好友设置</div>
                             <div class="mt-2">
@@ -126,13 +215,13 @@
                                                 <ElInput
                                                     v-model="formData.add_number"
                                                     v-number-input="{
-                                                        min: 0,
+                                                        min: 1,
                                                         max: 99,
                                                     }"
                                                     type="number"
                                                     class="!h-11" />
                                             </div>
-                                            <span class="text-[#ffffff80]">次</span>
+                                            <span class="text-[#ffffff80]">条</span>
                                         </div>
                                     </div>
                                     <div class="flex-1">
@@ -142,7 +231,7 @@
                                                 <ElInput
                                                     v-model="formData.add_interval_time"
                                                     v-number-input="{
-                                                        min: 0,
+                                                        min: 1,
                                                         max: 999,
                                                     }"
                                                     type="number"
@@ -165,7 +254,7 @@
                                 <div v-if="formData.add_remark_enable == 1">
                                     <div class="flex flex-wrap gap-2">
                                         <div
-                                            v-for="(item, index) in getWechatRemarks"
+                                            v-for="(item, index) in formData.remarks"
                                             :key="index"
                                             class="cursor-pointer hover:bg-app-bg-1 transition-all duration-300 border border-app-border-2 rounded-md px-4 py-2 flex items-center"
                                             @click="handleEditRemark(item, index)">
@@ -203,19 +292,14 @@
 
 <script setup lang="ts">
 import { getTaskList as getTaskListApi, createManualAddWechat } from "@/api/sph";
-import { getWeChatLists } from "@/api/person_wechat";
-import { useAppStore } from "@/stores/app";
 import RemarkPop from "@/pages/app/sph/_components/remark-pop.vue";
+import dayjs from "dayjs";
+import { useCreateTask } from "../../../_hooks/useCreateTask";
 
 const emit = defineEmits(["back"]);
 
-const appStore = useAppStore();
-
-const getWechatRemarks = computed(() => {
-    return appStore.config.wechat_remarks || [];
-});
-
 interface FormData {
+    name: string;
     source: 1 | 2;
     fileurl: string;
     crawling_task_ids: string[];
@@ -227,97 +311,96 @@ interface FormData {
     remarks: string[];
     wechat_id: string[];
     wechat_reg_type: 0 | 1 | 2;
+    task_frep: number;
+    custom_date: string[];
+    time_config: string[];
+    device_codes: string[];
 }
 
 const formData = reactive<FormData>({
+    name: `自动加好友任务${dayjs().format("YYYYMMDDHHmmss")}`,
     source: 1,
     fileurl: "",
     crawling_task_ids: [],
     add_type: "1",
-    add_number: 0,
-    add_interval_time: 0,
+    add_number: 15,
+    add_interval_time: 10,
     add_friends_prompt: "",
     add_remark_enable: 1,
-    remarks: getWechatRemarks.value || [],
+    remarks: [],
     wechat_id: [],
     wechat_reg_type: 0,
+    task_frep: 1,
+    custom_date: [],
+    time_config: ["", ""],
+    device_codes: [],
 });
+
+const taskErrorMsg = ref("");
+
+const {
+    getWechatRemarks,
+    deviceOptions,
+    currentFrequency,
+    disabledDate,
+    handleFrequency,
+    isAddRemarkGen,
+    remarkPopupRef,
+    handleAddRemark,
+    handleAddRemarkConfirm,
+    handleEditRemark,
+    handleDeleteRemark,
+    checkTimeConfig,
+} = useCreateTask(formData);
+
+watch(
+    getWechatRemarks,
+    (val) => {
+        formData.remarks = [...(val || [])];
+    },
+    { immediate: true }
+);
 
 const taskList = ref<any[]>([]);
-
-const isAddRemarkGen = ref(false);
-const remarkPopupRef = shallowRef<InstanceType<typeof RemarkPop>>();
-const editRemarkIndex = ref(-1);
-
-const { optionsData: deviceOptions } = useDictOptions<{
-    wechatLists: any[];
-}>({
-    wechatLists: {
-        api: getWeChatLists,
-        params: { page_size: 1000 },
-        transformData: (data) => data.lists,
-    },
-});
 
 const handleUploadSuccess = (result: any) => {
     formData.fileurl = result.data.uri;
 };
 
-const handleAddRemark = async () => {
-    isAddRemarkGen.value = true;
-    await nextTick();
-    remarkPopupRef.value?.open();
-};
-
-const handleAddRemarkConfirm = (remark: string) => {
-    if (editRemarkIndex.value == -1) {
-        formData.remarks.push(remark);
-    } else {
-        formData.remarks[editRemarkIndex.value] = remark;
-    }
-    editRemarkIndex.value = -1;
-    isAddRemarkGen.value = false;
-};
-
-const handleEditRemark = async (item: string, index: number) => {
-    isAddRemarkGen.value = true;
-    editRemarkIndex.value = index;
-    await nextTick();
-    remarkPopupRef.value?.open(item);
-};
-
-const handleDeleteRemark = (index: number) => {
-    formData.remarks.splice(index, 1);
-};
-
 const { isLock, lockFn } = useLockFn(async () => {
-    if (formData.source == 1) {
-        if (!formData.fileurl) {
-            feedback.msgWarning("请上传文件");
-            return;
-        }
-    }
-    if (formData.source == 2) {
-        if (!formData.crawling_task_ids.length) {
-            feedback.msgWarning("请选择获客任务");
-            return;
-        }
-    }
-    if (formData.add_type == "1") {
-        if (!formData.wechat_id.length) {
-            feedback.msgWarning("请选择加微微信");
-            return;
-        }
-        if (formData.add_remark_enable == 1 && !formData.remarks.length) {
-            feedback.msgWarning("请输入加好友备注内容");
-            return;
-        }
+    if (!formData.name) {
+        feedback.msgWarning("请输入任务名称");
+        return;
+    } else if (formData.source == 1 && formData.fileurl == "") {
+        feedback.msgWarning("请上传文件");
+        return;
+    } else if (formData.source == 2 && formData.crawling_task_ids.length == 0) {
+        feedback.msgWarning("请选择获客任务");
+        return;
+    } else if (formData.device_codes.length == 0) {
+        feedback.msgWarning("请选择执行设备");
+        return;
+    } else if (currentFrequency.value == 5 && formData.custom_date.length == 0) {
+        feedback.msgWarning("请选择自定义日期");
+        return;
+    } else if (!checkTimeConfig()) {
+        return;
+    } else if (formData.wechat_id.length == 0) {
+        feedback.msgWarning("请选择加微微信");
+        return;
+    } else if (formData.add_remark_enable == 1 && formData.remarks.length == 0) {
+        feedback.msgWarning("请输入加好友备注内容");
+        return;
     }
     try {
-        await createManualAddWechat(formData);
+        await createManualAddWechat({
+            ...formData,
+            time_config: [`${formData.time_config[0]}-${formData.time_config[1]}`],
+        });
         feedback.msgSuccess("创建成功");
         emit("back");
     } catch (error) {
+        taskErrorMsg.value = error;
         feedback.msgError(error);
     }
 });

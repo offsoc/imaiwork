@@ -44,7 +44,7 @@ class PublishDetailLists extends BaseApiDataLists implements ListsSearchInterfac
             ->when($this->request->get('start_time') && $this->request->get('end_time'), function ($query) {
                 $query->whereBetween('ps.exec_time', [strtotime($this->request->get('start_time')), strtotime($this->request->get('end_time'))]);
             })
-            ->order('ps.id', 'asc')
+            ->order('ps.publish_time', 'asc')
             ->limit($this->limitOffset, $this->limitLength)
             ->select()
             ->each(function ($item) {
@@ -63,24 +63,13 @@ class PublishDetailLists extends BaseApiDataLists implements ListsSearchInterfac
                     $item['exec_time'] = '';
                 }
 
-                if($item['account_type'] === 1){
-                    $account = AiWechat::alias('a')
-                        ->join('ai_wechat_device d', 'a.device_code = d.device_code and a.user_id = d.user_id')
-                        ->where('a.user_id', $item['user_id'])
-                        ->where('a.wechat_id', $item['account'])
-                        ->where('a.device_code', $item['device_code'])
-                        ->field('a.wechat_nickname as nickname, a.wechat_avatar as avatar, d.device_model, d.sdk_version')
-                        ->findOrEmpty();
-
-                }elseif($item['account_type'] === 3){
-                    $account = SvAccount::alias('a')
-                        ->join('sv_device d', 'a.device_code = d.device_code and a.user_id = d.user_id')
-                        ->where('a.user_id', $item['user_id'])
-                        ->where('a.account', $item['account'])
-                        ->where('a.device_code', $item['device_code'])
-                        ->field('a.nickname, a.avatar, d.device_model, d.sdk_version')
-                        ->findOrEmpty();
-                }
+                $account = SvAccount::alias('a')
+                    ->join('sv_device d', 'a.device_code = d.device_code and a.user_id = d.user_id')
+                    ->where('a.user_id', $item['user_id'])
+                    ->where('a.account', $item['account'])
+                    ->where('a.device_code', $item['device_code'])
+                    ->field('a.nickname, a.avatar, d.device_model, d.sdk_version')
+                    ->findOrEmpty();
                 if($account->isEmpty()){
                     $item['nickname'] = '';
                     $item['avatar'] = '';

@@ -95,6 +95,7 @@ export default function useDeviceWs(options?: WebSocketOptions) {
                 case DeviceCmdCodeEnum.SUCCESS:
                 case DeviceCmdCodeEnum.INIT_COMPLETE:
                 case DeviceCmdCodeEnum.CHECK_INIT:
+                case DeviceCmdCodeEnum.DEVICE_ONLINE:
                     triggerEvent("success", {
                         ...data,
                         content,
@@ -112,7 +113,7 @@ export default function useDeviceWs(options?: WebSocketOptions) {
             triggerEvent("error", {
                 error: content.msg,
                 type,
-                code: DeviceCmdCodeEnum.PUSH_MESSAGE_ERROR,
+                code,
                 deviceCode: deviceId,
             });
         }

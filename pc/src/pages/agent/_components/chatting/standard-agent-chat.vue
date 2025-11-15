@@ -67,6 +67,7 @@ watch(
     () => props.taskId,
     async (newId) => {
         chatStore.clearChat();
+        await nextTick();
         chatStore.setAgent({
             id: props.agentId,
             name: props.agentName || "",

@@ -30,12 +30,12 @@ class SvAccountLogic extends SvBaseLogic
             }
 
             // 获取信息
-            $account = self::accountInfo($params['account'], false);
+            $account = self::accountInfo($params['account'], false, $params['type']);
             if ($account instanceof SvAccount) {
                 $params['user_id'] = self::$uid;
                 $params['update_time'] = time();
                 $res = SvAccount::where('account', $params['account'])->where('user_id', self::$uid)->update($params);
-                $account = self::accountInfo($params['account'], false);
+                $account = self::accountInfo($params['account'], false, $params['type']);
 
                 $data = $account->toArray();
                 self::$returnData = $data;
@@ -112,7 +112,7 @@ class SvAccountLogic extends SvBaseLogic
         try {
             $params['status'] = 1;
             // 获取信息
-            $account = self::accountInfo($params['account']);
+            $account = self::accountInfo($params['account'], false, $params['type']);
             if (is_bool($account)) {
                 if(isset($params['id']) && $params['id'] > 0){
                     $account = SvAccount::where('id', $params['id'])->where('user_id', self::$uid)->findOrEmpty();
@@ -177,7 +177,7 @@ class SvAccountLogic extends SvBaseLogic
     {
         try {
             // 获取信息
-            $account = self::accountInfo($params['account']);
+            $account = self::accountInfo($params['account'], true, $params['account_type'] ?? 3);
             if (is_bool($account)) {
                 return false;
             }
@@ -188,6 +188,7 @@ class SvAccountLogic extends SvBaseLogic
                 $setting = [
                     'takeover_type' => 1,
                     'account' => $account->account,
+                    'account_type' => $account->type,
                     'user_id' => self::$uid
                 ];
                 SvSetting::create($setting);

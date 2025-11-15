@@ -21,7 +21,7 @@ class NotePublishCron extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        PublishLogic::aiNotePushCron(0);
+        //PublishLogic::aiNotePushCron(0);
         return true;
     }
 }
