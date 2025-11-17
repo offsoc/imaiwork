@@ -290,61 +290,70 @@ IMAIWORK 不是一个工具，而是一套可持续扩展的 **企业级智能�
 ## 📌 功能模块截图示例
 
 ### 1. AI个微 & 矩阵发布（RPA智能手机）
-自动化微信/多账号管理、好友聊天、SOP营销、朋友圈管理  
-![AI个微截图](WechatIMG311.jpg)  
-![AI个微截图](WechatIMG309.jpg)  
+自动化微信/多账号管理、好友聊天、SOP营销、朋友圈管理
+![AI个微截图](ReadMepicture/个微首页.png)  
+![AI个微截图](ReadMepicture/个微SOP.png)
+![AI个微截图](ReadMepicture/客户流程管理.png)
+![AI个微截图](ReadMepicture/自动打招呼.png)
+![AI个微截图](ReadMepicture/朋友圈.png)
+![AI个微截图](ReadMepicture/自动标签.png)
+![AI个微截图](ReadMepicture/素材库.png)
+![AI个微截图](ReadMepicture/微信管理.png)
 
 ### 2. 视频号 & 小红书 AI 自动获客
 视频号自动爬取、私信引导、批量发布；小红书自动引流与内容发布  
-![视频号截图](WechatIMG304.jpg)  
-![小红书截图](WechatIMG305.jpg)  
+![截图](ReadMepicture/矩阵账号管理.png)
+![截图](ReadMepicture/视频号获客.png)
+![截图](ReadMepicture/自动加微任务.png)
+![截图](ReadMepicture/自动加微任务2.png)
+![截图](ReadMepicture/自动获客小程序.png)
+![截图](ReadMepicture/线索词生成.png)
+![截图](ReadMepicture/线索词生成1.png)
+![截图](ReadMepicture/任务设置.png)
+![截图](ReadMepicture/获客时间设定.png)
 
 ### 3. AI会议纪要
 实时会议记录、音视频转写、多语言翻译、摘要与思维导图生成  
-![会议纪要截图](WechatIMG306.jpg)  
-![会议纪要截图](WechatIMG308.jpg)  
+![会议纪要截图](ReadMepicture/会议纪要.png)  
+![会议纪要截图](ReadMepicture/会议转写内容.png)  
 
 ### 4. AI数字人
 数字人形象克隆、音色克隆、视频合成、智能剪辑与混剪  
-![AI数字人截图](screenshot-20250610-154431.png)  
-![AI数字人截图](screenshot-20250610-154446.png)  
+![AI数字人截图](ReadMepicture/1.png)  
+![AI数字人截图](ReadMepicture/1.png)  
 
 ### 5. AI美工
 文生图/图生图、商品海报生成、模特换衣、图生视频  
-![AI美工截图](screenshot-20250610-154456.png)  
-![AI美工截图](screenshot-20250610-154511.png)  
+![AI美工截图](ReadMepicture/1.png)  
+![AI美工截图](ReadMepicture/1.png)  
 
 ### 6. AI工作台聊天
 多模型切换、智能体调用、文件理解、联网搜索  
-![AI聊天截图](WechatIMG304.jpg)  
-![AI聊天截图](WechatIMG305.jpg)  
+![AI聊天截图](ReadMepicture/1.png)  
+![AI聊天截图](ReadMepicture/1.png)  
 
 ### 7. AI陪练
 场景模拟、练习报告、自定义场景训练  
-![AI陪练截图](WechatIMG306.jpg)  
-![AI陪练截图](WechatIMG308.jpg)  
+![AI陪练截图](ReadMepicture/1.png)  
+![AI陪练截图](ReadMepicture/1.png)  
 
 ### 8. AI人事
 岗位管理、自动招聘、AI面试、面试报告与数据导出  
-![AI人事截图](screenshot-20250610-154431.png)  
-![AI人事截图](screenshot-20250610-154446.png)  
+![AI人事截图](ReadMepicture/1.png)  
+![AI人事截图](ReadMepicture/1.png)  
 
 ### 9. AI思维导图
 自动生成结构化思维导图  
-![思维导图截图](WechatIMG311.jpg)  
+![思维导图截图](ReadMepicture/1.png)  
 
 ### 10. 知识库（RAG & 向量）
 知识库管理、训练、智能切片、向量检索、多知识库挂载  
-![知识库截图](WechatIMG309.jpg)  
-![知识库截图](WechatIMG304.jpg)  
+![知识库截图](ReadMepicture/1.png)  
+![知识库截图](ReadMepicture/1.png)  
 
 ### 11. OEM & AI智能体
 品牌授权、自定义智能体模型、文件解析、网页/公众号/API调用  
-![OEM截图](WechatIMG305.jpg)  
-![AI智能体截图](WechatIMG306.jpg)  
+![OEM截图](ReadMepicture/1.png)  
+![AI智能体截图](ReadMepicture/1.png)  
 
-### 12. AI无人直播
-实景/绿幕直播、多平台同步、自动商品讲解、智能控场  
-![无人直播截图](WechatIMG308.jpg)  
-![无人直播截图](WechatIMG311.jpg)  
 
