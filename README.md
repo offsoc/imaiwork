@@ -339,31 +339,49 @@ IMAIWORK 不是一个工具，而是一套可持续扩展的 **企业级智能�
 
 ### 6. AI工作台聊天
 多模型切换、智能体调用、文件理解、联网搜索  
-![AI聊天截图](ReadMepicture/1.png)  
-![AI聊天截图](ReadMepicture/1.png)  
+![AI聊天截图](ReadMepicture/通用聊天.png)    
 
 ### 7. AI陪练
 场景模拟、练习报告、自定义场景训练  
-![AI陪练截图](ReadMepicture/1.png)  
-![AI陪练截图](ReadMepicture/1.png)  
+![AI陪练截图](ReadMepicture/智能陪练.png)  
+![AI陪练截图](ReadMepicture/陪练BP.png)
+![AI陪练截图](ReadMepicture/对话陪练.png)
+![AI陪练截图](ReadMepicture/陪练记录.png)  
 
 ### 8. AI人事
 岗位管理、自动招聘、AI面试、面试报告与数据导出  
-![AI人事截图](ReadMepicture/1.png)  
-![AI人事截图](ReadMepicture/1.png)  
+![AI人事截图](ReadMepicture/岗位创建.png)  
+![AI人事截图](ReadMepicture/自动面试1.png)
+![AI人事截图](ReadMepicture/自动面2.png)
+![AI人事截图](ReadMepicture/自动面试3.png)
+![AI人事截图](ReadMepicture/自动面试4.png)
+![AI人事截图](ReadMepicture/自动面试.png)
 
 ### 9. AI思维导图
 自动生成结构化思维导图  
-![思维导图截图](ReadMepicture/1.png)  
+![思维导图截图](ReadMepicture/思维导图.png)  
 
 ### 10. 知识库（RAG & 向量）
 知识库管理、训练、智能切片、向量检索、多知识库挂载  
-![知识库截图](ReadMepicture/1.png)  
-![知识库截图](ReadMepicture/1.png)  
+![知识库截图](ReadMepicture/向量知识库.png)  
+![知识库截图](ReadMepicture/Rag知识库.png)
+![知识库截图](ReadMepicture/检索测试.png)  
 
 ### 11. OEM & AI智能体
 品牌授权、自定义智能体模型、文件解析、网页/公众号/API调用  
 ![OEM截图](ReadMepicture/1.png)  
-![AI智能体截图](ReadMepicture/1.png)  
+![AI智能体截图](ReadMepicture/Ai智能体.png)
+![AI智能体截图](ReadMepicture/新增Coze智能体.png)
+![AI智能体截图](ReadMepicture/Coze工作流.png)
+![AI智能体截图](ReadMepicture/新增Ai智能体.png)
+![AI智能体截图](ReadMepicture/智能体知识库绑定.png)
+![AI智能体截图](ReadMepicture/智能体模型参数设定.png)  
+![AI智能体截图](ReadMepicture/智能体界面配置.png)
+![AI智能体截图](ReadMepicture/智能体发布.png)
+![AI智能体截图](ReadMepicture/智能体能力.png)
+![AI智能体截图](ReadMepicture/智能体设定.png)
+![AI智能体截图](ReadMepicture/1.png)
+![AI智能体截图](ReadMepicture/1.png)
+
 
 
