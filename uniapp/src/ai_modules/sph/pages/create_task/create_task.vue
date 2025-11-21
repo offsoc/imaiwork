@@ -54,7 +54,7 @@
                 <view class="flex items-center gap-x-2 px-4">
                     <view
                         class="flex-1 flex items-center justify-center gap-x-2 bg-white h-[100rpx] rounded-[10rpx]"
-                        @click="showAddKeywordPopup = true">
+                        @click="handleEditClue()">
                         <image src="/static/images/icons/edit.svg" class="w-[32rpx] h-[32rpx]"></image>
                         <text class="font-bold text-[32rpx]">手动输入</text>
                     </view>
@@ -71,17 +71,17 @@
                 <view class="font-bold text-[30rpx] px-4 mt-[60rpx]">线索词列表（{{ formData.keywords.length }}）</view>
                 <view class="grow min-h-0 mt-[32rpx]">
                     <scroll-view class="h-full" scroll-y>
-                        <view class="px-4 flex flex-col gap-y-[30rpx] pb-[100rpx]">
+                        <view class="px-4 flex flex-wrap gap-4 pb-[100rpx]">
                             <view
                                 v-for="(item, index) in formData.keywords"
                                 :key="index"
                                 class="keyword-item"
-                                @click="handleSelectClue(index)">
+                                @click="handleEditClue(index)">
                                 <view>{{ item }}</view>
                                 <view
-                                    class="absolute top-2 right-2 w-5 h-5 flex items-center justify-center bg-[#0000004d] rounded-full z-[88]"
+                                    class="w-4 h-4 flex items-center justify-center bg-[#0000004d] rounded-full"
                                     @click.stop="handleDeleteClue(index)">
-                                    <u-icon name="close" size="20" color="#ffffff"></u-icon>
+                                    <u-icon name="close" size="16" color="#ffffff"></u-icon>
                                 </view>
                             </view>
                         </view>
@@ -432,56 +432,7 @@
             </view>
         </view>
     </view>
-    <u-popup
-        v-model="showAddKeywordPopup"
-        mode="center"
-        width="90%"
-        border-radius="64"
-        :closeable="false"
-        @close="handleCloseAddKeywordPopup">
-        <view class="flex flex-col p-[32rpx]">
-            <view class="text-[26rpx] text-center mt-[14rpx]">请输入手动添加检索词</view>
-            <view class="h-[100rpx] rounded-xl bg-[#00000005] flex items-center px-[18rpx] mt-[46rpx]">
-                <input
-                    v-model="keyword"
-                    class="w-full"
-                    placeholder="请输入检索词"
-                    placeholder-style="font-size:26rpx;color:rgba(0,0,0,0.2)"
-                    :focus="showAddKeywordPopup"
-                    :maxlength="30" />
-            </view>
-            <view class="flex gap-x-[24rpx] mt-[36rpx] w-full">
-                <view class="flex-1">
-                    <u-button
-                        shape="circle"
-                        :custom-style="{
-                            height: '100rpx',
-                            boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.1)',
-                            backgroundColor: 'transparent',
-                            color: 'rgba(0,0,0,0.3)',
-                            fontSize: '26rpx',
-                        }"
-                        @click="handleCloseAddKeywordPopup"
-                        >取消</u-button
-                    >
-                </view>
-                <view class="flex-1">
-                    <u-button
-                        type="primary"
-                        shape="circle"
-                        :custom-style="{
-                            flex: 1,
-                            height: '100rpx',
-                            boxShadow: '0 6px 12px 0 rgba(0, 101, 251, 0.20)',
-                            fontSize: '26rpx',
-                        }"
-                        @click="handleAddKeyword"
-                        >确定</u-button
-                    >
-                </view>
-            </view>
-        </view>
-    </u-popup>
+    <clue-edit ref="clueEditRef" v-model="showClueEdit" @confirm="handleClueConfirm" @close="showClueEdit = false" />
     <u-popup v-model="showOCRTip" mode="bottom" border-radius="24" @close="showOCRTip = false">
         <view>
             <view class="text-center text-lg font-bold py-3"> 线索识别方式 </view>
@@ -534,9 +485,7 @@
 
 <script setup lang="ts">
 import { createTask } from "@/api/sph";
-import { getDeviceList as getDeviceListApi } from "@/api/device";
 import { getWeChatLists } from "@/api/person_wechat";
-import { usePaging } from "@/hooks/usePaging";
 import { useAppStore } from "@/stores/app";
 import { useUserStore } from "@/stores/user";
 import AccountIcon from "@/ai_modules/sph/static/icons/account.svg";
@@ -546,6 +495,7 @@ import VideoPrimaryIcon from "@/ai_modules/sph/static/icons/video_primary.svg";
 import { ListenerTypeEnum } from "@/ai_modules/sph/enums";
 import { AppTypeEnum, TokensSceneEnum } from "@/enums/appEnums";
 import { useDictOptions } from "@/hooks/useDictOptions";
+import ClueEdit from "@/ai_modules/sph/components/clue-edit/clue-edit.vue";
 
 enum CrawlType {
     ACCOUNT = 1,
@@ -629,12 +579,12 @@ const formData = reactive<{
     keywords: [],
     device_codes: [],
     task_frep: 1,
-    time_config: ["09:00", "09:30"],
+    time_config: ["09:00", "09:15"],
     custom_date: [],
 });
 
-const showAddKeywordPopup = ref(false);
-const keyword = ref("");
+const showClueEdit = ref(false);
+const clueEditRef = shallowRef();
 // 编辑线索词
 const editClueIndex = ref<number>(-1);
 
@@ -648,6 +598,9 @@ const currentFrequency = ref(0);
 const isExpandDate = ref(false);
 // 任务冲突
 const taskErrorMsg = ref("");
+
+const timeInterval = 15;
+
 const showCreateTaskSuccessDialog = ref(false);
 
 const currentGreetingContentSettingType = ref<GreetingContentSettingTypeEnum>(
@@ -722,11 +675,6 @@ const handleStep = (targetStep: number, type?: "next" | "prev") => {
     }
 };
 
-const { pager: devicePager, getLists: getDeviceList } = usePaging({
-    fetchFun: getDeviceListApi,
-    params: { page_size: 999 },
-});
-
 const { optionsData } = useDictOptions<{
     wechatLists: any[];
 }>({
@@ -741,30 +689,23 @@ const { optionsData } = useDictOptions<{
     },
 });
 
-const handleAddKeyword = () => {
-    if (!keyword.value) {
-        uni.$u.toast("请输入检索词");
-        return;
+const handleEditClue = async (index?: number) => {
+    showClueEdit.value = true;
+    await nextTick();
+    if (index) {
+        editClueIndex.value = index || -1;
+        clueEditRef.value.setFormData(formData.keywords[index]);
     }
+};
+
+const handleClueConfirm = (val: string) => {
     if (editClueIndex.value == -1) {
-        formData.keywords.unshift(keyword.value);
+        formData.keywords.push(val);
     } else {
-        formData.keywords[editClueIndex.value] = keyword.value;
+        formData.keywords[editClueIndex.value] = val;
     }
-    keyword.value = "";
-    showAddKeywordPopup.value = false;
-};
-
-const handleSelectClue = (index: number) => {
-    editClueIndex.value = index;
-    keyword.value = formData.keywords[index];
-    showAddKeywordPopup.value = true;
-};
-
-const handleCloseAddKeywordPopup = () => {
     editClueIndex.value = -1;
-    keyword.value = "";
-    showAddKeywordPopup.value = false;
+    showClueEdit.value = false;
 };
 
 const handleDeleteClue = (index: number) => {
@@ -830,8 +771,7 @@ const handleStartTimeChange = (e: any) => {
     const endTime = new Date(`2000/01/01 ${value}`);
 
     formData.time_config[0] = value;
-    //让time_config[1]加上30分钟
-    endTime.setMinutes(endTime.getMinutes() + 30);
+    endTime.setMinutes(endTime.getMinutes() + timeInterval);
     formData.time_config[1] = uni.$u.timeFormat(endTime, "hh:MM");
 };
 
@@ -844,8 +784,8 @@ const handleEndTimeChange = (e: any) => {
     }
     const startTIme = new Date(`2000/01/01 ${formData.time_config[0]}`);
     const endTime = new Date(`2000/01/01 ${value}`);
-    if (endTime.getTime() - startTIme.getTime() < 30 * 60 * 1000) {
-        uni.$u.toast(`结束时间不能小于开始时间30分钟`);
+    if (endTime.getTime() - startTIme.getTime() < timeInterval * 60 * 1000) {
+        uni.$u.toast(`结束时间不能小于开始时间${timeInterval}分钟`);
         return;
     }
     formData.time_config[1] = value;
@@ -907,13 +847,9 @@ watch(
     }
 );
 
-onShow(() => {
-    getDeviceList();
-});
-
 onLoad(({ type }: any) => {
     if (type) {
-        formData.crawl_type = type;
+        formData.crawl_type = parseInt(type);
     }
     uni.$on("confirm", (res: any) => {
         const { type, data } = res;
@@ -964,7 +900,7 @@ onLoad(({ type }: any) => {
 }
 
 .keyword-item {
-    @apply bg-white rounded-[20rpx] p-[38rpx] relative;
+    @apply bg-white rounded-[20rpx] px-4 py-2 flex items-center gap-x-2 relative;
 }
 
 .frequency-item {

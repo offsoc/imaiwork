@@ -41,7 +41,7 @@ class WechatLogic extends WechatBaseLogic
             $wechat = self::wechatInfo($params['wechat_id'], false);
             if ($wechat instanceof AiWechat)
             {
-                self::setError('微信账号已存在');
+                self::setError('该微信已在另一部AI手机登录，请先解绑');
                 return false;
             }
 

@@ -94,8 +94,6 @@
                                                 :accept="videoFormat"
                                                 :max-video-count="videoLimit"
                                                 :max-size="videoSize"
-                                                :video-min-duration="videoDuration[0]"
-                                                :video-max-duration="videoDuration[1]"
                                                 @preview-video="handlePreviewVideo"
                                                 @update:material-list="handleUpdateMaterialList"
                                                 @import-material="handleImportMaterial($event, 0)"
@@ -117,7 +115,7 @@
                                                 <div
                                                     class="absolute -top-2 -right-2 w-5 h-5"
                                                     @click="handleDeleteMaterialGroup(index)">
-                                                    <close-btn :icon-size="14"></close-btn>
+                                                    <close-btn :icon-size="14" :theme="ThemeEnum.DARK"></close-btn>
                                                 </div>
                                             </div>
                                         </template>
@@ -275,6 +273,7 @@ import dayjs from "dayjs";
 import { ElScrollbar } from "element-plus";
 import { getDeviceAccountList as getDeviceAccountListApi, addMatrixTask, publishDeviceTask } from "@/api/device";
 import { uploadImage } from "@/api/app";
+import { ThemeEnum } from "@/enums/appEnums";
 import { PublishTaskTypeEnum, MaterialActionType, MaterialTypeEnum, SidebarTypeEnum } from "../_enums";
 import ContentCopywritingMaterial from "./content-copywriting-material.vue";
 import CopywritingCard from "./copywriting-card.vue";
@@ -325,8 +324,6 @@ const steps = [
 
 // 视频上传限制
 const videoLimit = 99;
-// 视频时长
-const videoDuration = [1, 60];
 // 视频上传大小
 const videoSize = 100;
 // 视频上传格式
@@ -634,7 +631,7 @@ const { lockFn: submitForm, isLock: isSubmitting } = useLockFn(async () => {
 
     try {
         const copywriterList = materialFormData.title
-            .filter((item) => item)
+            .filter((item) => item.content)
             .map((item, index) => {
                 const content = materialFormData.subtitle[index]?.content;
                 const topic = materialFormData.subtitle[index]?.topic;
@@ -644,7 +641,6 @@ const { lockFn: submitForm, isLock: isSubmitting } = useLockFn(async () => {
                     topic: topic,
                 };
             });
-
         let media_url = [];
         if (type.value === PublishTaskTypeEnum.VIDEO) {
             media_url = materialFormData.media_url.map((item) => ({

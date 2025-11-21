@@ -93,7 +93,6 @@
 <script setup lang="ts">
 import { getVoiceList, deleteVoice } from "@/api/digital_human";
 import { useAppStore } from "@/stores/app";
-import { ToneType } from "@/pages/app/digital_human/_enums";
 import Empty from "@/pages/app/digital_human/_components/empty.vue";
 import { ToneTypeEnum, DigitalHumanModelVersionEnum } from "@/pages/app/digital_human/_enums";
 import AddPop from "./_components/add-pop.vue";

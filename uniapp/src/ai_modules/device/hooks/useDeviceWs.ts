@@ -71,6 +71,7 @@ export default function useDeviceWs(options?: WebSocketOptions) {
             type: DeviceCmdEnum.BIND_WS,
             content: {
                 type: DeviceCmdEnum.BIND_WS,
+                sourceType: "mprog",
             },
         });
     });

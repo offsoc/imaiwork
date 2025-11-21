@@ -14,7 +14,7 @@ const props = withDefaults(
     }>(),
     {
         iconSize: 16,
-        theme: ThemeEnum.DARK,
+        theme: ThemeEnum.LIGHT,
     }
 );
 

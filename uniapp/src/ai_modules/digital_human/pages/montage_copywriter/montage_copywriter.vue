@@ -51,9 +51,7 @@ const back = () => {
 
     uni.$emit("confirm", {
         type: ListenerTypeEnum.MONTAGE_COPYWRITER,
-        data: {
-            copywriterList: [formData],
-        },
+        data: [formData],
     });
     uni.navigateBack();
 };

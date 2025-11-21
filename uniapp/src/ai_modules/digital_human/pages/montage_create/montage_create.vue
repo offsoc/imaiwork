@@ -1,7 +1,7 @@
 <template>
     <view class="h-screen flex flex-col dh-bg">
         <u-navbar
-            title="智能数字人"
+            title="数字人口播混剪"
             title-bold
             :is-fixed="false"
             :border-bottom="false"
@@ -45,7 +45,11 @@
                     </view>
                 </view>
                 <view class="grow min-h-0 mt-[38rpx]">
-                    <scroll-view scroll-y class="h-full" v-if="anchorLists.length > 0">
+                    <scroll-view
+                        scroll-y
+                        class="h-full"
+                        v-if="anchorLists.length > 0"
+                        @scrolltolower="handleLoadAnchorMore">
                         <view class="grid grid-cols-3 gap-4 px-4 pb-4">
                             <view
                                 v-for="(item, index) in anchorLists"
@@ -125,7 +129,7 @@
                 <view class="flex items-center gap-x-2 px-4">
                     <view
                         class="flex-1 flex items-center justify-center gap-x-2 bg-white h-[100rpx] rounded-[10rpx]"
-                        @click="handleShowCopywriter">
+                        @click="handleShowCopywriter()">
                         <image src="/static/images/icons/edit.svg" class="w-[32rpx] h-[32rpx]"></image>
                         <text class="font-bold text-[32rpx]">手动输入</text>
                     </view>
@@ -153,7 +157,7 @@
                                 </view>
                                 <view
                                     class="absolute right-2 top-2 rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
-                                    @click="handleDeleteCopywriter(index)">
+                                    @click.stop="handleDeleteCopywriter(index)">
                                     <u-icon name="close" color="#ffffff" size="16"></u-icon>
                                 </view>
                             </view>
@@ -473,21 +477,22 @@
     <u-popup
         v-model="showCreateSuccess"
         mode="center"
-        border-radius="64"
-        width="90%"
+        border-radius="20"
+        width="85%"
         :custom-style="{ backgroundColor: 'transparent' }"
         :mask-close-able="false">
-        <view class="leading-[0] rounded-[48rpx] pb-[100rpx] relative">
-            <view class="w-full h-[890rpx]" @click="toPublish">
-                <image
-                    src="@/ai_modules/digital_human/static/images/common/create_success.png"
-                    class="w-full h-full"></image>
+        <view class="w-full bg-white rounded-[20rpx] py-[94rpx] px-[62rpx]">
+            <view class="text-[40rpx] font-bold text-center">混剪视频创建成功</view>
+            <view class="text-[30rpx] mt-[80rpx]"> 您可以立即去设置发布任务，也可以等待混剪视频成功后再发布 </view>
+            <view
+                @click="toPublish"
+                class="mt-[98rpx] bg-black text-white text-[30rpx] font-bold rounded-[20rpx] h-[90rpx] flex items-center justify-center">
+                立即去发布
             </view>
             <view
-                class="absolute bottom-[20rpx] left-[50%] w-[48rpx] h-[48rpx] rounded-full bg-[#0000004d]"
-                style="transform: translateX(-50%)"
-                @click="handleCloseCreateSuccess">
-                <image src="@/ai_modules/digital_human/static/icons/close.svg" class="w-full h-full"></image>
+                class="mt-[30rpx] bg-[#F3F3F3] text-[30rpx] font-bold rounded-[20rpx] h-[90rpx] flex items-center justify-center"
+                @click="toRecord">
+                查看混剪记录
             </view>
         </view>
     </u-popup>
@@ -508,7 +513,7 @@ import { useAppStore } from "@/stores/app";
 import { getVideoTranscodeResult, uploadFile, videoTranscode } from "@/api/app";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { chooseFile } from "@/components/file-upload/choose-file";
-import { ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
+import { DigitalHumanModelVersionEnum, ListenerTypeEnum } from "@/ai_modules/digital_human/enums";
 import usePolling from "@/hooks/usePolling";
 
 const userStore = useUserStore();
@@ -541,6 +546,13 @@ const formData = reactive<any>({
 
 // 形象列表
 const anchorLists = ref<any[]>([]);
+const anchorLoading = ref(false);
+const anchorFinished = ref(false);
+const anchorQueryParams = reactive({
+    page_no: 1,
+    page_size: 20,
+    status: 6,
+});
 
 // 历史人设列表
 const historyLists = ref<any[]>([]);
@@ -549,8 +561,8 @@ const showHistory = ref(false);
 const isHistoryPerson = ref(false);
 const pagingHistoryRef = ref<any>(null);
 
-// 选中的文案索引
-const selectedCopywriterIndex = ref(-1);
+// 编辑文案索引
+const editCopywriterIndex = ref(-1);
 
 // 上传素材提示显示
 const showUploadTip = ref(false);
@@ -657,7 +669,10 @@ const handleSelect = (val: any) => {
 
 const handleCreateAnchor = () => {
     uni.$u.route({
-        url: "/ai_modules/digital_human/pages/montage_anchor_create/montage_anchor_create",
+        url: "/ai_modules/digital_human/pages/anchor_create/anchor_create",
+        params: {
+            source: DigitalHumanModelVersionEnum.SHANJIAN,
+        },
     });
 };
 
@@ -711,7 +726,7 @@ const handleDeleteHistory = async (id: number) => {
 };
 
 const handleSelectCopywriter = (index: number) => {
-    selectedCopywriterIndex.value = index;
+    editCopywriterIndex.value = index;
     const selectedCopywriter = formData.copywriterList[index];
     handleShowCopywriter(selectedCopywriter);
 };
@@ -807,7 +822,6 @@ const uploadAndProcessFiles = async (fileType: "image" | "video") => {
                     const { width, height } = await uni.getImageInfo({
                         src: file.tempFilePath,
                     });
-                    console.log('file.name.split(".").pop()', file.name.split(".").pop());
                     if (!imageAccept.includes(file.name.split(".").pop())) {
                         uni.$u.toast(`图片格式必须是${imageAccept.join("、")}`);
                         continue;
@@ -1002,6 +1016,7 @@ const toPublish = () => {
     showCreateSuccess.value = false;
     uni.$u.route({
         url: "/ai_modules/digital_human/pages/montage_publish/montage_publish",
+        type: "reLaunch",
         params: {
             task_id: JSON.stringify([createResult.value.id]),
             scene: 1,
@@ -1009,30 +1024,46 @@ const toPublish = () => {
     });
 };
 
-const handleCloseCreateSuccess = () => {
+const toRecord = () => {
     uni.$u.route({
-        url: "/ai_modules/digital_human/pages/index/index",
+        url: "/ai_modules/digital_human/pages/montage_works/montage_works",
         type: "reLaunch",
     });
 };
 
 // 获取形象列表
 const getAnchorList = async () => {
-    const { lists } = await getShanjianAnchorList({ page_no: 1, page_size: 20, status: 6 });
-    anchorLists.value = lists;
+    anchorLoading.value = true;
+    try {
+        const { lists, count } = await getShanjianAnchorList(anchorQueryParams);
+        anchorFinished.value = !(lists.length < (anchorQueryParams.page_size || count));
+        anchorLists.value = anchorLists.value.concat(lists);
+    } finally {
+        anchorLoading.value = false;
+    }
+};
+
+const handleLoadAnchorMore = () => {
+    if (!anchorFinished.value || anchorLoading.value) return;
+    anchorQueryParams.page_no++;
+    getAnchorList();
 };
 
 onLoad(() => {
     getAnchorList();
     uni.$on("confirm", (res: any) => {
         const { type, data } = res;
-        if (type === ListenerTypeEnum.CHOOSE_MONTAGE_ANCHOR) {
+        if (type === ListenerTypeEnum.CREATE_ANCHOR) {
             if (!data) return;
             anchorLists.value = anchorLists.value.concat(data);
         }
-        if (type === ListenerTypeEnum.MONTAGE_COPYWRITER || type === ListenerTypeEnum.AI_COPYWRITER) {
-            if (data.copywriterList.length == 0) return;
-            formData.copywriterList = formData.copywriterList.concat(data.copywriterList);
+        if (type === ListenerTypeEnum.MONTAGE_COPYWRITER || type === ListenerTypeEnum.MONTAGE_AI_COPYWRITER) {
+            if (data.length == 0) return;
+            if (editCopywriterIndex.value !== -1) {
+                formData.copywriterList[editCopywriterIndex.value] = data[0];
+            } else {
+                formData.copywriterList = formData.copywriterList.concat(data);
+            }
         }
     });
 });

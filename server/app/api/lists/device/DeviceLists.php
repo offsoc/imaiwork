@@ -26,8 +26,7 @@ class DeviceLists extends BaseApiDataLists implements ListsSearchInterface
     public function setSearch(): array
     {
         return [
-            '=' => ['device_code'],
-            '%like%' => ['device_name']
+            '%like%' => ['device_name', 'device_code']
         ];
     }
 

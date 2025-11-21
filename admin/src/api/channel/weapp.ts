@@ -16,5 +16,5 @@ export function getWeappVersion() {
 }
 
 export function uploadMnp(params: any) {
-    return request.post({ url: "/channel.mnp_settings/uploadMnp", params, timeout: 120 * 1000 });
+    return request.post({ url: "/channel.mnp_settings/uploadMnp", params });
 }

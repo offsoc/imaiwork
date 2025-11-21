@@ -278,7 +278,7 @@
 				{
 					"path": "pages/video_create/video_create",
 					"style": {
-						"navigationBarTitleText": "智能数字人"
+						"navigationBarTitleText": "数字人纯口播视频"
 					},
 					"meta": {
 						"share": true
@@ -288,18 +288,6 @@
 					"path": "pages/tone_clone/tone_clone",
 					"style": {
 						"navigationBarTitleText": "音色克隆",
-						"enablePullDownRefresh": false,
-						"navigationStyle": "custom",
-						"disableScroll": true
-					},
-					"meta": {
-						"share": true
-					}
-				},
-				{
-					"path": "pages/tone_manage/tone_manage",
-					"style": {
-						"navigationBarTitleText": "我的音色",
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
@@ -327,9 +315,9 @@
 					}
 				},
 				{
-					"path": "pages/model_manage/model_manage",
+					"path": "pages/clone_manage/clone_manage",
 					"style": {
-						"navigationBarTitleText": "我的模特",
+						"navigationBarTitleText": "我的克隆",
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
@@ -370,7 +358,7 @@
 					}
 				},
 				{
-					"path": "pages/montage_anchor_create/montage_anchor_create",
+					"path": "pages/anchor_create/anchor_create",
 					"style": {
 						"navigationBarTitleText": "智能数字人",
 						"enablePullDownRefresh": false,
@@ -382,7 +370,7 @@
 					}
 				},
 				{
-					"path": "pages/montage_auth_video/montage_auth_video",
+					"path": "pages/anchor_auth_video/anchor_auth_video",
 					"style": {
 						"navigationBarTitleText": "历史授权视频",
 						"enablePullDownRefresh": false,
@@ -393,7 +381,7 @@
 					}
 				},
 				{
-					"path": "pages/montage_auth_camera/montage_auth_camera",
+					"path": "pages/anchor_auth_camera/anchor_auth_camera",
 					"style": {
 						"navigationBarTitleText": "授权视频",
 						"enablePullDownRefresh": false,
@@ -447,6 +435,15 @@
 					"path": "pages/montage_works/montage_works",
 					"style": {
 						"navigationBarTitleText": "混剪记录",
+						"enablePullDownRefresh": false,
+						"navigationStyle": "custom",
+						"disableScroll": true
+					}
+				},
+				{
+					"path": "pages/choose_create_type/choose_create_type",
+					"style": {
+						"navigationBarTitleText": "选择视频类型",
 						"enablePullDownRefresh": false,
 						"navigationStyle": "custom",
 						"disableScroll": true
@@ -684,27 +681,9 @@
 					}
 				},
 				{
-					"path": "pages/keywords/keywords",
-					"style": {
-						"navigationBarTitleText": "检索关键词设置",
-						"navigationStyle": "custom",
-						"enablePullDownRefresh": false,
-						"disableScroll": true
-					}
-				},
-				{
 					"path": "pages/create_task/create_task",
 					"style": {
 						"navigationBarTitleText": "创建获客任务",
-						"navigationStyle": "custom",
-						"enablePullDownRefresh": false,
-						"disableScroll": true
-					}
-				},
-				{
-					"path": "pages/create_task_set/create_task_set",
-					"style": {
-						"navigationBarTitleText": "高级设置",
 						"navigationStyle": "custom",
 						"enablePullDownRefresh": false,
 						"disableScroll": true
@@ -830,7 +809,8 @@
 				{
 					"path": "pages/task_ai_copywriter/task_ai_copywriter",
 					"style": {
-						"navigationStyle": "custom"
+						"navigationStyle": "custom",
+						"disableScroll": true
 					}
 				},
 				{

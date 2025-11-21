@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { getBaseUrl } from "@/utils/env";
 
 interface Detail {
     logo: string;
@@ -134,6 +134,9 @@ export const useChatStore = defineStore("chat", () => {
      */
     function setTaskId(id: string) {
         taskId.value = id;
+        replaceState({
+            task_id: taskId.value,
+        });
     }
 
     /**
@@ -222,6 +225,12 @@ export const useChatStore = defineStore("chat", () => {
     function clearFiles() {
         fileLists.value = [];
     }
+    /**
+     * @description 重置路由
+     */
+    function resetRoute() {
+        history.replaceState("", "", `?`);
+    }
 
     return {
         // State
@@ -247,5 +256,6 @@ export const useChatStore = defineStore("chat", () => {
         updateLastMessage,
         setFiles,
         clearFiles,
+        resetRoute,
     };
 });

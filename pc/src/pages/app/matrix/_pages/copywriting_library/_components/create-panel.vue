@@ -54,7 +54,7 @@
         @closed="showAiPopup = false">
         <div class="-my-2">
             <div class="w-6 h-6 absolute top-[18px] right-[18px] cursor-pointer" @click="handleAiClose">
-                <close-btn></close-btn>
+                <close-btn :theme="ThemeEnum.DARK"></close-btn>
             </div>
             <div class="text-white text-[15px] font-bold">智能生成</div>
             <div class="mt-[18px]">
@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { AppTypeEnum } from "@/enums/appEnums";
+import { AppTypeEnum, ThemeEnum } from "@/enums/appEnums";
 import {
     addCopywritingLibrary,
     updateCopywritingLibrary,

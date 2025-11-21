@@ -47,41 +47,13 @@
         </div>
         <div
             class="w-full"
-            :class="[
-                contentList.length == 0
-                    ? 'flex-1 flex flex-col items-center justify-center -mt-[var(--nav-height)]'
-                    : 'flex-none mt-2',
-            ]">
+            :class="[contentList.length == 0 ? 'flex-1 flex flex-col items-center justify-center' : 'flex-none mt-2']">
             <slot name="content" v-if="contentList.length == 0" class="mb-6"></slot>
             <div class="w-full">
                 <div class="md:max-w-3xl lg:max-w-[42rem] xl:max-w-[48rem] 2xl:max-w-[52rem] mx-auto mb-4 relative">
                     <div class="flex flex-col">
                         <slot name="chat-area-top" />
-                        <div class="flex items-center mb-3 relative h-10" v-if="isNewChat || !isDisabledHumanize">
-                            <div class="flex items-center gap-x-3 relative z-[10]" v-if="!isDisabledHumanize">
-                                <ElSelect
-                                    v-model="currModel.model_id"
-                                    placeholder="请选择模型"
-                                    class="ai-model-select"
-                                    popper-class="ai-model-popper"
-                                    :show-arrow="false"
-                                    @change="handleModelChange">
-                                    <ElOption
-                                        v-for="(item, index) in getAIModels"
-                                        :key="index"
-                                        :label="item.name"
-                                        :value="item.model_id">
-                                        <div class="flex items-center gap-x-2">
-                                            <img :src="item.logo" class="w-[18px] h-[18px] rounded-md object-cover" />
-                                            <span class="text-xs text-black">{{ item.name }}</span>
-                                        </div>
-                                    </ElOption>
-                                </ElSelect>
-                                <humanize-pop
-                                    ref="humanizePopRef"
-                                    :model-id="currModel.model_id"
-                                    :model-sub-id="currModel.model_sub_id" />
-                            </div>
+                        <div class="flex items-center mb-3 relative h-10" v-if="isNewChat">
                             <div class="w-full h-full flex items-center justify-center absolute z-[9]" v-if="isNewChat">
                                 <div
                                     class="bg-white rounded-xl w-[114px] h-8 flex items-center justify-center shadow-[0_0_4px_1px_rgba(0,0,0,0.05)] gap-x-1 cursor-pointer hover:bg-[#F5F5F5]"
@@ -92,13 +64,12 @@
                             </div>
                         </div>
                         <div
-                            class="bg-white rounded-tl-[24px] rounded-tr-[24px] border border-b-0 border-[#F1F1F2]"
+                            class="bg-white rounded-[24px] border border-[#EBEBEB]"
                             :class="{
-                                '!border-b-[1px] rounded-bl-[24px] rounded-br-[24px] shadow-[0_2px_6px_0px_rgba(0,0,0,0.04)]':
-                                    !showChattingBottom,
+                                'shadow-[0_2px_6px_0px_rgba(0,0,0,0.04)]': !showChattingBottom,
                             }">
                             <div
-                                class="h-[80px] border-b-[1px] border-[#F1F1F2] w-full px-2"
+                                class="h-[80px] border-b-[1px] border-[#EBEBEB] w-full px-2"
                                 v-if="fileList.length > 0">
                                 <file-lists v-model:file-list="fileList" />
                             </div>
@@ -118,7 +89,67 @@
                                         :placeholder="placeholder"
                                         @keydown="handleInputEnter" />
                                 </div>
-                                <div class="w-8 h-8 mb-[12px] absolute right-2 z-10">
+                            </div>
+                            <div
+                                class="flex items-center p-[6px]"
+                                :class="[showChattingBottom ? 'justify-between' : 'justify-end']">
+                                <div class="flex items-center gap-x-2" v-if="showChattingBottom">
+                                    <div
+                                        class="flex items-center justify-center gap-x-1 rounded-full h-[34px] px-[12px] hover:bg-[#00000008] cursor-pointer border border-[#EBEBEB]"
+                                        :class="{
+                                            '!bg-[#1ba7991a] !text-[#1BA799]': selectedNetwork,
+                                        }"
+                                        v-if="isNetwork"
+                                        @click="handleNetwork">
+                                        <Icon name="local-icon-network" color="#1BA799" :size="14"></Icon>
+                                        <span class="text-xs">联网搜索</span>
+                                    </div>
+                                    <file-upload
+                                        v-model="fileList"
+                                        :file-limit="fileLimit"
+                                        :accept="uploadAccept"
+                                        @update:modelValue="emit('update:fileList', fileList)">
+                                        <div
+                                            class="flex items-center justify-center gap-x-1 rounded-full h-[34px] px-[12px] hover:bg-[#00000008] cursor-pointer border border-[#EBEBEB]">
+                                            <Icon name="local-icon-note_book" color="#FF7919" :size="14"></Icon>
+                                            <span class="text-xs">文件上传</span>
+                                        </div>
+                                    </file-upload>
+                                    <div class="flex items-center gap-x-3 relative z-[10]" v-if="!isDisabledHumanize">
+                                        <ElSelect
+                                            v-model="currModel.model_id"
+                                            class="ai-model-select"
+                                            popper-class="ai-model-popper"
+                                            :show-arrow="false"
+                                            @change="handleModelChange">
+                                            <ElOption
+                                                v-for="(item, index) in getAIModels"
+                                                :key="index"
+                                                :label="item.name"
+                                                :value="item.model_id">
+                                                <div class="flex items-center gap-x-2">
+                                                    <img
+                                                        :src="item.logo"
+                                                        class="w-[18px] h-[18px] rounded-md object-cover" />
+                                                    <span class="text-xs text-black">{{ item.name }}</span>
+                                                </div>
+                                            </ElOption>
+                                            <template #label="{ label, value }">
+                                                <div class="flex items-center gap-x-2">
+                                                    <img
+                                                        :src="getCurrModel.logo"
+                                                        class="w-[18px] h-[18px] rounded-full object-cover" />
+                                                    <span class="text-xs text-black">{{ getCurrModel.name }}</span>
+                                                </div>
+                                            </template>
+                                        </ElSelect>
+                                        <humanize-pop
+                                            ref="humanizePopRef"
+                                            :model-id="currModel.model_id"
+                                            :model-sub-id="currModel.model_sub_id" />
+                                    </div>
+                                </div>
+                                <div class="w-8 h-8">
                                     <button
                                         v-if="isStop"
                                         @click="emit('close')"
@@ -136,34 +167,6 @@
                                             :size="18"></Icon>
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                        <div
-                            v-if="showChattingBottom"
-                            class="flex items-center h-[50px] px-[6px] bg-[#F6F6F6] border border-[#F1F1F2] border-t-0 rounded-bl-[24px] rounded-br-[24px]">
-                            <div class="flex items-center">
-                                <div
-                                    class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#1ba7991a] cursor-pointer"
-                                    :class="{
-                                        '!bg-[#1ba7991a] !text-[#1BA799]': selectedNetwork,
-                                    }"
-                                    v-if="isNetwork"
-                                    @click="handleNetwork">
-                                    <Icon name="local-icon-deep" color="#1BA799" :size="16"></Icon>
-                                    <span class="text-xs">联网搜索</span>
-                                </div>
-                                <ElDivider direction="vertical" class="!border-[#ededed]" v-if="isNetwork" />
-                                <file-upload
-                                    v-model="fileList"
-                                    :file-limit="fileLimit"
-                                    :accept="uploadAccept"
-                                    @update:modelValue="emit('update:fileList', fileList)">
-                                    <div
-                                        class="flex items-center justify-center gap-x-1 rounded-full h-[38px] px-[12px] hover:bg-[#FF79191a] cursor-pointer">
-                                        <Icon name="local-icon-note_book" color="#FF7919" :size="16"></Icon>
-                                        <span class="text-xs">文件上传</span>
-                                    </div>
-                                </file-upload>
                             </div>
                         </div>
                         <slot name="chat-area-bottom" />
@@ -243,6 +246,10 @@ const currModel = ref({
     name: "",
     model_id: "",
     model_sub_id: "",
+});
+
+const getCurrModel = computed(() => {
+    return getAIModels.value.find((item) => item.model_id == currModel.value.model_id);
 });
 
 const humanizePopRef = shallowRef<InstanceType<typeof HumanizePop>>();
@@ -456,11 +463,12 @@ defineExpose({
 }
 
 :deep(.ai-model-select) {
-    width: 159px;
+    width: 135px;
     .el-select__wrapper {
+        min-height: 34px;
         border-radius: 20px;
         box-shadow: none;
-        background: #f6f6f6;
+        border: 1px solid rgba(0, 0, 0, 0.1);
     }
 }
 textarea {

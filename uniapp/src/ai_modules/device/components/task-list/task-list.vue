@@ -250,7 +250,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     (e: "delete"): void;
-    (e: "update-name"): void;
+    (e: "update-name", data: any): void;
 }>();
 
 const showConfirmDialog = ref(false);
@@ -321,7 +321,7 @@ const handleConfirmName = async () => {
             duration: 3000,
         });
         shoeEditNamePop.value = false;
-        emit("update-name");
+        emit("update-name", editData);
     } catch (error: any) {
         uni.hideLoading();
         uni.showToast({
@@ -360,7 +360,6 @@ const handleDeleteTask = async () => {
             icon: "none",
             duration: 3000,
         });
-        getTaskSubtasks();
         showConfirmDialog.value = false;
         showDetail.value = false;
         detailData.value = {};
@@ -393,7 +392,6 @@ const handlePreviewImage = () => {
     const { material_url } = detailData.value.detail;
     if (!material_url) return;
     const pics = material_url.split(",");
-    console.log("pics", pics);
     uni.previewImage({
         urls: pics,
     });

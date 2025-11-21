@@ -40,11 +40,11 @@
                                     }">
                                     <Icon name="local-icon-upload2"></Icon>
                                 </div>
-                                <div class="ml-2 line-clamp-1 flex-1">
+                                <div class="ml-2 line-clamp-1 flex-1 break-all">
                                     {{ item.name }}
                                 </div>
-                                <div @click="handleDeleteFile(index)">
-                                    <close-btn />
+                                <div class="flex-shrink-0 ml-2 w-4 h-4" @click="handleDeleteFile(index)">
+                                    <close-btn :theme="ThemeEnum.LIGHT" :icon-size="12" />
                                 </div>
                             </div>
                         </div>
@@ -98,10 +98,11 @@
 <script setup lang="ts">
 import { uploadFile } from "@/api/app";
 import type { UploadFile, UploadInstance } from "element-plus";
-import { isSameFile, type IDataItem } from "./hook";
+import { ThemeEnum } from "@/enums/appEnums";
 import { readDocContent, readPdfContent, readTxtContent } from "@/utils/file-reader";
 import { splitText2ChunksArray } from "@/utils/text-splitter";
 import DataItem from "./data-item.vue";
+import { isSameFile, type IDataItem } from "./hook";
 
 const uploadRef = shallowRef<UploadInstance>();
 

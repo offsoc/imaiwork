@@ -25,7 +25,9 @@ class OemLogic extends ApiLogic
                 'is_oem' => 0,
                 'domain' => $domain,
                 'logo_url' => '',
+                'site_logo' => '',
                 'name' => '',
+                'site_logo' => '',
             ];
         } else {
             self::$returnData = [
@@ -33,6 +35,7 @@ class OemLogic extends ApiLogic
                 'domain' => $result->domain,
                 'name' => $result->name,
                 'logo_url' => FileService::getFileUrl($result->logo_url),
+                'site_logo' => is_null($result->site_logo) ? '' : FileService::getFileUrl($result->site_logo),
             ];
         }
 

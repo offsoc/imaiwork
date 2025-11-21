@@ -87,8 +87,8 @@ import { usePaging } from "@/hooks/usePaging";
 import TaskCard from "@/ai_modules/sph/components/task-card/task-card.vue";
 import TaskEdit from "@/ai_modules/sph/components/task-edit/task-edit.vue";
 enum TabKey {
-    VIDEO = 2,
-    ACCOUNT = 3,
+    VIDEO = 0,
+    ACCOUNT = 1,
 }
 
 const headerStyle = reactive({

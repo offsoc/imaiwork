@@ -15,7 +15,7 @@
                             <text class="text-[#FF3C26]">*</text>
                             <text>您想生成的主题大纲</text>
                         </view>
-                        <view class="mt-4 px-4 py-[16rpx] bg-white rounded-[16rpx]">
+                        <view class="mt-4 p-4 bg-white rounded-[16rpx]">
                             <textarea
                                 v-model="contentVal"
                                 focus
@@ -178,7 +178,7 @@ const isGenerated = computed(() => {
 // 获取消耗的算力
 const getToken = computed(() => {
     const token = userStore.getTokenByScene(TokensSceneEnum.SHANJIAN_COPYWRITING_CREATE)?.score;
-    return token * currentPromptNum.value;
+    return parseFloat(token) * currentPromptNum.value;
 });
 
 const contentPost = async (userInput: string) => {
@@ -186,7 +186,11 @@ const contentPost = async (userInput: string) => {
         uni.$u.toast("请输入文案");
         return;
     }
-    if (userTokens.value <= getToken.value || !isGenerated.value) return;
+    if (!isGenerated.value) return;
+    if (userTokens.value < getToken.value) {
+        uni.$u.toast("算力不足，请充值！");
+        return;
+    }
 
     try {
         isGenerating.value = true;
@@ -235,12 +239,10 @@ const useContent = () => {
         return;
     }
     uni.$emit("confirm", {
-        type: ListenerTypeEnum.AI_COPYWRITER,
-        data: {
-            copywriterList: chatContentList.value
-                .filter((item) => item.title)
-                .map((item) => ({ title: item.title, content: item.content })),
-        },
+        type: ListenerTypeEnum.MONTAGE_AI_COPYWRITER,
+        data: chatContentList.value
+            .filter((item) => item.title)
+            .map((item) => ({ title: item.title, content: item.content })),
     });
     chatContentList.value = [];
     uni.navigateBack();

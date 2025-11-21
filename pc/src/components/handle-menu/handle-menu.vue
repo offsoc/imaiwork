@@ -6,6 +6,7 @@
                 backgroundColor: getTheme.bgColor,
                 borderColor: getTheme.borderColor,
             }"
+            :trigger="trigger"
             width="212"
             :show-arrow="false"
             :popper-options="{
@@ -66,6 +67,10 @@ const props = defineProps({
     horizontal: {
         type: Boolean,
         default: false,
+    },
+    trigger: {
+        type: String as PropType<"hover" | "click">,
+        default: "hover",
     },
 });
 

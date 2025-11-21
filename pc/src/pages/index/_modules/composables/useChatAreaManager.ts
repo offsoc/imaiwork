@@ -1,7 +1,6 @@
 import { getAgentList as getAgentListApi } from "@/api/agent";
 import ChatArea from "chatarea";
 import "chatarea/lib/ChatArea.css";
-
 /**
  * @description 智能体的数据结构。
  */
@@ -82,6 +81,7 @@ export function useChatAreaManager(options: UseChatAreaOptions) {
                 placeholder: "发送消息、输入 @ 选择智能体",
                 needCallEvery: false, // 是否每次 @ 都触发
                 userList: agentList.value, // 智能体列表
+                device: "pc",
             });
 
             // 监听选择智能体事件

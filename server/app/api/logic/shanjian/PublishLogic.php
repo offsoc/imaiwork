@@ -277,7 +277,7 @@ class PublishLogic extends SvBaseLogic
                     if ($num > $account['count']) {
                         break;
                     }
-                    $num ++;
+                    $num++;
                     list($isOverlap, $lap) = \app\api\logic\device\TaskLogic::isTaskTimeOverlapping($account['device_code'], DeviceEnum::TASK_TYPE_PUBLISH, $time['start_time'], $time['end_time'], self::$uid);
                     if (!$isOverlap) {
                         $timeMsg = "【" . date('Y-m-d H:i', $lap['start_time']) . "-" . date('Y-m-d H:i', $lap['end_time']) . "】";
@@ -407,8 +407,12 @@ class PublishLogic extends SvBaseLogic
                 self::setError('任务不存在');
                 return false;
             }
+            $accountid = SvPublishSettingAccount::where('publish_id', 'in', $params['id'])->column('id');
             SvPublishSettingAccount::where('publish_id', $task['id'])->where('user_id', self::$uid)->select()->delete();
             SvPublishSettingDetail::where('publish_id', $task['id'])->where('user_id', self::$uid)->select()->delete();
+            if (count($accountid)) {
+                SvDeviceTask::where('sub_task_id', 'in', $accountid)->where('source', DeviceEnum::TASK_SOURCE_PUBLISH)->select()->delete();
+            }
 
             $task->delete();
             Db::commit();
@@ -478,7 +482,7 @@ class PublishLogic extends SvBaseLogic
             ->where('id', $params['id'])
             //->where('user_id', self::$uid)
             ->findOrEmpty();
-            //print_r($record->toArray());die;
+        //print_r($record->toArray());die;
         if ($record->isEmpty()) {
             self::setError('任务记录不存在');
             return false;
@@ -493,14 +497,14 @@ class PublishLogic extends SvBaseLogic
             ->fetchSql(false)
             ->findOrEmpty();
         //print_r($task->toArray());die;
-        if(!$task->isEmpty()){
+        if (!$task->isEmpty()) {
             $data = SvPublishSettingDetail::where('device_code', $record['device_code'])
                 ->where('account', $record['account'])
                 ->where('account_type', $record['account_type'])
                 ->where('publish_time', '>=', $task['start_time'])
                 ->where('publish_time', '<=', $task['end_time'])
                 ->findOrEmpty();
-            if($data->isEmpty()){
+            if ($data->isEmpty()) {
                 $task->delete();
             }
         }
@@ -747,7 +751,7 @@ class PublishLogic extends SvBaseLogic
                     'publish_id' => $publish->id,
                     'user_id' => self::$uid,
                     'task_type' => 2,
-                    'name' => $publish->name . '_' . $akey,
+                    'name' => $params['name'] . '_' . $akey,
                     'account' => $account['account'],
                     'account_type' => $account['type'],
                     'device_code' => $account['device_code'],
@@ -844,11 +848,16 @@ class PublishLogic extends SvBaseLogic
                 }
 
                 list($mediaStatus, $medias) = self::_getMedias($account, $usedVideoIds);
-                if($mediaStatus === false){
+                if ($mediaStatus === false) {
                     continue;
                 }
                 //print_r($medias);die;
                 if (empty($medias) && (int)$account['scene'] === 1) {
+                    $settingStatus = ShanjianVideoSetting::where('id', 'in', json_decode($account['video_ids'], true))->group('status')->column('status');
+                    if (in_array(1, $settingStatus) || in_array(2, $settingStatus)) {
+                        continue;
+                    }
+
                     \think\facade\Log::channel('publish')->write("medias 为空");
                     array_push($insertData, [
                         'publish_id' => $account['publish_id'],
@@ -935,11 +944,10 @@ class PublishLogic extends SvBaseLogic
             if (!empty($insertData)) {
                 $model = new SvPublishSettingDetail();
                 $model->saveAll($insertData);
+
+                sleep(2);
+                self::_checkPublishTime(array_column($accounts, 'id'));
             }
-
-            sleep(2);
-            self::_checkPublishTime(array_column($accounts, 'id'));
-
             self::$returnData = $insertData;
             return true;
         } catch (\Exception $e) {
@@ -1001,11 +1009,11 @@ class PublishLogic extends SvBaseLogic
         //如果有视频任务状态为0或1或2则返回false
         if (in_array(0, $settingStatus) || in_array(1, $settingStatus) || in_array(2, $settingStatus)) {
             if ($count == $account['count']) {
-                    SvPublishSettingAccount::where('id', $account['id'])->update([
-                        'task_status' => 2,
-                    ]);
-                    return true;
-                }
+                SvPublishSettingAccount::where('id', $account['id'])->update([
+                    'task_status' => 2,
+                ]);
+                return true;
+            }
             return false;
         } else {
             if (count($settingStatus) == 1 && array_sum($settingStatus) == 3) {
@@ -1160,18 +1168,18 @@ class PublishLogic extends SvBaseLogic
                     $vtPublishTime = date('Y-m-d H:i:s', $st + ($interval * 3));
                 }
 
-                if (strtotime($xhsPublishTime) <= strtotime($maxTime) || strtotime($xhsPublishTime) <= time()) {
-                    continue;
-                }
-                if (strtotime($dyPublishTime) <= strtotime($maxTime) || strtotime($dyPublishTime) <= time()) {
-                    continue;
-                }
-                if (strtotime($ksPublishTime) <= strtotime($maxTime) || strtotime($ksPublishTime) <= time()) {
-                    continue;
-                }
-                if (strtotime($vtPublishTime) <= strtotime($maxTime) || strtotime($vtPublishTime) <= time()) {
-                    continue;
-                }
+                // if (strtotime($xhsPublishTime) <= strtotime($maxTime) || strtotime($xhsPublishTime) <= time()) {
+                //     continue;
+                // }
+                // if (strtotime($dyPublishTime) <= strtotime($maxTime) || strtotime($dyPublishTime) <= time()) {
+                //     continue;
+                // }
+                // if (strtotime($ksPublishTime) <= strtotime($maxTime) || strtotime($ksPublishTime) <= time()) {
+                //     continue;
+                // }
+                // if (strtotime($vtPublishTime) <= strtotime($maxTime) || strtotime($vtPublishTime) <= time()) {
+                //     continue;
+                // }
                 $times[3][] = $xhsPublishTime;
                 $times[4][] = $dyPublishTime;
                 $times[5][] = $ksPublishTime;

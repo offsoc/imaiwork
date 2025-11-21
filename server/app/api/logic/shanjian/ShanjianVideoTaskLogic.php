@@ -375,7 +375,7 @@ class ShanjianVideoTaskLogic extends ApiLogic
                             "backgroundMusic"=>[
                             "audioSwitch"=>true,
                             "audioUrl"=> $task->music_url,
-                            "volume"=>1
+                            "volume"=>0.5
                           ],
                         ],
                         'processRules'=>[

@@ -328,8 +328,14 @@ class FuzzyMatcherService
 
     public function destroy(): void
     {
-        Jieba::destroy();
-        Finalseg::destroy();
+        // Jieba::destroy();
+        // Finalseg::destroy();
+        $this->keywords = [];
+        $this->threshold = 0.0;
+
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
     }
 }
 

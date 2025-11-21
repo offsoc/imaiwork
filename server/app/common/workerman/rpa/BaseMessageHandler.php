@@ -90,8 +90,13 @@ abstract class BaseMessageHandler
                     $this->setLog('设备不存在:' .  $payload['deviceId'], 'error');
                     return;
                 }
-                $uid = $this->service->getRedis()->get("xhs:user:{$find['user_id']}");
-                $this->service->send($uid, $payload);
+                $sources = WorkerEnum::WS_SOURCES;
+                foreach ($sources as $source) {
+                    $uid = $this->service->getRedis()->get("xhs:user:{$source}:{$find['user_id']}");
+                    if ($uid) {
+                        $this->service->send($uid, $payload);
+                    }
+                }
             } else {
                 $this->service->send($connection->uid, $payload);
             }

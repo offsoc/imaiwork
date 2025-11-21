@@ -119,7 +119,7 @@ export default function useWeChatWs(options: WebSocketOptions = {}) {
             });
             actionType.value = MsgTypeEnum.Auth;
         } catch (error) {
-            feedback.msgError(`${error}，请联系站长`);
+            feedback.msgError(`${error}`);
             triggerEvent("error");
         } finally {
             addDeviceLoading.value = false;

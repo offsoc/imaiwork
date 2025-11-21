@@ -15,7 +15,7 @@
                             <text class="text-[#FF3C26]">*</text>
                             <text>您想生成的主题大纲</text>
                         </view>
-                        <view class="mt-4 px-4 py-[16rpx] bg-white rounded-[16rpx]">
+                        <view class="mt-4 p-4 bg-white rounded-[16rpx]">
                             <textarea
                                 v-model="contentVal"
                                 focus
@@ -193,10 +193,8 @@ const isGenerated = computed(() => {
 // 获取消耗的算力
 const getToken = computed(() => {
     const token = userStore.getTokenByScene(TokensSceneEnum.MATRIX_COPYWRITER)?.score;
-    return token * currentPromptNum.value;
+    return parseFloat(token) * currentPromptNum.value;
 });
-
-const handleContentChange = (e: any) => {};
 
 const contentPost = async (userInput: string) => {
     // 正则判断文案是否符合要求
@@ -204,7 +202,11 @@ const contentPost = async (userInput: string) => {
         uni.$u.toast("请输入文案");
         return;
     }
-    if (userTokens.value <= getToken.value || isGenerating.value) return;
+    if (isGenerating.value) return;
+    if (userTokens.value <= getToken.value) {
+        uni.$u.toast("算力不足，请充值！");
+        return;
+    }
 
     try {
         isGenerating.value = true;
@@ -276,18 +278,23 @@ const useContent = () => {
         uni.$u.toast("文案在生成中...");
         return;
     }
-    uni.$emit("confirm", {
-        type: ListenerTypeEnum.TASK_AI_COPYWRITER,
-        data: chatContentList.value
-            .filter((item) => item.title)
-            .map((item) => ({
-                title: item.title,
-                content: item.content,
-                topic: item.topic,
-            })),
-    });
-    chatContentList.value = [];
-    uni.navigateBack();
+    try {
+        console.log("1", 1);
+        uni.$emit("confirm", {
+            type: ListenerTypeEnum.TASK_AI_COPYWRITER,
+            data: chatContentList.value
+                .filter((item) => item.title)
+                .map((item) => ({
+                    title: item.title,
+                    content: item.content,
+                    topic: item.topic,
+                })),
+        });
+        chatContentList.value = [];
+        uni.navigateBack();
+    } catch (error) {
+        console.log("error", error);
+    }
 };
 
 const back = () => {

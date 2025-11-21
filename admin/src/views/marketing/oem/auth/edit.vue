@@ -37,6 +37,10 @@
                     <material-picker v-model="formData.logo_url" :limit="1" />
                     <div class="form-tips">建议尺寸：64*64像素，支持jpg，jpeg，png格式</div>
                 </el-form-item>
+                <el-form-item label="站点LOGO" prop="site_logo">
+                    <material-picker v-model="formData.site_logo" :limit="1" />
+                    <div class="form-tips">建议尺寸：128*128像素，支持jpg，jpeg，png格式</div>
+                </el-form-item>
             </el-form>
         </div>
     </popup>

@@ -1,5 +1,5 @@
 <template>
-    <view class="fixed bottom-0 left-0 w-full h-full bg-white z-[88] flex flex-col" v-if="showPopup">
+    <view class="fixed bottom-0 left-0 w-full h-full bg-white z-[88888] flex flex-col" v-if="showPopup">
         <view class="grow min-h-0">
             <video-player
                 v-if="showPopup"
@@ -30,14 +30,12 @@ import { saveVideoToPhotosAlbum } from "@/utils/file";
 import VideoPlayer from "../video-player/video-player.vue";
 const props = withDefaults(
     defineProps<{
-        title: string;
         show: boolean;
         videoUrl: string;
         confirmBtnText?: string;
         poster?: string;
     }>(),
     {
-        title: "",
         show: false,
         poster: "",
     }

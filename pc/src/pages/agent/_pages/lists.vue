@@ -75,14 +75,17 @@
                                         lazy></ElImage>
                                 </div>
                             </div>
-                            <div class="px-3 my-10 w-full">
+                            <div class="px-3 mt-10 mb-6 w-full">
                                 <div class="text-[14px] text-center line-clamp-1">{{ item.name }}</div>
                                 <div class="mt-3 line-clamp-2 text-center text-[#737373] leading-7 h-12">
                                     {{ item.intro || item.introduced }}
                                 </div>
                             </div>
+                            <div class="text-xs text-[#999999] w-full mb-3 px-4">创建人：{{ item.source_text }}</div>
                             <!-- 悬浮操作菜单 -->
-                            <div class="absolute right-4 bottom-4 z-10 invisible group-hover:visible w-6 h-6">
+                            <div
+                                class="absolute right-4 bottom-2 z-10 invisible group-hover:visible w-6 h-6"
+                                v-if="item.source == 1">
                                 <handle-menu :data="item" :menu-list="handleMenuList" :horizontal="true" />
                             </div>
                         </div>
@@ -160,7 +163,7 @@ const currentTab = ref<AgentTypeEnum>(AgentTypeEnum.AGENT);
 const tabs = computed(() => TABS);
 
 // --- 数据获取与分页 ---
-const queryParams = reactive({ page_no: 1, source: 1 });
+const queryParams = reactive({ page_no: 1 });
 
 // 根据当前Tab动态选择获取列表的API
 const getListsAPI = (params: any) => {

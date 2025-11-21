@@ -798,11 +798,13 @@ trait AichatTrait
                     if ($resultMatch['matched']) {
                         $this->_parseMessage($request, $item->reply);
                         $match = true;
+                        $matcher->destroy();
+                        $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('模糊匹配')->withContext([
+                            'data' => $resultMatch
+                        ])->log();
+                        
                     }
-                    $matcher->destroy();
-                    $this->withChannel('wechat_socket')->withLevel('msg')->withTitle('模糊匹配')->withContext([
-                        'data' => $resultMatch
-                    ])->log();
+                    
                     // if (strpos($item->keyword, $request['message']) !== false || strpos($request['message'], $item->keyword) !== false) {
                     //     $this->_parseMessage($request, $item->reply);
                     //     $match = true;

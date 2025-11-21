@@ -38,8 +38,6 @@ interface RefreshAccount {
 }
 
 export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
-    const { socialPlatformList } = useSocialPlatform();
-
     const { send, onEvent } = options;
 
     const showAddDevice = ref(false);
@@ -190,15 +188,7 @@ export const useAddDeviceAccount = (options: UseAddDeviceAccountOptions) => {
     });
 
     // 确认添加设备
-    const handleAddDeviceConfirm = (deviceId: string) => {
-        completeProgress();
-        addDeviceLoading.value = true;
-        send({
-            type: DeviceCmdEnum.ADD_DEVICE,
-            content: { deviceId },
-            deviceId,
-        });
-    };
+    const handleAddDeviceConfirm = () => {};
 
     // 刷新账号
     const handleRefreshAccount = (deviceId: string, type: AppTypeEnum) => {

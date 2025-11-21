@@ -15,7 +15,7 @@
         <view class="grow min-h-0 px-[26rpx] mt-5">
             <z-paging ref="pagingRef" v-model="taskList" :fixed="false" @query="queryTaskList">
                 <view>
-                    <task-list :list="taskList" @delete="reload" @update-name="reload" />
+                    <task-list :list="taskList" @delete="reload" @update-name="handleUpdateTaskName" />
                 </view>
                 <template #empty>
                     <empty />
@@ -55,6 +55,14 @@ const handleSelectDate = (date: any) => {
 
 const reload = () => {
     pagingRef.value?.reload();
+};
+
+const handleUpdateTaskName = (data: any) => {
+    taskList.value.forEach((item) => {
+        if (item.id == data.id) {
+            item.name = data.name;
+        }
+    });
 };
 </script>
 

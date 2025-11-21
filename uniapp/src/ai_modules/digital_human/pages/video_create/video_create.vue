@@ -11,7 +11,7 @@
                         }">
                         <view class="h-[100rpx] flex items-center justify-between">
                             <view class="font-bold text-[32rpx]">选择数字人</view>
-                            <view class="flex items-center justify-center gap-x-2" @click="showChooseAnchor = true">
+                            <view class="flex items-center justify-center gap-x-2 p-1" @click="showChooseAnchor = true">
                                 <image
                                     src="@/ai_modules/digital_human/static/icons/add.svg"
                                     class="w-[28rpx] h-[28rpx]"></image>
@@ -39,7 +39,7 @@
                                             @click="chooseAnchor(item)">
                                             <view
                                                 class="absolute top-2 right-2"
-                                                v-if="formData.anchor_id === item.anchor_id">
+                                                v-if="formData.anchor_id == item.anchor_id">
                                                 <image
                                                     src="@/ai_modules/digital_human/static/icons/success.svg"
                                                     class="w-[28rpx] h-[28rpx]"></image>
@@ -51,13 +51,6 @@
                                                     <image
                                                         src="@/ai_modules/digital_human/static/icons/video_play.svg"
                                                         class="w-[60rpx] h-[60rpx]"></image>
-                                                </view>
-                                            </view>
-                                            <view
-                                                class="absolute bottom-2 z-[77] w-full flex justify-center"
-                                                v-if="modelVersionMap[item.model_version]">
-                                                <view class="dh-version-name">
-                                                    {{ modelVersionMap[item.model_version] }}
                                                 </view>
                                             </view>
                                         </view>
@@ -266,7 +259,7 @@ const formData = reactive<any>({
     anchor_id: "",
     anchor_name: "",
     gender: "male",
-    model_version: "" as unknown as DigitalHumanModelVersionEnum,
+    model_version: DigitalHumanModelVersionEnum.CHANJING as unknown as DigitalHumanModelVersionEnum,
     audio_type: CreateTypeEnum.TEXT,
     voice_id: "-1",
     voice_type: 1,
@@ -370,7 +363,7 @@ const handleChooseAnchor = (data: AnchorItem) => {
 // 模型相关方法
 const openModel = () => {
     uni.$u.route({
-        url: `/ai_modules/digital_human/pages/video_upload/video_upload?model_version=${DigitalHumanModelVersionEnum.CHANJING}&type=${ModeTypeEnum.ANCHOR}`,
+        url: `/ai_modules/digital_human/pages/anchor_create/anchor_create?source=${DigitalHumanModelVersionEnum.CHANJING}&type=${ModeTypeEnum.ANCHOR}`,
     });
 };
 
@@ -515,6 +508,7 @@ const getModelLists = async () => {
             page_size: 10,
             page_no: 1,
             type: 0,
+            status: "0,1",
             model_version: DigitalHumanModelVersionEnum.CHANJING,
         });
         if (lists && lists.length) {
@@ -533,48 +527,42 @@ const goHome = () => {
     });
 };
 
+const onCreateAnchor = (data: any) => {
+    const { name, url, anchor_id, pic, width, height, model_version } = data;
+    // if (!formData.model_version && formData.model_version !== anchor_id) {
+    //     clearData();
+    // }
+
+    // if (model_version == DigitalHumanModelVersionEnum.CHANJING) {
+    //     formData.voice_id = "-1";
+    // }
+
+    Object.assign(formData, {
+        anchor_name: name,
+        video_url: url,
+        anchor_id,
+        model_version,
+        pic,
+        width,
+        height,
+    });
+    // 检查是否已存在相同anchor_id的项目
+    anchorLists.value = [data, ...anchorLists.value];
+};
+
 // 生命周期钩子
-onLoad((options: any) => {
-    const { type, data } = options;
-    if (type === ListenerTypeEnum.UPLOAD_VIDEO) {
-        try {
-            const parsedData = JSON.parse(decodeURIComponent(data));
-            const { name, url, model_version, anchor_id, pic, width, height } = parsedData;
-            if (!formData.model_version && formData.model_version !== anchor_id) {
-                clearData();
-            }
-
-            if (model_version == DigitalHumanModelVersionEnum.CHANJING) {
-                formData.voice_id = "-1";
-            }
-
-            Object.assign(formData, {
-                anchor_name: name,
-                video_url: url,
-                model_version,
-                anchor_id,
-                pic,
-                width,
-                height,
-            });
-            // 检查是否已存在相同anchor_id的项目
-            const exists = anchorLists.value.some((item) => item.anchor_id === anchor_id);
-            if (!exists) {
-                anchorLists.value = [...anchorLists.value, parsedData];
-            }
-        } catch (error) {
-            console.error("解析数据失败", error);
-        } finally {
-            loading.value = false;
-        }
-    } else {
-        getModelLists();
+onLoad(async (options: any) => {
+    if (options.type == ListenerTypeEnum.CREATE_ANCHOR) {
+        onCreateAnchor(JSON.parse(decodeURIComponent(options.data)));
     }
     uni.$on("confirm", (result: any) => {
         const { type, data } = result;
+        if (type === ListenerTypeEnum.CREATE_ANCHOR) {
+            onCreateAnchor(data);
+        }
         if (type === ListenerTypeEnum.AI_COPYWRITER) {
             formData.msg = data.content;
-            if (formData.msg.length > textLimit.value) {
+            if (formData.msg?.length > textLimit.value) {
                 formData.msg = formData.msg.slice(0, textLimit.value);
             }
         }
@@ -585,8 +573,9 @@ onLoad((options: any) => {
             formData.music_url = data.url;
             formData.music_name = data.name;
         }
-        uni.$off("confirm");
     });
+    getModelLists();
+
     getClipConfigData();
 });
 </script>

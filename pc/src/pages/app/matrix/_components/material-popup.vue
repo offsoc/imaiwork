@@ -21,7 +21,7 @@
                     <div class="text-[20px] text-white font-bold">素材库</div>
                 </div>
                 <div class="w-6 h-6 cursor-pointer" @click="close">
-                    <close-btn />
+                    <close-btn :theme="ThemeEnum.DARK" />
                 </div>
             </div>
 
@@ -146,6 +146,7 @@
 <script setup lang="ts">
 import { getMaterialLibraryList, getDigitalHumanVideo } from "@/api/redbook";
 import { getVideoList as getDigitalHumanVideoList } from "@/api/digital_human";
+import { ThemeEnum } from "@/enums/appEnums";
 import Popup from "@/components/popup/index.vue";
 import { MaterialTypeEnum } from "../_enums";
 import feedback from "@/utils/feedback";

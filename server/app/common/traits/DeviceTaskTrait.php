@@ -159,19 +159,19 @@ trait DeviceTaskTrait
 
             self::checkOnline($task->device_code, 'ws');
 
-            $find = SvCrawlingTask::alias('ct')
-                ->field('ct.*, b.device_code, b.keywords')
-                ->join('sv_crawling_task_device_bind b', 'ct.id = b.task_id')
-                ->where('ct.id', $task->sub_task_id)
-                ->where('b.device_code', $task->device_code)
-                ->where('ct.status', 'in', [1, 3])
-                ->where('b.status', 1)
-                ->fetchSql(false)
-                ->findOrEmpty();
-            if ($find->isEmpty()) {
-                $output->writeln(Db::getLastSql());
-                throw new \Exception('暂时没有需要执行的设备');
-            }
+            // $find = SvCrawlingTask::alias('ct')
+            //     ->field('ct.*, b.device_code, b.keywords')
+            //     ->join('sv_crawling_task_device_bind b', 'ct.id = b.task_id')
+            //     ->where('ct.id', $task->sub_task_id)
+            //     ->where('b.device_code', $task->device_code)
+            //     ->where('ct.status', 'in', [1, 3])
+            //     ->where('b.status', 1)
+            //     ->fetchSql(false)
+            //     ->findOrEmpty();
+            // if ($find->isEmpty()) {
+            //     $output->writeln(Db::getLastSql());
+            //     throw new \Exception('暂时没有需要执行的设备');
+            // }
 
             $data = array(
                 'type' => 25,
@@ -195,7 +195,7 @@ trait DeviceTaskTrait
             SvCrawlingTaskDeviceBind::where('task_id', $task->sub_task_id)->where('device_code', $task->device_code)->update(['status' => 3, 'update_time' => time()]);
             self::setLog($data, 'clues');
             self::setWsSelect();
-            self::redis()->set("xhs:device:{$find['device_code']}:taskStatus", json_encode([
+            self::redis()->set("xhs:device:{$task->device_code}:taskStatus", json_encode([
                 'taskStatus' => 'standby',
                 'taskType' => 'setSph',
                 'msg' => '执行视频号',
@@ -264,6 +264,27 @@ trait DeviceTaskTrait
 
             $output->writeln(Db::getLastSql());
 
+            $payload = array(
+                'appType' => $task->account_type,
+                'messageId' => 0,
+                'type' => 60,
+                'deviceId' => $task->device_code,
+                'appVersion' => '2.4.0',
+                'content' => json_encode([
+                    'deviceId' => $task->device_code,
+                    'taskId' => $publish['id'],
+                    'msg' => '执行视频号发布,拉起app',
+
+                ], JSON_UNESCAPED_UNICODE)
+            );
+            self::setLog(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), 'publish');
+            $channel = "device.{$task->device_code}.message";
+            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::publish($channel, [
+                'data' => json_encode($payload)
+            ]);
+            sleep(2);
+
             $interval_find = \app\common\model\wechat\AiWechatLog::where('user_id', $publish['user_id'])
                 ->where('log_type', \app\common\model\wechat\AiWechatLog::TYPE_SPH_POST)
                 ->where('wechat_id', $publish['account'])
@@ -288,6 +309,9 @@ trait DeviceTaskTrait
                 'TaskId' => $publish['sub_task_id'],
                 'Poi' => [],
             ];
+
+
+
             self::setLog($payload, 'publish');
             $output->writeln(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             // 3. 构建消息发送请求

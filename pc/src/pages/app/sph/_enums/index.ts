@@ -1,12 +1,14 @@
 export enum SidebarTypeEnum {
-    // 自动获客
+    // 采集任务
     AUTO_GET_CUSTOMER = 1,
-    // 自动加微
-    AUTO_ADD_WECHAT = 2,
-    // 手动加微
-    MANUAL_ADD_WECHAT = 3,
-    // 私信管理
-    MESSAGE_MANAGEMENT = 4,
+    // 评论获客
+    COMMENT_GET_CUSTOMER = 2,
+    // 私信获客
+    MESSAGE_GET_CUSTOMER = 3,
+    // 采集加微
+    AUTO_ADD_WECHAT = 4,
+    // 批量加微
+    MANUAL_ADD_WECHAT = 5,
 }
 
 export enum CreateTypeEnum {

@@ -47,10 +47,11 @@
                 <view class="flex flex-col">
                     <view class="mb-2" v-if="currModel.id && !currAgent.id && !isCoze && !isStaff">
                         <view
-                            class="text-xs text-[#808080] bg-[#f6f6f6] rounded-[100rpx] px-4 h-[66rpx] inline-flex items-center"
+                            class="text-xs text-[#808080] bg-[#f6f6f6] rounded-[100rpx] pl-2 pr-4 h-[66rpx] inline-flex items-center gap-x-1"
                             @click="showModel = true">
+                            <image :src="currModel.logo" class="w-[32rpx] h-[32rpx] rounded-full"></image>
                             {{ currModel.name }}
-                            <view class="ml-2 inline-block">
+                            <view class="ml-1 inline-block">
                                 <u-icon name="arrow-down" size="20" color="#a8abb2"></u-icon>
                             </view>
                         </view>

@@ -19,7 +19,6 @@
                 </div>
             </ElScrollbar>
         </div>
-
         <div
             class="mt-2"
             :infinite-scroll-distance="10"

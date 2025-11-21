@@ -13,14 +13,14 @@
                     <template v-if="!isGenerating">
                         <view class="flex items-center gap-1 font-bold">
                             <text class="text-[#FF3C26]">*</text>
-                            <text>您想生成的主题大纲</text>
+                            <text>您想获取的线索方向</text>
                         </view>
                         <view class="mt-4 p-4 bg-white rounded-[16rpx]">
                             <textarea
                                 v-model="contentVal"
                                 focus
                                 height="364"
-                                placeholder="点击此输入您想生成的主题，如：北京旅游"
+                                placeholder="请输入的您的行业，如：家庭用品"
                                 placeholder-style="color: #7C7E80; "
                                 :maxlength="contentMaxLength" />
                             <view class="text-[#B2B2B2] text-[26rpx] text-end">
@@ -29,7 +29,7 @@
                         </view>
                         <view class="flex items-center gap-1 font-bold mt-[48rpx]">
                             <text class="text-[#FF3C26]">*</text>
-                            <text> 生成的口播文案数量</text>
+                            <text> 线索词数量</text>
                         </view>
                         <view class="flex items-center gap-[36rpx] mt-[28rpx]">
                             <view
@@ -42,7 +42,7 @@
                             </view>
                         </view>
                     </template>
-                    <view class="flex flex-col gap-4" v-else>
+                    <view class="flex flex-wrap gap-4" v-else>
                         <view v-for="(item, index) in chatContentList" :key="index" class="copywriter-item">
                             <!-- 骨架屏 -->
                             <view v-if="item.status === 'pending'">
@@ -57,17 +57,16 @@
                                     <view class="w-full h-[28rpx] bg-[#F7F8FC] rounded-[8rpx]"></view>
                                 </view>
                             </view>
-                            <template v-else>
-                                <u-input
-                                    v-model="item.content"
-                                    placeholder-style="color: #7C7E80; "
-                                    maxlength="100"></u-input>
+                            <view class="flex items-center gap-x-2" v-else>
+                                <view @click="handleEdit(index)">
+                                    {{ item.content }}
+                                </view>
                                 <view
-                                    class="absolute right-2 top-2 rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
+                                    class="rounded-full flex item-center justify-center w-4 h-4 bg-[#0000004C]"
                                     @click="handleDelete(index)">
                                     <u-icon name="close" color="#ffffff" size="16"></u-icon>
                                 </view>
-                            </template>
+                            </view>
                         </view>
                     </view>
                 </view>
@@ -81,7 +80,7 @@
                     class="flex-1 flex items-center justify-center text-white rounded-[8rpx] h-[100rpx]"
                     :class="[contentVal.length > 0 ? 'bg-black' : 'bg-[#787878CC]']"
                     @click="contentPost(contentVal)">
-                    生成文案（消耗{{ getToken }}算力）
+                    生成线索词（消耗{{ getToken }}算力）
                 </view>
                 <template v-else>
                     <view
@@ -93,12 +92,13 @@
                         class="flex-1 flex items-center justify-center text-white rounded-[8rpx] h-[80rpx]"
                         :class="[isGenerated ? 'bg-black' : 'bg-[#787878CC]']"
                         @click="useContent">
-                        使用文案
+                        使用线索词
                     </view>
                 </template>
             </view>
         </view>
     </view>
+    <clue-edit ref="clueEditRef" v-model="showEdit" @confirm="handleConfirm" @close="showEdit = false" />
 </template>
 
 <script setup lang="ts">
@@ -106,6 +106,7 @@ import { getAiKeywords } from "@/api/sph";
 import { useUserStore } from "@/stores/user";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { ListenerTypeEnum } from "@/ai_modules/sph/enums";
+import ClueEdit from "@/ai_modules/sph/components/clue-edit/clue-edit.vue";
 
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
@@ -121,6 +122,10 @@ const chatContentList = ref<any[]>([]);
 const promptNumList = [10, 20, 30, 40, 50];
 const currentPromptNum = ref<number>(promptNumList[0]);
 
+const editIndex = ref<number>(-1);
+const showEdit = ref<boolean>(false);
+const clueEditRef = ref<any>(null);
+
 // 是否正在生成
 const isGenerating = ref<boolean>(false);
 
@@ -132,7 +137,7 @@ const isGenerated = computed(() => {
 // 获取消耗的算力
 const getToken = computed(() => {
     const token = userStore.getTokenByScene(TokensSceneEnum.SPH_AI_CLUE)?.score;
-    return token * currentPromptNum.value;
+    return parseFloat(token) * currentPromptNum.value;
 });
 
 const contentPost = async (userInput: string) => {
@@ -140,7 +145,12 @@ const contentPost = async (userInput: string) => {
         uni.$u.toast("请输入文案");
         return;
     }
-    if (userTokens.value <= getToken.value || isGenerating.value) return;
+    if (isGenerating.value) return;
+
+    if (userTokens.value < getToken.value) {
+        uni.$u.toast("算力不足，请充值！");
+        return;
+    }
 
     try {
         isGenerating.value = true;
@@ -184,6 +194,18 @@ const reloadContent = () => {
     chatContentList.value = [];
     isGenerating.value = false;
     contentPost(contentVal.value);
+};
+
+const handleEdit = async (index: number) => {
+    editIndex.value = index;
+    showEdit.value = true;
+    await nextTick();
+    clueEditRef.value.setFormData(chatContentList.value[index].content);
+};
+
+const handleConfirm = (val: string) => {
+    chatContentList.value[editIndex.value].content = val;
+    showEdit.value = false;
 };
 
 const handleDelete = (index: number) => {
@@ -233,19 +255,12 @@ onLoad((options: any) => {
 .prompt-num-item {
     @apply w-[84rpx] h-[72rpx] flex items-center justify-center  bg-white text-[26rpx]  relative rounded-[16rpx];
     &.active {
-        @apply font-bold text-black;
-
-        &::before {
-            @include content-box;
-        }
+        @apply font-bold text-primary shadow-[0_0_0_1rpx_var(--color-primary)];
     }
 }
 
 .copywriter-item {
-    @apply relative rounded-[16rpx] bg-white shadow-[0rpx_6rpx_12rpx_0_rgba(0,0,0,0.03)] p-4;
-    &::before {
-        @include content-box;
-    }
+    @apply relative rounded-[16rpx] bg-white shadow-[0rpx_6rpx_12rpx_0_rgba(0,0,0,0.03)] px-4 py-2;
 }
 
 .topic-item {

@@ -261,7 +261,7 @@
                                             <div class="text-white text-xs">{{ item }}</div>
                                             <div class="w-[1px] h-[8px] bg-app-border-2 mx-2"></div>
                                             <div class="w-4 h-4" @click.stop="handleDeleteRemark(index)">
-                                                <close-btn :icon-size="10"></close-btn>
+                                                <close-btn :icon-size="10" :theme="ThemeEnum.DARK"></close-btn>
                                             </div>
                                         </div>
                                     </div>
@@ -292,6 +292,7 @@
 
 <script setup lang="ts">
 import { getTaskList as getTaskListApi, createManualAddWechat } from "@/api/sph";
+import { ThemeEnum } from "@/enums/appEnums";
 import RemarkPop from "@/pages/app/sph/_components/remark-pop.vue";
 import dayjs from "dayjs";
 import { useCreateTask } from "../../../_hooks/useCreateTask";

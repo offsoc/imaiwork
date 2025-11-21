@@ -364,24 +364,27 @@ trait SphTaskTrait
         $deviceIds = json_decode($find->device_codes, true);
         ChannelClient::connect('127.0.0.1', 2206);
         foreach ($deviceIds as $_deviceId) {
-            $data = array(
-                'type' => 24,
-                'appType' => 1,
-                'content' => json_encode(array(
-                    'task_id' => $task_id,
+            $isRun = SvDeviceTask::where('sub_task_id', $task_id)->where('device_code', $_deviceId)->where('task_type', 4)->where('status', 1)->findOrEmpty();
+            if (!$isRun->isEmpty()) {
+                $data = array(
+                    'type' => 22,
+                    'appType' => DeviceEnum::ACCOUNT_TYPE_SPH,
+                    'content' => json_encode(array(
+                        'task_id' => $task_id,
+                        'deviceId' => $_deviceId,
+                        'msg' => '任务删除'
+
+                    ), JSON_UNESCAPED_UNICODE),
                     'deviceId' => $_deviceId,
-                    'msg' => '任务删除'
+                    'appVersion' => '2.1.1',
+                    'messageId' => 0,
+                );
 
-                ), JSON_UNESCAPED_UNICODE),
-                'deviceId' => $_deviceId,
-                'appVersion' => '2.1.1',
-                'messageId' => 0,
-            );
-
-            $channel = "device.{$_deviceId}.message";
-            ChannelClient::publish($channel, [
-                'data' => json_encode($data)
-            ]);
+                $channel = "device.{$_deviceId}.message";
+                ChannelClient::publish($channel, [
+                    'data' => json_encode($data)
+                ]);
+            }
             SvCrawlingTaskDeviceBind::where('task_id', $task_id)->where('device_code', $_deviceId)->select()->delete();
             SvDeviceTask::where('sub_task_id', $task_id)->where('device_code', $_deviceId)->where('task_type', 4)->select()->delete();
         }

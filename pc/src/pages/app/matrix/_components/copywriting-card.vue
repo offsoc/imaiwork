@@ -63,7 +63,7 @@
                             <div class="w-[1px] h-[12px] bg-[#ffffff1a]"></div>
                             <div>
                                 <div class="w-4 h-4" @click="handleDelete(index)">
-                                    <close-btn :icon-size="10"></close-btn>
+                                    <close-btn :icon-size="10" :theme="ThemeEnum.DARK"></close-btn>
                                 </div>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                                 </div>
                                 <div>
                                     <div class="w-4 h-4" @click="handleDelete(index)">
-                                        <close-btn :icon-size="10"></close-btn>
+                                        <close-btn :icon-size="10" :theme="ThemeEnum.DARK"></close-btn>
                                     </div>
                                 </div>
                             </div>
@@ -134,6 +134,8 @@
 </template>
 
 <script setup lang="ts">
+import { ThemeEnum } from "@/enums/appEnums";
+
 const props = withDefaults(
     defineProps<{
         type: 1 | 2 | 3;

@@ -14,10 +14,10 @@ import { useAppStore } from "@/stores/app";
 
 const { getWebsiteConfig, getOemConfig } = useAppStore();
 
-const { is_oem, logo_url } = getOemConfig;
+const { is_oem, site_logo } = getOemConfig;
 
 const getLogo = computed(() => {
-    return is_oem == 1 ? logo_url : getWebsiteConfig.pc_logo;
+    return is_oem == 1 ? site_logo : getWebsiteConfig.pc_logo;
 });
 </script>
 

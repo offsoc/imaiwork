@@ -240,6 +240,7 @@ class HumanLogic extends ApiLogic
 
                     // TODO 失败退费
                     if ($item->status == 2) {
+                        $item->remark = $data['err_reason'] ?? '';
                         self::refundTokens($item->user_id, $item->audio_id, $item->task_id, 'human_audio_chanjing');
                     }
 
@@ -858,12 +859,11 @@ class HumanLogic extends ApiLogic
 
             })
             ->when($status != "", function ($query) use ($status) {
-                $query->where('status', $status);
+                $query->whereIn('status', $status);
             })
             ->limit($pageNo, $pageSize)
             ->order('create_time', 'desc')
-            ->select()
-            ->toArray();
+            ->select()->toArray();
 
         $data = [
             'lists' => $result,
@@ -2806,6 +2806,21 @@ class HumanLogic extends ApiLogic
             'clip_result_url'=>$url
         ]);
         
+        return true;
+    }
+
+    public static function updateTaskName($data){
+        $model = HumanVideoTask::where('id', $data['id'])->where('user_id', self::$uid)->findOrEmpty();
+        if ($model->isEmpty()) {
+
+            self::setError('参数错误');
+            return false;
+        }
+        $data['name'] = $data['name'] ?? '默认任务名称';
+        HumanVideoTask::update([
+            'id' => $data['id'],
+            'name'=>$data['name']
+        ]);
         return true;
     }
 }

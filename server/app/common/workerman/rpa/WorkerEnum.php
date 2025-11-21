@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace app\common\workerman\rpa;
@@ -12,6 +13,17 @@ class WorkerEnum
 
     public const ERROR_CODE = 400;
     public const SUCCESS_CODE = 200;
+
+
+
+    public const WS_SOURCE_PC_TYPE = 'pc';
+    public const WS_SOURCE_WM_PROG_TYPE = 'mprog';
+
+    public const WS_SOURCES = array(
+        self::WS_SOURCE_PC_TYPE,
+        self::WS_SOURCE_WM_PROG_TYPE,
+    );
+
     # rpa指令类型
     public const RPA_DEVICE_INFO = 1; # 设备信息状态
     public const RPA_USER_INFO = 2; # 用户信息状态
@@ -28,7 +40,7 @@ class WorkerEnum
     public const RPA_MSG_REPLY_COMPLETED = 13; #回复消息完成
     public const RPA_MEDIA_STATUS = 14; #图文视频发布状态更新
 
-    public const RPA_SPH_TASK_SEND = 20;//任务发送
+    public const RPA_SPH_TASK_SEND = 20; //任务发送
     public const RPA_SPH_TASK_RECORD_SAVE = 21; #任务记录保存
     public const RPA_SPH_TASK_PAUSE = 22; #任务暂停
     public const RPA_SPH_TASK_RESUME = 23; #任务恢复
@@ -36,15 +48,15 @@ class WorkerEnum
     public const RPA_SPH_TASK_COMPLETED = 25; #任务完成
     public const RPA_SPH_TASK_RECEIVEW  = 26; #任务接收
 
-    public const RPA_TAKE_OVER_TASK_SEND = 30;//接管任务发送
+    public const RPA_TAKE_OVER_TASK_SEND = 30; //接管任务发送
     public const RPA_TAKE_OVER_TASK_COMPLETED = 31; #接管任务完成
     public const RPA_TAKE_OVER_TASK_RESULT_SAVE = 32; #接管任务结果保存
 
-    public const RPA_ACTIVE_TASK_SEND = 40;//养号任务发送
+    public const RPA_ACTIVE_TASK_SEND = 40; //养号任务发送
     public const RPA_ACTIVE_TASK_COMPLETED = 41; #养号任务完成
     public const RPA_ACTIVE_TASK_RESULT_SAVE = 42; #养号任务结果保存
 
-    public const RPA_ADD_WECHAT_TASK_SEND = 50;//加微信任务发送
+    public const RPA_ADD_WECHAT_TASK_SEND = 50; //加微信任务发送
 
     public const RPA_DEVICE_APP_EXEC_SEND = 90; #设备应用执行发送
     public const RPA_DEVICE_APP_EXEC = 91; #设备应用执行
@@ -77,13 +89,13 @@ class WorkerEnum
     public const WEB_SEND_PRIVATE_MESSAGE = 82; #发送私信消息
     public const WEB_PRIVATE_MESSAGE_LIST = 83; #私信列表
     public const WEB_RECEIVE_PRIVATE_MESSAGE = 84; #接收私信
-    public const WEB_BIND_DEVICE = 85;#绑定设备
+    public const WEB_BIND_DEVICE = 85; #绑定设备
     public const WEB_CARDS = 86; #名片列表
     public const WEB_POST_STATUS_LIST = 87; #名片列表
     public const WEB_SEND_CARD = 88; #web端发送卡片消息
-    
-    
-    
+
+
+
 
     public const DEVICE_INIT_OK = 2001; #设备初始化完成
     public const INIT_CHECK = 2002; #初始化检查
@@ -109,51 +121,51 @@ class WorkerEnum
     public const DEVICE_INIT_COMPLETED_ERROR = 4019; #设备初始化完成异常
 
     public const MSG_ERROR_CODE = 4020; #消息指令异常;
-    public const MSG_DEVICE_ACCOUNT_SETTING = 4021;//请先配置设备账号相关设置;
-    public const MSG_ACCOUNT_NOT_REPLY_STRATEGY = 4021;//账号未配置回复策略;
-    public const MSG_ACCOUNT_NOT_ROBOT = 4022;//账号未配置机器人;
-    public const MSG_STOP_AI_REPLY = 4023;//已停止AI回复;
-    public const MSG_CHAT_PROMPT_NOT_FOUND = 4024;//提示词不存在;
-    public const MSG_ROBOT_NOT_FOUND_KNOWLEDGE = 4025;//机器人挂载的知识库不存在;
-    public const MSG_SEND_MESSAGE_ERROR = 4026;//发送消息失败;
-    public const NOT_SUPPORT = 4027;//不支持,请重试;
-    public const NOT_SUPPORT_PERSONAL = 4028;//个人账号不支持获取名片列表;
-    public const CARD_NOT_FOUND = 4029;//名片不存在;
-    public const UPDATE_POST_INFO_FAIL = 4030;//更新笔记状态异常
-    public const MSG_ACCOUNT_NOT_OPENAI = 4031;//未开启AI回复;
-    public const DEVICE_RUNNING_REPLY_MSG = 4032;//设备正在回复消息中, 请稍后再试y;
-    public const DEVICE_INVALID_REQUEST = 4033;//设备参数无效;
-    public const WEB_USER_INVALID_REQUEST = 4034;//用户参数无效;
-    public const WEB_GET_USER_INFO_FAIL = 4035;//获取账号信息失败,请重新获取;
+    public const MSG_DEVICE_ACCOUNT_SETTING = 4021; //请先配置设备账号相关设置;
+    public const MSG_ACCOUNT_NOT_REPLY_STRATEGY = 4021; //账号未配置回复策略;
+    public const MSG_ACCOUNT_NOT_ROBOT = 4022; //账号未配置机器人;
+    public const MSG_STOP_AI_REPLY = 4023; //已停止AI回复;
+    public const MSG_CHAT_PROMPT_NOT_FOUND = 4024; //提示词不存在;
+    public const MSG_ROBOT_NOT_FOUND_KNOWLEDGE = 4025; //机器人挂载的知识库不存在;
+    public const MSG_SEND_MESSAGE_ERROR = 4026; //发送消息失败;
+    public const NOT_SUPPORT = 4027; //不支持,请重试;
+    public const NOT_SUPPORT_PERSONAL = 4028; //个人账号不支持获取名片列表;
+    public const CARD_NOT_FOUND = 4029; //名片不存在;
+    public const UPDATE_POST_INFO_FAIL = 4030; //更新笔记状态异常
+    public const MSG_ACCOUNT_NOT_OPENAI = 4031; //未开启AI回复;
+    public const DEVICE_RUNNING_REPLY_MSG = 4032; //设备正在回复消息中, 请稍后再试y;
+    public const DEVICE_INVALID_REQUEST = 4033; //设备参数无效;
+    public const WEB_USER_INVALID_REQUEST = 4034; //用户参数无效;
+    public const WEB_GET_USER_INFO_FAIL = 4035; //获取账号信息失败,请重新获取;
 
-    public const SPH_STATUS_ERROR_CODE = 4036;//任务状态异常;
-    public const SPH_DELETE_ERROR_CODE = 4037;//任务删除异常;
-    public const SPH_PAUSE_ERROR_CODE = 4038;//任务暂停异常;
-    public const SPH_RECOVERY_ERROR_CODE = 4039;//任务恢复异常;
-    public const SPH_SEND_ERROR_CODE = 4040;//任务发送异常;
-    public const SPH_ADD_WECHAT_ERROR = 4041;//添加微信异常;
-    public const SPH_COMPLETE_ERROR_CODE = 4042;//任务完成异常;
-    public const DEVICE_EXEC_APP_ERROR_CODE = 4043;//设备执行应用异常;
-    public const SPH_RECEIVED_ERROR_CODE = 4044;//任务接收异常;
-    public const DEVICE_EXEC_OTHER_APP_ERROR_CODE = 4045;//正在执行其他app;
+    public const SPH_STATUS_ERROR_CODE = 4036; //任务状态异常;
+    public const SPH_DELETE_ERROR_CODE = 4037; //任务删除异常;
+    public const SPH_PAUSE_ERROR_CODE = 4038; //任务暂停异常;
+    public const SPH_RECOVERY_ERROR_CODE = 4039; //任务恢复异常;
+    public const SPH_SEND_ERROR_CODE = 4040; //任务发送异常;
+    public const SPH_ADD_WECHAT_ERROR = 4041; //添加微信异常;
+    public const SPH_COMPLETE_ERROR_CODE = 4042; //任务完成异常;
+    public const DEVICE_EXEC_APP_ERROR_CODE = 4043; //设备执行应用异常;
+    public const SPH_RECEIVED_ERROR_CODE = 4044; //任务接收异常;
+    public const DEVICE_EXEC_OTHER_APP_ERROR_CODE = 4045; //正在执行其他app;
 
-    public const RPA_APP_OPEN_FAIL = 4046;//打开app失败;
-    public const RPA_APP_PERSONAL_CENTER_FAIL = 4047;//打开个人中心失败;
-    public const RPA_APP_USERINFO_BEFORE_FAIL = 4048;//获取账号信息失败;
-    public const RPA_APP_COMPLETED_FAIL = 4049;//获取账号信息失败;
-    public const RPA_APP_DATA_SEND_FAIL = 4050;//数据发送失败;
-    public const RPA_APP_EXEC_FAIL = 4051;//手机处理指令失败;
-    public const RPA_APP_INFO_FAIL = 4052;//获取信息失败;
-    public const RPA_APP_SEND_FAIL = 4053;//正在发送数据失败;
-    public const WEB_GET_WECHAT_USER_INFO_FAIL = 4054;//获取微账号信息失败;
-
-
+    public const RPA_APP_OPEN_FAIL = 4046; //打开app失败;
+    public const RPA_APP_PERSONAL_CENTER_FAIL = 4047; //打开个人中心失败;
+    public const RPA_APP_USERINFO_BEFORE_FAIL = 4048; //获取账号信息失败;
+    public const RPA_APP_COMPLETED_FAIL = 4049; //获取账号信息失败;
+    public const RPA_APP_DATA_SEND_FAIL = 4050; //数据发送失败;
+    public const RPA_APP_EXEC_FAIL = 4051; //手机处理指令失败;
+    public const RPA_APP_INFO_FAIL = 4052; //获取信息失败;
+    public const RPA_APP_SEND_FAIL = 4053; //正在发送数据失败;
+    public const WEB_GET_WECHAT_USER_INFO_FAIL = 4054; //获取微账号信息失败;
 
 
 
 
 
-    
+
+
+
     #指令映射
     public const WEB_SOCKET_STATUS_TEXT = 'bindSocket';
     public const WEB_BIND_DEVICE_TEXT = 'addDevice';
@@ -170,8 +182,8 @@ class WorkerEnum
     public const WEB_DEVICE_ONLINE_TEXT = 'deviceOnline';
     public const DEFAULT_TEXT = 'default';
     public const WEB_SEND_CARD_TEXT = 'sendCard';
-    public const WEB_STOP_AI_TEXT ='stopAi';
-    
+    public const WEB_STOP_AI_TEXT = 'stopAi';
+
     /**
      * 指令描述
      */
@@ -227,7 +239,7 @@ class WorkerEnum
         self::DEVICE_INIT_COMPLETED_ERROR => '设备初始化完成异常',
         self::USER_ERROR_CODE => '用户指令异常',
         self::INIT_CHECK_ERROR_CODE => '初始化检查异常',
-        
+
         self::MSG_ERROR_CODE => '消息指令异常',
         self::MSG_DEVICE_ACCOUNT_SETTING => '请先配置设备账号相关设置',
         self::MSG_ACCOUNT_NOT_REPLY_STRATEGY => '账号未配置回复策略',
@@ -288,5 +300,4 @@ class WorkerEnum
         }
         return $desc[$type] ?? '';
     }
-
 }

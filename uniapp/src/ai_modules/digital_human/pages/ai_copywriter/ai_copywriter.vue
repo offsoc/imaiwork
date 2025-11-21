@@ -4,7 +4,7 @@
             <view class="text-[#C7C8C9] text-[26rpx]">
                 不知道该写什么，试试<text class="text-primary ml-2" @click="useCopywriter">一键填入数据</text>
             </view>
-            <view class="rounded-[48rpx] bg-white px-[32rpx] mt-[48rpx]">
+            <view class="rounded-[48rpx] bg-white px-[32rpx] mt-[28rpx]">
                 <view class="h-[100rpx] flex items-center text-[#333333]"> 分享主题 </view>
                 <u-line color="#e5e5e5"></u-line>
                 <view class="py-2">
@@ -12,12 +12,11 @@
                         v-model="contentVal"
                         type="textarea"
                         focus
-                        height="364"
+                        height="160"
                         placeholder="请输入或粘贴您的文案 ..."
                         placeholder-style="color: #00000033; font-size: 26rpx;"
                         :maxlength="contentMaxLength"></u-input>
                 </view>
-                <u-line color="#e5e5e5"></u-line>
                 <view class="text-[#B2B2B2] text-[26rpx] text-end py-[34rpx]">
                     {{ contentVal.length }} / {{ contentMaxLength }}
                 </view>
@@ -49,9 +48,7 @@
                         class="border border-solid border-[#ededed] rounded-lg p-4">
                         <view class="text-[26rpx] text-[#323232]">{{ item }}</view>
                         <div class="justify-end flex mt-2">
-                            <view>
-                                <u-button type="primary" size="mini" @click="useContent(item)">使用文案</u-button>
-                            </view>
+                            <u-button type="primary" size="mini" @click="useContent(item)">使用文案</u-button>
                         </div>
                     </view>
                 </view>
@@ -67,7 +64,7 @@
                     fontSize: '26rpx',
                 }"
                 @click="contentPost(contentVal)">
-                生成文案
+                生成文案（消耗{{ getToken }}算力）
             </u-button>
         </view>
     </view>
@@ -77,9 +74,9 @@
 import { getRect } from "@/utils/util";
 import { generatePrompt } from "@/api/digital_human";
 import { useUserStore } from "@/stores/user";
-import { TokensSceneEnum } from "@/enums/appEnums";
 import { aiTemplateCopywriter } from "../../config/copywriter";
 import { ListenerTypeEnum } from "../../enums";
+import { TokensSceneEnum } from "@/enums/appEnums";
 const userStore = useUserStore();
 const { userTokens } = toRefs(userStore);
 
@@ -101,6 +98,12 @@ const getPromptList = computed(() => {
     return promptList;
 });
 
+// 获取消耗的算力
+const getToken = computed(() => {
+    const token = userStore.getTokenByScene(TokensSceneEnum.HUMAN_COPYWRITING_CREATE)?.score;
+    return parseFloat(token);
+});
+
 const currentPrompt = ref<any>(getPromptList.value[0]);
 
 const scrollTop = ref<number>(0);
@@ -110,7 +113,7 @@ const contentPost = async (userInput: string) => {
         uni.$u.toast("请输入文案");
         return;
     }
-    if (userTokens.value <= 0) {
+    if (userTokens.value < getToken.value) {
         uni.$u.toast("算力不足，请充值！");
         return;
     }

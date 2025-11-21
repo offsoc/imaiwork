@@ -68,11 +68,14 @@ watch(
     async (newId) => {
         chatStore.clearChat();
         await nextTick();
-        chatStore.setAgent({
-            id: props.agentId,
-            name: props.agentName || "",
-        });
-        stopStream();
+        setTimeout(() => {
+            chatStore.setAgent({
+                id: props.agentId,
+                name: props.agentName || "",
+            });
+            stopStream();
+        }, 500);
+
         if (newId) {
             chatStore.setTaskId(newId || "");
 

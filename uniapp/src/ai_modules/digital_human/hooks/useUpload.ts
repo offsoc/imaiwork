@@ -19,11 +19,11 @@ export const commonUploadLimit = {
     // 最小分辨率
     minResolution: 360,
     // 最大分辨率
-    maxResolution: 1080,
+    maxResolution: 2000,
     // 最小时长
-    videoMinDuration: 5,
+    videoMinDuration: 30,
     // 最大时长
-    videoMaxDuration: 600,
+    videoMaxDuration: 60,
 };
 
 // 上传限制
@@ -53,16 +53,16 @@ export const uploadLimit: any = {
     [DigitalHumanModelVersionEnum.ADVANCED]: commonUploadLimit,
     [DigitalHumanModelVersionEnum.ELITE]: commonUploadLimit,
     [DigitalHumanModelVersionEnum.CHANJING]: {
-        size: 2000,
-        minResolution: 360,
-        maxResolution: 2048,
+        size: 300,
+        minResolution: 2000,
+        maxResolution: 2000,
         videoMinDuration: 30,
         videoMaxDuration: 300,
     },
     //闪剪
     [DigitalHumanModelVersionEnum.SHANJIAN]: {
-        size: 100,
-        minResolution: 360,
+        size: 300,
+        minResolution: 2000,
         maxResolution: 2000,
         videoMinDuration: 10,
         videoMaxDuration: 30,
@@ -72,11 +72,11 @@ export const uploadLimit: any = {
 export const useUpload = (options: Options) => {
     const {
         size = 100,
-        resolution = [640, 2048],
+        resolution = [0, 2048],
         duration = [15, 60],
         extension = ["mp4", "mov"],
         maxDuration = 10,
-        sizeType = ["original"],
+        sizeType = ["original", "compressed"],
         onSuccess,
         onError,
         onProgress,

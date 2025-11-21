@@ -6,7 +6,7 @@
             :background="{
                 background: 'transparent',
             }"
-            title="我的创作库"
+            title="混剪记录"
             title-bold>
         </u-navbar>
         <view class="px-4 mt-[26rpx]">
@@ -175,6 +175,7 @@
                     v-model="newName"
                     placeholder="请输入名称"
                     maxlength="30"
+                    clearable
                     placeholder-style="color: #0000004d; font-size: 26rpx;" />
             </view>
             <view class="flex items-center gap-x-5 mt-[56rpx]">

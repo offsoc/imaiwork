@@ -7,8 +7,10 @@
         :show-close="false"
         :style="{ padding: 0 }">
         <div class="-my-4 live-pop-container">
-            <div class="absolute right-4 top-4 w-6 h-6" @click="close">
-                <close-btn></close-btn>
+            <div
+                class="absolute right-4 top-4 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer bg-[#dfdfdf4d]"
+                @click="close">
+                <Icon name="el-icon-Close" color="#8B9199" :size="16"></Icon>
             </div>
             <div class="h-[365px] px-6 rounded-tl-3xl rounded-tr-3xl live-pop-cover">
                 <div class="pt-[60%] live-mask-text">
@@ -16,12 +18,10 @@
                     <div>智能互动体验</div>
                 </div>
                 <div class="mt-[10px] flex">
-                    <span class="text-xs text-[rgba(255,255,255,0.5)]">
-                        下载专属APK，一键打造7×24小时不下播的智能直播间。</span
-                    >
+                    <span class="text-xs text-[#ffffff80]"> 下载专属APK，一键打造7×24小时不下播的智能直播间。</span>
                     <a
                         :href="appLiveConfig.description"
-                        class="text-[rgba(255,255,255,0.8)] text-xs ml-2 underline"
+                        class="text-[#ffffffcc] text-xs ml-2 underline"
                         target="_blank">
                         了解更多
                     </a>

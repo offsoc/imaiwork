@@ -148,20 +148,37 @@ class PrivateMessageHandler extends BaseMessageHandler
         try {
 
             $userId = $this->userId;
-            $uid = $this->service->getRedis()->get("xhs:user:{$userId}");
-            if ($uid) {
-                $message = array(
-                    'messageId' => $uid,
-                    'type' => WorkerEnum::WEB_PRIVATE_MESSAGE_LIST_TEXT,
-                    'appType' => 3,
-                    'deviceId' => $this->payload['deviceId'],
-                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
-                    'reply' => $content
-                );
-                $this->sendResponse($uid,  $message,  $message['reply']);
+            $sources = WorkerEnum::WS_SOURCES;
+            foreach ($sources as $source) {
+                $uid = $this->service->getRedis()->get("xhs:user:{$source}:{$userId}");
+                if ($uid) {
+                    $message = array(
+                        'messageId' => $uid,
+                        'type' => WorkerEnum::WEB_PRIVATE_MESSAGE_LIST_TEXT,
+                        'appType' => 3,
+                        'deviceId' => $this->payload['deviceId'],
+                        'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+                        'reply' => $content
+                    );
+                    $this->sendResponse($uid,  $message,  $message['reply']);
 
-                $this->setLog($message, 'msg_list');
+                    $this->setLog($message, 'msg_list');
+                }
             }
+            // $uid = $this->service->getRedis()->get("xhs:user:pc:{$userId}") ?? $this->service->getRedis()->get("xhs:user:wmprog:{$userId}");
+            // if ($uid) {
+            //     $message = array(
+            //         'messageId' => $uid,
+            //         'type' => WorkerEnum::WEB_PRIVATE_MESSAGE_LIST_TEXT,
+            //         'appType' => 3,
+            //         'deviceId' => $this->payload['deviceId'],
+            //         'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+            //         'reply' => $content
+            //     );
+            //     $this->sendResponse($uid,  $message,  $message['reply']);
+
+            //     $this->setLog($message, 'msg_list');
+            // }
         } catch (\Exception $e) {
             $this->setLog('_sendWeb' . $e, 'error');
         }

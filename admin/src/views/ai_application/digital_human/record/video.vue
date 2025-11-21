@@ -135,7 +135,16 @@
         </el-card>
     </div>
     <el-dialog v-model="showVideo" width="740px" title="视频预览">
-        <video-player ref="playerRef" :src="videoUrl" width="100%" height="450px" />
+        <div>
+            <div class="text-lg font-bold mb-2">数字人视频</div>
+            <video-player ref="playerRef" :src="videoData.url" width="100%" height="450px" />
+            <el-button class="mt-2" type="primary" @click="downloadFile(videoData.url)">下载</el-button>
+        </div>
+        <div v-if="videoData.ai_url" class="mt-2">
+            <div class="text-lg font-bold mb-2">AI剪辑视频</div>
+            <video-player ref="playerRef" :src="videoData.ai_url" width="100%" height="450px" />
+            <el-button class="mt-2" type="primary" @click="downloadFile(videoData.ai_url)">下载</el-button>
+        </div>
     </el-dialog>
 </template>
 <script lang="ts" setup>
@@ -145,6 +154,7 @@ import useAppStore from "@/stores/modules/app";
 import feedback from "@/utils/feedback";
 import { ElTable } from "element-plus";
 import { ClipStyleMap } from "@/enums/appEnums";
+import { downloadFile } from "@/utils/util";
 
 const appStore = useAppStore();
 const { config } = toRefs(appStore);
@@ -184,21 +194,23 @@ const getVideoType = (audio_type: number) => {
 };
 
 const showVideo = ref(false);
-const videoUrl = ref("");
-const handlePlay = async (row: any) => {
-    const { result_url } = row;
-    if (!result_url) {
-        feedback.msgError("视频暂未生成");
-        return;
-    }
-    showVideo.value = true;
-    videoUrl.value = result_url;
-};
+const videoData = reactive({
+    url: "",
+    ai_url: "",
+});
 
 const multipleSelection = ref<any[]>([]);
 
 const handleSelectionChange = (val: any[]) => {
     multipleSelection.value = val;
+};
+
+const handlePlay = async (row: any) => {
+    showVideo.value = true;
+    videoData.url = row.result_url;
+    if (row.clip_result_url) {
+        videoData.ai_url = row.clip_result_url;
+    }
 };
 
 const handleDelete = async (id: number | number[]) => {

@@ -426,7 +426,7 @@ class MessageHandler extends BaseMessageHandler
                             if ($this->connection->multipleType) {
                                 array_push($this->connection->replyMessage,  $reply->image_reply);
                             }
-                            $this->updatePrivateMessageStatus($account, $friend, $reply->image_reply);  
+                            $this->updatePrivateMessageStatus($account, $friend, $reply->image_reply);
                             continue;
                         }
 
@@ -1509,19 +1509,35 @@ class MessageHandler extends BaseMessageHandler
     {
         try {
             $userId = $account['user_id'];
-            $uid = $this->service->getRedis()->get("xhs:user:{$userId}");
-            if ($uid) {
-                $message = array(
-                    'messageId' => $uid,
-                    'type' => $content['type'],
-                    'appType' => 3,
-                    'deviceId' => $account['device_code'],
-                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
-                    'code' => WorkerEnum::SUCCESS_CODE,
-                    'reply' => $content
-                );
-                $this->sendResponse($uid,  $message,  $message['reply']);
+            $sources = WorkerEnum::WS_SOURCES;
+            foreach ($sources as $source) {
+                $uid = $this->service->getRedis()->get("xhs:user:{$source}:{$userId}");
+                if ($uid) {
+                    $message = array(
+                        'messageId' => $uid,
+                        'type' => $content['type'],
+                        'appType' => 3,
+                        'deviceId' => $account['device_code'],
+                        'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+                        'code' => WorkerEnum::SUCCESS_CODE,
+                        'reply' => $content
+                    );
+                    $this->sendResponse($uid,  $message,  $message['reply']);
+                }
             }
+            // $uid = $this->service->getRedis()->get("xhs:user:pc:{$userId}") ?? $this->service->getRedis()->get("xhs:user:wmprog:{$userId}");
+            // if ($uid) {
+            //     $message = array(
+            //         'messageId' => $uid,
+            //         'type' => $content['type'],
+            //         'appType' => 3,
+            //         'deviceId' => $account['device_code'],
+            //         'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+            //         'code' => WorkerEnum::SUCCESS_CODE,
+            //         'reply' => $content
+            //     );
+            //     $this->sendResponse($uid,  $message,  $message['reply']);
+            // }
         } catch (\Exception $e) {
             $this->setLog('sendToWeb' . $e, 'error');
         }

@@ -167,11 +167,14 @@ const props = withDefaults(
         showAccounts: boolean;
         platformTypes?: AppTypeEnum[];
         currentFrequency?: number;
+        // 时间间隔
+        timeInterval?: number;
     }>(),
     {
         showDevice: true,
         showAccounts: false,
         currentFrequency: 0,
+        timeInterval: 30,
     }
 );
 
@@ -238,8 +241,8 @@ const handleEndTimeChange = (e: any) => {
     }
     const startTIme = new Date(`2000/01/01 ${formData.value.time_config[0]}`);
     const endTime = new Date(`2000/01/01 ${value}`);
-    if (endTime.getTime() - startTIme.getTime() < 30 * 60 * 1000) {
-        uni.$u.toast("结束时间不能小于开始时间30分钟");
+    if (endTime.getTime() - startTIme.getTime() < props.timeInterval * 60 * 1000) {
+        uni.$u.toast(`结束时间不能小于开始时间${props.timeInterval}分钟`);
         return;
     }
     formData.value.time_config[1] = value;

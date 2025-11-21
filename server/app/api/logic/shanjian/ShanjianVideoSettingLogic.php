@@ -270,6 +270,14 @@ class ShanjianVideoSettingLogic extends ApiLogic
         if (count($characterDesignData) == 0){
             throw new \Exception("人设信息不能为空");
         }
+
+        $copywritingDatanum = count($copywritingData)  * 0.5;
+        $materialDatanum = count($materialData);
+        $randcopywriting = false;
+        if ($materialDatanum > $copywritingDatanum && $materialDatanum > 4){
+            $randcopywriting = true;
+        }
+
         for ($i = 0; $i < $videoCount; $i++) {
             $number = random_int(1, 20);
             $music =  config('app.app_host') . '/static/audio/music/' . $number . '.mp3';
@@ -284,6 +292,22 @@ class ShanjianVideoSettingLogic extends ApiLogic
             }else{
                 $clip_id =  $clipData[$i % count($clipData)]['clip_template_id'] ??  $clip_template_id[$clip];
             }
+            $material = json_encode($materialData, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+            if ($randcopywriting){
+                $numberOfItems = rand(3, 4);
+                $randomKeys = array_rand($materialData, $numberOfItems);
+                if (is_array($randomKeys)) {
+                    // 如果抽取多个元素
+                    $material = array_intersect_key($materialData, array_flip($randomKeys));
+                } else {
+                    // 如果抽取一个元素
+                    $material = [$materialData[$randomKeys]];
+                }
+                $material = array_values($material);
+                $material = json_encode($material, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+            }
+
             $taskItem = [
                 'name' => ($params['name'] ?? '视频设置'.date('YmdHi')) . '_' . ($i + 1),
                 'pic' => $anchorData[$i % count($anchorData)]['pic'] ?? '',
@@ -298,7 +322,7 @@ class ShanjianVideoSettingLogic extends ApiLogic
                 'card_introduced' => $characterDesignData[0]['introduced'] ?? '',
                 'title' => $copywritingData[$i % count($copywritingData)]['title'] ?? '',
                 'msg' => $copywritingData[$i % count($copywritingData)]['content'] ?? '',
-                'material' => json_encode($materialData, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
+                'material' =>$material,
                 'music_url' => $music_url,
                 'clip_id' => $clip_id,
                 'extra' => json_encode([

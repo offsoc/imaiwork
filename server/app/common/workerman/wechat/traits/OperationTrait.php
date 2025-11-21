@@ -246,13 +246,37 @@ trait OperationTrait
                             'published_count' => Db::raw('published_count+1'),
                         ]);
                     }
+                    $task = SvDeviceTask::where('sub_data_id', $record['id'])->where('device_code', $record['device_code'])->where('task_type', 1)->findOrEmpty();
+                    if (!$task->isEmpty()) {
+                        $task->status = $status === 1 ? 2 : 3;
+                        $task->remark = $remark;
+                        $task->update_time = time();
+                        $task->save();
 
-                    SvDeviceTask::where('sub_task_id', $record['id'])->where('device_code', $record['device_code'])->where('task_type', 1)->update([
-                        'status' => $status === 1 ? 2 : 3,
-                        'remark' => $remark,
-                        'update_time' => time(),
-                    ]);
+                        $payload = array(
+                            'appType' => 1,
+                            'messageId' => 0,
+                            'type' => 61,
+                            'deviceId' => $task->device_code,
+                            'appVersion' => '2.4.0',
+                            'content' => json_encode([
+                                'deviceId' => $task->device_code,
+                                'taskId' => $task->id,
+                                'msg' => '执行视频号发布,拉起app',
 
+                            ], JSON_UNESCAPED_UNICODE)
+                        );
+                        $channel = "device.{$task->device_code}.message";
+                        \Channel\Client::connect('127.0.0.1', 2206);
+                        \Channel\Client::publish($channel, [
+                            'data' => json_encode($payload)
+                        ]);
+
+                        $this->withChannel('wechat_socket')->withLevel('cron')->withTitle('SphPostTaskOpt Rpa Notice')->withContext([
+                            'data' => $payload,
+                            'msg' => '发布完成通知rpa'
+                        ])->log();
+                    }
                     SvPublishSetting::where('id', $record['publish_id'])->update([
                         'update_time' => time(),
                         'status' => 2,

@@ -49,16 +49,18 @@ export enum ListenerTypeEnum {
     CHOOSE_STYLES = "choose-styles",
     // 选择背景音乐
     CHOOSE_MUSIC = "choose-music",
-    // 混剪形象
-    MONTAGE_ANCHOR = "montage-anchor",
+    // 形象
+    VIDEO_UPLOAD = "video-upload",
     // 选择混剪形象
-    CHOOSE_MONTAGE_ANCHOR = "choose-montage-anchor",
+    CREATE_ANCHOR = "create-anchor",
     // 混剪授权
-    MONTAGE_AUTH = "montage-auth",
+    ANCHOR_AUTH = "anchor-auth",
     // 上传授权相机
     UPLOAD_AUTH_CAMERA = "upload-auth-camera",
     // 混剪口播文案
     MONTAGE_COPYWRITER = "montage-copywriter",
+    // 混剪口播文案（AI）
+    MONTAGE_AI_COPYWRITER = "montage-ai-copywriter",
     // 账号
     CHOOSE_ACCOUNT = "choose-account",
 }

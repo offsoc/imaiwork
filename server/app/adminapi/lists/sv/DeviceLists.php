@@ -59,8 +59,8 @@ class DeviceLists extends BaseAdminDataLists implements ListsSearchInterface
     public function setSearch(): array
     {
         return [
-            '=' => ['d.device_code'],
-            '%like%' => ['u.nickname']
+            '=' => [],
+            '%like%' => ['u.nickname','d.device_code']
         ];
     }
  

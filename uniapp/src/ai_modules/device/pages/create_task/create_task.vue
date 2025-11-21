@@ -174,7 +174,7 @@
                                 <view class="font-bold mt-[26rpx]">
                                     {{ item.content }}
                                 </view>
-                                <view class="mt-[50rpx] flex flex-wrap gap-2">
+                                <view class="mt-[50rpx] flex items-center flex-wrap gap-2">
                                     <view
                                         v-for="(tag, tindex) in item.topic"
                                         :key="tindex"
@@ -345,8 +345,6 @@ const showVideoUploadTip = ref<boolean>(false);
 const showVideoUploadProgress = ref<boolean>(false);
 // 视频上传限制
 const videoLimit = 99;
-// 视频时长
-const videoDuration = [1, 60];
 // 视频上传大小
 const videoSize = 100;
 // 视频上传格式
@@ -377,9 +375,7 @@ const getTitle = computed(() => {
 
 const getVideoTipsContent = computed<string>(() => {
     return `
-        <div>· 视频素材支持：${videoFormat.join("、")}格式，${videoSize}M以内，时长范围${videoDuration[0]}s-${
-        videoDuration[1]
-    }s</div>
+        <div>· 视频素材支持：${videoFormat.join("、")}格式，${videoSize}M以内</div>
     <div class="mt-2">· 最多可传${videoLimit}个视频</div>
     <div class="mt-2">· 不符合条件的视频会被自动删除</div>
     `;
@@ -479,11 +475,6 @@ const handleVideoUpload = async () => {
         });
         const fileList = [];
         for (const file of tempFiles) {
-            const durationOk = file.duration >= videoDuration[0] && file.duration <= videoDuration[1];
-            if (!durationOk) {
-                uni.$u.toast(`视频时长不能超过${videoDuration[1]}秒`);
-                continue;
-            }
             if (file.size > videoSize * 1024 * 1024) {
                 uni.$u.toast(`视频大小不能超过${videoSize}M`);
                 continue;

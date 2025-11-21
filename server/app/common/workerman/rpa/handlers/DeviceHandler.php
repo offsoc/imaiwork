@@ -311,21 +311,37 @@ class DeviceHandler extends BaseMessageHandler
 
             $userId = SvDevice::where('device_code', $this->payload['deviceId'])->value('user_id');
             if ($userId) {
-                $uid = $this->service->getRedis()->get("xhs:user:{$userId}");
-                if ($uid) {
-                    $message = array(
-                        'messageId' => $uid,
-                        'type' => WorkerEnum::WEB_DEVICE_ONLINE_TEXT,
-                        'appType' => 3,
-                        'deviceId' => $this->payload['deviceId'],
-                        'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
-                        'code' => $this->payload['code'],
-                        'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
-                    );
-                    $this->sendResponse($uid,  $message,  $message['reply']);
-                } else {
-                    $this->setLog('web客户端不存在:' .  $userId, 'error');
+                $sources = WorkerEnum::WS_SOURCES;
+                foreach ($sources as $source) {
+                    $uid = $this->service->getRedis()->get("xhs:user:{$source}:{$userId}");
+                    if ($uid) {
+                        $message = array(
+                            'messageId' => $uid,
+                            'type' => WorkerEnum::WEB_DEVICE_ONLINE_TEXT,
+                            'appType' => 3,
+                            'deviceId' => $this->payload['deviceId'],
+                            'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+                            'code' => $this->payload['code'],
+                            'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
+                        );
+                        $this->sendResponse($uid,  $message,  $message['reply']);
+                    }
                 }
+                // $uid = $this->service->getRedis()->get("xhs:user:pc:{$userId}") ?? $this->service->getRedis()->get("xhs:user:wmprog:{$userId}");
+                // if ($uid) {
+                //     $message = array(
+                //         'messageId' => $uid,
+                //         'type' => WorkerEnum::WEB_DEVICE_ONLINE_TEXT,
+                //         'appType' => 3,
+                //         'deviceId' => $this->payload['deviceId'],
+                //         'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+                //         'code' => $this->payload['code'],
+                //         'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
+                //     );
+                //     $this->sendResponse($uid,  $message,  $message['reply']);
+                // } else {
+                //     $this->setLog('web客户端不存在:' .  $userId, 'error');
+                // }
             }
         } catch (\Exception $e) {
             $this->setLog('_sendWeb' . $e, 'error');

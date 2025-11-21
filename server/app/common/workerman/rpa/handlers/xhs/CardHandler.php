@@ -231,24 +231,43 @@ class CardHandler extends BaseMessageHandler
     {
         try {
             $userId = $this->userId;
-            $uid = $this->service->getRedis()->get("xhs:user:{$userId}");
-            if ($uid) {
-                $message = array(
-                    'messageId' => $uid,
-                    'type' => $content['type'],
-                    'appType' => $this->payload['appType'] ?? 3,
-                    'deviceId' => $this->payload['deviceId'],
-                    'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
-                    'code' => WorkerEnum::SUCCESS_CODE,
-                    'reply' => $content['reply']
-                );
+            $sources = WorkerEnum::WS_SOURCES;
+            foreach ($sources as $source) {
+                $uid = $this->service->getRedis()->get("xhs:user:{$source}:{$userId}");
+                if ($uid) {
+                    $message = array(
+                        'messageId' => $uid,
+                        'type' => $content['type'],
+                        'appType' => $this->payload['appType'] ?? 3,
+                        'deviceId' => $this->payload['deviceId'],
+                        'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+                        'code' => WorkerEnum::SUCCESS_CODE,
+                        'reply' => $content['reply']
+                    );
 
-                $this->sendResponse($uid,  $message,  $message['reply']);
-                $message['sendTo'] = 'web';
-                $this->setLog($message, 'card');
-            } else {
-                $this->setLog('web客户端连接未找到:' . $userId, 'card');
+                    $this->sendResponse($uid,  $message,  $message['reply']);
+                    $message['sendTo'] = 'web';
+                    $this->setLog($message, 'card');
+                }
             }
+            // $uid = $this->service->getRedis()->get("xhs:user:pc:{$userId}") ?? $this->service->getRedis()->get("xhs:user:wmprog:{$userId}");
+            // if ($uid) {
+            //     $message = array(
+            //         'messageId' => $uid,
+            //         'type' => $content['type'],
+            //         'appType' => $this->payload['appType'] ?? 3,
+            //         'deviceId' => $this->payload['deviceId'],
+            //         'appVersion' => $this->payload['appVersion'] ?? WorkerEnum::APP_VERSION,
+            //         'code' => WorkerEnum::SUCCESS_CODE,
+            //         'reply' => $content['reply']
+            //     );
+
+            //     $this->sendResponse($uid,  $message,  $message['reply']);
+            //     $message['sendTo'] = 'web';
+            //     $this->setLog($message, 'card');
+            // } else {
+            //     $this->setLog('web客户端连接未找到:' . $userId, 'card');
+            // }
         } catch (\Exception $e) {
             $this->setLog('_sendWeb' . $e, 'error');
         }

@@ -4,7 +4,7 @@
             <ElBreadcrumb>
                 <ElBreadcrumbItem>
                     <span class="cursor-pointer text-[#8A8C99] hover:text-primary" @click="$router.back()">
-                        智能体
+                        AI终端
                     </span>
                 </ElBreadcrumbItem>
                 <ElBreadcrumbItem>账号设置</ElBreadcrumbItem>
@@ -60,7 +60,7 @@
                         <div
                             v-for="(item, index) in getSocialPlatformList"
                             :key="index"
-                            class="flex items-center gap-x-3 px-4 hover:bg-primary-light-9 py-1.5 rounded-lg cursor-pointer"
+                            class="flex items-center gap-x-3 px-4 hover:bg-primary-light-9 py-1.5 cursor-pointer"
                             :class="{
                                 'bg-primary-light-9': currentSocialPlatform === item.type,
                             }"
@@ -228,7 +228,6 @@ const {
     progressValue,
     handleAddAccount: addAccount,
     refreshAccount,
-    handleAddDeviceConfirm,
     handleRefreshAccount,
 } = useAddDeviceAccount({
     send,
@@ -240,9 +239,7 @@ const {
                 showProgress.value = false;
                 getLists();
                 break;
-            case DeviceCmdEnum.GET_BUSINESS_CARD:
-                handleAddBusinessCard(data.content);
-                break;
+
             case DeviceCmdEnum.OPEN_APP:
             case DeviceCmdEnum.OPEN_PERSON_CENTER:
             case DeviceCmdEnum.GET_ACCOUNT_INFO:
@@ -263,6 +260,11 @@ const {
     },
 });
 
+const handleAddDeviceConfirm = async () => {
+    await getDeviceList();
+    getLists();
+};
+
 const isRefreshData = ref(false);
 const refreshData = async () => {
     if (isRefreshData.value) return;
@@ -279,27 +281,6 @@ const refreshData = async () => {
     } finally {
         isRefreshData.value = false;
     }
-};
-
-// 添加名卡
-const handleAddBusinessCard = async (content: string) => {
-    const { account, account_no } = currAccount.value;
-    try {
-        await addMaterial({
-            account,
-            account_no: account_no || account,
-            type: currentSocialPlatform.value,
-            content: JSON.stringify(content),
-            m_type: 5,
-            sort: 0,
-        });
-        getLists();
-        feedback.msgSuccess("添加成功");
-    } catch (error) {
-        feedback.msgError(error);
-    }
-    currAccount.value = null;
-    feedback.closeLoading();
 };
 
 const tableRef = ref<any>(null);

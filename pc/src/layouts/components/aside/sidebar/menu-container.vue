@@ -53,7 +53,13 @@ const tools = ref<Tools[]>([
         link: "/staff",
         is_new: false,
     },
-
+    {
+        id: ToolEnum.AID,
+        name: ToolEnumMap[ToolEnum.AID],
+        icon: "menu_auto_customer",
+        link: "/robot",
+        is_new: false,
+    },
     {
         id: ToolEnum.DATABASE,
         name: ToolEnumMap[ToolEnum.DATABASE],
@@ -84,7 +90,7 @@ const initActiveMenu = (path: string) => {
 const setActiveMenu = (path: string) => {
     // 使用路径前缀映射来简化路由匹配逻辑
     const pathPrefixMap = {
-        "/app": "/",
+        "/app": "/staff",
         "/robot": "/robot/aid",
         "/knowledge_base": "/knowledge_base",
         "/device": "/device",

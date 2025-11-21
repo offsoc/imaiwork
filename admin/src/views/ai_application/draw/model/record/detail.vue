@@ -1,12 +1,5 @@
 <template>
-    <popup
-        ref="popupRef"
-        title="生成详情"
-        width="700px"
-        confirm-button-text=""
-        cancel-button-text=""
-        style="padding: 0px"
-        @close="close">
+    <popup ref="popupRef" title="生成详情" width="700px" confirm-button-text="" cancel-button-text="" @close="close">
         <div class="flex flex-col gap-2">
             <div>
                 <div class="text-lg font-bold mb-2">创作时间</div>

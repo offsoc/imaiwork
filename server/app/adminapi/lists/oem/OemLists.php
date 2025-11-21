@@ -29,9 +29,13 @@ class OemLists extends BaseAdminDataLists implements ListsSearchInterface
             ->select()
             ->each(function ($item) {
                 $item['logo_url'] =  FileService::getFileUrl($item['logo_url']);
+                $item['site_logo'] = is_null($item['site_logo']) ? '' : FileService::getFileUrl($item['site_logo']);
                 return $item;
             })
             ->toArray();
+
+
+            
     }
     /**
      * @notes  获取数量

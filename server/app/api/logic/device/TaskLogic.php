@@ -96,7 +96,7 @@ class TaskLogic extends ApiLogic
         $query = SvDeviceTask::where('device_code', $deviceCode)->where('user_id', $userId)->where('start_time', '<', $endTime)->where('end_time', '>', $startTime);
 
         $find = $query->findOrEmpty();
-        
+
         if ($find->isEmpty()) {
             return [true, []];
         }
@@ -159,7 +159,7 @@ class TaskLogic extends ApiLogic
         return $resTimes;
     }
 
-    public static function statistics($day,$device_code)
+    public static function statistics($day, $device_code)
     {
         if (!$day) {
             $day = date('Y-m-d');
@@ -246,7 +246,7 @@ class TaskLogic extends ApiLogic
                     $start_time = date('Y-m-d H:i:s', $task['start_time']);
                     $end_time = date('Y-m-d H:i:s', $task['end_time']);
                     SvPublishSettingAccount::where('id', $taskinfo['id'])->where('user_id', self::$uid)->select()->delete();
-                    SvPublishSettingDetail::where('publish_id', $taskinfo['publish_id'])->where('publish_account_id',$taskinfo['id'])->where('publish_time','between',[$start_time,$end_time])->where('user_id', self::$uid)->select()->delete();
+                    SvPublishSettingDetail::where('publish_id', $taskinfo['publish_id'])->where('publish_account_id', $taskinfo['id'])->where('publish_time', 'between', [$start_time, $end_time])->where('user_id', self::$uid)->select()->delete();
                     break;
 
                 case DeviceEnum::TASK_SOURCE_TAKEOVER:
@@ -266,12 +266,12 @@ class TaskLogic extends ApiLogic
                         throw new \Exception('养号任务不存在');
                     }
 
-                   $count = SvDeviceActive::where('id', $taskinfo['active_id'])->where('user_id', self::$uid)->count();
-                   if ($count) {
-                       SvDeviceActive::where('id', $taskinfo['active_id'])->select()->delete();
-                   }
+                    $count = SvDeviceActive::where('id', $taskinfo['active_id'])->where('user_id', self::$uid)->count();
+                    if ($count) {
+                        SvDeviceActive::where('id', $taskinfo['active_id'])->select()->delete();
+                    }
                     SvDeviceActiveAccount::where('id', $taskinfo['id'])->select()->delete();
-                   
+
                     break;
 
                 case DeviceEnum::TASK_SOURCE_FRIENDS:
@@ -289,6 +289,31 @@ class TaskLogic extends ApiLogic
                     if (!$taskinfo) {
                         throw new \Exception('爬取任务不存在');
                     }
+                    $deviceIds = json_decode($taskinfo['device_codes'], true);
+                    \Channel\Client::connect('127.0.0.1', 2206);
+                    foreach ($deviceIds as $_deviceId) {
+                        $isRun = SvDeviceTask::where('sub_task_id', $params['sub_task_id'])->where('device_code', $_deviceId)->where('task_type', 4)->where('status', 1)->findOrEmpty();
+                        if (!$isRun->isEmpty()) {
+                            $data = array(
+                                'type' => 22,
+                                'appType' => DeviceEnum::ACCOUNT_TYPE_SPH,
+                                'content' => json_encode(array(
+                                    'task_id' => $params['sub_task_id'],
+                                    'deviceId' => $_deviceId,
+                                    'msg' => '任务删除'
+
+                                ), JSON_UNESCAPED_UNICODE),
+                                'deviceId' => $_deviceId,
+                                'appVersion' => '2.1.1',
+                                'messageId' => 0,
+                            );
+
+                            $channel = "device.{$_deviceId}.message";
+                            \Channel\Client::publish($channel, [
+                                'data' => json_encode($data)
+                            ]);
+                        }
+                    }
                     SvCrawlingTask::where('id', $params['sub_task_id'])->select()->delete();
                     SvCrawlingTaskDeviceBind::where('task_id', $params['sub_task_id'])->select()->delete();
                     break;
@@ -297,7 +322,6 @@ class TaskLogic extends ApiLogic
 
                     throw new \Exception('参数错误');
                     break;
-
             }
 
             SvDeviceTask::Where('id', $params['id'])->where('user_id', self::$uid)->delete();
@@ -306,9 +330,7 @@ class TaskLogic extends ApiLogic
         } catch (\Exception $e) {
             Db::rollback();
             throw new \Exception($e->getMessage());
-
         }
-
     }
 
 
@@ -337,12 +359,14 @@ class TaskLogic extends ApiLogic
                     }
                     $start_time = date('Y-m-d H:i:s', $task['start_time']);
                     $end_time = date('Y-m-d H:i:s', $task['end_time']);
-                    $detail =  SvPublishSettingDetail::where('publish_id', $taskinfo['publish_id']) ->where('user_id', self::$uid)
-                        ->where('publish_account_id', $taskinfo['id'])->where('publish_time','between',[$start_time,$end_time])->findOrEmpty()->toArray();
+                    $detail =  SvPublishSettingDetail::where('publish_id', $taskinfo['publish_id'])->where('user_id', self::$uid)
+                        ->where('publish_account_id', $taskinfo['id'])->where('publish_time', 'between', [$start_time, $end_time])->findOrEmpty()->toArray();
                     if ($detail) {
-                        if (trim($detail['material_tag'])){
+                        $material_tag = $detail['material_tag'] = trim($detail['material_tag']);
+                        if ($material_tag && !empty($material_tag)) {
                             $detail['material_tag'] =  explode(",", $detail['material_tag']);;
                         }
+                        $detail['name'] =  $taskinfo['name'] ?? '';
                         $task['detail'] = $detail;
                     }
                     break;
@@ -363,6 +387,7 @@ class TaskLogic extends ApiLogic
                     }
                     $detail = SvDeviceActive::where('id', $taskinfo['active_id'])->findOrEmpty()->toArray();
                     if ($detail) {
+                        $detail['name'] =  $detail['task_name'] ?? '';
                         $task['detail'] = $detail;
                     }
                     break;
@@ -373,9 +398,10 @@ class TaskLogic extends ApiLogic
                     if (!$taskinfo) {
                         throw new \Exception('自动加好友任务不存在');
                     }
-                  
+
                     $detail = SvCrawlingManualTask::where('id', $params['sub_task_id'])->findOrEmpty()->toArray();
                     if ($detail) {
+                        $detail['name'] =  $taskinfo['name'] ?? '';
                         $task['detail'] = $detail;
                     }
                     break;
@@ -387,8 +413,8 @@ class TaskLogic extends ApiLogic
                         throw new \Exception('爬取任务不存在');
                     }
                     $detail = SvCrawlingTaskDeviceBind::where('task_id', $taskinfo['id'])->where('device_code', $task['device_code'])->findOrEmpty()->toArray();
-                    $task['detail'] = '';
                     if ($detail) {
+                        $detail['name'] =  $taskinfo['name'] ?? '';
                         $detail['keywords'] = json_decode($detail['keywords'], true);
                         $task['detail'] = $detail;
                     }
@@ -398,36 +424,33 @@ class TaskLogic extends ApiLogic
 
                     throw new \Exception('参数错误');
                     break;
-
             }
 
             $task['device_info'] = SvDevice::where('device_code', $task['device_code'])->findOrEmpty()->toArray();
 
 
-            if ($task['account_type'] == 1){
+            if ($task['account_type'] == 1) {
 
                 $where = [
-                    'device_code'=>  $task['device_info']['wechat_device_code'],
+                    'device_code' =>  $task['device_info']['wechat_device_code'],
                     'wechat_id' => $task['account']
                 ];
                 $account_info =  AiWechat::where($where)->findOrEmpty()->toArray();
                 if (!$account_info) {
                     $task['account_info'] = '';
-
-                }else{
+                } else {
                     $task['account_info'] = $account_info;
                 }
-            }else{
+            } else {
                 $where = [
-                    'device_code'=> $task['device_code'],
+                    'device_code' => $task['device_code'],
                     'account' => $task['account']
                 ];
                 $task['account_info'] = SvAccount::where($where)->findOrEmpty()->toArray();
-
             }
             $task['task_category'] = DeviceEnum::getAccountTypeDesc($task['account_type']) . DeviceEnum::getTaskTypeDesc($task['task_type']);
-            $task['start_time'] = date('H:i',$task['start_time']);
-            $task['end_time'] = date('H:i',$task['end_time']);
+            $task['start_time'] = date('H:i', $task['start_time']);
+            $task['end_time'] = date('H:i', $task['end_time']);
             self::$returnData = $task;
             return true;
         } catch (\Exception $e) {
@@ -469,7 +492,7 @@ class TaskLogic extends ApiLogic
                     if (!$taskinfo) {
                         throw new \Exception('接管任务不存在');
                     }
-                    $name =  $params['name'] ?? '接管任务' ;
+                    $name =  $params['name'] ?? '接管任务';
                     SvDeviceTakeOverTask::where('id', $taskinfo['take_over_id'])->update(['name' => $name]);
                     break;
 
@@ -511,7 +534,6 @@ class TaskLogic extends ApiLogic
 
                     throw new \Exception('参数错误');
                     break;
-
             }
 
             Db::commit();
@@ -519,9 +541,6 @@ class TaskLogic extends ApiLogic
         } catch (\Exception $e) {
             Db::rollback();
             throw new \Exception($e->getMessage());
-
         }
-
     }
-
 }

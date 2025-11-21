@@ -53,6 +53,7 @@ class OemLogic extends BaseLogic
             $params['name'] = $params['name'] ?? 1;
             $params['update_time'] = time();
             $params['logo_url'] = $params['logo_url'] ? FileService::setFileUrl($params['logo_url']) : '';
+            $params['site_logo'] = $params['site_logo'] ? FileService::setFileUrl($params['site_logo']) : '';
             $params['username'] = User::where('id', $params['user_id'])->value('nickname');
             
             //更新oem数量
@@ -80,7 +81,7 @@ class OemLogic extends BaseLogic
     {
         try {
             //检查当前域名是否有配置oem权限
-            self::checkOem();
+            self::checkOem(false);
 
             $oemRow = Oem::where('id', $params['id'])->findOrEmpty();
             if ($oemRow->isEmpty()) {
@@ -100,6 +101,7 @@ class OemLogic extends BaseLogic
             }
             $params['update_time'] = time();
             $params['logo_url'] = $params['logo_url'] ? FileService::setFileUrl($params['logo_url']) : '';
+            $params['site_logo'] = $params['site_logo'] ? FileService::setFileUrl($params['site_logo']) : '';
             $params['username'] = User::where('id', $params['user_id'])->value('nickname');
             Oem::update($params);
             return true;
@@ -145,6 +147,7 @@ class OemLogic extends BaseLogic
     {
         $result = Oem::findOrEmpty($params['id'])->toArray();
         $result['logo_url'] = FileService::getFileUrl($result['logo_url']);
+        $result['site_logo'] = is_null($result['site_logo']) ? '' : FileService::getFileUrl($result['site_logo']);
         return $result;
     }
 
@@ -167,7 +170,7 @@ class OemLogic extends BaseLogic
         return true;
     }
 
-    private static function checkOem(){
+    private static function checkOem($isCheck = true){
         $result =  \app\common\service\ToolsService::Auth()->checkby();
         if(!isset($result['authnum'])){
             throw new \Exception('当前站点域名未授权配置OEM');
@@ -179,7 +182,7 @@ class OemLogic extends BaseLogic
             return false;
         }
         $useauthnum = Oem::count();;
-        if((int)$useauthnum === (int)$result['authnum']){
+        if((int)$useauthnum === (int)$result['authnum'] && $isCheck){
             throw new \Exception('当前站点域名配置OEM余额不足');
             return false;
         }

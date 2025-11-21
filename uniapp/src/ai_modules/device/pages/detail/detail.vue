@@ -79,7 +79,7 @@
                     :list="taskList"
                     v-if="taskList.length > 0"
                     @delete="handleUpdateSelectedDate"
-                    @update-name="handleUpdateSelectedDate" />
+                    @update-name="handleUpdateTaskName" />
                 <view v-else>
                     <empty text="暂无任务" />
                 </view>
@@ -274,6 +274,14 @@ const handleUpdateSelectedDate = () => {
     isLoading.value = false;
     getTaskList();
     getStatistics();
+};
+
+const handleUpdateTaskName = (data: any) => {
+    taskList.value.forEach((item) => {
+        if (item.id == data.id) {
+            item.name = data.name;
+        }
+    });
 };
 
 const getStatistics = async () => {

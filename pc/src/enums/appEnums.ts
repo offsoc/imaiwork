@@ -76,6 +76,7 @@ export enum ToolEnum {
 export const ToolEnumMap = {
     [ToolEnum.CHAT]: "工作台",
     [ToolEnum.STAFF]: "AI员工",
+    [ToolEnum.AID]: "岗位员工",
     [ToolEnum.DATABASE]: "AI知识库",
     [ToolEnum.DEVICE]: "AI终端",
     [ToolEnum.AGENT]: "AI智能体",
@@ -263,16 +264,18 @@ export enum AppKeyEnum {
     DRAW_VIDEO = "draw_video",
     DRAW_IMAGE = "draw_image",
     MATRIX = "matrix",
+    OFFICE = "office",
+    MATRIX_PUBLISH = "matrix_publish",
 }
 
-export const appKeyNameMap: Record<AppKeyEnum, string> = {
+export const appKeyNameMap = {
     [AppKeyEnum.LADDER_PLAYER]: "AI员工陪练",
     [AppKeyEnum.INTERVIEW]: "AI面试",
     [AppKeyEnum.MEETING_MINUTES]: "AI智能会议",
     [AppKeyEnum.MIND_MAP]: "AI思维导图",
     [AppKeyEnum.DOUBYIN]: "智能抖音",
     [AppKeyEnum.KUAISHOU]: "智能快手",
-    [AppKeyEnum.SPH]: "AI主动获客",
+    [AppKeyEnum.SPH]: "AI视频号获客",
     [AppKeyEnum.REDBOOK]: "AI被动获客",
     [AppKeyEnum.PERSON_WECHAT]: "AI金牌销售",
     [AppKeyEnum.TELEMARKETING]: "AI电销",
@@ -295,6 +298,7 @@ export const appKeyNameMap: Record<AppKeyEnum, string> = {
     [AppKeyEnum.DRAW_VIDEO]: "AI视频",
     [AppKeyEnum.DRAW_IMAGE]: "AI智能生图",
     [AppKeyEnum.MATRIX]: "矩阵发布",
+    [AppKeyEnum.OFFICE]: "AI office",
 };
 
 // 模型ID

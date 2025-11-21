@@ -130,7 +130,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             $result['device_codes'] = json_decode($result['device_codes'], JSON_UNESCAPED_UNICODE);
             $result['keywords'] = json_decode($result['keywords'], JSON_UNESCAPED_UNICODE);
 
-            self::setOldTaskStatus($task->id);
+            //self::setOldTaskStatus($task->id);
 
             \app\api\logic\device\TaskLogic::add($allTaskInstall);
 
@@ -182,8 +182,9 @@ class CrawlingTaskLogic extends SvBaseLogic
             $result = $task->toArray();
             $result['device_codes'] = json_decode($result['device_codes'], JSON_UNESCAPED_UNICODE);
             $result['keywords'] = json_decode($result['keywords'], JSON_UNESCAPED_UNICODE);
-            $result['crawl_number'] = SvCrawlingRecord::where('task_id', $task['id'])->where('reg_content', 'not in', ['', null])->group('reg_content')->count();
 
+            $reg_content = SvCrawlingRecord::where('task_id', $result['id'])->where('reg_content', '<>', '')->group('reg_content')->column('reg_content');
+            $result['crawl_number'] = $reg_content ? count(explode(",", implode(",", $reg_content))) : 0;
             self::$returnData = $result;
             return true;
         } catch (\Exception $e) {

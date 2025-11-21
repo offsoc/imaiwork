@@ -50,7 +50,7 @@
                             :key="index"
                             @click="handleEditTask(item)">
                             <div class="absolute right-2 top-2 w-6 h-6" @click.stop="handleDeleteTask(item.id, index)">
-                                <close-btn></close-btn>
+                                <close-btn :theme="ThemeEnum.DARK"></close-btn>
                             </div>
                             <div
                                 class="flex-shrink-0 w-[143px] border border-app-border-2 overflow-hidden rounded-md bg-black">
@@ -115,6 +115,7 @@
 <script setup lang="ts">
 import { getDigitalHumanList, deleteDigitalHuman } from "@/api/redbook";
 import Empty from "@/pages/app/matrix/_components/empty.vue";
+import { ThemeEnum } from "@/enums/appEnums";
 import { SidebarTypeEnum } from "@/pages/app/matrix/_enums";
 import CreatePanel from "./_components/create-panel.vue";
 import PreviewVideoResult from "./_components/preview-video-result.vue";

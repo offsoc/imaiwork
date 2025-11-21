@@ -16,10 +16,10 @@
             ],
         }">
         <template #reference>
-            <div>
+            <div class="rounded-full border border-[#EBEBEB]">
                 <ElTooltip content="参数微调" placement="top">
-                    <div class="p-2 rounded-2xl hover:bg-[#F6F6F6] cursor-pointer">
-                        <Icon name="local-icon-setting3" :size="18" color="#333333"></Icon>
+                    <div class="p-2 rounded-2xl hover:bg-[#00000008] cursor-pointer">
+                        <Icon name="local-icon-setting3" :size="14" color="#333333"></Icon>
                     </div>
                 </ElTooltip>
             </div>

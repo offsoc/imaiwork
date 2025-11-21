@@ -53,6 +53,7 @@ const currModel = ref();
 const chooseModel = (id: string | number) => {
     currModel.value = id;
     emit("confirm", id);
+    showPopup.value = false;
 };
 </script>
 

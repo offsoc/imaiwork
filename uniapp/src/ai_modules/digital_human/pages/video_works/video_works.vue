@@ -33,10 +33,15 @@
                         v-for="(item, index) in dataLists"
                         :key="index">
                         <view class="flex justify-between items-center">
-                            <view>
+                            <view class="">
                                 <view class="font-bold"> 视频名称 </view>
-                                <view class="text-[#0000007F] mt-[12rpx]">
-                                    {{ item.name }}
+                                <view class="flex items-center gap-x-2">
+                                    <view class="text-[#0000007F] mt-[12rpx]">
+                                        {{ item.name }}
+                                    </view>
+                                    <view class="p-1" @click="handleEdit(index)">
+                                        <image src="/static/images/icons/edit_pen.svg" class="w-4 h-4"></image>
+                                    </view>
                                 </view>
                             </view>
                             <view
@@ -59,7 +64,7 @@
                                 <view
                                     class="w-full h-full flex items-center justify-center gap-1 text-center px-2 text-white">
                                     <view
-                                        class="rounded-full bg-[#ffffff33] w-[48rpx] h-[48rpx]"
+                                        class="rounded-full bg-[#ffffff33] w-[68rpx] h-[68rpx]"
                                         style="backdrop-filter: blur(5px)"
                                         @click="handlePlay(item)">
                                         <image src="/static/images/icons/play.svg" class="w-full h-full"></image>
@@ -133,10 +138,35 @@
         :video-url="playItem.url"
         :poster="playItem.pic"
         @update:show="showVideoPreview = false"></video-preview-v2>
+    <u-popup v-model="shoeEditPopup" mode="center" width="90%" :border-radius="20">
+        <view class="p-4 bg-white rounded-[20rpx]">
+            <view class="text-[30rpx] font-bold text-center mt-2">编辑名称</view>
+            <view class="mt-[48rpx] bg-[#F3F3F3] px-4 py-2 rounded-[16rpx]">
+                <u-input
+                    v-model="newName"
+                    placeholder="请输入名称"
+                    maxlength="30"
+                    clearable
+                    placeholder-style="color: #0000004d; font-size: 26rpx;" />
+            </view>
+            <view class="flex items-center gap-x-5 mt-[56rpx]">
+                <view
+                    class="flex-1 h-[90rpx] flex items-center justify-center rounded-[12rpx] bg-[#F3F3F3] font-bold text-[#000000b3]"
+                    @click="shoeEditPopup = false">
+                    取消
+                </view>
+                <view
+                    class="flex-1 h-[90rpx] flex items-center justify-center rounded-[12rpx] bg-black font-bold text-white"
+                    @click="handleEditConfirm"
+                    >确定</view
+                >
+            </view>
+        </view>
+    </u-popup>
 </template>
 
 <script setup lang="ts">
-import { digitalHumanLists, deleteDigitalHuman } from "@/api/digital_human";
+import { digitalHumanLists, deleteDigitalHuman, updateDigitalHuman } from "@/api/digital_human";
 import { saveVideoToPhotosAlbum } from "@/utils/file";
 import VideoPreviewV2 from "@/ai_modules/digital_human/components/video-preview-v2/video-preview-v2.vue";
 
@@ -163,6 +193,47 @@ const queryList = async (page_no: number, page_size: number) => {
         pagingRef.value?.complete(lists);
     } catch (error) {
         pagingRef.value?.complete([]);
+    }
+};
+
+const editIndex = ref<number>(-1);
+const newName = ref<string>("");
+const shoeEditPopup = ref(false);
+
+const handleEdit = (index: number) => {
+    editIndex.value = index;
+    newName.value = dataLists.value[index].name;
+    shoeEditPopup.value = true;
+};
+
+const handleEditConfirm = async () => {
+    if (!newName.value) {
+        uni.$u.toast("请输入名称");
+        return;
+    }
+    shoeEditPopup.value = false;
+    uni.showLoading({
+        title: "修改中...",
+        mask: true,
+    });
+    try {
+        await updateDigitalHuman({
+            id: dataLists.value[editIndex.value].id,
+            name: newName.value,
+        });
+        uni.hideLoading();
+        uni.showToast({
+            title: "修改成功",
+            icon: "none",
+            duration: 3000,
+        });
+        dataLists.value[editIndex.value].name = newName.value;
+    } catch (error: any) {
+        uni.showToast({
+            title: error || "修改失败",
+            icon: "none",
+            duration: 3000,
+        });
     }
 };
 

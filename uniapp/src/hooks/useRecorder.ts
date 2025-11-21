@@ -221,6 +221,10 @@ export const useRecorder = (callbacks?: callbacks, options?: Options) => {
         // isAuth.value = false
     };
 
+    const pause = () => {
+        mediaRecorder.value?.pause();
+    };
+
     onBeforeUnmount(() => {
         stop();
         close();
@@ -232,6 +236,7 @@ export const useRecorder = (callbacks?: callbacks, options?: Options) => {
         authorize,
         stop,
         close,
+        pause,
         resume,
     };
 };

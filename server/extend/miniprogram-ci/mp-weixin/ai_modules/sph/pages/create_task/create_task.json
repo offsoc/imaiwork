@@ -12,8 +12,9 @@
     "data-select": "../../../../components/data-select/data-select",
     "u-input": "../../../../uni_modules/vk-uview-ui/components/u-input/u-input",
     "u-button": "../../../../uni_modules/vk-uview-ui/components/u-button/u-button",
-    "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup",
     "u-line": "../../../../uni_modules/vk-uview-ui/components/u-line/u-line",
-    "confirm-dialog": "../../../../components/confirm-dialog/confirm-dialog"
+    "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup",
+    "confirm-dialog": "../../../../components/confirm-dialog/confirm-dialog",
+    "clue-edit": "../../components/clue-edit/clue-edit"
   }
 }

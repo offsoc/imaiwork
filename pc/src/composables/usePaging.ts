@@ -39,6 +39,7 @@ export function usePaging(options: Options) {
                 if (isScroll) {
                     pager.lists = isConcat ? pager.lists.concat(lists) : lists;
                     pager.isLoad = !(lists.length < (params.page_size || size));
+                    console.log(pager.isLoad);
                 } else {
                     pager.lists = lists;
                 }

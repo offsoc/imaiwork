@@ -68,9 +68,9 @@ const taskList = ref<any[]>([]);
 
 const selectedList = ref<number[]>([]);
 
-const queryList = async (pageNo: number, pageSize: number) => {
+const queryList = async (page_no: number, page_size: number) => {
     try {
-        const { lists } = await getTaskList({});
+        const { lists } = await getTaskList({ page_no, page_size });
         pagingRef.value.complete(lists);
     } catch (error) {
         pagingRef.value.complete([]);

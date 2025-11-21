@@ -230,6 +230,8 @@ const tokensValue = computed(() => {
         [DigitalHumanModelVersionEnum.ADVANCED]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_AVATAR_ADVANCED)
             ?.score,
         [DigitalHumanModelVersionEnum.ELITE]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_AVATAR_ELITE)?.score,
+        [DigitalHumanModelVersionEnum.CHANJING]: userStore.getTokenByScene(TokensSceneEnum.HUMAN_AVATAR_CHANJING)
+            ?.score,
     }[formData.model_version];
 });
 

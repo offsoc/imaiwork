@@ -242,7 +242,7 @@ button::after {
 }
 
 .rotation {
-    @apply w-8 h-8 border-[5px] border-dotted border-white rounded-full inline-block mb-4;
+    @apply w-5 h-5 border-[10rpx] border-dotted border-white rounded-full inline-block mb-2;
     animation: rotation 3s linear infinite;
 }
 @keyframes rotation {

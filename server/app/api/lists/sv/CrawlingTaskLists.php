@@ -33,7 +33,9 @@ class CrawlingTaskLists extends BaseApiDataLists implements ListsSearchInterface
             ->each(function ($item) {
                 $item['device_codes'] = json_decode($item['device_codes'], true);
                 $item['keywords'] = json_decode($item['keywords'], true);
-                $item['crawl_number'] = SvCrawlingRecord::where('task_id', $item['id'])->where('reg_content', '<>', '')->group('reg_content')->count();
+                $reg_content = SvCrawlingRecord::where('task_id', $item['id'])->where('reg_content', '<>', '')->group('reg_content')->column('reg_content');
+                $item['crawl_number'] = $reg_content ? count(explode(",", implode(",", $reg_content))) : 0;
+
 
                 if($item['status'] == 3 && $item['number_of_implemented_keywords'] < $item['implementation_keywords_number']){
                     $item['status'] = 4;

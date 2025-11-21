@@ -108,8 +108,8 @@ const props = withDefaults(
         maxSize: 100,
         videoMinResolution: null,
         videoMaxResolution: null,
-        videoMinDuration: 5,
-        videoMaxDuration: 600,
+        videoMinDuration: 0,
+        videoMaxDuration: 99999,
     }
 );
 

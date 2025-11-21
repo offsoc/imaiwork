@@ -30,9 +30,14 @@
         <el-card class="!border-none mt-4" shadow="never">
             <el-table size="large" v-loading="pager.loading" :data="pager.lists">
                 <el-table-column label="站点域名" prop="domain" min-width="200" />
+                <el-table-column label="站点LOGO" width="120">
+                    <template #default="{ row }">
+                        <image-contain :src="row.site_logo" width="32" height="32" radius="50%" fit="cover" />
+                    </template>
+                </el-table-column>
                 <el-table-column label="站点ICON" width="100">
                     <template #default="{ row }">
-                        <image-contain :src="row.logo_url" width="32" height="32" />
+                        <image-contain :src="row.logo_url" width="32" height="32" radius="50%"  />
                     </template>
                 </el-table-column>
                 <el-table-column label="站点标题" prop="name" min-width="160" />

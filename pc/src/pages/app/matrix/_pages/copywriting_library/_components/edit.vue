@@ -9,7 +9,7 @@
         @close="close">
         <div class="-my-4">
             <div class="absolute top-2 right-2 w-6 h-6" @click="close">
-                <close-btn :icon-size="12"></close-btn>
+                <close-btn :icon-size="12" :theme="ThemeEnum.DARK"></close-btn>
             </div>
             <div class="text-white text-2xl font-bold">重命名</div>
             <div class="mt-2">
@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { updateCopywritingLibrary } from "@/api/redbook";
+import { ThemeEnum } from "@/enums/appEnums";
 
 const emit = defineEmits(["success", "close"]);
 

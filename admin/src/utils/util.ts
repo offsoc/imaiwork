@@ -275,11 +275,11 @@ export const downloadHtml2Image = async (
  * @param {String} url  文件url
  * @param {String} name 下载的文件名称
  */
-export const download = (url: string, name: string) => {
+export const download = (url: string, name?: string) => {
     const aTag = document.createElement("a");
     document.body.appendChild(aTag);
     aTag.href = url;
-    aTag.download = name;
+    aTag.download = name || getNonDuplicateID();
     aTag.target = "_blank";
     aTag.click();
     aTag.remove();
@@ -298,3 +298,31 @@ export const isJson = (value: string) => {
         return false;
     }
 };
+
+/**
+ * 从给定的 URL 下载文件并使用指定的文件名保存
+ *
+ * @param url - 要下载的文件的 URL
+ * @param filename - 本地保存文件时使用的文件名
+ * @throws 如果网络请求失败，将抛出错误
+ */
+export async function downloadFile(url: string, filename?: string): Promise<void> {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        const blob = await response.blob();
+        const urlObject = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = urlObject;
+        a.download = filename || url.split("/").pop() || "";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(urlObject);
+    } catch (error) {
+        console.error("There has been a problem with your fetch operation:", error);
+        throw error;
+    }
+}

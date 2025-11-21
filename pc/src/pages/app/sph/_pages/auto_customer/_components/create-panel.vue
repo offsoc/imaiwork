@@ -93,7 +93,7 @@
                                         <div class="w-[1px] h-[12px] bg-[#ffffff1a]"></div>
                                         <div>
                                             <div class="w-4 h-4" @click="handleKeywordDelete(index)">
-                                                <close-btn :icon-size="10"></close-btn>
+                                                <close-btn :icon-size="10" :theme="ThemeEnum.DARK"></close-btn>
                                             </div>
                                         </div>
                                     </div>
@@ -117,7 +117,7 @@
                         <div>
                             <div class="text-[#ffffff80] mb-3">时间设置</div>
                             <div class="bg-app-bg-3 rounded-xl shadow-[0_0_0_1px_var(--app-border-color-2)] p-4">
-                                <div class="text-white">自动加好友设置</div>
+                                <div class="text-white">任务执行天数</div>
                                 <div class="mt-4">
                                     <div class="flex flex-wrap gap-2">
                                         <div
@@ -447,7 +447,7 @@
 <script setup lang="ts">
 import { createTask } from "@/api/sph";
 import dayjs from "dayjs";
-import { AppTypeEnum, TokensSceneEnum } from "@/enums/appEnums";
+import { AppTypeEnum, TokensSceneEnum, ThemeEnum } from "@/enums/appEnums";
 import { CreateTypeEnum } from "@/pages/app/sph/_enums";
 import { useUserStore } from "@/stores/user";
 import AiAddKeyword from "./ai-add-keyword.vue";

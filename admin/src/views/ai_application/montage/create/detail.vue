@@ -88,9 +88,10 @@
                 </el-table-column>
                 <el-table-column label="消耗算力" prop="video_token" min-width="120" />
                 <el-table-column label="创作时间" prop="create_time" min-width="180" />
-                <el-table-column label="操作" width="120" fixed="right">
+                <el-table-column label="操作" width="160" fixed="right">
                     <template #default="{ row }">
                         <el-button type="primary" link @click="handlePlay(row)"> 播放 </el-button>
+                        <el-button type="primary" link @click="handleDownload(row)"> 下载 </el-button>
                         <el-button
                             v-perms="['ai_application.montage.create_record/delete']"
                             type="danger"
@@ -117,6 +118,7 @@ import {
 } from "@/api/ai_application/digital_human/montage";
 import { usePaging } from "@/hooks/usePaging";
 import feedback from "@/utils/feedback";
+import { downloadFile } from "@/utils/util";
 import { ElTable } from "element-plus";
 
 const route = useRoute();
@@ -139,11 +141,6 @@ const tableRef = ref<InstanceType<typeof ElTable>>();
 
 const showVideo = ref(false);
 const videoUrl = ref("");
-const handlePlay = async (row: any) => {
-    const { video_result_url } = row;
-    showVideo.value = true;
-    videoUrl.value = video_result_url;
-};
 
 const multipleSelection = ref<any[]>([]);
 
@@ -162,6 +159,25 @@ const getStatus = (status: number) => {
         6: "音色合成成功",
     };
     return statusMap[status as keyof typeof statusMap];
+};
+
+const handleDownload = async (row: any) => {
+    const { video_result_url } = row;
+    if (!video_result_url) {
+        feedback.msgError("视频地址为空");
+        return;
+    }
+    downloadFile(video_result_url);
+};
+
+const handlePlay = async (row: any) => {
+    const { video_result_url } = row;
+    if (!video_result_url) {
+        feedback.msgError("视频地址为空");
+        return;
+    }
+    showVideo.value = true;
+    videoUrl.value = video_result_url;
 };
 
 const handleDelete = async (id: number | number[]) => {

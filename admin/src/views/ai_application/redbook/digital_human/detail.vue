@@ -37,8 +37,8 @@
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" fixed="left" />
                 <el-table-column label="ID" prop="id" width="80" />
-                <el-table-column label="名称" prop="name" min-width="100" />
-                <el-table-column label="生成状态" min-width="100">
+                <el-table-column label="名称" prop="name" min-width="180" show-overflow-tooltip />
+                <el-table-column label="生成状态" min-width="120">
                     <template #default="{ row }">
                         {{ getStatusText(row.status) }}
                     </template>
@@ -62,9 +62,12 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="创作时间" prop="create_time" width="180" />
-                <el-table-column label="操作" width="120" fixed="right">
+                <el-table-column label="操作" width="160" fixed="right">
                     <template #default="{ row }">
                         <el-button type="primary" link @click="previewVideo(row)"> 播放 </el-button>
+                        <el-button class="ml-2" type="primary" link @click="downloadFile(row.video_result_url)"
+                            >下载</el-button
+                        >
                         <el-button
                             v-perms="['ai_application.redbook.dh_detail/delete']"
                             type="danger"
@@ -89,6 +92,7 @@ import { usePaging } from "@/hooks/usePaging";
 import { getDigitalHumanTaskList, deleteDigitalHumanTask } from "@/api/ai_application/redbook";
 import feedback from "@/utils/feedback";
 import { ClipStyleMap } from "@/enums/appEnums";
+import { downloadFile } from "@/utils/util";
 
 const route = useRoute();
 
@@ -135,6 +139,14 @@ const handleSelectionChange = (val: any[]) => {
         return;
     }
     multipleSelection.value = val;
+};
+
+const handleDownload = (url: string) => {
+    if (!url) {
+        feedback.msgError("视频地址为空");
+        return;
+    }
+    downloadFile(url);
 };
 
 const handleDelete = async (id: number | number[]) => {

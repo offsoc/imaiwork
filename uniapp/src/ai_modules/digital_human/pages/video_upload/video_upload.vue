@@ -85,7 +85,6 @@
         v-if="showUploadProgress"
         :progress="uploadProgressNum"
         :loading-text="loadingText"
-        :is-success="isUploadSuccess"
         :progress-type="uploadProgressType"
         :show-back="formData.model_version !== DigitalHumanModelVersionEnum.SHANJIAN"
         @cancel="handleUploadCancel"
@@ -96,7 +95,6 @@
 
 <script setup lang="ts">
 import config from "@/config";
-import { createAnchor } from "@/api/digital_human";
 import { TokensSceneEnum } from "@/enums/appEnums";
 import { ModeTypeEnum, ListenerTypeEnum, DigitalHumanModelVersionEnum } from "@/ai_modules/digital_human/enums";
 import VideoPlayer from "@/ai_modules/digital_human/components/video-player/video-player.vue";
@@ -204,7 +202,7 @@ const uploadTemplateContentLists = computed(() => {
         ? modelVersion
         : DigitalHumanModelVersionEnum.STANDARD;
 
-    const requirements = modelUploadRequirements[validModelVersion as number] || commonUploadRequirements;
+    const requirements = commonUploadRequirements;
 
     return [
         { name: "视频方向", value: "横向或纵向" },
@@ -260,12 +258,13 @@ const getSceneKeysByModelVersion = (modelVersion: number): { avatar: string } =>
 const startUpload = async () => {
     // 检查是否为形象模式，并验证积分
     if (modeType.value === ModeTypeEnum.ANCHOR) {
-        const modelVersion = parseInt(String(formData.model_version));
-        const keys = getSceneKeysByModelVersion(modelVersion);
-        const { score } = getTokenByScene(keys.avatar);
+        const shanjianKeys = getSceneKeysByModelVersion(DigitalHumanModelVersionEnum.SHANJIAN);
+        const chanjingKeys = getSceneKeysByModelVersion(DigitalHumanModelVersionEnum.CHANJING);
+        const { score: shanjianScore } = getTokenByScene(shanjianKeys.avatar);
+        const { score: chanjingScore } = getTokenByScene(chanjingKeys.avatar);
 
         // 积分不足，显示充值弹窗
-        if (userTokens.value < score) {
+        if (userTokens.value < shanjianScore + chanjingScore) {
             showRechargePopup.value = true;
             await nextTick();
             rechargePopupRef.value?.open();
@@ -280,17 +279,11 @@ const startUpload = async () => {
     });
     // #endif
 
-    // 检查上传参数是否有效
-    if (!uploadParams.value) {
-        uni.$u.toast("上传参数无效，请检查模型版本");
-        return;
-    }
-
     // 开始上传
     const { upload } = useUpload({
-        size: uploadParams.value.size,
-        resolution: [uploadParams.value.minResolution, uploadParams.value.maxResolution],
-        duration: [uploadParams.value.videoMinDuration, uploadParams.value.videoMaxDuration],
+        size: commonUploadLimit.size,
+        resolution: [commonUploadLimit.minResolution, commonUploadLimit.maxResolution],
+        duration: [commonUploadLimit.videoMinDuration, commonUploadLimit.videoMaxDuration],
         extension: SUPPORTED_EXTENSIONS,
         async onSuccess(res) {
             const { url, pic, width, height } = res;
@@ -301,27 +294,7 @@ const startUpload = async () => {
             formData.height = height;
 
             formData.name = uni.$u.timeFormat(Date.now(), "yyyymmddhhMM");
-            if (formData.model_version == DigitalHumanModelVersionEnum.SHANJIAN) {
-                isUploadSuccess.value = true;
-                return;
-            }
-            // 开始形象克隆
-            loadingText.value = "形象克隆中...";
-
-            try {
-                const result = await createAnchor(formData);
-                formData.anchor_id = result.id;
-                isUploadSuccess.value = true;
-                loadingText.value = "";
-            } catch (error) {
-                // 错误处理
-                showUploadProgress.value = false;
-                uploadProgressNum.value = 0;
-                loadingText.value = "";
-
-                uni.$u.toast(error || "上传失败");
-                resetNavigationBarColor();
-            }
+            handelUploadConfirm();
         },
         onProgress(res) {
             // 更新进度
@@ -364,24 +337,12 @@ const handleUploadCancel = () => {
  * 处理上传确认
  */
 const handelUploadConfirm = async () => {
-    if (formData.model_version == DigitalHumanModelVersionEnum.SHANJIAN) {
-        uni.$emit("confirm", {
-            type: ListenerTypeEnum.MONTAGE_ANCHOR,
-            data: formData,
-        });
-        uni.navigateBack();
-        return;
-    }
-
-    // 导航到视频创建页面，并传递数据
-    uni.$u.route({
-        url: "/ai_modules/digital_human/pages/video_create/video_create",
-        type: "redirect",
-        params: {
-            type: ListenerTypeEnum.UPLOAD_VIDEO,
-            data: JSON.stringify(formData),
-        },
+    uni.$emit("confirm", {
+        type: ListenerTypeEnum.VIDEO_UPLOAD,
+        data: formData,
     });
+    uni.navigateBack();
+    return;
 };
 
 /**
@@ -417,14 +378,14 @@ onLoad((options: any) => {
         }
 
         // 设置模型版本
-        if (options.model_version) {
-            const modelVersion = parseInt(options.model_version);
-            if (!isNaN(modelVersion)) {
-                formData.model_version = modelVersion;
-            } else {
-                console.warn("无效的模型版本:", options.model_version);
-            }
-        }
+        // if (options.model_version) {
+        //     const modelVersion = parseInt(options.model_version);
+        //     if (!isNaN(modelVersion)) {
+        //         formData.model_version = modelVersion;
+        //     } else {
+        //         console.warn("无效的模型版本:", options.model_version);
+        //     }
+        // }
     } catch (error) {
         console.error("页面加载参数处理失败:", error);
     }

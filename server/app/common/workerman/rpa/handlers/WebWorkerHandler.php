@@ -29,9 +29,11 @@ class WebWorkerHandler extends BaseMessageHandler
                 $worker->uidConnections[$uid]->apptype = WorkerEnum::WS_WEB_TYPE;
                 $worker->uidConnections[$uid]->userid = $content['userId'] ?? 0;
                 $worker->uidConnections[$uid]->clientType = 'webUser';
+                $worker->uidConnections[$uid]->sourceType = $content['sourceType'] ?? WorkerEnum::WS_SOURCE_PC_TYPE;
                 $worker->uidConnections[$uid]->name = 'web_' . $content['userId'];
 
-                $this->service->getRedis()->set("xhs:user:{$content['userId']}", $uid);
+                $source = $worker->uidConnections[$uid]->sourceType;
+                $this->service->getRedis()->set("xhs:user:{$source}:{$content['userId']}", $uid);
             }
 
             $message = array(
@@ -41,6 +43,7 @@ class WebWorkerHandler extends BaseMessageHandler
                     'type' => 'bindSocket',
                     'msg' => '绑定成功',
                     'userId' => $content['userId'],
+                    'sourceType' => $source,
                     'wsId' => $uid
                 ],
                 'code' => WorkerEnum::SUCCESS_CODE

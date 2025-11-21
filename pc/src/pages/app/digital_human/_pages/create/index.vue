@@ -105,8 +105,8 @@
                                                     class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                                                     <Icon name="local-icon-pic2" :size="14"></Icon>
                                                 </span>
-                                                <span class="text-white font-bold mt-1">正在生成中</span>
-                                                <span class="text-[rgba(255,255,255,0.5)]">大约等待几分钟</span>
+                                                <span class="text-white font-bold mt-1 text-xs">正在生成中</span>
+                                                <span class="text-[#ffffff80] text-[11px]">大约等待几分钟</span>
                                             </div>
                                         </div>
                                     </div>
@@ -504,6 +504,8 @@ const {
     fetchFun: getAnchorList,
     params: {
         type: 0,
+        status: "0,1",
+        model_version: DigitalHumanModelVersionEnum.CHANJING,
     },
 });
 
@@ -541,11 +543,6 @@ const getChooseAnchor = (data: any) => {
 
 // 选择形象
 const handleSelectAnchor = (data: any, index?: number) => {
-    // 检查形象是否可用且未被选中
-    if (!data.is_vanish && data.status != 1) {
-        return;
-    }
-
     // 更新当前选中的形象索引
     currentAnchorIndex.value = index ?? anchorPager.lists.findIndex((item) => item.anchor_id == data.anchor_id);
 
@@ -595,6 +592,8 @@ const handleAnchorCreate = async (data?: any) => {
     } else if (modelType === ModeTypeEnum.FIGURE) {
         await resetAnchorPage();
         anchorPager.lists.unshift(...localAnchorLists.value);
+        currentAnchorIndex.value = 0;
+        setFormData(anchorPager.lists[0], formData);
     }
 };
 

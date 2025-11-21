@@ -25,6 +25,11 @@ export const deleteDigitalHuman = (data: Record<string, any>) => {
     return request.post({ url: "/human/videoDelete", data });
 };
 
+// 更新数字人
+export const updateDigitalHuman = (data: Record<string, any>) => {
+    return request.post({ url: "/human/videoUpdate", data });
+};
+
 // 语音克隆
 export const voiceClone = (data: Record<string, any>) => {
     return request.post({ url: "/human/createVoice", data });

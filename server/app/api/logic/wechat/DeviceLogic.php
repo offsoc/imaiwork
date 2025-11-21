@@ -43,7 +43,7 @@ class DeviceLogic extends WechatBaseLogic
                     AiWechatDevice::where('id', $device->id)->update($params);
                     $data =$device->refresh()->toArray();
                 }else{
-                    self::setError('设备不属于当前用户');
+                    self::setError('设备不属于当前用户，请联系站长');
                     return false;
                 }
 

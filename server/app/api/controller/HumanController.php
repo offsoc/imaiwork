@@ -341,4 +341,19 @@ class HumanController extends BaseApiController
             return $this->fail('fail');
         }
     }
+
+
+    public function videoUpdate()
+    {
+        try {
+            $params = $this->request->post();
+            $result = HumanLogic::updateTaskName($params);
+            if ($result) {
+                return $this->success('操作成功');
+            }
+            return $this->fail(HumanLogic::getError());
+        } catch (\Exception $e) {
+            return $this->fail($e->getMessage());
+        }
+    }
 }

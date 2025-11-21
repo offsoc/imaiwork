@@ -11,7 +11,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { AppKeyEnum, ThemeEnum } from "@/enums/appEnums";
+import { AppKeyEnum, appKeyNameMap, ThemeEnum } from "@/enums/appEnums";
 import Sidebar from "../_components/sidebar.vue";
 import { SidebarTypeEnum } from "./_enums/index";
 import useSidebar from "../_hooks/useSidebar";
@@ -24,37 +24,44 @@ const { sidebar, sidebarIndex, getComponents, getSliderIndex, updateSliderIndex 
 
 sidebar.value = [
     {
-        name: "自动获客",
-        icon: "menu_auto_customer",
+        name: "采集任务",
+        icon: "menu_gather_task",
         components: markRaw(AutoCustomer),
         type: SidebarTypeEnum.AUTO_GET_CUSTOMER,
     },
     {
-        name: "自动加微",
+        name: "评论获客",
         icon: "menu_auto_wechat",
+        components: "",
+        type: SidebarTypeEnum.COMMENT_GET_CUSTOMER,
+        disabled: true,
+    },
+    {
+        name: "私信获客",
+        icon: "menu_auto_customer",
+        components: "",
+        type: SidebarTypeEnum.MESSAGE_GET_CUSTOMER,
+        disabled: true,
+    },
+    {
+        name: "采集加微",
+        icon: "menu_manual_wechat",
         components: markRaw(AutoAddWechat),
         type: SidebarTypeEnum.AUTO_ADD_WECHAT,
     },
     {
-        name: "手动加微",
-        icon: "menu_manual_wechat",
+        name: "批量加微",
+        icon: "menu_msg_manage",
         components: markRaw(ManualAddWechat),
         type: SidebarTypeEnum.MANUAL_ADD_WECHAT,
-    },
-    {
-        name: "私信管理",
-        icon: "menu_msg_manage",
-        disabled: true,
-        components: markRaw(MsgManagement),
-        type: SidebarTypeEnum.MESSAGE_MANAGEMENT,
     },
 ];
 
 enum SidebarGroupEnum {
     // 获客管理
-    GET_CUSTOMER_MANAGEMENT = "获客管理",
+    GET_CUSTOMER_MANAGEMENT = "主动获客",
     // 私信管理
-    MESSAGE_MANAGEMENT = "私信管理",
+    MESSAGE_MANAGEMENT = "线索加微",
 }
 
 const getSidebar = computed(() => {
@@ -66,8 +73,8 @@ const getSidebar = computed(() => {
         if (
             [
                 SidebarTypeEnum.AUTO_GET_CUSTOMER,
-                SidebarTypeEnum.AUTO_ADD_WECHAT,
-                SidebarTypeEnum.MANUAL_ADD_WECHAT,
+                SidebarTypeEnum.COMMENT_GET_CUSTOMER,
+                SidebarTypeEnum.MESSAGE_GET_CUSTOMER,
             ].includes(item.type)
         ) {
             group = groupedItems.find((g) => g.title === SidebarGroupEnum.GET_CUSTOMER_MANAGEMENT) || {
@@ -78,7 +85,7 @@ const getSidebar = computed(() => {
             if (!groupedItems.includes(group)) {
                 groupedItems.push(group);
             }
-        } else if ([SidebarTypeEnum.MESSAGE_MANAGEMENT].includes(item.type)) {
+        } else if ([SidebarTypeEnum.AUTO_ADD_WECHAT, SidebarTypeEnum.MANUAL_ADD_WECHAT].includes(item.type)) {
             group = groupedItems.find((g) => g.title === SidebarGroupEnum.MESSAGE_MANAGEMENT) || {
                 title: SidebarGroupEnum.MESSAGE_MANAGEMENT,
                 children: [],
@@ -94,7 +101,7 @@ const getSidebar = computed(() => {
 
 definePageMeta({
     layout: "base",
-    title: "AI视频号获客手",
+    title: appKeyNameMap[AppKeyEnum.SPH],
     key: AppKeyEnum.SPH,
 });
 </script>

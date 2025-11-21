@@ -6,7 +6,7 @@
                 {{ name }}
             </span>
             <div class="flex items-center gap-x-2">
-                <ElTooltip :content="isEdit ? '取消编辑' : '编辑'">
+                <ElTooltip content="编辑">
                     <div class="handle-item" @click="handleEdit">
                         <Icon name="local-icon-edit3" />
                     </div>
@@ -17,11 +17,38 @@
             </div>
         </div>
         <div class="mt-2">
-            <div ref="editRef" :contenteditable="isEdit" @blur="isEdit = false">
-                {{ value }}
+            <div ref="editRef">
+                {{ stageValue }}
             </div>
         </div>
     </div>
+    <popup
+        ref="editPopRef"
+        v-if="showEdit"
+        cancel-button-text=""
+        confirm-button-text=""
+        header-class="!p-0"
+        footer-class="!p-0"
+        width="600px"
+        :show-close="false">
+        <div class="px-4">
+            <div class="absolute w-6 h-6 right-4 top-4 cursor-pointer" @click="showEdit = false">
+                <close-btn />
+            </div>
+            <div class="text-2xl font-bold mb-5">编辑分段</div>
+            <div>
+                <ElInput v-model="editValue" type="textarea" resize="none" :rows="10" />
+            </div>
+            <div class="flex justify-center mt-5">
+                <ElButton
+                    type="primary"
+                    class="!rounded-full !h-[50px] w-[310px] shadow-[0_6px_12px_0px_#0065FB33]"
+                    @click="handleSave">
+                    保存
+                </ElButton>
+            </div>
+        </div>
+    </popup>
 </template>
 
 <script setup lang="ts">
@@ -36,14 +63,26 @@ const emit = defineEmits<{
     (event: "update:data", value: string): void;
 }>();
 
-const value = defineModel<string>("data", { required: true });
+const stageValue = defineModel<string>("data", { required: true });
 
 const editRef = shallowRef();
-const isEdit = ref(false);
+const showEdit = ref(false);
+const editValue = ref("");
+const editPopRef = shallowRef();
 const handleEdit = async (): Promise<void> => {
-    isEdit.value = !isEdit.value;
+    showEdit.value = true;
     await nextTick();
-    editRef.value.focus();
+    editValue.value = stageValue.value;
+    editPopRef.value?.open();
+};
+
+const handleSave = () => {
+    if (!editValue.value.trim()) {
+        feedback.msgWarning("请输入内容");
+        return;
+    }
+    stageValue.value = editValue.value;
+    showEdit.value = false;
 };
 
 const handleDelete = (): void => {

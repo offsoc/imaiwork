@@ -57,7 +57,7 @@
                             <div class="text-[#9E9E9E] mb-2">自动评论的好友标签：</div>
                             <ElSelect v-model="formData.reply_tag_ids" class="!w-[70%]" filterable multiple clearable>
                                 <ElOption
-                                    v-for="item in tagOptionsData.tagLists"
+                                    v-for="item in tagLists"
                                     :key="item.id"
                                     :label="item.tag_name"
                                     :value="item.id"></ElOption>
@@ -95,7 +95,7 @@
                             <div class="text-[#9E9E9E] mb-2">自动点赞的好友标签：</div>
                             <ElSelect v-model="formData.like_tag_ids" class="!w-[70%]" filterable multiple clearable>
                                 <ElOption
-                                    v-for="item in tagOptionsData.tagLists"
+                                    v-for="item in tagLists"
                                     :key="item.id"
                                     :label="item.tag_name"
                                     :value="item.id"></ElOption>
@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { circleStrategySet, circleStrategyInfo, tagListsV2 } from "@/api/person_wechat";
+import { circleStrategySet, circleStrategyInfo, tagLists as tagListsApi } from "@/api/person_wechat";
 import { getAgentList } from "@/api/agent";
 
 const formData = reactive({
@@ -131,15 +131,7 @@ const formData = reactive({
     reply_robot_id: "",
 });
 
-const { optionsData: tagOptionsData } = useDictOptions<{
-    tagLists: any[];
-}>({
-    tagLists: {
-        api: tagListsV2,
-        params: { page_size: 999 },
-        transformData: (data: any) => data.lists?.filter((item: any) => item.id != 0),
-    },
-});
+const tagLists = ref<any[]>([]);
 
 const agentLists = ref<any[]>([]);
 const agentLoading = ref(false);
@@ -167,11 +159,17 @@ const getRobotReplyStrategyFn = async () => {
     formData.like_tag_ids = data.like_tag_ids?.map((item: any) => parseInt(item));
 };
 
+const getTagList = async (query?: string) => {
+    const { lists } = await tagListsApi({ page_no: 1, page_size: 9999, tag_name: query });
+    tagLists.value = lists;
+};
+
 const { lockFn: lockConfirm, isLock } = useLockFn(handleConfirm);
 
 onMounted(() => {
     getRobotReplyStrategyFn();
     getAgentFn();
+    getTagList();
 });
 </script>
 

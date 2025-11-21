@@ -424,22 +424,42 @@ class RpaSocketService
                 $this->setLog('设备不存在:' .  $content['deviceId'], 'user');
                 return;
             }
-            $uid = $this->redis->get("xhs:user:{$find['user_id']}");
-            if ($uid) {
-                $message = array(
-                    'messageId' => $uid,
-                    'type' => $content['type'],
-                    'appType' => $content['appType'] ?? 3,
-                    'deviceId' => $content['deviceId'],
-                    'appVersion' => $content['appVersion'] ?? WorkerEnum::APP_VERSION,
-                    'code' => $content['code'],
-                    'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
-                );
-                $this->setLog($message, 'user');
-                $this->send($uid,  $message);
-            } else {
-                $this->setLog('web客户端不存在:' . $find['user_id'], 'user');
+
+            $sources = WorkerEnum::WS_SOURCES;
+            foreach ($sources as $source) {
+                $uid = $this->redis->get("xhs:user:{$source}:{$find['user_id']}");
+                if ($uid) {
+                    $message = array(
+                        'messageId' => $uid,
+                        'type' => $content['type'],
+                        'appType' => $content['appType'] ?? 3,
+                        'deviceId' => $content['deviceId'],
+                        'appVersion' => $content['appVersion'] ?? WorkerEnum::APP_VERSION,
+                        'code' => $content['code'],
+                        'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
+                    );
+                    $this->setLog($message, 'user');
+                    $this->send($uid,  $message);
+                }
             }
+
+
+            // $uid = $this->redis->get("xhs:user:pc:{$find['user_id']}") ?? $this->redis->get("xhs:user:wmprog:{$find['user_id']}");
+            // if ($uid) {
+            //     $message = array(
+            //         'messageId' => $uid,
+            //         'type' => $content['type'],
+            //         'appType' => $content['appType'] ?? 3,
+            //         'deviceId' => $content['deviceId'],
+            //         'appVersion' => $content['appVersion'] ?? WorkerEnum::APP_VERSION,
+            //         'code' => $content['code'],
+            //         'reply' => json_encode($content, JSON_UNESCAPED_UNICODE)
+            //     );
+            //     $this->setLog($message, 'user');
+            //     $this->send($uid,  $message);
+            // } else {
+            //     $this->setLog('web客户端不存在:' . $find['user_id'], 'user');
+            // }
         } catch (\Exception $e) {
             $this->setLog('sendWeb:' . $e, 'error');
         }
@@ -593,7 +613,10 @@ class RpaSocketService
             }
 
             $userId = $this->worker->uidConnections[$uid] ? $this->worker->uidConnections[$uid]->userid : 0;
-            $this->redis->del("xhs:user:{$userId}");
+            $sources =  WorkerEnum::WS_SOURCES;
+            foreach ($sources as $source) {
+                $this->redis->del("xhs:user:{$source}:{$userId}");
+            }
             // 连接断开时删除映射
             unset($this->worker->uidConnections[$uid]);
         } catch (\Exception $e) {

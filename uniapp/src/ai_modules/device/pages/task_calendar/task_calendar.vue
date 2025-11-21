@@ -64,7 +64,7 @@
         <view class="grow min-h-0 px-[26rpx] mt-5">
             <z-paging ref="pagingRef" v-model="taskList" :fixed="false" @query="queryTaskList">
                 <view>
-                    <task-list :list="taskList" @delete="refreshTaskList" @update-name="refreshTaskList" />
+                    <task-list :list="taskList" @delete="refreshTaskList" @update-name="handleUpdateTaskName" />
                 </view>
                 <template #empty>
                     <empty />
@@ -95,6 +95,11 @@ const taskDay = ref(uni.$u.timeFormat(new Date(), "yyyy-mm-dd"));
 
 const pagingRef = ref<any>(null);
 const taskList = ref<any[]>([]);
+
+const getProgress = computed(() => {
+    if (statistics.all === 0) return 0;
+    return Math.round(((statistics.completed + statistics.failure) / statistics.all) * 100);
+});
 
 const getStatistics = async () => {
     const data = await getDeviceTaskCalendarStatistics({
@@ -131,10 +136,13 @@ const handleSelectDate = (date: string) => {
     pagingRef.value?.reload();
 };
 
-const getProgress = computed(() => {
-    if (statistics.all === 0) return 0;
-    return Math.round(((statistics.completed + statistics.failure) / statistics.all) * 100);
-});
+const handleUpdateTaskName = (data: any) => {
+    taskList.value.forEach((item) => {
+        if (item.id == data.id) {
+            item.name = data.name;
+        }
+    });
+};
 
 onShow(() => {
     getStatistics();

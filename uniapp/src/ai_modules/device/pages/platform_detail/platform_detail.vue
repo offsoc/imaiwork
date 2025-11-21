@@ -66,7 +66,7 @@
                     <template v-if="currentPlatform == AppTypeEnum.XHS">
                         <view
                             class="flex items-center justify-between gap-2 h-[80rpx] border-[0] border-b border-t border-solid border-[#00000008]">
-                            <view class="font-bold flex-shrink-0">私信接管</view>
+                            <view class="font-bold flex-shrink-0">私信开关</view>
                             <view class="">
                                 <u-switch
                                     v-model="currentPlatformAccount.open_ai"

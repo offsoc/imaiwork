@@ -9,6 +9,15 @@
                     :safe-area-inset-bottom="true"
                     @query="queryList">
                     <view class="py-[30rpx] px-[32rpx] grid grid-cols-3 gap-2">
+                        <view
+                            class="bg-[#E6E6E6] h-[288rpx] rounded-[24rpx] flex flex-col items-center justify-center"
+                            @click="toClone">
+                            <view
+                                class="w-[32rpx] h-[32rpx] rounded-full flex items-center justify-center bg-[#00000080]">
+                                <u-icon name="plus" color="#ffffff" size="20"></u-icon>
+                            </view>
+                            <view class="text-[#000000b3] mt-[18rpx]">去克隆</view>
+                        </view>
                         <view v-for="(item, index) in dataLists" :key="index" @click.stop="chooseAnchor(item)">
                             <view
                                 class="flex-shrink-0 h-[288rpx] rounded-[24rpx] bg-cover relative bg-black"
@@ -19,9 +28,9 @@
                                     </view>
                                 </view>
                             </view>
-                            <view class="text-center mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+                            <!-- <view class="text-center mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs">
                                 {{ item.name }}
-                            </view>
+                            </view> -->
                         </view>
                     </view>
                     <template #empty>
@@ -36,7 +45,7 @@
 <script setup lang="ts">
 import { getAnchorList } from "@/api/digital_human";
 import { useAppStore } from "@/stores/app";
-import { DigitalHumanModelVersionEnum } from "../../enums";
+import { DigitalHumanModelVersionEnum, ModeTypeEnum } from "../../enums";
 
 const props = defineProps({
     show: {
@@ -74,7 +83,7 @@ const dataLists = ref<any[]>([]);
 const queryParams = reactive<any>({
     name: "",
     model_version: DigitalHumanModelVersionEnum.CHANJING,
-    status: 1,
+    status: "0,1",
     type: 0,
 });
 const queryList = async (page_no: number, page_size: number) => {
@@ -90,10 +99,28 @@ const queryList = async (page_no: number, page_size: number) => {
     }
 };
 
-const currAnchorId = ref();
 const chooseAnchor = (item: any) => {
     emit("confirm", item);
 };
+
+const toClone = () => {
+    showPopup.value = false;
+    uni.$u.route({
+        url: "/ai_modules/digital_human/pages/anchor_create/anchor_create",
+        params: {
+            source: DigitalHumanModelVersionEnum.CHANJING,
+        },
+    });
+};
+
+watch(
+    () => props.show,
+    (val) => {
+        if (val) {
+            pagingRef.value?.reload();
+        }
+    }
+);
 </script>
 
 <style scoped></style>

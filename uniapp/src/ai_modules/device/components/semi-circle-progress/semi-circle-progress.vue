@@ -1,11 +1,13 @@
 <template>
     <view class="progress-container" :style="{ width: size + 'px', height: size / 2 + 'px' }">
         <canvas
+            v-if="!imagePath"
             :canvas-id="canvasId"
             :id="canvasId"
             :style="{ width: size + 'px', height: size / 2 + 'px' }"
             :width="canvasWidth"
             :height="canvasHeight"></canvas>
+        <image v-else :src="imagePath" :style="{ width: size + 'px', height: size / 2 + 'px' }"></image>
         <view class="content">
             <slot></slot>
         </view>
@@ -38,6 +40,10 @@ const props = defineProps({
         type: Number,
         default: 800,
     },
+    animation: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const instance = getCurrentInstance();
@@ -47,10 +53,14 @@ const pixelRatio = ref(1);
 const canvasWidth = ref(props.size);
 const canvasHeight = ref(props.size / 2);
 
+const imagePath = ref("");
+
+const { proxy } = getCurrentInstance() as { proxy: any };
+
 const currentProgress = ref(0);
 let animationTimer: any = null;
 
-const drawCanvas = () => {
+const drawCanvas = (generateImage = false) => {
     const ctx = uni.createCanvasContext(canvasId, instance);
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -78,7 +88,24 @@ const drawCanvas = () => {
         ctx.stroke();
     }
 
-    ctx.draw();
+    ctx.draw(false, () => {
+        if (!generateImage) return;
+        uni.canvasToTempFilePath(
+            {
+                y: 0,
+                x: 0,
+                width: props.size,
+                height: props.size / 2,
+                canvasId,
+                success: (res) => {
+                    if (res.tempFilePath) {
+                        imagePath.value = res.tempFilePath;
+                    }
+                },
+            },
+            proxy
+        );
+    });
 };
 
 const animateProgress = (start: number, end: number) => {
@@ -87,16 +114,20 @@ const animateProgress = (start: number, end: number) => {
         animationTimer = null;
     }
 
+    imagePath.value = "";
+
     const duration = props.animationDuration;
     const startTime = Date.now();
 
     const step = () => {
         const elapsed = Date.now() - startTime;
-        const progressRatio = Math.min(elapsed / duration, 1);
+        const progressRatio = props.animation ? Math.min(elapsed / duration, 1) : 1;
         currentProgress.value = start + (end - start) * progressRatio;
-        drawCanvas();
 
-        if (progressRatio < 1) {
+        const isFinished = progressRatio === 1;
+        drawCanvas(isFinished);
+
+        if (!isFinished) {
             animationTimer = setTimeout(step, 16);
         } else {
             clearTimeout(animationTimer);

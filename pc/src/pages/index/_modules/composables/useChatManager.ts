@@ -21,18 +21,8 @@ export function useChatManager() {
     const appStore = useAppStore();
 
     // --- 从 Store 中获取响应式状态 ---
-    const {
-        taskId,
-        agentValue,
-        chatContentList,
-        isReceiving,
-        isStopChat,
-        isLoading,
-        isDeep,
-        isNetwork,
-        fileLists,
-        extraParams,
-    } = storeToRefs(chatStore);
+    const { taskId, agentValue, chatContentList, isReceiving, isStopChat, isDeep, isNetwork, fileLists, extraParams } =
+        storeToRefs(chatStore);
     const { userTokens, userInfo } = storeToRefs(userStore);
     // [FIX] 恢复到原始的 chatConfig 处理方式，以解决响应式系统错误
     const { chatConfig } = appStore;
@@ -151,7 +141,6 @@ export function useChatManager() {
             chatStore.chatContentList = historyMessages;
             chatScrollToBottom();
         } catch (err) {
-            console.error("获取聊天记录失败:", err);
             feedback.msgError("获取聊天记录失败");
         } finally {
             chatStore.isLoading = false;
@@ -284,7 +273,6 @@ export function useChatManager() {
         chattingRef,
 
         // Store State (从 storeToRefs 获取)
-        isLoading,
         isDeep,
         isNetwork,
         fileLists,

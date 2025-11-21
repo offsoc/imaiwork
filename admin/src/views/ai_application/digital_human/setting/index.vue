@@ -7,7 +7,7 @@
                     <el-form-item label="首页Banner">
                         <div>
                             <material-picker v-model="banner" :limit="1"></material-picker>
-                            <div class="form-tips">图片尺寸推荐470*170px</div>
+                            <div class="form-tips">图片尺寸推荐470*230px</div>
                         </div>
                     </el-form-item>
                     <div class="">

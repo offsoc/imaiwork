@@ -33,7 +33,7 @@
                 label-position="top"
                 :disabled="isLock">
                 <ElFormItem label="音色名称" prop="name">
-                    <ElInput v-model="formData.name" class="!h-11" placeholder="请输入音色名称" />
+                    <ElInput v-model="formData.name" class="!h-11" placeholder="请输入音色名称" maxlength="30" />
                 </ElFormItem>
                 <ElFormItem label="性别" prop="gender">
                     <ElSelect
