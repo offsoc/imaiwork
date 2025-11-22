@@ -77,8 +77,8 @@ export function useCreateTask(formData: any) {
             const startTime = new Date(`2000/01/01 ${formData.time_config[0]}`);
             const endTime = new Date(`2000/01/01 ${formData.time_config[1]}`);
             const diffTime = endTime.getTime() - startTime.getTime();
-            if (diffTime < 30 * 60 * 1000) {
-                feedback.msgWarning("结束时间不能小于开始时间30分钟");
+            if (diffTime < 15 * 60 * 1000) {
+                feedback.msgWarning("结束时间不能小于开始时间15分钟");
                 return false;
             }
         }
