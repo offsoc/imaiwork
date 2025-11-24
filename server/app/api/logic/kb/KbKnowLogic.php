@@ -144,16 +144,16 @@ class KbKnowLogic extends BaseLogic
         try {
 //            $unit = TokenLogService::checkToken($userId, 'create_vector_knowledge');
             // 主模型检测
-            $mainModel = (new Models())->where(['id'=>intval($post['documents_model_id'])])->findOrEmpty();
-            if (!$mainModel || !$mainModel['is_enable']) {
-                throw new Exception('文件处理模型已被下架');
-            }
+//            $mainModel = (new Models())->where(['id'=>intval($post['documents_model_id'])])->findOrEmpty();
+//            if (!$mainModel || !$mainModel['is_enable']) {
+//                throw new Exception('文件处理模型已被下架');
+//            }
 
             // 子模型检测
-            $subModel = (new ModelsCost())->where(['id'=>intval($post['documents_model_sub_id'])])->findOrEmpty();
-            if (!$subModel || !$subModel['status']) {
-                throw new Exception('文件处理模型已被下架!');
-            }
+//            $subModel = (new ModelsCost())->where(['id'=>intval($post['documents_model_sub_id'])])->findOrEmpty();
+//            if (!$subModel || !$subModel['status']) {
+//                throw new Exception('文件处理模型已被下架!');
+//            }
 
             // 主向量模型
             $mainEmbModel = (new Models())->where(['id'=>intval($post['embedding_model_id'])])->findOrEmpty();
@@ -235,16 +235,16 @@ class KbKnowLogic extends BaseLogic
             }
 
             // 主模型检测
-            $mainModel = (new Models())->where(['id'=>intval($post['documents_model_id'])])->findOrEmpty();
-            if (!$mainModel || !$mainModel['is_enable']) {
-                throw new Exception('文件处理模型已被下架了');
-            }
+//            $mainModel = (new Models())->where(['id'=>intval($post['documents_model_id'])])->findOrEmpty();
+//            if (!$mainModel || !$mainModel['is_enable']) {
+//                throw new Exception('文件处理模型已被下架了');
+//            }
 
             // 子模型检测
-            $subModel = (new ModelsCost())->where(['id'=>intval($post['documents_model_sub_id'])])->findOrEmpty();
-            if (!$subModel || !$subModel['status']) {
-                throw new Exception('文件处理模型已被下架了!');
-            }
+//            $subModel = (new ModelsCost())->where(['id'=>intval($post['documents_model_sub_id'])])->findOrEmpty();
+//            if (!$subModel || !$subModel['status']) {
+//                throw new Exception('文件处理模型已被下架了!');
+//            }
 
             KbKnow::update([
                 'image'                  => FileService::setFileUrl($post['image']??''),

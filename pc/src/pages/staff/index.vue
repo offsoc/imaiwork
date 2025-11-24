@@ -345,7 +345,6 @@ const appRoutes: Record<string, string> = {
     [AppKeyEnum.SERVICE]: `/app/${AppKeyEnum.SERVICE}`,
     [AppKeyEnum.PERSON_WECHAT]: `/app/person_wechat/chat`,
     [AppKeyEnum.MATRIX]: `/app/matrix`,
-    [AppKeyEnum.MATRIX_PUBLISH]: `/app/matrix?type=2`,
     matrix_dh: `/app/matrix?type=5`,
 };
 

@@ -98,8 +98,6 @@ const handleConfirm = async () => {
 
 defineExpose({
     setFormData: (data: any) => {
-        console.log("data", data);
-
         setFormData(data, formData);
     },
 });

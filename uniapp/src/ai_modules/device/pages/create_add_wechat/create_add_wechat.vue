@@ -598,6 +598,10 @@ onLoad(() => {
         }
     });
 });
+
+onUnload(() => {
+    uni.$off("confirm");
+});
 </script>
 
 <style scoped lang="scss">

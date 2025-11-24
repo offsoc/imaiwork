@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 import Calendar from "@/ai_modules/device/components/calendar/calendar.vue";
+import { ListenerTypeEnum } from "@/ai_modules/device/enums";
 
 const date = ref<string[]>([]);
 const calendarRef = ref<InstanceType<typeof Calendar>>();
@@ -85,7 +86,7 @@ const handleSave = () => {
         return;
     }
     uni.$emit("confirm", {
-        type: "choose-date",
+        type: ListenerTypeEnum.CHOOSE_DATE,
         data: date.value,
     });
     uni.navigateBack();

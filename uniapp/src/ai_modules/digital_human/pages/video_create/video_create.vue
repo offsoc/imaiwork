@@ -49,8 +49,8 @@
                                                 style="transform: translate(-50%, -50%)">
                                                 <view @click.stop="previewVideo(item.url)">
                                                     <image
-                                                        src="@/ai_modules/digital_human/static/icons/video_play.svg"
-                                                        class="w-[60rpx] h-[60rpx]"></image>
+                                                        src="/static/images/icons/play.svg"
+                                                        class="w-[48rpx] h-[48rpx]"></image>
                                                 </view>
                                             </view>
                                         </view>
@@ -575,8 +575,11 @@ onLoad(async (options: any) => {
         }
     });
     getModelLists();
-
     getClipConfigData();
+});
+
+onUnload(() => {
+    uni.$off("confirm");
 });
 </script>
 

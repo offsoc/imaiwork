@@ -9,6 +9,8 @@
     "u-popup": "../../../../uni_modules/vk-uview-ui/components/u-popup/u-popup",
     "calendar-simple": "../../components/calendar-simple/calendar-simple",
     "task-list": "../../components/task-list/task-list",
-    "semi-circle-progress": "../../components/semi-circle-progress/semi-circle-progress"
+    "semi-circle-progress": "../../components/semi-circle-progress/semi-circle-progress",
+    "task-detail-pop": "../../components/task-detail-pop/task-detail-pop",
+    "task-edit-name-pop": "../../components/task-edit-name/task-edit-name"
   }
 }

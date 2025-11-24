@@ -99,6 +99,7 @@ const newTopic = ref("");
 const editTagIndex = ref(-1);
 
 const handleAddTag = () => {
+    editTagIndex.value = -1;
     showAddTagPopup.value = true;
 };
 

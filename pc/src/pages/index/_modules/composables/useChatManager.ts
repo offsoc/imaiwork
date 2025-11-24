@@ -71,8 +71,15 @@ export function useChatManager() {
                 if (!text) return;
                 try {
                     const { object, content, task_id: newTaskId, usage, reasoning_content } = JSON.parse(text);
+                    if (!taskId.value) {
+                        chatStore.setTaskId(newTaskId);
+                        replaceState({
+                            task_id: newTaskId,
+                            agent_name: agentValue.value?.name,
+                            agent_id: agentValue.value?.id,
+                        });
+                    }
                     const lastMessage = chatContentList.value[chatContentList.value.length - 1];
-
                     if (object === "loading") {
                         const update: Partial<ChatMessage> = {};
                         if (reasoning_content) {
@@ -85,18 +92,9 @@ export function useChatManager() {
                         chatStore.updateLastMessage(update);
                     } else if (object === "finished") {
                         chatStore.updateLastMessage({ consume_tokens: usage });
-                        chatStore.setTaskId(newTaskId);
-                        // 更新URL，以便刷新后能恢复会话
-                        replaceState({
-                            task_id: newTaskId,
-                            agent_name: agentValue.value?.name,
-                            agent_id: agentValue.value?.id,
-                        });
                     }
-                    chatScrollToBottom();
-                } catch (error) {
-                    console.error("解析流式消息失败:", error, "原始文本:", text);
-                }
+                } catch (e) {}
+                chatScrollToBottom();
             });
     };
 
@@ -248,6 +246,11 @@ export function useChatManager() {
     };
 
     /**
+     * @description 重置滚动
+     */
+    const resetScroll = () => chattingRef.value?.resetScroll();
+
+    /**
      * @description 初始化函数，在组件挂载时调用。
      * 根据URL中的查询参数决定加载历史记录还是发送新消息。
      */
@@ -287,6 +290,7 @@ export function useChatManager() {
         startNewChat,
         stopStream,
         chatScrollToBottom,
+        resetScroll,
         fetchChatHistory,
         // 文件相关方法现在通过 chatStore 处理
         setFiles: chatStore.setFiles,

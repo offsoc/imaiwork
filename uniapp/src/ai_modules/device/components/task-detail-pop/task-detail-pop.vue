@@ -1,5 +1,5 @@
 <template>
-    <popup-bottom v-model:show="show" title="任务详情" custom-class="bg-[#F6F6F6]" :show-footer="false" height="70%">
+    <popup-bottom v-model:show="show" title="任务详情" custom-class="bg-[#F6F6F6]" :show-footer="false" height="80%">
         <template #content>
             <view class="h-full flex flex-col">
                 <view class="grow min-h-0 pb-5">
@@ -7,7 +7,7 @@
                         <view class="px-[26rpx] pt-3">
                             <view class="bg-white rounded-[20rpx] p-5">
                                 <view class="flex items-center justify-between">
-                                    <view class="font-bold text-[30rpx]">{{ detailData.detail?.task_name }}</view>
+                                    <view class="font-bold text-[30rpx]">{{ detailData.detail?.name }}</view>
                                     <view
                                         class="flex-shrink-0 px-[12rpx] py-[6rpx] rounded-[12rpx] font-bold text-[22rpx]"
                                         :class="getTaskStatusStyle(detailData.status)">
@@ -200,7 +200,7 @@ const handleDeleteTask = async () => {
     });
     try {
         await deleteDeviceTaskCalendar({
-            id: detailData.value.id,
+            id: detailData.value.task_id,
             sub_task_id: detailData.value.sub_task_id,
             source: detailData.value.source,
         });
@@ -210,6 +210,7 @@ const handleDeleteTask = async () => {
             icon: "none",
             duration: 3000,
         });
+        show.value = false;
         emit("delete");
     } catch (error) {
         uni.hideLoading();
@@ -229,6 +230,7 @@ const handlePreviewImage = () => {
     const { material_url } = detailData.value.detail;
     if (!material_url) return;
     const pics = material_url.split(",");
+    console.log("pics", pics);
     uni.previewImage({
         urls: pics,
     });
@@ -240,7 +242,12 @@ const getDetail = async (data: any) => {
         sub_task_id: data.sub_task_id,
         source: data.source,
     });
-    detailData.value = res;
+    detailData.value = {
+        ...res,
+        task_id: data.id,
+        sub_task_id: data.sub_task_id,
+        source: data.source,
+    };
 };
 
 defineExpose({

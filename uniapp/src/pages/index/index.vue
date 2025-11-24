@@ -443,6 +443,10 @@ onLoad((options?: Record<string, any>) => {
     watchFile();
 });
 
+onUnload(() => {
+    uni.$off("chooseFile");
+});
+
 onShow(() => {
     appStore.getChatConfig();
 });

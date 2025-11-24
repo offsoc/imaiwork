@@ -315,10 +315,9 @@ const toScrollHeight = () => {
 //对话框滚动
 const scroll = (value) => {
     const currentScrollTop = value.scrollTop;
-
     if (currentScrollTop < previousScrollTop.value) {
         disabledScroll.value = true;
-    } else if (currentScrollTop > previousScrollTop.value) {
+    } else if (currentScrollTop > previousScrollTop.value - 50) {
         disabledScroll.value = false;
     }
     previousScrollTop.value = value.scrollTop;
@@ -354,9 +353,7 @@ const scrollTo = async (top: number) => {
 
 const { height } = useElementSize(containerRef);
 watch(height, (value) => {
-    if (props.sendDisabled) {
-        scrollToBottom();
-    }
+    scrollToBottom();
 });
 
 //清空输入框
@@ -400,6 +397,7 @@ const contentPost = () => {
     }
 
     emit("contentPost", inputContent.value);
+    resetScroll();
     nextTick(() => {
         scrollToBottom();
     });

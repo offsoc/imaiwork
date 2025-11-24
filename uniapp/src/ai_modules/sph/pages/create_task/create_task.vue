@@ -868,6 +868,10 @@ onLoad(({ type }: any) => {
         }
     });
 });
+
+onUnload(() => {
+    uni.$off("confirm");
+});
 </script>
 
 <style scoped lang="scss">

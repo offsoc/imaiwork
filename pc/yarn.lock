@@ -1390,7 +1390,7 @@
   resolved "https://registry.npmmirror.com/@marijn/find-cluster-break/-/find-cluster-break-1.0.2.tgz#775374306116d51c0c500b8c4face0f9a04752d8"
   integrity sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==
 
-"@matechat/core@^1.5.2":
+"@matechat/core@^1.10.0":
   version "1.10.0"
   resolved "https://registry.npmmirror.com/@matechat/core/-/core-1.10.0.tgz#95a0c6d149aac5f8819d98d465054a16267b302b"
   integrity sha512-1E40PSlIbUtGLzgz2siTnkRaFyQeTVDrJOZJiWI0rqjDsRoEqIs1zprkpLqZIUcEzKqP7GNsBRD4Jg9PRsCP6w==

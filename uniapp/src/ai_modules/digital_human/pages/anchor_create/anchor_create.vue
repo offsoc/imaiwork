@@ -467,6 +467,7 @@ onUnload(() => {
     uni.hideLoading();
     activePollingEnds.value.forEach((endFn) => endFn());
     activePollingEnds.value = [];
+    uni.$off("confirm");
 });
 </script>
 

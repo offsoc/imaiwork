@@ -17,7 +17,7 @@
         confirm-button-text=""
         :show-close="false"
         @close="showConfirmPopup = false">
-        <div class="h-[204rpx] text-center -mb-4">
+        <div class="h-[100px] text-center -mb-4">
             <div class="text-lg font-bold">温馨提示</div>
             <div class="text-[rgba(0,0,0,0.5)] mt-4 w-[70%] mx-auto text-base">
                 请勾选已阅读并同意《服务协议》和《隐私协议》

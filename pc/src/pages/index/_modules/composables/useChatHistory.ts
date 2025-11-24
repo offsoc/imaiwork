@@ -23,7 +23,7 @@ export interface ChatHistoryItem {
  */
 export function useChatHistory() {
     const chatStore = useChatStore();
-    const { taskId, fetchChatHistory: loadChatHistory } = useChatManager();
+    const { taskId, fetchChatHistory: loadChatHistory, resetScroll, chatScrollToBottom } = useChatManager();
 
     // --- State ---
     /**
@@ -89,6 +89,8 @@ export function useChatHistory() {
 
         // 加载该会话的详细聊天记录
         await loadChatHistory();
+        resetScroll();
+        chatScrollToBottom();
     };
 
     /**

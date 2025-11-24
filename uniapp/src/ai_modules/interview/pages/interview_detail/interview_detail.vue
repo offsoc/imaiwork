@@ -292,14 +292,14 @@ const setFormData = async (data: Record<any, any>) => {
 onLoad((options: any) => {
     state.id = options.id;
     getDetail();
-});
-
-onShow(() => {
     uni.$on("update-resume", async (data: any) => {
         resumeStatus.value = 1;
         setFormData(data.formData);
-        uni.$off("update-resume");
     });
+});
+
+onUnload(() => {
+    uni.$off("update-resume");
 });
 </script>
 

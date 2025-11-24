@@ -54,7 +54,7 @@
                 </view>
             </view>
             <view class="bg-white rounded-[20rpx] px-[32rpx] mt-[20rpx] pb-5">
-                <calendar-simple v-model="selectedDate" @change="handleUpdateSelectedDate" />
+                <calendar-simple v-model="selectedDate" @change="reset" />
                 <view class="mt-[50rpx]">
                     <view class="text-[30rpx] font-bold">今日任务</view>
                     <view class="mt-[30rpx]">
@@ -76,9 +76,9 @@
             <view class="mt-[50rpx]">
                 <view class="text-[30rpx] font-bold mb-[26rpx]"> 任务列表（{{ taskList.length }}） </view>
                 <task-list
-                    :list="taskList"
                     v-if="taskList.length > 0"
-                    @delete="handleUpdateSelectedDate"
+                    :list="taskList"
+                    @handle-detail="handleDetail"
                     @update-name="handleUpdateTaskName" />
                 <view v-else>
                     <empty text="暂无任务" />
@@ -110,6 +110,8 @@
             </view>
         </view>
     </u-popup>
+    <task-detail-pop ref="taskDetailRef" v-model="showDetailPop" @delete="reset" />
+    <task-edit-name-pop ref="taskEditNameRef" v-model="showEditNamePop" @success="handleConfirmUpdateTaskName" />
 </template>
 
 <script setup lang="ts">
@@ -125,6 +127,8 @@ import CalendarSimple from "@/ai_modules/device/components/calendar-simple/calen
 import TaskList from "@/ai_modules/device/components/task-list/task-list.vue";
 import SemiCircleProgress from "@/ai_modules/device/components/semi-circle-progress/semi-circle-progress.vue";
 import { useDevice } from "@/ai_modules/device/hooks/useDevice";
+import TaskDetailPop from "@/ai_modules/device/components/task-detail-pop/task-detail-pop.vue";
+import TaskEditNamePop from "@/ai_modules/device/components/task-edit-name/task-edit-name.vue";
 
 const deviceCode = ref("");
 const detail = ref<any>({});
@@ -171,6 +175,11 @@ const taskStatistics = ref([
         key: "failure",
     },
 ]);
+
+const taskDetailRef = shallowRef<any>(null);
+const taskEditNameRef = shallowRef<any>(null);
+const showDetailPop = ref<boolean>(false);
+const showEditNamePop = ref<boolean>(false);
 
 const { platformLogo } = useDevice();
 
@@ -265,7 +274,7 @@ const handleUnbindDevice = () => {
     });
 };
 
-const handleUpdateSelectedDate = () => {
+const reset = () => {
     // 重置分页
     taskQuery.page_no = 1;
     // 重置任务列表
@@ -276,7 +285,19 @@ const handleUpdateSelectedDate = () => {
     getStatistics();
 };
 
-const handleUpdateTaskName = (data: any) => {
+const handleDetail = async (row: any) => {
+    showDetailPop.value = true;
+    await nextTick();
+    taskDetailRef.value?.getDetail(row);
+};
+
+const handleUpdateTaskName = async (data: any) => {
+    showEditNamePop.value = true;
+    await nextTick();
+    taskEditNameRef.value?.setFormData(data);
+};
+
+const handleConfirmUpdateTaskName = (data: any) => {
     taskList.value.forEach((item) => {
         if (item.id == data.id) {
             item.name = data.name;
@@ -325,13 +346,15 @@ const getDetail = async () => {
 
 const init = async () => {
     await getDetail();
-    await getStatistics();
-    await getTaskList();
+    reset();
 };
+
+onShow(() => {
+    init();
+});
 
 onLoad((options: any) => {
     deviceCode.value = options.device_code;
-    init();
 });
 
 onReachBottom(() => {

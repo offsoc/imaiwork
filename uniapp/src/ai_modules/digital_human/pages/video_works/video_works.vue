@@ -62,17 +62,16 @@
                             >
                             <template v-if="item.status == 1">
                                 <view
-                                    class="w-full h-full flex items-center justify-center gap-1 text-center px-2 text-white">
+                                    class="w-full h-full flex items-center justify-center gap-1 text-center px-2 text-white relative z-[22]">
                                     <view
                                         class="rounded-full bg-[#ffffff33] w-[68rpx] h-[68rpx]"
-                                        style="backdrop-filter: blur(5px)"
                                         @click="handlePlay(item)">
                                         <image src="/static/images/icons/play.svg" class="w-full h-full"></image>
                                     </view>
                                 </view>
                                 <view
                                     v-if="item.automatic_clip == 1"
-                                    class="absolute bottom-[100rpx] left-0 w-full z-[51] text-[#ffffff80] text-[22rpx] text-center">
+                                    class="absolute bottom-[80rpx] left-0 w-full z-[51] text-[#ffffff80] text-[22rpx] text-center">
                                     <template v-if="item.clip_status == 1 || item.clip_status == 2">
                                         AI智能剪辑中...
                                     </template>

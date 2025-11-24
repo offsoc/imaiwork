@@ -120,4 +120,8 @@ onLoad(() => {
         }
     });
 });
+
+onUnload(() => {
+    uni.$off("confirm");
+});
 </script>
