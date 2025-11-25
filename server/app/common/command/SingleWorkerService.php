@@ -47,7 +47,7 @@ class SingleWorkerService extends Command
         try {
             Worker::$stdoutFile = root_path(). '/runtime/log/workerman.log';
             // 初始化Channel服务（用于跨进程通信）
-            //$channel_server = new \Channel\Server('0.0.0.0', 2206);
+            //$channel_server = new \Channel\Server('0.0.0.0', env('WORKERMAN.CHANNEL_PROT', 2206));
             // 在这里放心的实例化worker,
             Worker::$daemonize = true;
             $rpaWorker = new Worker('websocket://0.0.0.0:2345');

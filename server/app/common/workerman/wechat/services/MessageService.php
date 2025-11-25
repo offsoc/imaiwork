@@ -230,7 +230,7 @@ class MessageService
             $data = $this->buildMessage($data);
         }
         $channel = "{$targetProcess}.{$deviceId}.message";
-        Client::connect('127.0.0.1', 2206);
+        Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
         Client::publish($channel, [
             'data' => is_array($data) ? json_encode($data) : $data
         ]);

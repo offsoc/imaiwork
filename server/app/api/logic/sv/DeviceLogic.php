@@ -268,7 +268,7 @@ class DeviceLogic extends SvBaseLogic
         print_r($payload);
 
         $channel = "device.{$appinfo->device_code}.message";
-        ChannelClient::connect('127.0.0.1', 2206);
+        ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
         ChannelClient::publish($channel, [
             'data' => json_encode($payload)
         ]);

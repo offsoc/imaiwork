@@ -118,7 +118,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$find['device_code']}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -188,7 +188,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$task->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -279,7 +279,7 @@ trait DeviceTaskTrait
             );
             self::setLog(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), 'publish');
             $channel = "device.{$task->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($payload)
             ]);
@@ -325,7 +325,7 @@ trait DeviceTaskTrait
             $data = $message->serializeToString();
             // 5. 发送到设备端
             $channel = "socket.{$wechat['device_code']}.message";
-            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);
@@ -443,7 +443,7 @@ trait DeviceTaskTrait
             );
             self::setLog(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), 'publish');
             $channel = "device.{$publish['device_code']}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($payload)
             ]);
@@ -639,7 +639,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$dtask->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -703,7 +703,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$dtask->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -771,7 +771,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$dtask->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -835,7 +835,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$dtask->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -903,7 +903,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $channel = "device.{$dtask->device_code}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($data)
             ]);
@@ -957,7 +957,7 @@ trait DeviceTaskTrait
             $channel = "socket.{$payload['DeviceCode']}.message";
             self::setLog('channel: ' . $channel, 'add_wechat');
 
-            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             \Channel\Client::publish($channel, [
                 'data' => is_array($pushMessage) ? json_encode($pushMessage) : $pushMessage
             ]);
@@ -1098,7 +1098,7 @@ trait DeviceTaskTrait
             $output->writeln(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             self::setLog(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), 'clues');
             $channel = "device.{$deviceCode}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => json_encode($payload)
             ]);

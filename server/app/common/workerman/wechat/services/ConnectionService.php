@@ -188,7 +188,7 @@ class ConnectionService
      */
     private function registerChannelListener(TcpConnection $connection, string $deviceId, string $type = SocketType::SOCKET): void
     {
-        Client::connect('127.0.0.1', 2206);
+        Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
 
         // 注册进程消息监听
         Client::on("{$type}.{$deviceId}.message", function ($data) use ($connection, $type) {

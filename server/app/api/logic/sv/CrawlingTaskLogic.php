@@ -845,7 +845,7 @@ class CrawlingTaskLogic extends SvBaseLogic
             $channel = "socket.{$payload['DeviceCode']}.message";
             self::setLog('channel: ' . $channel, 'add_wechat');
 
-            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             \Channel\Client::publish($channel, [
                 'data' => is_array($pushMessage) ? json_encode($pushMessage) : $pushMessage
             ]);

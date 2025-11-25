@@ -74,7 +74,7 @@ trait WechatTrait
             $data = $message->serializeToString();
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
-            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);
@@ -199,7 +199,7 @@ trait WechatTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => $data
             ]);
@@ -311,7 +311,7 @@ trait WechatTrait
 
             // 5. 发送到设备端
             $channel = "socket.{$deviceId}.message";
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             ChannelClient::publish($channel, [
                 'data' => $data
             ]);

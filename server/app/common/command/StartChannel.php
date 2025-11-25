@@ -24,7 +24,7 @@ class StartChannel extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $channel_server = new \Channel\Server('0.0.0.0', 2206);
+        $channel_server = new \Channel\Server('0.0.0.0', env('WORKERMAN.CHANNEL_PROT', 2206));
         $output->writeln('channel服务启动成功');
         if (!defined('GLOBAL_START')) {
             Worker::runAll();

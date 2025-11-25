@@ -45,7 +45,7 @@ trait SphTaskTrait
                 throw new \Exception('暂时没有需要执行的设备');
             }
 
-            ChannelClient::connect('127.0.0.1', 2206);
+            ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             $flag = false;
             $msg = '';
             foreach ($rows as $row) {
@@ -186,7 +186,7 @@ trait SphTaskTrait
         if ($find->isEmpty()) {
             throw new \Exception('暂时没有需要执行的设备');
         }
-        ChannelClient::connect('127.0.0.1', 2206);
+        ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
         $_deviceTaskStatus = self::redis()->get("xhs:device:{$find->device_code}:taskStatus");
         if (!empty($_deviceTaskStatus)) {
             $deviceTaskStatus = json_decode(($_deviceTaskStatus), true);
@@ -296,7 +296,7 @@ trait SphTaskTrait
             throw new \Exception('设备不存在');
         }
         $deviceIds = json_decode($find->device_codes, true);
-        ChannelClient::connect('127.0.0.1', 2206);
+        ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
         foreach ($deviceIds as $_deviceId) {
             $data = array(
                 'type' => 22,
@@ -329,7 +329,7 @@ trait SphTaskTrait
             throw new \Exception('设备不存在');
         }
         $deviceIds = json_decode($find->device_codes, true);
-        ChannelClient::connect('127.0.0.1', 2206);
+        ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
         foreach ($deviceIds as $_deviceId) {
             $data = array(
                 'type' => 23,
@@ -362,7 +362,7 @@ trait SphTaskTrait
             throw new \Exception('设备不存在');
         }
         $deviceIds = json_decode($find->device_codes, true);
-        ChannelClient::connect('127.0.0.1', 2206);
+        ChannelClient::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
         foreach ($deviceIds as $_deviceId) {
             $isRun = SvDeviceTask::where('sub_task_id', $task_id)->where('device_code', $_deviceId)->where('task_type', 4)->where('status', 1)->findOrEmpty();
             if (!$isRun->isEmpty()) {

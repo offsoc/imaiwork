@@ -91,7 +91,7 @@ class SvAddWechatRecordLogic extends SvBaseLogic
             $pushMessage = $message->serializeToString();
 
             $channel = "socket.{$wechat['device_code']}.message";
-            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             \Channel\Client::publish($channel, [
                 'data' => is_array($pushMessage) ? json_encode($pushMessage) : $pushMessage
             ]);

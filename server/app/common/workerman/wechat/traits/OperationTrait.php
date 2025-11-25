@@ -214,7 +214,7 @@ trait OperationTrait
             $data = $message->serializeToString();
             // 5. 发送到设备端
             $channel = "socket.{$wechat->device_code}.message";
-            \Channel\Client::connect('127.0.0.1', 2206);
+            \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
             \Channel\Client::publish($channel, [
                 'data' => $data
             ]);
@@ -267,7 +267,7 @@ trait OperationTrait
                             ], JSON_UNESCAPED_UNICODE)
                         );
                         $channel = "device.{$task->device_code}.message";
-                        \Channel\Client::connect('127.0.0.1', 2206);
+                        \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
                         \Channel\Client::publish($channel, [
                             'data' => json_encode($payload)
                         ]);

@@ -290,7 +290,7 @@ class TaskLogic extends ApiLogic
                         throw new \Exception('爬取任务不存在');
                     }
                     $deviceIds = json_decode($taskinfo['device_codes'], true);
-                    \Channel\Client::connect('127.0.0.1', 2206);
+                    \Channel\Client::connect('127.0.0.1', env('WORKERMAN.CHANNEL_PROT', 2206));
                     foreach ($deviceIds as $_deviceId) {
                         $isRun = SvDeviceTask::where('sub_task_id', $params['sub_task_id'])->where('device_code', $_deviceId)->where('task_type', 4)->where('status', 1)->findOrEmpty();
                         if (!$isRun->isEmpty()) {
